@@ -14,9 +14,9 @@ import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 @Dependent
 public class IAYRepositoryProvider {
 
-    private FagsakRepository fagsakRepository;
-    private SøknadRepository søknadRepository;
-    private BehandlingRepository behandlingRepository;
+    private final FagsakRepository fagsakRepository;
+    private final SøknadRepository søknadRepository;
+    private final BehandlingRepository behandlingRepository;
 
     @Inject
     public IAYRepositoryProvider(EntityManager entityManager) {

@@ -30,7 +30,6 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_FEIL_PROSESSUELL("RE-PRSSL", "Prosessuell feil"),
     RE_ENDRING_FRA_BRUKER("RE-END-FRA-BRUKER", "Endring fra bruker"),
     RE_FRAVÆRSKORRIGERING_FRA_SAKSBEHANDLER("RE-FRAVÆRKORR-SAKSB", "Fraværskorrigering fra saksbehandler"),
-    RE_ENDRET_INNTEKTSMELDING("RE-END-INNTEKTSMELD", "Mottatt ny inntektsmelding"),
     BERØRT_BEHANDLING("BERØRT-BEHANDLING", "Endring i den andre forelderens uttak"),
     RE_ANNET("RE-ANNET", "Annet"),
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),

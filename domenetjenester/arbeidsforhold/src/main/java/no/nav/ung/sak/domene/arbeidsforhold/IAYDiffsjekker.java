@@ -17,8 +17,8 @@ import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.typer.Stillingsprosent;
 
 public class IAYDiffsjekker {
-    private DiffEntity diffEntity;
-    private TraverseGraph traverseGraph;
+    private final DiffEntity diffEntity;
+    private final TraverseGraph traverseGraph;
 
     public IAYDiffsjekker() {
         this(true);

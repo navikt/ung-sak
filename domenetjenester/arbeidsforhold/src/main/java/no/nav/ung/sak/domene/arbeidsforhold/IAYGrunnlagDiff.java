@@ -1,5 +1,12 @@
 package no.nav.ung.sak.domene.arbeidsforhold;
 
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingslager.diff.DiffResult;
+import no.nav.ung.sak.domene.iay.modell.*;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -7,21 +14,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.InntektFilter;
-import no.nav.ung.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.ung.sak.domene.iay.modell.Ytelse;
-import no.nav.ung.sak.domene.iay.modell.YtelseFilter;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Saksnummer;
-
 public class IAYGrunnlagDiff {
     private static final Set<FagsakYtelseType> EKSLUSIVE_TYPER = Set.of(FagsakYtelseType.FORELDREPENGER, FagsakYtelseType.ENGANGSTØNAD);
-    private InntektArbeidYtelseGrunnlag grunnlag1;
-    private InntektArbeidYtelseGrunnlag grunnlag2;
+    private final InntektArbeidYtelseGrunnlag grunnlag1;
+    private final InntektArbeidYtelseGrunnlag grunnlag2;
 
     public IAYGrunnlagDiff(InntektArbeidYtelseGrunnlag grunnlag1, InntektArbeidYtelseGrunnlag grunnlag2) {
         this.grunnlag1 = grunnlag1;
@@ -30,25 +26,6 @@ public class IAYGrunnlagDiff {
 
     public DiffResult diffResultat(boolean onlyCheckTrackedFields) {
         return new IAYDiffsjekker(onlyCheckTrackedFields).getDiffEntity().diff(grunnlag1, grunnlag2);
-    }
-
-    public boolean erEndringPåInntektsmelding() {
-        var eksisterende = Optional.ofNullable(grunnlag1).flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger);
-        var nye = Optional.ofNullable(grunnlag2).flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger);
-
-        // quick check
-        if (eksisterende.isPresent() != nye.isPresent()) {
-            return true;
-        } else if (eksisterende.isEmpty()) {
-            return false;
-        } else {
-            if (eksisterende.get().getAlleInntektsmeldinger().size() != nye.get().getAlleInntektsmeldinger().size()) {
-                return true;
-            } else {
-                DiffResult diff = new IAYDiffsjekker().getDiffEntity().diff(eksisterende.get(), nye.get());
-                return !diff.isEmpty();
-            }
-        }
     }
 
     public boolean erEndringPåAktørArbeidForAktør(LocalDate skjæringstidspunkt, AktørId aktørId) {

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class InntektspostBuilder {
-    private Inntektspost inntektspost;
+    private final Inntektspost inntektspost;
 
     InntektspostBuilder(Inntektspost inntektspost) {
         this.inntektspost = inntektspost;

@@ -43,8 +43,7 @@ public class ArbeidsforholdOverstyrtePerioder implements IndexKey {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof ArbeidsforholdOverstyrtePerioder)) return false;
-        ArbeidsforholdOverstyrtePerioder that = (ArbeidsforholdOverstyrtePerioder) o;
+        if (o == null || !(o instanceof ArbeidsforholdOverstyrtePerioder that)) return false;
         return Objects.equals(periode, that.periode) && Objects.equals(arbeidsforholdOverstyring, that.arbeidsforholdOverstyring);
     }
 

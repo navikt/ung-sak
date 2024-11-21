@@ -1,13 +1,6 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatOverstyrtDto;
@@ -18,15 +11,19 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.typer.AktørId;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
+import java.util.UUID;
+
 public class IAYTilDtoMapper {
 
-    private AktørId aktørId;
-    private UUID grunnlagReferanse;
-    private UUID behandlingReferanse;
+    private final AktørId aktørId;
+    private final UUID grunnlagReferanse;
+    private final UUID behandlingReferanse;
 
     public IAYTilDtoMapper(AktørId aktørId,
                            UUID grunnlagReferanse,
@@ -68,23 +65,10 @@ public class IAYTilDtoMapper {
         });
         grunnlag.getSaksbehandletVersjon().ifPresent(a -> dto.medOverstyrt(mapSaksbehandlerOverstyrteOpplysninger(getArbeidforholdInfo(grunnlag), a)));
 
-        // INNTEKTSMELDINGER
-        grunnlag.getInntektsmeldinger().ifPresent(ims -> {
-            var mapInntektsmeldinger = new MapInntektsmeldinger.MapTilDto();
-            var inntektsmeldinger = mapInntektsmeldinger.map(getArbeidforholdInfo(grunnlag), ims, validerArbeidsforholdId);
-            dto.medInntektsmeldinger(inntektsmeldinger);
-        });
-
         // OPPGITT OPPTJENING
         grunnlag.getOppgittOpptjening().ifPresent(oo -> dto.medOppgittOpptjening(new MapOppgittOpptjening().mapTilDto(oo)));
         grunnlag.getOppgittOpptjeningAggregat().ifPresent( oa -> dto.medOppgittOpptjeninger(new MapOppgittOpptjening().mapTilDto(oa)));
         return dto;
-    }
-
-    public InntektsmeldingerDto mapTilDto(Collection<InntektsmeldingBuilder> inntektsmeldingBuildere) {
-        var mapInntektsmeldinger = new MapInntektsmeldinger.MapTilDto();
-
-        return mapInntektsmeldinger.map(inntektsmeldingBuildere);
     }
 
     public OppgittOpptjeningDto mapTilDto(OppgittOpptjeningBuilder builder) {

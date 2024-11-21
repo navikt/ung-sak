@@ -1,23 +1,16 @@
 package no.nav.ung.sak.domene.arbeidsforhold;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 import no.nav.abakus.iaygrunnlag.request.Dataset;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.ung.sak.domene.iay.modell.InntektsmeldingBuilder;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Saksnummer;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public interface InntektArbeidYtelseTjeneste {
     /**
@@ -53,27 +46,10 @@ public interface InntektArbeidYtelseTjeneste {
     Optional<InntektArbeidYtelseGrunnlag> finnGrunnlag(Long behandlingId);
 
     /**
-     *  Finn grunnlag med gitt grunnlagskobling. Bør kun brukes i situasjoner der man ikke har tilgang til behandling som grunnlaget er lagret på.
-     *
-     * @param fagsak Fagsak
-     * @param inntektArbeidYtelseGrunnlagUuid grunnlag-uuid
-     * @return iay-grunnlag
-     */
-    InntektArbeidYtelseGrunnlag hentGrunnlagForGrunnlagId(Fagsak fagsak, UUID inntektArbeidYtelseGrunnlagUuid);
-
-    /**
-     *
      * @param behandlingId
      * @return Register inntekt og arbeid (Opprett for å endre eller legge til registeropplysning)
      */
     InntektArbeidYtelseAggregatBuilder opprettBuilderForRegister(Long behandlingId);
-
-    /**
-     *
-     * @param behandlingUuid
-     * @return Register inntekt og arbeid (Opprett for å endre eller legge til registeropplysning)
-     */
-    InntektArbeidYtelseAggregatBuilder opprettBuilderForRegister(UUID behandlingUuid, UUID angittReferanse, LocalDateTime angittOpprettetTidspunkt);
 
     /**
      * @param behandlingId
@@ -98,20 +74,18 @@ public interface InntektArbeidYtelseTjeneste {
     /**
      * Lagre nytt grunnlag for Oppgitt Opptjening.
      */
-    /** @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet */
+    /**
+     * @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet
+     */
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
-    /**
-     *  Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
-     */
-    void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
     /**
      * Lagre nytt grunnlag for ArbeidsforholdInformasjon. Builder bør ikke gjenbrukes etter kall her.
      *
      * @param behandlingId - Behandling Id
-     * @param aktørId - Aktør Id
-     * @param builder - {@link ArbeidsforholdInformasjonBuilder}
+     * @param aktørId      - Aktør Id
+     * @param builder      - {@link ArbeidsforholdInformasjonBuilder}
      */
     void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder builder);
 
@@ -128,26 +102,7 @@ public interface InntektArbeidYtelseTjeneste {
      *
      * @param fraBehandlingId - Kilde behandling
      * @param tilBehandlingId - Ny behandling
-     * @param dataset - aggregatene som skal kopieres
+     * @param dataset         - aggregatene som skal kopieres
      */
     void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset);
-
-    Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer);
-
-    Set<Inntektsmelding> hentUnikeInntektsmeldingerForSak(Saksnummer saksnummer, AktørId aktørId, FagsakYtelseType ytelseType);
-
-    Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId);
-
-    /**
-     * Lagre en eller flere inntektsmeldinger på en behandling for en sak.
-     *
-     * @param saksnummer - Saksnummer
-     * @param behandlingId - Behandling Id
-     * @param builders - Collection med {@link InntektsmeldingBuilder}
-     */
-    void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders);
-
-    Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Saksnummer saksnummer, Long behandlingId, UUID eksternReferanse);
-    Set<Inntektsmelding> hentInntektsmeldingerKommetTomBehandling(Saksnummer saksnummer, Long behandlingId);
-
 }

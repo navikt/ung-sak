@@ -7,7 +7,7 @@ import no.nav.ung.sak.typer.Arbeidsgiver;
 
 public class InntektBuilder {
     private final boolean oppdaterer;
-    private Inntekt inntekt;
+    private final Inntekt inntekt;
 
     private InntektBuilder(Inntekt inntekt, boolean oppdaterer) {
         this.inntekt = inntekt;

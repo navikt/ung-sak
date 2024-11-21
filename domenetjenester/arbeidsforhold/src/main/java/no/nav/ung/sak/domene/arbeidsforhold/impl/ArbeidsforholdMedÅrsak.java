@@ -9,7 +9,7 @@ import no.nav.ung.sak.typer.InternArbeidsforholdRef;
 public class ArbeidsforholdMedÅrsak {
 
     private InternArbeidsforholdRef ref;
-    private Set<AksjonspunktÅrsak> årsaker = new HashSet<>();
+    private final Set<AksjonspunktÅrsak> årsaker = new HashSet<>();
 
     ArbeidsforholdMedÅrsak() {
         // default ctor

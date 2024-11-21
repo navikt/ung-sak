@@ -267,7 +267,7 @@ public class OppgittOpptjeningBuilder {
     }
 
     public static class OppgittArbeidsforholdBuilder {
-        private OppgittArbeidsforhold entitet;
+        private final OppgittArbeidsforhold entitet;
 
         private OppgittArbeidsforholdBuilder(OppgittArbeidsforhold entitet) {
             this.entitet = entitet;

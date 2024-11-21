@@ -213,10 +213,6 @@ spec:
       value: api://dev-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.preprod.local
-    - name: K9INNTEKTSMELDING_URL
-      value: https://k9-inntektsmelding.intern.dev.nav.no/k9/inntektsmelding
-    - name: K9INNTEKTSMELDING_SCOPE
-      value: api://dev-gcp.k9saksbehandling.k9-inntektsmelding/.default
     - name: K9FORDEL_URL
       value: https://k9-fordel.dev-fss-pub.nais.io/k9/fordel/api
     - name: K9FORDEL_SCOPE

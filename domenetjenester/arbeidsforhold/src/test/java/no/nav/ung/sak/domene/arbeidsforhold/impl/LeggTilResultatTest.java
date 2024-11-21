@@ -52,7 +52,7 @@ public class LeggTilResultatTest {
         Arbeidsgiver virksomhet = Arbeidsgiver.virksomhet("1");
         Set<InternArbeidsforholdRef> refs = Set.of();
         // Act
-        LeggTilResultat.leggTil(result, AksjonspunktÅrsak.MANGLENDE_INNTEKTSMELDING, virksomhet, refs);
+        LeggTilResultat.leggTil(result, AksjonspunktÅrsak.ENDRING_I_ARBEIDSFORHOLDS_ID, virksomhet, refs);
         // Assert
         assertThat(result).hasSize(1);
         assertThat(result.containsKey(virksomhet)).isTrue();

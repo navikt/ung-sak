@@ -95,8 +95,7 @@ public class YtelseAnvist implements IndexKey {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof YtelseAnvist)) return false;
-        YtelseAnvist that = (YtelseAnvist) o;
+        if (o == null || !(o instanceof YtelseAnvist that)) return false;
         return Objects.equals(anvistPeriode, that.anvistPeriode) &&
             Objects.equals(beløp, that.beløp) &&
             Objects.equals(dagsats, that.dagsats) &&

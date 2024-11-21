@@ -102,9 +102,7 @@ public class  OppgittArbeidsforhold implements IndexKey {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof OppgittArbeidsforhold)) return false;
-
-        OppgittArbeidsforhold that = (OppgittArbeidsforhold) o;
+        if (o == null || !(o instanceof OppgittArbeidsforhold that)) return false;
 
         return
                 Objects.equals(periode, that.periode) &&

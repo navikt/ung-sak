@@ -1,15 +1,9 @@
 package no.nav.ung.sak.mottak;
 
-import static java.util.stream.Collectors.toList;
-
-import java.time.LocalDate;
-import java.util.Optional;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -28,6 +22,11 @@ import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Dependent
 public class Behandlingsoppretter {
@@ -78,14 +77,6 @@ public class Behandlingsoppretter {
         }); // NOSONAR
     }
 
-    public Behandling opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(BehandlingÅrsakType behandlingÅrsakType, Fagsak fagsak) {
-        Behandling forrigeBehandling = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
-            .orElseThrow(() -> new IllegalStateException("Fant ingen behandling som passet for saksnummer: " + fagsak.getSaksnummer()));
-        Behandling nyFørstegangsbehandling = opprettFørstegangsbehandling(fagsak, behandlingÅrsakType, Optional.of(forrigeBehandling));
-        opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(forrigeBehandling, nyFørstegangsbehandling);
-        return nyFørstegangsbehandling;
-    }
-
     public Behandling opprettRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, origBehandling.getFagsakYtelseType()).orElseThrow();
         Behandling revurdering = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, revurderingsÅrsak, behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(origBehandling.getFagsak()));
@@ -94,34 +85,26 @@ public class Behandlingsoppretter {
 
     public Behandling oppdaterBehandlingViaHenleggelse(Behandling sisteYtelseBehandling, BehandlingÅrsakType revurderingsÅrsak) {
         henleggBehandling(sisteYtelseBehandling);
-        if (BehandlingType.FØRSTEGANGSSØKNAD.equals(sisteYtelseBehandling.getType())) {
-            return opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(revurderingsÅrsak, sisteYtelseBehandling.getFagsak());
-        } else {
-            Behandling revurdering = opprettRevurdering(sisteYtelseBehandling, revurderingsÅrsak);
 
-            opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(sisteYtelseBehandling, revurdering);
+        Behandling revurdering = opprettRevurdering(sisteYtelseBehandling, revurderingsÅrsak);
 
-            // Kopier behandlingsårsaker fra forrige behandling
-            new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
-                .map(BehandlingÅrsak::getBehandlingÅrsakType)
-                .collect(toList()))
-                    .buildFor(revurdering);
+        // Kopier behandlingsårsaker fra forrige behandling
+        new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
+            .map(BehandlingÅrsak::getBehandlingÅrsakType)
+            .collect(toList()))
+            .buildFor(revurdering);
 
-            BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
-            behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());
+        BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
+        behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());
 
-            return revurdering;
-        }
+        return revurdering;
+
     }
 
     public void henleggBehandling(Behandling behandling) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
         behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtførtForHenleggelse(behandling, kontekst);
         behandlingskontrollTjeneste.henleggBehandling(kontekst, BehandlingResultatType.MERGET_OG_HENLAGT);
-    }
-
-    public void opprettInntektsmeldingerFraMottatteDokumentPåNyBehandling(Behandling forrigeBehandling, Behandling nyBehandling) {
-        iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
     }
 
     public Behandling opprettNyFørstegangsbehandling(Fagsak fagsak, Behandling avsluttetBehandling) {

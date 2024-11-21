@@ -26,7 +26,7 @@ public class YrkesaktivitetEntitetTest {
         LocalDate overstyrtTom = LocalDate.of(2019, 8, 1);
 
         ArbeidsforholdOverstyringBuilder entitet = ArbeidsforholdOverstyringBuilder.ny()
-            .medHandling(ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING)
+            .medHandling(ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG)
             .leggTilOverstyrtPeriode(fom, overstyrtTom);
         AktivitetsAvtaleBuilder aktivitetsAvtale = AktivitetsAvtaleBuilder.ny()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));

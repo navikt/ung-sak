@@ -42,10 +42,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>inntektsmelding-v1</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9</groupId>
             <artifactId>ettersendelse</artifactId>
         </dependency>
         <dependency>

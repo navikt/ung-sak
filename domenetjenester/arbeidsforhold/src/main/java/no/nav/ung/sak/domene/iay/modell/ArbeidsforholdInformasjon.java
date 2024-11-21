@@ -16,10 +16,10 @@ import no.nav.ung.sak.typer.InternArbeidsforholdRef;
 public class ArbeidsforholdInformasjon {
 
     @ChangeTracked
-    private Set<ArbeidsforholdReferanse> referanser = new LinkedHashSet<>();
+    private final Set<ArbeidsforholdReferanse> referanser = new LinkedHashSet<>();
 
     @ChangeTracked
-    private List<ArbeidsforholdOverstyring> overstyringer = new ArrayList<>();
+    private final List<ArbeidsforholdOverstyring> overstyringer = new ArrayList<>();
 
     ArbeidsforholdInformasjon() {
     }
@@ -114,9 +114,8 @@ public class ArbeidsforholdInformasjon {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof ArbeidsforholdInformasjon))
+        if (o == null || !(o instanceof ArbeidsforholdInformasjon that))
             return false;
-        ArbeidsforholdInformasjon that = (ArbeidsforholdInformasjon) o;
         return Objects.equals(referanser, that.referanser) &&
             Objects.equals(overstyringer, that.overstyringer);
     }

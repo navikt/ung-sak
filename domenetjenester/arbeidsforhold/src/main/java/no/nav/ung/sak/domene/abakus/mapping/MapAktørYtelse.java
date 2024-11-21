@@ -54,10 +54,10 @@ public class MapAktørYtelse {
     }
 
     static class MapFraDto {
-        private InntektArbeidYtelseAggregatBuilder aggregatBuilder;
+        private final InntektArbeidYtelseAggregatBuilder aggregatBuilder;
 
         @SuppressWarnings("unused")
-        private AktørId søkerAktørId;
+        private final AktørId søkerAktørId;
 
         MapFraDto(AktørId søkerAktørId, InntektArbeidYtelseAggregatBuilder aggregatBuilder) {
             this.søkerAktørId = søkerAktørId;

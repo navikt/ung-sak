@@ -50,7 +50,7 @@ final class MapArbeidsforholdInformasjon {
     }
 
     static class MapFraDto {
-        private InntektArbeidYtelseGrunnlagBuilder grunnlagBuilder;
+        private final InntektArbeidYtelseGrunnlagBuilder grunnlagBuilder;
 
         public MapFraDto(InntektArbeidYtelseGrunnlagBuilder builder) {
             this.grunnlagBuilder = builder;

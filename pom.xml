@@ -311,11 +311,6 @@
                 <artifactId>innsyn</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
-           <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>inntektsmelding-v1</artifactId>
-                <version>${k9format.version}</version>
-            </dependency>
             <dependency>
                 <groupId>no.nav.k9.sak.ytelse</groupId>
                 <artifactId>ytelse-ung</artifactId>

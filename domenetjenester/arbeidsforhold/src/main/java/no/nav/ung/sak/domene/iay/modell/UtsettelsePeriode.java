@@ -77,8 +77,7 @@ public class UtsettelsePeriode implements IndexKey {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof UtsettelsePeriode)) return false;
-        UtsettelsePeriode that = (UtsettelsePeriode) o;
+        if (o == null || !(o instanceof UtsettelsePeriode that)) return false;
         return Objects.equals(periode, that.periode) &&
             Objects.equals(årsak, that.årsak);
     }

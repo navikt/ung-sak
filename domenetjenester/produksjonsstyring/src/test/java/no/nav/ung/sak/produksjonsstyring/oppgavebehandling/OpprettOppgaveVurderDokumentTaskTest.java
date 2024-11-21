@@ -41,7 +41,7 @@ public class OpprettOppgaveVurderDokumentTaskTest {
 
     @Test
     public void skal_opprette_oppgave_for_å_vurdere_dokument_basert_på_fagsakId() {
-        DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
+        DokumentTypeId dokumentTypeId = DokumentTypeId.LEGEERKLÆRING;
 
         // Arrange
         ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(OpprettOppgaveVurderDokumentTask.class);

@@ -33,7 +33,6 @@ public class HistorikkinnslagTjeneste {
     private static final String VEDLEGG = "Vedlegg";
     private static final String SØKNAD = "Søknad";
     private static final String INNSENDING = "Innsending";
-    private static final String INNTEKTSMELDING = "Inntektsmelding";
     private HistorikkRepository historikkRepository;
     private SafTjeneste safTjeneste;
 
@@ -114,9 +113,6 @@ public class HistorikkinnslagTjeneste {
         if (brevkode == null) {
             return INNSENDING;
         }
-        if (brevkode.equals(Brevkode.INNTEKTSMELDING)) {
-            return INNTEKTSMELDING;
-        }
         if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
             return SØKNAD;
         }
@@ -132,13 +128,10 @@ public class HistorikkinnslagTjeneste {
         return historikkinnslagDokumentLink;
     }
 
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
+    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId) {
         Historikkinnslag historikkinnslag = new Historikkinnslag();
-        if (dokumentTypeId != null && dokumentTypeId.equals(Brevkode.INNTEKTSMELDING)) {
-            historikkinnslag.setAktør(HistorikkAktør.ARBEIDSGIVER);
-        } else {
-            historikkinnslag.setAktør(HistorikkAktør.SØKER);
-        }
+        historikkinnslag.setAktør(HistorikkAktør.SØKER);
+
         historikkinnslag.setType(HistorikkinnslagType.VEDLEGG_MOTTATT);
         historikkinnslag.setFagsakId(fagsakId);
 

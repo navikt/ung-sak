@@ -20,8 +20,8 @@ import no.nav.ung.sak.typer.AktørId;
 @Dependent
 public class AsyncInntektArbeidYtelseTjeneste {
 
-    private ProsessTaskTjeneste prosessTaskRepository;
-    private BehandlingRepository behandlingRepository;
+    private final ProsessTaskTjeneste prosessTaskRepository;
+    private final BehandlingRepository behandlingRepository;
 
     @Inject
     public AsyncInntektArbeidYtelseTjeneste(BehandlingRepository behandlingRepository,

@@ -99,8 +99,6 @@ public class InnsynEventTjeneste {
 
         return switch (venteårsak) {
             case LEGEERKLÆRING, MEDISINSKE_OPPLYSNINGER -> lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.MEDISINSK_DOKUMENTASJON);
-            case INNTEKTSMELDING, VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER, VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL ->
-                lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.INNTEKTSMELDING);
             case FOR_TIDLIG_SOKNAD -> lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.FOR_TIDLIG_SOKNAD);
             case VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT -> lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.MELDEKORT);
             default -> Optional.empty();

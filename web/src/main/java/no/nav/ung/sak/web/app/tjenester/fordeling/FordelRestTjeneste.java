@@ -275,7 +275,7 @@ public class FordelRestTjeneste {
             .medType(mottattJournalpost.getType())
             .medJournalpostId(mottattJournalpost.getJournalpostId());
 
-        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
+        builder.medKanalreferanse(mottattJournalpost.getKanalReferanse());
 
         if (payload.isPresent()) {
             builder.medPayload(payload.get()); // NOSONAR
@@ -299,7 +299,7 @@ public class FordelRestTjeneste {
             .medType(mottattJournalpost.getType())
             .medJournalpostId(mottattJournalpost.getJournalpostId());
 
-        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
+        builder.medKanalreferanse(mottattJournalpost.getKanalReferanse());
 
         payload.ifPresent(builder::medPayload);
 
@@ -353,27 +353,6 @@ public class FordelRestTjeneste {
         if (!List.of(Journalstatus.FERDIGSTILT, Journalstatus.JOURNALFOERT).contains(journalpost.getJournalstatus())) {
             throw new IllegalArgumentException(journalpostId + " er ikke endelig journalført i Saf");
         }
-    }
-
-    /**
-     * @deprecated skal bare returnere kanalReferanse når k9-fordel alltid setter kanalReferanse. Da slipper vi oppslag mot Saf her
-     */
-    @Deprecated(forRemoval = true)
-    private String mapTilKanalreferanse(String kanalReferanse, JournalpostId journalpostId) {
-        if (kanalReferanse != null) {
-            return kanalReferanse;
-        } else {
-            return utledAltinnReferanseFraInntektsmelding(journalpostId);
-        }
-    }
-
-    /**
-     * @deprecated fjern denne når vi mottar fra fordel
-     */
-    @Deprecated(forRemoval = true)
-    private String utledAltinnReferanseFraInntektsmelding(JournalpostId journalpostId) {
-        ArkivJournalPost journalPost = safAdapter.hentInngåendeJournalpostHoveddokument(journalpostId);
-        return journalPost != null ? journalPost.getKanalreferanse() : null;
     }
 
     public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {

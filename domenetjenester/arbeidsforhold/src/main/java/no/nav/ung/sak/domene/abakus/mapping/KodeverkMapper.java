@@ -9,7 +9,6 @@ import no.nav.ung.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektPeriodeType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.ung.kodeverk.arbeidsforhold.NaturalYtelseType;
@@ -160,12 +159,6 @@ public final class KodeverkMapper {
             : ArbeidType.fraKode(dto.getKode());
     }
 
-    static no.nav.abakus.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType mapInntektsmeldingInnsendingsårsak(InntektsmeldingInnsendingsårsak kode) {
-        return kode == null || InntektsmeldingInnsendingsårsak.UDEFINERT.equals(kode)
-            ? null
-            : no.nav.abakus.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType.fraKode(kode.getKode());
-    }
-
     static no.nav.abakus.iaygrunnlag.kodeverk.NaturalytelseType mapNaturalYtelseTilDto(NaturalYtelseType kode) {
         return kode == null || NaturalYtelseType.UDEFINERT.equals(kode)
             ? null
@@ -231,24 +224,6 @@ public final class KodeverkMapper {
         return dto == null
             ? InntektPeriodeType.UDEFINERT
             : InntektPeriodeType.fraKode(dto.getKode());
-    }
-
-    static InntektsmeldingInnsendingsårsak mapInntektsmeldingInnsendingsårsakFraDto(no.nav.abakus.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType dto) {
-        return dto == null
-            ? InntektsmeldingInnsendingsårsak.UDEFINERT
-            : InntektsmeldingInnsendingsårsak.fraKode(dto.getKode());
-    }
-
-    static UtsettelseÅrsak mapUtsettelseÅrsakFraDto(no.nav.abakus.iaygrunnlag.kodeverk.UtsettelseÅrsakType dto) {
-        return dto == null
-            ? UtsettelseÅrsak.UDEFINERT
-            : UtsettelseÅrsak.fraKode(dto.getKode());
-    }
-
-    public static no.nav.abakus.iaygrunnlag.kodeverk.YtelseType mapFagsakYtelseTypeTilDto(FagsakYtelseType ytelseType) {
-        if (ytelseType == null)
-            return null;
-        return no.nav.abakus.iaygrunnlag.kodeverk.YtelseType.fraKode(ytelseType.getKode());
     }
 
 }

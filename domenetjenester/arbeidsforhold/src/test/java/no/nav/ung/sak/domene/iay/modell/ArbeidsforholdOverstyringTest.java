@@ -12,7 +12,7 @@ public class ArbeidsforholdOverstyringTest {
     @Test
     public void er_overstyrt() {
         var overstyring1 = new ArbeidsforholdOverstyring();
-        overstyring1.setHandling(ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING);
+        overstyring1.setHandling(ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER);
         assertThat(overstyring1.erOverstyrt()).isTrue();
 
         var overstyring2 = new ArbeidsforholdOverstyring();

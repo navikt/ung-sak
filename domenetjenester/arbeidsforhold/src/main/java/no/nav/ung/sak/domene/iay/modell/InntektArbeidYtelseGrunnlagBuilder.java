@@ -1,16 +1,16 @@
 package no.nav.ung.sak.domene.iay.modell;
 
+import no.nav.k9.felles.util.Tuple;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.InternArbeidsforholdRef;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import no.nav.k9.felles.util.Tuple;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Arbeidsgiver;
-import no.nav.ung.sak.typer.InternArbeidsforholdRef;
 
 public class InntektArbeidYtelseGrunnlagBuilder {
 
@@ -24,7 +24,9 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         return ny(UUID.randomUUID(), LocalDateTime.now());
     }
 
-    /** Opprett ny versjon av grunnlag med angitt assignet grunnlagReferanse og opprettetTidspunkt. */
+    /**
+     * Opprett ny versjon av grunnlag med angitt assignet grunnlagReferanse og opprettetTidspunkt.
+     */
     public static InntektArbeidYtelseGrunnlagBuilder ny(UUID grunnlagReferanse, LocalDateTime opprettetTidspunkt) {
         return new InntektArbeidYtelseGrunnlagBuilder(new InntektArbeidYtelseGrunnlag(grunnlagReferanse, opprettetTidspunkt));
     }
@@ -40,15 +42,6 @@ public class InntektArbeidYtelseGrunnlagBuilder {
     // FIXME: Bør ikke være public, bryter encapsulation
     public InntektArbeidYtelseGrunnlag getKladd() {
         return kladd;
-    }
-
-    public InntektsmeldingAggregat getInntektsmeldinger() {
-        final Optional<InntektsmeldingAggregat> inntektsmeldinger = kladd.getInntektsmeldinger();
-        return inntektsmeldinger.map(InntektsmeldingAggregat::new).orElseGet(InntektsmeldingAggregat::new);
-    }
-
-    public void setInntektsmeldinger(InntektsmeldingAggregat inntektsmeldinger) {
-        kladd.setInntektsmeldinger(inntektsmeldinger);
     }
 
     public void setOppgitteOpptjeninger(OppgittOpptjeningAggregat oppgittOpptjeningAggregat) {
@@ -73,7 +66,9 @@ public class InntektArbeidYtelseGrunnlagBuilder {
         kladd.setSaksbehandlet(builder == null ? null : builder.build());
     }
 
-    /** @deprecated skal fjernes, skal ikke kunne utføres på klient siden (kun internt i abakus). */
+    /**
+     * @deprecated skal fjernes, skal ikke kunne utføres på klient siden (kun internt i abakus).
+     */
     @Deprecated(forRemoval = true)
     public void medRegister(InntektArbeidYtelseAggregatBuilder builder) {
         kladd.setRegister(builder == null ? null : builder.build());
@@ -117,14 +112,13 @@ public class InntektArbeidYtelseGrunnlagBuilder {
 
     public InntektArbeidYtelseGrunnlag build() {
         var k = kladd;
-        if (kladd.getArbeidsforholdInformasjon().isPresent()) {
-            k.taHensynTilBetraktninger();
-        }
         kladd = null; // må ikke finne på å gjenbruke buildere her, tar heller straffen i en NPE ved første feilkall
         return k;
     }
 
-    /** @deprecated skal fjernes, skal kun kunne utføre {@link #medSaksbehandlet(InntektArbeidYtelseAggregatBuilder)} . */
+    /**
+     * @deprecated skal fjernes, skal kun kunne utføre {@link #medSaksbehandlet(InntektArbeidYtelseAggregatBuilder)} .
+     */
     @Deprecated(forRemoval = true)
     public InntektArbeidYtelseGrunnlagBuilder medData(InntektArbeidYtelseAggregatBuilder builder) {
         VersjonType versjon = builder.getVersjon();
@@ -164,11 +158,6 @@ public class InntektArbeidYtelseGrunnlagBuilder {
 
     public InntektArbeidYtelseGrunnlagBuilder medErAktivtGrunnlag(boolean erAktivt) {
         kladd.setAktivt(erAktivt);
-        return this;
-    }
-
-    public InntektArbeidYtelseGrunnlagBuilder medInntektsmeldinger(Collection<Inntektsmelding> inntektsmeldinger) {
-        setInntektsmeldinger(new InntektsmeldingAggregat(inntektsmeldinger));
         return this;
     }
 

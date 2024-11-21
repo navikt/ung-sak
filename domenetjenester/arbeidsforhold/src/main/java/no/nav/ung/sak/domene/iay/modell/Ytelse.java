@@ -131,9 +131,8 @@ public class Ytelse implements IndexKey {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof Ytelse))
+        if (o == null || !(o instanceof Ytelse that))
             return false;
-        Ytelse that = (Ytelse) o;
         return Objects.equals(relatertYtelseType, that.relatertYtelseType) &&
             Objects.equals(periode, that.periode) &&
             Objects.equals(saksnummer, that.saksnummer) &&

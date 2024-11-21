@@ -30,7 +30,6 @@ public class Brevkode implements Kodeverdi {
     private static final Map<String, Brevkode> KODER = new LinkedHashMap<>();
 
     public static final int VEDLEGG_RANGERING = 99;
-    public static final int INNTEKTSMELDING_RANGERING = 10;
     public static final int SØKNAD_RANGERING = 1;
 
     public static final String SØKNAD_OMS_UTVIDETRETT_MA_KODE = "SØKNAD_OMS_UTVIDETRETT_MA";
@@ -45,9 +44,7 @@ public class Brevkode implements Kodeverdi {
     public static final String ETTERSENDELSE_UTBETALING_OMS_AT_KODE = "ETTERSENDELSE_UTBETALING_OMS_AT";
     public static final String PAPIRSØKNAD_UTBETALING_OMS_AT_KODE = "PAPIRSØKNAD_UTBETALING_OMS_AT";
     public static final String FRAVÆRSKORRIGERING_IM_OMS_KODE = "FRAVÆRSKORRIGERING_IM_OMS";
-    public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
     // Match mot Deprecated {@link no.nav.ung.kodeverk.dokument.DokumentTypeId}
-    public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936", INNTEKTSMELDING_RANGERING);
     public static final Brevkode LEGEERKLÆRING = new Brevkode("LEGEERKLÆRING", "I000023", VEDLEGG_RANGERING);
     public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02", SØKNAD_RANGERING);
     /**

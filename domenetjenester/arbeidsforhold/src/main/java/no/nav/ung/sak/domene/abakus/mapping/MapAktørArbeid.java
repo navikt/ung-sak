@@ -61,9 +61,9 @@ public class MapAktørArbeid {
     public static class MapFraDto {
 
         @SuppressWarnings("unused")
-        private AktørId søkerAktørId;
+        private final AktørId søkerAktørId;
 
-        private InntektArbeidYtelseAggregatBuilder registerData;
+        private final InntektArbeidYtelseAggregatBuilder registerData;
 
         MapFraDto(AktørId søkerAktørId, InntektArbeidYtelseAggregatBuilder registerData) {
             this.registerData = registerData;
@@ -155,7 +155,7 @@ public class MapAktørArbeid {
 
         private static final Logger log = LoggerFactory.getLogger(MapTilDto.class);
 
-        private ArbeidsforholdInformasjon arbeidsforholdInformasjon;
+        private final ArbeidsforholdInformasjon arbeidsforholdInformasjon;
 
         public MapTilDto(ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
             this.arbeidsforholdInformasjon = arbeidsforholdInformasjon;

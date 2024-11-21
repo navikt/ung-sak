@@ -1,7 +1,6 @@
 package no.nav.ung.sak.domene.iay.modell;
 
 import static no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_MED_OVERSTYRT_PERIODE;
-import static no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.BRUK_UTEN_INNTEKTSMELDING;
 import static no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.INNTEKT_IKKE_MED_I_BG;
 import static no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER;
 
@@ -39,7 +38,7 @@ public class ArbeidsforholdOverstyring implements IndexKey {
 
     private Stillingsprosent stillingsprosent;
 
-    private List<ArbeidsforholdOverstyrtePerioder> arbeidsforholdOverstyrtePerioder = new ArrayList<>();
+    private final List<ArbeidsforholdOverstyrtePerioder> arbeidsforholdOverstyrtePerioder = new ArrayList<>();
 
     private BekreftetPermisjon bekreftetPermisjon = new BekreftetPermisjon();
 
@@ -134,11 +133,6 @@ public class ArbeidsforholdOverstyring implements IndexKey {
                 !Objects.equals(bekreftetPermisjon.getStatus(), BekreftetPermisjonStatus.UDEFINERT));
     }
 
-    public boolean kreverIkkeInntektsmelding() {
-        return Set.of(LAGT_TIL_AV_SAKSBEHANDLER, BRUK_UTEN_INNTEKTSMELDING,
-            BRUK_MED_OVERSTYRT_PERIODE, INNTEKT_IKKE_MED_I_BG).contains(handling);
-    }
-
     @Override
     public String getIndexKey() {
         Object[] keyParts = { arbeidsgiver, arbeidsforholdRef };
@@ -149,9 +143,8 @@ public class ArbeidsforholdOverstyring implements IndexKey {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof ArbeidsforholdOverstyring))
+        if (o == null || !(o instanceof ArbeidsforholdOverstyring that))
             return false;
-        ArbeidsforholdOverstyring that = (ArbeidsforholdOverstyring) o;
         return Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
             Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef);
     }

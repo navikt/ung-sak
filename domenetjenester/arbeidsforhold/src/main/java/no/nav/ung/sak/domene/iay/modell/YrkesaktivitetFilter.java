@@ -27,10 +27,10 @@ public class YrkesaktivitetFilter {
      */
     public static final YrkesaktivitetFilter EMPTY = new YrkesaktivitetFilter(null, Collections.emptyList());
 
-    private ArbeidsforholdInformasjon arbeidsforholdOverstyringer;
+    private final ArbeidsforholdInformasjon arbeidsforholdOverstyringer;
     private LocalDate skjæringstidspunkt;
     private Boolean ventreSideAvSkjæringstidspunkt;
-    private Collection<Yrkesaktivitet> yrkesaktiviteter;
+    private final Collection<Yrkesaktivitet> yrkesaktiviteter;
     private DatoIntervallEntitet periode;
 
     public YrkesaktivitetFilter(ArbeidsforholdInformasjon overstyringer, Collection<Yrkesaktivitet> yrkesaktiviteter) {
@@ -173,7 +173,7 @@ public class YrkesaktivitetFilter {
         var filter = new YrkesaktivitetFilter(arbeidsforholdOverstyringer, getAlleYrkesaktiviteter());
         filter.periode = null;
         filter.skjæringstidspunkt = skjæringstidspunkt;
-        filter.ventreSideAvSkjæringstidspunkt = !(skjæringstidspunkt != null);
+        filter.ventreSideAvSkjæringstidspunkt = skjæringstidspunkt == null;
         return filter;
     }
 
@@ -243,8 +243,7 @@ public class YrkesaktivitetFilter {
     }
 
     private boolean erLagtTilAvSaksbehandler(ArbeidsforholdHandlingType handling) {
-        return ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER.equals(handling) ||
-            ArbeidsforholdHandlingType.BASERT_PÅ_INNTEKTSMELDING.equals(handling);
+        return ArbeidsforholdHandlingType.LAGT_TIL_AV_SAKSBEHANDLER.equals(handling);
     }
 
     private Optional<ArbeidsforholdOverstyring> finnMatchendeOverstyring(Yrkesaktivitet ya) {

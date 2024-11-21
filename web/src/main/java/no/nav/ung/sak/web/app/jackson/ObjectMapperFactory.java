@@ -8,10 +8,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.ung.kodeverk.KodeverdiSomStringSerializer;
 import no.nav.ung.kodeverk.OpenapiEnumBeanDeserializerModifier;
 import no.nav.ung.kodeverk.OpenapiEnumSerializer;
-import no.nav.ung.kodeverk.KodeverdiSomStringSerializer;
-import no.nav.ung.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 
 import java.net.URI;
@@ -63,9 +62,6 @@ public class ObjectMapperFactory {
         Collection<Class<?>> restClasses = new RestImplementationClasses().getImplementationClasses();
 
         Set<Class<?>> scanClasses = new LinkedHashSet<>(restClasses);
-
-        // hack - additional locations to scan (jars uten rest services) - trenger det her p.t. for å bestemme hvilke jars / maven moduler som skal scannes for andre dtoer
-        scanClasses.add(AvklarArbeidsforholdDto.class);
 
         // avled code location fra klassene
         scanClasses

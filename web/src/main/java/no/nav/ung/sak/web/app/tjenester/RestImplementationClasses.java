@@ -12,7 +12,6 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.OverlapendeYtelserRestTjeneste;
@@ -69,7 +68,6 @@ public class RestImplementationClasses {
         classes.add(PersonRestTjeneste.class);
         classes.add(SøknadRestTjeneste.class);
         classes.add(InntektArbeidYtelseRestTjeneste.class);
-        classes.add(ArbeidsgiverRestTjeneste.class);
         classes.add(VilkårRestTjeneste.class);
         classes.add(IntegrasjonstatusRestTjeneste.class);
         classes.add(PipRestTjeneste.class);

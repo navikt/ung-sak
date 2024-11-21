@@ -17,7 +17,7 @@
 
 ## Behandling og prosesskontroll
 1. Adaptiv saksbehandling (~ koordinerende og orkestrerende prosesskontroll)
-    - Hendelser oppstår utenfor kontroll av saksbehandlingssytemet (eks. ny inntektsmelding, flytting, dødsfall, innringing, nye opplysninger i registeret etc)
+    - Hendelser oppstår utenfor kontroll av saksbehandlingssytemet (eks. flytting, dødsfall, innringing, nye opplysninger i registeret etc)
     - Behandlingskontroll sjekker hva som endres av datagrunnlag hver gang en behandling kjøres og tilpasser behandlingsprosess (eks. tilbakehopp i saksbehandling)
 1. Hovedflyt i saksbehandling går gjennom steg som vurderer datagrunnlag og produserer aggregater av data som benyttes i videre prosessering
 

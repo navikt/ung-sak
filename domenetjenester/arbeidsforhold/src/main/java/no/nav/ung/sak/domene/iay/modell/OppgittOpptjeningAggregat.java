@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 public class OppgittOpptjeningAggregat {
 
     @ChangeTracked
-    private List<OppgittOpptjening> oppgitteOpptjeninger = new ArrayList<>();
+    private final List<OppgittOpptjening> oppgitteOpptjeninger = new ArrayList<>();
 
 
     OppgittOpptjeningAggregat() {
@@ -42,9 +42,8 @@ public class OppgittOpptjeningAggregat {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof OppgittOpptjeningAggregat))
+        if (o == null || !(o instanceof OppgittOpptjeningAggregat that))
             return false;
-        OppgittOpptjeningAggregat that = (OppgittOpptjeningAggregat) o;
         return Objects.equals(oppgitteOpptjeninger, that.oppgitteOpptjeninger);
     }
 

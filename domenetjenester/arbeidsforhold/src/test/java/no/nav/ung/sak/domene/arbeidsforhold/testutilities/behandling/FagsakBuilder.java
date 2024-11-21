@@ -16,7 +16,7 @@ class FagsakBuilder {
 
     private Fagsak fagsak;
 
-    private FagsakYtelseType fagsakYtelseType;
+    private final FagsakYtelseType fagsakYtelseType;
 
     private FagsakBuilder(FagsakYtelseType fagsakYtelseType) {
         this.fagsakYtelseType = fagsakYtelseType;

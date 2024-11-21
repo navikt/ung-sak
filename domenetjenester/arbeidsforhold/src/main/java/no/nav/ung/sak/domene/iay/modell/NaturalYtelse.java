@@ -64,9 +64,8 @@ public class NaturalYtelse implements IndexKey {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof NaturalYtelse))
+        if (o == null || !(o instanceof NaturalYtelse that))
             return false;
-        NaturalYtelse that = (NaturalYtelse) o;
         return Objects.equals(periode, that.periode) &&
             Objects.equals(type, that.type);
     }

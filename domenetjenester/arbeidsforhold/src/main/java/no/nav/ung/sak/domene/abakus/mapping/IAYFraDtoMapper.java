@@ -1,27 +1,23 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.ung.sak.domene.iay.modell.*;
+import no.nav.ung.sak.typer.AktørId;
+
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.domene.iay.modell.VersjonType;
-import no.nav.ung.sak.typer.AktørId;
-
 /**
  * Merk denne mapper alltid hele aggregat tilbake til nye instanser av IAY Aggregat. (i motsetning til tilsvarende implementasjon i ABakus som mapper til eksisterende instans).
  */
 public class IAYFraDtoMapper {
 
-    private AktørId aktørId;
+    private final AktørId aktørId;
 
     public IAYFraDtoMapper(AktørId aktørId) {
         this.aktørId = aktørId;
@@ -71,8 +67,6 @@ public class IAYFraDtoMapper {
 
     private void mapTilGrunnlagBuilder(InntektArbeidYtelseGrunnlagDto dto, InntektArbeidYtelseGrunnlagBuilder builder) {
         var arbeidsforholdInformasjonBuilder = new MapArbeidsforholdInformasjon.MapFraDto(builder).map(dto.getArbeidsforholdInformasjon());
-        var mapInntektsmeldinger = new MapInntektsmeldinger.MapFraDto();
-        var inntektsmeldinger = mapInntektsmeldinger.map(arbeidsforholdInformasjonBuilder, dto.getInntektsmeldinger());
 
         var oppgittOpptjening = mapOppgttOpptjening(dto.getOppgittOpptjening());
         var overstyrtOppgittOpptjening = mapOppgttOpptjening(dto.getOverstyrtOppgittOpptjening());
@@ -81,7 +75,6 @@ public class IAYFraDtoMapper {
         builder.medOverstyrtOppgittOpptjening(overstyrtOppgittOpptjening);
         builder.medOppgittOpptjening(oppgittOpptjening);
         builder.medOppgittOpptjeningAggregat(mapOppgitteOpptjeninger(dto.getOppgitteOpptjeninger()));
-        builder.setInntektsmeldinger(inntektsmeldinger);
         builder.medInformasjon(arbeidsforholdInformasjon);
     }
 

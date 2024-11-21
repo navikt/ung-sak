@@ -11,7 +11,7 @@ import no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem;
 
 public class ArbeidsforholdRefDtoTest {
 
-    private ObjectMapper om = new ObjectMapper();
+    private final ObjectMapper om = new ObjectMapper();
 
     @Test
     public void skal_serialisere_dto() throws Exception {

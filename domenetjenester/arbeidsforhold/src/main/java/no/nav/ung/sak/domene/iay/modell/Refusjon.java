@@ -47,8 +47,7 @@ public class Refusjon implements IndexKey {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof Refusjon)) return false;
-        Refusjon that = (Refusjon) o;
+        if (o == null || !(o instanceof Refusjon that)) return false;
         return Objects.equals(refusjonsbeløpMnd, that.refusjonsbeløpMnd) &&
             Objects.equals(fom, that.fom);
     }

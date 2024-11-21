@@ -32,9 +32,8 @@ public class OppgittFrilans {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof OppgittFrilans))
+        if (o == null || !(o instanceof OppgittFrilans that))
             return false;
-        OppgittFrilans that = (OppgittFrilans) o;
         return Objects.equals(harInntektFraFosterhjem, that.harInntektFraFosterhjem)
             && Objects.equals(erNyoppstartet, that.erNyoppstartet)
             && Objects.equals(harNærRelasjon, that.harNærRelasjon)

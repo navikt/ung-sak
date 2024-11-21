@@ -41,7 +41,7 @@ public class IAYDtoMapperLagretKonverteringTest {
     private static final LocalDate ANVIST_TOM = DATO.minusDays(100);
     private static final LocalDate OPPRINNELIG_IDENTDATO = DATO.minusDays(100);
 
-    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+    private final InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
     private InntektArbeidYtelseGrunnlag hentGrunnlag(Long behandlingId) {
         return iayTjeneste.hentGrunnlag(behandlingId);
@@ -117,7 +117,7 @@ public class IAYDtoMapperLagretKonverteringTest {
 
         var mapper = new IAYTilDtoMapper(aktørId, grunnlag.getEksternReferanse(), behandlingUuid);
 
-        var dto = mapper.mapTilDto(YtelseType.OMSORGSPENGER, grunnlag, true);
+        var dto = mapper.mapTilDto(YtelseType.UNGDOMSYTELSE, grunnlag, true);
 
         JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter().writeValue(System.out, dto);
 
@@ -140,17 +140,17 @@ public class IAYDtoMapperLagretKonverteringTest {
             .medYtelseGrunnlag(
                 ytelselseBuilder.getGrunnlagBuilder()
                     .medOpprinneligIdentdato(OPPRINNELIG_IDENTDATO)
-                    .medInntektsgrunnlagProsent(new BigDecimal(99.00))
-                    .medDekningsgradProsent(new BigDecimal(98.00))
+                    .medInntektsgrunnlagProsent(new BigDecimal("99.00"))
+                    .medDekningsgradProsent(new BigDecimal("98.00"))
                     .medYtelseStørrelse(YtelseStørrelseBuilder.ny()
-                        .medBeløp(new BigDecimal(100000.50))
+                        .medBeløp(new BigDecimal("100000.50"))
                         .medVirksomhet(ORGNR)
                         .build())
                     .medVedtaksDagsats(new Beløp(557))
                     .build())
             .medYtelseAnvist(ytelselseBuilder.getAnvistBuilder()
                 .medAnvistPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(ANVIST_FOM, ANVIST_TOM))
-                .medDagsats(new BigDecimal(500.00))
+                .medDagsats(new BigDecimal("500.00"))
                 .medUtbetalingsgradProsent(null)
                 .build());
     }

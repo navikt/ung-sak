@@ -20,7 +20,6 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 public enum DokumentGruppe implements Kodeverdi {
 
     SØKNAD("SØKNAD", "Søknad"),
-    INNTEKTSMELDING("INNTEKTSMELDING", "Inntektsmelding"),
     VEDLEGG("VEDLEGG", "Vedlegg"),
     UDEFINERT("-", "Ikke definert"),
 

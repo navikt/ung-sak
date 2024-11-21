@@ -23,7 +23,7 @@ import no.nav.ung.sak.typer.EksternArbeidsforholdRef;
 @Dependent
 public class ArbeidsforholdTjeneste {
 
-    private AbakusTjeneste abakusTjeneste;
+    private final AbakusTjeneste abakusTjeneste;
 
     @Inject
     public ArbeidsforholdTjeneste(AbakusTjeneste abakusTjeneste) {

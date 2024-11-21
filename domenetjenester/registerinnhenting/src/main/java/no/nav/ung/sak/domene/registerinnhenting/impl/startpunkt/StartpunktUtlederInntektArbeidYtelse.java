@@ -1,23 +1,9 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl.startpunkt;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.FRISINN;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -30,13 +16,20 @@ import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.domene.arbeidsforhold.AktørYtelseEndring;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.arbeidsforhold.VurderArbeidsforholdTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Saksnummer;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.*;
 
 @ApplicationScoped
 @GrunnlagRef(InntektArbeidYtelseGrunnlag.class)
@@ -50,10 +43,9 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger;
-    private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
+
     public StartpunktUtlederInntektArbeidYtelse() {
         // For CDI
     }
@@ -61,13 +53,9 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
     @Inject
     StartpunktUtlederInntektArbeidYtelse(InntektArbeidYtelseTjeneste iayTjeneste, // NOSONAR - ingen enkel måte å unngå mange parametere her
                                          BehandlingRepositoryProvider repositoryProvider,
-                                         StartpunktUtlederInntektsmeldinger startpunktUtlederInntektsmeldinger,
-                                         VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste,
                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.iayTjeneste = iayTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.startpunktUtlederInntektsmeldinger = startpunktUtlederInntektsmeldinger;
-        this.vurderArbeidsforholdTjeneste = vurderArbeidsforholdTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
@@ -84,55 +72,33 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
         var forrigeGrunnlag = grunnlagId2 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2) : null;
         var diff = new IAYGrunnlagDiff(oppdatertGrunnlag, forrigeGrunnlag);
 
-        if (startpunktUtlederInntektsmeldinger.inntektsmeldingErSøknad(ref)) {
-            var startpunktType = startpunktUtlederInntektsmeldinger.utledStartpunkt(ref, forrigeGrunnlag);
-            boolean erInntektsmeldingEndret = !StartpunktType.UDEFINERT.equals(startpunktType);
-            if (erInntektsmeldingEndret) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, startpunktType, "tilkommet inntektsmeldinger");
-            }
-        } else {
-            boolean erInntektsmeldingEndret = diff.erEndringPåInntektsmelding();
-            if (erInntektsmeldingEndret) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.BEREGNING, "inntektsmelding");
-            }
-        }
-
         Saksnummer saksnummer = ref.getSaksnummer();
 
 
-        if (FagsakYtelseType.FRISINN.equals(ref.getFagsakYtelseType())) {
-            diffForFrisinn(ref, grunnlagId1, grunnlagId2, startpunkter, diff, saksnummer);
-        } else {
-            var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-            var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
 
-            for (DatoIntervallEntitet periode : perioderTilVurdering) {
-                var opptjeningsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(30), periode.getFomDato());
+        for (DatoIntervallEntitet periode : perioderTilVurdering) {
+            var opptjeningsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(30), periode.getFomDato());
 
-                boolean erAktørArbeidEndretForSøker = diff.erEndringPåAktørArbeidForAktør(opptjeningsperiode, ref.getAktørId());
-                boolean aktørYtelseEndring = diff.endringPåAktørYtelseForAktør(saksnummer, opptjeningsperiode, ref.getAktørId());
-                if (erAktørArbeidEndretForSøker) {
-                    leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktørarbeid for periode " + opptjeningsperiode);
-                } else if (aktørYtelseEndring) {
-                    leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør ytelse andre tema for periode " + opptjeningsperiode);
-                } else {
-                    var relevantInntektsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusMonths(3), periode.getFomDato());
-                    boolean erAktørInntektEndretForSøker = diff.erEndringPåAktørInntektForAktør(relevantInntektsperiode, ref.getAktørId());
-                    if (erAktørInntektEndretForSøker) {
-                        leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør inntekt for periode " + relevantInntektsperiode);
-                    }
+            boolean erAktørArbeidEndretForSøker = diff.erEndringPåAktørArbeidForAktør(opptjeningsperiode, ref.getAktørId());
+            boolean aktørYtelseEndring = diff.endringPåAktørYtelseForAktør(saksnummer, opptjeningsperiode, ref.getAktørId());
+            if (erAktørArbeidEndretForSøker) {
+                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktørarbeid for periode " + opptjeningsperiode);
+            } else if (aktørYtelseEndring) {
+                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør ytelse andre tema for periode " + opptjeningsperiode);
+            } else {
+                var relevantInntektsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusMonths(3), periode.getFomDato());
+                boolean erAktørInntektEndretForSøker = diff.erEndringPåAktørInntektForAktør(relevantInntektsperiode, ref.getAktørId());
+                if (erAktørInntektEndretForSøker) {
+                    leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør inntekt for periode " + relevantInntektsperiode);
                 }
             }
         }
 
-
         if (harAksjonspunkt5080(ref)) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
-        } else if (erPåkrevdManuelleAvklaringer(ref)) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
         }
-
-
 
         return startpunkter;
     }
@@ -153,10 +119,6 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
                 leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør inntekt");
             }
         }
-    }
-
-    private boolean erPåkrevdManuelleAvklaringer(BehandlingReferanse ref) {
-        return !vurderArbeidsforholdTjeneste.vurder(ref).isEmpty();
     }
 
     private boolean harAksjonspunkt5080(BehandlingReferanse ref) {

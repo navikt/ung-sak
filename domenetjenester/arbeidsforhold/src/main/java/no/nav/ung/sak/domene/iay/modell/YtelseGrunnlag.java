@@ -117,9 +117,8 @@ public class YtelseGrunnlag {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof YtelseGrunnlag))
+        if (o == null || !(o instanceof YtelseGrunnlag that))
             return false;
-        YtelseGrunnlag that = (YtelseGrunnlag) o;
         return Objects.equals(arbeidskategori, that.arbeidskategori) &&
             Objects.equals(dekngradProsent, that.dekngradProsent) &&
             Objects.equals(graderingProsent, that.graderingProsent) &&

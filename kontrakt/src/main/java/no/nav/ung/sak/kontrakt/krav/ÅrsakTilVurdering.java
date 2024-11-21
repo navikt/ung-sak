@@ -26,8 +26,6 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER", "Endring fra søknad/Punsj"),
     // Kravet for perioden har blitt trukket
     TRUKKET_KRAV("TRUKKET_KRAV", "Endret/fjernet søknadsperiode"),
-    // Vurderes på nytt pga inntektsmelding som er sendt inn for perioden
-    REVURDERER_NY_INNTEKTSMELDING("REVURDERER_NY_INNTEKTSMELDING", "Ny inntektsmelding"),
     // Perioden ses på pga endringer i felles opplysninger (Nattevåk/beredskap/etablert tilsyn/sykdom
     REVURDERER_ENDRING_FRA_ANNEN_PART("REVURDERER_ENDRING_FRA_ANNEN_PART", "Annen parts vedtak endrer uttak"),
     REVURDERER_ENDRING_FERIEPENGER("REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "Feriepenger reberegnes som følge av vedtak i annen sak"),
@@ -65,7 +63,6 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, HENDELSE_DØD_PLEIETRENGENDE);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER);
-        sammenheng.put(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING, REVURDERER_NY_INNTEKTSMELDING);
         sammenheng.put(BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK, REVURDERER_ENDRING_FERIEPENGER);
         sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, REVURDERER_BERØRT_PERIODE);
         sammenheng.put(BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, REVURDERER_LIGNET_INNTEKT);
