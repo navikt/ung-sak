@@ -1,10 +1,5 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import no.nav.k9.felles.util.Tuple;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Arbeidsgiver;
-import no.nav.ung.sak.typer.InternArbeidsforholdRef;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -46,19 +41,6 @@ public class InntektArbeidYtelseGrunnlagBuilder {
 
     public void setOppgitteOpptjeninger(OppgittOpptjeningAggregat oppgittOpptjeningAggregat) {
         kladd.setOppgittOpptjeningAggregat(oppgittOpptjeningAggregat);
-    }
-
-    public ArbeidsforholdInformasjon getInformasjon() {
-        var informasjon = kladd.getArbeidsforholdInformasjon();
-
-        var informasjonEntitet = informasjon.orElseGet(() -> new ArbeidsforholdInformasjon());
-        kladd.setInformasjon(informasjonEntitet);
-        return informasjonEntitet;
-    }
-
-    public InntektArbeidYtelseGrunnlagBuilder medInformasjon(ArbeidsforholdInformasjon informasjon) {
-        kladd.setInformasjon(informasjon);
-        return this;
     }
 
     @Deprecated
@@ -129,27 +111,6 @@ public class InntektArbeidYtelseGrunnlagBuilder {
             medSaksbehandlet(builder);
         }
         return this;
-    }
-
-    public void ryddOppErstattedeArbeidsforhold(AktørId søker,
-                                                List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> erstattArbeidsforhold) {
-        final Optional<InntektArbeidYtelseAggregat> registerFørVersjon = kladd.getRegisterVersjon();
-        for (Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>> tuple : erstattArbeidsforhold) {
-            if (registerFørVersjon.isPresent()) {
-                // TODO: Vurder konsekvensen av dette.
-                var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(registerFørVersjon, VersjonType.REGISTER);
-                builder.oppdaterArbeidsforholdReferanseEtterErstatting(
-                    søker,
-                    tuple.getElement1(),
-                    tuple.getElement2().getElement1(),
-                    tuple.getElement2().getElement2());
-                medData(builder);
-            }
-        }
-    }
-
-    public Optional<ArbeidsforholdInformasjon> getArbeidsforholdInformasjon() {
-        return kladd.getArbeidsforholdInformasjon();
     }
 
     protected void fjernSaksbehandlet() {

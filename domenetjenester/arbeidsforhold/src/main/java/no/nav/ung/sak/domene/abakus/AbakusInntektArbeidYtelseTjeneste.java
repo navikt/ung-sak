@@ -38,8 +38,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private static final Logger log = LoggerFactory.getLogger(AbakusInntektArbeidYtelseTjeneste.class);
     private AbakusTjeneste abakusTjeneste;
     private BehandlingRepository behandlingRepository;
-    private FagsakRepository fagsakRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
     private IAYRequestCache requestCache;
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
 
@@ -58,14 +56,10 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
                                              AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
                                              BehandlingRepository behandlingRepository,
-                                             MottatteDokumentRepository mottatteDokumentRepository,
-                                             FagsakRepository fagsakRepository,
                                              IAYRequestCache requestCache) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
-        this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
     }
 
@@ -156,24 +150,13 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         }
         InntektArbeidYtelseGrunnlag dummy = getGrunnlagBuilder(behandlingId, builder).build();
         var saksbehandlet = dummy.getSaksbehandletVersjon().orElse(null);
-        var arbeidsforholdInformasjon = dummy.getArbeidsforholdInformasjon().orElse(null);
-        konverterOgLagre(behandlingId, saksbehandlet, arbeidsforholdInformasjon);
+        konverterOgLagre(behandlingId, saksbehandlet);
     }
 
     @Override
     /** @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet */
     public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
         throw new UnsupportedOperationException("Ikke lenger i bruk, bruk heller AsyncAbakusLagreOpptjeningTask");
-    }
-
-    // FIXME: bør kalle asyncabakustjeneste internt og overføre abakus i egen task
-    @Override
-    public void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder informasjonBuilder) {
-        Objects.requireNonNull(informasjonBuilder, "informasjonBuilder"); // NOSONAR
-
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var eksisterendeGrunnlag = Optional.ofNullable(hentGrunnlagHvisEksisterer(behandling));
-        konverterOgLagre(behandlingId, eksisterendeGrunnlag.flatMap(InntektArbeidYtelseGrunnlag::getSaksbehandletVersjon).orElse(null), informasjonBuilder.build());
     }
 
     @Override
@@ -279,22 +262,22 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return InntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidGrunnlag);
     }
 
-    private void konverterOgLagre(Long behandlingId, InntektArbeidYtelseAggregat overstyrtArbeid, ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
+    private void konverterOgLagre(Long behandlingId, InntektArbeidYtelseAggregat overstyrtArbeid) {
         Objects.requireNonNull(behandlingId, "behandlingId");
-        lagreOverstyrt(overstyrtArbeid, arbeidsforholdInformasjon, behandlingId);
+        lagreOverstyrt(overstyrtArbeid, behandlingId);
     }
 
-    private UUID lagreOverstyrt(InntektArbeidYtelseAggregat overstyrtArbeid, ArbeidsforholdInformasjon arbeidsforholdInformasjon, Long behandlingId) {
+    private UUID lagreOverstyrt(InntektArbeidYtelseAggregat overstyrtArbeid,Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return lagreOverstyrt(konverterTilDto(behandling, overstyrtArbeid, arbeidsforholdInformasjon));
+        return lagreOverstyrt(konverterTilDto(behandling, overstyrtArbeid));
     }
 
-    private OverstyrtInntektArbeidYtelseDto konverterTilDto(Behandling behandling, InntektArbeidYtelseAggregat overstyrt, ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
+    private OverstyrtInntektArbeidYtelseDto konverterTilDto(Behandling behandling, InntektArbeidYtelseAggregat overstyrt) {
         OverstyrtInntektArbeidYtelseDto dto;
         UUID nyGrunnlagReferanse = UUID.randomUUID();
         try {
             var tilDto = new IAYTilDtoMapper(behandling.getAktørId(), nyGrunnlagReferanse, behandling.getUuid());
-            dto = tilDto.mapTilDto(behandling.getFagsakYtelseType(), overstyrt, arbeidsforholdInformasjon);
+            dto = tilDto.mapTilDto(behandling.getFagsakYtelseType(), overstyrt);
         } catch (RuntimeException t) {
             log.warn("Kunne ikke transformere til Dto: grunnlag=" + nyGrunnlagReferanse + ", behandling=" + behandling.getId(), t);
             throw t;

@@ -79,7 +79,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         Optional<InntektArbeidYtelseGrunnlag> origAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(fraBehandlingId);
         origAggregat.ifPresent(orig -> {
             var builder = InntektArbeidYtelseGrunnlagBuilder.nytt();
-            builder.medInformasjon(orig.getArbeidsforholdInformasjon().orElse(null));
             for (Dataset data : dataset) {
                 switch (data) {
                     case REGISTER:
@@ -111,12 +110,7 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     public void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder builder) {
         var grunnlagBuilder = getGrunnlagBuilder(behandlingId, builder);
 
-        ArbeidsforholdInformasjon informasjon = grunnlagBuilder.getInformasjon();
-
         // lagre reserverte interne referanser opprettet tidligere
-        builder.getNyeInternArbeidsforholdReferanser()
-            .forEach(aref -> informasjon.opprettNyReferanse(aref.getArbeidsgiver(), aref.getInternReferanse(), aref.getEksternReferanse()));
-
         lagreOgFlush(behandlingId, grunnlagBuilder.build());
     }
 
@@ -164,15 +158,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
             return aggregat.getSaksbehandletVersjon();
         }
         throw new IllegalStateException("Kunne ikke finne riktig versjon av InntektArbeidYtelseGrunnlag");
-    }
-
-    @Override
-    public void lagreArbeidsforhold(Long behandlingId, AktørId søkerAktørId, ArbeidsforholdInformasjonBuilder informasjon) {
-        Objects.requireNonNull(informasjon, "informasjon"); // NOSONAR
-        var builder = opprettGrunnlagBuilderFor(behandlingId);
-        builder.medInformasjon(informasjon.build());
-
-        lagreOgFlush(behandlingId, builder.build());
     }
 
     @Override
@@ -293,12 +278,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         @Override
         public void fjernSaksbehandlet() {
             super.fjernSaksbehandlet();
-        }
-
-        @Override
-        public void ryddOppErstattedeArbeidsforhold(AktørId søker,
-                                                    List<Tuple<Arbeidsgiver, Tuple<InternArbeidsforholdRef, InternArbeidsforholdRef>>> erstattArbeidsforhold) {
-            super.ryddOppErstattedeArbeidsforhold(søker, erstattArbeidsforhold);
         }
 
         @Override

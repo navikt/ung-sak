@@ -32,7 +32,6 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
     private static final Logger log = LoggerFactory.getLogger(BehandlingÅrsakUtlederInntektArbeidYtelse.class);
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private BehandlingÅrsakUtlederAktørArbeid behandlingÅrsakUtlederAktørArbeid;
     private BehandlingÅrsakUtlederAktørInntekt behandlingÅrsakUtlederAktørInntekt;
     private BehandlingÅrsakUtlederAktørYtelse behandlingÅrsakUtlederAktørYtelse;
 
@@ -43,7 +42,6 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
                                                      BehandlingÅrsakUtlederAktørInntekt behandlingÅrsakUtlederAktørInntekt,
                                                      BehandlingÅrsakUtlederAktørYtelse behandlingÅrsakUtlederAktørYtelse) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.behandlingÅrsakUtlederAktørArbeid = behandlingÅrsakUtlederAktørArbeid;
         this.behandlingÅrsakUtlederAktørInntekt = behandlingÅrsakUtlederAktørInntekt;
         this.behandlingÅrsakUtlederAktørYtelse = behandlingÅrsakUtlederAktørYtelse;
     }
@@ -64,15 +62,10 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
         Set<BehandlingÅrsakType> behandlingÅrsakTyper = new HashSet<>();
 
         IAYGrunnlagDiff iayGrunnlagDiff = new IAYGrunnlagDiff(inntektArbeidYtelseGrunnlag1, inntektArbeidYtelseGrunnlag2);
-        boolean erAktørArbeidEndret = iayGrunnlagDiff.erEndringPåAktørArbeidForAktør(skjæringstidspunkt, ref.getAktørId());
+
         boolean erAktørInntektEndret = iayGrunnlagDiff.erEndringPåAktørInntektForAktør(skjæringstidspunkt, ref.getAktørId());
         AktørYtelseEndring aktørYtelseEndring = iayGrunnlagDiff.endringPåAktørYtelseForAktør(saksnummer, skjæringstidspunkt, ref.getAktørId());
 
-        if (erAktørArbeidEndret) {
-            BehandlingÅrsakType behandlingÅrsakTypeAktørArbeid = behandlingÅrsakUtlederAktørArbeid.utledBehandlingÅrsak();
-            log.info("Setter behandlingårsak til {}, har endring i aktør arbeid, grunnlagId1: {}, grunnlagId2: {}", behandlingÅrsakTypeAktørArbeid, grunnlagUuid1, grunnlagUuid2);
-            behandlingÅrsakTyper.add(behandlingÅrsakTypeAktørArbeid);
-        }
         if (aktørYtelseEndring.erEndret()) {
             BehandlingÅrsakType behandlingÅrsakTypeAktørYtelse = behandlingÅrsakUtlederAktørYtelse.utledBehandlingÅrsak();
             log.info("Setter behandlingårsak til {}, har endring i aktør ytelse, grunnlagId1: {}, grunnlagId2: {}", behandlingÅrsakTypeAktørYtelse, grunnlagUuid1, grunnlagUuid2);

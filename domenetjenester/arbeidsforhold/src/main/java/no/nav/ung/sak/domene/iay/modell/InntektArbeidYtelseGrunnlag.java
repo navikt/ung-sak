@@ -41,9 +41,6 @@ public class InntektArbeidYtelseGrunnlag {
     @ChangeTracked
     private OppgittOpptjening overstyrtOppgittOpptjening;
 
-    @ChangeTracked
-    private ArbeidsforholdInformasjon arbeidsforholdInformasjon;
-
     private boolean aktiv = true;
 
     @DiffIgnore
@@ -61,7 +58,6 @@ public class InntektArbeidYtelseGrunnlag {
         grunnlag.getOverstyrtOppgittOpptjening().ifPresent(this::setOverstyrtOppgittOpptjening);
         grunnlag.getRegisterVersjon().ifPresent(this::setRegister);
         grunnlag.getSaksbehandletVersjon().ifPresent(this::setSaksbehandlet);
-        grunnlag.getArbeidsforholdInformasjon().ifPresent(this::setInformasjon);
     }
 
     public InntektArbeidYtelseGrunnlag(UUID grunnlagReferanse, LocalDateTime opprettetTidspunkt) {
@@ -113,27 +109,6 @@ public class InntektArbeidYtelseGrunnlag {
 
     public void setOppgittOpptjeningAggregat(OppgittOpptjeningAggregat oppgittOpptjeningAggregat) {
         this.oppgittOpptjeningAggregat = oppgittOpptjeningAggregat;
-    }
-
-    /**
-     * sjekkom bekreftet annen opptjening. Oppgi aktørId for matchende behandling (dvs.normalt søker).
-     */
-    public Optional<AktørArbeid> getBekreftetAnnenOpptjening(AktørId aktørId) {
-        return getSaksbehandletVersjon()
-            .map(InntektArbeidYtelseAggregat::getAktørArbeid)
-            .flatMap(it -> it.stream().filter(aa -> aa.getAktørId().equals(aktørId))
-                .findFirst());
-    }
-
-    public Optional<AktørArbeid> getAktørArbeidFraRegister(AktørId aktørId) {
-        if (register != null) {
-            var aktørArbeid = register.getAktørArbeid().stream().filter(aa -> Objects.equals(aa.getAktørId(), aktørId)).collect(Collectors.toList());
-            if (aktørArbeid.size() > 1) {
-                throw new IllegalStateException("Kan kun ha ett innslag av AktørArbeid for aktørId:" + aktørId + " i  grunnlag " + this.getEksternReferanse());
-            }
-            return aktørArbeid.stream().findFirst();
-        }
-        return Optional.empty();
     }
 
     public Optional<AktørYtelse> getAktørYtelseFraRegister(AktørId aktørId) {
@@ -199,16 +174,8 @@ public class InntektArbeidYtelseGrunnlag {
         this.register = registerFør;
     }
 
-    public Optional<ArbeidsforholdInformasjon> getArbeidsforholdInformasjon() {
-        return Optional.ofNullable(arbeidsforholdInformasjon);
-    }
-
     public Optional<UUID> getKoblingReferanse() {
         return Optional.empty();
-    }
-
-    void setInformasjon(ArbeidsforholdInformasjon informasjon) {
-        this.arbeidsforholdInformasjon = informasjon;
     }
 
     @Override

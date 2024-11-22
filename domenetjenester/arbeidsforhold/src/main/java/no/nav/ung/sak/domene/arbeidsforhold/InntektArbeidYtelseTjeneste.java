@@ -1,11 +1,9 @@
 package no.nav.ung.sak.domene.arbeidsforhold;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
-import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -78,16 +76,6 @@ public interface InntektArbeidYtelseTjeneste {
      * @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet
      */
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
-
-
-    /**
-     * Lagre nytt grunnlag for ArbeidsforholdInformasjon. Builder bør ikke gjenbrukes etter kall her.
-     *
-     * @param behandlingId - Behandling Id
-     * @param aktørId      - Aktør Id
-     * @param builder      - {@link ArbeidsforholdInformasjonBuilder}
-     */
-    void lagreArbeidsforhold(Long behandlingId, AktørId aktørId, ArbeidsforholdInformasjonBuilder builder);
 
     /**
      * (async) Kopier IAY grunnlag fra en behandling til en annen.

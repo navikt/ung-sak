@@ -1,10 +1,6 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
 import no.nav.abakus.iaygrunnlag.*;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.AktivitetsAvtaleDto;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.ArbeidDto;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.PermisjonDto;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.YrkesaktivitetDto;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.InntekterDto;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingDto;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingsPostDto;
@@ -53,7 +49,7 @@ public class IAYDtoMapperRoundtripTest {
         // Act
         InntektArbeidYtelseGrunnlag iayGrunnlag = fraDtoMapper.mapTilGrunnlagInklusivRegisterdata(dto, true);
         IAYTilDtoMapper dtoMapper = new IAYTilDtoMapper(aktørId, uuid, uuid);
-        InntektArbeidYtelseGrunnlagDto dtoIgjen = dtoMapper.mapTilDto(ytelseType, iayGrunnlag, true);
+        InntektArbeidYtelseGrunnlagDto dtoIgjen = dtoMapper.mapTilDto(ytelseType, iayGrunnlag);
 
         // Assert
         assertThat(dtoIgjen.getGrunnlagTidspunkt()).isEqualTo(dto.getGrunnlagTidspunkt());
@@ -78,19 +74,6 @@ public class IAYDtoMapperRoundtripTest {
 
         grunnlag.medRegister(
                 new InntektArbeidYtelseAggregatRegisterDto(tidspunkt, uuid)
-                    .medArbeid(List.of(
-                        new ArbeidDto(aktørIdent)
-                            .medYrkesaktiviteter(List.of(
-                                new YrkesaktivitetDto(arbeidType)
-                                    .medArbeidsgiver(org)
-                                    .medPermisjoner(List.of(new PermisjonDto(periode, PermisjonsbeskrivelseType.PERMISJON).medProsentsats(50)))
-                                    .medArbeidsforholdId(arbeidsforholdId)
-                                    .medNavnArbeidsgiverUtland("utlandskNavnAS")
-                                    .medAktivitetsAvtaler(List.of(
-                                        new AktivitetsAvtaleDto(periode)
-                                            .medSistLønnsendring(fom)
-                                            .medBeskrivelse("Beskrivelse")
-                                            .medStillingsprosent(50)))))))
                     .medInntekt(List.of(
                         new InntekterDto(aktørIdent)
                             .medUtbetalinger(List.of(
@@ -120,19 +103,7 @@ public class IAYDtoMapperRoundtripTest {
                                             .medDagsats(100)
                                             .medUtbetalingsgrad(100))))))))
             .medOverstyrt(
-                new InntektArbeidYtelseAggregatOverstyrtDto(tidspunkt, uuid)
-                    .medArbeid(List.of(
-                        new ArbeidDto(aktørIdent)
-                            .medYrkesaktiviteter(List.of(
-                                new YrkesaktivitetDto(arbeidType)
-                                    .medArbeidsgiver(org)
-                                    .medPermisjoner(List.of(new PermisjonDto(periode, PermisjonsbeskrivelseType.PERMISJON).medProsentsats(50)))
-                                    .medArbeidsforholdId(arbeidsforholdId)
-                                    .medAktivitetsAvtaler(List.of(
-                                        new AktivitetsAvtaleDto(periode)
-                                            .medSistLønnsendring(tom)
-                                            .medBeskrivelse("beskrivelse")
-                                            .medStillingsprosent(30))))))))
+                new InntektArbeidYtelseAggregatOverstyrtDto(tidspunkt, uuid))
             .medOppgittOpptjening(
                 new OppgittOpptjeningDto(null, null, uuid, offTidspunkt)
                     .medArbeidsforhold(List.of(

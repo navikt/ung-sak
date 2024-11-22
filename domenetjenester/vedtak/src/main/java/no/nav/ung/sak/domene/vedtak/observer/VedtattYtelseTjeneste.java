@@ -51,11 +51,6 @@ public class VedtattYtelseTjeneste {
     public Ytelse genererYtelse(Behandling behandling) {
         final BehandlingVedtak vedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
         Optional<BeregningsresultatEntitet> berResultat = beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
-        List<ArbeidsforholdReferanse> arbeidsforholdReferanser = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId())
-            .getArbeidsforholdInformasjon()
-            .stream()
-            .flatMap(a -> a.getArbeidsforholdReferanser().stream())
-            .collect(Collectors.toList());
 
         final Aktør aktør = new Aktør();
         aktør.setVerdi(behandling.getAktørId().getId());
@@ -72,7 +67,7 @@ public class VedtattYtelseTjeneste {
                 PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere)));
 
         ytelse.setPeriode(utledPeriode(vedtak, berResultat.orElse(null)));
-        ytelse.setAnvist(mapAnvisninger(berResultat.orElse(null), arbeidsforholdReferanser));
+        ytelse.setAnvist(mapAnvisninger(berResultat.orElse(null)));
         return ytelse;
     }
 

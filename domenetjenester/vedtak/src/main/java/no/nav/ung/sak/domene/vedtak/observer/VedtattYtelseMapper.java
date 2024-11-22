@@ -26,17 +26,17 @@ import no.nav.ung.sak.typer.InternArbeidsforholdRef;
 class VedtattYtelseMapper {
 
 
-    static List<Anvisning> mapAnvisninger(BeregningsresultatEntitet beregningsresultatEntitet, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
+    static List<Anvisning> mapAnvisninger(BeregningsresultatEntitet beregningsresultatEntitet) {
         if (beregningsresultatEntitet == null) {
             return List.of();
         }
         return beregningsresultatEntitet.getBeregningsresultatPerioder().stream()
             .filter(periode -> periode.getDagsats() > 0)
-            .map(p -> map(p, arbeidsforholdReferanser))
+            .map(p -> map(p))
             .collect(Collectors.toList());
     }
 
-    private static Anvisning map(BeregningsresultatPeriode periode, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
+    private static Anvisning map(BeregningsresultatPeriode periode) {
         final Anvisning anvisning = new Anvisning();
         final Periode p = new Periode();
         p.setFom(periode.getBeregningsresultatPeriodeFom());
@@ -44,23 +44,23 @@ class VedtattYtelseMapper {
         anvisning.setPeriode(p);
         anvisning.setDagsats(new Desimaltall(new BigDecimal(periode.getDagsats())));
         anvisning.setUtbetalingsgrad(periode.getLavestUtbetalingsgrad().map(Desimaltall::new).orElse(null));
-        anvisning.setAndeler(mapAndeler(periode.getBeregningsresultatAndelList(), arbeidsforholdReferanser));
+        anvisning.setAndeler(mapAndeler(periode.getBeregningsresultatAndelList()));
         return anvisning;
     }
 
-    private static List<AnvistAndel> mapAndeler(List<BeregningsresultatAndel> beregningsresultatAndelList, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
+    private static List<AnvistAndel> mapAndeler(List<BeregningsresultatAndel> beregningsresultatAndelList) {
         Map<AnvistAndelNøkkel, List<BeregningsresultatAndel>> resultatPrNøkkkel = beregningsresultatAndelList.stream()
             .collect(Collectors.groupingBy(a -> new AnvistAndelNøkkel(a.getArbeidsgiver().orElse(null), a.getArbeidsforholdRef(), a.getInntektskategori(), a.getAktivitetStatus())));
         return resultatPrNøkkkel.entrySet().stream()
             .sorted(Map.Entry.comparingByKey())
-            .map(e -> mapTilAnvistAndel(e, arbeidsforholdReferanser))
+            .map(e -> mapTilAnvistAndel(e))
             .collect(Collectors.toList());
     }
 
-    private static AnvistAndel mapTilAnvistAndel(Map.Entry<AnvistAndelNøkkel, List<BeregningsresultatAndel>> e, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
+    private static AnvistAndel mapTilAnvistAndel(Map.Entry<AnvistAndelNøkkel, List<BeregningsresultatAndel>> e) {
         return new AnvistAndel(
             mapAktør(e.getKey().getArbeidsgiver()),
-            finnEksternReferanse(e.getKey().getArbeidsforholdRef(), arbeidsforholdReferanser),
+            null,
             new Desimaltall(finnTotalBeløp(e.getValue())),
             finnUtbetalingsgrad(e.getValue()),
             new Desimaltall(finnRefusjonsgrad(e.getValue())),
@@ -118,17 +118,6 @@ class VedtattYtelseMapper {
             .reduce(Integer::sum)
             .map(BigDecimal::valueOf)
             .orElse(BigDecimal.ZERO);
-    }
-
-    private static String finnEksternReferanse(InternArbeidsforholdRef internArbeidsforholdRef, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
-        if (internArbeidsforholdRef == null || !internArbeidsforholdRef.gjelderForSpesifiktArbeidsforhold()) {
-            return null;
-        }
-        return arbeidsforholdReferanser.stream()
-            .filter(r -> r.getInternReferanse().gjelderFor(internArbeidsforholdRef))
-            .findFirst().map(ArbeidsforholdReferanse::getEksternReferanse)
-            .map(EksternArbeidsforholdRef::getReferanse)
-            .orElse(null);
     }
 
     private static ArbeidsgiverIdent mapAktør(Arbeidsgiver arbeidsgiver) {
