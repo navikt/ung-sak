@@ -20,11 +20,6 @@ public class AbakusInntektArbeidYtelseGrunnlag extends InntektArbeidYtelseGrunnl
         this(grunnlag.getEksternReferanse(), grunnlag.getOpprettetTidspunkt(), grunnlag);
         this.koblingReferanse = koblingReferanse;
     }
-
-    public AbakusInntektArbeidYtelseGrunnlag(UUID grunnlagReferanse, LocalDateTime opprettetTidspunkt) {
-        super(grunnlagReferanse, opprettetTidspunkt);
-    }
-
     public AbakusInntektArbeidYtelseGrunnlag(UUID eksternReferanse, LocalDateTime opprettetTidspunkt, InntektArbeidYtelseGrunnlag grunnlag) {
         super(eksternReferanse, opprettetTidspunkt, grunnlag);
     }

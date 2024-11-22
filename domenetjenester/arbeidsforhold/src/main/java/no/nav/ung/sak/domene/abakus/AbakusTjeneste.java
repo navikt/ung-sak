@@ -158,14 +158,6 @@ public class AbakusTjeneste {
         }
     }
 
-    public InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) throws IOException {
-        var endpoint = endpointGrunnlagSnapshot;
-        var reader = iayGrunnlagSnapshotReader;
-        var responseHandler = new ObjectReaderResponseHandler<InntektArbeidYtelseGrunnlagSakSnapshotDto>(endpoint, reader);
-        var json = iayJsonWriter.writeValueAsString(request);
-        return hentFraAbakus(new HttpPost(endpoint), responseHandler, json);// NOSONAR håndterer i responseHandler
-    }
-
     public int utførAktørbytte(AktørId gyldigAktørid, AktørId utgåttAktørId) {
         try {
 
@@ -333,33 +325,6 @@ public class AbakusTjeneste {
 
     public String getCallbackScope() {
         return callbackScope;
-    }
-
-
-    public void lagreOverstyrtOppgittOpptjening(OppgittOpptjeningMottattRequest request) throws IOException {
-        var json = iayJsonWriter.writeValueAsString(request);
-        lagreOverstyrtOppgittOpptjening(request.getKoblingReferanse(), json);
-    }
-
-    public void lagreOverstyrtOppgittOpptjening(UUID behandlingRef, String json) throws IOException {
-        HttpPost httpPost = new HttpPost(endpointOverstyrtOppgittOpptjening);
-        httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-
-        log.info("Lagre overstyrt oppgitt opptjening (behandlingUUID={}) i Abakus", behandlingRef);
-        try (var httpResponse = restClient.execute(httpPost)) {
-            int responseCode = httpResponse.getStatusLine().getStatusCode();
-            if (responseCode != HttpStatus.SC_OK) {
-                String responseBody = EntityUtils.toString(httpResponse.getEntity());
-                String feilmelding = "Kunne ikke lagre overstyrt oppgitt opptjening for behandling: " + behandlingRef + " til abakus: " + httpPost.getURI()
-                    + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
-
-                if (responseCode == HttpStatus.SC_BAD_REQUEST) {
-                    throw AbakusTjenesteFeil.FEIL.feilKallTilAbakus(feilmelding).toException();
-                } else {
-                    throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
-                }
-            }
-        }
     }
 
     private int utførAktørbytte(String json) throws IOException {

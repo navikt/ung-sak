@@ -62,8 +62,11 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
         FagsakProsessTask.logContext(fagsak);
 
-        // hent alle dokumenter markert mottatt
-        List<MottattDokument> mottatteDokumenter = new ArrayList<>(mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT));
+        List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT)
+            .stream()
+            // gamle inntektsmeldinger kan ha status null, men vil være koblet til behandlingId (skal ikke ta på nytt her)
+            .filter(m -> m.getBehandlingId() == null)
+            .collect(Collectors.toList());
 
         if (mottatteDokumenter.isEmpty()) {
             log.info("Ingen dokumenter fortsatt markert MOTTATT, avbryter denne tasken (behandlet av tidligere kjøring)");

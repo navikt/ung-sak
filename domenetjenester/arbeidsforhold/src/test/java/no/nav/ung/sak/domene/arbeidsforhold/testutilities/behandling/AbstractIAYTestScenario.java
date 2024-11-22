@@ -175,9 +175,4 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
     }
-
-    public AktørId getDefaultBrukerAktørId() {
-        return fagsakBuilder.getBruker();
-    }
-
 }

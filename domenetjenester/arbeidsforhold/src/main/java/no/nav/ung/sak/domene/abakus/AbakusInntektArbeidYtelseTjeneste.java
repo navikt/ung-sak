@@ -196,14 +196,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
     }
 
-    private InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) {
-        try {
-            return abakusTjeneste.hentGrunnlagSnapshot(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
-        }
-    }
-
     private InntektArbeidYtelseGrunnlag mapResult(AktørId aktørId, InntektArbeidYtelseGrunnlagDto dto, boolean isAktiv) {
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = new IAYFraDtoMapper(aktørId).mapTilGrunnlagInklusivRegisterdata(dto, isAktiv);
         return new AbakusInntektArbeidYtelseGrunnlag(inntektArbeidYtelseGrunnlag, dto.getKoblingReferanse());
@@ -216,15 +208,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         request.medYtelseType(YtelseType.fraKode(behandling.getFagsakYtelseType().getKode()));
         request.forKobling(behandling.getUuid());
         request.medDataset(Arrays.asList(Dataset.values()));
-        return request;
-    }
-
-    private InntektArbeidYtelseGrunnlagRequest initSnapshotRequest(Fagsak fagsak, GrunnlagVersjon siste) {
-        var request = new InntektArbeidYtelseGrunnlagRequest(new AktørIdPersonident(fagsak.getAktørId().getId()));
-        request.medSaksnummer(fagsak.getSaksnummer().getVerdi());
-        request.medYtelseType(YtelseType.fraKode(fagsak.getYtelseType().getKode()));
-        request.medDataset(Arrays.asList(Dataset.values()));
-        request.hentGrunnlagVersjon(siste);
         return request;
     }
 

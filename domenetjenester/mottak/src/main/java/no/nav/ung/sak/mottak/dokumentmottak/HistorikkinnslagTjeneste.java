@@ -128,37 +128,6 @@ public class HistorikkinnslagTjeneste {
         return historikkinnslagDokumentLink;
     }
 
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(HistorikkAktør.SØKER);
-
-        historikkinnslag.setType(HistorikkinnslagType.VEDLEGG_MOTTATT);
-        historikkinnslag.setFagsakId(fagsakId);
-
-        leggTilHistorikkinnslagDokumentlinker(journalpostId, historikkinnslag);
-
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.VEDLEGG_MOTTATT);
-        builder.build(historikkinnslag);
-
-        historikkRepository.lagre(historikkinnslag);
-    }
-
-    public void opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        historikkinnslag.setType(HistorikkinnslagType.BEH_OPPDATERT_NYE_OPPL);
-        historikkinnslag.setBehandlingId(behandling.getId());
-        historikkinnslag.setFagsakId(behandling.getFagsakId());
-
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.BEH_OPPDATERT_NYE_OPPL)
-            .medBegrunnelse(behandlingÅrsakType);
-        builder.build(historikkinnslag);
-
-        historikkRepository.lagre(historikkinnslag);
-    }
-
     private JournalpostResponseProjection byggDokumentoversiktResponseProjection() {
         return new JournalpostResponseProjection()
                 .journalpostId()

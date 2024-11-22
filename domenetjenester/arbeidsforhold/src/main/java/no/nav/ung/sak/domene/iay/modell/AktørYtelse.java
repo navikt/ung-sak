@@ -66,10 +66,6 @@ public class AktørYtelse implements IndexKey {
         this.ytelser.add(ytelse);
     }
 
-    void fjernYtelse(Ytelse ytelse) {
-        this.ytelser.remove(ytelse);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

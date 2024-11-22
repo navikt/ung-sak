@@ -58,7 +58,7 @@ class HåndterMottattDokumentTaskTest {
 
     @BeforeEach
     void setup() {
-        Long fagsakId = fagsakRepository.opprettNy(new Fagsak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), AktørId.dummy(), null, new Saksnummer("1337"), LocalDate.now(), LocalDate.now()));
+        Long fagsakId = fagsakRepository.opprettNy(new Fagsak(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), AktørId.dummy(), null, new Saksnummer("1337"), LocalDate.now(), LocalDate.now()));
         fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         behandling = Behandling.forFørstegangssøknad(fagsak)
             .medBehandlingStatus(BehandlingStatus.UTREDES)
