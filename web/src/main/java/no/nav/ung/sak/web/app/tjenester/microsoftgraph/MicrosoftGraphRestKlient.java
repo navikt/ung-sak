@@ -41,6 +41,9 @@ public class MicrosoftGraphRestKlient {
             throw new IllegalArgumentException("Ugyldig format på identNavBruker: " + identNavBruker);
         }
 
+        // henter navn på én bruker
+        // https://learn.microsoft.com/en-us/graph/api/user-list
+
         URI requestUri = UriBuilder.fromUri(toUri("/users"))
             .queryParam("$select", "id,displayName")
             .queryParam("$filter", "onPremisesSamAccountName eq '" + identNavBruker + "'")
