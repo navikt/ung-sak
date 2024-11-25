@@ -23,6 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.saksbehandler.SaksbehandlerDto;
+import no.nav.ung.sak.web.app.tjenester.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.HashMap;
@@ -42,7 +43,7 @@ public class SaksbehandlerRestTjeneste {
     public static final String SAKSBEHANDLER_PATH = "/saksbehandler";
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(480, TimeUnit.MINUTES);
 
-    private LRUCache<String, String> cache = new LRUCache<>(100, CACHE_ELEMENT_LIVE_TIME_MS);
+    private MicrosoftGraphTjeneste microsoftGraphTjeneste;
 
     private String systembruker;
 
@@ -55,9 +56,10 @@ public class SaksbehandlerRestTjeneste {
 
     @Inject
     public SaksbehandlerRestTjeneste(
-        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
+        MicrosoftGraphTjeneste microsoftGraphTjeneste, @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
         HistorikkRepository historikkRepository,
         BehandlingRepository behandlingRepository) {
+        this.microsoftGraphTjeneste = microsoftGraphTjeneste;
         this.systembruker = systembruker;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
@@ -92,13 +94,7 @@ public class SaksbehandlerRestTjeneste {
 
         unikeIdenter.remove(systembruker);
 
-        Map<String, String> identTilNavn = new HashMap<>();
-
-        for (String ident : unikeIdenter) {
-            String navn = ident; //FIXME slå opp navn på saksbehandler
-
-            identTilNavn.put(ident, navn);
-        }
+        Map<String, String> identTilNavn = microsoftGraphTjeneste.navnPåNavAnsatte(unikeIdenter);
 
         return new SaksbehandlerDto(identTilNavn);
     }
