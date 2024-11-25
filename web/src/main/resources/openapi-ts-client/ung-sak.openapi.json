@@ -4260,6 +4260,18 @@
         },
         "type" : "object"
       },
+      "SaksbehandlerIdentDto" : {
+        "properties" : {
+          "ident" : {
+            "maxLength" : 7,
+            "minLength" : 7,
+            "pattern" : "^[A-Z][0-9]{6}$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "ident" ],
+        "type" : "object"
+      },
       "SaksnummerDto" : {
         "properties" : {
           "saksnummer" : {
@@ -7657,6 +7669,29 @@
           }
         },
         "tags" : [ "aktoer" ]
+      }
+    },
+    "/forvaltning/saksbehandler/saksbehandlernavn" : {
+      "post" : {
+        "operationId" : "finnNavnPåSakbehandler",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SaksbehandlerIdentDto"
+              }
+            }
+          },
+          "description" : "saksbehandleIdent"
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        }
       }
     },
     "/historikk" : {
