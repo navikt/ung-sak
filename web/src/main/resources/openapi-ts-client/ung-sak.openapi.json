@@ -7687,7 +7687,7 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "text/plain" : { }
             },
             "description" : "default response"
           }
