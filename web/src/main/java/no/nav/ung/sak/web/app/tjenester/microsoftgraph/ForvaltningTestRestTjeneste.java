@@ -1,9 +1,13 @@
 package no.nav.ung.sak.web.app.tjenester.microsoftgraph;
 
+import com.fasterxml.jackson.annotation.*;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -42,14 +46,45 @@ public class ForvaltningTestRestTjeneste {
     @Path("/saksbehandlernavn")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response finnNavnPåSakbehandler(@Parameter(description = "saksbehandleIdent") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid String saksbehandler) {
+    public Response finnNavnPåSakbehandler(@Parameter(description = "saksbehandleIdent") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid SaksbehandlerIdentDto saksbehandler) {
         if (Environment.current().isProd()) {
             throw new IllegalArgumentException("Kun tiltenkt brukt i test");
         }
-        Optional<String> resultat = microsoftGraphTjeneste.navnPåNavAnsatt(saksbehandler);
+        Optional<String> resultat = microsoftGraphTjeneste.navnPåNavAnsatt(saksbehandler.ident);
         if (resultat.isPresent()) {
             return Response.ok(resultat.get()).build();
         }
         return Response.noContent().build();
     }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+    @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    public class SaksbehandlerIdentDto {
+
+        @JsonProperty("ident")
+        @NotNull
+        @Valid
+        @Pattern(regexp = "^[A-Z][0-9]{6}$")
+        @Size(min = 7, max = 7)
+        private String ident;
+
+        public SaksbehandlerIdentDto() {
+            //
+        }
+
+        @JsonCreator
+        public SaksbehandlerIdentDto(@JsonProperty("ident") @NotNull @Valid String ident) {
+            this.ident = ident;
+        }
+
+        public String getIdent() {
+            return ident;
+        }
+
+        public void setIdent(String ident) {
+            this.ident = ident;
+        }
+    }
+
 }
