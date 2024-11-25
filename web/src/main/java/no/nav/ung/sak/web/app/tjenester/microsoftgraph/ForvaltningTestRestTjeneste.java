@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.Optional;
@@ -46,7 +47,7 @@ public class ForvaltningTestRestTjeneste {
     @Path("/saksbehandlernavn")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response finnNavnPåSakbehandler(@Parameter(description = "saksbehandleIdent") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid SaksbehandlerIdentDto saksbehandler) {
+    public Response finnNavnPåSakbehandler(@Parameter(description = "saksbehandleIdent") @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) @Valid SaksbehandlerIdentDto saksbehandler) {
         if (Environment.current().isProd()) {
             throw new IllegalArgumentException("Kun tiltenkt brukt i test");
         }
