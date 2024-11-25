@@ -60,7 +60,7 @@ public class ForvaltningTestRestTjeneste {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public class SaksbehandlerIdentDto {
+    public static class SaksbehandlerIdentDto {
 
         @JsonProperty("ident")
         @NotNull
