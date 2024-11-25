@@ -31,7 +31,7 @@ public class MicrosoftGraphRestKlient {
     }
 
     @Inject
-    public MicrosoftGraphRestKlient(SystemUserOidcRestClient sysemuserRestClient, @KonfigVerdi(value = "microsoft_graph.url") URI endpoint) {
+    public MicrosoftGraphRestKlient(SystemUserOidcRestClient sysemuserRestClient, @KonfigVerdi(value = "microsoft_graph.url", defaultVerdi = "https://graph.microsoft.com/v1.0") URI endpoint) {
         this.sysemuserRestClient = sysemuserRestClient;
         this.endpoint = endpoint;
     }
