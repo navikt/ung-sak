@@ -42,7 +42,7 @@ public class ForvaltningTestRestTjeneste {
     }
 
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/saksbehandlernavn")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
