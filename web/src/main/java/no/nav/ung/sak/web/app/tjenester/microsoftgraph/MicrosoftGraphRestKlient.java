@@ -1,8 +1,11 @@
 package no.nav.ung.sak.web.app.tjenester.microsoftgraph;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.core.UriBuilder;
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
@@ -17,8 +20,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 @ApplicationScoped
@@ -64,11 +69,27 @@ public class MicrosoftGraphRestKlient {
             logger.info("Fant ikke bruker med ident: {}", identNavBruker); //skjer når bruker ikke lenger jobber i nav
             return Optional.empty();
         }
-        if (Environment.current().isDev()){
+        if (Environment.current().isDev()) {
             logger.info("Fant bruker: " + stringResponse);
         }
-        User user = fromJson(stringResponse, User.class);
-        return Optional.of(user.displayName());
+        UsersResponse users = fromJson(stringResponse, UsersResponse.class);
+        if (users.users.isEmpty()) {
+            return Optional.empty();
+        } else if (users.users.size() > 1) {
+            logger.warn("Fant flere brukere for ident: {}", identNavBruker);
+            return Optional.empty();
+        } else {
+            return Optional.of(users.users.getFirst().displayName());
+        }
+    }
+
+    record User(@NotNull UUID id,
+                @NotNull String onPremisesSamAccountName,
+                @NotNull String displayName) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    record UsersResponse(@NotNull @JsonProperty("value") List<User> users) {
     }
 
     private URI toUri(String relativeUri) {
