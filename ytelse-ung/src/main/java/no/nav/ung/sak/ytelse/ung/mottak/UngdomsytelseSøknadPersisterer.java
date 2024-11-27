@@ -20,6 +20,8 @@ import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
 
+import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
+
 @Dependent
 public class UngdomsytelseSøknadPersisterer {
 
@@ -30,7 +32,7 @@ public class UngdomsytelseSøknadPersisterer {
 
     @Inject
     public UngdomsytelseSøknadPersisterer(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository,
-                                   UngdomsytelseSøknadsperiodeRepository ungdomsytelseSøknadsperiodeRepository) {
+                                          UngdomsytelseSøknadsperiodeRepository ungdomsytelseSøknadsperiodeRepository) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = fagsakRepository;
         this.ungdomsytelseSøknadsperiodeRepository = ungdomsytelseSøknadsperiodeRepository;
@@ -55,7 +57,15 @@ public class UngdomsytelseSøknadPersisterer {
     public void lagreSøknadsperioder(List<Periode> søknadsperioder, JournalpostId journalpostId, Long behandlingId) {
         final List<UngdomsytelseSøknadsperiode> søknadsperiodeliste = new ArrayList<>();
         søknadsperioder.stream()
-            .map(s -> new UngdomsytelseSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed()), journalpostId))
+            .map(s -> {
+                LocalDate fraOgMed = s.getFraOgMed();
+                LocalDate tilOgMed = s.getTilOgMed();
+                if (tilOgMed.equals(TIDENES_ENDE)) {
+                    tilOgMed = fraOgMed.plusDays(260);
+                }
+
+                return new UngdomsytelseSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed), journalpostId);
+            })
             .forEach(søknadsperiodeliste::add);
 
         ungdomsytelseSøknadsperiodeRepository.lagre(behandlingId, søknadsperiodeliste);
