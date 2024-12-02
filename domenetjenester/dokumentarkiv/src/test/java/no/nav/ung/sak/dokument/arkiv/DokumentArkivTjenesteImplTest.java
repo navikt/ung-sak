@@ -131,20 +131,6 @@ public class DokumentArkivTjenesteImplTest {
         assertThat(arkivDokuments).hasSize(1);
     }
 
-    @Test
-    public void skalRetunereDokumenttypeInntektsmelding() {
-        Journalpost journalpost = byggJournalpostMedFlereDokumenter(List.of(
-            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.INNTEKTSMELDING),
-            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.UDEFINERT)
-        ));
-        Dokumentoversikt dokumentoversikt = new Dokumentoversikt(List.of(journalpost), null);
-        when(safTjeneste.dokumentoversiktFagsak(any(DokumentoversiktFagsakQueryRequest.class), any(DokumentoversiktResponseProjection.class)))
-            .thenReturn(dokumentoversikt);
-
-        List<ArkivJournalPost> arkivDokuments = dokumentApplikasjonTjeneste.hentAlleDokumenterForVisning(KJENT_SAK);
-
-        assertThat(arkivDokuments).hasSize(1);
-    }
 
     @Test
     public void skalRetunereDokumenterAvVariantFormatARKIV() {

@@ -74,11 +74,11 @@ class HåndterMottattDokumentTaskTest {
             .medMottattTidspunkt(LocalDateTime.now())
             .medFagsakId(fagsakId)
             .medJournalPostId(new JournalpostId("2222233333"))
-            .medType(Brevkode.INNTEKTSMELDING)
+            .medType(Brevkode.UNGDOMSYTELSE_SOKNAD)
             .build();
         mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
-        when(dokumentValidatorProvider.finnValidator(Brevkode.INNTEKTSMELDING)).thenReturn(dokumentValidator);
+        when(dokumentValidatorProvider.finnValidator(Brevkode.UNGDOMSYTELSE_SOKNAD)).thenReturn(dokumentValidator);
     }
 
     @Test

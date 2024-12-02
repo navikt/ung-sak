@@ -2,7 +2,6 @@ package no.nav.ung.sak.mottak.dokumentmottak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -32,8 +31,8 @@ public class DokumentmottakerFelles {
         historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, journalpostId, HistorikkinnslagType.BEH_STARTET);
     }
 
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
-        historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(fagsakId, journalpostId, dokumentTypeId);
+    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId) {
+        historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(fagsakId, journalpostId);
     }
 
     public ProsessTaskData opprettTaskForÅStarteBehandling(Behandling behandling) {

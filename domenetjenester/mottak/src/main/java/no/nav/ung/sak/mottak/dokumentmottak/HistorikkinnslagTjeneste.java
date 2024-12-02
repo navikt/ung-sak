@@ -114,9 +114,6 @@ public class HistorikkinnslagTjeneste {
         if (brevkode == null) {
             return INNSENDING;
         }
-        if (brevkode.equals(Brevkode.INNTEKTSMELDING)) {
-            return INNTEKTSMELDING;
-        }
         if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
             return SØKNAD;
         }
@@ -132,13 +129,9 @@ public class HistorikkinnslagTjeneste {
         return historikkinnslagDokumentLink;
     }
 
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
+    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId) {
         Historikkinnslag historikkinnslag = new Historikkinnslag();
-        if (dokumentTypeId != null && dokumentTypeId.equals(Brevkode.INNTEKTSMELDING)) {
-            historikkinnslag.setAktør(HistorikkAktør.ARBEIDSGIVER);
-        } else {
-            historikkinnslag.setAktør(HistorikkAktør.SØKER);
-        }
+        historikkinnslag.setAktør(HistorikkAktør.SØKER);
         historikkinnslag.setType(HistorikkinnslagType.VEDLEGG_MOTTATT);
         historikkinnslag.setFagsakId(fagsakId);
 
@@ -168,36 +161,36 @@ public class HistorikkinnslagTjeneste {
 
     private JournalpostResponseProjection byggDokumentoversiktResponseProjection() {
         return new JournalpostResponseProjection()
-                .journalpostId()
+            .journalpostId()
+            .tittel()
+            .journalposttype()
+            .journalstatus()
+            .kanal()
+            .tema()
+            .behandlingstema()
+            .sak(new SakResponseProjection()
+                .fagsaksystem()
+                .fagsakId())
+            .bruker(new BrukerResponseProjection()
+                .id()
+                .type())
+            .avsenderMottaker(new AvsenderMottakerResponseProjection()
+                .id()
+                .type()
+                .navn())
+            .dokumenter(new DokumentInfoResponseProjection()
+                .dokumentInfoId()
                 .tittel()
-                .journalposttype()
-                .journalstatus()
-                .kanal()
-                .tema()
-                .behandlingstema()
-                .sak(new SakResponseProjection()
-                    .fagsaksystem()
-                    .fagsakId())
-                .bruker(new BrukerResponseProjection()
-                    .id()
-                    .type())
-                .avsenderMottaker(new AvsenderMottakerResponseProjection()
-                    .id()
-                    .type()
-                    .navn())
-                .dokumenter(new DokumentInfoResponseProjection()
-                    .dokumentInfoId()
-                    .tittel()
-                    .brevkode()
-                    .dokumentvarianter(new DokumentvariantResponseProjection()
-                        .variantformat()
-                        .filnavn()
-                        .filtype()
-                        .saksbehandlerHarTilgang()
-                    ))
-                .relevanteDatoer(new RelevantDatoResponseProjection()
-                    .dato()
-                    .datotype()
-                );
+                .brevkode()
+                .dokumentvarianter(new DokumentvariantResponseProjection()
+                    .variantformat()
+                    .filnavn()
+                    .filtype()
+                    .saksbehandlerHarTilgang()
+                ))
+            .relevanteDatoer(new RelevantDatoResponseProjection()
+                .dato()
+                .datotype()
+            );
     }
 }
