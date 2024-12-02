@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse.ung.søknadsperioder;
+package no.nav.ung.sak.ytelse.ung.startdatoer;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -20,13 +20,13 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.ung.sak.typer.JournalpostId;
 
-@Entity(name = "UngdomsytelseSøknadsperiode")
-@Table(name = "UNG_SOEKNADSPERIODE")
+@Entity(name = "UngdomsytelseSøktStartdato")
+@Table(name = "UNG_SOEKT_STARTDATO")
 @Immutable
-public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPeriodeData {
+public class UngdomsytelseSøktStartdato extends BaseEntitet implements SøktPeriodeData {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKNADSPERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKT_STARTDATO")
     private Long id;
 
     @Embedded
@@ -34,7 +34,7 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
         @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
         @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
-    private DatoIntervallEntitet periode;
+    private LocalDate startdato;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
@@ -44,31 +44,26 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseSøknadsperiode(DatoIntervallEntitet periode, JournalpostId journalpostId) {
-        this.periode = periode;
+    public UngdomsytelseSøktStartdato(LocalDate startdato, JournalpostId journalpostId) {
+        this.startdato = startdato;
         this.journalpostId = journalpostId;
     }
 
-    public UngdomsytelseSøknadsperiode(DatoIntervallEntitet periode) {
-        this.periode = periode;
+    public UngdomsytelseSøktStartdato(LocalDate startdato) {
+        this.startdato = startdato;
     }
 
-
-    public UngdomsytelseSøknadsperiode(LocalDate fom, LocalDate tom, JournalpostId journalpostId) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), journalpostId);
-    }
-
-    public UngdomsytelseSøknadsperiode(UngdomsytelseSøknadsperiode it) {
+    public UngdomsytelseSøktStartdato(UngdomsytelseSøktStartdato it) {
         this.journalpostId = it.getJournalpostId();
-        this.periode = it.getPeriode();
+        this.startdato = it.getStartdato();
     }
 
-    public UngdomsytelseSøknadsperiode() {
+    public UngdomsytelseSøktStartdato() {
         // hibernate
     }
 
-    public DatoIntervallEntitet getPeriode() {
-        return periode;
+    public LocalDate getStartdato() {
+        return startdato;
     }
 
     public JournalpostId getJournalpostId() {
@@ -85,20 +80,20 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UngdomsytelseSøknadsperiode that = (UngdomsytelseSøknadsperiode) o;
-        return Objects.equals(periode, that.periode);
+        UngdomsytelseSøktStartdato that = (UngdomsytelseSøktStartdato) o;
+        return Objects.equals(startdato, that.startdato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode);
+        return Objects.hash(startdato);
     }
 
     @Override
     public String toString() {
-        return "UngdomsytelseSøknadsperiode{" +
+        return "UngdomsytelseSøktStartdato{" +
                 "id=" + id +
-                ", periode=" + periode +
+                ", startdato=" + startdato +
                 ", journalpostId=" + journalpostId +
                 ", versjon=" + versjon +
                 '}';

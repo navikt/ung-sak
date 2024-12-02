@@ -19,11 +19,12 @@ class VurderAntallDagerTjeneste {
     public static final long MAKS_ANTALL_DAGER = 260;
 
 
-    static Optional<UngdomsytelseUttakPerioder> vurderAntallDagerOgLagUttaksperioder(LocalDateTimeline<Boolean> godkjentePerioder) {
+    static Optional<UngdomsytelseUttakPerioder> vurderAntallDagerOgLagUttaksperioder(LocalDateTimeline<Boolean> godkjentePerioder,
+                                                                                     LocalDateTimeline<Boolean> ungdomsprogramtidslinje) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
-        var perioderMedNokDagerResultat = finnPerioderMedNokDager(godkjentePerioder);
+        var perioderMedNokDagerResultat = finnPerioderMedNokDager(ungdomsprogramtidslinje);
 
         var perioderEtterOppbrukteDager = godkjentePerioder.disjoint(perioderMedNokDagerResultat.tidslinjeNokDager());
 
