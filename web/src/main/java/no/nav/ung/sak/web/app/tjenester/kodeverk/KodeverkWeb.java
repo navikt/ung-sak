@@ -20,6 +20,7 @@ import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 /**
  * Denne klassen er definert berre for å eksponere kodeverk og andre typer frå ung-sak java kodebasen ut til k9-sak-web
@@ -131,5 +132,9 @@ public class KodeverkWeb {
     @NotNull
     @Valid
     public Fagsystem fagsystem;
+
+    @NotNull
+    @Valid
+    public VilkårType vilkårtype;
 
 }
