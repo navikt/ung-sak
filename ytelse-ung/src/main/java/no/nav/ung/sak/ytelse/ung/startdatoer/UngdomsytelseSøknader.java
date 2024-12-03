@@ -35,7 +35,7 @@ public class UngdomsytelseSøknader extends BaseEntitet {
 
     @ChangeTracked
     @BatchSize(size = 20)
-    @JoinColumn(name = "UNG_SOEKNAD_ID", nullable = false)
+    @JoinColumn(name = "UNG_SOEKNADER_ID", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<UngdomsytelseSøktStartdato> startdatoer;
 

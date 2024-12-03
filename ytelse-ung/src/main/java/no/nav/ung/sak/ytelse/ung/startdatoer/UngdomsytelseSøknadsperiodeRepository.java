@@ -66,7 +66,7 @@ public class UngdomsytelseSøknadsperiodeRepository {
     private Optional<UngdomsytelseSøknadGrunnlag> hentEksisterendeGrunnlag(Long id) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseSøknadsperiodeGrunnlag s " +
+                "FROM UngdomsytelseSøknadGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId " +
                 "AND s.aktiv = true", UngdomsytelseSøknadGrunnlag.class);
 
