@@ -2,6 +2,7 @@
 <configuration>
 
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="no.nav.ung.sak.web.server.logging.KodeverdiEnumLogFilter" />
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                 <maxLength>15000</maxLength>
