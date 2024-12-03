@@ -1,3 +1,19 @@
+/* Dropp gamle tabeller, indexer og sekvenser */
+DROP INDEX IF EXISTS idx_gr_soeknadsperiode_oppgitt_soeknadperiode;
+DROP INDEX IF EXISTS idx_ung_gr_soeknadsperiode_behandling;
+DROP INDEX IF EXISTS idx_ung_soeknadsperiode_journalpost;
+DROP INDEX IF EXISTS idx_ung_soeknadsperiode_perioder;
+DROP INDEX IF EXISTS uidx_ung_gr_soeknadsperiode_aktiv_behandling;
+
+DROP TABLE IF EXISTS ung_gr_soeknadsperiode CASCADE;
+DROP TABLE IF EXISTS ung_soeknadsperiode CASCADE;
+DROP TABLE IF EXISTS ung_soeknadsperioder CASCADE;
+
+DROP SEQUENCE IF EXISTS seq_ung_gr_soeknadsperiode;
+DROP SEQUENCE IF EXISTS seq_ung_soeknadsperiode;
+DROP SEQUENCE IF EXISTS seq_ung_soeknadsperioder;
+/* Dropp gamle tabeller, indexer og sekvenser */
+
 create table if not exists UNG_SOEKNADER
 (
     ID            BIGINT                                 NOT NULL PRIMARY KEY,
