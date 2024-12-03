@@ -1,22 +1,20 @@
 package no.nav.ung.sak.ytelse.ung.uttak;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class VurderAntallDagerTjenesteTest {
 
     @Test
     void skal_returnere_tomt_resultat_dersom_ingen_vilkår_oppfylt() {
-
-        var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(LocalDateTimeline.empty(), ungdomsprogramtidslinje);
+        var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(LocalDateTimeline.empty(), LocalDateTimeline.empty());
 
         assertThat(ungdomsytelseUttakPerioder).isEmpty();
     }
@@ -26,12 +24,17 @@ class VurderAntallDagerTjenesteTest {
 
         var fom = LocalDate.of(2024, 10, 3);
         var tom = LocalDate.of(2024, 10, 3);
+
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, true)
+        ));
+
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(1);
-        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
         assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
@@ -40,15 +43,19 @@ class VurderAntallDagerTjenesteTest {
 
     @Test
     void skal_returnere_en_periode_uten_utbetaling_dersom_kun_helg_oppfylt() {
-
         var fom = LocalDate.of(2024, 10, 5);
         var tom = LocalDate.of(2024, 10, 6);
+
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, true)
+        ));
+
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(1);
-        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
         assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
@@ -60,12 +67,16 @@ class VurderAntallDagerTjenesteTest {
         var mandag_to_uker_før = LocalDate.of(2024, 9, 22);
         var søndag = LocalDate.of(2024, 10, 6);
 
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(mandag_to_uker_før, søndag, true)
+        ));
+
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(mandag_to_uker_før, søndag, Boolean.TRUE), ungdomsprogramtidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(1);
-        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(mandag_to_uker_før);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(søndag);
         assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
@@ -78,31 +89,37 @@ class VurderAntallDagerTjenesteTest {
         var mandag_to_uker_før = LocalDate.of(2024, 9, 22);
         var fredag = LocalDate.of(2024, 10, 4);
 
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(mandag_to_uker_før, fredag, true)
+        ));
+
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(mandag_to_uker_før, fredag, Boolean.TRUE), ungdomsprogramtidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(1);
-        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(mandag_to_uker_før);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(fredag);
         assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
     }
 
 
-
     @Test
     void skal_gi_en_periode_oppfylt_dersom_godkjent_periode_er_364_dager_og_starter_på_torsdag() {
-
         var fom = LocalDate.of(2024, 10, 3);
         var tom = fom.plusWeeks(52).minusDays(1);
+
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, true)
+        ));
 
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(1);
-        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
         assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
@@ -110,21 +127,24 @@ class VurderAntallDagerTjenesteTest {
 
     @Test
     void skal_gi_to_perioder_en_oppfylt_og_en_dag_avslått_dersom_godkjent_periode_365_dager_og_starter_på_torsdag() {
-
         var fom = LocalDate.of(2024, 10, 3);
         var tom = fom.plusWeeks(52);
+
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, true)
+        ));
 
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(2);
-        var nokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var nokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(nokDagerPeriode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(nokDagerPeriode.getPeriode().getTomDato()).isEqualTo(tom.minusDays(1));
         assertThat(nokDagerPeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
-        var ikkeNokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getLast();;
+        var ikkeNokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getLast();
         assertThat(ikkeNokDagerPeriode.getPeriode().getFomDato()).isEqualTo(tom);
         assertThat(ikkeNokDagerPeriode.getPeriode().getTomDato()).isEqualTo(tom);
         assertThat(ikkeNokDagerPeriode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
@@ -136,12 +156,17 @@ class VurderAntallDagerTjenesteTest {
         var fom = LocalDate.of(2024, 10, 5);
         var tom = fom.plusDays(365);
 
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, true)
+        ));
+
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(1);
-        var nokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var nokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
+
         assertThat(nokDagerPeriode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(nokDagerPeriode.getPeriode().getTomDato()).isEqualTo(tom);
         assertThat(nokDagerPeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
@@ -156,6 +181,11 @@ class VurderAntallDagerTjenesteTest {
         var fom2 = tom1.plusDays(7);
         var tom2 = fom2.plusWeeks(12).minusDays(2);
 
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true),
+            new LocalDateSegment<>(fom2, tom2, true)
+        ));
+
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom1, tom1, true),
             new LocalDateSegment<>(fom2, tom2, true)
@@ -164,12 +194,14 @@ class VurderAntallDagerTjenesteTest {
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(2);
-        var nokDagerPeriode1 = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();;
+        var nokDagerPeriode1 = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
+
         assertThat(nokDagerPeriode1.getPeriode().getFomDato()).isEqualTo(fom1);
         assertThat(nokDagerPeriode1.getPeriode().getTomDato()).isEqualTo(tom1);
         assertThat(nokDagerPeriode1.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
-        var nokDagerPeriode2 = ungdomsytelseUttakPerioder.get().getPerioder().getLast();;
+        var nokDagerPeriode2 = ungdomsytelseUttakPerioder.get().getPerioder().getLast();
+
         assertThat(nokDagerPeriode2.getPeriode().getFomDato()).isEqualTo(fom2);
         assertThat(nokDagerPeriode2.getPeriode().getTomDato()).isEqualTo(tom2);
         assertThat(nokDagerPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
@@ -183,6 +215,11 @@ class VurderAntallDagerTjenesteTest {
         var fom2 = tom1.plusDays(7);
         var tom2 = fom2.plusWeeks(12).minusDays(1);
 
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true),
+            new LocalDateSegment<>(fom2, tom2, true)
+        ));
+
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom1, tom1, true),
             new LocalDateSegment<>(fom2, tom2, true)
@@ -192,22 +229,24 @@ class VurderAntallDagerTjenesteTest {
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(3);
         var iterator = ungdomsytelseUttakPerioder.get().getPerioder().iterator();
-        var nokDagerPeriode1 = iterator.next();;
+        var nokDagerPeriode1 = iterator.next();
+
         assertThat(nokDagerPeriode1.getPeriode().getFomDato()).isEqualTo(fom1);
         assertThat(nokDagerPeriode1.getPeriode().getTomDato()).isEqualTo(tom1);
         assertThat(nokDagerPeriode1.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
-        var nokDagerPeriode2 = iterator.next();;
+        var nokDagerPeriode2 = iterator.next();
+
         assertThat(nokDagerPeriode2.getPeriode().getFomDato()).isEqualTo(fom2);
         assertThat(nokDagerPeriode2.getPeriode().getTomDato()).isEqualTo(tom2.minusDays(1));
         assertThat(nokDagerPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
-        var ikkeNokDager = iterator.next();;
+        var ikkeNokDager = iterator.next();
+
         assertThat(ikkeNokDager.getPeriode().getFomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getPeriode().getTomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
-
 
 
     @Test
@@ -221,6 +260,11 @@ class VurderAntallDagerTjenesteTest {
         var fom3 = tom2.plusDays(7);
         var tom3 = fom3.plusWeeks(1).minusDays(1);
 
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true),
+            new LocalDateSegment<>(fom2, tom2, true),
+            new LocalDateSegment<>(fom3, tom3, true)
+        ));
 
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom1, tom1, true),
@@ -233,27 +277,71 @@ class VurderAntallDagerTjenesteTest {
 
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(4);
         var iterator = ungdomsytelseUttakPerioder.get().getPerioder().iterator();
-        var nokDagerPeriode1 = iterator.next();;
+        var nokDagerPeriode1 = iterator.next();
+
         assertThat(nokDagerPeriode1.getPeriode().getFomDato()).isEqualTo(fom1);
         assertThat(nokDagerPeriode1.getPeriode().getTomDato()).isEqualTo(tom1);
         assertThat(nokDagerPeriode1.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
-        var nokDagerPeriode2 = iterator.next();;
+        var nokDagerPeriode2 = iterator.next();
+
         assertThat(nokDagerPeriode2.getPeriode().getFomDato()).isEqualTo(fom2);
         assertThat(nokDagerPeriode2.getPeriode().getTomDato()).isEqualTo(tom2.minusDays(1));
         assertThat(nokDagerPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
-        var ikkeNokDager = iterator.next();;
+        var ikkeNokDager = iterator.next();
+
         assertThat(ikkeNokDager.getPeriode().getFomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getPeriode().getTomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
 
 
-        var ikkeNokDager2 = iterator.next();;
+        var ikkeNokDager2 = iterator.next();
+
         assertThat(ikkeNokDager2.getPeriode().getFomDato()).isEqualTo(fom3);
         assertThat(ikkeNokDager2.getPeriode().getTomDato()).isEqualTo(tom3);
         assertThat(ikkeNokDager2.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
 
+    @Test
+    void skal_gi_avslag_på_oppbrukte_dager_selvom_deltaker_ikke_har_søkt() {
+        var fom1 = LocalDate.of(2024, 1, 1);
+        var tom1 = fom1.plusWeeks(52).minusWeeks(1).minusDays(1); // 255 dager
 
+        var fom2 = tom1.plusWeeks(2);
+        var tom2 = fom2.plusWeeks(1).minusDays(1); // 5 dager
+
+        var fom3 = tom2.plusWeeks(2);
+        var tom3 = fom3.plusWeeks(1).minusDays(1); // 5 dager
+
+        // 255 + 5 + 5 = 265 dager
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true), // 255 dager
+            new LocalDateSegment<>(fom2, tom2, true), // 5 dager
+            new LocalDateSegment<>(fom3, tom3, true) // 5 dager
+        ));
+
+        // Deltaker har kun søkt for to av periodene
+        var søknadsperioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true),
+            new LocalDateSegment<>(fom3, tom3, true)
+        ));
+
+        var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(søknadsperioder, ungdomsprogramtidslinje);
+
+        assertThat(ungdomsytelseUttakPerioder).isPresent();
+        assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(2);
+
+        // Første periode er 255 dager og skal være 100% utbetaling
+        var førstePeriode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
+        assertThat(førstePeriode.getPeriode().getFomDato()).isEqualTo(fom1);
+        assertThat(førstePeriode.getPeriode().getTomDato()).isEqualTo(tom1);
+        assertThat(førstePeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
+
+
+        var andrePeriode = ungdomsytelseUttakPerioder.get().getPerioder().get(1);
+        assertThat(andrePeriode.getPeriode().getFomDato()).isEqualTo(fom3);
+        assertThat(andrePeriode.getPeriode().getTomDato()).isEqualTo(tom3);
+        assertThat(andrePeriode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
+    }
 }

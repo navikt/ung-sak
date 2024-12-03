@@ -29,7 +29,7 @@ class VurderAntallDagerTjeneste {
         var perioderEtterOppbrukteDager = godkjentePerioder.disjoint(perioderMedNokDagerResultat.tidslinjeNokDager());
 
         // Perioder med nok dager får 100% utbetaling enn så lenge
-        var uttakPerioder = perioderMedNokDagerResultat.tidslinjeNokDager().getLocalDateIntervals().stream().map(p -> new UngdomsytelseUttakPeriode(BigDecimal.valueOf(100), DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())))
+        var uttakPerioder = perioderMedNokDagerResultat.tidslinjeNokDager().intersection(godkjentePerioder).getLocalDateIntervals().stream().map(p -> new UngdomsytelseUttakPeriode(BigDecimal.valueOf(100), DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())))
             .collect(Collectors.toCollection(ArrayList::new));
 
         // Perioder etter kvote er brukt opp får 0% utbetaling

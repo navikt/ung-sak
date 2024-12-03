@@ -33,7 +33,7 @@ public class UngdomsytelseSøknadGrunnlag extends BaseEntitet {
      */
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "relevant_soknad_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "relevante_soeknader_id", nullable = true, updatable = false, unique = true)
     private UngdomsytelseSøknader relevanteSøknader;
 
     /**
@@ -41,7 +41,7 @@ public class UngdomsytelseSøknadGrunnlag extends BaseEntitet {
      */
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "oppgitt_soknad_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "oppgitte_soeknader_id", nullable = false, updatable = false, unique = true)
     private UngdomsytelseSøknader oppgitteSøknader;
 
     @Column(name = "aktiv", nullable = false)

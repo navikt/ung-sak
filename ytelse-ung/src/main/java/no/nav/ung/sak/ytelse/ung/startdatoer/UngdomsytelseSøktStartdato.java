@@ -29,11 +29,8 @@ public class UngdomsytelseSøktStartdato extends BaseEntitet implements SøktPer
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKT_STARTDATO")
     private Long id;
 
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
-    })
+
+    @Column(name = "startdato", nullable = false)
     private LocalDate startdato;
 
     @Embedded
@@ -92,10 +89,10 @@ public class UngdomsytelseSøktStartdato extends BaseEntitet implements SøktPer
     @Override
     public String toString() {
         return "UngdomsytelseSøktStartdato{" +
-                "id=" + id +
-                ", startdato=" + startdato +
-                ", journalpostId=" + journalpostId +
-                ", versjon=" + versjon +
-                '}';
+            "id=" + id +
+            ", startdato=" + startdato +
+            ", journalpostId=" + journalpostId +
+            ", versjon=" + versjon +
+            '}';
     }
 }
