@@ -66,8 +66,8 @@ public class UngdomsytelseSøknadPersisterer {
      * @param maksSøknadsperiode Ny utvidelse av fagsakperioder
      * @param fagsakId FagsakId
      */
-    public void oppdaterFagsakperiode(Optional<Periode> maksSøknadsperiode, Long fagsakId) {
-        maksSøknadsperiode.ifPresent(periode -> fagsakRepository.utvidPeriode(fagsakId, periode.getFraOgMed(), periode.getTilOgMed()));
+    public void oppdaterFagsakperiode(LocalDate fom, Long fagsakId) {
+        fagsakRepository.utvidPeriode(fagsakId, fom, fom.plusWeeks(52));
     }
 
     private Språkkode getSpraakValg(Språk spraak) {

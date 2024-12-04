@@ -1,11 +1,15 @@
 package no.nav.ung.sak.ytelse.ung.startdatoer;
 
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeTjeneste;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -59,11 +63,15 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
 
             TreeSet<DatoIntervallEntitet> relvanteUngdomsprogramperioder = ungdomsprogramtidslinje.stream()
                 .filter(it -> startdatoer.contains(it.getFom()))
-                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), begrensTomDato(it)))
                 .collect(Collectors.toCollection(TreeSet::new));
 
             return relvanteUngdomsprogramperioder;
         }
+    }
+
+    private static LocalDate begrensTomDato(LocalDateSegment<Boolean> it) {
+        return it.getTom().equals(TIDENES_ENDE) ? it.getFom().plusWeeks(52) : it.getTom();
     }
 
 
