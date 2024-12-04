@@ -35,7 +35,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.ung.sak.kontrakt.dokument.BestillBrevDto;
+import no.nav.ung.sak.kontrakt.dokument.BestillBrevDtoGammel;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveSendTilInfotrygdTask;
 
 @ApplicationScoped
@@ -183,7 +183,7 @@ public class HenleggBehandlingTjeneste {
     }
 
     private void sendHenleggelsesbrev(long behandlingId, HistorikkAktør aktør) {
-        BestillBrevDto bestillBrevDto = new BestillBrevDto(behandlingId, DokumentMalType.HENLEGG_BEHANDLING_DOK);
+        BestillBrevDtoGammel bestillBrevDto = new BestillBrevDtoGammel(behandlingId, DokumentMalType.HENLEGG_BEHANDLING_DOK);
         // TODO: send brev
 //        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, aktør);
     }

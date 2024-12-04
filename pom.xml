@@ -16,6 +16,7 @@
         <module>behandlingslager</module>
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
+        <module>formidling</module>
 
         <!--Ytelsespesifikke moduler -->
         <module>ytelse-ung</module>
