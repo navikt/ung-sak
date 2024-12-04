@@ -58,11 +58,11 @@ class VurderAntallDagerTjeneste {
     }
 
 
-    private static VurderAntallDagerResultet finnPerioderMedNokDager(LocalDateTimeline<Boolean> godkjentePerioder) {
+    private static VurderAntallDagerResultet finnPerioderMedNokDager(LocalDateTimeline<Boolean> ungdomsprogramperiode) {
 
-        var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(godkjentePerioder);
+        var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(ungdomsprogramperiode);
 
-        var kunVirkedager = godkjentePerioder.disjoint(helger);
+        var kunVirkedager = ungdomsprogramperiode.disjoint(helger);
 
         long antallDager = 0;
         LocalDateTimeline<Boolean> resultatTidslinje = LocalDateTimeline.empty();

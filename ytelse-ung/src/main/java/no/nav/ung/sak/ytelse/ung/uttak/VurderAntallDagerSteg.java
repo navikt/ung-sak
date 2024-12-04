@@ -1,21 +1,17 @@
 package no.nav.ung.sak.ytelse.ung.uttak;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANTALL_DAGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeTjeneste;
+
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANTALL_DAGER;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @BehandlingStegRef(value = VURDER_ANTALL_DAGER)
@@ -45,7 +41,12 @@ public class VurderAntallDagerSteg implements BehandlingSteg {
             .mapValue(it -> it.getSamletUtfall().equals(Utfall.OPPFYLT))
             .filterValue(Boolean.TRUE::equals);
 
-        LocalDateTimeline<Boolean> ungdomsprogramtidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
+        var ungdomsprogramtidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
+        if (!godkjentePerioder.isEmpty()) {
+            ungdomsprogramtidslinje = ungdomsprogramtidslinje
+                // Fjerner deler av programperiode som er etter søkte perioder.
+                .intersection(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, godkjentePerioder.getMaxLocalDate(), true));
+        }
 
         var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(godkjentePerioder, ungdomsprogramtidslinje);
         ungdomsytelseUttakPerioder.ifPresent(it -> ungdomsytelseGrunnlagRepository.lagre(behandlingId, it));
