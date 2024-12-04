@@ -4,12 +4,12 @@
         xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
         version="3.0">
 
-	<sequence-generator name="SEQ_UNG_GR_SOEKNADSPERIODE" allocation-size="50" sequence-name="SEQ_UNG_GR_SOEKNADSPERIODE" />
-	<sequence-generator name="SEQ_UNG_SOEKNADSPERIODER" allocation-size="50" sequence-name="SEQ_UNG_SOEKNADSPERIODER" />
-	<sequence-generator name="SEQ_UNG_SOEKNADSPERIODE" allocation-size="50" sequence-name="SEQ_UNG_SOEKNADSPERIODE" />
+	<sequence-generator name="SEQ_UNG_GR_SOEKNADGRUNNLAG" allocation-size="50" sequence-name="SEQ_UNG_GR_SOEKNADGRUNNLAG" />
+	<sequence-generator name="SEQ_UNG_SOEKNADER" allocation-size="50" sequence-name="SEQ_UNG_SOEKNADER" />
+	<sequence-generator name="SEQ_UNG_SOEKT_STARTDATO" allocation-size="50" sequence-name="SEQ_UNG_SOEKT_STARTDATO" />
 
-	<entity class="no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeGrunnlag" />
-    <entity class="no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperioder" />
-    <entity class="no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiode" />
+	<entity class="no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøknadGrunnlag" />
+    <entity class="no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøknader" />
+    <entity class="no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøktStartdato" />
 
 </entity-mappings>

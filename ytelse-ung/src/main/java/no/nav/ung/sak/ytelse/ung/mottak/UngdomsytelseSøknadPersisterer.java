@@ -1,12 +1,10 @@
 package no.nav.ung.sak.ytelse.ung.mottak;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.type.Periode;
+import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -14,13 +12,13 @@ import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiode;
-import no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeRepository;
-import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.type.Periode;
-import no.nav.k9.søknad.felles.type.Språk;
+import no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøknadsperiodeRepository;
+import no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøktStartdato;
 
-import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Dependent
 public class UngdomsytelseSøknadPersisterer {
@@ -55,17 +53,9 @@ public class UngdomsytelseSøknadPersisterer {
     }
 
     public void lagreSøknadsperioder(List<Periode> søknadsperioder, JournalpostId journalpostId, Long behandlingId) {
-        final List<UngdomsytelseSøknadsperiode> søknadsperiodeliste = new ArrayList<>();
+        final List<UngdomsytelseSøktStartdato> søknadsperiodeliste = new ArrayList<>();
         søknadsperioder.stream()
-            .map(s -> {
-                LocalDate fraOgMed = s.getFraOgMed();
-                LocalDate tilOgMed = s.getTilOgMed();
-                if (tilOgMed.equals(TIDENES_ENDE)) {
-                    tilOgMed = fraOgMed.plusDays(260);
-                }
-
-                return new UngdomsytelseSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed), journalpostId);
-            })
+            .map(s -> new UngdomsytelseSøktStartdato(s.getFraOgMed(), journalpostId))
             .forEach(søknadsperiodeliste::add);
 
         ungdomsytelseSøknadsperiodeRepository.lagre(behandlingId, søknadsperiodeliste);

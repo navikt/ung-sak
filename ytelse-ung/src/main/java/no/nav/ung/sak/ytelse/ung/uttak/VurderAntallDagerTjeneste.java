@@ -19,16 +19,17 @@ class VurderAntallDagerTjeneste {
     public static final long MAKS_ANTALL_DAGER = 260;
 
 
-    static Optional<UngdomsytelseUttakPerioder> vurderAntallDagerOgLagUttaksperioder(LocalDateTimeline<Boolean> godkjentePerioder) {
+    static Optional<UngdomsytelseUttakPerioder> vurderAntallDagerOgLagUttaksperioder(LocalDateTimeline<Boolean> godkjentePerioder,
+                                                                                     LocalDateTimeline<Boolean> ungdomsprogramtidslinje) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
-        var perioderMedNokDagerResultat = finnPerioderMedNokDager(godkjentePerioder);
+        var perioderMedNokDagerResultat = finnPerioderMedNokDager(ungdomsprogramtidslinje);
 
         var perioderEtterOppbrukteDager = godkjentePerioder.disjoint(perioderMedNokDagerResultat.tidslinjeNokDager());
 
         // Perioder med nok dager får 100% utbetaling enn så lenge
-        var uttakPerioder = perioderMedNokDagerResultat.tidslinjeNokDager().getLocalDateIntervals().stream().map(p -> new UngdomsytelseUttakPeriode(BigDecimal.valueOf(100), DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())))
+        var uttakPerioder = perioderMedNokDagerResultat.tidslinjeNokDager().intersection(godkjentePerioder).getLocalDateIntervals().stream().map(p -> new UngdomsytelseUttakPeriode(BigDecimal.valueOf(100), DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())))
             .collect(Collectors.toCollection(ArrayList::new));
 
         // Perioder etter kvote er brukt opp får 0% utbetaling
@@ -57,11 +58,11 @@ class VurderAntallDagerTjeneste {
     }
 
 
-    private static VurderAntallDagerResultet finnPerioderMedNokDager(LocalDateTimeline<Boolean> godkjentePerioder) {
+    private static VurderAntallDagerResultet finnPerioderMedNokDager(LocalDateTimeline<Boolean> ungdomsprogramperiode) {
 
-        var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(godkjentePerioder);
+        var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(ungdomsprogramperiode);
 
-        var kunVirkedager = godkjentePerioder.disjoint(helger);
+        var kunVirkedager = ungdomsprogramperiode.disjoint(helger);
 
         long antallDager = 0;
         LocalDateTimeline<Boolean> resultatTidslinje = LocalDateTimeline.empty();

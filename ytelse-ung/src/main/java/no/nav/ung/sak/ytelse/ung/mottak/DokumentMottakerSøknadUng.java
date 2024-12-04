@@ -1,12 +1,8 @@
 package no.nav.ung.sak.ytelse.ung.mottak;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.util.Collection;
-import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
@@ -14,11 +10,14 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
+
+import java.util.Collection;
+import java.util.Optional;
+
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 
 @ApplicationScoped
@@ -28,17 +27,15 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
 
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private FagsakRepository fagsakRepository;
     private UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer;
 
     public DokumentMottakerSøknadUng() {
     }
 
     @Inject
-    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, FagsakRepository fagsakRepository, UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer) {
+    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer) {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.fagsakRepository = fagsakRepository;
         this.ungdomsytelseSøknadPersisterer = ungdomsytelseSøknadPersisterer;
     }
 
