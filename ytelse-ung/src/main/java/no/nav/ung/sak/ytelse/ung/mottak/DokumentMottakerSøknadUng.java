@@ -54,7 +54,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
             Ungdomsytelse ytelse = søknad.getYtelse();
             ungdomsytelseSøknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, Optional.of(ytelse.getSøknadsperiode()), dokument.getMottattDato());
             ungdomsytelseSøknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiodeList(), dokument.getJournalpostId(), behandlingId);
-            ungdomsytelseSøknadPersisterer.oppdaterFagsakperiode(Optional.of(ytelse.getSøknadsperiode()), behandling.getFagsakId());
+            ungdomsytelseSøknadPersisterer.oppdaterFagsakperiode(ytelse.getSøknadsperiode().getFraOgMed(), behandling.getFagsakId());
         }
     }
 
