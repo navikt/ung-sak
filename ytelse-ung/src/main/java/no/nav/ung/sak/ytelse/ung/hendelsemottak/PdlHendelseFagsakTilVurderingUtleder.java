@@ -56,8 +56,8 @@ abstract class PdlHendelseFagsakTilVurderingUtleder implements FagsakerTilVurder
 
     @Inject
     public PdlHendelseFagsakTilVurderingUtleder(FagsakRepository fagsakRepository,
-                                              BehandlingRepository behandlingRepository,
-                                              UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, PdlKlient pdlKlient) {
+                                                BehandlingRepository behandlingRepository,
+                                                UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, PdlKlient pdlKlient) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
@@ -70,6 +70,8 @@ abstract class PdlHendelseFagsakTilVurderingUtleder implements FagsakerTilVurder
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
         var relevanteFagsaker = new HashSet<Fagsak>();
+        var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
+
         for (AktørId aktør : aktører) {
 
             var personInfo = hentPersonInformasjon(aktør);
@@ -80,6 +82,7 @@ abstract class PdlHendelseFagsakTilVurderingUtleder implements FagsakerTilVurder
                 var fagsakForAktør = hentRelevantFagsakForAktør(aktør, aktuellDato);
                 if (fagsakForAktør.isPresent()) {
                     if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId)) {
+                        fagsakÅrsakMap.put(fagsakForAktør.get(), BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
                         relevanteFagsaker.add(fagsakForAktør.get());
                         break;
                     }
@@ -95,10 +98,11 @@ abstract class PdlHendelseFagsakTilVurderingUtleder implements FagsakerTilVurder
                 .forEach(relevanteFagsaker::add);
         }
 
-        var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
-        relevanteFagsaker.forEach(it -> fagsakÅrsakMap.put(it, BehandlingÅrsakType.RE_HENDELSE_FØDSEL));
+        relevanteFagsaker.forEach(it -> fagsakÅrsakMap.put(it, getBehandlingÅrsakType()));
         return fagsakÅrsakMap;
     }
+
+    abstract BehandlingÅrsakType getBehandlingÅrsakType();
 
     private Person hentPersonInformasjon(AktørId aktør) {
         var query = new HentPersonQueryRequest();

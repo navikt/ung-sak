@@ -10,6 +10,7 @@ import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
 import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.integrasjon.pdl.Person;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
@@ -35,6 +36,10 @@ public class PdlDødsfallFagsakTilVurderingUtleder extends PdlHendelseFagsakTilV
             .map(Doedsfall::getDoedsdato)
             .filter(Objects::nonNull)
             .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
+    }
+
+    BehandlingÅrsakType getBehandlingÅrsakType() {
+        return BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER;
     }
 
 }

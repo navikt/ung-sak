@@ -68,4 +68,9 @@ public class PdlFødselFagsakTilVurderingUtleder extends PdlHendelseFagsakTilVur
             .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
     }
 
+    BehandlingÅrsakType getBehandlingÅrsakType() {
+        return BehandlingÅrsakType.RE_HENDELSE_FØDSEL;
+    }
+
+
 }
