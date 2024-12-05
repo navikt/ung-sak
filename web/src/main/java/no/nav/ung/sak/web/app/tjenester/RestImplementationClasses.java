@@ -36,6 +36,7 @@ import no.nav.ung.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestT
 import no.nav.ung.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.microsoftgraph.ForvaltningTestRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.notat.NotatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
@@ -87,6 +88,7 @@ public class RestImplementationClasses {
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
         classes.add(ForvaltningAksjonspunktSammendragRestTjeneste.class);
+        classes.add(ForvaltningTestRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
         classes.add(ForvaltningPersonRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);

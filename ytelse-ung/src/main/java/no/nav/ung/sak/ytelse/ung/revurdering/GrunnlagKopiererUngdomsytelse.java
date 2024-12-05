@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeRepository;
+import no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøknadsperiodeRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)

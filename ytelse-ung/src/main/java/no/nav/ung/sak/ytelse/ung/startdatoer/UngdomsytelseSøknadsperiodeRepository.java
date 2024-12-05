@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse.ung.søknadsperioder;
+package no.nav.ung.sak.ytelse.ung.startdatoer;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,55 +20,55 @@ public class UngdomsytelseSøknadsperiodeRepository {
         this.entityManager = entityManager;
     }
 
-    public Optional<UngdomsytelseSøknadsperiodeGrunnlag> hentGrunnlag(Long behandlingId) {
+    public Optional<UngdomsytelseSøknadGrunnlag> hentGrunnlag(Long behandlingId) {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagre(Long behandlingId, List<UngdomsytelseSøknadsperiode> søknadsperioder) {
+    public void lagre(Long behandlingId, List<UngdomsytelseSøktStartdato> søknadsperioder) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId, it))
-            .orElse(new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId));
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseSøknadGrunnlag(behandlingId, it))
+            .orElse(new UngdomsytelseSøknadGrunnlag(behandlingId));
         nyttGrunnlag.leggTil(søknadsperioder);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
-    public void lagreRelevanteSøknadsperioder(Long behandlingId, UngdomsytelseSøknadsperioder søknadsperioder) {
+    public void lagreRelevanteSøknader(Long behandlingId, UngdomsytelseSøknader søknader) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId, it))
-            .orElse(new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId));
-        nyttGrunnlag.setRelevanteSøknadsperioder(søknadsperioder);
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseSøknadGrunnlag(behandlingId, it))
+            .orElse(new UngdomsytelseSøknadGrunnlag(behandlingId));
+        nyttGrunnlag.setRelevanteSøknader(søknader);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
 
 
-    private void persister(Optional<UngdomsytelseSøknadsperiodeGrunnlag> eksisterendeGrunnlag, UngdomsytelseSøknadsperiodeGrunnlag nyttGrunnlag) {
+    private void persister(Optional<UngdomsytelseSøknadGrunnlag> eksisterendeGrunnlag, UngdomsytelseSøknadGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
 
-        if (nyttGrunnlag.getOppgitteSøknadsperioder() != null) {
-            entityManager.persist(nyttGrunnlag.getOppgitteSøknadsperioder());
+        if (nyttGrunnlag.getOppgitteSøknader() != null) {
+            entityManager.persist(nyttGrunnlag.getOppgitteSøknader());
         }
-        if (nyttGrunnlag.getRelevantSøknadsperioder() != null) {
-            entityManager.persist(nyttGrunnlag.getRelevantSøknadsperioder());
+        if (nyttGrunnlag.getRelevantSøknader() != null) {
+            entityManager.persist(nyttGrunnlag.getRelevantSøknader());
         }
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
 
-    private void deaktiverEksisterende(UngdomsytelseSøknadsperiodeGrunnlag gr) {
+    private void deaktiverEksisterende(UngdomsytelseSøknadGrunnlag gr) {
         gr.setAktiv(false);
         entityManager.persist(gr);
         entityManager.flush();
     }
 
-    private Optional<UngdomsytelseSøknadsperiodeGrunnlag> hentEksisterendeGrunnlag(Long id) {
+    private Optional<UngdomsytelseSøknadGrunnlag> hentEksisterendeGrunnlag(Long id) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseSøknadsperiodeGrunnlag s " +
+                "FROM UngdomsytelseSøknadGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId " +
-                "AND s.aktiv = true", UngdomsytelseSøknadsperiodeGrunnlag.class);
+                "AND s.aktiv = true", UngdomsytelseSøknadGrunnlag.class);
 
         query.setParameter("behandlingId", id);
 
@@ -78,7 +78,7 @@ public class UngdomsytelseSøknadsperiodeRepository {
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
         eksisterendeGrunnlag.ifPresent(entitet -> {
-            persister(Optional.empty(), new UngdomsytelseSøknadsperiodeGrunnlag(nyBehandlingId, entitet));
+            persister(Optional.empty(), new UngdomsytelseSøknadGrunnlag(nyBehandlingId, entitet));
         });
     }
 }
