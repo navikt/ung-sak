@@ -12,12 +12,9 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.ung.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
@@ -29,21 +26,21 @@ import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeRepository;
 public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
     private static final Logger logger = LoggerFactory.getLogger(UngdomsprogramOpphørFagsakTilVurderingUtleder.class);
-    private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
 
     public UngdomsprogramOpphørFagsakTilVurderingUtleder() {
         // For CDI
     }
 
     @Inject
-    public UngdomsprogramOpphørFagsakTilVurderingUtleder(FagsakRepository fagsakRepository,
-                                                         BehandlingRepository behandlingRepository,
-                                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        this.fagsakRepository = fagsakRepository;
+    public UngdomsprogramOpphørFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
+                                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
     }
 
     @Override
@@ -55,9 +52,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
 
         for (AktørId aktør : aktører) {
-            var relevantFagsak = fagsakRepository.hentForBruker(aktør).stream()
-                .filter(f -> f.getYtelseType().equals(FagsakYtelseType.UNGDOMSYTELSE))
-                .filter(f -> f.getPeriode().overlapper(opphørsdatoFraHendelse, AbstractLocalDateInterval.TIDENES_ENDE)).findFirst();
+            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, opphørsdatoFraHendelse);
             if (relevantFagsak.isEmpty()) {
                 continue;
             }

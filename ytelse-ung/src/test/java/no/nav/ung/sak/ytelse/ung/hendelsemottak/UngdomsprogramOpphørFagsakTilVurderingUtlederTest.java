@@ -47,8 +47,9 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
 
     @BeforeEach
     void setUp() {
-        this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(new FagsakRepository(entityManager),
-            new BehandlingRepository(entityManager), ungdomsprogramPeriodeRepository);
+        var fagsakRepository = new FagsakRepository(entityManager);
+        this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
+            new BehandlingRepository(entityManager), ungdomsprogramPeriodeRepository, new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
     }
