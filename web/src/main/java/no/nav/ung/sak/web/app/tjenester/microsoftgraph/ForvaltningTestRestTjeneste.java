@@ -14,11 +14,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
-import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.Optional;
 
