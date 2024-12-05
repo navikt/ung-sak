@@ -21,7 +21,6 @@ public enum ArbeidsforholdKilde implements Kodeverdi {
 
     AAREGISTERET("AA-Registeret"),
     INNTEKTSKOMPONENTEN("A-Inntekt"),
-    INNTEKTSMELDING("Inntektsmelding"),
     SAKSBEHANDLER("Saksbehandler");
 
     private static final Map<String, ArbeidsforholdKilde> KODER = new LinkedHashMap<>();

@@ -21,10 +21,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE = "7014";
     public static final String AUTO_VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE = "7019";
     public static final String AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT_KODE = "7020";
-    public static final String AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID_KODE = "7022";
     public static final String AUTO_VENT_MILITÆR_OG_BG_UNDER_3G_KODE = "7023";
     public static final String AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE = "7025";
-    public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
     public static final String AUTO_VENT_PÅ_LOVENDRING_8_41_KODE = "7041";
 
     public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
@@ -153,8 +151,6 @@ public class AksjonspunktKodeDefinisjon {
     // Kompletthet for beregning
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
     public static final String ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9071";
-    public static final String ETTERLYS_IM_FOR_BEREGNING_KODE = "9068";
-    public static final String ETTERLYS_IM_VARSLE_AVSLAG_FOR_BEREGNING_KODE = "9070";
 
     static final Map<String, String> KODER;
 

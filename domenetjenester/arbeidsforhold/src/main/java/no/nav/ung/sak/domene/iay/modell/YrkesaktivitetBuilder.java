@@ -1,12 +1,11 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import java.util.List;
-import java.util.Optional;
-
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.InternArbeidsforholdRef;
+
+import java.util.Optional;
 
 public class YrkesaktivitetBuilder {
     private final Yrkesaktivitet kladd;
@@ -77,7 +76,7 @@ public class YrkesaktivitetBuilder {
     }
 
     public YrkesaktivitetBuilder leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder builder) {
-        if(!builder.isOppdatering()) {
+        if (!builder.isOppdatering()) {
             AktivitetsAvtale aktivitetsAvtale = builder.build();
             kladd.leggTilAktivitetsAvtale(aktivitetsAvtale);
         }
@@ -113,17 +112,4 @@ public class YrkesaktivitetBuilder {
         oppdater.medPeriode(aktivitetsPeriode);
         return oppdater;
     }
-
-    public boolean harIngenAvtaler() {
-        return new YrkesaktivitetFilter(null, List.of(kladd)).getAktivitetsAvtalerForArbeid().isEmpty();
-    }
-
-    public void fjernPeriode(DatoIntervallEntitet aktivitetsPeriode) {
-        kladd.fjernPeriode(aktivitetsPeriode);
-    }
-
-    public YrkesaktivitetBuilder medArbeidType(String kode) {
-        return medArbeidType(ArbeidType.fraKode(kode));
-    }
-
 }

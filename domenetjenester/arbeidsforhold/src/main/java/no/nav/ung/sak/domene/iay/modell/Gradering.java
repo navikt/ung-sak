@@ -86,8 +86,7 @@ public class Gradering implements IndexKey, Comparable<Gradering> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || !(o instanceof Gradering)) return false;
-        Gradering that = (Gradering) o;
+        if (o == null || !(o instanceof Gradering that)) return false;
         return Objects.equals(periode, that.periode);
     }
 

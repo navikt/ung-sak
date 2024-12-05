@@ -26,7 +26,6 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum DokumentTypeId implements Kodeverdi {
 
-    INNTEKTSMELDING("INNTEKTSMELDING", "I000067", DokumentGruppe.INNTEKTSMELDING, Brevkode.INNTEKTSMELDING),
     LEGEERKLÆRING("LEGEERKLÆRING", "I000023", DokumentGruppe.VEDLEGG, Brevkode.LEGEERKLÆRING),
     UDEFINERT("-", null, null, null),
     ;

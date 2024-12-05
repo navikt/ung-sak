@@ -4,7 +4,7 @@ Modulen forsørger Vedtaksløsningens mottak og registrering av dokumenter. Dett
 
 ## Hensikten
 
-* Motta dokumenter (innsendte søknader, inntektsmeldinger, ustrukturerte dokumenter).
+* Motta dokumenter (innsendte søknader, ustrukturerte dokumenter).
 * Registrere ustrukturte dokumenter fra mottak som strukturert informasjon i Vedtaksløsningen.
 
 ## Brukes av

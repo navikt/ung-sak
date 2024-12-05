@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum KravDokumenType {
-    INNTEKTSMELDING("INNTEKTSMELDING"), SØKNAD("SØKNAD");
+    SØKNAD("SØKNAD");
 
     private static final Map<String, KravDokumenType> KODER = new LinkedHashMap<>();
 

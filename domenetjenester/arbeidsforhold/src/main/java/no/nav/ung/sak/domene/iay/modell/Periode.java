@@ -79,10 +79,9 @@ public class Periode implements Comparable<Periode> {
     public boolean equals(Object o) {
         if (o == this)
             return true;
-        if (!(o instanceof Periode)) {
+        if (!(o instanceof Periode annen)) {
             return false;
         }
-        var annen = (Periode) o;
         return fom.equals(annen.getFom()) && tom.equals(annen.getTom());
     }
 

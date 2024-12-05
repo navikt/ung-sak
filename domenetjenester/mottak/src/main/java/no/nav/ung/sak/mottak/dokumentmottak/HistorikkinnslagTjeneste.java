@@ -33,7 +33,6 @@ public class HistorikkinnslagTjeneste {
     private static final String VEDLEGG = "Vedlegg";
     private static final String SØKNAD = "Søknad";
     private static final String INNSENDING = "Innsending";
-    private static final String INNTEKTSMELDING = "Inntektsmelding";
     private HistorikkRepository historikkRepository;
     private SafTjeneste safTjeneste;
 
@@ -114,9 +113,6 @@ public class HistorikkinnslagTjeneste {
         if (brevkode == null) {
             return INNSENDING;
         }
-        if (brevkode.equals(Brevkode.INNTEKTSMELDING)) {
-            return INNTEKTSMELDING;
-        }
         if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
             return SØKNAD;
         }
@@ -130,40 +126,6 @@ public class HistorikkinnslagTjeneste {
         historikkinnslagDokumentLink.setLinkTekst(linkTekst);
         historikkinnslagDokumentLink.setHistorikkinnslag(historikkinnslag);
         return historikkinnslagDokumentLink;
-    }
-
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        if (dokumentTypeId != null && dokumentTypeId.equals(Brevkode.INNTEKTSMELDING)) {
-            historikkinnslag.setAktør(HistorikkAktør.ARBEIDSGIVER);
-        } else {
-            historikkinnslag.setAktør(HistorikkAktør.SØKER);
-        }
-        historikkinnslag.setType(HistorikkinnslagType.VEDLEGG_MOTTATT);
-        historikkinnslag.setFagsakId(fagsakId);
-
-        leggTilHistorikkinnslagDokumentlinker(journalpostId, historikkinnslag);
-
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.VEDLEGG_MOTTATT);
-        builder.build(historikkinnslag);
-
-        historikkRepository.lagre(historikkinnslag);
-    }
-
-    public void opprettHistorikkinnslagForBehandlingOppdatertMedNyeOpplysninger(Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        historikkinnslag.setType(HistorikkinnslagType.BEH_OPPDATERT_NYE_OPPL);
-        historikkinnslag.setBehandlingId(behandling.getId());
-        historikkinnslag.setFagsakId(behandling.getFagsakId());
-
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.BEH_OPPDATERT_NYE_OPPL)
-            .medBegrunnelse(behandlingÅrsakType);
-        builder.build(historikkinnslag);
-
-        historikkRepository.lagre(historikkinnslag);
     }
 
     private JournalpostResponseProjection byggDokumentoversiktResponseProjection() {

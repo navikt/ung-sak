@@ -90,9 +90,8 @@ public class PeriodeAndel {
     public boolean equals(Object obj) {
         if (obj == this)
             return true;
-        if (!(obj instanceof PeriodeAndel))
+        if (!(obj instanceof PeriodeAndel other))
             return false;
-        var other = (PeriodeAndel) obj;
         return Objects.equals(periode, other.periode)
             && Objects.equals(varighetPerDag, other.varighetPerDag);
     }

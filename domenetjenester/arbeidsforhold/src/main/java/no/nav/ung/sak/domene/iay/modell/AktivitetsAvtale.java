@@ -39,11 +39,6 @@ public class AktivitetsAvtale implements IndexKey {
         this.periode = aktivitetsAvtale.getPeriodeUtenOverstyring();
     }
 
-    public AktivitetsAvtale(AktivitetsAvtale avtale, DatoIntervallEntitet overstyrtPeriode) {
-        this(avtale);
-        this.overstyrtPeriode = overstyrtPeriode;
-    }
-
     @Override
     public String getIndexKey() {
         Object[] keyParts = { periode, aktivitetsAvtaleInnhold.getSisteLønnsendringsdato() };
@@ -105,15 +100,6 @@ public class AktivitetsAvtale implements IndexKey {
         return getPeriode().equals(aktivitetsAvtale);
     }
 
-    /**
-     * Er avtallen løpende
-     *
-     * @return true/false
-     */
-    public boolean getErLøpende() {
-        return Tid.TIDENES_ENDE.equals(getPeriode().getTomDato());
-    }
-
     public String getBeskrivelse() {
         return aktivitetsAvtaleInnhold.getBeskrivelse();
     }
@@ -124,10 +110,6 @@ public class AktivitetsAvtale implements IndexKey {
 
     void setSisteLønnsendringsdato(LocalDate sisteLønnsendringsdato) {
         this.aktivitetsAvtaleInnhold.setSisteLønnsendringsdato(sisteLønnsendringsdato);
-    }
-
-    public AktivitetsAvtaleInnhold getAktivitetsAvtaleInnhold() {
-        return aktivitetsAvtaleInnhold;
     }
 
     @Override

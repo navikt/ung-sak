@@ -15,8 +15,6 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum ArbeidsforholdAksjonspunktÅrsak implements Kodeverdi {
 
-    MANGLENDE_INNTEKTSMELDING("MANGLENDE_INNTEKTSMELDING"),
-    INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD("INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD"),
     OVERGANG_ARBEIDSFORHOLDS_ID_UNDER_YTELSE("OVERGANG_ARBEIDSFORHOLDS_ID_UNDER_YTELSE");
 
     public static final String KODEVERK = "ARBEIDSFORHOLD_AKSJONSPUNKT_ÅRSAKER";

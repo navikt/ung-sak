@@ -13,27 +13,10 @@ import no.nav.ung.sak.typer.JournalpostId;
 @Dependent
 public class DokumentmottakerFelles {
 
-    private final ProsessTaskTjeneste prosessTaskRepository;
-    private final HistorikkinnslagTjeneste historikkinnslagTjeneste;
+
 
     @Inject
-    public DokumentmottakerFelles(ProsessTaskTjeneste prosessTaskRepository,
-                                  HistorikkinnslagTjeneste historikkinnslagTjeneste) {
-        this.prosessTaskRepository = prosessTaskRepository;
-        this.historikkinnslagTjeneste = historikkinnslagTjeneste;
-    }
-
-    public void opprettTaskForÅStarteBehandlingMedNySøknad(Behandling behandling, JournalpostId journalpostId) {
-        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(StartBehandlingTask.class);
-        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        prosessTaskData.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(prosessTaskData);
-
-        historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, journalpostId, HistorikkinnslagType.BEH_STARTET);
-    }
-
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId, Brevkode dokumentTypeId) {
-        historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(fagsakId, journalpostId, dokumentTypeId);
+    public DokumentmottakerFelles() {
     }
 
     public ProsessTaskData opprettTaskForÅStarteBehandling(Behandling behandling) {
