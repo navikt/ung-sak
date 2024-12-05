@@ -9,6 +9,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -16,6 +17,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 public class UngdomsprogramPeriodeTjeneste {
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private static final KantIKantVurderer KANT_I_KANT_VURDERER = new DefaultKantIKantVurderer();
 
     @Inject
     public UngdomsprogramPeriodeTjeneste(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
@@ -23,23 +25,22 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
 
-    public LocalDateTimeline<Boolean> finnPeriodeTidslinje(Long behandlingId, KantIKantVurderer kantIKantVurderer) {
+    public LocalDateTimeline<Boolean> finnPeriodeTidslinje(Long behandlingId) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
-        return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag, kantIKantVurderer);
+        return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
     }
 
     /**
      * Utleder tidslinje for endringer i perioder fra grunnlaget i forrige behandling og det aktive. I førstegangsbehandlinger vil alle perioder returnerers som endring.
      *
      * @param behandlingReferanse Behandlingreferanse
-     * @param kantIKantVurderer   Kant-i-kant-vurderer, vurderer om to perioder skal regnes for å være sammenhengende
      * @return Tidslinje for endrede perioder
      */
-    public LocalDateTimeline<Boolean> finnEndretPeriodeTidslinje(BehandlingReferanse behandlingReferanse, KantIKantVurderer kantIKantVurderer) {
+    public LocalDateTimeline<Boolean> finnEndretPeriodeTidslinje(BehandlingReferanse behandlingReferanse) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
-        var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag, kantIKantVurderer);
+        var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
         var originaltGrunnlag = behandlingReferanse.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag);
-        var initiellPeriodeTidslinje = lagPeriodeTidslinje(originaltGrunnlag, kantIKantVurderer);
+        var initiellPeriodeTidslinje = lagPeriodeTidslinje(originaltGrunnlag);
         return initiellPeriodeTidslinje.crossJoin(periodeTidslinje, UngdomsprogramPeriodeTjeneste::erEndret)
             .filterValue(v -> v);
     }
@@ -48,16 +49,15 @@ public class UngdomsprogramPeriodeTjeneste {
      * Lager tidslinje for perioder der bruker deltar i ungdomsprogram basert på verdier fra et oppgitt periodegrunnlag
      *
      * @param ungdomsprogramPeriodeGrunnlag Ungdomsprogram-grunnlag med perioder der bruker er i ungdomsprogram
-     * @param kantIKantVurderer             KantIKantVurderer som vurderer om en periode skal kunne slå sammen med en annen
      * @return Tidslinje for perioder der bruker er i ungdomsprogram
      */
-    private LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag, KantIKantVurderer kantIKantVurderer) {
+    private LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag) {
         return ungdomsprogramPeriodeGrunnlag.stream()
             .flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
             .map(UngdomsprogramPeriode::getPeriode)
             .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
             .reduce(LocalDateTimeline::crossJoin)
-            .map(t -> komprimer(t, kantIKantVurderer))
+            .map(t -> komprimer(t))
             .orElse(LocalDateTimeline.empty());
     }
 
@@ -66,8 +66,8 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
 
-    private LocalDateTimeline<Boolean> komprimer(LocalDateTimeline<Boolean> t, KantIKantVurderer kantIKantVurderer) {
-        return t.compress((d1, d2) -> kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
+    private LocalDateTimeline<Boolean> komprimer(LocalDateTimeline<Boolean> t) {
+        return t.compress((d1, d2) -> KANT_I_KANT_VURDERER.erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
     }
 
 }

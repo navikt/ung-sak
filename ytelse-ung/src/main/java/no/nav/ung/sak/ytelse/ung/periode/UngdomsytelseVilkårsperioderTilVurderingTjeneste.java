@@ -23,7 +23,7 @@ import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.ytelse.ung.inngangsvilkår.InngangsvilkårUtleder;
-import no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeTjeneste;
+import no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøknadsperiodeTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef
@@ -104,7 +104,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         var søknadsperiodeTidslinje = TidslinjeUtil.tilTidslinje(alleSøknadsperioder);
 
         // Finner endringer i perioder der bruker er meldt inn i ungdomsprogram
-        var ungdomsprogramEndretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(BehandlingReferanse.fra(behandling), getKantIKantVurderer());
+        var ungdomsprogramEndretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(BehandlingReferanse.fra(behandling));
 
         // Kun perioder med endringer som overlapper med søkte perioder tas hensyn til
         var endretTidslinje = ungdomsprogramEndretTidslinje.intersection(søknadsperiodeTidslinje);

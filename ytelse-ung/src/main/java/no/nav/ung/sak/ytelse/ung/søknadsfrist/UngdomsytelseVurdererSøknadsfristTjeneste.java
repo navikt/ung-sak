@@ -20,12 +20,12 @@ import no.nav.ung.sak.perioder.KravDokumentType;
 import no.nav.ung.sak.perioder.SøktPeriode;
 import no.nav.ung.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.ung.sak.perioder.VurdertSøktPeriode;
-import no.nav.ung.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiode;
+import no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøktStartdato;
 
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
-public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<UngdomsytelseSøknadsperiode> {
+public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<UngdomsytelseSøktStartdato> {
 
     // TODO: Denne må implementeres
 
@@ -42,22 +42,22 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
 
 
     @Override
-    public Map<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøknadsperiode>>> vurderSøknadsfrist(BehandlingReferanse referanse) {
+    public Map<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøktStartdato>>> vurderSøknadsfrist(BehandlingReferanse referanse) {
         var søktePerioder = hentPerioderTilVurdering(referanse);
 
         return vurderSøknadsfrist(referanse.getBehandlingId(), søktePerioder);
     }
 
     @Override
-    public Map<KravDokument, List<SøktPeriode<UngdomsytelseSøknadsperiode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
-        var result = new HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøknadsperiode>>>();
+    public Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
+        var result = new HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>>();
         return result;
     }
 
 
     @Override
-    public Map<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøknadsperiode>>> vurderSøknadsfrist(Long behandlingId, Map<KravDokument, List<SøktPeriode<UngdomsytelseSøknadsperiode>>> søknaderMedPerioder) {
-        var result = new HashMap<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøknadsperiode>>>();
+    public Map<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøktStartdato>>> vurderSøknadsfrist(Long behandlingId, Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> søknaderMedPerioder) {
+        var result = new HashMap<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøktStartdato>>>();
         return result;
     }
 

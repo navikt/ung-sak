@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse.ung.søknadsperioder;
+package no.nav.ung.sak.ytelse.ung.startdatoer;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,43 +24,43 @@ import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 
-@Entity(name = "UngdomsytelseSøknadsperioder")
-@Table(name = "UNG_SOEKNADSPERIODER")
+@Entity(name = "UngdomsytelseSøknader")
+@Table(name = "UNG_SOEKNADER")
 @Immutable
-public class UngdomsytelseSøknadsperioder extends BaseEntitet {
+public class UngdomsytelseSøknader extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKNADSPERIODER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKNADER")
     private Long id;
 
     @ChangeTracked
     @BatchSize(size = 20)
-    @JoinColumn(name = "UNG_SOEKNADSPERIODER_ID", nullable = false)
+    @JoinColumn(name = "UNG_SOEKNADER_ID", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private Set<UngdomsytelseSøknadsperiode> perioder;
+    private Set<UngdomsytelseSøktStartdato> startdatoer;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseSøknadsperioder() {
+    public UngdomsytelseSøknader() {
         // hibernate
     }
 
-    public UngdomsytelseSøknadsperioder(UngdomsytelseSøknadsperioder periode) {
-        this.perioder = periode.getPerioder()
+    public UngdomsytelseSøknader(UngdomsytelseSøknader periode) {
+        this.startdatoer = periode.getStartdatoer()
             .stream()
-            .map(UngdomsytelseSøknadsperiode::new)
+            .map(UngdomsytelseSøktStartdato::new)
             .collect(Collectors.toSet());
         // hibernate
     }
 
-    public UngdomsytelseSøknadsperioder(UngdomsytelseSøknadsperiode... perioder) {
-        this(Arrays.asList(perioder));
+    public UngdomsytelseSøknader(UngdomsytelseSøktStartdato... startdatoer) {
+        this(Arrays.asList(startdatoer));
     }
 
-    public UngdomsytelseSøknadsperioder(Collection<UngdomsytelseSøknadsperiode> perioder) {
-        this.perioder = new LinkedHashSet<>(Objects.requireNonNull(perioder));
+    public UngdomsytelseSøknader(Collection<UngdomsytelseSøktStartdato> startdatoer) {
+        this.startdatoer = new LinkedHashSet<>(Objects.requireNonNull(startdatoer));
     }
 
     public Long getId() {
@@ -68,27 +68,27 @@ public class UngdomsytelseSøknadsperioder extends BaseEntitet {
     }
 
 
-    public Set<UngdomsytelseSøknadsperiode> getPerioder() {
-        return Collections.unmodifiableSet(perioder);
+    public Set<UngdomsytelseSøktStartdato> getStartdatoer() {
+        return Collections.unmodifiableSet(startdatoer);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UngdomsytelseSøknadsperioder that = (UngdomsytelseSøknadsperioder) o;
-        return Objects.equals(perioder, that.perioder);
+        UngdomsytelseSøknader that = (UngdomsytelseSøknader) o;
+        return Objects.equals(startdatoer, that.startdatoer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(perioder);
+        return Objects.hash(startdatoer);
     }
 
     @Override
     public String toString() {
-        return "Søknadsperioder{" +
-            ", perioder=" + perioder +
+        return "UngdomsytelseSøknader{" +
+            ", perioder=" + startdatoer +
             '}';
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.ung.sak.ytelse.ung.registerdata;
 
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.ARBEIDSFORHOLD;
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
 
 import java.util.Map;
@@ -22,11 +21,9 @@ public class UngdomsytelseInformasjonselementerUtleder implements Informasjonsel
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
         BehandlingType.FØRSTEGANGSSØKNAD,
         Set.of(
-            ARBEIDSFORHOLD,
             INNTEKT_BEREGNINGSGRUNNLAG),
         BehandlingType.REVURDERING,
         Set.of(
-            ARBEIDSFORHOLD,
             INNTEKT_BEREGNINGSGRUNNLAG));
 
     @Override
