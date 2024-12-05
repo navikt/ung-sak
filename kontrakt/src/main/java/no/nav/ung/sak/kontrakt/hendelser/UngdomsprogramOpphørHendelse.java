@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.ungdomsytelse.hendelser;
+package no.nav.ung.sak.kontrakt.hendelser;
 
 import java.time.LocalDate;
 
@@ -11,8 +11,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.hendelser.HendelseType;
-import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
-import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
