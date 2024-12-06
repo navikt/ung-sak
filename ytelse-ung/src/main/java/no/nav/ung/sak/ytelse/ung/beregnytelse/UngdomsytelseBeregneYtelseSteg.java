@@ -82,7 +82,8 @@ public class UngdomsytelseBeregneYtelseSteg implements BeregneYtelseSteg {
             .medRegelSporing(lagRegelSporing(resultatTidslinje))
             .build();
 
-        resultatTidslinje.toSegments()
+        resultatTidslinje.toSegments().stream()
+            .filter(s -> s.getValue().utbetalingsgrad.compareTo(BigDecimal.ZERO) > 0) // Filterer ut perioder med ingen utbetalingsgrad.
             .forEach(p -> {
                 var resultatPeriode = BeregningsresultatPeriode.builder()
                     .medBeregningsresultatPeriodeFomOgTom(p.getFom(), p.getTom())
