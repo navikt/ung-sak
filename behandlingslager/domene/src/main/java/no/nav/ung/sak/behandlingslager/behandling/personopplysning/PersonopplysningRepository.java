@@ -5,15 +5,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.hibernate.jpa.QueryHints;
-import org.hibernate.query.NativeQuery;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
@@ -121,8 +118,7 @@ public class PersonopplysningRepository {
     }
 
     private List<Long> finnBehandlingerMedAdresseInformasjonFor(AktørId aktørId) {
-        @SuppressWarnings("unchecked")
-        final List<Long> result = entityManager.createNativeQuery("SELECT DISTINCT g.behandling_id\n"
+        @SuppressWarnings("unchecked") final List<Long> result = entityManager.createNativeQuery("SELECT DISTINCT g.behandling_id\n"
                 + "FROM GR_PERSONOPPLYSNING g INNER JOIN PO_INFORMASJON i ON (\n"
                 + "    g.registrert_informasjon_id = i.id\n"
                 + "    OR g.overstyrt_informasjon_id = i.id\n"
@@ -130,16 +126,16 @@ public class PersonopplysningRepository {
                 + "    i.id = a.po_informasjon_id\n"
                 + "  )\n"
                 + "WHERE a.aktoer_id = :aktor")
-                .setParameter("aktor", aktørId.getId())
-                .getResultList();
+            .setParameter("aktor", aktørId.getId())
+            .getResultList();
 
         return result;
     }
 
     private Optional<PersonopplysningGrunnlagEntitet> getAktivtGrunnlag(Long behandlingId) {
         TypedQuery<PersonopplysningGrunnlagEntitet> query = entityManager.createQuery(
-            "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id AND pbg.aktiv = true", // NOSONAR //$NON-NLS-1$
-            PersonopplysningGrunnlagEntitet.class)
+                "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id AND pbg.aktiv = true", // NOSONAR //$NON-NLS-1$
+                PersonopplysningGrunnlagEntitet.class)
             .setHint(QueryHints.HINT_CACHE_MODE, "IGNORE")
             .setParameter("behandling_id", behandlingId); // NOSONAR //$NON-NLS-1$
 
@@ -239,7 +235,9 @@ public class PersonopplysningRepository {
         return PersonopplysningGrunnlagBuilder.oppdatere(aktivtGrunnlag);
     }
 
-    /** Tar med tidligere overstyring når lager ny overstyrt versjon. */
+    /**
+     * Tar med tidligere overstyring når lager ny overstyrt versjon.
+     */
     public PersonInformasjonBuilder opprettBuilderFraEksisterende(Long behandlingId, PersonopplysningVersjonType type) {
         var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
         if (aktivtGrunnlag.isEmpty()) {
@@ -256,11 +254,11 @@ public class PersonopplysningRepository {
     }
 
     private Optional<PersonopplysningGrunnlagEntitet> getInitiellVersjonAvPersonopplysningBehandlingsgrunnlag(
-                                                                                                              Long behandlingId) {
+        Long behandlingId) {
         // må også sortere på id da opprettetTidspunkt kun er til nærmeste millisekund og ikke satt fra db.
         TypedQuery<PersonopplysningGrunnlagEntitet> query = entityManager.createQuery(
-            "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id order by pbg.opprettetTidspunkt, pbg.id", //$NON-NLS-1$
-            PersonopplysningGrunnlagEntitet.class)
+                "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id order by pbg.opprettetTidspunkt, pbg.id", //$NON-NLS-1$
+                PersonopplysningGrunnlagEntitet.class)
             .setParameter("behandling_id", behandlingId) // NOSONAR
             .setMaxResults(1);
 
@@ -282,10 +280,10 @@ public class PersonopplysningRepository {
     }
 
     private Optional<PersonopplysningGrunnlagEntitet> getVersjonAvPersonopplysningBehandlingsgrunnlagPåId(
-                                                                                                          Long aggregatId) {
+        Long aggregatId) {
         TypedQuery<PersonopplysningGrunnlagEntitet> query = entityManager.createQuery(
-            "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.id = :aggregatId", //$NON-NLS-1$
-            PersonopplysningGrunnlagEntitet.class)
+                "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.id = :aggregatId", //$NON-NLS-1$
+                PersonopplysningGrunnlagEntitet.class)
             .setParameter("aggregatId", aggregatId); // NOSONAR //$NON-NLS-1$
 
         Optional<PersonopplysningGrunnlagEntitet> resultat = query.getResultStream().findFirst();
