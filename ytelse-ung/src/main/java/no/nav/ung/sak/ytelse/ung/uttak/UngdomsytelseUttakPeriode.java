@@ -44,6 +44,7 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
     public UngdomsytelseUttakPeriode(UngdomsytelseUttakPeriode ungdomsytelseUttakPeriode) {
         this.periode = ungdomsytelseUttakPeriode.getPeriode().toRange();
         this.utbetalingsgrad = ungdomsytelseUttakPeriode.getUtbetalingsgrad();
+        this.avslagsårsak = ungdomsytelseUttakPeriode.getAvslagsårsak();
     }
 
     public UngdomsytelseUttakPeriode(BigDecimal utbetalingsgrad,

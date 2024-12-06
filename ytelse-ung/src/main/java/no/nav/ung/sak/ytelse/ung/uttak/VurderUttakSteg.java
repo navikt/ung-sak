@@ -5,35 +5,39 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeTjeneste;
 
 import java.util.logging.Logger;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANTALL_DAGER;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
-@BehandlingStegRef(value = VURDER_ANTALL_DAGER)
+@BehandlingStegRef(value = VURDER_UTTAK)
 @BehandlingTypeRef
 @ApplicationScoped
-public class VurderAntallDagerSteg implements BehandlingSteg {
-    private static final Logger LOGGER = Logger.getLogger(VurderAntallDagerSteg.class.getName());
+public class VurderUttakSteg implements BehandlingSteg {
+    private static final Logger LOGGER = Logger.getLogger(VurderUttakSteg.class.getName());
 
     private VilkårTjeneste vilkårTjeneste;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private PersonopplysningRepository personopplysningRepository;
 
     @Inject
-    public VurderAntallDagerSteg(VilkårTjeneste vilkårTjeneste, UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+    public VurderUttakSteg(VilkårTjeneste vilkårTjeneste, UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, PersonopplysningRepository personopplysningRepository) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
-    public VurderAntallDagerSteg() {
+    public VurderUttakSteg() {
     }
 
     @Override
@@ -53,7 +57,15 @@ public class VurderAntallDagerSteg implements BehandlingSteg {
             // Fjerner deler av programperiode som er etter søkte perioder.
             .intersection(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, godkjentePerioder.getMaxLocalDate(), true));
 
-        var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(godkjentePerioder, ungdomsprogramtidslinje);
+        var søkersDødsdato = personopplysningRepository.hentPersonopplysninger(behandlingId)
+            .getGjeldendeVersjon()
+            .getPersonopplysninger()
+            .stream()
+            .filter(it -> it.getAktørId().equals(kontekst.getAktørId()))
+            .findFirst()
+            .map(PersonopplysningEntitet::getDødsdato);
+
+        var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato);
         ungdomsytelseUttakPerioder.ifPresent(it -> ungdomsytelseGrunnlagRepository.lagre(behandlingId, it));
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

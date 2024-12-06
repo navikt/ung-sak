@@ -7,7 +7,8 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 
 public enum UngdomsytelseUttakAvslagsårsak implements Kodeverdi {
 
-    IKKE_NOK_DAGER("IKKE_NOK_DAGER", "Ikke nok dager");
+    IKKE_NOK_DAGER("IKKE_NOK_DAGER", "Ikke nok dager"),
+    SØKERS_DØDSFALL("SØKERS_DØDSFALL", "Søkers dødsfall");
 
 
     private static final Map<String, UngdomsytelseUttakAvslagsårsak> KODER = new LinkedHashMap<>();

@@ -21,7 +21,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
-import no.nav.ung.sak.kontrakt.ungdomsytelse.hendelser.UngdomsprogramOpphørHendelse;
+import no.nav.ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriode;
@@ -47,8 +47,9 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
 
     @BeforeEach
     void setUp() {
-        this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(new FagsakRepository(entityManager),
-            new BehandlingRepository(entityManager), ungdomsprogramPeriodeRepository);
+        var fagsakRepository = new FagsakRepository(entityManager);
+        this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
+            new BehandlingRepository(entityManager), ungdomsprogramPeriodeRepository, new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
     }

@@ -5,10 +5,16 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeTjeneste;
@@ -17,14 +23,16 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class VurderAntallDagerStegTest {
+class VurderUttakStegTest {
     private VilkårTjeneste vilkårTjeneste = mock(VilkårTjeneste.class);
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository = mock(UngdomsytelseGrunnlagRepository.class);
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
+    private PersonopplysningRepository personopplysningRepository = mock(PersonopplysningRepository.class);
 
     @Test
     void Forventer_ingen_timeline_empty_ved_ingen_godkjente_perioder() {
@@ -36,7 +44,7 @@ class VurderAntallDagerStegTest {
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
 
-        VurderAntallDagerSteg steg = new VurderAntallDagerSteg(vilkårTjeneste, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeTjeneste);
+        VurderUttakSteg steg = new VurderUttakSteg(vilkårTjeneste, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeTjeneste, personopplysningRepository);
         LocalDate fom = LocalDate.parse("2024-01-01");
         LocalDate tom = LocalDate.parse("2024-01-31");
 
@@ -50,6 +58,10 @@ class VurderAntallDagerStegTest {
         when(vilkårTjeneste.samletVilkårsresultat(behandling.getId())).thenReturn(samletVilkårResultatTidslinje);
 
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId())).thenReturn(new LocalDateTimeline<>(fom, null, true));
+        var personInformasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+        personInformasjonBuilder.leggTil(personInformasjonBuilder.getPersonopplysningBuilder(fagsak.getAktørId()));
+        when(personopplysningRepository.hentPersonopplysninger(behandling.getId())).thenReturn(PersonopplysningGrunnlagBuilder.oppdatere(Optional.empty())
+            .medRegistrertVersjon(personInformasjonBuilder).build());
 
 
         Assertions.assertDoesNotThrow(() -> {
