@@ -17,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -37,24 +38,28 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
     private EntityManager em;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private UngdomsytelseSøknadsperiodeRepository søknadsperiodeRepository;
+    private BehandlingRepository behandlingRepository;
     private Behandling behandling;
 
     @BeforeEach
     void setUp() {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(em);
         søknadsperiodeRepository = new UngdomsytelseSøknadsperiodeRepository(em);
+        behandlingRepository = new BehandlingRepository(em);
         ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(søknadsperiodeRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository));
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
+            behandlingRepository
+            );
 
         var fom = LocalDate.now();
-        var fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), fom, fom.plusWeeks(52));
+        var fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), fom, fom.plusWeeks(64));
         em.persist(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        em.persist(behandling);
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }
 
     @Test
-    void skal_begrense_ungdomsprogramperiode_uten_opphør_til_52_uker() {
+    void skal_begrense_ungdomsprogramperiode_uten_opphør_til_fagsakpeiode_tom() {
         var fom = LocalDate.now();
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
         var søknadsperioder = List.of(new UngdomsytelseSøktStartdato(fom, new JournalpostId(12455L)));
@@ -65,7 +70,7 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
 
         assertThat(periode.size()).isEqualTo(1);
         var enestePeriode = periode.getFirst();
-        assertThat(enestePeriode.getTomDato()).isEqualTo(fom.plusWeeks(52));
+        assertThat(enestePeriode.getTomDato()).isEqualTo(fom.plusWeeks(64));
     }
 
     @Test
