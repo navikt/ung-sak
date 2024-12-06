@@ -122,7 +122,7 @@ public class VilkårRestTjeneste {
         Set<VilkårType> aktuelleVilkårTyper = finnAktuelleVilkårTyper(behandling, vilkårene);
         Map<VilkårType, Set<DatoIntervallEntitet>> resultat = new EnumMap<>(VilkårType.class);
         for (VilkårType vilkårType : aktuelleVilkårTyper) {
-            resultat.put(vilkårType, utledPeriodeTilVurdering(behandling, vilkårType));
+            resultat.put(vilkårType, utledPeriodeTilVurdering(behandling));
         }
         return resultat;
     }
@@ -146,8 +146,8 @@ public class VilkårRestTjeneste {
         return vilkårene.getVilkårene().stream().map(Vilkår::getVilkårType).collect(Collectors.toSet());
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledPeriodeTilVurdering(Behandling behandling, VilkårType vilkårType) {
-        return getPerioderTilVurderingTjeneste(behandling).utled(behandling.getId(), vilkårType);
+    private NavigableSet<DatoIntervallEntitet> utledPeriodeTilVurdering(Behandling behandling) {
+        return getPerioderTilVurderingTjeneste(behandling).utled(behandling.getId());
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {

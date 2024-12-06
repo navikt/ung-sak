@@ -48,7 +48,7 @@ public class UngdomsytelseForeslåBehandlingsresultatTjeneste extends ForeslåBe
         var timeline = new LocalDateTimeline<Boolean>(List.of());
 
         for (VilkårType vilkårType : definerendeVilkår) {
-            timeline = timeline.combine(new LocalDateTimeline<>(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)
+            timeline = timeline.combine(new LocalDateTimeline<>(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId)
                 .stream()
                 .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
                 .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
