@@ -95,7 +95,7 @@ public class OverlappendeYtelserTjeneste {
 
     private LocalDateTimeline<Boolean> hentBeregningsgrunnlagPerioderTilVurderingTidslinje(BehandlingReferanse ref) {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId());
         var periodeSegmenter = perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).toList();
 
         return new LocalDateTimeline<>(periodeSegmenter);

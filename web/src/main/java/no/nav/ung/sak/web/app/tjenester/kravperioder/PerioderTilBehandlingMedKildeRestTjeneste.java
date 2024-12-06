@@ -122,13 +122,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
     private LocalDateTimeline<Utfall> utledTidslinjeTilVurdering(Behandling behandling, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
-        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
-
-        return new LocalDateTimeline<>(definerendeVilkår.stream()
-            .map(it -> perioderTilVurderingTjeneste.utled(behandling.getId(), it))
-            .flatMap(Collection::stream)
-            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), Utfall.IKKE_VURDERT))
-            .collect(Collectors.toSet()));
+        final var segmenter = perioderTilVurderingTjeneste.utled(behandling.getId())
+            .stream().map(intervall -> new LocalDateSegment<>(intervall.toLocalDateInterval(), Utfall.IKKE_VURDERT))
+            .collect(Collectors.toSet());
+        return new LocalDateTimeline<>(segmenter);
     }
 
     private List<PeriodeMedUtfall> mapVilkårMedUtfall(Behandling behandling, LocalDateTimeline<Utfall> timelineTilVurdering) {
@@ -154,10 +151,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
 
-        var perioderTilVurdering = definerendeVilkår.stream()
-            .map(it -> perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), it))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toCollection(TreeSet::new));
+        final var perioderTilVurdering = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId()));
 
         perioderTilVurdering.addAll(perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref));
 
