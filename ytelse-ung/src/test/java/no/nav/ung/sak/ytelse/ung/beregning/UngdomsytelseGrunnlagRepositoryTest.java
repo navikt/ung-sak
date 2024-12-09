@@ -49,7 +49,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var dagsats = BigDecimal.TEN;
         var grunnbeløp = BigDecimal.valueOf(50);
         var grunnbeløpFaktor = BigDecimal.valueOf(2);
-        lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY, 0, BigDecimal.ZERO);
+        lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY, 0, 0);
 
         var ungdomsytelseGrunnlag = repository.hentGrunnlag(behandling.getId());
         assertThat(ungdomsytelseGrunnlag.isPresent()).isTrue();
@@ -70,7 +70,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var grunnbeløp = BigDecimal.valueOf(50);
         var grunnbeløpFaktor = BigDecimal.valueOf(2);
         var antallBarn = 2;
-        var barnetilleggDagsats = BigDecimal.valueOf(100);
+        var barnetilleggDagsats = 100;
         lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY, antallBarn, barnetilleggDagsats);
 
         var utbetalingsgrad = BigDecimal.TEN;
@@ -97,13 +97,14 @@ class UngdomsytelseGrunnlagRepositoryTest {
         assertThat(uttakperioder.get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()));
     }
 
-    private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, BigDecimal barnetilleggDagsats) {
-        repository.lagre(behandling.getId(), new LocalDateTimeline<>(List.of(
+    private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, int barnetilleggDagsats) {
+        var tidslinje = new LocalDateTimeline<>(List.of(
             lagSegment(periode1, dagsats, grunnbeløp, sats, antallBarn, barnetilleggDagsats)
-        )));
+        ));
+        repository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(tidslinje, "regelInput", "regelSporing"));
     }
 
-    private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, BigDecimal barnetilleggDagsats) {
+    private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, int barnetilleggDagsats) {
         return new LocalDateSegment(
             datoInterval,
             new UngdomsytelseSatser(
