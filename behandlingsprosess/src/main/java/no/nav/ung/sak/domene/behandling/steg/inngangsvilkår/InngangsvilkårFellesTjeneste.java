@@ -49,7 +49,7 @@ public class InngangsvilkårFellesTjeneste {
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(Long behandlingId, VilkårType vilkårType) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var tjeneste = getPerioderTilVurderingTjeneste(behandling);
-        var perioderTilVurdering = tjeneste.utled(behandlingId, vilkårType);
+        var perioderTilVurdering = tjeneste.utled(behandlingId);
 
         if (behandling.getOriginalBehandlingId().isPresent()) {
             // Trekk fra periodene som er forlengelse
@@ -68,7 +68,7 @@ public class InngangsvilkårFellesTjeneste {
     public NavigableSet<DatoIntervallEntitet> utledForlengelserTilVurdering(Long behandlingId, VilkårType vilkårType) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var tjeneste = getPerioderTilVurderingTjeneste(behandling);
-        var perioderTilVurdering = tjeneste.utled(behandlingId, vilkårType);
+        var perioderTilVurdering = tjeneste.utled(behandlingId);
         var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(this.forlengelseTjeneste, behandling.getFagsakYtelseType(), behandling.getType());
 
         return forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(BehandlingReferanse.fra(behandling), perioderTilVurdering, vilkårType);

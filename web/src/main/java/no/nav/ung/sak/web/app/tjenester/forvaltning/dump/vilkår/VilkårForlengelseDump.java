@@ -73,7 +73,7 @@ public class VilkårForlengelseDump implements DebugDumpBehandling {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType());
         return vilkårene.getVilkårene().stream().flatMap(v -> {
             var perioder = v.getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toCollection(TreeSet::new));
-            var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), v.getVilkårType());
+            var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId());
 
             try {
                 var forlengelseperioder = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(ref,

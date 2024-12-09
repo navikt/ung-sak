@@ -64,7 +64,7 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.UNGDOMSPROGRAMVILKÅRET);
-        var perioderTilVurdering = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.UNGDOMSPROGRAMVILKÅRET);
+        var perioderTilVurdering = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId());
         var ungdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
         var builders = vurderPerioder(ungdomsprogramTidslinje, perioderTilVurdering, vilkårBuilder);
         builders.forEach(vilkårBuilder::leggTil);

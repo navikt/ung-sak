@@ -57,7 +57,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.UNGDOMSPROGRAMVILKÅRET);
+        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(kontekst.getBehandlingId());
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(kontekst.getBehandlingId());
         var perioderTilVurderingTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
         var oppfyltVilkårTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.OPPFYLT));
