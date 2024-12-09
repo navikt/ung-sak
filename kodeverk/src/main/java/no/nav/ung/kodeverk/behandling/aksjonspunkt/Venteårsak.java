@@ -33,8 +33,6 @@ public enum Venteårsak implements Kodeverdi {
     ANKE_OVERSENDT_TIL_TRYGDERETTEN("ANKE_OVERSENDT_TIL_TRYGDERETTEN", "Venter på at saken blir behandlet hos Trygderetten", false, AVVENTER_ANNET_IKKE_SAKSBEHANDLINGSTID),
     ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER("ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "Tilbakemelding fra søker", true, AVVENTER_SØKER),
     AVV_DOK("AVV_DOK", "Annen dokumentasjon", true, AVVENTER_SØKER),
-    AVV_IM_MOT_AAREG("AVV_IM_MOT_AAREG", "Venter på inntektsmelding fra arbeidsgiver som stemmer med Aareg", false, AVVENTER_ARBEIDSGIVER),
-    AVV_IM_MOT_SØKNAD_AT("AVV_IM_MOT_SØKNAD_AT", "Venter på inntektsmelding fra arbeidsgiver etter mottatt søknad som arbeidstaker", false, AVVENTER_ARBEIDSGIVER),
     AVV_SØKNADSPERIODER("AVV_SØKNADSPERIODER", "Kan ikke behandle videre før det mottas søknadsperioder fra søknad eller refusjonskrav fra inntektsmelding", false, AVVENTER_SØKER),
     AVV_FODSEL("AVV_FODSEL", "Avventer fødsel", false, AVVENTER_SØKER),
     AVV_RESPONS_REVURDERING("AVV_RESPONS_REVURDERING", "Tilbakemelding på varsel om revurdering", true, AVVENTER_SØKER),
@@ -48,9 +46,7 @@ public enum Venteårsak implements Kodeverdi {
     VENT_INFOTRYGD("VENT_INFOTRYGD", "Venter på en ytelse i Infotrygd", false, AVVENTER_ANNET),
     VENT_INNTEKT_RAPPORTERINGSFRIST("VENT_INNTEKT_RAPPORTERINGSFRIST", "Inntekt rapporteringsfrist", false, AVVENTER_ARBEIDSGIVER),
     VENT_MILITÆR_BG_UNDER_3G("VENT_MILITÆR_OG_BG_UNDER_3G", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette.", false, AVVENTER_TEKNISK_FEIL),
-    VENT_OPDT_INNTEKTSMELDING("VENT_OPDT_INNTEKTSMELDING", "Venter på oppdatert inntektsmelding", false, AVVENTER_ARBEIDSGIVER),
     VENT_OPPTJENING_OPPLYSNINGER("VENT_OPPTJENING_OPPLYSNINGER", "Venter på opptjeningsopplysninger", false, AVVENTER_ARBEIDSGIVER), //TODO?
-    VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID("VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID", "Venter på ny inntektsmelding med arbeidsforholdId som stemmer med Aareg", false, AVVENTER_ARBEIDSGIVER),
     VENT_REGISTERINNHENTING("VENT_REGISTERINNHENTING", "Venter på registerinformasjon", false, AVVENTER_ANNET),
     VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT("VENT_PÅ_SISTE_AAP_MELDEKORT", "Venter på siste meldekort for AAP eller dagpenger før første uttaksdag.", false, AVVENTER_SØKER),
     VENT_SØKNAD_SENDT_INFORMASJONSBREV("VENT_SØKNAD_SENDT_INFORMASJONSBREV", "Sendt informasjonsbrev venter søknad.", false, AVVENTER_SØKER),
@@ -60,13 +56,9 @@ public enum Venteårsak implements Kodeverdi {
     VENTER_SVAR_PORTEN("VENTER_SVAR_PORTEN", "Sak meldt i Porten, venter på svar", true, AVVENTER_TEKNISK_FEIL),
     VENTER_SVAR_TEAMS("VENTER_SVAR_TEAMS", "Sak meldt i Teams, venter på svar", true, AVVENTER_TEKNISK_FEIL),
     ANDRE_INNTEKTSOPPLYSNINGER("ANDRE_INNTEKTSOPPLYSNINGER", "Andre inntektsopplysninger (ikke inntektsmelding)", true, AVVENTER_SØKER), //TODO?
-    INNTEKTSMELDING("INNTEKTSMELDING", "Inntektsmelding", true, AVVENTER_ARBEIDSGIVER),
     LEGEERKLÆRING("LEGEERKLÆRING", "Legeerklæring fra riktig lege", true, AVVENTER_SØKER),
     MEDISINSKE_OPPLYSNINGER("MEDISINSKE_OPPLYSNINGER", "Medisinske opplysninger", true, AVVENTER_SØKER),
     ANNET("ANNET", "Annet", true, AVVENTER_ANNET),  //TODO?
-
-    VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER("VENTER_ETTERLYS_IM", "Venter på inntektsmeldinger etter etterlysning", false, AVVENTER_ARBEIDSGIVER),
-    VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL("VENTER_ETTERLYS_IM_VARSEL", "Venter på inntektsmeldinger etter etterlysning med varsel om mulig avslag", false, AVVENTER_ARBEIDSGIVER),
 
     OPPD_ÅPEN_BEH("OPPD_ÅPEN_BEH", "Venter på oppdatering av åpen behandling", false, AVVENTER_ANNET), //TODO?
     VENT_DEKGRAD_REGEL("VENT_DEKGRAD_REGEL", "Venter på 80% dekningsgrad-regel", false, AVVENTER_TEKNISK_FEIL),

@@ -173,9 +173,8 @@ public class OppgittOpptjening {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof OppgittOpptjening))
+        if (o == null || !(o instanceof OppgittOpptjening that))
             return false;
-        OppgittOpptjening that = (OppgittOpptjening) o;
         return Objects.equals(oppgittArbeidsforhold, that.oppgittArbeidsforhold) &&
             Objects.equals(egenNæring, that.egenNæring) &&
             Objects.equals(annenAktivitet, that.annenAktivitet) &&

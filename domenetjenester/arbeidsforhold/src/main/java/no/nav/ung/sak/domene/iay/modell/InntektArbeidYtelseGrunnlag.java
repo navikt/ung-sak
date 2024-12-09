@@ -1,19 +1,18 @@
 package no.nav.ung.sak.domene.iay.modell;
 
+import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.ung.sak.typer.AktørId;
+
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.EksternArbeidsforholdRef;
-
-/** NB navnet her brukes av @GrunnlagRef i BehandlingÅrsakUtleder/StartpunktUtleder. */
+/**
+ * NB navnet her brukes av @GrunnlagRef i BehandlingÅrsakUtleder/StartpunktUtleder.
+ */
 public class InntektArbeidYtelseGrunnlag {
 
     @DiffIgnore
@@ -42,12 +41,6 @@ public class InntektArbeidYtelseGrunnlag {
     @ChangeTracked
     private OppgittOpptjening overstyrtOppgittOpptjening;
 
-    @ChangeTracked
-    private InntektsmeldingAggregat inntektsmeldingAggregat;
-
-    @ChangeTracked
-    private ArbeidsforholdInformasjon arbeidsforholdInformasjon;
-
     private boolean aktiv = true;
 
     @DiffIgnore
@@ -65,8 +58,6 @@ public class InntektArbeidYtelseGrunnlag {
         grunnlag.getOverstyrtOppgittOpptjening().ifPresent(this::setOverstyrtOppgittOpptjening);
         grunnlag.getRegisterVersjon().ifPresent(this::setRegister);
         grunnlag.getSaksbehandletVersjon().ifPresent(this::setSaksbehandlet);
-        grunnlag.getInntektsmeldinger().ifPresent(this::setInntektsmeldinger);
-        grunnlag.getArbeidsforholdInformasjon().ifPresent(this::setInformasjon);
     }
 
     public InntektArbeidYtelseGrunnlag(UUID grunnlagReferanse, LocalDateTime opprettetTidspunkt) {
@@ -84,7 +75,9 @@ public class InntektArbeidYtelseGrunnlag {
         setOpprettetTidspunkt(opprettetTidspunkt);
     }
 
-    /** Identifisere en immutable instans av grunnlaget unikt og er egnet for utveksling (eks. til abakus eller andre systemer) */
+    /**
+     * Identifisere en immutable instans av grunnlaget unikt og er egnet for utveksling (eks. til abakus eller andre systemer)
+     */
     public UUID getEksternReferanse() {
         return uuid;
     }
@@ -110,44 +103,12 @@ public class InntektArbeidYtelseGrunnlag {
         return Optional.ofNullable(register);
     }
 
-    /**
-     * Returnerer aggregat som holder alle inntektsmeldingene som benyttes i behandlingen.
-     */
-    public Optional<InntektsmeldingAggregat> getInntektsmeldinger() {
-        return Optional.ofNullable(inntektsmeldingAggregat);
-    }
-
-    void setInntektsmeldinger(InntektsmeldingAggregat inntektsmeldingAggregat) {
-        this.inntektsmeldingAggregat = inntektsmeldingAggregat;
-    }
-
     public Optional<OppgittOpptjeningAggregat> getOppgittOpptjeningAggregat() {
         return Optional.ofNullable(oppgittOpptjeningAggregat);
     }
 
     public void setOppgittOpptjeningAggregat(OppgittOpptjeningAggregat oppgittOpptjeningAggregat) {
         this.oppgittOpptjeningAggregat = oppgittOpptjeningAggregat;
-    }
-
-    /**
-     * sjekkom bekreftet annen opptjening. Oppgi aktørId for matchende behandling (dvs.normalt søker).
-     */
-    public Optional<AktørArbeid> getBekreftetAnnenOpptjening(AktørId aktørId) {
-        return getSaksbehandletVersjon()
-            .map(InntektArbeidYtelseAggregat::getAktørArbeid)
-            .flatMap(it -> it.stream().filter(aa -> aa.getAktørId().equals(aktørId))
-                .findFirst());
-    }
-
-    public Optional<AktørArbeid> getAktørArbeidFraRegister(AktørId aktørId) {
-        if (register != null) {
-            var aktørArbeid = register.getAktørArbeid().stream().filter(aa -> Objects.equals(aa.getAktørId(), aktørId)).collect(Collectors.toList());
-            if (aktørArbeid.size() > 1) {
-                throw new IllegalStateException("Kan kun ha ett innslag av AktørArbeid for aktørId:" + aktørId + " i  grunnlag " + this.getEksternReferanse());
-            }
-            return aktørArbeid.stream().findFirst();
-        }
-        return Optional.empty();
     }
 
     public Optional<AktørYtelse> getAktørYtelseFraRegister(AktørId aktørId) {
@@ -194,30 +155,6 @@ public class InntektArbeidYtelseGrunnlag {
         return Optional.ofNullable(overstyrtOppgittOpptjening);
     }
 
-    public List<InntektsmeldingSomIkkeKommer> getInntektsmeldingerSomIkkeKommer() {
-        if (arbeidsforholdInformasjon == null) {
-            return Collections.emptyList();
-        } else {
-            var overstyringer = arbeidsforholdInformasjon.getOverstyringer();
-            return overstyringer.stream()
-                .filter(ov -> ov.kreverIkkeInntektsmelding())
-                .map(ov -> {
-                    // TODO (FC): fiks/fjern eksternRef herfra
-                    EksternArbeidsforholdRef eksternRef = null; // arbeidsforholdInformasjon.finnEkstern(ov.getArbeidsgiver(), ov.getArbeidsforholdRef()); //
-                                                                // NOSONAR
-                    return new InntektsmeldingSomIkkeKommer(ov.getArbeidsgiver(), ov.getArbeidsforholdRef(), eksternRef);
-                }) // NOSONAR
-                .collect(Collectors.toList());
-        }
-    }
-
-    public List<ArbeidsforholdOverstyring> getArbeidsforholdOverstyringer() {
-        if (arbeidsforholdInformasjon == null) {
-            return Collections.emptyList();
-        }
-        return arbeidsforholdInformasjon.getOverstyringer();
-    }
-
     public Long getBehandlingId() {
         return behandlingId;
     }
@@ -226,7 +163,9 @@ public class InntektArbeidYtelseGrunnlag {
         this.aktiv = aktiv;
     }
 
-    /** Hvorvidt dette er det siste (aktive grunnlaget) for en behandling. */
+    /**
+     * Hvorvidt dette er det siste (aktive grunnlaget) for en behandling.
+     */
     public boolean isAktiv() {
         return aktiv;
     }
@@ -235,29 +174,16 @@ public class InntektArbeidYtelseGrunnlag {
         this.register = registerFør;
     }
 
-    public Optional<ArbeidsforholdInformasjon> getArbeidsforholdInformasjon() {
-        return Optional.ofNullable(arbeidsforholdInformasjon);
-    }
-
     public Optional<UUID> getKoblingReferanse() {
         return Optional.empty();
-    }
-
-    void setInformasjon(ArbeidsforholdInformasjon informasjon) {
-        this.arbeidsforholdInformasjon = informasjon;
-    }
-
-    void taHensynTilBetraktninger() {
-        Optional.ofNullable(inntektsmeldingAggregat).ifPresent(it -> it.taHensynTilBetraktninger(this.arbeidsforholdInformasjon));
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof InntektArbeidYtelseGrunnlag))
+        if (o == null || !(o instanceof InntektArbeidYtelseGrunnlag that))
             return false;
-        InntektArbeidYtelseGrunnlag that = (InntektArbeidYtelseGrunnlag) o;
         return aktiv == that.aktiv &&
             Objects.equals(oppgittOpptjeningAggregat, that.oppgittOpptjeningAggregat) &&
             Objects.equals(register, that.register) &&

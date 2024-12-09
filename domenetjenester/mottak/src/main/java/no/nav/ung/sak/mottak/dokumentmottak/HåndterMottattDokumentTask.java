@@ -1,5 +1,6 @@
 package no.nav.ung.sak.mottak.dokumentmottak;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +62,6 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
         FagsakProsessTask.logContext(fagsak);
 
-        // hent alle dokumenter markert mottatt
         List<MottattDokument> mottatteDokumenter = mottatteDokumentTjeneste.hentMottatteDokumentPåFagsak(fagsakId, true, DokumentStatus.MOTTATT)
             .stream()
             // gamle inntektsmeldinger kan ha status null, men vil være koblet til behandlingId (skal ikke ta på nytt her)

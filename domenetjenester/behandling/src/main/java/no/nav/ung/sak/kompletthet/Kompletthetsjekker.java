@@ -31,10 +31,6 @@ public interface Kompletthetsjekker {
 
     boolean erForsendelsesgrunnlagKomplett(BehandlingReferanse ref);
 
-    default KompletthetResultat vurderEtterlysningInntektsmelding(@SuppressWarnings("unused") BehandlingReferanse ref) {
-        return KompletthetResultat.oppfylt();
-    }
-
 
 
     public static Kompletthetsjekker finnKompletthetsjekkerFor(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

@@ -84,9 +84,6 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
     @JsonProperty(value = "aksjonspunktÅrsaker")
     private Set<ArbeidsforholdAksjonspunktÅrsak> aksjonspunktÅrsaker = new LinkedHashSet<>();
 
-    @JsonProperty(value = "inntektsmeldinger")
-    private Set<MottattInntektsmeldingDto> inntektsmeldinger;
-
     public InntektArbeidYtelseArbeidsforholdV2Dto() {
         //
     }
@@ -189,23 +186,6 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
         this.aksjonspunktÅrsaker.add(aksjonspunktÅrsak);
     }
 
-    public Set<MottattInntektsmeldingDto> getInntektsmeldinger() {
-        return inntektsmeldinger == null ? Set.of() : Collections.unmodifiableSet(inntektsmeldinger);
-    }
-
-    public void setInntektsmeldinger(Set<MottattInntektsmeldingDto> inntektsmeldinger) {
-        this.inntektsmeldinger = new LinkedHashSet<>(inntektsmeldinger);
-    }
-
-    public void leggTilInntektsmelding(MottattInntektsmeldingDto inntektsmelding) {
-        Objects.requireNonNull(inntektsmelding);
-        if (this.inntektsmeldinger == null) {
-            this.inntektsmeldinger = new LinkedHashSet<>();
-        }
-
-        this.inntektsmeldinger.add(inntektsmelding);
-    }
-
     public String getYrkestittel() {
         return yrkestittel;
     }
@@ -223,7 +203,6 @@ public class InntektArbeidYtelseArbeidsforholdV2Dto {
             + ", ansettelsesPerioder=" + ansettelsesPerioder
             + ", handlingType=" + handlingType
             + ", aksjonspunktÅrsaker=" + aksjonspunktÅrsaker
-            + ", inntektsmeldinger=" + inntektsmeldinger
             + ">";
     }
 

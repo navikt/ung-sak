@@ -100,11 +100,11 @@ public class MottatteDokumentRepositoryTest {
         lagreBehandling(beh2);
 
         // Opprett og lagre MottateDokument
-        dokument1 = lagMottatteDokument(beh1, Brevkode.INNTEKTSMELDING, payload);
+        dokument1 = lagMottatteDokument(beh1, Brevkode.UNGDOMSYTELSE_SOKNAD, payload);
         mottatteDokumentRepository.lagre(dokument1, DokumentStatus.GYLDIG);
 
         // Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
-        dokument2 = lagMottatteDokument(beh2, Brevkode.INNTEKTSMELDING, payload);
+        dokument2 = lagMottatteDokument(beh2, Brevkode.UNGDOMSYTELSE_SOKNAD, payload);
         mottatteDokumentRepository.lagre(dokument2, DokumentStatus.GYLDIG);
     }
 

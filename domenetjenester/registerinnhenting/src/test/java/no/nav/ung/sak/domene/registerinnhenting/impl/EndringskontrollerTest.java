@@ -16,6 +16,7 @@ import java.util.HashSet;
 
 import jakarta.enterprise.inject.Instance;
 
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +32,6 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.ung.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
 import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
@@ -85,7 +85,7 @@ public class EndringskontrollerTest {
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, historikkinnslagTjenesteMock, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
 
         // Act
-        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
+        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(InntektArbeidYtelseGrunnlag.class, 1L, 2L));
 
         // Assert
         assertThat(revurdering.getStartpunkt()).isEqualTo(UDEFINERT); // Ikke satt
@@ -110,7 +110,7 @@ public class EndringskontrollerTest {
         when(behandlingskontrollTjenesteMock.sammenlignRekkefølge(any(), any(), any(), any())).thenReturn(1);
 
         // Act
-        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
+        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(InntektArbeidYtelseGrunnlag.class, 1L, 2L));
 
         // Assert
         verify(behandlingskontrollTjenesteMock).behandlingTilbakeføringHvisTidligereBehandlingSteg(any(),eq(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING));
@@ -130,7 +130,7 @@ public class EndringskontrollerTest {
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, null, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
 
         // Act
-        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
+        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(InntektArbeidYtelseGrunnlag.class, 1L, 2L));
 
         // Assert
         assertThat(behandling.getStartpunkt()).isEqualTo(startpunktUdefinert);
@@ -153,7 +153,7 @@ public class EndringskontrollerTest {
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, null, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
 
         // Act
-        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
+        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(InntektArbeidYtelseGrunnlag.class, 1L, 2L));
 
         // Assert
         assertThat(revurdering.getStartpunkt()).isEqualTo(startpunktBeregning);
@@ -175,7 +175,7 @@ public class EndringskontrollerTest {
             null, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
 
         // Act
-        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
+        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(InntektArbeidYtelseGrunnlag.class, 1L, 2L));
 
         // Assert
         assertThat(revurdering.getStartpunkt()).isEqualTo(startpunktTypePåBehandling);
@@ -199,7 +199,7 @@ public class EndringskontrollerTest {
         when(behandlingskontrollTjenesteMock.sammenlignRekkefølge(any(), any(), any(), any())).thenReturn(0);
 
         // Act
-        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
+        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(InntektArbeidYtelseGrunnlag.class, 1L, 2L));
 
         // Assert
         verify(behandlingskontrollTjenesteMock).behandlingTilbakeføringHvisTidligereBehandlingSteg(any(),eq(BehandlingStegType.KONTROLLER_FAKTA));
@@ -222,7 +222,7 @@ public class EndringskontrollerTest {
         when(behandlingskontrollTjenesteMock.sammenlignRekkefølge(any(), any(), any(), any())).thenReturn(-1);
 
         // Act
-        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(Inntektsmelding.class, 1L, 2L));
+        endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(InntektArbeidYtelseGrunnlag.class, 1L, 2L));
 
         // Assert
         verify(behandlingskontrollTjenesteMock, times(0)).behandlingTilbakeføringHvisTidligereBehandlingSteg(any(), any());

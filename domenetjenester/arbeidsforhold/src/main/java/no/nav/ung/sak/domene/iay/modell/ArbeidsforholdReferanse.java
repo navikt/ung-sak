@@ -57,9 +57,8 @@ public class ArbeidsforholdReferanse extends BaseEntitet implements IndexKey, Tr
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof ArbeidsforholdReferanse))
+        if (o == null || !(o instanceof ArbeidsforholdReferanse that))
             return false;
-        ArbeidsforholdReferanse that = (ArbeidsforholdReferanse) o;
         return Objects.equals(arbeidsgiver, that.arbeidsgiver) &&
             Objects.equals(internReferanse, that.internReferanse) &&
             Objects.equals(eksternReferanse, that.eksternReferanse);

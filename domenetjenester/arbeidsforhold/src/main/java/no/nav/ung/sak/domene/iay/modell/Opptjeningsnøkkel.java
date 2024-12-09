@@ -9,9 +9,9 @@ import no.nav.ung.sak.typer.InternArbeidsforholdRef;
 
 public class Opptjeningsnøkkel {
 
-    private InternArbeidsforholdRef arbeidsforholdId;
-    private String orgNummer;
-    private String aktørId;
+    private final InternArbeidsforholdRef arbeidsforholdId;
+    private final String orgNummer;
+    private final String aktørId;
 
     public Opptjeningsnøkkel(Yrkesaktivitet yrkesaktivitet) {
         this(yrkesaktivitet.getArbeidsforholdRef(), yrkesaktivitet.getArbeidsgiver());

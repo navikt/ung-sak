@@ -48,9 +48,8 @@ public class OppgittAnnenAktivitet implements IndexKey {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof OppgittAnnenAktivitet))
+        if (o == null || !(o instanceof OppgittAnnenAktivitet that))
             return false;
-        OppgittAnnenAktivitet that = (OppgittAnnenAktivitet) o;
         return Objects.equals(periode, that.periode) &&
             Objects.equals(arbeidType, that.arbeidType);
     }

@@ -40,7 +40,6 @@ public class UtledStatusPåPerioderTjeneste {
     private static Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterForArbeidsgiver(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode, Arbeidsgiver arbeidsgiver) {
         return alleKravdokumenterMedPeriode.entrySet()
             .stream()
-            .filter(it -> it.getKey().getType() == no.nav.ung.sak.perioder.KravDokumentType.INNTEKTSMELDING)
             .filter(e -> e.getValue().stream().anyMatch(at -> arbeidsgiver.equals(at.getArbeidsgiver())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -115,8 +114,6 @@ public class UtledStatusPåPerioderTjeneste {
 
         var kravdokumenterPerKravstiller = kravdokumenter
             .stream()
-            //Denne er nødvendig fordi type for kravdokumenter som gjelder for behandling ikke mappes til INNTEKTSMELDING_UTEN_REFUSJONSKRAV
-            .filter(it -> !erInntektmeldingUtenRefusjonskrav(it, kravdokumenterMedPeriode))
             .filter(it -> it.getType() != no.nav.ung.sak.perioder.KravDokumentType.SØKNAD)
             .map(it -> mapTilKravdokumentPerRolle(it, kravdokumenterMedPeriode))
             .collect(Collectors.groupingBy(KravdokumenterPerKravstiller::rolleType));
@@ -144,12 +141,6 @@ public class UtledStatusPåPerioderTjeneste {
         return resultat;
     }
 
-    private boolean erInntektmeldingUtenRefusjonskrav(KravDokument kravDokument, Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode) {
-        return kravdokumenterMedPeriode.keySet().stream()
-            .filter(it -> it.getType() == no.nav.ung.sak.perioder.KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV)
-            .anyMatch(it -> kravDokument.getJournalpostId().equals(it.getJournalpostId()));
-    }
-
     private KravdokumenterPerKravstiller mapTilKravdokumentPerRolle(
         KravDokument kravdokumentPåBehandling,
         Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode) {
@@ -160,7 +151,6 @@ public class UtledStatusPåPerioderTjeneste {
 
             Arbeidsgiver arbeidsgiver = alleKravdokumenterMedPeriode.entrySet()
                 .stream()
-                .filter(it -> it.getKey().getType() != no.nav.ung.sak.perioder.KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV)
                 .filter(it -> kravdokumentPåBehandling.getJournalpostId().equals(it.getKey().getJournalpostId()))
                 .findAny().orElseThrow(() -> new IllegalArgumentException("Kravdokument mangler i alle kravdokument lista"))
                 .getValue().stream()
@@ -390,10 +380,6 @@ public class UtledStatusPåPerioderTjeneste {
     private Set<ÅrsakTilVurdering> utledÅrsakForEndring(Set<no.nav.ung.sak.perioder.KravDokumentType> kravDokumentTyper) {
         if (kravDokumentTyper.contains(no.nav.ung.sak.perioder.KravDokumentType.SØKNAD)) {
             return Set.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
-        }
-        if (kravDokumentTyper.contains(no.nav.ung.sak.perioder.KravDokumentType.INNTEKTSMELDING)
-            || kravDokumentTyper.contains(no.nav.ung.sak.perioder.KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV)) {
-            return Set.of(ÅrsakTilVurdering.REVURDERER_NY_INNTEKTSMELDING);
         }
         return Collections.emptySet();
     }

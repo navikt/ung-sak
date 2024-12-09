@@ -187,9 +187,8 @@ public class OppgittEgenNæring implements IndexKey {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof OppgittEgenNæring))
+        if (o == null || !(o instanceof OppgittEgenNæring that))
             return false;
-        OppgittEgenNæring that = (OppgittEgenNæring) o;
         return Objects.equals(periode, that.periode) &&
             Objects.equals(virksomhetOrgnr, that.virksomhetOrgnr) &&
             Objects.equals(nyoppstartet, that.nyoppstartet) &&

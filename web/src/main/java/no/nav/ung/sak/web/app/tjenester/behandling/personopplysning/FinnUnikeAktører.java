@@ -1,11 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.personopplysning;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
@@ -14,10 +8,14 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.ung.sak.mottak.inntektsmelding.InntektsmeldingParser;
-import no.nav.ung.sak.mottak.inntektsmelding.v1.MottattDokumentWrapperInntektsmelding;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Dependent
 public class FinnUnikeAktører {
@@ -61,26 +59,9 @@ public class FinnUnikeAktører {
         if (Brevkode.SØKNAD_TYPER.contains(d.getType())) {
             var søknad = new SøknadParser().parseSøknad(d);
             return Optional.of(new PersonIdent(søknad.getSøker().getPersonIdent().getVerdi()));
-        } else if (d.getType().equals(Brevkode.INNTEKTSMELDING)) {
-            var wrapper = new InntektsmeldingParser().xmlTilWrapper(d);
-            if (wrapper instanceof MottattDokumentWrapperInntektsmelding wrapperV1) {
-                return Optional.of(new PersonIdent(wrapperV1.getArbeidstaker()));
-            } else if (wrapper instanceof no.nav.ung.sak.mottak.inntektsmelding.v2.MottattDokumentWrapperInntektsmelding wrapperV2) {
-                return Optional.of(new PersonIdent(wrapperV2.getArbeidstaker()));
-            }
-            throw new IllegalArgumentException("Kunne ikke hente personident fra xml");
         }
 
         return Optional.empty();
 
     }
-
-    public static boolean erXml(String payload) {
-        return payload != null && payload.substring(0, Math.min(50, payload.length())).trim().startsWith("<");
-    }
-
-    public static boolean erJson(String payload) {
-        return payload != null && payload.substring(0, Math.min(50, payload.length())).trim().startsWith("{");
-    }
-
 }

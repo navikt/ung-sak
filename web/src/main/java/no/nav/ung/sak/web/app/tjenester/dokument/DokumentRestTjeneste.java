@@ -1,23 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.dokument;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.io.ByteArrayInputStream;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -44,13 +26,10 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumen
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.ung.sak.dokument.arkiv.ArkivDokument;
 import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.arbeidsgiver.VirksomhetTjeneste;
-import no.nav.ung.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.dokument.DokumentDto;
 import no.nav.ung.sak.kontrakt.dokument.DokumentIdDto;
@@ -59,6 +38,15 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+
+import java.io.ByteArrayInputStream;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 @Path("")
 @ApplicationScoped
@@ -72,10 +60,8 @@ public class DokumentRestTjeneste {
     public static final String DOKUMENT_ID_PARAM = "dokumentId";
 
     private DokumentArkivTjeneste dokumentArkivTjeneste;
-    private InntektArbeidYtelseTjeneste inntektsmeldingTjeneste;
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private VirksomhetTjeneste virksomhetTjeneste;
     private BehandlingRepository behandlingRepository;
 
     public DokumentRestTjeneste() {
@@ -84,16 +70,12 @@ public class DokumentRestTjeneste {
 
     @Inject
     public DokumentRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste,
-                                InntektArbeidYtelseTjeneste inntektsmeldingTjeneste,
                                 FagsakRepository fagsakRepository,
                                 MottatteDokumentRepository mottatteDokumentRepository,
-                                VirksomhetTjeneste virksomhetTjeneste,
                                 BehandlingRepository behandlingRepository) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
-        this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.virksomhetTjeneste = virksomhetTjeneste;
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -123,10 +105,8 @@ public class DokumentRestTjeneste {
             List<ArkivJournalPost> journalPostList = dokumentArkivTjeneste.hentAlleDokumenterForVisning(saksnummer);
             List<DokumentDto> dokumentResultat = new ArrayList<>();
 
-            Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger = finnInntektsmeldinger(fagsak);
-
             journalPostList.forEach(arkivJournalPost -> {
-                dokumentResultat.addAll(mapFraArkivJournalPost(saksnummer, arkivJournalPost, mottattedokumenter, inntektsmeldinger));
+                dokumentResultat.addAll(mapFraArkivJournalPost(saksnummer, arkivJournalPost, mottattedokumenter));
             });
 
             return dokumentResultat.stream()
@@ -190,15 +170,6 @@ public class DokumentRestTjeneste {
         return tidslinje;
     }
 
-    private Map<JournalpostId, List<Inntektsmelding>> finnInntektsmeldinger(Fagsak fagsak) {
-        var ytelseType = fagsak.getYtelseType();
-        boolean harInntektsmeldinger = !ytelseType.erRammevedtak();
-        return !harInntektsmeldinger
-            ? Collections.emptyMap()
-            : inntektsmeldingTjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer()).stream()
-            .collect(Collectors.groupingBy(Inntektsmelding::getJournalpostId));
-    }
-
     @GET
     @Path(DOKUMENT_PATH)
     @Operation(description = "Søk etter dokument på JOARK-identifikatorene journalpostId og dokumentId", summary = ("Retunerer dokument som er tilknyttet saksnummer, journalpostId og dokumentId."), tags = "dokument")
@@ -220,23 +191,21 @@ public class DokumentRestTjeneste {
         }
     }
 
-    private List<DokumentDto> mapFraArkivJournalPost(Saksnummer saksnummer, ArkivJournalPost arkivJournalPost, Map<JournalpostId, List<MottattDokument>> mottatteDokument,
-                                                     Map<JournalpostId, List<Inntektsmelding>> inntektsMeldinger) {
+    private List<DokumentDto> mapFraArkivJournalPost(Saksnummer saksnummer, ArkivJournalPost arkivJournalPost, Map<JournalpostId, List<MottattDokument>> mottatteDokument) {
         List<DokumentDto> dokumentForJP = new ArrayList<>();
         if (arkivJournalPost.getHovedDokument() != null) {
-            dokumentForJP.add(mapFraArkivDokument(saksnummer, arkivJournalPost, arkivJournalPost.getHovedDokument(), mottatteDokument, inntektsMeldinger));
+            dokumentForJP.add(mapFraArkivDokument(saksnummer, arkivJournalPost, arkivJournalPost.getHovedDokument(), mottatteDokument));
         }
         if (arkivJournalPost.getAndreDokument() != null) {
             arkivJournalPost.getAndreDokument().forEach(dok -> {
-                dokumentForJP.add(mapFraArkivDokument(saksnummer, arkivJournalPost, dok, mottatteDokument, inntektsMeldinger));
+                dokumentForJP.add(mapFraArkivDokument(saksnummer, arkivJournalPost, dok, mottatteDokument));
             });
         }
         return dokumentForJP;
     }
 
     private DokumentDto mapFraArkivDokument(Saksnummer saksnummer, ArkivJournalPost arkivJournalPost, ArkivDokument arkivDokument,
-                                            Map<JournalpostId, List<MottattDokument>> mottatteDokument,
-                                            Map<JournalpostId, List<Inntektsmelding>> inntektsmeldinger) {
+                                            Map<JournalpostId, List<MottattDokument>> mottatteDokument) {
         var dto = new DokumentDto(byggApiPath(saksnummer));
         dto.setJournalpostId(arkivJournalPost.getJournalpostId());
         dto.setDokumentId(arkivDokument.getDokumentId());
@@ -246,34 +215,12 @@ public class DokumentRestTjeneste {
         dto.setTidspunkt(arkivJournalPost.getTidspunkt());
 
         if (mottatteDokument.containsKey(arkivJournalPost.getJournalpostId())) {
-            JournalpostId journalpostId = dto.getJournalpostId();
             dto.setBehandlinger(List.of());
-
-            var imForJournalpost = inntektsmeldinger.getOrDefault(journalpostId, Collections.emptyList());
-            Optional<String> navn = hentGjelderFor(imForJournalpost);
-            navn.ifPresent(dto::setGjelderFor);
         }
         return dto;
     }
 
     private String byggApiPath(Saksnummer saksnummer) {
         return BehandlingDtoUtil.getApiPath(DokumentRestTjeneste.DOKUMENT_PATH + "?" + SAKSNUMMER_PARAM + "=" + saksnummer.getVerdi());
-    }
-
-    private Optional<String> hentGjelderFor(List<Inntektsmelding> inntektsmeldinger) {
-        Optional<String> navn = inntektsmeldinger
-            .stream()
-            .map(im -> {
-                var t = im.getArbeidsgiver();
-                if (t.getErVirksomhet()) {
-                    Optional<Virksomhet> virksomhet = virksomhetTjeneste.finnOrganisasjon(t.getOrgnr());
-                    return virksomhet.orElseThrow(() -> new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + t.getOrgnr()))
-                        .getNavn();
-                } else {
-                    return "Privatperson";
-                }
-            })// TODO slå opp navnet på privatpersonen?
-            .findFirst();
-        return navn;
     }
 }

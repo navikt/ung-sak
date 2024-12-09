@@ -24,11 +24,8 @@ public enum DokumentMalType implements Kodeverdi {
     REVURDERING_DOK("REVURD", "Varsel om revurdering"),
     INNVILGELSE_DOK("INNVILGELSE", "Innvilgelsesbrev"),
     OPPHØR_DOK("OPPHOR", "Opphør brev"),
-    INNTEKTSMELDING_FOR_TIDLIG_DOK("INNTID", "Ikke mottatt søknad"),
     AVSLAG__DOK("AVSLAG", "Avslagsbrev"),
     FRITEKST_DOK("FRITKS", "Fritekstbrev"),
-    ETTERLYS_INNTEKTSMELDING_DOK("INNLYS", "Etterlys inntektsmelding"),
-    ETTERLYS_INNTEKTSMELDING_PURRING("INNLYS_PURRING", "Etterlys inntektsmelding - purring"),
     GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev"),
     VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst"),
 

@@ -90,9 +90,8 @@ public class YtelseStørrelse implements IndexKey {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof YtelseStørrelse))
+        if (o == null || !(o instanceof YtelseStørrelse that))
             return false;
-        YtelseStørrelse that = (YtelseStørrelse) o;
         return Objects.equals(virksomhetOrgnr, that.virksomhetOrgnr) &&
             Objects.equals(beløp, that.beløp) &&
             Objects.equals(hyppighet, that.hyppighet);

@@ -61,21 +61,6 @@ public class InntektArbeidYtelseAggregatBuilder {
     }
 
     /**
-     * Legger til aktiviteter for en gitt aktør hvis det ikke er en oppdatering av eksisterende.
-     * Ved oppdatering eksisterer koblingen for denne aktøren allerede så en kopi av forrige innslag manipuleres før lagring.
-     *
-     * @param aktørArbeid {@link AktørArbeidBuilder}
-     * @return this
-     */
-    public InntektArbeidYtelseAggregatBuilder leggTilAktørArbeid(AktørArbeidBuilder aktørArbeid) {
-        if (!aktørArbeid.getErOppdatering()) {
-            // Hvis ny så skal den legges til, hvis ikke ligger den allerede der og blir manipulert.
-            this.kladd.leggTilAktørArbeid(aktørArbeid.build());
-        }
-        return this;
-    }
-
-    /**
      * Legger til tilstøtende ytelser for en gitt aktør hvis det ikke er en oppdatering av eksisterende.
      * Ved oppdatering eksisterer koblingen for denne aktøren allerede så en kopi av forrige innslag manipuleres før lagring.
      *
@@ -88,17 +73,6 @@ public class InntektArbeidYtelseAggregatBuilder {
             this.kladd.leggTilAktørYtelse(aktørYtelse.build());
         }
         return this;
-    }
-
-    /**
-     * Oppretter builder for aktiviteter for en gitt aktør. Baserer seg på en kopi av forrige innslag for aktøren hvis det eksisterer.
-     *
-     * @param aktørId aktøren
-     * @return builder {@link AktørArbeidBuilder}
-     */
-    public AktørArbeidBuilder getAktørArbeidBuilder(AktørId aktørId) {
-        Optional<AktørArbeid> aktørArbeid = kladd.getAktørArbeid().stream().filter(aa -> aktørId.equals(aa.getAktørId())).findFirst();
-        return AktørArbeidBuilder.oppdatere(aktørArbeid).medAktørId(aktørId);
     }
 
     /**
@@ -131,32 +105,6 @@ public class InntektArbeidYtelseAggregatBuilder {
 
     public VersjonType getVersjon() {
         return versjon;
-    }
-
-    void oppdaterArbeidsforholdReferanseEtterErstatting(AktørId søker, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef gammelRef,
-                                                        InternArbeidsforholdRef nyRef) {
-        final AktørArbeidBuilder builder = getAktørArbeidBuilder(søker);
-        if (builder.getErOppdatering()) {
-            if (eksistererIkkeFraFør(arbeidsgiver, gammelRef, builder)) {
-                var yrkesaktivitetBuilder = builder.getYrkesaktivitetBuilderForNøkkelAvType(
-                    Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(gammelRef, arbeidsgiver),
-                    ArbeidType.AA_REGISTER_TYPER);
-                if (yrkesaktivitetBuilder.getErOppdatering()) {
-                    yrkesaktivitetBuilder.medArbeidsforholdId(nyRef);
-                    builder.leggTilYrkesaktivitet(yrkesaktivitetBuilder);
-                    leggTilAktørArbeid(builder);
-                }
-            }
-        }
-    }
-
-    private boolean eksistererIkkeFraFør(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef gammelRef, AktørArbeidBuilder builder) {
-        return !builder.getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel.forArbeidsforholdIdMedArbeidgiver(gammelRef, arbeidsgiver),
-            ArbeidType.AA_REGISTER_TYPER).getErOppdatering();
-    }
-
-    public void tilbakestillYrkesaktiviteter() {
-
     }
 
     public void medNyInternArbeidsforholdRef(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef nyRef, EksternArbeidsforholdRef eksternReferanse) {
@@ -193,77 +141,6 @@ public class InntektArbeidYtelseAggregatBuilder {
 
     public List<ArbeidsforholdReferanse> getNyeInternArbeidsforholdReferanser() {
         return nyeInternArbeidsforholdReferanser;
-    }
-
-    public static class AktørArbeidBuilder {
-        private final AktørArbeid kladd;
-        private final boolean oppdatering;
-
-        private AktørArbeidBuilder(AktørArbeid aktørArbeid, boolean oppdatering) {
-            this.kladd = aktørArbeid;
-            this.oppdatering = oppdatering;
-        }
-
-        static AktørArbeidBuilder ny() {
-            return new AktørArbeidBuilder(new AktørArbeid(), false);
-        }
-
-        static AktørArbeidBuilder oppdatere(AktørArbeid oppdatere) {
-            return new AktørArbeidBuilder(oppdatere, true);
-        }
-
-        public static AktørArbeidBuilder oppdatere(Optional<AktørArbeid> oppdatere) {
-            return oppdatere.map(AktørArbeidBuilder::oppdatere).orElseGet(AktørArbeidBuilder::ny);
-        }
-
-        public AktørArbeidBuilder medAktørId(AktørId aktørId) {
-            this.kladd.setAktørId(aktørId);
-            return this;
-        }
-
-        public YrkesaktivitetBuilder getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel nøkkel, ArbeidType arbeidType) {
-            return kladd.getYrkesaktivitetBuilderForNøkkel(nøkkel, arbeidType);
-        }
-
-        public YrkesaktivitetBuilder getYrkesaktivitetBuilderForNøkkelAvType(Opptjeningsnøkkel nøkkel, Set<ArbeidType> arbeidType) {
-            return kladd.getYrkesaktivitetBuilderForNøkkel(nøkkel, arbeidType);
-        }
-
-        public YrkesaktivitetBuilder getYrkesaktivitetBuilderForType(ArbeidType type) {
-            return kladd.getYrkesaktivitetBuilderForType(type);
-        }
-
-        public AktørArbeidBuilder leggTilYrkesaktivitet(YrkesaktivitetBuilder builder) {
-            Yrkesaktivitet yrkesaktivitet = builder.build();
-            if (!builder.getErOppdatering()) {
-                kladd.leggTilYrkesaktivitet(yrkesaktivitet);
-            }
-            return this;
-        }
-
-        public AktørArbeidBuilder leggTilYrkesaktivitet(Yrkesaktivitet yrkesaktivitet) {
-            kladd.leggTilYrkesaktivitet(yrkesaktivitet);
-            return this;
-        }
-
-        public AktørArbeid build() {
-            if (kladd.hasValues()) {
-                return kladd;
-            }
-            throw new IllegalStateException();
-        }
-
-        boolean getErOppdatering() {
-            return oppdatering;
-        }
-
-        public void fjernYrkesaktivitetHvisFinnes(YrkesaktivitetBuilder builder) {
-            kladd.fjernYrkesaktivitetForBuilder(builder);
-        }
-
-        public void tilbakestillYrkesaktiviteter() {
-            kladd.tilbakestillYrkesaktiviteter();
-        }
     }
 
     public static class AktørInntektBuilder {

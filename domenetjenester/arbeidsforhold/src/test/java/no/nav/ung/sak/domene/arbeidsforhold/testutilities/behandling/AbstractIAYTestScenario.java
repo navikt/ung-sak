@@ -41,12 +41,12 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
     private static final AtomicLong FAKE_ID = new AtomicLong(100999L);
     private final FagsakBuilder fagsakBuilder;
     private Behandling behandling;
-    private BehandlingStatus status = BehandlingStatus.UTREDES;
+    private final BehandlingStatus status = BehandlingStatus.UTREDES;
     private Fagsak fagsak;
 
-    private Long fagsakId = nyId();
+    private final Long fagsakId = nyId();
     private BehandlingRepository mockBehandlingRepository;
-    private BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
+    private final BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
 
     private IAYRepositoryProvider repositoryProvider;
 
@@ -175,9 +175,4 @@ abstract class AbstractIAYTestScenario<S extends AbstractIAYTestScenario<S>> {
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
     }
-
-    public AktørId getDefaultBrukerAktørId() {
-        return fagsakBuilder.getBruker();
-    }
-
 }
