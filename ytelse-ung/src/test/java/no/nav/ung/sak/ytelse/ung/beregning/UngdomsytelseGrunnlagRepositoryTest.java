@@ -98,9 +98,10 @@ class UngdomsytelseGrunnlagRepositoryTest {
     }
 
     private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, BigDecimal barnetilleggDagsats) {
-        repository.lagre(behandling.getId(), new LocalDateTimeline<>(List.of(
+        var tidslinje = new LocalDateTimeline<>(List.of(
             lagSegment(periode1, dagsats, grunnbeløp, sats, antallBarn, barnetilleggDagsats)
-        )));
+        ));
+        repository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(tidslinje, "regelInput", "regelSporing"));
     }
 
     private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, BigDecimal barnetilleggDagsats) {

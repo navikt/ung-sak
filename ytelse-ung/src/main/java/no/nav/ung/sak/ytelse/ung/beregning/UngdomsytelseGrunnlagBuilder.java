@@ -1,5 +1,6 @@
 package no.nav.ung.sak.ytelse.ung.beregning;
 
+import java.sql.Clob;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.RegelData;
 import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
 import no.nav.ung.sak.ytelse.ung.uttak.UngdomsytelseUttakPerioder;
 
@@ -17,29 +19,33 @@ class UngdomsytelseGrunnlagBuilder {
     private static final Logger log = LoggerFactory.getLogger(UngdomsytelseGrunnlagBuilder.class);
 
     private LocalDateTimeline<UngdomsytelseSatser> perioder = LocalDateTimeline.empty();
+    private Clob satsBeregningRegelInput;
+    private Clob satsBeregningRegelSporing;
     private UngdomsytelseUttakPerioder uttakPerioder;
 
     private boolean built = false;
 
     UngdomsytelseGrunnlagBuilder(UngdomsytelseGrunnlag kladd) {
         if (kladd != null && kladd.getSatsPerioder() != null) {
-            this.leggTilPerioder(kladd.getSatsPerioder().getPerioder());
+            var satsPerioder = kladd.getSatsPerioder();
+            this.leggTilPerioder(satsPerioder.getPerioder(), satsPerioder.getRegelInput().getClob(), satsPerioder.getRegelSporing().getClob());
             this.uttakPerioder = kladd.getUttakPerioder();
         }
     }
 
-    UngdomsytelseGrunnlagBuilder leggTilPerioder(List<UngdomsytelseSatsPeriode> perioder) {
+    UngdomsytelseGrunnlagBuilder leggTilPerioder(List<UngdomsytelseSatsPeriode> perioder, Clob regelInput, Clob regelSporing) {
         validerState();
         var segmenter = perioder.stream().map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), it.satser())).toList();
         LocalDateTimeline<UngdomsytelseSatser> nyePerioder = new LocalDateTimeline<>(segmenter);
-        return leggTilPerioder(nyePerioder);
-
+        return leggTilPerioder(nyePerioder, regelInput, regelSporing);
     }
 
-    UngdomsytelseGrunnlagBuilder leggTilPerioder(LocalDateTimeline<UngdomsytelseSatser> nyePerioder){
+    UngdomsytelseGrunnlagBuilder leggTilPerioder(LocalDateTimeline<UngdomsytelseSatser> nyePerioder, Clob regelInput, Clob regelSporing){
         this.perioder = this.perioder
             .union(nyePerioder, StandardCombinators::coalesceRightHandSide)
             .compress();
+        this.satsBeregningRegelInput = regelInput;
+        this.satsBeregningRegelSporing = regelInput;
         return this;
     }
 
@@ -62,7 +68,9 @@ class UngdomsytelseGrunnlagBuilder {
 
     private UngdomsytelseGrunnlag repeatableBuild() {
         UngdomsytelseGrunnlag resultat = new UngdomsytelseGrunnlag();
-        resultat.setSatsPerioder(new UngdomsytelseSatsPerioder(perioder.toSegments().stream().map(UngdomsytelseGrunnlagBuilder::mapTilPeriode).toList()));
+        var entitetPerioder = perioder.toSegments().stream().map(UngdomsytelseGrunnlagBuilder::mapTilPeriode).toList();
+        var satsPerioder = new UngdomsytelseSatsPerioder(entitetPerioder, satsBeregningRegelInput, satsBeregningRegelSporing);
+        resultat.setSatsPerioder(satsPerioder);
         resultat.setUttakPerioder(uttakPerioder);
         return resultat;
     }

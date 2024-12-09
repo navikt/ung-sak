@@ -1,5 +1,7 @@
 package no.nav.ung.sak.ytelse.ung.beregning.barnetillegg;
 
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+
 import java.math.BigDecimal;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
@@ -27,24 +29,21 @@ public class LagBarnetilleggTidslinje {
      * @param behandlingReferanse Behandlingreferanse
      * @return Tidslinje for barnetillegg
      */
-    public LocalDateTimeline<Barnetillegg> lagTidslinje(BehandlingReferanse behandlingReferanse) {
+    public BarnetilleggResultat lagTidslinje(BehandlingReferanse behandlingReferanse) {
         // TODO: Lagre sporing av antall barn, og muligens lagre ned hvilke barn
-        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(behandlingReferanse);
-        return beregnBarnetillegg(antallBarnTidslinje);
+        var barnetilleggMellomregning = lagAntallBarnTidslinje.lagAntallBarnTidslinje(behandlingReferanse);
+        return new BarnetilleggResultat(beregnBarnetillegg(barnetilleggMellomregning.antallBarnTidslinje()), barnetilleggMellomregning.input()) ;
     }
 
-    private static LocalDateTimeline<Barnetillegg> beregnBarnetillegg(LocalDateTimeline<Integer> antallBarnTidslinje) {
+    static LocalDateTimeline<Barnetillegg> beregnBarnetillegg(LocalDateTimeline<Integer> antallBarnTidslinje) {
         List<LocalDateSegment<Integer>> antallBarnMånedsvisSegmenter = antallBarnTidslinje
             .toSegments()
             .stream()
             .filter(s -> s.getLocalDateInterval().contains(s.getFom().with(TemporalAdjusters.lastDayOfMonth()))) // Finner siste segment i hver måned
-            .map(s -> new LocalDateSegment<>(s.getFom().plusMonths(1).withDayOfMonth(1), s.getTom(), s.getValue())) // Mapper alle segmenter til å starte første dag i neste måned
+            .map(s -> new LocalDateSegment<>(s.getFom().plusMonths(1).withDayOfMonth(1), TIDENES_ENDE, s.getValue())) // Mapper alle segmenter til å starte første dag i neste måned
             .toList();
-        var antallBarnForBarnetilleggTidslinje = new LocalDateTimeline<>(antallBarnMånedsvisSegmenter, (di, lhs, rhs) -> StandardCombinators.sum(di, lhs, rhs));
+        var antallBarnForBarnetilleggTidslinje = new LocalDateTimeline<>(antallBarnMånedsvisSegmenter, StandardCombinators::coalesceRightHandSide);
         return antallBarnForBarnetilleggTidslinje.mapValue(antallBarn -> new Barnetillegg(BigDecimal.valueOf(antallBarn).multiply(BARNETILLEGG_DAGSATS), antallBarn));
-    }
-
-    public record Barnetillegg(BigDecimal dagsats, int antallBarn) {
     }
 
 }

@@ -56,7 +56,7 @@ class LagAntallBarnTidslinjeTest {
 
         var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
 
-        assertThat(antallBarnTidslinje.isEmpty()).isTrue();
+        assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isTrue();
     }
 
     @Test
@@ -71,8 +71,8 @@ class LagAntallBarnTidslinjeTest {
 
         var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
 
-        assertThat(antallBarnTidslinje.isEmpty()).isFalse();
-        var segments = antallBarnTidslinje.toSegments();
+        assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isFalse();
+        var segments = antallBarnTidslinje.antallBarnTidslinje().toSegments();
         assertThat(segments.size()).isEqualTo(1);
         var segment = segments.first();
         assertThat(segment.getFom()).isEqualTo(fødselsdatoBarn);
@@ -92,8 +92,8 @@ class LagAntallBarnTidslinjeTest {
 
         var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
 
-        assertThat(antallBarnTidslinje.isEmpty()).isFalse();
-        var segments = antallBarnTidslinje.toSegments();
+        assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isFalse();
+        var segments = antallBarnTidslinje.antallBarnTidslinje().toSegments();
         assertThat(segments.size()).isEqualTo(1);
         var segment = segments.first();
         assertThat(segment.getFom()).isEqualTo(fødselsdatoBarn);
@@ -117,8 +117,8 @@ class LagAntallBarnTidslinjeTest {
 
         var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
 
-        assertThat(antallBarnTidslinje.isEmpty()).isFalse();
-        var segments = antallBarnTidslinje.toSegments();
+        assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isFalse();
+        var segments = antallBarnTidslinje.antallBarnTidslinje().toSegments();
         assertThat(segments.size()).isEqualTo(3);
         var iterator = segments.iterator();
         var segment1 = iterator.next();
@@ -140,7 +140,7 @@ class LagAntallBarnTidslinjeTest {
     private void leggTilBarn(PersonInformasjonBuilder personInformasjonBuilder, PersonInformasjonBuilder.PersonopplysningBuilder builder, AktørId barnAktørId, LocalDate fødselsdatoBarn, LocalDate dødsdato) {
         personInformasjonBuilder.leggTil(personInformasjonBuilder.getRelasjonBuilder(behandling.getAktørId(), barnAktørId, RelasjonsRolleType.BARN));
         personopplysningRepository.lagre(behandling.getId(), personInformasjonBuilder);
-        var fødselOgDødInfo = new HentFødselOgDød.FødselOgDødInfo(barnAktørId, fødselsdatoBarn, dødsdato);
+        var fødselOgDødInfo = new FødselOgDødInfo(barnAktørId, fødselsdatoBarn, dødsdato);
         when(hentFødselOgDød.hentFødselOgDødInfo(eq(barnAktørId))).thenReturn(fødselOgDødInfo);
     }
 
