@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -80,9 +78,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         summary = ("Hent perioder til behandling og kilden til disse"),
         tags = "perioder",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Liste med periode og årsaken til at perioden behandles", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = StatusForPerioderPåBehandling.class))
-            }),
+            @ApiResponse(description = "Liste med periode og årsaken til at perioden behandles"),
         })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -96,14 +92,14 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
     @GET
     @Path(BEHANDLING_PERIODER_MED_VILKÅR)
-    @Operation(description = "Hent perioder til behandling og kilden til disse",
+    @Operation(
+        description = "Hent perioder til behandling og kilden til disse",
         summary = ("Hent perioder til behandling og kilden til disse"),
         tags = "perioder",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Liste med periode og årsaken til at perioden behandles", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = StatusForPerioderPåBehandling.class))
-            }),
-        })
+            @ApiResponse(description = "Liste med periode og årsaken til at perioden behandles"),
+        }
+    )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public StatusForPerioderPåBehandlingInkludertVilkår hentPerioderMedVilkårForBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {

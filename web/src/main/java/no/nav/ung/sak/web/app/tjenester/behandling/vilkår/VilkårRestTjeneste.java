@@ -1,21 +1,8 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vilkår;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,9 +16,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -45,12 +30,18 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.vilkår.VilkårDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårMedPerioderDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.sak.web.server.caching.CacheControl;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
@@ -85,37 +76,35 @@ public class VilkårRestTjeneste {
     @GET
     @Path(V3_PATH)
     @Operation(description = "Hent informasjon om vilkår for en behandling", tags = "vilkår", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårDto.class)))
+        @ApiResponse(description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkårV3(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    @CacheControl()
+    public List<VilkårMedPerioderDto> getVilkårV3(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         return getVilkårV3(behandlingUuid, false);
     }
 
     @GET
     @Path(FULL_V3_PATH)
     @Operation(description = "Forvaltning : Hent informasjon om vilkår for en behandling", summary = ("Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering)."), tags = {"vilkår", "forvaltning"}, responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårMedPerioderDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkårFullV3(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    @CacheControl()
+    public List<VilkårMedPerioderDto> getVilkårFullV3(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         return getVilkårV3(behandlingUuid, true);
     }
 
-    private Response getVilkårV3(BehandlingUuidDto behandlingUuid, boolean inkluderVilkårkjøring) {
+    private List<VilkårMedPerioderDto> getVilkårV3(BehandlingUuidDto behandlingUuid, boolean inkluderVilkårkjøring) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var vilkåreneOpt = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
         var dto = vilkåreneOpt.map(vilkårene -> {
             var vilkårPeriodeMap = utledFaktiskeVilkårPerioder(behandling, vilkårene);
             return VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene, vilkårPeriodeMap);
         }).orElse(Collections.emptyList());
-        CacheControl cc = new CacheControl();
-        cc.setNoCache(true);
-        cc.setNoStore(true);
-        cc.setMaxAge(0);
-        return Response.ok(dto).cacheControl(cc).build();
+        return dto;
     }
 
     private Map<VilkårType, Set<DatoIntervallEntitet>> utledFaktiskeVilkårPerioder(Behandling behandling, Vilkårene vilkårene) {
@@ -163,20 +152,16 @@ public class VilkårRestTjeneste {
     @GET
     @Path(VILKÅR_SAMLET_PATH)
     @Operation(description = "Hent informasjon om vilkår samlet for en behandling", tags = "vilkår", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = VilkårResultatContainer.class)))
+        @ApiResponse(description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getVilkårSamlet(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    @CacheControl()
+    public VilkårResultatContainer getVilkårSamlet(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var samletVilkårResultat = vilkårTjeneste.samletVilkårsresultat(behandling.getId());
 
-        var dto = new VilkårResultatContainer(samletVilkårResultat);
-        CacheControl cc = new CacheControl();
-        cc.setNoCache(true);
-        cc.setNoStore(true);
-        cc.setMaxAge(0);
-        return Response.ok(dto).cacheControl(cc).build();
+        return new VilkårResultatContainer(samletVilkårResultat);
     }
 
     @Schema
@@ -184,6 +169,7 @@ public class VilkårRestTjeneste {
 
 
         @JsonProperty(value = "vilkårTidslinje")
+        @Valid
         private LocalDateTimeline<VilkårUtfallSamlet> vilkårTidslinje;
 
         public VilkårResultatContainer(LocalDateTimeline<VilkårUtfallSamlet> vilkårTidslinje) {

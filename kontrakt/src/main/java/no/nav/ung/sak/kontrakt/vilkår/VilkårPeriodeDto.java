@@ -68,13 +68,7 @@ public class VilkårPeriodeDto {
      * indikerer om en vilkårsperiode er aktuell for vurdering i inneværende behandling
      */
     @JsonProperty("vurderesIBehandlingen")
-    @JsonAlias("vurdersIBehandlingen")
     private Boolean vurderesIBehandlingen;
-
-
-    @JsonProperty("vurdersIBehandlingen")
-    @JsonAlias("vurderesIBehandlingen")
-    private Boolean vurdersIBehandlingen;
 
     @JsonProperty(value = "merknad")
     @Valid
@@ -140,17 +134,12 @@ public class VilkårPeriodeDto {
     }
 
 
-    public Boolean getVurdersIBehandlingen() {
-        return vurdersIBehandlingen;
-    }
-
     public Boolean getVurderesIBehandlingen() {
         return vurderesIBehandlingen;
     }
 
     public void setVurderesIBehandlingen(Boolean vurderesIBehandlingen) {
         this.vurderesIBehandlingen = vurderesIBehandlingen;
-        this.vurdersIBehandlingen = vurderesIBehandlingen;
     }
 
     public VilkårUtfallMerknad getMerknad() {
