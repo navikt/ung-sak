@@ -3,6 +3,7 @@ package no.nav.ung.sak.ytelse.ung.beregning.barnetillegg;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
@@ -42,7 +43,11 @@ public class LagBarnetilleggTidslinje {
             .map(s -> new LocalDateSegment<>(s.getFom().plusMonths(1).withDayOfMonth(1), TIDENES_ENDE, s.getValue())) // Mapper alle segmenter til å starte første dag i neste måned
             .toList();
         var antallBarnForBarnetilleggTidslinje = new LocalDateTimeline<>(antallBarnMånedsvisSegmenter, StandardCombinators::coalesceRightHandSide);
-        return antallBarnForBarnetilleggTidslinje.mapValue(antallBarn -> new Barnetillegg(BigDecimal.valueOf(antallBarn).multiply(BARNETILLEGG_DAGSATS), antallBarn));
+        return antallBarnForBarnetilleggTidslinje.mapValue(antallBarn -> new Barnetillegg(finnUtregnetBarnetillegg(antallBarn), antallBarn));
+    }
+
+    private static int finnUtregnetBarnetillegg(Integer antallBarn) {
+        return BigDecimal.valueOf(antallBarn).multiply(BARNETILLEGG_DAGSATS).intValue(); // Både sats og antall barn er heltall, så vi trenger ingen avrunding. Caster direkte til long
     }
 
 }

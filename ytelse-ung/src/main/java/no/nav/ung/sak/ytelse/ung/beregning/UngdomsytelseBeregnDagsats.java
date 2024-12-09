@@ -74,7 +74,7 @@ public class UngdomsytelseBeregnDagsats {
             var builder = lhs.getValue().kopi();
             return new LocalDateSegment<>(di,
                 rhs == null ?
-                    builder.medAntallBarn(0).medBarnetilleggDagsats(java.math.BigDecimal.ZERO) :
+                    builder.medAntallBarn(0).medBarnetilleggDagsats(0) :
                     builder.medAntallBarn(rhs.getValue().antallBarn()).medBarnetilleggDagsats(rhs.getValue().dagsats()));
         };
     }

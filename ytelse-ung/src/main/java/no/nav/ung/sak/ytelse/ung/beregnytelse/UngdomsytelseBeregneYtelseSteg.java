@@ -109,9 +109,9 @@ public class UngdomsytelseBeregneYtelseSteg implements BeregneYtelseSteg {
         return (di, lhs, rhs) ->
         {
             var dagsats = lhs.getValue().dagsats().multiply(rhs.getValue().utbetalingsgrad()).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-            var dagsatsBarnetillegg = UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER.equals(rhs.getValue().avslagsårsak()) ? BigDecimal.ZERO : lhs.getValue().dagsatsBarnetillegg();
+            var dagsatsBarnetillegg = UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER.equals(rhs.getValue().avslagsårsak()) ? 0L : lhs.getValue().dagsatsBarnetillegg();
             return new LocalDateSegment<>(di,
-                new DagsatsOgUtbetalingsgrad(dagsats.add(dagsatsBarnetillegg), rhs.getValue().utbetalingsgrad()));
+                new DagsatsOgUtbetalingsgrad(dagsats.add(BigDecimal.valueOf(dagsatsBarnetillegg)), rhs.getValue().utbetalingsgrad()));
         };
     }
 
