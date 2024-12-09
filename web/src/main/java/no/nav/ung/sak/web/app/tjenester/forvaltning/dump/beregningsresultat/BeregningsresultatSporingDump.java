@@ -67,11 +67,11 @@ public class BeregningsresultatSporingDump implements DebugDumpFagsak {
             dumpMottaker.write("saksnummer: " + result.get(0) + "\\n");
             dumpMottaker.write("behanlingId: " + behandlingId + "\\n");
             dumpMottaker.write("opprettetTid: " + result.get(2) + "\\n");
-            dumpMottaker.newFile(filnavnPrefix + "input.json");
+            dumpMottaker.newFile(filnavnPrefix + "relevanteBarnPersoninformasjon.json");
             dumpMottaker.write((String) result.get(3));
             dumpMottaker.newFile(filnavnPrefix + "sporing.json");
             dumpMottaker.write((String) result.get(4));
-            dumpMottaker.newFile(filnavnPrefix + "input-feriepenger.json");
+            dumpMottaker.newFile(filnavnPrefix + "relevanteBarnPersoninformasjon-feriepenger.json");
             dumpMottaker.write((String) result.get(5));
             dumpMottaker.newFile(filnavnPrefix + "sporing-feriepenger.json");
             dumpMottaker.write((String) result.get(6));

@@ -72,7 +72,7 @@ public class VilkårDump implements DebugDumpFagsak {
         var valueMapper = settOppMappingAvVilkårType(results);
         String output = CsvOutput.dumpAsCsv(true, results, valueMapper);
 
-        dumpMottaker.newFile("vilkår/resultat.csv");
+        dumpMottaker.newFile("vilkår/barnetilleggTidslinje.csv");
         dumpMottaker.write(output);
     }
 

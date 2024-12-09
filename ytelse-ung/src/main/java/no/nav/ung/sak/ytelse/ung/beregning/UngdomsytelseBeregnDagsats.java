@@ -18,6 +18,7 @@ import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.Barnetillegg;
@@ -43,19 +44,17 @@ public class UngdomsytelseBeregnDagsats {
         var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
         var barnetilleggResultat = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef);
 
-        var json = JsonObjectMapper.toJson(grunnbeløpFaktorTidslinje, JsonMappingFeil.FACTORY::jsonMappingFeil);
-
         var satsTidslinje = perioder
             .intersection(grunnbeløpFaktorTidslinje, StandardCombinators::rightOnly)
             .mapValue(UngdomsytelseBeregnDagsats::leggTilSatsTypeOgGrunnbeløpFaktor)
             .intersection(grunnbeløpTidslinje, leggTilGrunnbeløp())
-            .combine(barnetilleggResultat.resultat(), leggTilBarnetillegg(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .combine(barnetilleggResultat.barnetilleggTidslinje(), leggTilBarnetillegg(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .mapValue(UngdomsytelseSatser.Builder::build);
 
         return new UngdomsytelseSatsResultat(
             satsTidslinje,
-            lagRegelSporing(grunnbeløpTidslinje, grunnbeløpFaktorTidslinje, barnetilleggResultat.resultat()),
-            lagRegelInput(perioder, fødselsdato, harTriggerBeregnHøySats, beregningsdato, barnetilleggResultat.input())
+            lagRegelSporing(grunnbeløpTidslinje, grunnbeløpFaktorTidslinje, barnetilleggResultat.barnetilleggTidslinje()),
+            lagRegelInput(perioder, fødselsdato, harTriggerBeregnHøySats, beregningsdato, barnetilleggResultat.relevanteBarnPersoninformasjon())
         );
     }
 
@@ -86,13 +85,13 @@ public class UngdomsytelseBeregnDagsats {
         return JsonObjectMapper.toJson(regelSporing, JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
-    private static String lagRegelInput(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats, LocalDate beregningsdato, List<FødselOgDødInfo> barnFødselOgDød) {
+    private static String lagRegelInput(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats, LocalDate beregningsdato, List<FødselOgDødInfo> barnPersoninformasjon) {
         var regelInput = new RegelInput(
             TidslinjeUtil.tilPerioder(perioder),
             fødselsdato,
             harTriggerBeregnHøySats,
             beregningsdato,
-            barnFødselOgDød
+            barnPersoninformasjon
         );
         return JsonObjectMapper.toJson(regelInput, JsonMappingFeil.FACTORY::jsonMappingFeil);
     }

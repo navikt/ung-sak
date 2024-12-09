@@ -87,7 +87,7 @@ public class VilkårRestTjeneste {
 
     @GET
     @Path(FULL_V3_PATH)
-    @Operation(description = "Forvaltning : Hent informasjon om vilkår for en behandling", summary = ("Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering)."), tags = {"vilkår", "forvaltning"}, responses = {
+    @Operation(description = "Forvaltning : Hent informasjon om vilkår for en behandling", summary = ("Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (relevanteBarnPersoninformasjon og evaluering)."), tags = {"vilkår", "forvaltning"}, responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)

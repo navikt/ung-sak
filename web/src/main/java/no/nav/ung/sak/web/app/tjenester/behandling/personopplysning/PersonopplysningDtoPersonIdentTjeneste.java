@@ -101,7 +101,7 @@ public class PersonopplysningDtoPersonIdentTjeneste {
 
     }
 
-    /** Lag en funksjon som husker resultat av tidligere input. Nyttig for repeterende lookups */
+    /** Lag en funksjon som husker barnetilleggTidslinje av tidligere relevanteBarnPersoninformasjon. Nyttig for repeterende lookups */
     static <I, O> Function<I, O> memoize(Function<I, O> f) {
         ConcurrentMap<I, O> lookup = new ConcurrentHashMap<>();
         return input -> input == null ? null : lookup.computeIfAbsent(input, f);

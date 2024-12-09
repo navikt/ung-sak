@@ -195,7 +195,7 @@ public class BehandlingRestTjeneste {
 
     @GET
     @Path(BEHANDLINGER_PATH)
-    @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
+    @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er barnetilleggTidslinje etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
@@ -213,7 +213,7 @@ public class BehandlingRestTjeneste {
 
     @GET
     @Path(BEHANDLING_PATH)
-    @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er resultat etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
+    @Operation(description = "Hent behandling gitt id", summary = ("Returnerer behandlingen som er tilknyttet id. Dette er barnetilleggTidslinje etter at asynkrone operasjoner er utført."), tags = "behandlinger", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer Behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)

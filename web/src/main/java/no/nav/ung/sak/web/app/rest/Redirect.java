@@ -61,7 +61,7 @@ public final class Redirect {
     private static Response buildResponse(HttpServletRequest request, AsyncPollingStatus status, URI resultatUri) throws URISyntaxException {
         URI uri = honorXForwardedProto(request, resultatUri);
         if (status != null) {
-            // sett alltid resultat-location i tilfelle timeout på klient
+            // sett alltid barnetilleggTidslinje-location i tilfelle timeout på klient
             status.setLocation(uri);
             return Response.status(status.getStatus().getHttpStatus()).entity(status).build();
         } else {

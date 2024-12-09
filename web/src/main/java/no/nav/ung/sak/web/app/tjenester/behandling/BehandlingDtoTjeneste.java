@@ -65,7 +65,7 @@ import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 /**
- * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
+ * Bygger et sammensatt barnetilleggTidslinje av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
  */
 @Dependent
 public class BehandlingDtoTjeneste {
@@ -139,7 +139,7 @@ public class BehandlingDtoTjeneste {
         if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
             dto.leggTil(getFraMap(KontrollRestTjeneste.KONTROLLRESULTAT_V2_PATH, "kontrollresultat", idQueryParams));
         } else if (BehandlingType.REVURDERING.equals(behandling.getType())) {
-            dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", uuidQueryParams));
+            dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-barnetilleggTidslinje", uuidQueryParams));
         }
         dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER, "behandling-perioder-årsak", uuidQueryParams));
         dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER_MED_VILKÅR, "behandling-perioder-årsak-med-vilkår", uuidQueryParams));

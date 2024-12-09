@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 
 /**
- * DummyRestTjeneste returnerer alltid tomt resultat. Klienten for tilbakekreving krever at det retureres en verdi,
+ * DummyRestTjeneste returnerer alltid tomt barnetilleggTidslinje. Klienten for tilbakekreving krever at det retureres en verdi,
  * derfor kan ikke DummyRestTjeneste benyttes
  */
 @Path("/dummy-fptilbake")

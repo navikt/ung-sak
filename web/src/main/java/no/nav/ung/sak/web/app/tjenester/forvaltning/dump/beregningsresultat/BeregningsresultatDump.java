@@ -79,7 +79,7 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
 
         Optional<String> output = CsvOutput.dumpResultSetToCsv(results);
         if (output.isPresent()) {
-            dumpMottaker.newFile("beregningsresultat/resultat.csv");
+            dumpMottaker.newFile("beregningsresultat/barnetilleggTidslinje.csv");
             dumpMottaker.write(output.get());
         }
     }

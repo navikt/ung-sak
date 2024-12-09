@@ -33,9 +33,7 @@ public class UngdomsytelseGrunnlagRepository {
         var aktivtGrunnlag = grunnlagOptional.orElse(new UngdomsytelseGrunnlag());
 
         var builder = new UngdomsytelseGrunnlagBuilder(aktivtGrunnlag);
-        var inputData = new RegelData(perioder.regelInput());
-        var sporingData = new RegelData(perioder.regelSporing());
-        builder.leggTilPerioder(perioder.resultatTidslinje(), inputData.getClob(), sporingData.getClob());
+        builder.medSatsPerioder(perioder.resultatTidslinje(), perioder.regelInput(), perioder.regelSporing());
 
         var differ = differ();
 
@@ -43,7 +41,7 @@ public class UngdomsytelseGrunnlagRepository {
             grunnlagOptional.ifPresent(this::deaktiverEksisterende);
             lagre(builder, behandlingId);
         } else {
-            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
+            log.info("[behandlingId={}] Forkaster lagring nytt barnetilleggTidslinje da dette er identisk med eksisterende barnetilleggTidslinje.", behandlingId);
         }
     }
 
@@ -60,7 +58,7 @@ public class UngdomsytelseGrunnlagRepository {
             grunnlagOptional.ifPresent(this::deaktiverEksisterende);
             lagre(builder, behandlingId);
         } else {
-            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
+            log.info("[behandlingId={}] Forkaster lagring nytt barnetilleggTidslinje da dette er identisk med eksisterende barnetilleggTidslinje.", behandlingId);
         }
     }
 

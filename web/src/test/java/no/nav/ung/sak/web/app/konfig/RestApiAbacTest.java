@@ -61,7 +61,7 @@ public class RestApiAbacTest {
     }
 
     /**
-     * IKKE ignorer denne testen, helper til med at input til tilgangskontroll blir riktig
+     * IKKE ignorer denne testen, helper til med at relevanteBarnPersoninformasjon til tilgangskontroll blir riktig
      * <p>
      * Kontakt Team Humle hvis du trenger hjelp til å endre koden din slik at den går igjennom her *
      */

@@ -45,16 +45,11 @@ public class UngdomsytelseSatsPerioder extends BaseEntitet {
     private Clob regelSporing;
 
 
-    public UngdomsytelseSatsPerioder(List<UngdomsytelseSatsPeriode> satsPerioder, Clob regelInput, Clob regelSporing) {
+    public UngdomsytelseSatsPerioder(List<UngdomsytelseSatsPeriode> satsPerioder, String regelInput, String regelSporing) {
         this.satsPerioder = satsPerioder != null ? satsPerioder.stream().map(UngdomsytelseSatsPeriode::new).toList() : null;
-        this.regelInput = regelInput;
-        this.regelSporing = regelSporing;
+        this.regelInput = new RegelData(regelInput).getClob();
+        this.regelSporing = new RegelData(regelSporing).getClob();
     }
-
-    public UngdomsytelseSatsPerioder(UngdomsytelseSatsPerioder satsPerioder) {
-        this(satsPerioder.satsPerioder, satsPerioder.regelInput, satsPerioder.regelSporing);
-    }
-
 
     public UngdomsytelseSatsPerioder() {
     }
@@ -70,6 +65,7 @@ public class UngdomsytelseSatsPerioder extends BaseEntitet {
     public RegelData getRegelSporing() {
         return regelSporing == null ? null : new RegelData(regelSporing);
     }
+
     public void setRegelInput(String data) {
         setRegelInput(data == null ? null : new RegelData(data));
     }

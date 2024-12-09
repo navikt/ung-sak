@@ -29,10 +29,9 @@ public class LagBarnetilleggTidslinje {
      * @param behandlingReferanse Behandlingreferanse
      * @return Tidslinje for barnetillegg
      */
-    public BarnetilleggResultat lagTidslinje(BehandlingReferanse behandlingReferanse) {
-        // TODO: Lagre sporing av antall barn, og muligens lagre ned hvilke barn
+    public BarnetilleggVurdering lagTidslinje(BehandlingReferanse behandlingReferanse) {
         var barnetilleggMellomregning = lagAntallBarnTidslinje.lagAntallBarnTidslinje(behandlingReferanse);
-        return new BarnetilleggResultat(beregnBarnetillegg(barnetilleggMellomregning.antallBarnTidslinje()), barnetilleggMellomregning.input()) ;
+        return new BarnetilleggVurdering(beregnBarnetillegg(barnetilleggMellomregning.antallBarnTidslinje()), barnetilleggMellomregning.barnFødselOgDødInfo()) ;
     }
 
     static LocalDateTimeline<Barnetillegg> beregnBarnetillegg(LocalDateTimeline<Integer> antallBarnTidslinje) {
