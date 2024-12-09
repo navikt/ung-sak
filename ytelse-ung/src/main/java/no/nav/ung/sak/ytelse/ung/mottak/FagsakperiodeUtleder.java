@@ -48,18 +48,19 @@ public class FagsakperiodeUtleder {
             } else {
                 var resterendeDager = FinnForbrukteDager.MAKS_ANTALL_DAGER - forbrukteDager;
                 var medHeleAntallUkerLagtTil = søknadFom.plusWeeks(resterendeDager / VIRKEDAGER_PR_UKE).minusDays(1);
-                var daysToAdd = finnRestDagerÅLeggeTil(medHeleAntallUkerLagtTil, resterendeDager % VIRKEDAGER_PR_UKE);
+                var restPeriodeFom = medHeleAntallUkerLagtTil.plusDays(1);
+                var daysToAdd = finnRestDagerÅLeggeTil(restPeriodeFom, resterendeDager % VIRKEDAGER_PR_UKE);
                 return medHeleAntallUkerLagtTil.plusDays(daysToAdd);
             }
 
         }
     }
 
-    private long finnRestDagerÅLeggeTil(LocalDate fra, long modulo) {
+    private long finnRestDagerÅLeggeTil(LocalDate fom, long modulo) {
         if (modulo >= VIRKEDAGER_PR_UKE) {
             throw new IllegalArgumentException("Forventet mindre enn en uke i resterende dager");
         }
-        if (fra.getDayOfWeek().getValue() + modulo < DayOfWeek.FRIDAY.getValue()) {
+        if (fom.getDayOfWeek().getValue() + modulo < DayOfWeek.FRIDAY.getValue()) {
             return modulo;
         } else {
             return modulo+2;
