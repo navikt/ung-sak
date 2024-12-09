@@ -29,20 +29,12 @@ class LagBarnetilleggTidslinjeTest {
             new LocalDateSegment<>(fødselsdato3, TIDENES_ENDE, 3)
         )));
 
-        var segmenter = resultat.toSegments();
-        assertThat(segmenter.size()).isEqualTo(3);
-        var segmentIterator = segmenter.iterator();
-        var første = segmentIterator.next();
-        assertThat(første.getFom()).isEqualTo(LocalDate.parse("2014-08-01", DateTimeFormatter.ISO_LOCAL_DATE));
-        assertThat(første.getValue().antallBarn()).isEqualTo(1);
+        var forventetResultat = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(LocalDate.parse("2014-08-01", DateTimeFormatter.ISO_LOCAL_DATE), LocalDate.parse("2020-03-31", DateTimeFormatter.ISO_LOCAL_DATE), new Barnetillegg(36, 1)),
+            new LocalDateSegment<>(LocalDate.parse("2020-04-01", DateTimeFormatter.ISO_LOCAL_DATE), LocalDate.parse("2024-10-31", DateTimeFormatter.ISO_LOCAL_DATE), new Barnetillegg(72, 2)),
+            new LocalDateSegment<>(LocalDate.parse("2024-11-01", DateTimeFormatter.ISO_LOCAL_DATE), TIDENES_ENDE, new Barnetillegg(108, 3))
+        ));
 
-        var andre = segmentIterator.next();
-        assertThat(andre.getFom()).isEqualTo(LocalDate.parse("2020-04-01", DateTimeFormatter.ISO_LOCAL_DATE));
-        assertThat(andre.getValue().antallBarn()).isEqualTo(2);
-
-        var tredje = segmentIterator.next();
-        assertThat(tredje.getFom()).isEqualTo(LocalDate.parse("2024-11-01", DateTimeFormatter.ISO_LOCAL_DATE));
-        assertThat(tredje.getValue().antallBarn()).isEqualTo(3);
-
+        assertThat(resultat).isEqualTo(forventetResultat);
     }
 }
