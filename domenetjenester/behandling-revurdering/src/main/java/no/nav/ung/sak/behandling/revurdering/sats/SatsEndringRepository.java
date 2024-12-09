@@ -47,6 +47,8 @@ public class SatsEndringRepository {
                     "   AND personopplysning.foedselsdato <= :tjuefem_aar_foer_dato " +
                     "   AND programperiode.tom >= date_trunc('month', foedselsdato + interval '301 months') " + // Første dagen i måneden etter 25 års dagen.
                     "   AND programperiode_gr.aktiv = true" +
+                    "   AND gr.aktiv = true" +
+                    "   AND f.ytelse_type != 'OBSOLETE'" +
                     "   AND f.periode @> date_trunc('month', foedselsdato + interval '301 months')" + // Fagsakperioden inneholder endringsdatoen
                     // Idempotens sjekk at vi ikke allerede har beregnet høy sats.
                     "   AND NOT exists (SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
