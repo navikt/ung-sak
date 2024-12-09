@@ -5134,59 +5134,6 @@
         "required" : [ "kanVelges", "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
-      "VilkårDto" : {
-        "properties" : {
-          "avslagKode" : {
-            "nullable" : true,
-            "pattern" : "^[\\p{Alnum}\\p{Space}]+$",
-            "type" : "string"
-          },
-          "evaluering" : {
-            "maxLength" : 1000000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$",
-            "readOnly" : true,
-            "type" : "string"
-          },
-          "input" : {
-            "maxLength" : 1000000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$",
-            "readOnly" : true,
-            "type" : "string"
-          },
-          "lovReferanse" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "merknadParametere" : {
-            "additionalProperties" : {
-              "nullable" : true,
-              "type" : "string"
-            },
-            "type" : "object"
-          },
-          "overstyrbar" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "vilkarStatus" : {
-            "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
-            "type" : "string"
-          },
-          "vilkarType" : {
-            "enum" : [ "FP_VK_0", "FP_VK_2", "K9_VK_1", "K9_VK_3", "K9_VK_5_3", "K9_VK_2_a", "K9_VK_2_b", "FP_VK_3", "FP_VK_34", "FP_VK_21", "FP_VK_23", "FP_VK_41", "K9_VK_16", "K9_VK_20", "K9_VK_21", "K9_VK_22", "K9_VK_17", "K9_VK_9_6", "UNG_VK_XXX", "-" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "vilkarStatus", "vilkarType" ],
-        "type" : "object"
-      },
       "VilkårMedPerioderDto" : {
         "properties" : {
           "lovReferanse" : {
@@ -5265,10 +5212,6 @@
             "type" : "string"
           },
           "vurderesIBehandlingen" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "vurdersIBehandlingen" : {
             "nullable" : true,
             "type" : "boolean"
           }
@@ -5935,7 +5878,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5965,11 +5908,11 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/StatusForPerioderPåBehandling"
+                  "$ref" : "#/components/schemas/StatusForPerioderPåBehandlingInkludertVilkår"
                 }
               }
             },
@@ -6356,15 +6299,18 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VilkårDto"
+                  "items" : {
+                    "$ref" : "#/components/schemas/VilkårMedPerioderDto"
+                  },
+                  "type" : "array"
                 }
               }
             },
-            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
+            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer"
           }
         },
         "tags" : [ "vilkår" ]
@@ -6386,14 +6332,7 @@
         } ],
         "responses" : {
           "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/VilkårMedPerioderDto"
-                }
-              }
-            },
-            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
+            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer"
           }
         },
         "summary" : "Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering).",
@@ -6415,7 +6354,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6423,7 +6362,7 @@
                 }
               }
             },
-            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
+            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer"
           }
         },
         "tags" : [ "vilkår" ]
