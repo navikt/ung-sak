@@ -169,6 +169,7 @@ public class VilkårRestTjeneste {
 
 
         @JsonProperty(value = "vilkårTidslinje")
+        @Valid
         private LocalDateTimeline<VilkårUtfallSamlet> vilkårTidslinje;
 
         public VilkårResultatContainer(LocalDateTimeline<VilkårUtfallSamlet> vilkårTidslinje) {
