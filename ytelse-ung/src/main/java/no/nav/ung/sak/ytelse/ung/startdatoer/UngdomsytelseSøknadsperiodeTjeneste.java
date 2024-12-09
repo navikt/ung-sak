@@ -6,6 +6,9 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeTjeneste;
 
@@ -21,12 +24,14 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
 
     private final UngdomsytelseSøknadsperiodeRepository søknadsperiodeRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
-    public UngdomsytelseSøknadsperiodeTjeneste(UngdomsytelseSøknadsperiodeRepository søknadsperiodeRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+    public UngdomsytelseSøknadsperiodeTjeneste(UngdomsytelseSøknadsperiodeRepository søknadsperiodeRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
 
         this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     /**
@@ -61,17 +66,21 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
             var startdatoer = søkteDatoer.stream().map(UngdomsytelseSøktStartdato::getStartdato)
                 .toList();
 
+            var behandling = behandlingRepository.hentBehandling(behandlingId);
+
+            var fagsak = behandling.getFagsak();
+
             TreeSet<DatoIntervallEntitet> relvanteUngdomsprogramperioder = ungdomsprogramtidslinje.stream()
                 .filter(it -> startdatoer.contains(it.getFom()))
-                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), begrensTomDato(it)))
+                .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), begrensTomDato(it, fagsak)))
                 .collect(Collectors.toCollection(TreeSet::new));
 
             return relvanteUngdomsprogramperioder;
         }
     }
 
-    private static LocalDate begrensTomDato(LocalDateSegment<Boolean> it) {
-        return it.getTom().equals(TIDENES_ENDE) ? it.getFom().plusWeeks(52) : it.getTom();
+    private static LocalDate begrensTomDato(LocalDateSegment<Boolean> it, Fagsak fagsak) {
+        return it.getTom().equals(TIDENES_ENDE) ? fagsak.getPeriode().getTomDato() : it.getTom();
     }
 
 
