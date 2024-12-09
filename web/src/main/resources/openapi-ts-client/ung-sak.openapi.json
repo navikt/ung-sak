@@ -5015,7 +5015,8 @@
             "type" : "number"
           },
           "dagsatsBarnetillegg" : {
-            "type" : "number"
+            "format" : "int32",
+            "type" : "integer"
           },
           "fom" : {
             "format" : "date",
