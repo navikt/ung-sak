@@ -80,7 +80,7 @@ public class FagsakApplikasjonTjeneste {
     /**
      * Finner matchende fagsaker for ytelse+bruker+periode .
      * Hvis pleietrengende/relatertAnnenPart oppgis matches disse også. Merk dersom fagsak har pleietrengende/relatertAnnenPart OG det ikke
-     * oppgis som relevanteBarnPersoninformasjon, vil ikke fagsaken matche.
+     * oppgis som input, vil ikke fagsaken matche.
      * Dette er lagt på som begrensning, slik at all tilgangskontroll håndteres før søker utføres (caller må kjenne til alle personer han ønsker
      * å søke etter).
      */

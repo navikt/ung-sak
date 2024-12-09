@@ -29,7 +29,7 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
     public ObjectMapperResolver() {
         this.baseObjektMapper = ObjectMapperFactory.createBaseObjectMapper();
         this.overstyrKodeverdiAlltidSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING));
-        // defaultObjektMapper brukast når relevanteBarnPersoninformasjon header for overstyring ikkje er satt.
+        // defaultObjektMapper brukast når input header for overstyring ikkje er satt.
         // Bruker samme logikk som har vore pr no. Det vil seie overstyring av Kalkulus Kodeverdi serialisering til objekt, så lenge ikkje feature flagg for string serialisering er aktivt.
         // Når alle klienter kan handtere at Kalkulus Kodeverdi kjem som string kan denne sannsynlegvis settast lik baseObjektMapper.
         this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN));

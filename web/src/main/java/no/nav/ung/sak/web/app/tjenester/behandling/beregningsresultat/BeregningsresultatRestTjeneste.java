@@ -71,7 +71,7 @@ public class BeregningsresultatRestTjeneste {
     @GET
     @Path(HAR_SAMME_RESULTAT)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Har revurdering samme barnetilleggTidslinje som original behandling", tags = "beregningsresultat")
+    @Operation(description = "Har revurdering samme resultat som original behandling", tags = "beregningsresultat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Boolean harRevurderingSammeResultatSomOriginalBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {

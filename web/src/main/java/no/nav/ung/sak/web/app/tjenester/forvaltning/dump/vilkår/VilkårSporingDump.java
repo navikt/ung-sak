@@ -62,7 +62,7 @@ public class VilkårSporingDump implements DebugDumpFagsak {
             String input = (String) result.get(5);
             String filPrefix = "vilkår/sporing/behandling-" + behandlingId + "/" + vilkårType + "/" + fom + "_" + tom + "-";
             if (input != null) {
-                dumpMottaker.newFile(filPrefix + "relevanteBarnPersoninformasjon.json");
+                dumpMottaker.newFile(filPrefix + "input.json");
                 dumpMottaker.write(input);
             }
             String evaluering = (String) result.get(6);

@@ -35,7 +35,7 @@ Install the package as usual from GitHub package registry. More info about that 
 ```typescript
 import { UngSakClient } from "@navikt/ung-sak-typescript-client";
 
-const organisasjonsnr = 111222333; // relevanteBarnPersoninformasjon
+const organisasjonsnr = 111222333; // input
 const ungSak = new UngSakClient();
 const mottakerinfo = await ungSak.brev.getBrevMottakerinfoEreg({organisasjonsnr})
 

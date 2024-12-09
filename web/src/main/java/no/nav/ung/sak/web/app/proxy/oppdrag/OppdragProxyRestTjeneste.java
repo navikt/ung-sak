@@ -23,7 +23,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 @Transactional
 public class OppdragProxyRestTjeneste {
 
-    public static final String SIMULERING_RESULTAT_URL = "/proxy/oppdrag/simulering/detaljert-barnetilleggTidslinje";
+    public static final String SIMULERING_RESULTAT_URL = "/proxy/oppdrag/simulering/detaljert-resultat";
 
     private K9OppdragRestKlient restKlient;
 
@@ -38,7 +38,7 @@ public class OppdragProxyRestTjeneste {
 
     @GET
     @Path("/simulering/detaljert-resultat")
-    @Operation(description = "Hent detaljert barnetilleggTidslinje av simulering mot økonomi med og uten inntrekk", summary = ("Returnerer simuleringsresultat."), tags = "simulering")
+    @Operation(description = "Hent detaljert resultat av simulering mot økonomi med og uten inntrekk", summary = ("Returnerer simuleringsresultat."), tags = "simulering")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursKoder.FAGSAK)
     public Optional<SimuleringResultatDto> hentSimuleringResultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         return restKlient.hentSimuleringResultat(behandlingIdDto.getBehandlingUuid());

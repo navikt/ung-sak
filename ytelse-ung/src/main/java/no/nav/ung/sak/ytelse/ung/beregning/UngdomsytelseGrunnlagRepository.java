@@ -41,7 +41,7 @@ public class UngdomsytelseGrunnlagRepository {
             grunnlagOptional.ifPresent(this::deaktiverEksisterende);
             lagre(builder, behandlingId);
         } else {
-            log.info("[behandlingId={}] Forkaster lagring nytt barnetilleggTidslinje da dette er identisk med eksisterende barnetilleggTidslinje.", behandlingId);
+            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
     }
 
@@ -58,7 +58,7 @@ public class UngdomsytelseGrunnlagRepository {
             grunnlagOptional.ifPresent(this::deaktiverEksisterende);
             lagre(builder, behandlingId);
         } else {
-            log.info("[behandlingId={}] Forkaster lagring nytt barnetilleggTidslinje da dette er identisk med eksisterende barnetilleggTidslinje.", behandlingId);
+            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
     }
 

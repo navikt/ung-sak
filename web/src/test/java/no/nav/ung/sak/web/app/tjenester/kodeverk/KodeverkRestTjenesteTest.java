@@ -55,7 +55,7 @@ public class KodeverkRestTjenesteTest {
         final AlleKodeverdierSomObjektResponse alleKodeverdierSomObjektResponse = tjeneste.alleKodeverdierSomObjekt();
         for(final var fagsakYtelseType : alleKodeverdierSomObjektResponse.fagsakYtelseTyper()) {
             if(!fagsakYtelseType.getKode().equals("-")) {
-                // Sjekk at den finnast i gammalt barnetilleggTidslinje
+                // Sjekk at den finnast i gammalt resultat
                 final LinkedHashMap<String, String> funnet = legacyFagsakYtelseType.stream().filter(v -> {
                     final String kode = v.get("kode");
                     return kode.equals(fagsakYtelseType.getKode());

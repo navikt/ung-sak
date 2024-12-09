@@ -26,7 +26,7 @@ import java.util.Set;
  * Denne klassen justerer generert openapi spesifikasjon til å stemme med våre behov i to ulike tilfeller.
  * <ul>
  *     <li>
- * Når rest endepunkt returnerer Optional<T> type, altså eit barnetilleggTidslinje som kan vere null eller ein gitt type: Modifiserer
+ * Når rest endepunkt returnerer Optional<T> type, altså eit resultat som kan vere null eller ein gitt type: Modifiserer
  * generert openapi spesifikasjon for normalrespons slik at respons definisjon blir satt som "nullable": true. For at dette
  * skal fungere må også den opprinnelege respons type $ref flyttast inn i ein "allOf" array.
  *     </li>

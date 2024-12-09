@@ -14,9 +14,9 @@ interface PdpRequestBuilderFeil extends DeklarerteFeil {
 
     PdpRequestBuilderFeil FACTORY = FeilFactory.create(PdpRequestBuilderFeil.class);
 
-    @TekniskFeil(feilkode = "FP-621834", feilmelding = "Ugyldig relevanteBarnPersoninformasjon. Støtter bare 0 eller 1 behandling, men har %s", logLevel = LogLevel.WARN)
+    @TekniskFeil(feilkode = "FP-621834", feilmelding = "Ugyldig input. Støtter bare 0 eller 1 behandling, men har %s", logLevel = LogLevel.WARN)
     Feil ugyldigInputFlereBehandlingIder(Collection<Long> behandlingId);
 
-    @ManglerTilgangFeil(feilkode = "FP-280301", feilmelding = "Ugyldig relevanteBarnPersoninformasjon. Ikke samsvar mellom behandlingId %s og fagsakId %s", logLevel = LogLevel.WARN)
+    @ManglerTilgangFeil(feilkode = "FP-280301", feilmelding = "Ugyldig input. Ikke samsvar mellom behandlingId %s og fagsakId %s", logLevel = LogLevel.WARN)
     Feil ugyldigInputManglerSamsvarBehandlingFagsak(Long behandlingId, List<Long> fagsakIder);
 }

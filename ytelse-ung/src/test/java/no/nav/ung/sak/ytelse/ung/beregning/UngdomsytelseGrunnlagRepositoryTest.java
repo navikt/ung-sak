@@ -77,7 +77,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var uttakperioder1 = new UngdomsytelseUttakPerioder(List.of(new UngdomsytelseUttakPeriode(
             utbetalingsgrad, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now())
         )));
-        uttakperioder1.setRegelInput("En relevanteBarnPersoninformasjon");
+        uttakperioder1.setRegelInput("En input");
         uttakperioder1.setRegelSporing("En sporing");
         repository.lagre(behandling.getId(), uttakperioder1);
 
