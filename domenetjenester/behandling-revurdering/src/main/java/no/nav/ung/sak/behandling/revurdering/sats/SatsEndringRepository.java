@@ -32,7 +32,7 @@ public class SatsEndringRepository {
         LocalDate tjuefemÅrFørDato = dato.minusYears(25);
 
         //language=PostgreSQL
-        String sistOpprettet = "(SELECT max(b2.opprettet_tid) FROM Behandling b2 WHERE b2.fagsak_id=f.id ORDER BY b2.opprettet_tid DESC)";
+        String sistOpprettet = "(SELECT max(b2.opprettet_tid) FROM Behandling b2 WHERE b2.fagsak_id=f.id GROUP BY (b2.opprettet_tid) ORDER BY b2.opprettet_tid DESC)";
 
         Query query = entityManager
             .createNativeQuery(
@@ -49,7 +49,7 @@ public class SatsEndringRepository {
                     "   AND programperiode_gr.aktiv = true" +
                     "   AND gr.aktiv = true" +
                     "   AND f.ytelse_type != 'OBSOLETE'" +
-                    "   AND f.periode @> date_trunc('month', foedselsdato + interval '301 months')" + // Fagsakperioden inneholder endringsdatoen
+                    "   AND f.periode @> date_trunc('month', foedselsdato + interval '301 months')::date" + // Fagsakperioden inneholder endringsdatoen
                     // Idempotens sjekk at vi ikke allerede har beregnet høy sats.
                     "   AND NOT exists (SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
                     "       INNER JOIN UNG_SATS_PERIODE satsperiode ON ungdomsgrunnlag.ung_sats_perioder_id = satsperiode.id " +
