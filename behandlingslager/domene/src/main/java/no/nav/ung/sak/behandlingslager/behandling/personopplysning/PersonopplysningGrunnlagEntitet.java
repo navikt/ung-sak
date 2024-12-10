@@ -50,7 +50,7 @@ public class PersonopplysningGrunnlagEntitet extends BaseEntitet {
     PersonopplysningGrunnlagEntitet() {
     }
 
-    public PersonopplysningGrunnlagEntitet(PersonopplysningGrunnlagEntitet behandlingsgrunnlag) {
+    PersonopplysningGrunnlagEntitet(PersonopplysningGrunnlagEntitet behandlingsgrunnlag) {
         if (behandlingsgrunnlag.getOverstyrtVersjon().isPresent()) {
             this.overstyrtePersonopplysninger = behandlingsgrunnlag.getOverstyrtVersjon().get();
         }
