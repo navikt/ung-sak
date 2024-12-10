@@ -126,7 +126,7 @@ class SatsEndringRepositoryTest {
     }
 
     private void opprettSatsPeriode(Behandling behandling) {
-        int satsPerioderId = entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODER (id, regel_input, regel_sporing) VALUES (1, lo_from_bytea(0, 'some binary data'::bytea), lo_from_bytea(0, 'some tracking data'::bytea))")
+        int satsPerioderId = entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODER (id, regel_input, regel_sporing) VALUES (1, lo_from_bytea(0, 'regelinput'::bytea), lo_from_bytea(0, 'regelsporing'::bytea))")
 
             .executeUpdate();
 
