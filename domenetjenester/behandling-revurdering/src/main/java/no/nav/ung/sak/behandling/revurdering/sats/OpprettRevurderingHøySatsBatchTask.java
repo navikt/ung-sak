@@ -50,11 +50,11 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
         LocalDate datoForKjøring = LocalDate.now();
         ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
 
-        Set<Map.Entry<Fagsak, LocalDate>> entries = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(datoForKjøring).entrySet();
+        Set<Map.Entry<Fagsak, LocalDate>> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(datoForKjøring).entrySet();
 
-        List<ProsessTaskData> prosessTaskDataStream = utledProsessTaskerForRevurdering(entries);
+        List<ProsessTaskData> prosessTaskerTilRevurdering = utledProsessTaskerForRevurdering(fagsakerTilRevurdering);
 
-        taskGruppe.addNesteParallell(prosessTaskDataStream);
+        taskGruppe.addNesteParallell(prosessTaskerTilRevurdering);
     }
 
     static List<ProsessTaskData> utledProsessTaskerForRevurdering(Set<Map.Entry<Fagsak, LocalDate>> entries) {
