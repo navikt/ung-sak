@@ -7,6 +7,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class SatsEndringRepository {
 
         Query query = entityManager
             .createNativeQuery(
-                "SELECT DISTINCT f fagsakTilVurdering, foedselsdato FROM GR_PERSONOPPLYSNING gr " +
+                "SELECT DISTINCT f.id, foedselsdato FROM GR_PERSONOPPLYSNING gr " +
                     "INNER JOIN PO_INFORMASJON informasjon ON informasjon.id = gr.registrert_informasjon_id " +
                     "INNER JOIN PO_PERSONOPPLYSNING personopplysning ON personopplysning.po_informasjon_id = informasjon.id " +
                     "INNER JOIN BEHANDLING b ON gr.behandling_id = b.id " +
@@ -57,10 +58,17 @@ public class SatsEndringRepository {
                 Tuple.class)
             .setParameter("tjuefem_aar_foer_dato", tjuefemÅrFørDato); // NOSONAR //$NON-NLS-1$
         List<Tuple> resultList = query.getResultList();
-        return resultList.stream()
-            .collect(Collectors.toMap(
-                tuple -> tuple.get("fagsakTilVurdering", Fagsak.class),
-                tuple -> tuple.get("foedselsdato", LocalDate.class).plusMonths(1).withDayOfMonth(1)) // Endringsdato
-            );
+
+        return resultList.stream().collect(Collectors.toMap(this::mapTilFagsak, this::mapTilEndringsdato));
+    }
+
+    private Fagsak mapTilFagsak(Tuple tuple) {
+        Long fagsakId = tuple.get(0, Long.class);
+        return entityManager.find(Fagsak.class, fagsakId);
+    }
+
+    private LocalDate mapTilEndringsdato(Tuple tuple) {
+        Date fødselsdatoString = tuple.get(1, Date.class);
+        return LocalDate.parse(fødselsdatoString.toString()).plusMonths(1).withDayOfMonth(1);
     }
 }
