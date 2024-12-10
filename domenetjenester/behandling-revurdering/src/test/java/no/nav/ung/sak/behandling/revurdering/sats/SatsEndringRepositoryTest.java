@@ -53,7 +53,7 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
@@ -71,7 +71,7 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(20).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
@@ -83,7 +83,7 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(1));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
@@ -95,18 +95,49 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, true);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, true, false);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
         assertThat(fagsakerTilRevurdering.size()).isEqualTo(0);
     }
 
-    private void klargjørDatagrunnlag(Periode fagsakPeriode, Periode ungdomsprogramPeriode, LocalDate fødselsdato, boolean fagsakObselete) {
+    @Test
+    void forventer_ingen_fagsaker_fordi_satsen_allerede_er_oppjustert() {
+        Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
+        LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
+
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, true);
+
+        Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
+
+        assertThat(fagsakerTilRevurdering.size()).isEqualTo(0);
+    }
+
+    private void klargjørDatagrunnlag(Periode fagsakPeriode, Periode ungdomsprogramPeriode, LocalDate fødselsdato, boolean fagsakObselete, boolean harHøySatsFraFør) {
         Fagsak fagsak = opprettFagsak(fagsakPeriode, fagsakObselete);
         Behandling behandling = opprettBehandlingFor(fagsak);
         opprettPersonopplysningGrunnlag(behandling, fødselsdato);
         opprettUngdomsprogramPeriodeGrunnlag(behandling, ungdomsprogramPeriode);
+
+        if (harHøySatsFraFør) {
+            opprettSatsPeriode(behandling);
+        }
+    }
+
+    private void opprettSatsPeriode(Behandling behandling) {
+        int satsPerioderId = entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODER (id, regel_input, regel_sporing) VALUES (1, lo_from_bytea(0, 'some binary data'::bytea), lo_from_bytea(0, 'some tracking data'::bytea))")
+
+            .executeUpdate();
+
+        entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODE (id, ung_sats_perioder_id, periode, dagsats, grunnbeløp, grunnbeløp_faktor, sats_type, antall_barn, dagsats_barnetillegg) VALUES (1, :satsPerioderId, '[2021-01-01,2021-12-31]', 1000, 1000, 1, 'HOY', 0, 0)")
+            .setParameter("satsPerioderId", satsPerioderId)
+            .executeUpdate();
+
+        entityManager.createNativeQuery("INSERT INTO UNG_GR (id, behandling_id, ung_sats_perioder_id, aktiv) VALUES (1, :behandlingId, :satsPerioderId, true)")
+            .setParameter("behandlingId", behandling.getId())
+            .setParameter("satsPerioderId", satsPerioderId)
+            .executeUpdate();
     }
 
     private PersonopplysningGrunnlagEntitet opprettPersonopplysningGrunnlag(Behandling behandling, LocalDate fødselsdato) {
