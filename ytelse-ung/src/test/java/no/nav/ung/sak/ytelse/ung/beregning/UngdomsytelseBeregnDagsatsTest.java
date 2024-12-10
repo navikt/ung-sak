@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTjeneste;
+import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.BarnetilleggMellomregning;
 import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.LagAntallBarnTidslinje;
 import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.LagBarnetilleggTidslinje;
 
@@ -34,8 +36,9 @@ class UngdomsytelseBeregnDagsatsTest {
     @BeforeEach
     void setUp() {
         tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(grunnbeløpTjeneste), new LagBarnetilleggTidslinje(lagAntallBarnTidslinje));
-        when(lagAntallBarnTidslinje.lagAntallBarnTidslinje(any())).thenReturn(LocalDateTimeline.empty());
+        when(lagAntallBarnTidslinje.lagAntallBarnTidslinje(any())).thenReturn(new BarnetilleggMellomregning(LocalDateTimeline.empty(), List.of()));
     }
+
 
     @Test
     void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_april_2024_og_bruker_18_år_ved_start() {
@@ -45,7 +48,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var fødselsdag = fom.minusYears(18).minusDays(1);
         var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdag, LocalDate.now(), false);
 
-        var segmenter = dagsatsTidslinje.toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(1);
 
         var first = segmenter.first();
@@ -65,7 +68,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var fødselsdag = fom.minusYears(18).minusDays(1);
         var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdag, LocalDate.now(), false);
 
-        var segmenter = dagsatsTidslinje.toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();
@@ -93,7 +96,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, tjuefemårsdag.minusDays(1), false);
 
-        var segmenter = dagsatsTidslinje.toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();
@@ -123,7 +126,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, tjuefemårsdag.plusDays(1), false);
 
-        var segmenter = dagsatsTidslinje.toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();
@@ -152,7 +155,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, tjuefemårsdag.minusDays(1), true);
 
-        var segmenter = dagsatsTidslinje.toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();
@@ -182,7 +185,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, LocalDate.now(), true);
 
-        var segmenter = dagsatsTidslinje.toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();

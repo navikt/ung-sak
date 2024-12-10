@@ -47,11 +47,4 @@ public class HentFødselOgDød {
         return new FødselOgDødInfo(aktørId, fødselsdato, dødssdato);
     }
 
-    public record FødselOgDødInfo(
-        AktørId aktørId,
-        LocalDate fødselsdato,
-        LocalDate dødsdato
-    ) {
-    }
-
 }

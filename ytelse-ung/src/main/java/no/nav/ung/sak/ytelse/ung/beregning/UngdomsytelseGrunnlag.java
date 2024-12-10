@@ -48,10 +48,6 @@ public class UngdomsytelseGrunnlag {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseGrunnlag(UngdomsytelseGrunnlag eksisterende) {
-        behandlingId = eksisterende.behandlingId;
-        satsPerioder = satsPerioder != null ? new UngdomsytelseSatsPerioder(satsPerioder) : null;
-    }
 
     public UngdomsytelseGrunnlag() {
     }

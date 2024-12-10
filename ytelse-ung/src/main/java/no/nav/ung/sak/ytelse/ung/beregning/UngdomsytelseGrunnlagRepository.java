@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.RegelData;
 import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
 import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
@@ -28,12 +28,12 @@ public class UngdomsytelseGrunnlagRepository {
         this.entityManager = entityManager;
     }
 
-    public void lagre(Long behandlingId, LocalDateTimeline<UngdomsytelseSatser> perioder) {
+    public void lagre(Long behandlingId, UngdomsytelseSatsResultat perioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new UngdomsytelseGrunnlag());
 
         var builder = new UngdomsytelseGrunnlagBuilder(aktivtGrunnlag);
-        builder.leggTilPerioder(perioder);
+        builder.medSatsPerioder(perioder.resultatTidslinje(), perioder.regelInput(), perioder.regelSporing());
 
         var differ = differ();
 

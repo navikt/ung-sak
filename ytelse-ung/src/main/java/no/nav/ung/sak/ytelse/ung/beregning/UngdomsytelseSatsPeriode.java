@@ -49,7 +49,7 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
     private int antallBarn;
 
     @Column(name = "dagsats_barnetillegg", nullable = false)
-    private BigDecimal dagsatsBarnetillegg;
+    private int dagsatsBarnetillegg;
 
     public UngdomsytelseSatsPeriode() {
     }
@@ -98,7 +98,7 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         return antallBarn;
     }
 
-    public BigDecimal getDagsatsBarnetillegg() {
+    public int getDagsatsBarnetillegg() {
         return dagsatsBarnetillegg;
     }
 

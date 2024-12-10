@@ -12,7 +12,7 @@ public record UngdomsytelseSatser(BigDecimal dagsats,
                                   BigDecimal grunnbeløpFaktor,
                                   UngdomsytelseSatsType satsType,
                                   Integer antallBarn,
-                                  BigDecimal dagsatsBarnetillegg) {
+                                  int dagsatsBarnetillegg) {
 
     public static UngdomsytelseSatser.Builder builder() {
         return new Builder();
@@ -26,7 +26,7 @@ public record UngdomsytelseSatser(BigDecimal dagsats,
         private BigDecimal grunnbeløpFaktor;
         private UngdomsytelseSatsType satsType;
         private Integer antallBarn;
-        private BigDecimal dagsatsBarnetillegg;
+        private int dagsatsBarnetillegg;
 
         public Builder() {}
 
@@ -62,7 +62,7 @@ public record UngdomsytelseSatser(BigDecimal dagsats,
             return this;
         }
 
-        public Builder medBarnetilleggDagsats(BigDecimal barnetilleggDagsats) {
+        public Builder medBarnetilleggDagsats(int barnetilleggDagsats) {
             this.dagsatsBarnetillegg = barnetilleggDagsats;
             return this;
         }

@@ -35,7 +35,7 @@ public class LagAntallBarnTidslinje {
      * @param behandlingReferanse Behandlingreferanse
      * @return Tidslinje for antall barn der antall er mer eller lik 1
      */
-    public LocalDateTimeline<Integer> lagAntallBarnTidslinje(BehandlingReferanse behandlingReferanse) {
+    public BarnetilleggMellomregning lagAntallBarnTidslinje(BehandlingReferanse behandlingReferanse) {
         var personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandlingReferanse.getBehandlingId());
         var barnAvSøkerAktørId = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getRelasjoner()
             .stream().filter(r -> r.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
@@ -46,17 +46,18 @@ public class LagAntallBarnTidslinje {
             .map(this::finnRelevantPersonInfo)
             .toList();
 
-        return relevantPersonInfoBarn.stream()
+        var antallBarnTidslinje = relevantPersonInfoBarn.stream()
             .map(info -> new LocalDateTimeline<>(info.fødselsdato(), getTilDato(info), 1))
             .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::sum))
             .orElse(LocalDateTimeline.empty());
+        return new BarnetilleggMellomregning(antallBarnTidslinje, relevantPersonInfoBarn);
     }
 
-    private static LocalDate getTilDato(HentFødselOgDød.FødselOgDødInfo info) {
+    private static LocalDate getTilDato(FødselOgDødInfo info) {
         return info.dødsdato() != null ? info.dødsdato() : TIDENES_ENDE;
     }
 
-    private HentFødselOgDød.FødselOgDødInfo finnRelevantPersonInfo(AktørId barnAktørId) {
+    private FødselOgDødInfo finnRelevantPersonInfo(AktørId barnAktørId) {
         return hentFødselOgDød.hentFødselOgDødInfo(barnAktørId);
     }
 
