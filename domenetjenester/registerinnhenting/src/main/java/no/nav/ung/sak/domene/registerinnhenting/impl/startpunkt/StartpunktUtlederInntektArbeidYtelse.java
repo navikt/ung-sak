@@ -104,7 +104,7 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
             diffForFrisinn(ref, grunnlagId1, grunnlagId2, startpunkter, diff, saksnummer);
         } else {
             var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-            var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
+            var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId());
 
             for (DatoIntervallEntitet periode : perioderTilVurdering) {
                 var opptjeningsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(30), periode.getFomDato());

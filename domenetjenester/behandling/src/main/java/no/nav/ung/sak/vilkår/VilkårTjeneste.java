@@ -289,8 +289,8 @@ public class VilkårTjeneste {
     }
 
     @WithSpan
-    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, @SpanAttribute("vilkarType") VilkårType vilkårType) {
-        return utledPerioderTilVurderingUfiltrert(ref, vilkårType);
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref) {
+        return utledPerioderTilVurderingUfiltrert(ref);
     }
 
     public TreeSet<DatoIntervallEntitet> utledPerioderSomIkkeVurderes(BehandlingReferanse ref, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {
@@ -303,9 +303,9 @@ public class VilkårTjeneste {
                 .noneMatch(tilVurdering -> tilVurdering.inkluderer(vilkårsperiode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref, VilkårType vilkårType) {
+    public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref) {
         var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType());
-        var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), vilkårType));
+        var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId()));
         var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
         if (!utvidetTilVUrdering.isEmpty()) {
             perioder.addAll(utvidetTilVUrdering);

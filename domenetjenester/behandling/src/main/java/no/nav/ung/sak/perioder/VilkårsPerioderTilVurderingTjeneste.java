@@ -34,15 +34,13 @@ public interface VilkårsPerioderTilVurderingTjeneste {
         return null;
     }
 
-    NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType);
+    NavigableSet<DatoIntervallEntitet> utled(Long behandlingId);
 
     default NavigableSet<DatoIntervallEntitet> utledFraDefinerendeVilkår(Long behandlingId) {
         LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
-        for (VilkårType vilkårType : this.definerendeVilkår()) {
-            NavigableSet<DatoIntervallEntitet> perioderForVilkår = this.utled(behandlingId, vilkårType);
-            var perioderSomTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioderForVilkår);
-            tidslinje = tidslinje.crossJoin(perioderSomTidslinje, StandardCombinators::alwaysTrueForMatch);
-        }
+        NavigableSet<DatoIntervallEntitet> perioderForVilkår = this.utled(behandlingId);
+        var perioderSomTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioderForVilkår);
+        tidslinje = tidslinje.crossJoin(perioderSomTidslinje, StandardCombinators::alwaysTrueForMatch);
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
     Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId);

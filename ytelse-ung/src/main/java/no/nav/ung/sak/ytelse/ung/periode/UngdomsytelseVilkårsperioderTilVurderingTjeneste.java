@@ -56,7 +56,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId) {
         return utledPeriode(behandlingId);
     }
 

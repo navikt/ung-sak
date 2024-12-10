@@ -58,7 +58,7 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
 
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
 
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR);
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId());
         var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
         vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato);
