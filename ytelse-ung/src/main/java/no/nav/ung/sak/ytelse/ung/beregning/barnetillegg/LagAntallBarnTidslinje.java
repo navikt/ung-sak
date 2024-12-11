@@ -1,5 +1,6 @@
 package no.nav.ung.sak.ytelse.ung.beregning.barnetillegg;
 
+import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE;
 import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 
 import java.time.LocalDate;
@@ -33,9 +34,10 @@ public class LagAntallBarnTidslinje {
      * Utleder tidslinje for perioder der bruker har ett eller flere barn. I perioder uten barn er tidslinjen tom
      *
      * @param behandlingReferanse Behandlingreferanse
+     * @param relevantTidslinje Relevante perioder tidslinje
      * @return Tidslinje for antall barn der antall er mer eller lik 1
      */
-    public BarnetilleggMellomregning lagAntallBarnTidslinje(BehandlingReferanse behandlingReferanse) {
+    public BarnetilleggMellomregning lagAntallBarnTidslinje(BehandlingReferanse behandlingReferanse, LocalDateTimeline<Boolean> relevantTidslinje) {
         var personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandlingReferanse.getBehandlingId());
         var barnAvSøkerAktørId = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getRelasjoner()
             .stream().filter(r -> r.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
@@ -50,7 +52,16 @@ public class LagAntallBarnTidslinje {
             .map(info -> new LocalDateTimeline<>(info.fødselsdato(), getTilDato(info), 1))
             .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::sum))
             .orElse(LocalDateTimeline.empty());
-        return new BarnetilleggMellomregning(antallBarnTidslinje, relevantPersonInfoBarn);
+
+        return new BarnetilleggMellomregning(fyllAlleDelerOgBegrensTilRelevant(relevantTidslinje, antallBarnTidslinje), relevantPersonInfoBarn);
+    }
+
+    private static LocalDateTimeline<Integer> fyllAlleDelerOgBegrensTilRelevant( LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<Integer> antallBarnTidslinje) {
+        if (antallBarnTidslinje.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+        var fyllMedNullTidslinje = new LocalDateTimeline<>(antallBarnTidslinje.getMinLocalDate(), relevantTidslinje.getMaxLocalDate(), 0);
+        return fyllMedNullTidslinje.combine(antallBarnTidslinje, StandardCombinators::sum , LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     private static LocalDate getTilDato(FødselOgDødInfo info) {

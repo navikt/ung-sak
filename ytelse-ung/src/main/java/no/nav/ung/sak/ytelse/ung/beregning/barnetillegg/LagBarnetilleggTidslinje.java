@@ -3,7 +3,6 @@ package no.nav.ung.sak.ytelse.ung.beregning.barnetillegg;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
@@ -25,13 +24,16 @@ public class LagBarnetilleggTidslinje {
         this.lagAntallBarnTidslinje = lagAntallBarnTidslinje;
     }
 
-    /** Utleder tidslinje for barnetillegg basert på antall barn i siste dag i måneden før
-     *  Barn som fødes og dør i samme måned gir ikke barnetillegg basert på denne logikken.
+    /**
+     * Utleder tidslinje for barnetillegg basert på antall barn i siste dag i måneden før
+     * Barn som fødes og dør i samme måned gir ikke barnetillegg basert på denne logikken.
+     *
      * @param behandlingReferanse Behandlingreferanse
+     * @param perioder
      * @return Tidslinje for barnetillegg
      */
-    public BarnetilleggVurdering lagTidslinje(BehandlingReferanse behandlingReferanse) {
-        var barnetilleggMellomregning = lagAntallBarnTidslinje.lagAntallBarnTidslinje(behandlingReferanse);
+    public BarnetilleggVurdering lagTidslinje(BehandlingReferanse behandlingReferanse, LocalDateTimeline<Boolean> perioder) {
+        var barnetilleggMellomregning = lagAntallBarnTidslinje.lagAntallBarnTidslinje(behandlingReferanse, perioder);
         return new BarnetilleggVurdering(beregnBarnetillegg(barnetilleggMellomregning.antallBarnTidslinje()), barnetilleggMellomregning.barnFødselOgDødInfo()) ;
     }
 

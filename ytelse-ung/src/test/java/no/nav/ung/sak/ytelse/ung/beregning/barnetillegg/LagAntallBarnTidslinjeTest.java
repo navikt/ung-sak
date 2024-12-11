@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Iterator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -53,8 +56,9 @@ class LagAntallBarnTidslinjeTest {
         builder.medFødselsdato(LocalDate.now().minusYears(18));
         personInformasjonBuilder.leggTil(builder);
         personopplysningRepository.lagre(behandling.getId(), personInformasjonBuilder);
+        var relevantPeriodeFom = LocalDate.now();
 
-        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
+        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling), new LocalDateTimeline<>(relevantPeriodeFom, relevantPeriodeFom.plusMonths(2), true));
 
         assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isTrue();
     }
@@ -68,15 +72,17 @@ class LagAntallBarnTidslinjeTest {
         var barnAktørId = AktørId.dummy();
         var fødselsdatoBarn = LocalDate.now().minusYears(1);
         leggTilBarn(personInformasjonBuilder, builder, barnAktørId, fødselsdatoBarn, null);
+        var relevantPeriodeFom = LocalDate.now();
+        var relevantPeriodeTom = relevantPeriodeFom.plusMonths(2);
 
-        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
+        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling), new LocalDateTimeline<>(relevantPeriodeFom, relevantPeriodeTom, true));
 
         assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isFalse();
         var segments = antallBarnTidslinje.antallBarnTidslinje().toSegments();
         assertThat(segments.size()).isEqualTo(1);
         var segment = segments.first();
         assertThat(segment.getFom()).isEqualTo(fødselsdatoBarn);
-        assertThat(segment.getTom()).isEqualTo(TIDENES_ENDE);
+        assertThat(segment.getTom()).isEqualTo(relevantPeriodeTom);
         assertThat(segment.getValue()).isEqualTo(1);
     }
 
@@ -89,16 +95,24 @@ class LagAntallBarnTidslinjeTest {
         var barnAktørId = AktørId.dummy();
         var fødselsdatoBarn = LocalDate.now().minusYears(1);
         leggTilBarn(personInformasjonBuilder, builder, barnAktørId, fødselsdatoBarn, fødselsdatoBarn.plusMonths(5));
+        var relevantPeriodeFom = LocalDate.now();
+        var relevantPeriodeTom = relevantPeriodeFom.plusMonths(8);
 
-        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
+        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling), new LocalDateTimeline<>(relevantPeriodeFom, relevantPeriodeTom, true));
 
         assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isFalse();
         var segments = antallBarnTidslinje.antallBarnTidslinje().toSegments();
-        assertThat(segments.size()).isEqualTo(1);
-        var segment = segments.first();
+        assertThat(segments.size()).isEqualTo(2);
+        var iterator = segments.iterator();
+        var segment = iterator.next();
         assertThat(segment.getFom()).isEqualTo(fødselsdatoBarn);
         assertThat(segment.getTom()).isEqualTo(fødselsdatoBarn.plusMonths(5));
         assertThat(segment.getValue()).isEqualTo(1);
+
+        var segment2 = iterator.next();
+        assertThat(segment2.getFom()).isEqualTo(fødselsdatoBarn.plusMonths(5).plusDays(1));
+        assertThat(segment2.getTom()).isEqualTo(relevantPeriodeTom);
+        assertThat(segment2.getValue()).isEqualTo(0);
     }
 
     @Test
@@ -114,8 +128,10 @@ class LagAntallBarnTidslinjeTest {
         var barnAktørId2 = AktørId.dummy();
         var fødselsdatoBarn2 = LocalDate.now().minusYears(2);
         leggTilBarn(personInformasjonBuilder, builder, barnAktørId2, fødselsdatoBarn2, null);
+        var relevantPeriodeFom = LocalDate.now();
+        var relevantPeriodeTom = relevantPeriodeFom.plusMonths(8);
 
-        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling));
+        var antallBarnTidslinje = lagAntallBarnTidslinje.lagAntallBarnTidslinje(BehandlingReferanse.fra(behandling), new LocalDateTimeline<>(relevantPeriodeFom, relevantPeriodeTom, true));
 
         assertThat(antallBarnTidslinje.antallBarnTidslinje().isEmpty()).isFalse();
         var segments = antallBarnTidslinje.antallBarnTidslinje().toSegments();
@@ -133,7 +149,7 @@ class LagAntallBarnTidslinjeTest {
 
         var segment3 = iterator.next();
         assertThat(segment3.getFom()).isEqualTo(dødsdatoBarn1.plusDays(1));
-        assertThat(segment3.getTom()).isEqualTo(TIDENES_ENDE);
+        assertThat(segment3.getTom()).isEqualTo(relevantPeriodeTom);
         assertThat(segment3.getValue()).isEqualTo(1);
     }
 

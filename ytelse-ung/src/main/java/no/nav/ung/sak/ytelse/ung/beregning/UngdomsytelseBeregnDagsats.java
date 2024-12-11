@@ -42,7 +42,7 @@ public class UngdomsytelseBeregnDagsats {
     UngdomsytelseSatsResultat beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
         var grunnbeløpTidslinje = lagGrunnbeløpTidslinjeTjeneste.lagGrunnbeløpTidslinjeForPeriode(perioder);
         var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
-        var barnetilleggResultat = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef);
+        var barnetilleggResultat = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef, perioder);
 
         var satsTidslinje = perioder
             .intersection(grunnbeløpFaktorTidslinje, StandardCombinators::rightOnly)
