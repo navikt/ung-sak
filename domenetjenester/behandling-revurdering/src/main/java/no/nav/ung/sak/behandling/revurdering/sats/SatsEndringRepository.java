@@ -45,11 +45,11 @@ public class SatsEndringRepository {
                     "INNER JOIN UNG_GR_UNGDOMSPROGRAMPERIODE programperiode_gr ON b.id = programperiode_gr.behandling_id " +
                     "INNER JOIN UNG_UNGDOMSPROGRAMPERIODE programperiode ON programperiode_gr.ung_ungdomsprogramperioder_id = programperiode.ung_ungdomsprogramperioder_id " +
                     "WHERE b.opprettet_tid = " + sistOpprettet + // Henter siste behandling
-                    "   AND personopplysning.foedselsdato <= :tjuefem_aar_foer_dato " +
-                    "   AND programperiode.tom >= date_trunc('month', foedselsdato + interval '301 months') " + // Første dagen i måneden etter 25 års dagen.
                     "   AND programperiode_gr.aktiv = true" +
                     "   AND gr.aktiv = true" +
                     "   AND f.ytelse_type != 'OBSOLETE'" +
+                    "   AND personopplysning.foedselsdato <= :tjuefem_aar_foer_dato " +
+                    "   AND programperiode.tom >= date_trunc('month', foedselsdato + interval '301 months') " + // Første dagen i måneden etter 25 års dagen.
                     "   AND f.periode @> date_trunc('month', foedselsdato + interval '301 months')::date" + // Fagsakperioden inneholder endringsdatoen
                     // Idempotens sjekk at vi ikke allerede har beregnet høy sats.
                     "   AND NOT exists (SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
