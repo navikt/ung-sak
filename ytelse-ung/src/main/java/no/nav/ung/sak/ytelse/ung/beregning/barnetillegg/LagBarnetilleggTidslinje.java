@@ -33,7 +33,7 @@ public class LagBarnetilleggTidslinje {
      * @return Tidslinje for barnetillegg
      */
     public BarnetilleggVurdering lagTidslinje(BehandlingReferanse behandlingReferanse, LocalDateTimeline<Boolean> perioder) {
-        var barnetilleggMellomregning = lagAntallBarnTidslinje.lagAntallBarnTidslinje(behandlingReferanse, perioder);
+        var barnetilleggMellomregning = lagAntallBarnTidslinje.lagAntallBarnTidslinje(behandlingReferanse);
         return new BarnetilleggVurdering(beregnBarnetillegg(barnetilleggMellomregning.antallBarnTidslinje()), barnetilleggMellomregning.barnFødselOgDødInfo()) ;
     }
 
@@ -41,10 +41,9 @@ public class LagBarnetilleggTidslinje {
         List<LocalDateSegment<Integer>> antallBarnMånedsvisSegmenter = antallBarnTidslinje
             .toSegments()
             .stream()
-            .filter(s -> s.getLocalDateInterval().contains(s.getFom().with(TemporalAdjusters.lastDayOfMonth()))) // Finner siste segment i hver måned
-            .map(s -> new LocalDateSegment<>(s.getFom().plusMonths(1).withDayOfMonth(1), TIDENES_ENDE, s.getValue())) // Mapper alle segmenter til å starte første dag i neste måned
+            .map(s -> new LocalDateSegment<>(s.getFom().plusMonths(1).withDayOfMonth(1), s.getFom().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()), s.getValue())) // Mapper alle segmenter til å starte første dag i neste måned
             .toList();
-        var antallBarnForBarnetilleggTidslinje = new LocalDateTimeline<>(antallBarnMånedsvisSegmenter, StandardCombinators::coalesceRightHandSide);
+        var antallBarnForBarnetilleggTidslinje = new LocalDateTimeline<>(antallBarnMånedsvisSegmenter, StandardCombinators::max);
         return antallBarnForBarnetilleggTidslinje.mapValue(antallBarn -> new Barnetillegg(finnUtregnetBarnetillegg(antallBarn), antallBarn));
     }
 

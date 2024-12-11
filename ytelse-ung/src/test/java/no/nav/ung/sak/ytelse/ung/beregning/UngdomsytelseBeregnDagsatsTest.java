@@ -36,7 +36,7 @@ class UngdomsytelseBeregnDagsatsTest {
     @BeforeEach
     void setUp() {
         tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(grunnbeløpTjeneste), new LagBarnetilleggTidslinje(lagAntallBarnTidslinje));
-        when(lagAntallBarnTidslinje.lagAntallBarnTidslinje(any(), any())).thenReturn(new BarnetilleggMellomregning(LocalDateTimeline.empty(), List.of()));
+        when(lagAntallBarnTidslinje.lagAntallBarnTidslinje(any())).thenReturn(new BarnetilleggMellomregning(LocalDateTimeline.empty(), List.of()));
     }
 
 
