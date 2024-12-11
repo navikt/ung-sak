@@ -19,7 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.typer.AktørId;
 
 /**
- * Finner tidslinje for antall barn.
+ * Finner tidslinje for barnetillegg.
  */
 @Dependent
 public class LagBarnetilleggTidslinje {
@@ -38,9 +38,13 @@ public class LagBarnetilleggTidslinje {
 
     /**
      * Utleder tidslinje for utbetaling av barnetillegg
+     * <p>
+     * Alle folkeregistrerte barn gir rett på barnetillegg. For en gitt måned utbetales det 36 kroner per dag for hvert barn som har levd i måneden før.
+     * Dette betyr barns død påvirker utbetaling først to kalendermåneder etter dødsdato.
+     * Barnetillegg utbetales alltid for hele måneder gitt at alle andre vilkår er oppfylt for måneden.
      *
      * @param behandlingReferanse Behandlingreferanse
-     * @return Tidslinje for barnetillegg der denne overstiger 0
+     * @return Resultat med tidslinje for barnetillegg der dagsats overstiger 0
      */
     public BarnetilleggVurdering lagTidslinje(BehandlingReferanse behandlingReferanse, LocalDateTimeline<Boolean> perioder) {
         var personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandlingReferanse.getBehandlingId());
