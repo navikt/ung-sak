@@ -35,12 +35,7 @@ class SatsEndringRepositoryTest {
     private EntityManager entityManager;
 
     private SatsEndringRepository satsEndringRepository;
-
     private BehandlingRepositoryProvider repositoryProvider;
-
-    @Inject
-    private PersonopplysningRepository personopplysningRepository;
-
 
     @BeforeEach
     void setUp() {
