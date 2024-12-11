@@ -32,8 +32,11 @@ public class SatsEndringRepository {
     public Map<Fagsak, LocalDate> hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate dato) {
         LocalDate tjuefemÅrFørDato = dato.minusYears(25);
 
-        //language=PostgreSQL
         String sistOpprettet = "(SELECT max(b2.opprettet_tid) FROM Behandling b2 WHERE b2.fagsak_id=f.id GROUP BY (b2.opprettet_tid) ORDER BY b2.opprettet_tid DESC)";
+
+        String periodeMedHøySats = "(SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
+            "       INNER JOIN UNG_SATS_PERIODE satsperiode ON ungdomsgrunnlag.ung_sats_perioder_id = satsperiode.id " +
+            "       WHERE sats_type = 'HOY' AND ungdomsgrunnlag.behandling_id = b.id)";
 
         Query query = entityManager
             .createNativeQuery(
@@ -51,10 +54,7 @@ public class SatsEndringRepository {
                     "   AND personopplysning.foedselsdato <= :tjuefem_aar_foer_dato " +
                     "   AND programperiode.tom >= date_trunc('month', foedselsdato + interval '301 months') " + // Første dagen i måneden etter 25 års dagen.
                     "   AND f.periode @> date_trunc('month', foedselsdato + interval '301 months')::date" + // Fagsakperioden inneholder endringsdatoen
-                    // Idempotens sjekk at vi ikke allerede har beregnet høy sats.
-                    "   AND NOT exists (SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
-                    "       INNER JOIN UNG_SATS_PERIODE satsperiode ON ungdomsgrunnlag.ung_sats_perioder_id = satsperiode.id " +
-                    "       WHERE sats_type = 'HOY' AND ungdomsgrunnlag.behandling_id = b.id)", //$NON-NLS-1$
+                    "   AND NOT exists " + periodeMedHøySats, // Idempotens sjekk at vi ikke allerede har beregnet høy sats.
                 Tuple.class)
             .setParameter("tjuefem_aar_foer_dato", tjuefemÅrFørDato); // NOSONAR //$NON-NLS-1$
         List<Tuple> resultList = query.getResultList();
