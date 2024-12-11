@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,7 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.ytelse.ung.kodeverk.UngdomsytelseSatsTypeKodeverdiConverter;
 
 @Entity(name = "UngdomsytelseSatsPeriode")
 @Table(name = "UNG_SATS_PERIODE")
@@ -42,6 +44,7 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
     @Column(name = "grunnbeløp_faktor", nullable = false)
     private BigDecimal grunnbeløpFaktor;
 
+    @Convert(converter = UngdomsytelseSatsTypeKodeverdiConverter.class)
     @Column(name = "sats_type", nullable = false)
     private UngdomsytelseSatsType satsType;
 
