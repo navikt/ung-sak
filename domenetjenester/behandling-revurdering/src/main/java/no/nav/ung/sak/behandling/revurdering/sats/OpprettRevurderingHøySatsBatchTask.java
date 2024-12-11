@@ -2,10 +2,7 @@ package no.nav.ung.sak.behandling.revurdering.sats;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -35,26 +32,31 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingHøySatsBatchTask.class);
     private SatsEndringRepository satsEndringRepository;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
-    OpprettRevurderingHøySatsBatchTask() {
+
+    OpprettRevurderingHøySatsBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
         // for CDI proxy
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @Inject
-    public OpprettRevurderingHøySatsBatchTask(SatsEndringRepository satsEndringRepository) {
+    public OpprettRevurderingHøySatsBatchTask(SatsEndringRepository satsEndringRepository, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.satsEndringRepository = satsEndringRepository;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         LocalDate datoForKjøring = LocalDate.now();
-        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
+        ProsessTaskGruppe taskGruppeTilRevurderinger = new ProsessTaskGruppe();
 
         Set<Map.Entry<Fagsak, LocalDate>> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(datoForKjøring).entrySet();
 
         List<ProsessTaskData> prosessTaskerTilRevurdering = utledProsessTaskerForRevurdering(fagsakerTilRevurdering);
 
-        taskGruppe.addNesteParallell(prosessTaskerTilRevurdering);
+        taskGruppeTilRevurderinger.addNesteParallell(prosessTaskerTilRevurdering);
+        prosessTaskTjeneste.lagre(taskGruppeTilRevurderinger);
     }
 
     static List<ProsessTaskData> utledProsessTaskerForRevurdering(Set<Map.Entry<Fagsak, LocalDate>> entries) {
