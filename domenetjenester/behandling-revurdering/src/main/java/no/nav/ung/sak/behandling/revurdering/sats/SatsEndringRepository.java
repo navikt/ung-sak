@@ -32,7 +32,7 @@ public class SatsEndringRepository {
     public Map<Fagsak, LocalDate> hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate dato) {
         LocalDate tjuefemÅrFørDato = dato.minusYears(25);
 
-        String sistOpprettet = "(SELECT max(b2.opprettet_tid) FROM Behandling b2 WHERE b2.fagsak_id=f.id GROUP BY (b2.opprettet_tid) ORDER BY b2.opprettet_tid DESC LIMIT 1)";
+        String sistOpprettet = "(SELECT max(b2.opprettet_tid) FROM Behandling b2 WHERE b2.fagsak_id = f.id)";
 
         String periodeMedHøySats = "(SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
             "       INNER JOIN UNG_SATS_PERIODE satsperiode ON ungdomsgrunnlag.ung_sats_perioder_id = satsperiode.id " +
