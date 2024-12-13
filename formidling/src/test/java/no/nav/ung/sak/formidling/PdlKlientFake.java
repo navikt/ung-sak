@@ -29,6 +29,7 @@ import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
 
+//TODO flytt opprettelsen i TestScenarioBuilder?
 public class PdlKlientFake implements Pdl {
     private final String aktørid;
     private final Person person;

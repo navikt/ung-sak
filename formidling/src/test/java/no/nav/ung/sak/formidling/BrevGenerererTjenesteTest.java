@@ -52,11 +52,8 @@ class BrevGenerererTjenesteTest {
 
     @BeforeEach
     void setup() {
-
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         fagsakRepository = new FagsakRepository(entityManager);
-
-
 
     }
 

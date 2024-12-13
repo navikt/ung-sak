@@ -39,13 +39,14 @@ public class BrevGenerererTjeneste {
     public GenerertBrev genererPdf(BrevbestillingDto brevbestillingDto) {
 
         Behandling behandling = behandlingRepository.hentBehandling(brevbestillingDto.behandlingId());
-        AktørId aktørId = behandling.getFagsak().getAktørId();
-        var personIdent = aktørTjeneste.hentPersonIdentForAktørId(aktørId)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke person med aktørid"));
-        PersoninfoBasis personinfoBasis = personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent);
+        PartResponseDto mottaker = hentMottaker(behandling);
 
+        // valider mal via regel hvis vedtaksbrev
 
-        PartResponseDto mottaker = new PartResponseDto(aktørId.getId(), personinfoBasis.getNavn(), IdType.AKTØRID, RolleType.BRUKER);
+        // lag brev json via datasamler og velg template
+
+        // konverter til pdf fra template
+
 
         return new GenerertBrev(
             "123".getBytes(),
@@ -53,5 +54,16 @@ public class BrevGenerererTjeneste {
             mottaker,
             brevbestillingDto.malType()
         );
+    }
+
+    private PartResponseDto hentMottaker(Behandling behandling) {
+        AktørId aktørId = behandling.getFagsak().getAktørId();
+        var personIdent = aktørTjeneste.hentPersonIdentForAktørId(aktørId)
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke person med aktørid"));
+        PersoninfoBasis personinfoBasis = personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent);
+
+
+        PartResponseDto mottaker = new PartResponseDto(aktørId.getId(), personinfoBasis.getNavn(), IdType.AKTØRID, RolleType.BRUKER);
+        return mottaker;
     }
 }
