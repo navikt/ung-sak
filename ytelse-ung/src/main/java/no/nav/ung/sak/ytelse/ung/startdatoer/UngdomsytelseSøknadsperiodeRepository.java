@@ -81,4 +81,15 @@ public class UngdomsytelseSøknadsperiodeRepository {
             persister(Optional.empty(), new UngdomsytelseSøknadGrunnlag(nyBehandlingId, entitet));
         });
     }
+
+    public Optional<UngdomsytelseSøknadGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
+        var query = entityManager.createQuery(
+            "SELECT s " +
+                "FROM UngdomsytelseSøknadGrunnlag s " +
+                "WHERE s.id = :grunnlagId", UngdomsytelseSøknadGrunnlag.class);
+
+        query.setParameter("grunnlagId", grunnlagId);
+
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
 }
