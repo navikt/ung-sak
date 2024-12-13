@@ -37,14 +37,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>4.4.1</felles.version>
-        <swagger.version>2.2.25</swagger.version>
+        <swagger.version>2.2.27</swagger.version>
         <junit.version>5.11.3</junit.version>
         <k9format.version>9.8.0</k9format.version>
-        <jackson.version>2.18.1</jackson.version>
+        <jackson.version>2.18.2</jackson.version>
         <asm.version>9.7.1</asm.version>
-        <kotlin-stdlib.version>2.0.21</kotlin-stdlib.version>
+        <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
-        <flyway.version>11.0.0</flyway.version>
+        <flyway.version>11.1.0</flyway.version>
 
     </properties>
 
@@ -77,7 +77,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>8.0.1.Final</version>
+                <version>8.0.2.Final</version>
             </dependency>
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
