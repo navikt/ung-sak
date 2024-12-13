@@ -20,7 +20,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTjeneste;
 import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.BarnetilleggMellomregning;
-import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.LagAntallBarnTidslinje;
+import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.BarnetilleggVurdering;
 import no.nav.ung.sak.ytelse.ung.beregning.barnetillegg.LagBarnetilleggTidslinje;
 
 @ExtendWith(JpaExtension.class)
@@ -30,13 +30,13 @@ class UngdomsytelseBeregnDagsatsTest {
     private UngdomsytelseBeregnDagsats tjeneste;
     @Inject
     private GrunnbeløpTjeneste grunnbeløpTjeneste;
-    private LagAntallBarnTidslinje lagAntallBarnTidslinje = mock(LagAntallBarnTidslinje.class);
+    private LagBarnetilleggTidslinje lagBarnetilleggTidslinje = mock(LagBarnetilleggTidslinje.class);
 
 
     @BeforeEach
     void setUp() {
-        tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(grunnbeløpTjeneste), new LagBarnetilleggTidslinje(lagAntallBarnTidslinje));
-        when(lagAntallBarnTidslinje.lagAntallBarnTidslinje(any())).thenReturn(new BarnetilleggMellomregning(LocalDateTimeline.empty(), List.of()));
+        tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(grunnbeløpTjeneste), lagBarnetilleggTidslinje);
+        when(lagBarnetilleggTidslinje.lagTidslinje(any(), any())).thenReturn(new BarnetilleggVurdering(LocalDateTimeline.empty(), List.of()));
     }
 
 
