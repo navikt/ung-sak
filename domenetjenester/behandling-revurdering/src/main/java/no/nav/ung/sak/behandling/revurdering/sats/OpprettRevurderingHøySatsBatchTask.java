@@ -35,9 +35,8 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
 
-    OpprettRevurderingHøySatsBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
+    OpprettRevurderingHøySatsBatchTask() {
         // for CDI proxy
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @Inject
