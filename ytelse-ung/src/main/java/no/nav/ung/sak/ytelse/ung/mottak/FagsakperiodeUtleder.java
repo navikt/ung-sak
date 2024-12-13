@@ -47,23 +47,25 @@ public class FagsakperiodeUtleder {
                 return søknadFom;
             } else {
                 var resterendeDager = FinnForbrukteDager.MAKS_ANTALL_DAGER - forbrukteDager;
-                var medHeleAntallUkerLagtTil = søknadFom.plusWeeks(resterendeDager / VIRKEDAGER_PR_UKE).minusDays(1);
-                var restPeriodeFom = medHeleAntallUkerLagtTil.plusDays(1);
-                var daysToAdd = finnRestDagerÅLeggeTil(restPeriodeFom, resterendeDager % VIRKEDAGER_PR_UKE);
+                var weeksToAdd = resterendeDager / VIRKEDAGER_PR_UKE;
+                var medHeleAntallUkerLagtTil = søknadFom.plusWeeks(weeksToAdd).minusDays(1);
+                var daysToAdd = finnRestDagerÅLeggeTil(medHeleAntallUkerLagtTil, resterendeDager % VIRKEDAGER_PR_UKE);
                 return medHeleAntallUkerLagtTil.plusDays(daysToAdd);
             }
 
         }
     }
 
-    private long finnRestDagerÅLeggeTil(LocalDate fom, long modulo) {
-        if (modulo >= VIRKEDAGER_PR_UKE) {
+    private long finnRestDagerÅLeggeTil(LocalDate fraDato, long virkedagerSomLeggesTil) {
+        if (virkedagerSomLeggesTil >= VIRKEDAGER_PR_UKE) {
             throw new IllegalArgumentException("Forventet mindre enn en uke i resterende dager");
         }
-        if (fom.getDayOfWeek().getValue() + modulo < DayOfWeek.FRIDAY.getValue()) {
-            return modulo;
+        if (fraDato.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+            return virkedagerSomLeggesTil + 1;
+        } else if (fraDato.getDayOfWeek().equals(DayOfWeek.SUNDAY) || (fraDato.getDayOfWeek().getValue() + virkedagerSomLeggesTil <= DayOfWeek.FRIDAY.getValue())) {
+            return virkedagerSomLeggesTil;
         } else {
-            return modulo+2;
+            return virkedagerSomLeggesTil + 2;
         }
     }
 
