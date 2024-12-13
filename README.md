@@ -2,7 +2,7 @@
 
 [![](https://github.com/navikt/ung-sak/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/ung-sak/actions?query=workflow%3A%22Bygg+og+deploy%22) [![](https://github.com/navikt/k9-verdikjede/workflows/Tester%20saksbehandling/badge.svg)](https://navikt.github.io/k9-verdikjede)
 
-Dette er repository for kildkode applikasjonen for saksbehandling av ytelser i [Folketrygdloven kapittel 9](https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_5-5#%C2%A79-1)
+Dette er repository for kildkode applikasjonen for saksbehandling av ungdomsytelsen
 
 # Utvikling
    
