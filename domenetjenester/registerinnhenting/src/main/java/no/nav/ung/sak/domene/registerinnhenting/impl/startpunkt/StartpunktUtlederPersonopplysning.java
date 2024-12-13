@@ -1,12 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl.startpunkt;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.FRISINN;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -31,12 +24,7 @@ import no.nav.ung.sak.typer.AktørId;
 
 @ApplicationScoped
 @GrunnlagRef(PersonInformasjonEntitet.class)
-@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
-@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-@FagsakYtelseTypeRef(OMSORGSPENGER)
-@FagsakYtelseTypeRef(FRISINN)
-@FagsakYtelseTypeRef(UNGDOMSYTELSE)
+@FagsakYtelseTypeRef
 class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
     private final String source = this.getClass().getSimpleName();

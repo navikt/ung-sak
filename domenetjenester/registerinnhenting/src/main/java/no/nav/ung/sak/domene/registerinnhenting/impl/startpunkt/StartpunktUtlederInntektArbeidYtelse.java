@@ -1,7 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl.startpunkt;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,7 +24,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @GrunnlagRef(InntektArbeidYtelseGrunnlag.class)
-@FagsakYtelseTypeRef(UNGDOMSYTELSE)
+@FagsakYtelseTypeRef
 class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
