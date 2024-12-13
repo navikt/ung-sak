@@ -84,8 +84,8 @@ class FagsakperiodeUtlederTest {
     }
 
     @Test
-    void skal_sette_periode_for_revurdering_med_en_uke_forbrukte_dager() {
-        var fom = LocalDate.now();
+    void skal_sette_periode_for_revurdering_med_en_uke_forbrukte_dager_med_start_fredag() {
+        var fom = LocalDate.of(2023, 12, 3);
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), fom, null);
         entityManager.persist(fagsak);
         var behandling = Behandling.forFørstegangssøknad(fagsak).build();
@@ -94,11 +94,46 @@ class FagsakperiodeUtlederTest {
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, fom.plusWeeks(1).minusDays(1))));
 
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
-        var nySøknadFom = fom.plusWeeks(2);
+        var nySøknadFom = LocalDate.of(2024, 12, 13);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
         assertThat(periode.getFomDato()).isEqualTo(fom);
-        assertThat(periode.getTomDato()).isEqualTo(nySøknadFom.plusWeeks(51).minusDays(1));
+        assertThat(periode.getTomDato()).isEqualTo(LocalDate.of(2025, 12, 4));
     }
+
+    @Test
+    void skal_sette_periode_for_revurdering_med_en_uke_forbrukte_dager_med_start_laurdag() {
+        var fom = LocalDate.of(2023, 12, 3);
+        var fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), fom, null);
+        entityManager.persist(fagsak);
+        var behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        entityManager.persist(behandling);
+
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, fom.plusWeeks(1).minusDays(1))));
+
+        var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
+        var nySøknadFom = LocalDate.of(2024, 12, 14);
+        var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
+        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getTomDato()).isEqualTo(LocalDate.of(2025, 12, 5));
+    }
+
+    @Test
+    void skal_sette_periode_for_revurdering_med_en_uke_forbrukte_dager_med_start_søndag() {
+        var fom = LocalDate.of(2023, 12, 3);
+        var fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), fom, null);
+        entityManager.persist(fagsak);
+        var behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        entityManager.persist(behandling);
+
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, fom.plusWeeks(1).minusDays(1))));
+
+        var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
+        var nySøknadFom = LocalDate.of(2024, 12, 15);
+        var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
+        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getTomDato()).isEqualTo(LocalDate.of(2025, 12, 7));
+    }
+
 
     @Test
     void skal_sette_periode_for_revurdering_med_tre_forbrukte_dager() {
