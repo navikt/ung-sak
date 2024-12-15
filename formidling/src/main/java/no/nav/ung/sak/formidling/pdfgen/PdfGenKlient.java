@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.pdfgen.core.Environment;
 import no.nav.pdfgen.core.PDFGenCore;
 import no.nav.pdfgen.core.PDFGenResource;
@@ -19,7 +18,7 @@ import no.nav.pdfgen.core.pdf.CreatePdfKt;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 
 @ApplicationScoped
-public class PdfGen {
+public class PdfGenKlient {
     private static String RESOURCE_TEMPLATE = "pdfgen/%s";
     private final ObjectMapper pdfgenObjectMapper;
     //Brukes for test da pdfgenerering er tregt.
@@ -27,10 +26,10 @@ public class PdfGen {
 
 
     @Inject
-    public PdfGen() {
+    public PdfGenKlient() {
         this(false);
     }
-    public PdfGen(Boolean ignorePdf) {
+    public PdfGenKlient(Boolean ignorePdf) {
         this.ignorePdf = Objects.requireNonNullElse(ignorePdf, false);
         System.setProperty("sun2d.cmm", "sun2d.cmm.kcms.KcmsServiceProvider");
         VeraGreenfieldFoundryProvider.initialise();

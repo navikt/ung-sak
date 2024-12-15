@@ -1,7 +1,6 @@
 package no.nav.ung.sak.formidling;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.BrevbestillingDto;
-import no.nav.ung.sak.formidling.pdfgen.PdfGen;
+import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -51,7 +50,7 @@ class InnvilgelseTest {
             repositoryProvider.getBehandlingRepository(),
             new PersonBasisTjeneste(pdlKlient),
             new AktørTjeneste(pdlKlient),
-            new PdfGen(true)
+            new PdfGenKlient(true)
         );
     }
 
