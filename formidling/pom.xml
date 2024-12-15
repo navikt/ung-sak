@@ -26,6 +26,27 @@
 			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>domenetjenester-bom</artifactId>
 		</dependency>
+        <!-- PDFGEN -->
+        <dependency>
+            <groupId>no.nav.pdfgen</groupId>
+            <artifactId>pdfgen-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.verapdf</groupId>
+                    <artifactId>validation-model</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.verapdf</groupId>
+            <artifactId>validation-model-jakarta</artifactId>
+            <version>1.26.1</version>
+        </dependency>
 
 		<!-- Test avhengigheter -->
 		<dependency>

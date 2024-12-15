@@ -2,32 +2,27 @@ package no.nav.ung.sak.formidling;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
-import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.søknad.JsonUtils;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.notat.NotatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.dto.BrevbestillingDto;
-import no.nav.ung.sak.formidling.dto.GenerertBrev;
+import no.nav.ung.sak.formidling.pdfgen.PdfGen;
+import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.PartResponseDto;
 import no.nav.ung.sak.formidling.kodeverk.IdType;
 import no.nav.ung.sak.formidling.kodeverk.RolleType;
@@ -68,7 +63,8 @@ class BrevGenerererTjenesteTest {
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
             new PersonBasisTjeneste(pdlKlient),
-            new AktørTjeneste(pdlKlient)
+            new AktørTjeneste(pdlKlient),
+            new PdfGen()
         );
 
         // Lag innvilgelsesbrev
@@ -82,7 +78,7 @@ class BrevGenerererTjenesteTest {
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererPdf(bestillBrevDto);
 
-        assertThat(new String(generertBrev.pdfData())).isEqualTo("123");
+        assertThat(erPdf(generertBrev.pdf())).isTrue();
         PartResponseDto mottaker = generertBrev.mottaker();
         assertThat(mottaker.navn()).isEqualTo(navn);
         assertThat(mottaker.id()).isEqualTo(ungdom.getAktørId());
@@ -97,6 +93,17 @@ class BrevGenerererTjenesteTest {
 
 
 
+    }
+
+    public static boolean erPdf(byte[] fileBytes) {
+        if (fileBytes == null || fileBytes.length < 5) {
+            return false; // Not enough data to check
+        }
+
+        // Bruker StandardCharsets.US_ASCII for å sikre konsekvent tolkning av PDF-magiske tall ("%PDF-"),
+        // siden dette alltid er innenfor ASCII-tegnsettet, uavhengig av plattformens standard tegnsett.
+        String magicNumber = new String(fileBytes, 0, 5, StandardCharsets.US_ASCII);
+        return "%PDF-".equals(magicNumber);
     }
 
 }
