@@ -32,6 +32,7 @@ import no.nav.ung.sak.formidling.dto.PartResponseDto;
 import no.nav.ung.sak.formidling.kodeverk.IdType;
 import no.nav.ung.sak.formidling.kodeverk.RolleType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
+import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -83,6 +84,7 @@ class BrevGenerererTjenesteTest {
         );
 
         GenerertBrev generertBrev = brevGenerererTjeneste.generer(bestillBrevDto);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
 
         assertThat(erPdf(generertBrev.dokument().pdf())).isTrue();
         if (System.getenv("LAGRE_PDF") != null) {

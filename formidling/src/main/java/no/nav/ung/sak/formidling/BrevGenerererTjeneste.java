@@ -63,7 +63,8 @@ public class BrevGenerererTjeneste {
             dokument,
             mottaker,
             mottaker,
-            brevbestillingDto.malType()
+            brevbestillingDto.malType(),
+            input.templateType()
         );
     }
 
