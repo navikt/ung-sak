@@ -41,7 +41,7 @@ public class PdfGenKlient {
             new PDFGenResource(RESOURCE_TEMPLATE.formatted("data/"))
         );
         PDFGenCore.Companion.init(initialEnvironment);
-        pdfgenObjectMapper = PdfGenObjectMapper.lag();
+        pdfgenObjectMapper = PdfGenObjectMapperConfig.lag();
 
     }
 
