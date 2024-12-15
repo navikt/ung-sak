@@ -1,21 +1,6 @@
 <div style="margin-top: -20mm; min-height: 20mm;">
-    {{#if felles.mottaker.bruker}}
-        <div class="uten-mellomrom">
-            <p>Til: {{felles.mottaker.navn}}</p>
-            <p>Fødselsnummer: {{felles.mottaker.id}}</p>
-        </div>
-
-        <div class="uten-mellomrom" style="font-style: italic; margin-top: 2mm; font-size: small;">
-            {{#if felles.gjelder.barn.navn}}<p>Gjelder: {{felles.gjelder.barn.navn}}</p>{{/if}}
-            {{#if felles.gjelder.barn.id}}<p>Fødselsnummer: {{felles.gjelder.barn.id}}</p>{{/if}}
-        </div>
-    {{else}}
-        <div class="uten-mellomrom">
-            {{#if felles.mottaker.navn}}<p>{{felles.mottaker.navn}}</p>{{/if}}
-            {{#if felles.mottaker.id}}<p>{{felles.mottaker.id}}</p>{{/if}}
-        </div>
-        <div style="font-style: italic; font-size: small;">
-            <p>Gjelder: {{felles.gjelder.navn}}, {{felles.gjelder.fødselsdato}}</p>
-        </div>
-    {{/if}}
+    <div class="uten-mellomrom">
+        <p>Til: {{felles.mottaker.navn}}</p>
+        <p>Fødselsnummer: {{felles.mottaker.id}}</p>
+    </div>
 </div>

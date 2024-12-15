@@ -14,10 +14,12 @@ import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.PartResponseDto;
 import no.nav.ung.sak.formidling.kodeverk.IdType;
 import no.nav.ung.sak.formidling.kodeverk.RolleType;
+import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.TemplateType;
-import no.nav.ung.sak.formidling.template.dto.FellesTemplateData;
-import no.nav.ung.sak.formidling.template.dto.InnvilgelseTemplate;
+import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
+import no.nav.ung.sak.formidling.template.dto.InnvilgelseDto;
+import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.typer.AktørId;
 
 @ApplicationScoped
@@ -40,7 +42,7 @@ public class BrevGenerererTjeneste {
         this.pdfGen = pdfGen;
     }
 
-    public GenerertBrev genererPdf(BrevbestillingDto brevbestillingDto) {
+    public GenerertBrev generer(BrevbestillingDto brevbestillingDto) {
 
         Behandling behandling = behandlingRepository.hentBehandling(brevbestillingDto.behandlingId());
         PartResponseDto mottaker = hentMottaker(behandling);
@@ -49,22 +51,21 @@ public class BrevGenerererTjeneste {
 
         // lag brev json via datasamler og velg templateData
         var input = new TemplateInput(TemplateType.INNVILGELSE,
-            new InnvilgelseTemplate(
-                new FellesTemplateData()
+            new InnvilgelseDto(
+                FellesDto.automatisk(new MottakerDto(mottaker.navn(), mottaker.id()))
             ));
 
 
         // konverter til pdf fra templateData
-        byte[] pdf = pdfGen.lagPdf(input);
+        PdfGenDokument dokument = pdfGen.lagDokument(input);
 
         return new GenerertBrev(
-            pdf,
+            dokument,
             mottaker,
             mottaker,
             brevbestillingDto.malType()
         );
     }
-
 
     private PartResponseDto hentMottaker(Behandling behandling) {
         AktørId aktørId = behandling.getFagsak().getAktørId();
