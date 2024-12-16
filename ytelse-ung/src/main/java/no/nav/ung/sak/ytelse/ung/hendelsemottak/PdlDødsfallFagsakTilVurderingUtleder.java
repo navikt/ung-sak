@@ -87,8 +87,8 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
             finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomBarnAvSøker(aktør, aktuellDato)
                 .stream()
                 .filter(f -> deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId))
-                .filter(f -> erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId))
-                .forEach(f -> fagsakÅrsakMap.put(f, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER));
+                .filter(f -> erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId))
+                .forEach(f -> fagsakÅrsakMap.put(f, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN));
         }
 
         return fagsakÅrsakMap;
