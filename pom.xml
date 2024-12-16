@@ -456,12 +456,6 @@
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-common</artifactId>
-                <version>${kotlin-stdlib.version}</version>
-            </dependency>
-            <dependency>
-                <!-- lagt her for å sikre dependencyConvergence -->
-                <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-reflect</artifactId>
                 <version>${kotlin-stdlib.version}</version>
             </dependency>
