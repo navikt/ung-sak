@@ -18,6 +18,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
@@ -47,8 +48,6 @@ import no.nav.ung.sak.kontrakt.vilkår.VilkårResultatDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
@@ -62,7 +61,6 @@ import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 /**
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
@@ -287,12 +285,6 @@ public class BehandlingDtoTjeneste {
         boolean ytelseMedBeregning = InformasjonselementerUtleder.finnTjeneste(informasjonselementer, behandling.getFagsakYtelseType(), behandling.getType()).harBeregnetYtelse(behandling.getType());
 
         if (ytelseMedBeregning) {
-            // FIXME: fjern denne, skal bare ha "arbeidsforhold" som rel
-            dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH, "arbeidsforhold-v1", uuidQueryParams));
-            dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.INNTEKT_ARBEID_YTELSE_ARBEIDSFORHOLD_PATH, "arbeidsforhold", uuidQueryParams));
-
-            dto.leggTil(getFraMap(ArbeidsgiverRestTjeneste.ARBEIDSGIVER_PATH, "arbeidsgivere", uuidQueryParams));
-
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
             lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);

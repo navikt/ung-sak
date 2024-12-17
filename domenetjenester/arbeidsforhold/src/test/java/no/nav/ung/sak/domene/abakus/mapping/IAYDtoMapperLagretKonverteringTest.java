@@ -59,39 +59,14 @@ public class IAYDtoMapperLagretKonverteringTest {
             new Opptjeningsnøkkel(null, ORGNR, null));
         var inntektspostBuilder = inntektBuilder.getInntektspostBuilder();
 
-        var aktørArbeidBuilder = aggregatBuilder.getAktørArbeidBuilder(aktørId);
-        var yrkesaktivitetBuilder = aktørArbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(
-            new Opptjeningsnøkkel(null, ORGNR, null),
-            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-
         var aktørYtelseBuilder = aggregatBuilder.getAktørYtelseBuilder(aktørId);
         aktørYtelseBuilder.leggTilYtelse(lagYtelse());
-
-        var aktivitetsAvtaleBuilder = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder();
-        var permisjonBuilder = yrkesaktivitetBuilder.getPermisjonBuilder();
 
         var fraOgMed = DATO.minusWeeks(1);
         var tilOgMed = DATO.plusMonths(1);
 
-        var permisjon = permisjonBuilder
-            .medProsentsats(BigDecimal.valueOf(100))
-            .medPeriode(fraOgMed, tilOgMed)
-            .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMISJON)
-            .build();
 
-        var aktivitetsAvtale = aktivitetsAvtaleBuilder
-            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed))
-            .medSisteLønnsendringsdato(fraOgMed);
 
-        var yrkesaktivitet = yrkesaktivitetBuilder
-            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-            .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
-            .leggTilAktivitetsAvtale(aktivitetsAvtale)
-            .leggTilPermisjon(permisjon)
-            .build();
-
-        var aktørArbeid = aktørArbeidBuilder
-            .leggTilYrkesaktivitet(yrkesaktivitetBuilder);
 
         var inntektspost = inntektspostBuilder
             .medBeløp(BigDecimal.TEN)
@@ -101,14 +76,13 @@ public class IAYDtoMapperLagretKonverteringTest {
 
         inntektBuilder
             .leggTilInntektspost(inntektspost)
-            .medArbeidsgiver(yrkesaktivitet.getArbeidsgiver())
+            .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
             .medInntektsKilde(InntektsKilde.INNTEKT_OPPTJENING);
 
         InntektArbeidYtelseAggregatBuilder.AktørInntektBuilder aktørInntekt = aktørInntektBuilder
             .leggTilInntekt(inntektBuilder);
 
         aggregatBuilder.leggTilAktørInntekt(aktørInntekt);
-        aggregatBuilder.leggTilAktørArbeid(aktørArbeid);
         aggregatBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
 
         iayTjeneste.lagreIayAggregat(behandlingId, aggregatBuilder);

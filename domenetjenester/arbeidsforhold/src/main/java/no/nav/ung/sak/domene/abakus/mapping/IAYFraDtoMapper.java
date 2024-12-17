@@ -58,31 +58,22 @@ public class IAYFraDtoMapper {
 
         var registerBuilder = InntektArbeidYtelseAggregatBuilder.builderFor(Optional.empty(), register.getEksternReferanse(), tidspunkt, VersjonType.REGISTER);
 
-        var aktørArbeid = new MapAktørArbeid.MapFraDto(aktørId, registerBuilder).map(register.getArbeid());
         var aktørInntekt = new MapAktørInntekt.MapFraDto(aktørId, registerBuilder).map(register.getInntekt());
         var aktørYtelse = new MapAktørYtelse.MapFraDto(aktørId, registerBuilder).map(register.getYtelse());
 
-        aktørArbeid.forEach(registerBuilder::leggTilAktørArbeid);
         aktørInntekt.forEach(registerBuilder::leggTilAktørInntekt);
         aktørYtelse.forEach(registerBuilder::leggTilAktørYtelse);
 
-        builder.medData(registerBuilder);
+        builder.medRegister(registerBuilder);
     }
 
     private void mapTilGrunnlagBuilder(InntektArbeidYtelseGrunnlagDto dto, InntektArbeidYtelseGrunnlagBuilder builder) {
-        var arbeidsforholdInformasjonBuilder = new MapArbeidsforholdInformasjon.MapFraDto(builder).map(dto.getArbeidsforholdInformasjon());
-        var mapInntektsmeldinger = new MapInntektsmeldinger.MapFraDto();
-        var inntektsmeldinger = mapInntektsmeldinger.map(arbeidsforholdInformasjonBuilder, dto.getInntektsmeldinger());
-
         var oppgittOpptjening = mapOppgttOpptjening(dto.getOppgittOpptjening());
         var overstyrtOppgittOpptjening = mapOppgttOpptjening(dto.getOverstyrtOppgittOpptjening());
-        var arbeidsforholdInformasjon = arbeidsforholdInformasjonBuilder.build();
 
         builder.medOverstyrtOppgittOpptjening(overstyrtOppgittOpptjening);
         builder.medOppgittOpptjening(oppgittOpptjening);
         builder.medOppgittOpptjeningAggregat(mapOppgitteOpptjeninger(dto.getOppgitteOpptjeninger()));
-        builder.setInntektsmeldinger(inntektsmeldinger);
-        builder.medInformasjon(arbeidsforholdInformasjon);
     }
 
     private Collection<OppgittOpptjeningBuilder> mapOppgitteOpptjeninger(OppgitteOpptjeningerDto oppgitteOpptjeninger) {
@@ -103,9 +94,7 @@ public class IAYFraDtoMapper {
         if (overstyrt != null) {
             var tidspunkt = overstyrt.getOpprettetTidspunkt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
             var saksbehandlerOverstyringer = InntektArbeidYtelseAggregatBuilder.builderFor(Optional.empty(), overstyrt.getEksternReferanse(), tidspunkt, VersjonType.SAKSBEHANDLET);
-            var overstyrtAktørArbeid = new MapAktørArbeid.MapFraDto(aktørId, saksbehandlerOverstyringer).map(overstyrt.getArbeid());
-            overstyrtAktørArbeid.forEach(saksbehandlerOverstyringer::leggTilAktørArbeid);
-            builder.medData(saksbehandlerOverstyringer);
+            builder.medRegister(saksbehandlerOverstyringer);
         }
     }
 }

@@ -96,8 +96,6 @@ public class SøknadDtoTjeneste {
         dto.setBegrunnelseForSenInnsending(søknad.getBegrunnelseForSenInnsending());
         Optional.ofNullable(søknad.getSøknadsperiode()).ifPresent(sp -> dto.setSøknadsperiode(new Periode(sp.getFomDato(), sp.getTomDato())));
 
-        dto.setManglendeVedlegg(genererManglendeVedlegg(ref));
-
         dto.setAngittePersoner(mapAngittePersoner(søknad.getAngittePersoner()));
 
         return Optional.of(dto);
@@ -175,54 +173,6 @@ public class SøknadDtoTjeneste {
                 return dto;
             })
             .toList();
-    }
-
-    private List<ManglendeVedleggDto> genererManglendeVedlegg(BehandlingReferanse ref) {
-        Kompletthetsjekker kompletthetsjekker = Kompletthetsjekker.finnKompletthetsjekkerFor(ref.getFagsakYtelseType(), ref.getBehandlingType());
-        List<ManglendeVedlegg> alleManglendeVedlegg = new ArrayList<>(kompletthetsjekker.utledAlleManglendeVedleggForForsendelse(ref));
-        List<ManglendeVedlegg> vedleggSomIkkeKommer = List.copyOf(kompletthetsjekker.utledAlleManglendeVedleggSomIkkeKommer(ref));
-
-        // Fjerner slik at det ikke blir dobbelt opp, og for å markere korrekt hvilke som ikke vil komme
-        alleManglendeVedlegg.removeIf(e -> vedleggSomIkkeKommer.stream().anyMatch(it -> it.getArbeidsgiver().equals(e.getArbeidsgiver())));
-        alleManglendeVedlegg.addAll(vedleggSomIkkeKommer);
-
-        return alleManglendeVedlegg.stream().map(this::mapTilManglendeVedleggDto).collect(Collectors.toList());
-    }
-
-    private ManglendeVedleggDto mapTilManglendeVedleggDto(ManglendeVedlegg mv) {
-        final ManglendeVedleggDto dto = new ManglendeVedleggDto();
-        dto.setDokumentType(mv.getDokumentType());
-        if (mv.getDokumentType().equals(DokumentTypeId.INNTEKTSMELDING)) {
-            dto.setArbeidsgiver(mapTilArbeidsgiverDto(mv.getArbeidsgiver().getIdentifikator()));
-            dto.setBrukerHarSagtAtIkkeKommer(mv.getBrukerHarSagtAtIkkeKommer() != null ? mv.getBrukerHarSagtAtIkkeKommer() : false);
-        }
-        return dto;
-    }
-
-    private ArbeidsgiverDto mapTilArbeidsgiverDto(String arbeidsgiverIdent) {
-        if (OrganisasjonsNummerValidator.erGyldig(arbeidsgiverIdent) || OrgNummer.erKunstig(arbeidsgiverIdent)) {
-            return virksomhetArbeidsgiver(new OrgNummer(arbeidsgiverIdent));
-        } else {
-            return privatpersonArbeidsgiver(new AktørId(arbeidsgiverIdent));
-        }
-    }
-
-    private ArbeidsgiverDto privatpersonArbeidsgiver(AktørId aktørId) {
-        ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.person(aktørId));
-        ArbeidsgiverDto dto = new ArbeidsgiverDto();
-        dto.setNavn(opplysninger.getNavn());
-        dto.setFødselsdato(opplysninger.getFødselsdato());
-        dto.setAktørId(aktørId);
-
-        return dto;
-    }
-
-    private ArbeidsgiverDto virksomhetArbeidsgiver(OrgNummer orgnr) {
-        ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(Arbeidsgiver.virksomhet(orgnr));
-        ArbeidsgiverDto dto = new ArbeidsgiverDto();
-        dto.setOrganisasjonsnummer(orgnr);
-        dto.setNavn(opplysninger.getNavn());
-        return dto;
     }
 
     private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTilVurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

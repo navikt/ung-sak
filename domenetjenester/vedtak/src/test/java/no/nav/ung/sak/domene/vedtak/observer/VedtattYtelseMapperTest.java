@@ -53,7 +53,7 @@ class VedtattYtelseMapperTest {
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
             .buildFor(periode);
 
-        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat, List.of(arbeidsforholdReferanse));
+        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat);
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
@@ -91,7 +91,7 @@ class VedtattYtelseMapperTest {
         ArbeidsforholdReferanse arbeidsforholdReferanse2 = lagReferanser(arbeidsgiver1, arbeidsforholdRef2, eksternReferanse2);
         fullRefusjon(arbeidsgiver2, periode, arbeidsforholdRef2, dagsats2);
 
-        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat, List.of(arbeidsforholdReferanse1, arbeidsforholdReferanse2));
+        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat);
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(2);
@@ -134,7 +134,7 @@ class VedtattYtelseMapperTest {
         ArbeidsforholdReferanse arbeidsforholdReferanse = lagReferanser(arbeidsgiver, arbeidsforholdRef, eksternReferanse);
         fullRefusjon(arbeidsgiver, periode, arbeidsforholdRef, dagsats);
 
-        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat, List.of(arbeidsforholdReferanse));
+        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat);
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
@@ -164,7 +164,7 @@ class VedtattYtelseMapperTest {
         int dagsats = 500;
         fullRefusjon(arbeidsgiver, periode, arbeidsforholdRef, dagsats);
 
-        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat, List.of());
+        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat);
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
@@ -201,7 +201,7 @@ class VedtattYtelseMapperTest {
             .medInntektskategori(Inntektskategori.DAGPENGER)
             .buildFor(periode);
 
-        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat, List.of());
+        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat);
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
@@ -244,7 +244,7 @@ class VedtattYtelseMapperTest {
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER)
             .buildFor(periode);
 
-        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat, List.of());
+        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat);
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(2);

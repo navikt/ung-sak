@@ -39,21 +39,6 @@ public class TotrinnskontrollAksjonspunkterDto {
             return this;
         }
 
-        public Builder medArbeidsforhold(List<TotrinnsArbeidsforholdDto> totrinnsArbeidsforholdDtos) {
-            kladd.arbeidforholdDtos = totrinnsArbeidsforholdDtos;
-            return this;
-        }
-
-        public Builder medBeregningDto(TotrinnsBeregningDto beregningDto) {
-            kladd.beregningDto = beregningDto;
-            return this;
-        }
-
-        public Builder medBeregningDtoer(List<TotrinnsBeregningDto> beregningDto) {
-            kladd.beregningDtoer = beregningDto;
-            return this;
-        }
-
         public Builder medBesluttersBegrunnelse(String besluttersBegrunnelse) {
             kladd.besluttersBegrunnelse = besluttersBegrunnelse;
             return this;
