@@ -63,7 +63,10 @@ public class LagBarnetilleggTidslinje {
 
     static BarnetilleggVurdering beregnBarnetillegg(LocalDateTimeline<Boolean> perioder, List<FødselOgDødInfo> relevantPersonInfoBarn) {
         var antallBarnGrunnlagTidslinje = relevantPersonInfoBarn.stream()
-            .map(info -> new LocalDateTimeline<>(info.fødselsdato().plusMonths(1).withDayOfMonth(1), getTilDato(info), 1))
+            .map(info -> {
+                boolean barnILive = info.dødsdato() == null;
+                return new LocalDateTimeline<>(info.fødselsdato().plusDays(1), getTilDato(info), barnILive ? 1 : 0);
+            })
             .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::sum))
             .orElse(LocalDateTimeline.empty());
 
@@ -79,7 +82,7 @@ public class LagBarnetilleggTidslinje {
 
 
     private static LocalDate getTilDato(FødselOgDødInfo info) {
-        return info.dødsdato() != null ? info.dødsdato().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()) : TIDENES_ENDE;
+        return info.dødsdato() != null ? info.dødsdato().plusDays(1) : TIDENES_ENDE;
     }
 
     private FødselOgDødInfo finnRelevantPersonInfo(AktørId barnAktørId) {
