@@ -87,7 +87,7 @@ spec:
         - host: "k9-tilbake.dev-fss-pub.nais.io"
         - host: "k9-fordel.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
-        - host: "saf-q1.dev-fss-pub.nais.io"
+        - host: "saf-q2.dev-fss-pub.nais.io"
         - host: "norg2.dev-fss-pub.nais.io"
     inbound:
       rules:
@@ -228,9 +228,9 @@ spec:
 
     # Graphql services
     - name: SAF_BASE_URL
-      value: https://saf.dev-fss-pub.nais.io
+      value: https://saf-q2.dev-fss-pub.nais.io
     - name: SAF_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+      value: api://dev-fss.teamdokumenthandtering.saf-q2/.default
 
     # Sikkerhet:
     - name: CLIENT_SCOPE
