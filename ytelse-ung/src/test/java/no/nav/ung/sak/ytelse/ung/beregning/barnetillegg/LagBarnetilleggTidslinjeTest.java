@@ -36,14 +36,16 @@ class LagBarnetilleggTidslinjeTest {
         var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29), new Barnetillegg(108, 3)),
-            new LocalDateSegment<>(LocalDate.of(2020, 3, 1), LocalDate.of(2020, 3, 15), new Barnetillegg(36, 1))));
+            new LocalDateSegment<>(LocalDate.of(2020, 1, 2), LocalDate.of(2020, 1, 15), new Barnetillegg(0, 0)),
+            new LocalDateSegment<>(LocalDate.of(2020, 1, 16), LocalDate.of(2020, 1, 16), new Barnetillegg(0, 0)),
+            new LocalDateSegment<>(LocalDate.of(2020, 1, 18), LocalDate.of(2020, 3, 15), new Barnetillegg(36, 1))
+        ));
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
     }
 
     @Test
-    void skal_få_barnetillegg_for_barn_som_er_født_og_dør_samme_dag() {
+    void skal_ikke_få_barnetillegg_for_barn_som_er_født_og_dør_samme_dag() {
         var fødselsdato1 = LocalDate.of(2020,1,1);
         var dødsdato1 = LocalDate.of(2020,1,1);
 
@@ -60,13 +62,13 @@ class LagBarnetilleggTidslinjeTest {
         var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 29), new Barnetillegg(36, 1))));
+            new LocalDateSegment<>(LocalDate.of(2020, 1, 2), LocalDate.of(2020, 1, 2), new Barnetillegg(0, 0))));
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
     }
 
     @Test
-    void skal_få_barnetillegg_for_barn_som_er_født_og_dør_siste_dag_i_måneden() {
+    void skal_ikke_få_barnetillegg_for_barn_som_er_født_og_dør_siste_dag_i_måneden() {
         var fødselsdato1 = LocalDate.of(2020,2,29);
         var dødsdato1 = LocalDate.of(2020,2,29);
 
@@ -83,7 +85,7 @@ class LagBarnetilleggTidslinjeTest {
         var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(LocalDate.of(2020, 3, 1), LocalDate.of(2020, 3, 15), new Barnetillegg(36, 1))));
+            new LocalDateSegment<>(LocalDate.of(2020, 3, 1), LocalDate.of(2020, 3, 1), new Barnetillegg(0, 0))));
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
     }
