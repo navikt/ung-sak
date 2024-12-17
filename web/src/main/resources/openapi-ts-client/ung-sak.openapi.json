@@ -1849,6 +1849,29 @@
         "required" : [ "aktørId", "ytelseType" ],
         "type" : "object"
       },
+      "ForhåndsvisDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "dokumentMal" : {
+            "enum" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "FRITEKST_DOK" ],
+            "nullable" : true,
+            "type" : "string"
+          },
+          "dokumentdata" : {
+            "$ref" : "#/components/schemas/JsonNode"
+          },
+          "mottaker" : {
+            "$ref" : "#/components/schemas/MottakerDto"
+          }
+        },
+        "required" : [ "behandlingId", "dokumentMal" ],
+        "type" : "object"
+      },
       "FødselHendelse" : {
         "allOf" : [ {
           "$ref" : "#/components/schemas/Hendelse"
@@ -2113,6 +2136,9 @@
           }
         },
         "required" : [ "journalpostId" ],
+        "type" : "object"
+      },
+      "JsonNode" : {
         "type" : "object"
       },
       "KodeverdiSomObjektAktivitetStatus" : {
@@ -3153,6 +3179,23 @@
           }
         },
         "required" : [ "behandlingUuid" ],
+        "type" : "object"
+      },
+      "MottakerDto" : {
+        "properties" : {
+          "id" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "type" : {
+            "enum" : [ "ORGNR", "AKTØRID" ],
+            "pattern" : "^[\\p{L}\\p{N}]+$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "type" ],
         "type" : "object"
       },
       "NyBehandlingDto" : {
@@ -7085,6 +7128,31 @@
         },
         "summary" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
         "tags" : [ "fordel" ]
+      }
+    },
+    "/formidling/forhaandsvis" : {
+      "post" : {
+        "description" : "Forhåndsvise brev",
+        "operationId" : "forhåndsvis",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ForhåndsvisDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/pdf" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
       }
     },
     "/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
