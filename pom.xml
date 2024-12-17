@@ -318,12 +318,12 @@
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <groupId>no.nav.ung.sak.ytelse</groupId>
                 <artifactId>ytelse-ung</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>formidling</artifactId>
                 <version>${project.version}</version>
             </dependency>

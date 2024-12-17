@@ -12,6 +12,7 @@ COPY web/target/classes/logback.xml /app/conf/
 
 # Avhengigheter
 COPY web/target/lib/*.jar /app/lib/
+COPY formidling/target/pdfgen /app/pdfgen
 
 # Application Container (Jetty)
 COPY web/target/app.jar /app/

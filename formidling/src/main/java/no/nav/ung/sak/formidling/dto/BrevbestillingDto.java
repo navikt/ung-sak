@@ -40,8 +40,9 @@ public record BrevbestillingDto(
     PartRequestDto mottaker,
 
     /*
-     * felter som skal injectes i malen
+     * felter som skal injectes i malen //TODO endre til json subtypes
      */
-    JsonNode dokumentinnhold
+    @JsonProperty("dokumentdata")
+    JsonNode dokumentdata
 ) {
 }

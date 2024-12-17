@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.kodeverk;
+package no.nav.ung.kodeverk.formidling;
 
 public enum IdType {
      ORGNR, AKTØRID

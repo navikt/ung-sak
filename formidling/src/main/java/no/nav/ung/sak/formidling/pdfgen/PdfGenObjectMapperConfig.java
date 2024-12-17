@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-public class PdfGenObjectMapperConfig {
+class PdfGenObjectMapperConfig {
 
     static ObjectMapper lag() {
         var module = new SimpleModule();
