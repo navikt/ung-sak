@@ -34,8 +34,8 @@ public class FinnFagsakerForAktørTjeneste {
                     "inner join BEHANDLING b on gr.behandling_id = b.id " +
                     "inner join FAGSAK f on b.fagsak_id = f.id " +
                     "WHERE f.ytelse_type != 'OBSOLETE'" +
-                    "and relasjonsrolle = :relasjonsrolle " +
-                    "and til_aktoer_id = :aktoer_id " +
+                    "and relasjon.relasjonsrolle = :relasjonsrolle " +
+                    "and relasjon.til_aktoer_id = :aktoer_id " +
                     "and f.periode && daterange(cast(:dato as date), cast(:dato as date), '[]') = true", //$NON-NLS-1$
                 Fagsak.class)
             .setParameter("relasjonsrolle", RelasjonsRolleType.BARN.getKode())
