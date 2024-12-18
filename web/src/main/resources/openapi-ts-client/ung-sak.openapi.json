@@ -250,15 +250,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "arbeidsforholdHandlingTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidsforholdHandlingType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "arbeidskategorier" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidskategori"
@@ -513,15 +504,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "permisjonsbeskrivelseTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektPermisjonsbeskrivelseType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "personstatusTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektPersonstatusType"
@@ -658,7 +640,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidsforholdHandlingTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "permisjonsbeskrivelseTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "utenlandsoppholdÅrsaker", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "utenlandsoppholdÅrsaker", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "AngittPersonDto" : {
@@ -728,24 +710,21 @@
       },
       "ArbeidsgiverDto" : {
         "properties" : {
-          "aktørId" : {
+          "identifikator" : {
             "nullable" : true,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
             "type" : "string"
           },
-          "fødselsdato" : {
-            "format" : "date",
+          "identifikatorGUI" : {
+            "maxLength" : 100,
+            "minLength" : 0,
             "nullable" : true,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
             "type" : "string"
           },
           "navn" : {
-            "maxLength" : 200,
-            "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "organisasjonsNummer" : {
-            "nullable" : true,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
             "type" : "string"
           }
         },
@@ -2166,21 +2145,6 @@
         "required" : [ "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
-      "KodeverdiSomObjektArbeidsforholdHandlingType" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
       "KodeverdiSomObjektArbeidskategori" : {
         "properties" : {
           "kode" : {
@@ -2572,21 +2536,6 @@
         "type" : "object"
       },
       "KodeverdiSomObjektOpptjeningAktivitetType" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektPermisjonsbeskrivelseType" : {
         "properties" : {
           "kode" : {
             "type" : "string"
@@ -3113,24 +3062,6 @@
             "type" : "boolean"
           }
         },
-        "type" : "object"
-      },
-      "ManglendeVedleggDto" : {
-        "properties" : {
-          "arbeidsgiver" : {
-            "$ref" : "#/components/schemas/ArbeidsgiverDto"
-          },
-          "brukerHarSagtAtIkkeKommer" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "dokumentType" : {
-            "enum" : [ "INNTEKTSMELDING", "LEGEERKLÆRING", "UDEFINERT" ],
-            "nullable" : true,
-            "type" : "string"
-          }
-        },
-        "required" : [ "dokumentType" ],
         "type" : "object"
       },
       "MatchFagsak" : {
@@ -4333,15 +4264,6 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
-          "manglendeVedlegg" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ManglendeVedleggDto"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          },
           "mottattDato" : {
             "format" : "date",
             "type" : "string"
@@ -4633,42 +4555,6 @@
         "required" : [ "andeler", "periode" ],
         "type" : "object"
       },
-      "TotrinnsArbeidsforholdDto" : {
-        "properties" : {
-          "arbeidsforholdHandlingType" : {
-            "enum" : [ "-", "BRUK", "LAGT_TIL_AV_SAKSBEHANDLER", "BASERT_PÅ_INNTEKTSMELDING", "BRUK_UTEN_INNTEKTSMELDING", "IKKE_BRUK", "NYTT_ARBEIDSFORHOLD", "SLÅTT_SAMMEN_MED_ANNET", "BRUK_MED_OVERSTYRT_PERIODE", "INNTEKT_IKKE_MED_I_BG" ],
-            "nullable" : true,
-            "type" : "string"
-          },
-          "arbeidsforholdId" : {
-            "maxLength" : 50,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "brukPermisjon" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "navn" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "organisasjonsnummer" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[1-9][0-9\\-.]{6,20}+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "navn" ],
-        "type" : "object"
-      },
       "TotrinnsBeregningDto" : {
         "properties" : {
           "faktaOmBeregningTilfeller" : {
@@ -4706,15 +4592,6 @@
             "nullable" : true,
             "pattern" : "^[\\p{Alnum}]+$",
             "type" : "string"
-          },
-          "arbeidsforholdDtos" : {
-            "items" : {
-              "$ref" : "#/components/schemas/TotrinnsArbeidsforholdDto"
-            },
-            "maxItems" : 200,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
           },
           "beregningDto" : {
             "$ref" : "#/components/schemas/TotrinnsBeregningDto"
