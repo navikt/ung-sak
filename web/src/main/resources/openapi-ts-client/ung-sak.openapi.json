@@ -4818,12 +4818,9 @@
           },
           "mottaker" : {
             "$ref" : "#/components/schemas/MottakerDto"
-          },
-          "saksnummer" : {
-            "type" : "string"
           }
         },
-        "required" : [ "behandlingId", "saksnummer" ],
+        "required" : [ "behandlingId" ],
         "type" : "object"
       },
       "VenteårsakSomObjekt" : {
@@ -7134,8 +7131,8 @@
     },
     "/formidling/vedtaksbrev/forhaandsvis" : {
       "post" : {
-        "description" : "Forhåndsvise brev",
-        "operationId" : "forhåndsvis",
+        "description" : "Forhåndsvise vedtaksbrev for en behandling",
+        "operationId" : "forhåndsvisVedtaksbrev",
         "requestBody" : {
           "content" : {
             "application/json" : {
