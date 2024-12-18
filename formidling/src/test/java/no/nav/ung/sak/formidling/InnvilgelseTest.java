@@ -19,7 +19,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.BrevbestillingDto;
+import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -69,8 +69,8 @@ class InnvilgelseTest {
 
     }
 
-    private BrevbestillingDto lagBestilling(Behandling behandling) {
-        return new BrevbestillingDto(
+    private Brevbestilling lagBestilling(Behandling behandling) {
+        return new Brevbestilling(
             behandling.getId(),
             DokumentMalType.INNVILGELSE_DOK,
             behandling.getFagsak().getSaksnummer(),

@@ -29,7 +29,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.BrevbestillingDto;
+import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.dto.PartResponseDto;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
@@ -75,7 +75,7 @@ class BrevGenerererTjenesteTest {
         );
 
         // Lag innvilgelsesbrev
-        var bestillBrevDto = new BrevbestillingDto(
+        var bestillBrevDto = new Brevbestilling(
             behandling.getId(),
             DokumentMalType.INNVILGELSE_DOK,
             behandling.getFagsak().getSaksnummer(),

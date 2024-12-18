@@ -18,12 +18,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.RolleType;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.BrevbestillingDto;
+import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.dto.PartRequestDto;
-import no.nav.ung.sak.kontrakt.formidling.ForhåndsvisDto;
+import no.nav.ung.sak.kontrakt.formidling.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("")
@@ -44,26 +45,27 @@ public class FormidlingRestTjeneste {
 
 
     @POST
-    @Path("/formidling/forhaandsvis")
+    @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/pdf")
     @Operation(description = "Forhåndsvise brev", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvis(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ForhåndsvisDto forhåndsvisDto
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto
     ) {
-        GenerertBrev generertBrev = brevGenerererTjeneste.generer(new BrevbestillingDto(
-            forhåndsvisDto.behandlingId(),
-            forhåndsvisDto.dokumentMal(),
-            null,
-            forhåndsvisDto.mottaker() != null ? new PartRequestDto(forhåndsvisDto.mottaker().id(), forhåndsvisDto.mottaker().type(), RolleType.BRUKER) : null,
-            forhåndsvisDto.dokumentdata()
+        GenerertBrev generertBrev = brevGenerererTjeneste.generer(new Brevbestilling(
+            dto.behandlingId(),
+            DokumentMalType.INNVILGELSE_DOK,
+            dto.saksnummer(),
+            dto.mottaker() != null ? new PartRequestDto(dto.mottaker().id(), dto.mottaker().type(), RolleType.BRUKER) : null,
+            dto.dokumentdata()
         ));
 
         return Response.ok(generertBrev.dokument().pdf())
             .type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", forhåndsvisDto.behandlingId(), generertBrev.malType().getKode()))
+            .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
             .build();
     }
 
 }
+

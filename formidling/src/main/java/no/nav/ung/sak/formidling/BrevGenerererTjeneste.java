@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.BrevbestillingDto;
+import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.dto.PartResponseDto;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -45,8 +45,8 @@ public class BrevGenerererTjeneste {
     public BrevGenerererTjeneste() {
     }
 
-    public GenerertBrev generer(BrevbestillingDto brevbestillingDto) {
-        Behandling behandling = behandlingRepository.hentBehandling(brevbestillingDto.behandlingId());
+    public GenerertBrev generer(Brevbestilling brevbestilling) {
+        Behandling behandling = behandlingRepository.hentBehandling(brevbestilling.behandlingId());
         PartResponseDto mottaker = hentMottaker(behandling);
 
         // valider mal via regel hvis vedtaksbrev
@@ -65,7 +65,7 @@ public class BrevGenerererTjeneste {
             dokument,
             mottaker,
             mottaker,
-            brevbestillingDto.malType(),
+            brevbestilling.malType(),
             input.templateType()
         );
     }

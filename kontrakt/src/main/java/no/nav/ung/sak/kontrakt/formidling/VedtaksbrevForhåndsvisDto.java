@@ -11,13 +11,18 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.abac.AbacAttributt;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record ForhåndsvisDto(
+public record VedtaksbrevForhåndsvisDto(
+
+    /**
+     * settes for relatert til en sak. Enten behandlingId eller saksnummer må være satt
+     */
     @JsonProperty(value = BehandlingIdDto.NAME)
     @NotNull
     @Valid
@@ -26,18 +31,41 @@ public record ForhåndsvisDto(
     @Max(Long.MAX_VALUE)
     Long behandlingId,
 
+    /**
+     * settes for brev relatert til en sak, men ingen behandling. Enten behandlingId eller saksnummer må være satt.
+     */
+    @AbacAttributt("saksnummer")
+    @JsonProperty(value = SaksnummerDto.NAME)
+    @NotNull
+    @Valid
+    Saksnummer saksnummer,
+
+    /**
+     * For brev som støtter flere mottakere
+     */
     @JsonProperty("mottaker")
     @Valid
     MottakerDto mottaker,
 
-    @JsonProperty(value = "dokumentMal", required = true)
+    /**
+     * Angir om automatisk vedtaksbrev eller lagret manuell brev skal forhåndsvises, default er false
+     */
+    @JsonProperty("manuellBrev")
     @Valid
-    DokumentMalType dokumentMal,
+    Boolean manuellBrev,
 
+    /**
+     * TODO
+     */
     @JsonProperty("dokumentdata")
     @Valid
     JsonNode dokumentdata
 
 
 ) {
+    public VedtaksbrevForhåndsvisDto {
+        if (behandlingId == null && saksnummer == null) {
+            throw new IllegalArgumentException("BehandlingId eller saksnummer må være satt");
+        }
+    }
 }
