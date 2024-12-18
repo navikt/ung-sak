@@ -1849,29 +1849,6 @@
         "required" : [ "aktørId", "ytelseType" ],
         "type" : "object"
       },
-      "ForhåndsvisDto" : {
-        "properties" : {
-          "behandlingId" : {
-            "format" : "int64",
-            "maximum" : 9223372036854775807,
-            "minimum" : 0,
-            "type" : "integer"
-          },
-          "dokumentMal" : {
-            "enum" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "FRITEKST_DOK" ],
-            "nullable" : true,
-            "type" : "string"
-          },
-          "dokumentdata" : {
-            "$ref" : "#/components/schemas/JsonNode"
-          },
-          "mottaker" : {
-            "$ref" : "#/components/schemas/MottakerDto"
-          }
-        },
-        "required" : [ "behandlingId", "dokumentMal" ],
-        "type" : "object"
-      },
       "FødselHendelse" : {
         "allOf" : [ {
           "$ref" : "#/components/schemas/Hendelse"
@@ -4824,6 +4801,31 @@
         "required" : [ "varseltekst" ],
         "type" : "object"
       },
+      "VedtaksbrevForhåndsvisDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "dokumentdata" : {
+            "$ref" : "#/components/schemas/JsonNode"
+          },
+          "manuellBrev" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "mottaker" : {
+            "$ref" : "#/components/schemas/MottakerDto"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "behandlingId", "saksnummer" ],
+        "type" : "object"
+      },
       "VenteårsakSomObjekt" : {
         "properties" : {
           "kanVelges" : {
@@ -7130,7 +7132,7 @@
         "tags" : [ "fordel" ]
       }
     },
-    "/formidling/forhaandsvis" : {
+    "/formidling/vedtaksbrev/forhaandsvis" : {
       "post" : {
         "description" : "Forhåndsvise brev",
         "operationId" : "forhåndsvis",
@@ -7138,7 +7140,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ForhåndsvisDto"
+                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisDto"
               }
             }
           },
