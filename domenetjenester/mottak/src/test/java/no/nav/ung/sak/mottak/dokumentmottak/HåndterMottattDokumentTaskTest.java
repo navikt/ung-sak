@@ -1,5 +1,6 @@
 package no.nav.ung.sak.mottak.dokumentmottak;
 
+import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -28,6 +30,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
+import no.nav.ung.sak.mottak.Behandlingsoppretter;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -36,8 +39,12 @@ import no.nav.ung.sak.typer.Saksnummer;
 @ExtendWith(MockitoExtension.class)
 class HåndterMottattDokumentTaskTest {
 
-    @Inject
+
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
+    @Inject
+    private DokumentmottakerFelles dokumentmottakerFelles;
+    @Inject
+    private Behandlingsoppretter behandlingsoppretter;
     @Inject
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     @Inject
@@ -48,6 +55,8 @@ class HåndterMottattDokumentTaskTest {
     private DokumentValidatorProvider dokumentValidatorProvider;
     @Mock
     private DokumentValidator dokumentValidator;
+    @Mock
+    private Dokumentmottaker dokumentmottaker;
     @Inject
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     @Inject
@@ -58,7 +67,7 @@ class HåndterMottattDokumentTaskTest {
 
     @BeforeEach
     void setup() {
-        Long fagsakId = fagsakRepository.opprettNy(new Fagsak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), AktørId.dummy(), null, new Saksnummer("1337"), LocalDate.now(), LocalDate.now()));
+        Long fagsakId = fagsakRepository.opprettNy(new Fagsak(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), AktørId.dummy(), null, new Saksnummer("1337"), LocalDate.now(), LocalDate.now()));
         fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         behandling = Behandling.forFørstegangssøknad(fagsak)
             .medBehandlingStatus(BehandlingStatus.UTREDES)
@@ -74,11 +83,23 @@ class HåndterMottattDokumentTaskTest {
             .medMottattTidspunkt(LocalDateTime.now())
             .medFagsakId(fagsakId)
             .medJournalPostId(new JournalpostId("2222233333"))
-            .medType(Brevkode.INNTEKTSMELDING)
+            .medType(Brevkode.UNGDOMSYTELSE_SOKNAD)
             .build();
         mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
-        when(dokumentValidatorProvider.finnValidator(Brevkode.INNTEKTSMELDING)).thenReturn(dokumentValidator);
+        when(dokumentValidatorProvider.finnValidator(Brevkode.UNGDOMSYTELSE_SOKNAD)).thenReturn(dokumentValidator);
+
+        when(dokumentmottaker.getBehandlingÅrsakType(Brevkode.UNGDOMSYTELSE_SOKNAD)).thenReturn(RE_ENDRING_FRA_BRUKER);
+
+        innhentDokumentTjeneste = new InnhentDokumentTjeneste(
+            new UnitTestLookupInstanceImpl<>(dokumentmottaker),
+            dokumentmottakerFelles,
+            behandlingsoppretter,
+            behandlingRepositoryProvider,
+            null,
+            null,
+            fagsakProsessTaskRepository
+        );
     }
 
     @Test
