@@ -1,14 +1,9 @@
 package no.nav.ung.sak.kontrakt.vedtak;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -18,6 +13,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.kontrakt.Patterns;
@@ -60,11 +58,6 @@ public class TotrinnskontrollAksjonspunkterDto {
     @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String aksjonspunktKode;
 
-    @JsonProperty(value = "arbeidsforholdDtos")
-    @Size(max = 200)
-    @Valid
-    private List<TotrinnsArbeidsforholdDto> arbeidforholdDtos = new ArrayList<>();
-
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "beregningDto")
     @Valid
@@ -97,10 +90,6 @@ public class TotrinnskontrollAksjonspunkterDto {
         return AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
     }
 
-    public List<TotrinnsArbeidsforholdDto> getArbeidforholdDtos() {
-        return Collections.unmodifiableList(arbeidforholdDtos);
-    }
-
     public TotrinnsBeregningDto getBeregningDto() {
         return beregningDto;
     }
@@ -123,10 +112,6 @@ public class TotrinnskontrollAksjonspunkterDto {
 
     public void setAksjonspunktKode(String aksjonspunktKode) {
         this.aksjonspunktKode = aksjonspunktKode;
-    }
-
-    public void setArbeidforholdDtos(List<TotrinnsArbeidsforholdDto> arbeidforholdDtos) {
-        this.arbeidforholdDtos = arbeidforholdDtos;
     }
 
     public void setBeregningDto(TotrinnsBeregningDto beregningDto) {

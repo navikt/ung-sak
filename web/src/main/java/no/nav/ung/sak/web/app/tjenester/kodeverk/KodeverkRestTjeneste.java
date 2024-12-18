@@ -1,7 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.kodeverk;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -117,7 +117,6 @@ public class KodeverkRestTjeneste {
             sortert(alle.sivilstandTyper()),
             sortert(alle.faktaOmBeregningTilfeller()),
             sortert(alle.skjermlenkeTyper()),
-            sortert(alle.arbeidsforholdHandlingTyper()),
             sortert(alle.historikkOpplysningTyper()),
             sortert(alle.historikkEndretFeltTyper()),
             sortert(alle.historikkEndretFeltVerdiTyper()),
@@ -131,7 +130,6 @@ public class KodeverkRestTjeneste {
             sortert(alle.avslagsårsaker()),
             sortert(alle.konsekvenserForYtelsen()),
             sortert(alle.vilkårTyper()),
-            sortert(alle.permisjonsbeskrivelseTyper()),
             sortert(alle.vurderArbeidsforholdHistorikkinnslag()),
             sortert(alle.tilbakekrevingVidereBehandlinger()),
             sortert(alle.vurderingsÅrsaker()),
@@ -187,7 +185,6 @@ public class KodeverkRestTjeneste {
             o.sivilstandTyper(),
             o.faktaOmBeregningTilfeller(),
             o.skjermlenkeTyper(),
-            o.arbeidsforholdHandlingTyper(),
             o.historikkOpplysningTyper(),
             o.historikkEndretFeltTyper(),
             o.historikkEndretFeltVerdiTyper(),
@@ -201,7 +198,6 @@ public class KodeverkRestTjeneste {
             o.avslagsårsaker(),
             o.konsekvenserForYtelsen(),
             o.vilkårTyper(),
-            o.permisjonsbeskrivelseTyper(),
             o.vurderArbeidsforholdHistorikkinnslag(),
             o.tilbakekrevingVidereBehandlinger(),
             o.vurderingsÅrsaker(),

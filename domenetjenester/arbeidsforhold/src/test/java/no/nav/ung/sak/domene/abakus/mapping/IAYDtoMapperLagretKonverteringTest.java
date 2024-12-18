@@ -1,13 +1,20 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.ung.kodeverk.Fagsystem;
-import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.ung.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -22,14 +29,6 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.typer.Saksnummer;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class IAYDtoMapperLagretKonverteringTest {
 
@@ -66,8 +65,6 @@ public class IAYDtoMapperLagretKonverteringTest {
         var tilOgMed = DATO.plusMonths(1);
 
 
-
-
         var inntektspost = inntektspostBuilder
             .medBeløp(BigDecimal.TEN)
             .medPeriode(fraOgMed, tilOgMed)
@@ -101,9 +98,9 @@ public class IAYDtoMapperLagretKonverteringTest {
     private YtelseBuilder lagYtelse() {
         Saksnummer sakId = new Saksnummer("1200094");
         YtelseBuilder ytelselseBuilder = YtelseBuilder.oppdatere(Optional.empty())
-                .medKilde(Fagsystem.K9SAK)  // FIXME: Bytt til UNG_SAK når det er støttet
-                .medYtelseType(FagsakYtelseType.SYKEPENGER)
-                .medSaksnummer(sakId);
+            .medKilde(Fagsystem.K9SAK)  // FIXME: Bytt til UNG_SAK når det er støttet
+            .medYtelseType(FagsakYtelseType.SYKEPENGER)
+            .medSaksnummer(sakId);
 
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder.medKilde(Fagsystem.INFOTRYGD)
