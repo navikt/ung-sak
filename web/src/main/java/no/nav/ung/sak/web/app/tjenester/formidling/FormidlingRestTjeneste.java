@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -48,15 +49,15 @@ public class FormidlingRestTjeneste {
     @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/pdf")
-    @Operation(description = "Forhåndsvise brev", tags = "formidling")
+    @Operation(description = "Forhåndsvise vedtaksbrev for en behandling", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Response forhåndsvis(
+    public Response forhåndsvisVedtaksbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto
     ) {
         GenerertBrev generertBrev = brevGenerererTjeneste.generer(new Brevbestilling(
             dto.behandlingId(),
             DokumentMalType.INNVILGELSE_DOK,
-            dto.saksnummer(),
+            null,
             dto.mottaker() != null ? new PartRequestDto(dto.mottaker().id(), dto.mottaker().type(), RolleType.BRUKER) : null,
             dto.dokumentdata()
         ));

@@ -12,8 +12,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -21,24 +19,15 @@ import no.nav.ung.sak.typer.Saksnummer;
 public record VedtaksbrevForhåndsvisDto(
 
     /**
-     * settes for relatert til en sak. Enten behandlingId eller saksnummer må være satt
+     * Behandlingid
      */
-    @JsonProperty(value = BehandlingIdDto.NAME)
+    @JsonProperty(value = BehandlingIdDto.NAME, required = true)
     @NotNull
     @Valid
     @AbacAttributt(BehandlingIdDto.NAME)
     @Min(0)
     @Max(Long.MAX_VALUE)
     Long behandlingId,
-
-    /**
-     * settes for brev relatert til en sak, men ingen behandling. Enten behandlingId eller saksnummer må være satt.
-     */
-    @AbacAttributt("saksnummer")
-    @JsonProperty(value = SaksnummerDto.NAME)
-    @NotNull
-    @Valid
-    Saksnummer saksnummer,
 
     /**
      * For brev som støtter flere mottakere
@@ -63,9 +52,4 @@ public record VedtaksbrevForhåndsvisDto(
 
 
 ) {
-    public VedtaksbrevForhåndsvisDto {
-        if (behandlingId == null && saksnummer == null) {
-            throw new IllegalArgumentException("BehandlingId eller saksnummer må være satt");
-        }
-    }
 }
