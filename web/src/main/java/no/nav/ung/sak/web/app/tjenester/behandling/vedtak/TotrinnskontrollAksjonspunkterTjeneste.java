@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,7 +17,6 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.kontrakt.vedtak.TotrinnskontrollAksjonspunkterDto;
 import no.nav.ung.sak.kontrakt.vedtak.TotrinnskontrollSkjermlenkeContextDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
-import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
 @ApplicationScoped
@@ -55,7 +53,7 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
                     builder.medGodkjent(ttVurdering.isGodkjent());
                 }
             });
-            lagTotrinnsaksjonspunkt(behandling, skjermlenkeMap, builder.build());
+            lagTotrinnsaksjonspunkt(skjermlenkeMap, builder.build());
         }
         for (var skjermlenke : skjermlenkeMap.entrySet()) {
             var context = new TotrinnskontrollSkjermlenkeContextDto(skjermlenke.getKey(), skjermlenke.getValue());
@@ -64,11 +62,9 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
         return skjermlenkeContext;
     }
 
-    private void lagTotrinnsaksjonspunkt(Behandling behandling, Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap,
+    private void lagTotrinnsaksjonspunkt(Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap,
                                          Totrinnsvurdering vurdering) {
-        Optional<Totrinnresultatgrunnlag> totrinnresultatOpt = totrinnTjeneste.hentTotrinngrunnlagHvisEksisterer(behandling);
-        TotrinnskontrollAksjonspunkterDto totrinnsAksjonspunkt = totrinnsaksjonspunktDtoTjeneste.lagTotrinnskontrollAksjonspunktDto(vurdering, behandling,
-            totrinnresultatOpt);
+        TotrinnskontrollAksjonspunkterDto totrinnsAksjonspunkt = totrinnsaksjonspunktDtoTjeneste.lagTotrinnskontrollAksjonspunktDto(vurdering);
         SkjermlenkeType skjermlenkeType = SkjermlenkeType.finnSkjermlenkeType(vurdering.getAksjonspunktDefinisjon());
         if (skjermlenkeType != null && !SkjermlenkeType.UDEFINERT.equals(skjermlenkeType)) {
             List<TotrinnskontrollAksjonspunkterDto> aksjonspktContextListe = skjermlenkeMap.computeIfAbsent(skjermlenkeType,
@@ -82,7 +78,7 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
         Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
         Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap = new HashMap<>();
         for (var vurdering : totrinnaksjonspunktvurderinger) {
-            lagTotrinnsaksjonspunkt(behandling, skjermlenkeMap, vurdering);
+            lagTotrinnsaksjonspunkt(skjermlenkeMap, vurdering);
         }
         for (Map.Entry<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenke : skjermlenkeMap.entrySet()) {
             var context = new TotrinnskontrollSkjermlenkeContextDto(skjermlenke.getKey(), skjermlenke.getValue());

@@ -6,17 +6,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.typer.Periode;
@@ -30,11 +29,6 @@ public class SøknadDto {
     @Size(max = 5000)
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelseForSenInnsending;
-
-    @JsonProperty(value = "manglendeVedlegg")
-    @Valid
-    @Size(max = 20)
-    private List<ManglendeVedleggDto> manglendeVedlegg = new ArrayList<>();
 
     @JsonProperty(value = "angittePersoner")
     @Valid
@@ -88,14 +82,6 @@ public class SøknadDto {
 
     public void setBegrunnelseForSenInnsending(String begrunnelseForSenInnsending) {
         this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
-    }
-
-    public List<ManglendeVedleggDto> getManglendeVedlegg() {
-        return Collections.unmodifiableList(manglendeVedlegg);
-    }
-
-    public void setManglendeVedlegg(List<ManglendeVedleggDto> manglendeVedlegg) {
-        this.manglendeVedlegg = List.copyOf(manglendeVedlegg);
     }
 
     public LocalDate getMottattDato() {

@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.kodeverk.dto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import no.nav.abakus.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.arbeidsforhold.*;
 import no.nav.ung.kodeverk.behandling.*;
@@ -53,7 +54,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<SivilstandType>> sivilstandTyper,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<FaktaOmBeregningTilfelle>> faktaOmBeregningTilfeller,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<SkjermlenkeType>> skjermlenkeTyper,
-    @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<ArbeidsforholdHandlingType>> arbeidsforholdHandlingTyper,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<HistorikkOpplysningType>> historikkOpplysningTyper,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<HistorikkEndretFeltType>> historikkEndretFeltTyper,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<HistorikkEndretFeltVerdiType>> historikkEndretFeltVerdiTyper,
@@ -67,7 +67,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<Avslagsårsak>> avslagsårsaker,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<KonsekvensForYtelsen>> konsekvenserForYtelsen,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<VilkårType>> vilkårTyper,
-    @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<PermisjonsbeskrivelseType>> permisjonsbeskrivelseTyper,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<VurderArbeidsforholdHistorikkinnslag>> vurderArbeidsforholdHistorikkinnslag,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<TilbakekrevingVidereBehandling>> tilbakekrevingVidereBehandlinger,
     @NotNull @Valid @Size(min= 1, max=1000) SortedSet<KodeverdiSomObjekt<VurderÅrsak>> vurderingsÅrsaker,

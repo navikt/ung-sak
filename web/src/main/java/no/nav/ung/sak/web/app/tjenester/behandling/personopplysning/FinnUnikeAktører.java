@@ -14,8 +14,6 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.ung.sak.mottak.inntektsmelding.InntektsmeldingParser;
-import no.nav.ung.sak.mottak.inntektsmelding.v1.MottattDokumentWrapperInntektsmelding;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
@@ -61,14 +59,6 @@ public class FinnUnikeAktører {
         if (Brevkode.SØKNAD_TYPER.contains(d.getType())) {
             var søknad = new SøknadParser().parseSøknad(d);
             return Optional.of(new PersonIdent(søknad.getSøker().getPersonIdent().getVerdi()));
-        } else if (d.getType().equals(Brevkode.INNTEKTSMELDING)) {
-            var wrapper = new InntektsmeldingParser().xmlTilWrapper(d);
-            if (wrapper instanceof MottattDokumentWrapperInntektsmelding wrapperV1) {
-                return Optional.of(new PersonIdent(wrapperV1.getArbeidstaker()));
-            } else if (wrapper instanceof no.nav.ung.sak.mottak.inntektsmelding.v2.MottattDokumentWrapperInntektsmelding wrapperV2) {
-                return Optional.of(new PersonIdent(wrapperV2.getArbeidstaker()));
-            }
-            throw new IllegalArgumentException("Kunne ikke hente personident fra xml");
         }
 
         return Optional.empty();

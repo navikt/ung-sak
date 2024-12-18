@@ -11,7 +11,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
-import no.nav.ung.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.ung.sak.domene.iay.modell.Ytelse;
 import no.nav.ung.sak.domene.iay.modell.YtelseFilter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

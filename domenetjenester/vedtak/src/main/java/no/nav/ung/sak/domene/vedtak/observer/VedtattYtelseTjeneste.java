@@ -17,14 +17,11 @@ import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRe
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
 
@@ -51,11 +48,7 @@ public class VedtattYtelseTjeneste {
     public Ytelse genererYtelse(Behandling behandling) {
         final BehandlingVedtak vedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
         Optional<BeregningsresultatEntitet> berResultat = beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
-        List<ArbeidsforholdReferanse> arbeidsforholdReferanser = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId())
-            .getArbeidsforholdInformasjon()
-            .stream()
-            .flatMap(a -> a.getArbeidsforholdReferanser().stream())
-            .collect(Collectors.toList());
+
 
         final Aktør aktør = new Aktør();
         aktør.setVerdi(behandling.getAktørId().getId());
@@ -72,7 +65,7 @@ public class VedtattYtelseTjeneste {
                 PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere)));
 
         ytelse.setPeriode(utledPeriode(vedtak, berResultat.orElse(null)));
-        ytelse.setAnvist(mapAnvisninger(berResultat.orElse(null), arbeidsforholdReferanser));
+        ytelse.setAnvist(mapAnvisninger(berResultat.orElse(null)));
         return ytelse;
     }
 
