@@ -16,10 +16,12 @@ import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.Patterns;
 
+
+@Deprecated(forRemoval = true) //Ersattet av formidling
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class BestillBrevDto {
+public class BestillBrevDtoGammel {
 
     @JsonProperty(value = "arsakskode")
     @Size(min = 1, max = 100)
@@ -60,27 +62,27 @@ public class BestillBrevDto {
     @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String dokumentbestillingsId;
 
-    public BestillBrevDto() { // NOSONAR
+    public BestillBrevDtoGammel() { // NOSONAR
     }
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType) {
+    public BestillBrevDtoGammel(long behandlingId, DokumentMalType dokumentMalType) {
         this(behandlingId, dokumentMalType, null, null, null, null);
     }
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst) {
+    public BestillBrevDtoGammel(long behandlingId, DokumentMalType dokumentMalType, String fritekst) {
         this(behandlingId, dokumentMalType, fritekst, null, null, null);
     }
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto) {
+    public BestillBrevDtoGammel(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto) {
         this(behandlingId, dokumentMalType, null, mottakerDto, null, null);
     }
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto, String dokumentbestillingsId) {
+    public BestillBrevDtoGammel(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto, String dokumentbestillingsId) {
         this(behandlingId, dokumentMalType, null, mottakerDto, null, dokumentbestillingsId);
     }
 
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, FritekstbrevinnholdDto fritekstbrev, String dokumentbestillingsId) { // NOSONAR
+    public BestillBrevDtoGammel(long behandlingId, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, FritekstbrevinnholdDto fritekstbrev, String dokumentbestillingsId) { // NOSONAR
         this.behandlingId = behandlingId;
         this.brevmalkode = dokumentMalType == null ? null : dokumentMalType.getKode();
         this.fritekst = fritekst;

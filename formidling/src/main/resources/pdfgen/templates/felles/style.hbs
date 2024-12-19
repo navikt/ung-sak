@@ -1,0 +1,122 @@
+<style>
+    /* WARNING: Uses CSS 2.1 */
+    @page {
+        size: A4 portrait;
+        @bottom-left {
+            content: element(footer);
+        }
+    }
+
+    * {
+        font-family: "Source Sans Pro", sans-serif !important;
+        color: #3E3832;
+        border-spacing: 0;
+    }
+
+    body {
+        padding: 10mm 10mm 0 10mm;
+        margin: 0;
+        position: relative;
+        font-size: 14px;
+    }
+
+    header {
+        padding-bottom: 5mm;
+    }
+
+    #nav_logo_container {
+        margin-bottom: 10mm;
+    }
+
+    #footer {
+        margin-top: 8mm;
+        width: 100%;
+    }
+
+    .uten-mellomrom p {
+        margin: 0;
+    }
+
+    #nav_logo {
+        width: 15mm;
+        height: 9.1mm;
+        margin: auto;
+        padding: 0 0 10mm 0;
+        position: absolute;
+        right: 10mm;
+    }
+
+    h1 {
+        font-size: 25px;
+        font-weight: 500;
+    }
+
+    h2 {
+        font-size: 20px;
+        margin: 10mm 0 1.5mm 0;
+        font-weight: 500;
+    }
+
+    h3 {
+        font-size: 18px;
+        margin: 10mm 0 1.5mm 0;
+        font-weight: 500;
+    }
+
+    p {
+        margin: 3mm 0 2mm 0;
+    }
+
+    tr {
+        font-size: 14px;
+    }
+
+    /*
+    td {
+        border: 1px solid black;
+    }
+    */
+
+    table {
+        width: 100%;
+    }
+
+    .td01 {
+        width: 110px;
+        font-size: 12px;
+    }
+
+    .td02 {
+        width: 150px;
+    }
+
+    .bold {
+        font-weight: 700;
+    }
+
+    .new_page {
+        page-break-before: always;
+    }
+    .same_page {
+        page-break-inside: avoid;
+    }
+
+    .sidetall {
+        float: right;
+    }
+    #pagenumber:before {
+        content: counter(page);
+    }
+
+    #pagecount:before {
+        content: counter(pages)
+    }
+
+    .diskre {
+        margin-top: 8mm;
+        font-size: 0.8rem;
+        font-style: italic;
+    }
+
+
+</style>

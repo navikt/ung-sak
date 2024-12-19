@@ -16,6 +16,7 @@
         <module>behandlingslager</module>
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
+        <module>formidling</module>
 
         <!--Ytelsespesifikke moduler -->
         <module>ytelse-ung</module>
@@ -45,7 +46,7 @@
         <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
         <flyway.version>11.1.0</flyway.version>
-
+        <pdfgen-core.version>1.1.36</pdfgen-core.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -317,8 +318,13 @@
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak.ytelse</groupId>
+                <groupId>no.nav.ung.sak.ytelse</groupId>
                 <artifactId>ytelse-ung</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>formidling</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -326,6 +332,12 @@
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
                 <version>2.6.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.pdfgen</groupId>
+                <artifactId>pdfgen-core</artifactId>
+                <version>${pdfgen-core.version}</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->

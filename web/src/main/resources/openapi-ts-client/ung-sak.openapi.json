@@ -2115,6 +2115,9 @@
         "required" : [ "journalpostId" ],
         "type" : "object"
       },
+      "JsonNode" : {
+        "type" : "object"
+      },
       "KodeverdiSomObjektAktivitetStatus" : {
         "properties" : {
           "kode" : {
@@ -3153,6 +3156,23 @@
           }
         },
         "required" : [ "behandlingUuid" ],
+        "type" : "object"
+      },
+      "MottakerDto" : {
+        "properties" : {
+          "id" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "type" : {
+            "enum" : [ "ORGNR", "AKTØRID" ],
+            "pattern" : "^[\\p{L}\\p{N}]+$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "id", "type" ],
         "type" : "object"
       },
       "NyBehandlingDto" : {
@@ -4779,6 +4799,28 @@
           }
         },
         "required" : [ "varseltekst" ],
+        "type" : "object"
+      },
+      "VedtaksbrevForhåndsvisDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "dokumentdata" : {
+            "$ref" : "#/components/schemas/JsonNode"
+          },
+          "manuellBrev" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "mottaker" : {
+            "$ref" : "#/components/schemas/MottakerDto"
+          }
+        },
+        "required" : [ "behandlingId" ],
         "type" : "object"
       },
       "VenteårsakSomObjekt" : {
@@ -7085,6 +7127,31 @@
         },
         "summary" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
         "tags" : [ "fordel" ]
+      }
+    },
+    "/formidling/vedtaksbrev/forhaandsvis" : {
+      "post" : {
+        "description" : "Forhåndsvise vedtaksbrev for en behandling",
+        "operationId" : "forhåndsvisVedtaksbrev",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/pdf" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
       }
     },
     "/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {

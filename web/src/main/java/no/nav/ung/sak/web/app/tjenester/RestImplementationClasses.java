@@ -28,6 +28,7 @@ import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.formidling.FormidlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
@@ -57,6 +58,7 @@ public class RestImplementationClasses {
         classes.add(BehandlingBackendRestTjeneste.class);
         classes.add(AksjonspunktRestTjeneste.class);
         classes.add(DokumentRestTjeneste.class);
+        classes.add(FormidlingRestTjeneste.class);
         classes.add(HistorikkRestTjeneste.class);
         classes.add(KodeverkRestTjeneste.class);
         classes.add(SøknadsfristRestTjeneste.class);
