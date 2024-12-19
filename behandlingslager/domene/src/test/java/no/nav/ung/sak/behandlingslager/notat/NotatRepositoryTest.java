@@ -83,32 +83,6 @@ class NotatRepositoryTest {
 
 
     @Test
-    void skalOppretteNotatPåAktør() {
-        var fagsak = lagFagsak();
-        fagsakRepository.opprettNy(fagsak);
-        String tekst = "en tekst med litt notater på aktør";
-
-        NotatEntitet notat = NotatBuilder.of(fagsak)
-            .notatTekst(tekst)
-            .skjult(false)
-            .build();
-
-        var notatId = notatRepository.lagre(notat);
-        List<NotatEntitet> notatEntitets = notatRepository.hentForSakOgAktør(fagsak);
-        assertThat(notatEntitets).hasSize(1);
-
-        NotatAktørEntitet lagretNotat = (NotatAktørEntitet) notatEntitets.get(0);
-        assertThat(lagretNotat.getUuid()).isEqualTo(notatId);
-        assertThat(lagretNotat.getNotatTekst()).isEqualTo(tekst);
-        assertThat(lagretNotat.getYtelseType()).isEqualTo(fagsak.getYtelseType());
-        assertThat(lagretNotat.getOpprettetAv()).isEqualTo("enSaksbehandler");
-        assertThat(lagretNotat.isAktiv()).isTrue();
-        assertThat(lagretNotat.getVersjon()).isEqualTo(0);
-
-    }
-
-
-    @Test
     void skalSortereNotaterPåOpprettetTidspunkt() {
         var fagsak = lagFagsak();
         fagsakRepository.opprettNy(fagsak);

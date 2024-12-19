@@ -33,7 +33,6 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.notat.NotatGjelderType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.notat.NotatAktørEntitet;
 import no.nav.ung.sak.behandlingslager.notat.NotatBuilder;
 import no.nav.ung.sak.behandlingslager.notat.NotatEntitet;
 import no.nav.ung.sak.behandlingslager.notat.NotatRepository;
