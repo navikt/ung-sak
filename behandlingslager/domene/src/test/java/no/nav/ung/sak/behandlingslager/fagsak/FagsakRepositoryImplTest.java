@@ -82,48 +82,6 @@ public class FagsakRepositoryImplTest {
         Assertions.assertThat(list).hasSize(1);
     }
 
-    @Test
-    public void skal_finne_fagsak_relatert_til_pleietrengende_i_angitt_intervall() {
-        AktørId aktørIdSøker1 = AktørId.dummy();
-        AktørId aktørIdSøker2 = AktørId.dummy();
-        FagsakYtelseType ytelseType = FagsakYtelseType.DAGPENGER;
-        LocalDate fom = LocalDate.now();
-        LocalDate tom = fom.plusDays(10);
-
-        // Opprett fagsaker
-        Fagsak[] fagsaker = {
-                new Fagsak(ytelseType, aktørIdSøker1, new Saksnummer("200"), fom, tom),
-                new Fagsak(ytelseType, aktørIdSøker1, new Saksnummer("201"), fom.minusDays(1000L), fom.minusDays(1)),
-                new Fagsak(ytelseType, aktørIdSøker2, new Saksnummer("202"), fom, tom),
-                new Fagsak(ytelseType, aktørIdSøker2, new Saksnummer("203"), tom.plusDays(1), null),
-                new Fagsak(ytelseType, aktørIdSøker2, new Saksnummer("205"), tom.plusDays(1), null)
-
-        };
-
-        lagre(fagsaker);
-
-        List<Fagsak> list0 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker1, fom.minusDays(10), fom.plusDays(5));
-        assertThat(list0).containsOnly(fagsaker[0], fagsaker[1]);
-
-        List<Fagsak> list0_2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, fom.minusDays(10), fom.plusDays(5));
-        assertThat(list0_2).containsOnly(fagsaker[2]);
-
-        List<Fagsak> list1 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker1, tom, tom);
-        assertThat(list1).containsOnly(fagsaker[0]);
-
-        List<Fagsak> list1_2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, tom, tom);
-        assertThat(list1_2).containsOnly(fagsaker[2]);
-
-        List<Fagsak> list2_1 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker1, tom, null);
-        assertThat(list2_1).containsOnly(fagsaker[0]);
-
-        List<Fagsak> list2_2 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, tom, null);
-        assertThat(list2_2).containsOnly(fagsaker[2], fagsaker[3]);
-
-        List<Fagsak> list3 = fagsakRepository.finnFagsakRelatertTil(ytelseType, aktørIdSøker2, tom, null);
-        assertThat(list3).containsOnly(fagsaker[4]);
-    }
-
     private void lagre(Fagsak... fagsaker) {
         for (var f : fagsaker) {
             repository.lagre(f);

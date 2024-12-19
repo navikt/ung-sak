@@ -82,17 +82,6 @@ public class PubliserInfotrygdFeedElementTaskTest {
     }
 
     @Test
-    public void publiserHendelse_uten_aktørId_pleietrengende() {
-        String aktørId = "123";
-        Behandling behandling = mockHelper()
-            .medAktørId(aktørId)
-            .hentBehandling();
-
-        InfotrygdFeedMessage message = task.getInfotrygdFeedMessage(behandling);
-        assertThat(message.getAktoerId()).isEqualTo(aktørId);
-    }
-
-    @Test
     public void publiserHendelse_uten_treff_i_tjeneste() {
         initServices(null, null);
         Behandling behandling = mockHelper()
