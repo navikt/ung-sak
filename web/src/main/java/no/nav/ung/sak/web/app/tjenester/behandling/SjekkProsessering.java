@@ -54,7 +54,7 @@ public class SjekkProsessering {
                              ProsessTaskTjeneste prosessTaskRepository) {
         this.asynkTjeneste = asynkTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.gruppeIdSaksbehandler = this.gruppeIdSaksbehandler;
+        this.gruppeIdSaksbehandler = gruppeIdSaksbehandler;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
