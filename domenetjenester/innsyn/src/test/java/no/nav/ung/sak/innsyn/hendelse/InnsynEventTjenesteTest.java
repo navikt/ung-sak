@@ -59,7 +59,7 @@ class InnsynEventTjenesteTest {
         var venteFrist = now.plusWeeks(4);
 
         TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
-            .builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE, mor);
+            .builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, mor);
 
         behandlingRepository = testScenarioBuilder.mockBehandlingRepository();
         var behandling = testScenarioBuilder.lagMocked();
@@ -98,7 +98,7 @@ class InnsynEventTjenesteTest {
         Fagsak sak = b.fagsak();
         assertThat(sak.saksnummer().verdi()).isEqualTo(fagsak.getSaksnummer().getVerdi());
         assertThat(sak.søkerAktørId().id()).isEqualTo(mor.getId());
-        assertThat(sak.ytelseType().getKode()).isEqualTo(FagsakYtelseType.UNGDOMSYTELSE.getKode());
+        assertThat(sak.ytelseType().getKode()).isEqualTo(FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getKode());
 
         assertThat(b.behandlingsId()).isEqualTo(behandling.getUuid());
         assertThat(b.erUtenlands()).isEqualTo(false);
