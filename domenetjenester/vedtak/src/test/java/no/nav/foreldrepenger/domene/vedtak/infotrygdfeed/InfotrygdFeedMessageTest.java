@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InfotrygdFeedMessageTest {
-    private final String json = "{\"uuid\":\"uuid\",\"ytelse\":\"ytelse\",\"saksnummer\":\"saksnummer\",\"aktoerId\":\"aktørId\",\"aktoerIdPleietrengende\":\"aktørIdPleietrengende\",\"foersteStoenadsdag\":\"2020-01-01\",\"sisteStoenadsdag\":\"2020-01-01\"}";
+    private final String json = "{\"uuid\":\"uuid\",\"ytelse\":\"ytelse\",\"saksnummer\":\"saksnummer\",\"aktoerId\":\"aktørId\",\"foersteStoenadsdag\":\"2020-01-01\",\"sisteStoenadsdag\":\"2020-01-01\"}";
     private final LocalDate date = LocalDate.of(2020, 1, 1);
 
     @Test
