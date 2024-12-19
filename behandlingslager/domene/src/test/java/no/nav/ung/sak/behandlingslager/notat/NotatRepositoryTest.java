@@ -61,7 +61,7 @@ class NotatRepositoryTest {
         Long fagsakId = fagsakRepository.opprettNy(fagsak);
         String tekst = "en tekst med litt notater";
 
-        NotatEntitet notat = NotatBuilder.of(fagsak, false)
+        NotatEntitet notat = NotatBuilder.of(fagsak)
             .notatTekst(tekst)
             .skjult(false)
             .build();
@@ -83,48 +83,21 @@ class NotatRepositoryTest {
 
 
     @Test
-    void skalOppretteNotatPåAktør() {
-        var fagsak = lagFagsakMedPleietrengende();
-        fagsakRepository.opprettNy(fagsak);
-        String tekst = "en tekst med litt notater på aktør";
-
-        NotatEntitet notat = NotatBuilder.of(fagsak, true)
-            .notatTekst(tekst)
-            .skjult(false)
-            .build();
-
-        var notatId = notatRepository.lagre(notat);
-        List<NotatEntitet> notatEntitets = notatRepository.hentForSakOgAktør(fagsak);
-        assertThat(notatEntitets).hasSize(1);
-
-        NotatAktørEntitet lagretNotat = (NotatAktørEntitet) notatEntitets.get(0);
-        assertThat(lagretNotat.getUuid()).isEqualTo(notatId);
-        assertThat(lagretNotat.getNotatTekst()).isEqualTo(tekst);
-        assertThat(lagretNotat.getAktørId()).isEqualTo(fagsak.getPleietrengendeAktørId());
-        assertThat(lagretNotat.getYtelseType()).isEqualTo(fagsak.getYtelseType());
-        assertThat(lagretNotat.getOpprettetAv()).isEqualTo("enSaksbehandler");
-        assertThat(lagretNotat.isAktiv()).isTrue();
-        assertThat(lagretNotat.getVersjon()).isEqualTo(0);
-
-    }
-
-
-    @Test
     void skalSortereNotaterPåOpprettetTidspunkt() {
-        var fagsak = lagFagsakMedPleietrengende();
+        var fagsak = lagFagsak();
         fagsakRepository.opprettNy(fagsak);
 
         var nå = LocalDateTime.now();
-        NotatEntitet notat4 = NotatBuilder.of(fagsak, true).notatTekst("nyeste notat").build();
+        NotatEntitet notat4 = NotatBuilder.of(fagsak).notatTekst("nyeste notat").build();
         notat4.overstyrOpprettetTidspunkt(nå);
 
-        NotatEntitet notat3 = NotatBuilder.of(fagsak, false).notatTekst("nr 3").build();
+        NotatEntitet notat3 = NotatBuilder.of(fagsak).notatTekst("nr 3").build();
         notat3.overstyrOpprettetTidspunkt(nå.minusSeconds(10));
 
-        NotatEntitet notat2 = NotatBuilder.of(fagsak, true).notatTekst("nr 2").build();
+        NotatEntitet notat2 = NotatBuilder.of(fagsak).notatTekst("nr 2").build();
         notat2.overstyrOpprettetTidspunkt(nå.minusMinutes(10));
 
-        NotatEntitet notat1 = NotatBuilder.of(fagsak, false).notatTekst("eldste notat").build();
+        NotatEntitet notat1 = NotatBuilder.of(fagsak).notatTekst("eldste notat").build();
         notat1.overstyrOpprettetTidspunkt(nå.minusMonths(1));
 
         notatRepository.lagre(notat2);
@@ -148,12 +121,12 @@ class NotatRepositoryTest {
 
     @Test
     void skalFeileHvisEndrerPåUtdatertVersjon() {
-        var fagsak = lagFagsakMedPleietrengende();
+        var fagsak = lagFagsak();
         fagsakRepository.opprettNy(fagsak);
         String tekst = "en tekst med litt notater på aktør";
 
         //Klient 1 lager notat
-        NotatEntitet originalNotat = NotatBuilder.of(fagsak, true)
+        NotatEntitet originalNotat = NotatBuilder.of(fagsak)
             .notatTekst(tekst)
             .skjult(false)
             .build();
@@ -192,34 +165,9 @@ class NotatRepositoryTest {
             .medForetrukketSpråk(Språkkode.nb)
             .build();
 
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.OMSORGSPENGER, personinfo.getAktørId(), new Saksnummer("A123"), LocalDate.now(), LocalDate.now());
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, personinfo.getAktørId(), new Saksnummer("A123"), LocalDate.now(), LocalDate.now());
         return fagsak;
 
     }
 
-    private Fagsak lagFagsakMedPleietrengende() {
-        final Personinfo personinfo = new Personinfo.Builder()
-            .medNavn("Navn navnesen")
-            .medAktørId(AktørId.dummy())
-            .medFødselsdato(LocalDate.now().minusYears(20))
-            .medLandkode(Landkoder.NOR)
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medPersonIdent(new PersonIdent("12345678901"))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-
-        final Personinfo pleietrengende = new Personinfo.Builder()
-            .medNavn("Navn navnesen")
-            .medAktørId(AktørId.dummy())
-            .medFødselsdato(LocalDate.now().minusYears(20))
-            .medLandkode(Landkoder.NOR)
-            .medKjønn(NavBrukerKjønn.KVINNE)
-            .medPersonIdent(new PersonIdent("12345678901"))
-            .medForetrukketSpråk(Språkkode.nb)
-            .build();
-
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, personinfo.getAktørId(), pleietrengende.getAktørId(), null, new Saksnummer("A123"), LocalDate.now(), LocalDate.now());
-        return fagsak;
-
-    }
 }

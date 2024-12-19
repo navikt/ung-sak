@@ -59,16 +59,6 @@ public interface VilkårsPerioderTilVurderingTjeneste {
         return new TreeSet<>();
     }
 
-    /**
-     * Utleder perioder som skal revurders pga endring i annen sak på samme pleietrengende
-     *
-     * @param referanse behandlingen
-     * @return set med perioder
-     */
-    default NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
-        return new TreeSet<>();
-    }
-
     default KantIKantVurderer getKantIKantVurderer() {
         return new DefaultKantIKantVurderer();
     }

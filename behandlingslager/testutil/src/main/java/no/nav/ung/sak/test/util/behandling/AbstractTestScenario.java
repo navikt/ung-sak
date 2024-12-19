@@ -730,15 +730,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     @SuppressWarnings("unchecked")
-    @Deprecated // Ikke relevant for UNG
-    public S medPleietrengende(AktørId aktørId) {
-        fagsakBuilder
-            .medPleietrengende(aktørId);
-
-        return (S) this;
-    }
-
-    @SuppressWarnings("unchecked")
     public S medBehandlingStegStart(BehandlingStegType startSteg) {
         this.startSteg = startSteg;
         return (S) this;

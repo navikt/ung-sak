@@ -95,18 +95,6 @@ public class FordelRestTjeneste {
         var ytelseType = finnYtelseType(opprettSakDto);
 
         AktørId aktørId = new AktørId(opprettSakDto.getAktørId());
-        AktørId pleietrengendeAktørId = null;
-        if (opprettSakDto.getPleietrengendeAktørId() != null) {
-            pleietrengendeAktørId = new AktørId(opprettSakDto.getPleietrengendeAktørId());
-        }
-
-        AktørId relatertPersonAktørId = null;
-        if (opprettSakDto.getRelatertPersonAktørId() != null) {
-            relatertPersonAktørId = new AktørId(opprettSakDto.getRelatertPersonAktørId());
-        }
-
-        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
-
         Periode periode = opprettSakDto.getPeriode();
         if (periode == null) {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
@@ -114,7 +102,7 @@ public class FordelRestTjeneste {
 
         var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, periode.getFom(), periode.getTom());
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
@@ -130,17 +118,6 @@ public class FordelRestTjeneste {
         var ytelseType = finnYtelseType(opprettSakDto);
 
         AktørId aktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getSøker())).orElseThrow();
-        AktørId pleietrengendeAktørId = null;
-        if (opprettSakDto.getPleietrengende() != null) {
-            pleietrengendeAktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getPleietrengende())).orElseThrow();
-        }
-
-        AktørId relatertPersonAktørId = null;
-        if (opprettSakDto.getRelatertPerson() != null) {
-            relatertPersonAktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getRelatertPerson())).orElseThrow();
-        }
-
-        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
 
         Periode periode = opprettSakDto.getPeriode();
         if (periode == null) {
@@ -154,7 +131,7 @@ public class FordelRestTjeneste {
 
         var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, periode.getFom(), periode.getTom());
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
@@ -169,11 +146,10 @@ public class FordelRestTjeneste {
         var ytelseType = finnSakDto.getYtelseType();
 
         AktørId bruker = finnSakDto.getAktørId();
-        AktørId pleietrengendeAktørId = finnSakDto.getPleietrengendeAktørId();
         AktørId relatertPersonAktørId = finnSakDto.getRelatertPersonAktørId();
         var periode = finnSakDto.getPeriode();
 
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, bruker, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, bruker, periode.getFom(), periode.getTom());
 
         return fagsak.isPresent() ? new SaksnummerDto(fagsak.get().getSaksnummer().getVerdi()) : null;
     }
@@ -192,8 +168,6 @@ public class FordelRestTjeneste {
         return fagsakTjeneste.finnesEnFagsakForMinstEnAvAktørene(
             finnSakDto.getYtelseType(),
             finnSakDto.getAktørId(),
-            finnSakDto.getPleietrengendeAktørId(),
-            finnSakDto.getRelatertPersonAktørId(),
             finnSakDto.getPeriode().getFom(),
             finnSakDto.getPeriode().getTom()
         );
@@ -313,21 +287,7 @@ public class FordelRestTjeneste {
 
     //TODO fjern dupliseringen ved å bruke denne metoden alle steder der fagsak opprettes
     private Fagsak finnEllerOpprettSakGittSaksnummer(AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
-        final Saksnummer saksnummer = journalpostMottakOpprettSakDto.getSaksnummer();
         final FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
-
-        AktørId pleietrengendeAktørId = null;
-        if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
-            pleietrengendeAktørId = new AktørId(journalpostMottakOpprettSakDto.getPleietrengendeAktørId());
-        }
-
-        AktørId relatertPersonAktørId = null;
-        if (journalpostMottakOpprettSakDto.getRelatertPersonAktørId() != null) {
-            relatertPersonAktørId = new AktørId(journalpostMottakOpprettSakDto.getRelatertPersonAktørId());
-        }
-
-        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
-
         Periode periode = journalpostMottakOpprettSakDto.getPeriode();
         if (periode == null) {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + journalpostMottakOpprettSakDto);
@@ -338,9 +298,7 @@ public class FordelRestTjeneste {
         return søknadMottaker.finnEllerOpprettFagsak(
             ytelseType,
             new AktørId(journalpostMottakOpprettSakDto.getAktørId()),
-            pleietrengendeAktørId,
-            relatertPersonAktørId,
-            periode.getFom(),
+                periode.getFom(),
             periode.getTom()
         );
     }

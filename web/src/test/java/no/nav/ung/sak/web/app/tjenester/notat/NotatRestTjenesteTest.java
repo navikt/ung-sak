@@ -87,63 +87,10 @@ class NotatRestTjenesteTest {
 
     }
 
-
-    @Test
-    void skalSkjuleNotatInklAndreSine() {
-        var mor = AktørId.dummy();
-        var pleietrengende = AktørId.dummy();
-
-        var saksnummer = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
-
-        SubjectHandlerUtils.setInternBruker("saksbehandler1");
-        var notatDto = new OpprettNotatDto(
-                "tekst",
-                saksnummer,
-                NotatGjelderType.PLEIETRENGENDE
-        );
-
-        opprettNotat(notatDto);
-        NotatDto notat = hentForFagsak(saksnummer).stream().findFirst().orElseThrow();
-        assertThat(notat.skjult()).isFalse();
-
-        skjulNotat(new SkjulNotatDto(
-                notat.notatId(),
-                true,
-                saksnummer,
-                notat.versjon()
-        ));
-        NotatDto skjultNotat = hentNotat(saksnummer, notat.notatId());
-        assertThat(skjultNotat.notatId()).isEqualTo(notat.notatId());
-        assertThat(skjultNotat.skjult()).isTrue();
-        assertThat(skjultNotat.opprettetAv()).isEqualTo("saksbehandler1");
-        assertThat(skjultNotat.opprettetTidspunkt()).isEqualTo(notat.opprettetTidspunkt());
-        assertThat(skjultNotat.endretTidspunkt()).isNull();
-        assertThat(skjultNotat.endretAv()).isNull();
-        assertThat(skjultNotat.versjon()).isEqualTo(1);
-
-        SubjectHandlerUtils.setInternBruker("saksbehandler2");
-        skjulNotat(new SkjulNotatDto(
-                notat.notatId(),
-                false,
-                saksnummer,
-                skjultNotat.versjon()
-        ));
-
-        NotatDto fjernetSkjult = hentNotat(saksnummer, notat.notatId());
-        assertThat(fjernetSkjult.skjult()).isFalse();
-        //skjuling telles ikke som endring
-        assertThat(fjernetSkjult.endretTidspunkt()).isNull();
-        assertThat(fjernetSkjult.endretAv()).isNull();
-        assertThat(fjernetSkjult.versjon()).isEqualTo(2);
-    }
-
-
     @Test
     void skalEndreTekst() {
         var mor = AktørId.dummy();
-        var pleietrengende = AktørId.dummy();
-
-        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
+        var morSak = TestScenarioBuilder.builderMedSøknad(mor).lagreFagsak(repositoryProvider);
 
         String morTekst = "et gammelt notat ";
         var saksnummer = morSak.getSaksnummer();
@@ -181,9 +128,7 @@ class NotatRestTjenesteTest {
     @Test
     void skalIkkeEndreAndreSineNotaterTekst() {
         var mor = AktørId.dummy();
-        var pleietrengende = AktørId.dummy();
-
-        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
+        var morSak = TestScenarioBuilder.builderMedSøknad(mor).lagreFagsak(repositoryProvider);
 
         var saksnummer = morSak.getSaksnummer();
 
@@ -212,9 +157,7 @@ class NotatRestTjenesteTest {
     @Test
     void skalFeileHvisEndrerPåEldreVersjon() {
         var mor = AktørId.dummy();
-        var pleietrengende = AktørId.dummy();
-
-        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
+        var morSak = TestScenarioBuilder.builderMedSøknad(mor).lagreFagsak(repositoryProvider);
 
         var saksnummer = morSak.getSaksnummer();
         opprettNotat(new OpprettNotatDto(
@@ -242,86 +185,6 @@ class NotatRestTjenesteTest {
                         saksnummer,
                         førsteVersjon))
         ).isInstanceOf(TekniskException.class);
-    }
-
-    @Test
-    void skalOppretteNotatPåPleietrengendeOgHentePåAnnenForeldresSak() {
-        var mor = AktørId.dummy();
-        var far = AktørId.dummy();
-        var pleietrengende = AktørId.dummy();
-
-        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
-        var farSak = TestScenarioBuilder.builderUtenSøknad(far).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
-
-        String morNotat = "notat som gjelder mor";
-        opprettNotat(new OpprettNotatDto(
-                morNotat,
-                morSak,
-                NotatGjelderType.FAGSAK
-        ));
-        String pleietrengedeNotat = "notat som gjelder pleietrengende";
-        opprettNotat(new OpprettNotatDto(
-                pleietrengedeNotat,
-                morSak,
-                NotatGjelderType.PLEIETRENGENDE
-        ));
-
-        String farNotat = "notat som gjelder far";
-        opprettNotat(new OpprettNotatDto(
-                farNotat,
-                farSak,
-                NotatGjelderType.FAGSAK
-        ));
-
-        List<NotatDto> morNotater = hentForFagsak(morSak);
-        assertThat(morNotater).hasSize(2);
-        assertThat(morNotater).extracting(NotatDto::notatTekst).containsExactlyInAnyOrder(morNotat, pleietrengedeNotat);
-
-
-        List<NotatDto> farNotater = hentForFagsak(farSak);
-        assertThat(farNotater).hasSize(2);
-        assertThat(farNotater).extracting(NotatDto::notatTekst).containsExactlyInAnyOrder(farNotat, pleietrengedeNotat);
-
-    }
-
-
-    @Test
-    void notatPåPsbPleietrengendeSkalIkkeHentesPåPils() {
-        var mor = AktørId.dummy();
-        var far = AktørId.dummy();
-        var pleietrengende = AktørId.dummy();
-
-        var psbSak = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PSB, mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
-        var pilsSak = TestScenarioBuilder.builderUtenSøknad(FagsakYtelseType.PPN, far).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
-
-        String morNotat = "notat som gjelder psb";
-        opprettNotat(new OpprettNotatDto(
-                morNotat,
-                psbSak,
-                NotatGjelderType.FAGSAK
-        ));
-        String pleietrengedeNotat = "notat som gjelder pleietrengende";
-        opprettNotat(new OpprettNotatDto(
-                pleietrengedeNotat,
-                psbSak,
-                NotatGjelderType.PLEIETRENGENDE
-        ));
-
-        String farNotat = "notat som gjelder pils";
-        opprettNotat(new OpprettNotatDto(
-                farNotat,
-                pilsSak,
-                NotatGjelderType.FAGSAK
-        ));
-
-        List<NotatDto> morNotater = hentForFagsak(psbSak);
-        assertThat(morNotater).hasSize(2);
-        assertThat(morNotater).extracting(NotatDto::notatTekst).containsExactlyInAnyOrder(morNotat, pleietrengedeNotat);
-
-
-        List<NotatDto> farNotater = hentForFagsak(pilsSak);
-        assertThat(farNotater).hasSize(1);
-        assertThat(farNotater).extracting(NotatDto::notatTekst).containsExactlyInAnyOrder(farNotat);
     }
 
 

@@ -94,8 +94,6 @@ public class BehandlingProsessHendelseMapper {
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
             .medBehandlendeEnhet(behandling.getBehandlendeEnhet())
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
-            .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
-            .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
             .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)

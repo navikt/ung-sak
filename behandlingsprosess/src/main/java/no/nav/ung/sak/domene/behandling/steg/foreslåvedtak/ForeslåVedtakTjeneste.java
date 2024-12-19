@@ -53,12 +53,6 @@ class ForeslåVedtakTjeneste {
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        long fagsakId = behandling.getFagsakId();
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        if (fagsak.getSkalTilInfotrygd()) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
         aksjonspunktDefinisjoner.addAll(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
         // TODO: Fiks integrering mot k9-tilbake

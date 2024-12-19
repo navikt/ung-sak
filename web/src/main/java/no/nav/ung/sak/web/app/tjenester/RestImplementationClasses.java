@@ -23,7 +23,6 @@ import no.nav.ung.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRe
 import no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.brukerdialog.BrukerdialogRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
@@ -79,7 +78,6 @@ public class RestImplementationClasses {
         classes.add(OverlapendeYtelserRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);
         classes.add(LosRestTjeneste.class);
-        classes.add(BrukerdialogRestTjeneste.class);
 
         classes.add(UngdomsytelseRestTjeneste.class);
 

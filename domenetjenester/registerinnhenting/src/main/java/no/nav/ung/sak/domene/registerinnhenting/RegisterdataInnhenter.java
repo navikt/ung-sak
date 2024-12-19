@@ -125,9 +125,7 @@ public class RegisterdataInnhenter {
         leggTilFosterbarn(søkerPersonInfo, behandling, informasjonBuilder, opplysningsperioden);
 
         if (fagsakYtelseType.harRelatertePersoner()) {
-            leggTilPleietrengende(informasjonBuilder, behandling, opplysningsperioden);
             leggTilEktefelle(informasjonBuilder, behandling, opplysningsperioden, søkerPersonInfo);
-            leggTilRelatertPerson(informasjonBuilder, behandling, opplysningsperioden);
         }
 
         return informasjonBuilder;
@@ -161,49 +159,9 @@ public class RegisterdataInnhenter {
         });
     }
 
-    private void leggTilPleietrengende(PersonInformasjonBuilder informasjonBuilder, Behandling behandling, no.nav.ung.sak.typer.Periode opplysningsperioden) {
-        var pleietrengende = Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId());
-        if (pleietrengende.isPresent()) {
-            var aktørId = pleietrengende.get();
-            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
-            if (personinfo != null) {
-                log.info("Fant personinfo for angitt pleietrengende fra fagsak");
-                if (harAktør(informasjonBuilder, personinfo)) {
-                    return;
-                }
-                if (hentHistorikkForRelatertePersoner(behandling)) {
-                    Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(personinfo.getAktørId(), opplysningsperioden);
-                    mapInfoMedHistorikkTilEntitet(personinfo, personhistorikkinfo, informasjonBuilder, behandling);
-                } else {
-                    mapInfoTilEntitet(personinfo, informasjonBuilder, behandling);
-                }
-            } else {
-                throw new IllegalStateException("Finner ikke personinfo i PDL for pleietrengende aktørid");
-            }
-        }
-    }
 
     private boolean harAktør(PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
         return informasjonBuilder.harAktørId(personinfo.getAktørId());
-    }
-
-    private void leggTilRelatertPerson(PersonInformasjonBuilder informasjonBuilder, Behandling behandling, no.nav.ung.sak.typer.Periode opplysningsperioden) {
-        var relatertPerson = Optional.ofNullable(behandling.getFagsak().getRelatertPersonAktørId());
-        if (relatertPerson.isPresent()) {
-            var aktørId = relatertPerson.get();
-            var personinfo = personinfoAdapter.hentPersoninfo(aktørId);
-            if (personinfo != null) {
-                log.info("Fant personinfo for angitt relatert person fra fagsak");
-                if (hentHistorikkForRelatertePersoner(behandling)) {
-                    Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(personinfo.getAktørId(), opplysningsperioden);
-                    mapInfoMedHistorikkTilEntitet(personinfo, personhistorikkinfo, informasjonBuilder, behandling);
-                } else {
-                    mapInfoTilEntitet(personinfo, informasjonBuilder, behandling);
-                }
-            } else {
-                throw new IllegalStateException("Finner ikke personinfo i PDL for relatert person aktørid");
-            }
-        }
     }
 
     private void mapPersonstatus(List<PersonstatusPeriode> personstatushistorikk, PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {

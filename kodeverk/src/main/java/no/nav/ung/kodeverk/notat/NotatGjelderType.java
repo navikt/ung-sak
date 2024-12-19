@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum NotatGjelderType implements Kodeverdi {
-    FAGSAK("FAGSAK", "Fagsak"), PLEIETRENGENDE("PLEIETRENGENDE", "Pleietrengende") ;
+    FAGSAK("FAGSAK", "Fagsak");
 
     private final String kode;
     private final String navn;

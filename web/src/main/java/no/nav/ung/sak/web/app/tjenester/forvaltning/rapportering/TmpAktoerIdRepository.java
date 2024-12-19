@@ -29,10 +29,6 @@ public class TmpAktoerIdRepository {
         String sql = """
                 select distinct f.bruker_aktoer_id from fagsak f
                     where not exists (select 1 from tmp_aktoer_id t where t.aktoer_id=f.bruker_aktoer_id)
-                 union select f.pleietrengende_aktoer_id from fagsak f
-                    where not exists (select 1 from tmp_aktoer_id t where t.aktoer_id=f.pleietrengende_aktoer_id)
-                 union select f.relatert_person_aktoer_id from fagsak f
-                    where not exists (select 1 from tmp_aktoer_id t where t.aktoer_id=f.relatert_person_aktoer_id)
                 """;
 
         @SuppressWarnings("unchecked")

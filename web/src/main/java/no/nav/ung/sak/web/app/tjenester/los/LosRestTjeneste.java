@@ -94,8 +94,6 @@ public class LosRestTjeneste {
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(påklagdBehandlingUuid.getBehandlingUuid());
         if (behandling.isPresent()) {
             LosOpplysningerSomManglerIKlageDto dto = new LosOpplysningerSomManglerIKlageDto();
-            dto.setPleietrengendeAktørId(behandling.get().getFagsak().getPleietrengendeAktørId());
-
             dto.setUtenlandstilsnitt(behandling.get().getAksjonspunkter()
                 .stream()
                 .filter(ap -> !ap.erAvbrutt())

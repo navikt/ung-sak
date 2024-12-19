@@ -35,12 +35,6 @@ public class PersonopplysningDto extends PersonIdentDto {
     @Valid
     private PersonopplysningDto annenPart;
 
-    /** Angitt pleietrengende part (dersom ytelse er knyttet til søker&lt;-&gt;pleietrengende part */
-    @JsonInclude(value = Include.NON_EMPTY)
-    @JsonProperty(value = "pleietrengendePart")
-    @Valid
-    private PersonopplysningDto pleietrengendePart;
-
     @JsonProperty(value = "avklartPersonstatus")
     @Valid
     private AvklartPersonstatus avklartPersonstatus;
@@ -118,10 +112,6 @@ public class PersonopplysningDto extends PersonIdentDto {
 
     public PersonopplysningDto getAnnenPart() {
         return annenPart;
-    }
-
-    public PersonopplysningDto getPleietrengendePart() {
-        return pleietrengendePart;
     }
 
     public AvklartPersonstatus getAvklartPersonstatus() {
@@ -244,7 +234,4 @@ public class PersonopplysningDto extends PersonIdentDto {
         this.statsborgerskap = statsborgerskap;
     }
 
-    public void setPleietrengendePart(PersonopplysningDto dto) {
-        this.pleietrengendePart = dto;
-    }
 }

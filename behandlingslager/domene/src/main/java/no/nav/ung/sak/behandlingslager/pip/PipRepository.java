@@ -104,25 +104,12 @@ public class PipRepository {
              SELECT fag.bruker_aktoer_id FROM Fagsak fag
              WHERE fag.id in (:fagsakIder) AND fag.bruker_aktoer_id IS NOT NULL
              UNION ALL
-             SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag
-             WHERE fag.id in (:fagsakIder) AND fag.pleietrengende_aktoer_id IS NOT NULL
-             UNION ALL
-             SELECT fag.relatert_person_aktoer_id FROM Fagsak fag
-             WHERE fag.id in (:fagsakIder) AND fag.relatert_person_aktoer_id IS NOT NULL
-             UNION ALL
              SELECT soa.aktoer_id from so_soeknad_angitt_person soa
              INNER JOIN so_soeknad so on so.id=soa.soeknad_id
              INNER JOIN gr_soeknad gr on gr.soeknad_id=so.id
              INNER JOIN behandling b on b.id=gr.behandling_id
              INNER JOIN fagsak fag on fag.id=b.fagsak_id
              WHERE fag.id in (:fagsakIder) and soa.aktoer_id is not null
-             UNION ALL
-             SELECT fag2.bruker_aktoer_id
-             FROM Fagsak fag INNER JOIN Fagsak fag2 ON (
-              fag.pleietrengende_aktoer_id IS NOT NULL AND fag.pleietrengende_aktoer_id = fag2.pleietrengende_aktoer_id
-              OR fag.relatert_person_aktoer_id IS NOT NULL AND fag.relatert_person_aktoer_id = fag2.relatert_person_aktoer_id
-             )
-             WHERE fag.id in (:fagsakIder)
              """;
 
         Query query = entityManager.createNativeQuery(sql);
@@ -147,25 +134,12 @@ public class PipRepository {
              SELECT fag.bruker_aktoer_id FROM Fagsak fag
              WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.bruker_aktoer_id IS NOT NULL
              UNION ALL
-             SELECT fag.pleietrengende_aktoer_id FROM Fagsak fag
-             WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.pleietrengende_aktoer_id IS NOT NULL
-             UNION ALL
-             SELECT fag.relatert_person_aktoer_id FROM Fagsak fag
-             WHERE fag.SAKSNUMMER = (:saksnummer) AND fag.relatert_person_aktoer_id IS NOT NULL
-             UNION ALL
              SELECT soa.aktoer_id from so_soeknad_angitt_person soa
              INNER JOIN so_soeknad so on so.id=soa.soeknad_id
              INNER JOIN gr_soeknad gr on gr.soeknad_id=so.id
              INNER JOIN behandling b on b.id=gr.behandling_id
              INNER JOIN fagsak fag on fag.id=b.fagsak_id
-             WHERE fag.SAKSNUMMER = (:saksnummer) and soa.aktoer_id is not null
-             UNION ALL
-             SELECT fag2.bruker_aktoer_id
-             FROM Fagsak fag INNER JOIN Fagsak fag2 ON (
-              fag.pleietrengende_aktoer_id IS NOT NULL AND fag.pleietrengende_aktoer_id = fag2.pleietrengende_aktoer_id
-              OR fag.relatert_person_aktoer_id IS NOT NULL AND fag.relatert_person_aktoer_id = fag2.relatert_person_aktoer_id
-             )
-             WHERE fag.SAKSNUMMER = (:saksnummer);
+             WHERE fag.SAKSNUMMER = (:saksnummer) and soa.aktoer_id is not null;
             """;
 
         Query query = entityManager.createNativeQuery(sql); // NOSONAR

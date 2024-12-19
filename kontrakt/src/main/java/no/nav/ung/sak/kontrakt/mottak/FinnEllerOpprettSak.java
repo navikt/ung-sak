@@ -32,10 +32,12 @@ public class FinnEllerOpprettSak {
     @Digits(integer = 19, fraction = 0)
     private String aktørId;
 
+    @Deprecated(forRemoval = true)
     @JsonProperty(value = "pleietrengendeAktørId")
     @Digits(integer = 19, fraction = 0)
     private String pleietrengendeAktørId;
 
+    @Deprecated(forRemoval = true)
     @JsonProperty(value = "relatertPersonAktørId")
     @Digits(integer = 19, fraction = 0)
     private String relatertPersonAktørId;

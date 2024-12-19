@@ -30,9 +30,6 @@ public class StønadstatistikkHendelseValidator {
     }
 
     private void validerOmsorgspenger(StønadstatistikkHendelse stønadstatistikkHendelse) {
-        if (stønadstatistikkHendelse.getPleietrengende() != null) {
-            throw new IllegalArgumentException("Skal ikke sette pleietrengende for OMP");
-        }
         if (!stønadstatistikkHendelse.getDiagnosekoder().isEmpty()) {
             throw new IllegalArgumentException("Skal ikke sette diagnosekoder for OMP");
         }

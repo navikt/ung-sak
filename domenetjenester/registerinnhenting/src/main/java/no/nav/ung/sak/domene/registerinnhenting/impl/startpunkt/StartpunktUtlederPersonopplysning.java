@@ -66,7 +66,7 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
         Set<StartpunktType> startpunkter = new LinkedHashSet<>();
         if (forelderDødEndret) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "foreldres død", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "foreldres død", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
         if (poDiff.erSivilstandEndretForBruker()) {
@@ -74,18 +74,9 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
 
-        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OLP).contains(ref.getFagsakYtelseType())) {
-            Fagsak fagsak = fagsakRepository.finnEksaktFagsak(ref.getFagsakId());
-            AktørId pleietrengendeAktørId = fagsak.getPleietrengendeAktørId();
-            if (poDiff.erDødsdatoEndret(pleietrengendeAktørId)) {
-                FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.INNGANGSVILKÅR_MEDISINSK, "pletrengendes dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
-                startpunkter.add(StartpunktType.INNGANGSVILKÅR_MEDISINSK);
-            }
-        } else if (Set.of(FagsakYtelseType.OMP).contains(ref.getFagsakYtelseType())) {
-            if (poDiff.erBarnDødsdatoEndret()) {
-                FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
-                startpunkter.add(StartpunktType.UTTAKSVILKÅR);
-            }
+        if (poDiff.erBarnDødsdatoEndret()) {
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
+            startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
 
         final LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();

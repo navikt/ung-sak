@@ -72,15 +72,6 @@ public class VedtakHendelse {
     @JsonProperty(value = "fagsakPeriode", required = false)
     private Periode fagsakPeriode;
 
-    /** (Optional) AktørId for angitt pleietrengende (barn, eller nærstående). */
-    @Valid
-    @JsonProperty(value = "pleietrengendeAktørId")
-    private AktørId pleietrengendeAktørId;
-
-    /** (Optional) AktørId for angitt relatert annen part (eks. annen forelder. */
-    @Valid
-    @JsonProperty(value = "relatertPartAktørId", required = false)
-    private AktørId relatertPartAktørId;
 
     public Periode getFagsakPeriode() {
         return fagsakPeriode;
@@ -88,22 +79,6 @@ public class VedtakHendelse {
 
     public void setFagsakPeriode(Periode fagsakPeriode) {
         this.fagsakPeriode = fagsakPeriode;
-    }
-
-    public AktørId getPleietrengendeAktørId() {
-        return pleietrengendeAktørId;
-    }
-
-    public void setPleietrengendeAktørId(AktørId pleietrengendeAktørId) {
-        this.pleietrengendeAktørId = pleietrengendeAktørId;
-    }
-
-    public AktørId getRelatertPartAktørId() {
-        return relatertPartAktørId;
-    }
-
-    public void setRelatertPartAktørId(AktørId relatertPartAktørId) {
-        this.relatertPartAktørId = relatertPartAktørId;
     }
 
     public AktørId getAktør() {

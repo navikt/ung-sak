@@ -13,9 +13,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class SakRettigheterDto {
 
-    @JsonProperty(value = "sakSkalTilInfotrygd")
-    private boolean sakSkalTilInfotrygd;
-
     @JsonProperty(value = "behandlingTypeKanOpprettes")
     @Valid
     @Size(max = 10)
@@ -26,14 +23,9 @@ public class SakRettigheterDto {
     @Size(max = 100)
     private List<BehandlingOperasjonerDto> behandlingTillatteOperasjoner;
 
-    public SakRettigheterDto(boolean sakSkalTilInfotrygd, List<BehandlingOpprettingDto> behandlingTypeKanOpprettes, List<BehandlingOperasjonerDto> behandlingTillatteOperasjoner) {
-        this.sakSkalTilInfotrygd = sakSkalTilInfotrygd;
+    public SakRettigheterDto(List<BehandlingOpprettingDto> behandlingTypeKanOpprettes, List<BehandlingOperasjonerDto> behandlingTillatteOperasjoner) {
         this.behandlingTypeKanOpprettes = behandlingTypeKanOpprettes;
         this.behandlingTillatteOperasjoner = behandlingTillatteOperasjoner;
-    }
-
-    public boolean isSakSkalTilInfotrygd() {
-        return sakSkalTilInfotrygd;
     }
 
     public List<BehandlingOpprettingDto> getBehandlingTypeKanOpprettes() {

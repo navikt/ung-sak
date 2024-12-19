@@ -214,20 +214,6 @@ public class PersonopplysningRepository {
         if (!personInformasjonBuilder.harAktørId(behandling.getAktørId())) {
             throw new IllegalStateException("Mangler personinfo for brukers aktørId");
         }
-
-        var pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
-        if (pleietrengendeAktørId != null) {
-            if (!personInformasjonBuilder.harAktørId(pleietrengendeAktørId)) {
-                throw new IllegalStateException("Mangler personinfo for angitt pleietrengende aktørId");
-            }
-        }
-
-        var relatertAnnenPerson = behandling.getFagsak().getRelatertPersonAktørId();
-        if (relatertAnnenPerson != null) {
-            if (!personInformasjonBuilder.harAktørId(relatertAnnenPerson)) {
-                throw new IllegalStateException("Mangler personinfo for angitt relatert annen part aktørId");
-            }
-        }
     }
 
     private PersonopplysningGrunnlagBuilder getGrunnlagBuilderFor(Long behandlingId) {

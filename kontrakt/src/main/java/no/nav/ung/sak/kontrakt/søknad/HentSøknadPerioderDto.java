@@ -30,9 +30,7 @@ public class HentSøknadPerioderDto {
     @Valid
     private PersonIdent brukerIdent;
 
-    @JsonProperty(value = "pleietrengende")
-    @Valid
-    private PersonIdent pleietrengendeIdent;
+
 
 
     protected HentSøknadPerioderDto() {
@@ -40,11 +38,9 @@ public class HentSøknadPerioderDto {
     }
 
     public HentSøknadPerioderDto(@Valid @NotNull FagsakYtelseType ytelseType,
-                                 @Valid @NotNull PersonIdent brukerIdent,
-                                 @Valid PersonIdent pleietrengendeIdent) {
+                                 @Valid @NotNull PersonIdent brukerIdent) {
         this.ytelseType = ytelseType;
         this.brukerIdent = brukerIdent;
-        this.pleietrengendeIdent = pleietrengendeIdent;
     }
 
     public FagsakYtelseType getYtelseType() {
@@ -55,7 +51,4 @@ public class HentSøknadPerioderDto {
         return brukerIdent;
     }
 
-    public PersonIdent getPleietrengende() {
-        return pleietrengendeIdent;
-    }
 }

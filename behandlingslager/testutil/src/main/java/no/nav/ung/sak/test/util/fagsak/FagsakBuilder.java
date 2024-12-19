@@ -18,7 +18,6 @@ public class FagsakBuilder {
 
     private FagsakYtelseType fagsakYtelseType;
     private AktørId aktørId = AktørId.dummy();
-    private AktørId pleietrengendeAktørId;
 
     private FagsakBuilder(FagsakYtelseType fagsakYtelseType) {
         this.fagsakYtelseType = fagsakYtelseType;
@@ -58,18 +57,12 @@ public class FagsakBuilder {
         return this;
     }
 
-    public FagsakBuilder medPleietrengende(AktørId aktørId) {
-        validerFagsakIkkeSatt();
-        this.pleietrengendeAktørId = aktørId;
-        return this;
-    }
-
     public Fagsak build() {
 
         if (fagsak != null) {
             return fagsak;
         } else {
-            fagsak = Fagsak.opprettNy(fagsakYtelseType, aktørId, pleietrengendeAktørId, null, saksnummer, LocalDate.now(), null);
+            fagsak = Fagsak.opprettNy(fagsakYtelseType, aktørId, saksnummer, LocalDate.now(), null);
             return fagsak;
         }
 

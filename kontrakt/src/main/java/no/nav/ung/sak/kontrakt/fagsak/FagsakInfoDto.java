@@ -47,20 +47,9 @@ public class FagsakInfoDto {
     @Pattern(regexp = "^[a-zæøåA-ZÆØÅ0-9_]+$", message = "ident [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String status;
 
-    @JsonProperty(value = "skalBehandlesAvInfotrygd")
-    private Boolean skalBehandlesAvInfotrygd;
-
     @JsonProperty(value = "person", required = false)
     @Valid
     private PersonIdent person;
-
-    @JsonProperty(value = "pleietrengendeAktørId", required = false)
-    @Valid
-    private PersonIdent pleietrengendeAktørId;
-
-    @JsonProperty(value = "relatertPersonAktørId", required = false)
-    @Valid
-    private PersonIdent relatertPersonAktørId;
 
     public FagsakInfoDto() {
         //
@@ -70,18 +59,12 @@ public class FagsakInfoDto {
                          FagsakYtelseType ytelseType,
                          FagsakStatus status,
                          Periode periode,
-                         PersonIdent person,
-                         PersonIdent pleietrengendeAktørId,
-                         PersonIdent relatertPersonAktørId,
-                         Boolean skalBehandlesAvInfotrygd) {
+                         PersonIdent person) {
         this.saksnummer = saksnummer;
         this.ytelseType = ytelseType.getKode();
         this.status = status == null ? null : status.getKode();
         this.gyldigPeriode = periode;
         this.person = person;
-        this.pleietrengendeAktørId = pleietrengendeAktørId;
-        this.relatertPersonAktørId = relatertPersonAktørId;
-        this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
     }
 
     @Override
@@ -97,9 +80,7 @@ public class FagsakInfoDto {
             && Objects.equals(ytelseType, other.ytelseType)
             && Objects.equals(status, other.status)
             && Objects.equals(person, other.person)
-            && Objects.equals(gyldigPeriode, other.gyldigPeriode)
-            && Objects.equals(pleietrengendeAktørId, other.pleietrengendeAktørId)
-            && Objects.equals(relatertPersonAktørId, other.relatertPersonAktørId);
+            && Objects.equals(gyldigPeriode, other.gyldigPeriode);
     }
 
     public Saksnummer getSaksnummer() {
@@ -118,25 +99,14 @@ public class FagsakInfoDto {
         return FagsakStatus.fraKode(status);
     }
 
-    public Boolean getSkalBehandlesAvInfotrygd() {
-        return skalBehandlesAvInfotrygd;
-    }
-
     public PersonIdent getPerson() {
         return person;
     }
 
-    public PersonIdent getPleietrengendeAktørId() {
-        return pleietrengendeAktørId;
-    }
-
-    public PersonIdent getRelatertPersonAktørId() {
-        return relatertPersonAktørId;
-    }
 
     @Override
     public int hashCode() {
-        return Objects.hash(saksnummer, ytelseType, person, gyldigPeriode, pleietrengendeAktørId, relatertPersonAktørId);
+        return Objects.hash(saksnummer, ytelseType, person, gyldigPeriode);
     }
 
     @Override

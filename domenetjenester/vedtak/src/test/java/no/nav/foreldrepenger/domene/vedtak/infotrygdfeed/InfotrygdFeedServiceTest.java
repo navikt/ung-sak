@@ -42,7 +42,6 @@ public class InfotrygdFeedServiceTest {
         Behandling behandling = mockHelper()
             .medSaksnummer("saksnummer")
             .medAktørId("123")
-            .medAktørIdPleietrengende("321")
             .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
             .medVersjonFagsak(99L)
             .medVersjonBehandling(88L)

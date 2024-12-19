@@ -76,13 +76,11 @@ public class SjekkProsessering {
     private boolean skalInnhenteRegisteropplysningerPåNytt(Behandling behandling) {
         return erGyldigBehandlingStatus(behandling)
             && !behandling.isBehandlingPåVent()
-            // XXX: Finne en bedre måte å bestemme når vi skal oppfriske data og ikke. Skal det være konfigurasjon per ytelse? ...eller eget interface per ytelse?
-            && (behandling.getFagsak().getPleietrengendeAktørId() != null || behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling));
+            && behandlingProsesseringTjeneste.skalInnhenteRegisteropplysningerPåNytt(behandling);
     }
 
     private boolean erGyldigBehandlingStatus(Behandling behandling) {
-        return behandling.getFagsak().getPleietrengendeAktørId() == null && BehandlingStatus.UTREDES.equals(behandling.getStatus())
-            || behandling.getFagsak().getPleietrengendeAktørId() != null && Set.of(BehandlingStatus.UTREDES, BehandlingStatus.FATTER_VEDTAK).contains(behandling.getStatus());
+        return BehandlingStatus.UTREDES.equals(behandling.getStatus());
     }
 
     private boolean harRolleSaksbehandler() {

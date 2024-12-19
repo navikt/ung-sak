@@ -37,89 +37,20 @@ public enum FagsakYtelseType implements Kodeverdi {
     DAGPENGER("DAG", "Dagpenger", null, null),
 
     /** Ny ytelse for kompenasasjon for koronatiltak for Selvstendig næringsdrivende og Frilansere (Anmodning 10). */
-    FRISINN("FRISINN", "FRIlansere og Selvstendig næringsdrivendes INNtektskompensasjon", "FRI", "FRI") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
-
-        @Override
-        public boolean vurderÅpneOppgaverFørVedtak() {
-            return false;
-        }
-    },
+    FRISINN("FRISINN", "FRIlansere og Selvstendig næringsdrivendes INNtektskompensasjon", "FRI", "FRI"),
 
     /** Folketrygdloven K8 ytelser. */
     SYKEPENGER("SP", "Sykepenger", null, null),
 
     /** Folketrygdloven K9 ytelser. */
-    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "PN", "OMS") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNonNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
-    },
-    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger livets sluttfase", "PP", "OMS") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNonNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
-    },
-    OMSORGSPENGER("OMP", "Omsorgspenger", "OM", "OMS") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
+    PLEIEPENGER_SYKT_BARN("PSB", "Pleiepenger sykt barn", "PN", "OMS"),
+    PLEIEPENGER_NÆRSTÅENDE("PPN", "Pleiepenger livets sluttfase", "PP", "OMS"),
+    OMSORGSPENGER("OMP", "Omsorgspenger", "OM", "OMS"),
+    OMSORGSPENGER_KS("OMP_KS", "Ekstra omsorgsdager kronisk syk", "OM", "OMS"),
+    OMSORGSPENGER_MA("OMP_MA", "Ekstra omsorgsdager midlertidig alene", "OM", "OMS"),
+    OMSORGSPENGER_AO("OMP_AO", "Alene om omsorgen", "OM", "OMS"),
 
-    },
-    OMSORGSPENGER_KS("OMP_KS", "Ekstra omsorgsdager kronisk syk", "OM", "OMS") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNonNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
-
-        @Override
-        public boolean vurderÅpneOppgaverFørVedtak() {
-            return false;
-        }
-    },
-    OMSORGSPENGER_MA("OMP_MA", "Ekstra omsorgsdager midlertidig alene", "OM", "OMS") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNull(pleietrengendeAktørId, "pleietrengende");
-            requireNonNull(relatertPersonAktørId, "relatertPerson");
-        }
-
-        @Override
-        public boolean vurderÅpneOppgaverFørVedtak() {
-            return false;
-        }
-    },
-    OMSORGSPENGER_AO("OMP_AO", "Alene om omsorgen", "OM", "OMS") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNonNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
-
-        @Override
-        public boolean vurderÅpneOppgaverFørVedtak() {
-            return false;
-        }
-    },
-
-    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", "OP", "OMS") {
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNonNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
-    },
+    OPPLÆRINGSPENGER("OLP", "Opplæringspenger", "OP", "OMS"),
 
     /** Folketrygdloven K11 ytelser. */
     ARBEIDSAVKLARINGSPENGER("AAP", "Arbeidsavklaringspenger", null, null),
@@ -134,12 +65,6 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     /** Folketrygdloven ?? ytelser. */
     UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "OMS"){
-        @Override
-        public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-            requireNull(pleietrengendeAktørId, "pleietrengende");
-            requireNull(relatertPersonAktørId, "relatertPerson");
-        }
-
         @Override
         public boolean vurderÅpneOppgaverFørVedtak() {
             return false;
@@ -434,15 +359,6 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     public boolean omfattesAvK8() {
         return OMFATTES_AV_KAP_8.contains(this);
-    }
-
-    @SuppressWarnings("unused")
-    public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
-        throw new UnsupportedOperationException("støtter ikke ytelsetype: " + this);
-    }
-
-    public void validerNøkkelParametere(AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId) {
-        validerNøkkelParametere(pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getAktørId(), relatertPersonAktørId == null ? null : relatertPersonAktørId.getAktørId());
     }
 
     public boolean vurderÅpneOppgaverFørVedtak() {

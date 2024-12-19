@@ -12,9 +12,6 @@ import no.nav.ung.sak.typer.AktørId;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class LosOpplysningerSomManglerIKlageDto {
 
-    @Valid
-    @JsonProperty(value = "pleietrengendeAktørId")
-    private AktørId pleietrengendeAktørId;
 
     @Valid
     @JsonProperty(value = "utenlandstilsnitt")
@@ -22,14 +19,6 @@ public class LosOpplysningerSomManglerIKlageDto {
 
     public void setUtenlandstilsnitt(boolean utenlandstilsnitt) {
         this.utenlandstilsnitt = utenlandstilsnitt;
-    }
-
-    public void setPleietrengendeAktørId(AktørId pleietrengendeAktørId) {
-        this.pleietrengendeAktørId = pleietrengendeAktørId;
-    }
-
-    public AktørId getPleietrengendeAktørId() {
-        return pleietrengendeAktørId;
     }
 
     public boolean isUtenlandstilsnitt() {

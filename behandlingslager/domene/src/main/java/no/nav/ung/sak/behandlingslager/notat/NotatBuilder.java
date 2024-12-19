@@ -10,23 +10,16 @@ import no.nav.ung.sak.typer.AktørId;
 public class NotatBuilder {
     private UUID uuid;
     private String notatTekst;
-    private AktørId aktørId;
     private Long fagsakId;
     private boolean skjult = false;
     private FagsakYtelseType ytelseType;
 
-    private NotatBuilder() {}
+    private NotatBuilder() {
+    }
 
-    public static NotatBuilder of(Fagsak fagsak, boolean gjelderPleietrengende) {
+    public static NotatBuilder of(Fagsak fagsak) {
         var builder = new NotatBuilder();
-        if (gjelderPleietrengende) {
-            Objects.requireNonNull(fagsak.getPleietrengendeAktørId(), "Pleietrengende må finnes på fagsaken");
-            builder.aktørId = fagsak.getPleietrengendeAktørId();
-            builder.ytelseType = fagsak.getYtelseType();
-        } else {
-            builder.fagsakId = fagsak.getId();
-        }
-
+        builder.fagsakId = fagsak.getId();
         return builder;
     }
 
@@ -42,10 +35,6 @@ public class NotatBuilder {
 
     public NotatEntitet build() {
         Objects.requireNonNull(notatTekst, "Notattekst må være satt");
-        if (aktørId != null) {
-            if (fagsakId != null) throw new IllegalArgumentException("Kan ikke sette både fagsak og aktør");
-            return new NotatAktørEntitet(aktørId, ytelseType, notatTekst, skjult);
-        }
         if (fagsakId != null) {
             return new NotatSakEntitet(fagsakId, notatTekst, skjult);
         }
