@@ -91,38 +91,10 @@ public class PersonopplysningDtoTjeneste {
     }
 
     private PersonopplysningDto mapPersonopplysningDto(PersonopplysningEntitet søker, PersonopplysningerAggregat aggregat, Long behandlingId) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var fagsak = behandling.getFagsak();
-
         PersonopplysningDto dto = enkelMapping(søker, aggregat);
-
         leggTilRegistrerteBarn(aggregat, dto);
-        leggTilBarnSøktFor(aggregat, dto, behandling);
         leggTilEktefelle(søker, aggregat, dto);
-
-        // fra fagsak
-        leggTilRelatertAnnenPart(aggregat, dto, fagsak.getRelatertPersonAktørId());
-        leggTilPleietrengende(aggregat, dto, fagsak.getPleietrengendeAktørId());
-
         return dto;
-    }
-
-    private void leggTilPleietrengende(PersonopplysningerAggregat aggregat, PersonopplysningDto dto, AktørId pleietrengendeAktørId) {
-        if (pleietrengendeAktørId == null) {
-            return;
-        }
-        var personinfo = aggregat.getPersonopplysning(pleietrengendeAktørId);
-        var pleietrengendeDto = enkelMapping(Objects.requireNonNull(personinfo), aggregat);
-        dto.setPleietrengendePart(pleietrengendeDto);
-    }
-
-    private void leggTilRelatertAnnenPart(PersonopplysningerAggregat aggregat, PersonopplysningDto dto, AktørId relatertPersonAktørId) {
-        if (relatertPersonAktørId == null) {
-            return;
-        }
-        var personinfo = aggregat.getPersonopplysning(relatertPersonAktørId);
-        var relatertPartDto = enkelMapping(Objects.requireNonNull(personinfo), aggregat);
-        dto.setAnnenPart(relatertPartDto);
     }
 
     private void leggTilRegistrerteBarn(PersonopplysningerAggregat aggregat, PersonopplysningDto dto) {
@@ -142,12 +114,6 @@ public class PersonopplysningDtoTjeneste {
             PersonopplysningDto ektefelle = enkelMapping(ektefelleOpt.get(), aggregat);
             dto.setEktefelle(ektefelle);
         }
-    }
-
-    private void leggTilBarnSøktFor(PersonopplysningerAggregat aggregat, PersonopplysningDto dto, Behandling behandling) {
-        Optional.ofNullable(behandling.getFagsak().getPleietrengendeAktørId()).ifPresent(aktørId -> {
-            dto.setBarnSoktFor(List.of(enkelMapping(aggregat.getPersonopplysning(aktørId), aggregat)));
-        });
     }
 
     private PersonopplysningDto enkelMapping(PersonopplysningEntitet personopplysning, PersonopplysningerAggregat aggregat) {

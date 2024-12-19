@@ -69,8 +69,6 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
         setSaksnummerOgAktørId(builder, behandling.getFagsak());
         setPeriode(builder, behandling);
         setInfotrygdYtelseKode(builder, behandling);
-        setAktørIdPleietrengende(builder, behandling);
-
         return builder.build();
     }
 
@@ -104,10 +102,4 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
         return builder.ytelse(infotrygdBehandlingstema);
     }
 
-    private void setAktørIdPleietrengende(InfotrygdFeedMessage.Builder builder, Behandling behandling) {
-        AktørId pleietrengendeAktørId = behandling.getFagsak().getPleietrengendeAktørId();
-        if (pleietrengendeAktørId != null) {
-            builder.aktoerIdPleietrengende(pleietrengendeAktørId.getId());
-        }
-    }
 }

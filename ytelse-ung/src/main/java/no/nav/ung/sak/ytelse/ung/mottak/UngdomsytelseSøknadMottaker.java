@@ -38,13 +38,9 @@ public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<Ungdo
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType,
                                          AktørId søkerAktørId,
-                                         AktørId pleietrengendeAktørId,
-                                         AktørId relatertPersonAktørId,
                                          LocalDate startDato,
                                          LocalDate sluttDato) {
-        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
-
-        final Optional<Fagsak> fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, null, null, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+        final Optional<Fagsak> fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
 
 
         if (fagsak.isPresent()) {
@@ -52,12 +48,12 @@ public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<Ungdo
         }
 
         final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
+        final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, ytelseType, startDato, sluttDato);
         return nyFagsak;
     }
 
-    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato, LocalDate sluttDato) {
-        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, null, saksnummer, startDato, sluttDato);
+    private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, FagsakYtelseType ytelseType, LocalDate startDato, LocalDate sluttDato) {
+        final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, saksnummer, startDato, sluttDato);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
     }

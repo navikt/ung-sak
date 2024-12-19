@@ -30,6 +30,7 @@ import no.nav.ung.sak.typer.AktørId;
  */
 @Entity(name = "NotatAktørEntitet")
 @Table(name = "notat_aktoer")
+@Deprecated(forRemoval = true)
 public class NotatAktørEntitet extends NotatEntitet {
 
     @Id

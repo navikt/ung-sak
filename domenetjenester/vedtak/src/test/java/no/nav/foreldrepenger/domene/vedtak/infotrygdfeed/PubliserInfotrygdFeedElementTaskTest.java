@@ -67,7 +67,6 @@ public class PubliserInfotrygdFeedElementTaskTest {
         Behandling behandling = mockHelper()
             .medSaksnummer("saksnummer")
             .medAktørId("123")
-            .medAktørIdPleietrengende("321")
             .medFagsakYtelsesType(FagsakYtelseType.OMSORGSPENGER)
             .medVersjonFagsak(99L)
             .medVersjonBehandling(88L)
@@ -78,7 +77,6 @@ public class PubliserInfotrygdFeedElementTaskTest {
         assertThat(message.getYtelse()).isEqualTo(FagsakYtelseType.OMSORGSPENGER.getInfotrygdBehandlingstema());
         assertThat(message.getSaksnummer()).isEqualTo("saksnummer");
         assertThat(message.getAktoerId()).isEqualTo("123");
-        assertThat(message.getAktoerIdPleietrengende()).isEqualTo("321");
         assertThat(message.getFoersteStoenadsdag()).isEqualTo(LocalDate.now());
         assertThat(message.getSisteStoenadsdag()).isEqualTo(LocalDate.now().plusDays(1));
     }
@@ -88,12 +86,10 @@ public class PubliserInfotrygdFeedElementTaskTest {
         String aktørId = "123";
         Behandling behandling = mockHelper()
             .medAktørId(aktørId)
-            .medAktørIdPleietrengende(null)
             .hentBehandling();
 
         InfotrygdFeedMessage message = task.getInfotrygdFeedMessage(behandling);
         assertThat(message.getAktoerId()).isEqualTo(aktørId);
-        assertThat(message.getAktoerIdPleietrengende()).isNull();
     }
 
     @Test
@@ -132,7 +128,6 @@ class FeedServiceMockHelper {
     // Builder-parametere
     private Saksnummer saksnummer = new Saksnummer("x123");
     private AktørId aktørId = new AktørId(123L);
-    private AktørId aktørIdPleietrengende; // = new AktørId(543L);
     private FagsakYtelseType fagsakYtelseType = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
     private Long versjonFagsak = 1L;
     private Long versjonBehandling = 2L;
@@ -163,15 +158,6 @@ class FeedServiceMockHelper {
         return this;
     }
 
-    FeedServiceMockHelper medAktørIdPleietrengende(String aktørIdPleietrengende) {
-        if (aktørIdPleietrengende == null) {
-            this.aktørIdPleietrengende = null;
-        } else {
-            this.aktørIdPleietrengende = new AktørId(aktørIdPleietrengende);
-        }
-        return this;
-    }
-
     FeedServiceMockHelper medFagsakYtelsesType(FagsakYtelseType fagsakYtelseType) {
         this.fagsakYtelseType = fagsakYtelseType;
         return this;
@@ -197,8 +183,6 @@ class FeedServiceMockHelper {
 
     private Behandling mockBehandling(Long behandlingId) {
         var fagsak1 = Fagsak.opprettNy(fagsakYtelseType, aktørId, saksnummer);
-        fagsak1.setPleietrengende(aktørIdPleietrengende);
-
         Behandling behandling = Behandling.nyBehandlingFor(fagsak1, BehandlingType.FØRSTEGANGSSØKNAD).build();
         try {
             getField(fagsak1.getClass(), "id").set(fagsak1, behandlingId);

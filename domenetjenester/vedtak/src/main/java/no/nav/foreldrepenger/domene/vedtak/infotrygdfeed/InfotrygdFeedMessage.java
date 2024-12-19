@@ -38,9 +38,6 @@ public class InfotrygdFeedMessage {
     @NotNull
     private final String aktoerId;
 
-    @JsonProperty("aktoerIdPleietrengende")
-    private final String aktoerIdPleietrengende;
-
     @JsonProperty("foersteStoenadsdag")
     private final LocalDate foersteStoenadsdag;
 
@@ -57,14 +54,12 @@ public class InfotrygdFeedMessage {
                 @JsonProperty("ytelse") String ytelse,
                 @JsonProperty("saksnummer") String saksnummer,
                 @JsonProperty("aktoerId") String aktoerId,
-                @JsonProperty("aktoerIdPleietrengende") String aktoerIdPleietrengende,
                 @JsonProperty("foersteStoenadsdag") LocalDate foersteStoenadsdag,
                 @JsonProperty("sisteStoenadsdag") LocalDate sisteStoenadsdag) {
         this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.ytelse = Objects.requireNonNull(ytelse, "ytelse");
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
         this.aktoerId = Objects.requireNonNull(aktoerId, "aktoerId");
-        this.aktoerIdPleietrengende = aktoerIdPleietrengende;
         this.foersteStoenadsdag = foersteStoenadsdag;
         this.sisteStoenadsdag = sisteStoenadsdag;
     }
@@ -101,10 +96,6 @@ public class InfotrygdFeedMessage {
         return aktoerId;
     }
 
-    public String getAktoerIdPleietrengende() {
-        return aktoerIdPleietrengende;
-    }
-
     public LocalDate getFoersteStoenadsdag() {
         return foersteStoenadsdag;
     }
@@ -122,14 +113,13 @@ public class InfotrygdFeedMessage {
             Objects.equals(ytelse, that.ytelse) &&
             Objects.equals(saksnummer, that.saksnummer) &&
             Objects.equals(aktoerId, that.aktoerId) &&
-            Objects.equals(aktoerIdPleietrengende, that.aktoerIdPleietrengende) &&
             Objects.equals(foersteStoenadsdag, that.foersteStoenadsdag) &&
             Objects.equals(sisteStoenadsdag, that.sisteStoenadsdag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, ytelse, saksnummer, aktoerId, aktoerIdPleietrengende, foersteStoenadsdag, sisteStoenadsdag);
+        return Objects.hash(uuid, ytelse, saksnummer, aktoerId, foersteStoenadsdag, sisteStoenadsdag);
     }
 
     @Override
@@ -139,7 +129,6 @@ public class InfotrygdFeedMessage {
             ", ytelse='" + ytelse + '\'' +
             ", saksnummer='" + saksnummer + '\'' +
             ", aktoerId='" + aktoerId + '\'' +
-            ", aktoerIdPleietrengende='" + aktoerIdPleietrengende + '\'' +
             ", foersteStoenadsdag=" + foersteStoenadsdag +
             ", sisteStoenadsdag=" + sisteStoenadsdag +
             '}';
@@ -151,12 +140,11 @@ public class InfotrygdFeedMessage {
         private String saksnummer; // oblig
         private String aktoerId; // oblig
 
-        private String aktoerIdPleietrengende;
         private LocalDate foersteStoenadsdag;
         private LocalDate sisteStoenadsdag;
 
         public InfotrygdFeedMessage build() {
-            return new InfotrygdFeedMessage(uuid, ytelse, saksnummer, aktoerId, aktoerIdPleietrengende, foersteStoenadsdag, sisteStoenadsdag);
+            return new InfotrygdFeedMessage(uuid, ytelse, saksnummer, aktoerId, foersteStoenadsdag, sisteStoenadsdag);
         }
 
         public Builder uuid(String uuid) {
@@ -176,11 +164,6 @@ public class InfotrygdFeedMessage {
 
         public Builder aktoerId(String aktoerId) {
             this.aktoerId = aktoerId;
-            return this;
-        }
-
-        public Builder aktoerIdPleietrengende(String aktoerIdPleietrengende) {
-            this.aktoerIdPleietrengende = aktoerIdPleietrengende;
             return this;
         }
 

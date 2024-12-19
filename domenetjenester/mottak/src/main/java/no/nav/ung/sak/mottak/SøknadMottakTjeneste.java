@@ -9,5 +9,5 @@ import no.nav.ung.sak.typer.AktørId;
 
 public interface SøknadMottakTjeneste<V extends InnsendingInnhold> {
 
-    Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato);
+    Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, LocalDate startDato, LocalDate sluttDato);
 }

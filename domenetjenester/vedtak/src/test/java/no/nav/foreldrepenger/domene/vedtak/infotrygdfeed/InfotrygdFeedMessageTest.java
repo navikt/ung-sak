@@ -16,7 +16,6 @@ public class InfotrygdFeedMessageTest {
             .uuid("uuid")
             .ytelse("ytelse")
             .aktoerId("aktørId")
-            .aktoerIdPleietrengende("aktørIdPleietrengende")
             .saksnummer("saksnummer")
             .foersteStoenadsdag(date)
             .sisteStoenadsdag(date)
@@ -31,7 +30,6 @@ public class InfotrygdFeedMessageTest {
         assertThat(msg.getUuid()).isEqualTo("uuid");
         assertThat(msg.getYtelse()).isEqualTo("ytelse");
         assertThat(msg.getAktoerId()).isEqualTo("aktørId");
-        assertThat(msg.getAktoerIdPleietrengende()).isEqualTo("aktørIdPleietrengende");
         assertThat(msg.getSaksnummer()).isEqualTo("saksnummer");
         assertThat(msg.getFoersteStoenadsdag()).isEqualTo(date);
         assertThat(msg.getSisteStoenadsdag()).isEqualTo(date);

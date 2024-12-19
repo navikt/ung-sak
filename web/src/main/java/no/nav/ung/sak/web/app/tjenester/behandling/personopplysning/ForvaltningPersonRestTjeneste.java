@@ -160,7 +160,6 @@ public class ForvaltningPersonRestTjeneste {
         aktørIdSplittTjeneste.patchBrukerAktørId(dto.getGyldigAktørId(),
             dto.getUtgåttAktørId(),
             Optional.ofNullable(dto.getAktørIdForIdenterSomSkalByttes()),
-            dto.getGjelderBruker(),
             dto.getBegrunnelse(),
             "/forvaltning/person/oppdater-aktoer-bruker", dto.getSkalValidereUtgåttAktør());
         return Response.ok().build();
@@ -177,11 +176,6 @@ public class ForvaltningPersonRestTjeneste {
         @Valid
         @NotNull
         private AktørIdDto utgåttAktørId;
-
-        @JsonProperty("gjelderBruker")
-        @Valid
-        @NotNull
-        private boolean gjelderBruker;
 
         @JsonProperty("skalValidereUtgåttAktør")
         @Valid
@@ -206,13 +200,11 @@ public class ForvaltningPersonRestTjeneste {
         @JsonCreator
         public OppdaterAktørIdDto(@JsonProperty("gyldigAktørId") @NotNull @Valid String gyldigAktørId,
                                   @JsonProperty("utgåttAktørId") @NotNull @Valid String utgåttAktørId,
-                                  @JsonProperty("gjelderBruker") @NotNull @Valid boolean gjelderBruker,
                                   @JsonProperty("skalValidereUtgåttAktør") @NotNull @Valid boolean skalValidereUtgåttAktør,
                                   @JsonProperty("aktørIdForIdenterSomSkalByttes") @Valid String aktørIdForIdenterSomSkalByttes,
                                   @JsonProperty("begrunnelse") @NotNull @Valid String begrunnelse) {
             this.gyldigAktørId = new AktørIdDto(gyldigAktørId);
             this.utgåttAktørId = new AktørIdDto(utgåttAktørId);
-            this.gjelderBruker = gjelderBruker;
             this.skalValidereUtgåttAktør = skalValidereUtgåttAktør;
             this.aktørIdForIdenterSomSkalByttes = aktørIdForIdenterSomSkalByttes != null ? new AktørIdDto(aktørIdForIdenterSomSkalByttes) : null;
             this.begrunnelse = begrunnelse;
@@ -254,14 +246,6 @@ public class ForvaltningPersonRestTjeneste {
             this.skalValidereUtgåttAktør = skalValidereUtgåttAktør;
         }
 
-        public boolean getGjelderBruker() {
-            return gjelderBruker;
-        }
-
-        public void setGjelderBruker(boolean gjelderBruker) {
-            this.gjelderBruker = gjelderBruker;
-        }
-
         @Override
         public AbacDataAttributter abacAttributter() {
             //ikke mulig med reell tilgangskontroll, siden aktørId på saken er ugyldig
@@ -278,7 +262,7 @@ public class ForvaltningPersonRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<Saksnummer> getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {
         var aktørId = aktørIdDto.getAktørId();
-        List<Fagsak> fagsaker = fagsakRepository.hentSakerHvorBrukerHarMinstEnRolle(aktørId);
+        List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
         return fagsaker.stream().map(Fagsak::getSaksnummer).distinct().toList();
     }
 

@@ -98,9 +98,7 @@ public class NotatRestTjeneste {
         @NotNull @Parameter(description = "Nytt notat") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OpprettNotatDto opprettNotatDto
     ) {
         Fagsak fagsak = hentSak(opprettNotatDto.saksnummer().getSaksnummer());
-
-        var gjelderPleietrengende = opprettNotatDto.notatGjelderType() == NotatGjelderType.PLEIETRENGENDE;
-        NotatEntitet entitet = NotatBuilder.of(fagsak, gjelderPleietrengende)
+        NotatEntitet entitet = NotatBuilder.of(fagsak)
             .notatTekst(opprettNotatDto.notatTekst())
             .build();
         notatRepository.lagre(entitet);
@@ -223,9 +221,6 @@ public class NotatRestTjeneste {
     }
 
     private static NotatGjelderType bestemNotatGjelder(NotatEntitet entitet) {
-        if (entitet instanceof NotatAktørEntitet) {
-            return NotatGjelderType.PLEIETRENGENDE;
-        }
         if (entitet instanceof NotatSakEntitet) {
             return NotatGjelderType.FAGSAK;
         }

@@ -50,8 +50,7 @@ public class UtledStatusPåPerioderTjeneste {
                                                Set<KravDokument> kravdokumenter,
                                                Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
                                                NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                               NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
-                                               NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
+                                               NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
 
 
         List<PeriodeMedÅrsaker> perioder = perioderMedÅrsaker(behandling,
@@ -59,8 +58,7 @@ public class UtledStatusPåPerioderTjeneste {
             kravdokumenter,
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
 
@@ -79,7 +77,6 @@ public class UtledStatusPåPerioderTjeneste {
                 kravdokumenterMedPeriode,
                 perioderTilVurdering,
                 perioderSomSkalTilbakestilles,
-                revurderingPerioderFraAndreParter,
                 perioder);
         } else {
             perioderMedÅrsakPerKravstiller = Set.of(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null, perioder));
@@ -103,7 +100,6 @@ public class UtledStatusPåPerioderTjeneste {
         Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
-        NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter,
         List<PeriodeMedÅrsaker> perioderMedÅrsakPåTversAvKravstillere) {
 
         Set<PerioderMedÅrsakPerKravstiller> resultat = new HashSet<>();
@@ -135,8 +131,7 @@ public class UtledStatusPåPerioderTjeneste {
                                 .collect(Collectors.toSet()),
                             alleKravdokumenterForArbeidsgiver(kravdokumenterMedPeriode, arbeidsgiver),
                             perioderTilVurdering,
-                            perioderSomSkalTilbakestilles,
-                            revurderingPerioderFraAndreParter
+                            perioderSomSkalTilbakestilles
                         ))
                     ));
         }
@@ -191,8 +186,7 @@ public class UtledStatusPåPerioderTjeneste {
         Set<KravDokument> kravdokumenter,
         Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-        NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
-        NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
+        NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
 
@@ -217,12 +211,6 @@ public class UtledStatusPåPerioderTjeneste {
 
         tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         tidslinje = tidslinje.filterValue(this::harIkkeBareBerørtPeriode);
-
-        var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
-            .map(entry -> new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak())))))
-            .collect(Collectors.toList()), this::mergeAndreBerørtSaker);
-        tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-
 
         var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
             .compress();

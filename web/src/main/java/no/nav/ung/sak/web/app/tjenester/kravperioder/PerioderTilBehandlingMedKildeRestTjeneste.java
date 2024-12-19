@@ -111,10 +111,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var timelineTilVurdering = utledTidslinjeTilVurdering(behandling, perioderTilVurderingTjeneste);
 
         return new StatusForPerioderPåBehandlingInkludertVilkår(statusForPerioderPåBehandling,
-            mapVilkårMedUtfall(behandling, timelineTilVurdering),
+            mapVilkårMedUtfall(timelineTilVurdering),
             behandling.getOriginalBehandlingId()
                 .map(it -> behandlingRepository.hentBehandling(it))
-                .map(b -> mapVilkårMedUtfall(b, new LocalDateTimeline<>(List.of()))).orElse(List.of()));
+                .map(b -> mapVilkårMedUtfall(new LocalDateTimeline<>(List.of()))).orElse(List.of()));
     }
 
     private LocalDateTimeline<Utfall> utledTidslinjeTilVurdering(Behandling behandling, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
@@ -127,7 +127,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             .collect(Collectors.toSet()));
     }
 
-    private List<PeriodeMedUtfall> mapVilkårMedUtfall(Behandling behandling, LocalDateTimeline<Utfall> timelineTilVurdering) {
+    private List<PeriodeMedUtfall> mapVilkårMedUtfall(LocalDateTimeline<Utfall> timelineTilVurdering) {
         LocalDateTimeline<Utfall> timeline = LocalDateTimeline.empty();
 
         // TODO: Map utfall
@@ -157,7 +157,6 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
         perioderTilVurdering.addAll(perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref));
 
-        var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
         var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
 
         var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(
@@ -166,8 +165,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             kravdokumenter,
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter);
+            perioderSomSkalTilbakestilles);
         return statusForPerioderPåBehandling;
     }
 }

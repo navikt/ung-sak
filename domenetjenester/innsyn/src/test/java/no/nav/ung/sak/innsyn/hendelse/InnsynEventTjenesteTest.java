@@ -38,7 +38,6 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
 import no.nav.ung.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -47,29 +46,20 @@ import no.nav.k9.søknad.JsonUtils;
 
 class InnsynEventTjenesteTest {
     private final MottatteDokumentRepository mottatteDokumentRepository = mock();
-    private final UtlandVurdererTjeneste utlandVurdererTjeneste = mock();
     private final AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
     private final BrukerdialoginnsynMeldingProducer producer = mock();
     private BehandlingRepository behandlingRepository;
 
-
-    @BeforeEach
-    void setup() {
-        when(utlandVurdererTjeneste.erUtenlandssak(any())).thenReturn(false);
-    }
-
     @Test
     void nyBehandlingEvent() {
         var mor = AktørId.dummy();
-        var pleietrengende = AktørId.dummy();
         var now = LocalDateTime.now();
         var søknadJpId = "123";
         var ettersendelseJpId = "456";
         var venteFrist = now.plusWeeks(4);
 
         TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
-            .builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, mor)
-            .medPleietrengende(pleietrengende);
+            .builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE, mor);
 
         behandlingRepository = testScenarioBuilder.mockBehandlingRepository();
         var behandling = testScenarioBuilder.lagMocked();
@@ -92,7 +82,6 @@ class InnsynEventTjenesteTest {
 
         var tjeneste = new InnsynEventTjeneste(
             mottatteDokumentRepository,
-            utlandVurdererTjeneste,
             producer);
 
         tjeneste.publiserBehandling(behandlingRepository.hentBehandling(behandling.getId()));
@@ -109,8 +98,7 @@ class InnsynEventTjenesteTest {
         Fagsak sak = b.fagsak();
         assertThat(sak.saksnummer().verdi()).isEqualTo(fagsak.getSaksnummer().getVerdi());
         assertThat(sak.søkerAktørId().id()).isEqualTo(mor.getId());
-        assertThat(sak.ytelseType().getKode()).isEqualTo(FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getKode());
-        assertThat(sak.pleietrengendeAktørId().id()).isEqualTo(pleietrengende.getId());
+        assertThat(sak.ytelseType().getKode()).isEqualTo(FagsakYtelseType.UNGDOMSYTELSE.getKode());
 
         assertThat(b.behandlingsId()).isEqualTo(behandling.getUuid());
         assertThat(b.erUtenlands()).isEqualTo(false);

@@ -15,18 +15,12 @@ public class NotatBuilder {
     private boolean skjult = false;
     private FagsakYtelseType ytelseType;
 
-    private NotatBuilder() {}
+    private NotatBuilder() {
+    }
 
-    public static NotatBuilder of(Fagsak fagsak, boolean gjelderPleietrengende) {
+    public static NotatBuilder of(Fagsak fagsak) {
         var builder = new NotatBuilder();
-        if (gjelderPleietrengende) {
-            Objects.requireNonNull(fagsak.getPleietrengendeAktørId(), "Pleietrengende må finnes på fagsaken");
-            builder.aktørId = fagsak.getPleietrengendeAktørId();
-            builder.ytelseType = fagsak.getYtelseType();
-        } else {
-            builder.fagsakId = fagsak.getId();
-        }
-
+        builder.fagsakId = fagsak.getId();
         return builder;
     }
 

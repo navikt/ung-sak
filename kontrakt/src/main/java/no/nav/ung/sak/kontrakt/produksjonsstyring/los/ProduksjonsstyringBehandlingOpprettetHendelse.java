@@ -25,8 +25,6 @@ public class ProduksjonsstyringBehandlingOpprettetHendelse extends Produksjonsst
     public final LocalDate behandlingstidFrist;
     public final Periode fagsakPeriode;
     public final AktørId søkersAktørId;
-    public final AktørId pleietrengendeAktørId;
-    public final AktørId relatertPartAktørId;
 
 
     @JsonCreator
@@ -38,9 +36,7 @@ public class ProduksjonsstyringBehandlingOpprettetHendelse extends Produksjonsst
         @JsonProperty("behandlingType") BehandlingType behandlingType,
         @JsonProperty("behandlingstidFrist") LocalDate behandlingstidFrist,
         @JsonProperty("fagsakPeriode") Periode fagsakPeriode,
-        @JsonProperty("søkersAktørId") AktørId søkersAktørId,
-        @JsonProperty("pleietrengendeAktørId") AktørId pleietrengendeAktørId,
-        @JsonProperty("relatertPartAktørId") AktørId relatertPartAktørId
+        @JsonProperty("søkersAktørId") AktørId søkersAktørId
     ) {
         super(eksternId, hendelseTid, UngSakHendelseType.BEHANDLING_OPPRETTET);
         this.saksnummer = saksnummer;
@@ -49,7 +45,5 @@ public class ProduksjonsstyringBehandlingOpprettetHendelse extends Produksjonsst
         this.behandlingstidFrist = behandlingstidFrist;
         this.fagsakPeriode = fagsakPeriode;
         this.søkersAktørId = søkersAktørId;
-        this.pleietrengendeAktørId = pleietrengendeAktørId;
-        this.relatertPartAktørId = relatertPartAktørId;
     }
 }
