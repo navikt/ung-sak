@@ -77,14 +77,6 @@
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
           },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "saksnummer" : {
             "type" : "string"
           },
@@ -1673,10 +1665,6 @@
             "nullable" : true,
             "type" : "string"
           },
-          "erPbSak" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
           "gyldigPeriode" : {
             "$ref" : "#/components/schemas/Periode"
           },
@@ -1692,24 +1680,12 @@
           "person" : {
             "$ref" : "#/components/schemas/PersonDto"
           },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "saksnummer" : {
             "type" : "string"
           },
           "sakstype" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
-          },
-          "skalBehandlesAvInfotrygd" : {
-            "nullable" : true,
-            "type" : "boolean"
           },
           "status" : {
             "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
@@ -1729,20 +1705,8 @@
             "nullable" : true,
             "type" : "string"
           },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "saksnummer" : {
             "type" : "string"
-          },
-          "skalBehandlesAvInfotrygd" : {
-            "nullable" : true,
-            "type" : "boolean"
           },
           "status" : {
             "nullable" : true,
@@ -1795,14 +1759,6 @@
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengende" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPerson" : {
-            "nullable" : true,
-            "type" : "string"
           },
           "saksnummer" : {
             "maxLength" : 19,
@@ -1883,24 +1839,6 @@
           }
         },
         "required" : [ "behandlingId", "behandlingVersjon" ],
-        "type" : "object"
-      },
-      "HarGyldigOmsorgsdagerVedtakDto" : {
-        "properties" : {
-          "harInnvilgedeBehandlinger" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "saksnummer" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "vedtaksdato" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          }
-        },
         "type" : "object"
       },
       "Hendelse" : {
@@ -1993,22 +1931,9 @@
         "required" : [ "aktørIder" ],
         "type" : "object"
       },
-      "HentSisteGyldigeVedtakForAktørInputDto" : {
-        "properties" : {
-          "pleietrengendeAktørId" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "pleietrengendeAktørId" ],
-        "type" : "object"
-      },
       "HentSøknadPerioderDto" : {
         "properties" : {
           "bruker" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "pleietrengende" : {
             "nullable" : true,
             "type" : "string"
           },
@@ -3056,10 +2981,6 @@
       },
       "LosOpplysningerSomManglerIKlageDto" : {
         "properties" : {
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "utenlandstilsnitt" : {
             "nullable" : true,
             "type" : "boolean"
@@ -3075,26 +2996,6 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengendeIdenter" : {
-            "items" : {
-              "nullable" : true,
-              "type" : "string"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          },
-          "relatertPersonIdenter" : {
-            "items" : {
-              "nullable" : true,
-              "type" : "string"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
           },
           "ytelseType" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
@@ -3208,9 +3109,6 @@
             "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
             "type" : "string"
           },
-          "gjelderBruker" : {
-            "type" : "boolean"
-          },
           "gyldigAktørId" : {
             "type" : "string"
           },
@@ -3221,7 +3119,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "gjelderBruker", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
+        "required" : [ "begrunnelse", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
@@ -3253,7 +3151,7 @@
       "OpprettNotatDto" : {
         "properties" : {
           "notatGjelderType" : {
-            "enum" : [ "FAGSAK", "PLEIETRENGENDE" ],
+            "enum" : [ "FAGSAK" ],
             "type" : "string"
           },
           "notatTekst" : {
@@ -3403,7 +3301,7 @@
           },
           "årsaker" : {
             "items" : {
-              "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_PLEIETRENGENDE", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
+              "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
               "nullable" : true,
               "type" : "string"
             },
@@ -3630,9 +3528,6 @@
             "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
             "nullable" : true,
             "type" : "string"
-          },
-          "pleietrengendePart" : {
-            "$ref" : "#/components/schemas/PersonopplysningDto"
           },
           "region" : {
             "enum" : [ "NORDEN", "EOS", "ANNET", "-" ],
@@ -3889,41 +3784,6 @@
         "required" : [ "referanse" ],
         "type" : "object"
       },
-      "RelatertSakDto" : {
-        "properties" : {
-          "relaterteSøkere" : {
-            "items" : {
-              "$ref" : "#/components/schemas/RelatertSøkerDto"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
-      "RelatertSøkerDto" : {
-        "properties" : {
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "søkerIdent" : {
-            "type" : "string"
-          },
-          "søkerNavn" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "åpenBehandling" : {
-            "type" : "boolean"
-          }
-        },
-        "required" : [ "saksnummer", "søkerIdent", "søkerNavn", "åpenBehandling" ],
-        "type" : "object"
-      },
       "ResourceLink" : {
         "properties" : {
           "href" : {
@@ -3982,10 +3842,6 @@
             "minItems" : 0,
             "nullable" : true,
             "type" : "array"
-          },
-          "sakSkalTilInfotrygd" : {
-            "nullable" : true,
-            "type" : "boolean"
           }
         },
         "type" : "object"
@@ -4963,7 +4819,7 @@
             "type" : "array"
           },
           "årsak" : {
-            "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_PLEIETRENGENDE", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
+            "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
             "type" : "string"
           }
         },
@@ -6447,35 +6303,6 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/brukerdialog/omsorgsdager-kronisk-sykt-barn/har-gyldig-vedtak" : {
-      "post" : {
-        "description" : "Returnerer nyeste gyldige vedtak for en gitt aktørId",
-        "operationId" : "hentSisteGyldigeVedtakForAktorId",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/HentSisteGyldigeVedtakForAktørInputDto"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/HarGyldigOmsorgsdagerVedtakDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Returnerer nyeste gyldige vedtak for en gitt aktørId",
-        "tags" : [ "brukerdialog" ]
-      }
-    },
     "/diagnostikk/sak" : {
       "post" : {
         "description" : "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak",
@@ -6768,34 +6595,6 @@
           }
         },
         "summary" : "Finner matchende fagsaker for angitt ytelse, bruker, etc.. ",
-        "tags" : [ "fagsak" ]
-      }
-    },
-    "/fagsak/relatertesaker" : {
-      "get" : {
-        "description" : "Hent liste over saket tilknyttet en pleietrengende",
-        "operationId" : "hentRelaterteSaker",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/RelatertSakDto"
-                }
-              }
-            }
-          }
-        },
         "tags" : [ "fagsak" ]
       }
     },
