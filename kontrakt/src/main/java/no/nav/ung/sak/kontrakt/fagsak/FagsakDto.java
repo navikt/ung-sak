@@ -48,9 +48,6 @@ public class FagsakDto {
     @JsonProperty(value = "kanRevurderingOpprettes")
     private Boolean kanRevurderingOpprettes;
 
-    @JsonProperty(value = "skalBehandlesAvInfotrygd")
-    private Boolean skalBehandlesAvInfotrygd;
-
     @JsonProperty(value = "opprettet")
     private LocalDateTime opprettet;
 
@@ -61,18 +58,6 @@ public class FagsakDto {
     @Valid
     private PersonDto person;
 
-    @JsonProperty(value = "pleietrengendeAktørId", required = false)
-    @Valid
-    private AktørId pleietrengendeAktørId;
-
-    @JsonProperty(value = "relatertPersonAktørId", required = false)
-    @Valid
-    private AktørId relatertPersonAktørId;
-
-    @JsonProperty(value = "erPbSak", required = false)
-    private Boolean erPbSak;
-
-
     public FagsakDto() {
         // Injiseres i test
     }
@@ -82,25 +67,17 @@ public class FagsakDto {
                      FagsakStatus status,
                      Periode periode,
                      PersonDto person,
-                     AktørId pleietrengendeAktørId,
-                     AktørId relatertPersonAktørId,
                      Boolean kanRevurderingOpprettes,
-                     Boolean skalBehandlesAvInfotrygd,
                      LocalDateTime opprettetTidspunkt,
-                     LocalDateTime endretTidspunkt,
-                     Boolean erPbSak) {
+                     LocalDateTime endretTidspunkt) {
         this.saksnummer = saksnummer;
         this.sakstype = ytelseType;
         this.status = status;
         this.gyldigPeriode = periode;
         this.person = person;
-        this.pleietrengendeAktørId = pleietrengendeAktørId;
-        this.relatertPersonAktørId = relatertPersonAktørId;
         this.opprettet = opprettetTidspunkt;
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;
-        this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
-        this.erPbSak = erPbSak;
     }
 
     @Override
@@ -115,14 +92,12 @@ public class FagsakDto {
             && Objects.equals(sakstype, other.sakstype)
             && Objects.equals(status, other.status)
             && Objects.equals(person, other.person)
-            && Objects.equals(gyldigPeriode, other.gyldigPeriode)
-            && Objects.equals(pleietrengendeAktørId, other.pleietrengendeAktørId)
-            && Objects.equals(relatertPersonAktørId, other.relatertPersonAktørId);
+            && Objects.equals(gyldigPeriode, other.gyldigPeriode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(saksnummer, sakstype, status, person, gyldigPeriode, pleietrengendeAktørId, relatertPersonAktørId);
+        return Objects.hash(saksnummer, sakstype, status, person, gyldigPeriode);
     }
 
     public LocalDateTime getEndret() {
@@ -143,10 +118,6 @@ public class FagsakDto {
 
     public FagsakYtelseType getSakstype() {
         return sakstype;
-    }
-
-    public Boolean getSkalBehandlesAvInfotrygd() {
-        return skalBehandlesAvInfotrygd;
     }
 
     public FagsakStatus getStatus() {
@@ -173,20 +144,8 @@ public class FagsakDto {
         this.sakstype = sakstype;
     }
 
-    public void setSkalBehandlesAvInfotrygd(Boolean skalBehandlesAvInfotrygd) {
-        this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
-    }
-
     public void setStatus(FagsakStatus status) {
         this.status = status;
-    }
-
-    public AktørId getPleietrengendeAktørId() {
-        return pleietrengendeAktørId;
-    }
-
-    public boolean erPbSak() {
-        return erPbSak != null && erPbSak;
     }
 
     @Override

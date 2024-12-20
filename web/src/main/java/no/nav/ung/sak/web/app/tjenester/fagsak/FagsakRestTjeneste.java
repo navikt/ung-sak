@@ -46,23 +46,16 @@ import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingOpprettingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.behandling.SakRettigheterDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.fagsak.FagsakDto;
 import no.nav.ung.sak.kontrakt.fagsak.FagsakInfoDto;
 import no.nav.ung.sak.kontrakt.fagsak.MatchFagsak;
-import no.nav.ung.sak.kontrakt.fagsak.RelatertSakDto;
-import no.nav.ung.sak.kontrakt.fagsak.RelatertSøkerDto;
 import no.nav.ung.sak.kontrakt.mottak.FinnSak;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
 import no.nav.ung.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
@@ -84,7 +77,6 @@ public class FagsakRestTjeneste {
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
     public static final String MATCH_PATH = PATH + "/match";
-    public static final String RELATERTE_SAKER_PATH = PATH + "/relatertesaker";
 
     public static final String BRUKER_PATH = PATH + "/bruker";
     public static final String RETTIGHETER_PATH = PATH + "/rettigheter";
@@ -92,22 +84,18 @@ public class FagsakRestTjeneste {
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
-    private PersoninfoAdapter personinfoAdapter;
-    private BehandlingRepository behandlingRepository;
-    private FagsakRepository fagsakRepository;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste, FagsakTjeneste fagsakTjeneste, BehandlingsoppretterTjeneste behandlingsoppretterTjeneste, PersoninfoAdapter personinfoAdapter, BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository) {
+    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
+                              FagsakTjeneste fagsakTjeneste,
+                              BehandlingsoppretterTjeneste behandlingsoppretterTjeneste) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
-        this.personinfoAdapter = personinfoAdapter;
-        this.behandlingRepository = behandlingRepository;
-        this.fagsakRepository = fagsakRepository;
     }
 
     @GET
@@ -166,14 +154,10 @@ public class FagsakRestTjeneste {
         var ytelseType = finnSakDto.getYtelseType();
 
         AktørId bruker = finnSakDto.getAktørId();
-        AktørId pleietrengendeAktørId = finnSakDto.getPleietrengendeAktørId();
-        AktørId relatertPersonAktørId = finnSakDto.getRelatertPersonAktørId();
         var periode = finnSakDto.getPeriode();
 
         var fagsak = fagsakTjeneste.finnFagsakerForAktør(bruker)
             .stream()
-            .filter(f -> pleietrengendeAktørId == null || Objects.equals(f.getPleietrengendeAktørId(), pleietrengendeAktørId))
-            .filter(f -> relatertPersonAktørId == null || Objects.equals(f.getRelatertPersonAktørId(), relatertPersonAktørId))
             .filter(f -> Objects.equals(f.getYtelseType(), ytelseType))
             .filter(f -> periode == null || f.getPeriode().overlapper(DatoIntervallEntitet.fra(periode)))
             .sorted(Comparator.comparing(Fagsak::getPeriode).thenComparing(Fagsak::getOpprettetTidspunkt).reversed())
@@ -220,7 +204,7 @@ public class FagsakRestTjeneste {
             .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt)))
             .collect(Collectors.toList());
 
-        var dto = new SakRettigheterDto(fagsak.map(Fagsak::getSkalTilInfotrygd).orElse(false), oppretting, List.of());
+        var dto = new SakRettigheterDto(oppretting, List.of());
         return Response.ok(dto).build();
     }
 
@@ -247,46 +231,9 @@ public class FagsakRestTjeneste {
     public List<FagsakInfoDto> matchFagsaker(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchFagsakAttributter.class) MatchFagsak matchFagsak) {
         List<FagsakInfoDto> fagsaker = fagsakApplikasjonTjeneste.matchFagsaker(matchFagsak.getYtelseType(),
             matchFagsak.getBruker(),
-            matchFagsak.getPeriode(),
-            matchFagsak.getPleietrengendeIdenter(),
-            matchFagsak.getRelatertPersonIdenter());
+            matchFagsak.getPeriode()
+        );
         return fagsaker;
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path(RELATERTE_SAKER_PATH)
-    @Operation(description = "Hent liste over saket tilknyttet en pleietrengende"
-        , tags = "fagsak"
-        , responses = {
-        @ApiResponse(responseCode = "200",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                schema = @Schema(implementation = RelatertSakDto.class)))
-    })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public RelatertSakDto hentRelaterteSaker(
-        @QueryParam(BehandlingUuidDto.NAME)
-        @Parameter(description = BehandlingUuidDto.DESC)
-        @NotNull
-        @Valid
-        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-        BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid()); //TODO: utvide for andre ytelsestyper
-        if (behandling.getFagsak().getPleietrengendeAktørId() == null) {
-            return new RelatertSakDto(List.of());
-        }
-        List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(behandling.getFagsakYtelseType(), behandling.getFagsak().getPleietrengendeAktørId(), null, null, null);
-
-        return new RelatertSakDto(fagsaker.stream()
-            .filter(f -> !f.getAktørId().equals(behandling.getAktørId()))
-            .map(f -> {
-                Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(f.getAktørId());
-                var åpenBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(f.getId())
-                    .map(Behandling::erStatusFerdigbehandlet)
-                    .map(it -> !it)
-                    .orElse(false);
-                return new RelatertSøkerDto(personinfo.getPersonIdent(), personinfo.getNavn(), f.getSaksnummer(), åpenBehandling);
-            }).collect(Collectors.toList()));
     }
 
     private List<FagsakDto> tilDtoer(FagsakSamlingForBruker view) {
@@ -322,13 +269,9 @@ public class FagsakRestTjeneste {
             fagsak.getStatus(),
             periode,
             personDto,
-            fagsak.getPleietrengendeAktørId(),
-            fagsak.getRelatertPersonAktørId(),
             kanRevurderingOpprettes,
-            fagsak.getSkalTilInfotrygd(),
             fagsak.getOpprettetTidspunkt(),
-            fagsak.getEndretTidspunkt(),
-            false);
+            fagsak.getEndretTidspunkt());
     }
 
     private PersonDto mapFraPersoninfoBasis(PersoninfoBasis pi) {
@@ -344,34 +287,8 @@ public class FagsakRestTjeneste {
         public AbacDataAttributter apply(Object obj) {
             var m = (MatchFagsak) obj;
             var abac = AbacDataAttributter.opprett();
-
             Optional.ofNullable(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(FNR_TYPE, v));
             Optional.ofNullable(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(AKTØR_ID_TYPE, v));
-
-            Optional.ofNullable(m.getPleietrengendeIdenter()).stream()
-                .flatMap(List::stream)
-                .map(PersonIdent::getIdent)
-                .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(FNR_TYPE, v));
-
-            Optional.ofNullable(m.getPleietrengendeIdenter()).stream()
-                .flatMap(List::stream)
-                .map(PersonIdent::getAktørId)
-                .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(AKTØR_ID_TYPE, v));
-
-            Optional.ofNullable(m.getRelatertPersonIdenter()).stream()
-                .flatMap(List::stream)
-                .map(PersonIdent::getIdent)
-                .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(FNR_TYPE, v));
-
-            Optional.ofNullable(m.getRelatertPersonIdenter()).stream()
-                .flatMap(List::stream)
-                .map(PersonIdent::getAktørId)
-                .filter(Objects::nonNull)
-                .forEach(v -> abac.leggTil(AKTØR_ID_TYPE, v));
-
             // må ha minst en aktørid
             if (abac.getVerdier(FNR_TYPE).isEmpty() && abac.getVerdier(AKTØR_ID_TYPE).isEmpty()) {
                 throw new IllegalArgumentException("Må ha minst en aktørid eller fnr oppgitt");

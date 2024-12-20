@@ -162,8 +162,6 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         vedtakHendelse.setVedtakResultat(vedtak.getVedtakResultatType());
         vedtakHendelse.setVedtattTidspunkt(vedtak.getVedtakstidspunkt());
         vedtakHendelse.setFagsakPeriode(fagsak.getPeriode().tilPeriode());
-        vedtakHendelse.setPleietrengendeAktørId(fagsak.getPleietrengendeAktørId());
-        vedtakHendelse.setRelatertPartAktørId(fagsak.getRelatertPersonAktørId());
         return vedtakHendelse;
     }
 }

@@ -121,9 +121,6 @@ public class HenleggBehandlingTjeneste {
 
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
             sendHenleggelsesbrev(behandling.getId(), HistorikkAktør.VEDTAKSLØSNINGEN);
-        } else if (BehandlingResultatType.MANGLER_BEREGNINGSREGLER.equals(årsakKode)) {
-            fagsakRepository.fagsakSkalBehandlesAvInfotrygd(behandling.getFagsakId());
-            opprettOppgaveTilInfotrygd(behandling);
         }
         lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, historikkAktør);
 

@@ -40,7 +40,6 @@ public class SøknadDtoTjeneste {
 
     private BehandlingRepositoryProvider repositoryProvider;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
-    private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
@@ -52,13 +51,11 @@ public class SøknadDtoTjeneste {
     public SøknadDtoTjeneste(BehandlingRepositoryProvider repositoryProvider,
                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                              PersoninfoAdapter personinfoAdapter,
-                             ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
 
         this.repositoryProvider = repositoryProvider;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personinfoAdapter = personinfoAdapter;
-        this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
@@ -67,14 +64,12 @@ public class SøknadDtoTjeneste {
         if (søknadOpt.isPresent()) {
             SøknadEntitet søknad = søknadOpt.get();
             var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
-            return lagSoknadDto(søknad, ref);
+            return lagSoknadDto(søknad);
         }
         return Optional.empty();
     }
 
-    private Optional<SøknadDto> lagSoknadDto(SøknadEntitet søknad, BehandlingReferanse ref) {
-        Long behandlingId = ref.getBehandlingId();
-
+    private Optional<SøknadDto> lagSoknadDto(SøknadEntitet søknad) {
         var dto = new SøknadDto();
         dto.setMottattDato(søknad.getMottattDato());
         dto.setSoknadsdato(søknad.getSøknadsdato());
@@ -92,12 +87,9 @@ public class SøknadDtoTjeneste {
         return Optional.of(dto);
     }
 
-    public List<Periode> hentSøknadperioderPåFagsak(FagsakYtelseType ytelsetype, PersonIdent ident, PersonIdent pleietrengendeAktørIdent) {
+    public List<Periode> hentSøknadperioderPåFagsak(FagsakYtelseType ytelsetype, PersonIdent ident) {
         AktørId aktørId = finnAktørId(ident);
-        AktørId pleietrengendeAktør = pleietrengendeAktørIdent != null ? finnAktørId(pleietrengendeAktørIdent) : null;
-        ytelsetype.validerNøkkelParametere(pleietrengendeAktør, null);
-
-        final Optional<Fagsak> fagsakOpt = finnSisteFagsakPå(ytelsetype, aktørId, pleietrengendeAktør);
+        final Optional<Fagsak> fagsakOpt = finnSisteFagsakPå(ytelsetype, aktørId);
         return hentFagsakPerioder(fagsakOpt);
     }
 
@@ -118,8 +110,8 @@ public class SøknadDtoTjeneste {
         return hentFagsakPerioder(fagsakOpt);
     }
 
-    private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId) {
-        final List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTil(ytelseType, bruker, pleietrengendeAktørId, null, null, null);
+    private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker) {
+        final List<Fagsak> fagsaker = repositoryProvider.getFagsakRepository().finnFagsakRelatertTil(ytelseType, bruker, null, null);
         if (fagsaker.isEmpty()) {
             return Optional.empty();
         }

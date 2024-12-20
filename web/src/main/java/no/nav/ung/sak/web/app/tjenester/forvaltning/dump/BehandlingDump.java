@@ -60,8 +60,6 @@ public class BehandlingDump implements DebugDumpFagsak {
         toCsv.put("id", Fagsak::getId);
         toCsv.put("saksnummer", Fagsak::getSaksnummer);
         toCsv.put("aktoer_id", it -> it.getAktørId().getAktørId());
-        toCsv.put("pleietrengende_aktoer_id", it -> it.getPleietrengendeAktørId() != null ? it.getPleietrengendeAktørId().getAktørId() : null);
-        toCsv.put("relatert_person_aktoer_id", it -> it.getRelatertPersonAktørId() != null ? it.getRelatertPersonAktørId().getAktørId() : null);
         toCsv.put("ytelse_type", Fagsak::getYtelseType);
         toCsv.put("periode", Fagsak::getPeriode);
         toCsv.put("status", Fagsak::getStatus);

@@ -66,16 +66,13 @@ class UtledStatusPåPerioderTjenesteTest {
 
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
 
-        var revurderingPerioderFraAndreParter = new TreeSet<PeriodeMedÅrsak>();
-
         StatusForPerioderPåBehandling utled = utledStatusPåPerioderTjeneste.utled(
             behandling,
             new PåTversAvHelgErKantIKantVurderer(),
             Set.of(kravDokTilkommetBehandling),
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
         var perioderMedÅrsakPerKravstiller = utled.getPerioderMedÅrsakPerKravstiller();
@@ -112,7 +109,6 @@ class UtledStatusPåPerioderTjenesteTest {
 
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
 
-        var revurderingPerioderFraAndreParter = new TreeSet<PeriodeMedÅrsak>();
 
         StatusForPerioderPåBehandling utled = utledStatusPåPerioderTjeneste.utled(
             behandling,
@@ -120,8 +116,7 @@ class UtledStatusPåPerioderTjenesteTest {
             Set.of(kravDokTilkommetBehandling1, kravDokTilkommetBehandling2),
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
 
@@ -172,16 +167,13 @@ class UtledStatusPåPerioderTjenesteTest {
 
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
 
-        var revurderingPerioderFraAndreParter = new TreeSet<PeriodeMedÅrsak>();
-
         StatusForPerioderPåBehandling utled = utledStatusPåPerioderTjeneste.utled(
             behandling,
             new PåTversAvHelgErKantIKantVurderer(),
             Set.of(kravDokTilkommetBehandling),
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
         var perioderMedÅrsakPerKravstiller = utled.getPerioderMedÅrsakPerKravstiller();
@@ -216,16 +208,13 @@ class UtledStatusPåPerioderTjenesteTest {
 
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
 
-        var revurderingPerioderFraAndreParter = new TreeSet<PeriodeMedÅrsak>();
-
         StatusForPerioderPåBehandling svar = utledStatusPåPerioderTjeneste.utled(
             behandling,
             new PåTversAvHelgErKantIKantVurderer(),
             Set.of(kravDokTilkommetBehandling_im, kravDokTilkommetBehandling_søknad),
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
         assertThat(svar.getPerioderMedÅrsak().get(0).getPeriode()).isEqualTo(new Periode(fom, tom));
@@ -261,16 +250,13 @@ class UtledStatusPåPerioderTjenesteTest {
 
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
 
-        NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter = new TreeSet<>();
-
         StatusForPerioderPåBehandling utled = utledStatusPåPerioderTjeneste.utled(
             behandling,
             new PåTversAvHelgErKantIKantVurderer(),
             Set.of(søknadTilkommetBehandling),
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
         assertThat(utled.getPerioderMedÅrsak().stream().findFirst().get().getÅrsaker()).containsOnly(ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
@@ -306,16 +292,13 @@ class UtledStatusPåPerioderTjenesteTest {
 
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
 
-        var revurderingPerioderFraAndreParter = new TreeSet<PeriodeMedÅrsak>();
-
         StatusForPerioderPåBehandling svar = utledStatusPåPerioderTjeneste.utled(
             behandling,
             new PåTversAvHelgErKantIKantVurderer(),
             Set.of(kravDokTilkommetBehandling1, kravDokTilkommetBehandling2),
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
 
@@ -359,16 +342,13 @@ class UtledStatusPåPerioderTjenesteTest {
 
         NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
 
-        NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter = new TreeSet<>();
-
         StatusForPerioderPåBehandling svar = utledStatusPåPerioderTjeneste.utled(
             behandling,
             new PåTversAvHelgErKantIKantVurderer(),
             Set.of(kravDokTilkommetBehandling),
             kravdokumenterMedPeriode,
             perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter
+            perioderSomSkalTilbakestilles
         );
 
 
