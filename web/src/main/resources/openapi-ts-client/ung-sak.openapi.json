@@ -4679,6 +4679,27 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
+      "VedtaksbrevOperasjonerDto" : {
+        "properties" : {
+          "harHindret" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "harRedigert" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "kanHindre" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "kanRedigere" : {
+            "nullable" : true,
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
       "VenteårsakSomObjekt" : {
         "properties" : {
           "kanVelges" : {
@@ -6928,6 +6949,36 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/formidling/vedtaksbrev" : {
+      "get" : {
+        "description" : "Operasjoner som er mulig for vedtaksbrev",
+        "operationId" : "tilgjengeligeVedtaksbrev",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "behandlingId",
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VedtaksbrevOperasjonerDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
     "/formidling/vedtaksbrev/forhaandsvis" : {
       "post" : {
         "description" : "Forhåndsvise vedtaksbrev for en behandling",
@@ -6945,7 +6996,7 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/pdf" : { }
+              "application/octet-stream" : { }
             },
             "description" : "default response"
           }
