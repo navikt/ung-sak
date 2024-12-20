@@ -6998,11 +6998,22 @@
           "required" : true
         },
         "responses" : {
-          "default" : {
+          "200" : {
             "content" : {
-              "application/octet-stream" : { }
+              "application/octet-stream" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              }
             },
-            "description" : "default response"
+            "description" : "pdf"
           }
         },
         "tags" : [ "formidling" ]
