@@ -140,31 +140,16 @@ public class FagsakRepository {
         String sqlString = """
                     select f.* from Fagsak f
                       where f.ytelse_type = :ytelseType
-                         and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
-            """
-            + (brukerId == null ? "" : "and f.bruker_aktoer_id = :brukerAktørId"); // NOSONAR (avsjekket dynamisk sql)
+                         and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true and f.bruker_aktoer_id = :brukerAktørId
+            """;
 
         Query query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
-
+        query.setParameter("brukerAktørId", brukerId.getId());
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
         query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
 
         return query.getResultList();
-    }
-
-    /**
-     * Henter siste fagsak (nyeste) per søker
-     * @param tom
-     */
-    @SuppressWarnings("unchecked")
-    public List<Fagsak> finnFagsakRelatertTil(
-        FagsakYtelseType ytelseType,
-        LocalDate fom,
-        LocalDate tom) {
-
-
-        return finnFagsakRelatertTil(ytelseType, null, fom, tom);
     }
 
     public Optional<Fagsak> hentSakGittSaksnummer(Saksnummer saksnummer, boolean taSkriveLås) {
