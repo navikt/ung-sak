@@ -5,6 +5,9 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -15,6 +18,8 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -37,6 +42,10 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 public class FormidlingRestTjeneste {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
+
+    private static final String PDF_MEDIA_STRING = "application/pdf";
+    private static final MediaType PDF_MEDIA_TYPE = MediaType.valueOf(PDF_MEDIA_STRING);
+
 
     @Inject
     public FormidlingRestTjeneste(BrevGenerererTjeneste brevGenerererTjeneste) {
@@ -67,11 +76,21 @@ public class FormidlingRestTjeneste {
     @POST
     @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Operation(description = "Forhåndsvise vedtaksbrev for en behandling", tags = "formidling")
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING})
+    @Operation(description = "Forhåndsvise vedtaksbrev for en behandling", tags = "formidling",
+        responses = @ApiResponse(
+            responseCode = "200",
+            description = "pdf",
+            content = {
+                @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
+                @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary"))
+                }
+            )
+        )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisVedtaksbrev(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
+        @Context HttpHeaders headers
     ) {
         GenerertBrev generertBrev = brevGenerererTjeneste.generer(new Brevbestilling(
             dto.behandlingId(),
@@ -81,11 +100,16 @@ public class FormidlingRestTjeneste {
             dto.dokumentdata()
         ));
 
-        return Response.ok(generertBrev.dokument().pdf())
-            .type(MediaType.APPLICATION_OCTET_STREAM)
+
+        var mediaTypeReq = headers.getAcceptableMediaTypes().stream().findFirst().orElse(MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        var response = Response.ok(generertBrev.dokument().pdf()).type(mediaTypeReq);
+
+        if (mediaTypeReq == PDF_MEDIA_TYPE) return response.build();
+        else return response
             .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
             .build();
     }
+
 
 }
 
