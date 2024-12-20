@@ -3,6 +3,8 @@ package no.nav.ung.sak.web.app.tjenester.formidling;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
+import java.util.Objects;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -90,7 +93,7 @@ public class FormidlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisVedtaksbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
-        @Context HttpHeaders headers
+        @Context HttpServletRequest request
     ) {
         GenerertBrev generertBrev = brevGenerererTjeneste.generer(new Brevbestilling(
             dto.behandlingId(),
@@ -101,11 +104,11 @@ public class FormidlingRestTjeneste {
         ));
 
 
-        var mediaTypeReq = headers.getAcceptableMediaTypes().stream().findFirst().orElse(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        var response = Response.ok(generertBrev.dokument().pdf()).type(mediaTypeReq);
+        Response.ResponseBuilder response = Response.ok(generertBrev.dokument().pdf());
 
-        if (mediaTypeReq.equals(PDF_MEDIA_TYPE)) return response.build();
-        else return response
+        var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
+        if (mediaTypeReq.equals(PDF_MEDIA_STRING)) return response.build();
+        else return response //Kun for å få swagger til å laste ned pdf
             .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
             .build();
     }
