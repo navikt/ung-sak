@@ -56,9 +56,11 @@ public class FormidlingRestTjeneste {
     public VedtaksbrevOperasjonerDto tilgjengeligeVedtaksbrev(
         @NotNull @Parameter(description = "behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
 
-        return new VedtaksbrevOperasjonerDto(
-            false, false, false, false
-        );
+        return new VedtaksbrevOperasjonerDto(true,
+            false,
+            false,
+            false,
+            false);
     }
 
 
