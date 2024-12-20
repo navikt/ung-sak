@@ -6996,7 +6996,7 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/pdf" : { }
+              "application/octet-stream" : { }
             },
             "description" : "default response"
           }
