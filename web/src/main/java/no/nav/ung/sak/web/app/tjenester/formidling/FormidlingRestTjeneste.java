@@ -25,7 +25,9 @@ import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.dto.PartRequestDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.VedtaksbrevForhåndsvisDto;
+import no.nav.ung.sak.kontrakt.formidling.VedtaksbrevOperasjonerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("")
@@ -42,6 +44,21 @@ public class FormidlingRestTjeneste {
     }
 
     FormidlingRestTjeneste() {
+    }
+
+
+    @GET
+    @Path("/formidling/vedtaksbrev")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Operasjoner som er mulig for vedtaksbrev", tags = "formidling")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public VedtaksbrevOperasjonerDto tilgjengeligeVedtaksbrev(
+        @NotNull @Parameter(description = "behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
+
+        return new VedtaksbrevOperasjonerDto(
+            false, false, false, false
+        );
     }
 
 
