@@ -4681,19 +4681,23 @@
       },
       "VedtaksbrevOperasjonerDto" : {
         "properties" : {
-          "harHindret" : {
+          "enableHindre" : {
             "nullable" : true,
             "type" : "boolean"
           },
-          "harRedigert" : {
+          "enableRediger" : {
             "nullable" : true,
             "type" : "boolean"
           },
-          "kanHindre" : {
+          "harBrev" : {
             "nullable" : true,
             "type" : "boolean"
           },
-          "kanRedigere" : {
+          "hindret" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "redigert" : {
             "nullable" : true,
             "type" : "boolean"
           }
