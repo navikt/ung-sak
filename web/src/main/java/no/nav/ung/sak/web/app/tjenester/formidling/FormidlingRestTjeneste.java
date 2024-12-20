@@ -104,7 +104,7 @@ public class FormidlingRestTjeneste {
         var mediaTypeReq = headers.getAcceptableMediaTypes().stream().findFirst().orElse(MediaType.APPLICATION_OCTET_STREAM_TYPE);
         var response = Response.ok(generertBrev.dokument().pdf()).type(mediaTypeReq);
 
-        if (mediaTypeReq == PDF_MEDIA_TYPE) return response.build();
+        if (mediaTypeReq.equals(PDF_MEDIA_TYPE)) return response.build();
         else return response
             .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
             .build();
