@@ -65,7 +65,7 @@ public class FormidlingRestTjeneste {
     @POST
     @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces("application/pdf")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Forhåndsvise vedtaksbrev for en behandling", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisVedtaksbrev(
