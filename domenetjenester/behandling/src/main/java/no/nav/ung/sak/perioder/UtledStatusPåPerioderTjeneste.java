@@ -1,6 +1,22 @@
 package no.nav.ung.sak.perioder;
 
-import no.nav.fpsak.tidsserie.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -8,6 +24,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
+import no.nav.ung.sak.kontrakt.krav.KravDokumentType;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedÅrsaker;
 import no.nav.ung.sak.kontrakt.krav.PerioderMedÅrsakPerKravstiller;
 import no.nav.ung.sak.kontrakt.krav.RolleType;
@@ -16,17 +33,9 @@ import no.nav.ung.sak.kontrakt.krav.ÅrsakMedPerioder;
 import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.kontrakt.krav.KravDokumentType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class UtledStatusPåPerioderTjeneste {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(UtledStatusPåPerioderTjeneste.class);
     private Boolean filtrereUtTilstøtendePeriode;
 
     private UtledPerioderMedRegisterendring utledPerioderMedRegisterendring;
@@ -212,6 +221,10 @@ public class UtledStatusPåPerioderTjeneste {
         tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         tidslinje = tidslinje.filterValue(this::harIkkeBareBerørtPeriode);
 
+        // En side effect av tidligere mergeAndreBerørtSaker som videreføres etter at andre parter ble fjernet
+        tidslinje = velgFørstegangsbehandlingSomEnesteÅrsakHvisFinnes(tidslinje);
+
+
         var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
             .compress();
 
@@ -227,6 +240,20 @@ public class UtledStatusPåPerioderTjeneste {
             .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), transformerÅrsaker(it)))
             .collect(Collectors.toList());
         return perioder;
+    }
+
+    private static LocalDateTimeline<ÅrsakerTilVurdering> velgFørstegangsbehandlingSomEnesteÅrsakHvisFinnes(LocalDateTimeline<ÅrsakerTilVurdering> tidslinje) {
+        return tidslinje.mapValue(v -> {
+            var årsaker = v.getÅrsaker();
+            if (v.getÅrsaker().contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
+                if (årsaker.contains(ÅrsakTilVurdering.UTSATT_BEHANDLING)) {
+                    årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING, ÅrsakTilVurdering.UTSATT_BEHANDLING));
+                } else {
+                    årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING));
+                }
+            }
+            return new ÅrsakerTilVurdering(årsaker, v.getKravdokumenterForÅrsaker());
+        });
     }
 
     private Set<Periode> utledPerioderTilVurdering(LocalDateTimeline<Boolean> perioderTilVurderingKombinert, List<ÅrsakMedPerioder> årsakMedPerioder) {
@@ -324,28 +351,6 @@ public class UtledStatusPåPerioderTjeneste {
 
     private boolean kravDokumentTypeBrukesAvFormidling(no.nav.ung.sak.perioder.KravDokumentType kravDokumentType) {
         return KravDokumentType.fraKode(kravDokumentType.name()) != null;
-    }
-
-    private LocalDateSegment<ÅrsakerTilVurdering> mergeAndreBerørtSaker(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {
-        Set<ÅrsakTilVurdering> årsaker = new HashSet<>();
-        Set<no.nav.ung.sak.perioder.KravDokumentType> kravDokumentTyper = new HashSet<>();
-        if (første != null && første.getValue() != null) {
-            årsaker.addAll(første.getValue().getÅrsaker());
-            kravDokumentTyper.addAll(første.getValue().getKravdokumenterForÅrsaker());
-        }
-        if (siste != null && siste.getValue() != null) {
-            årsaker.addAll(siste.getValue().getÅrsaker());
-            kravDokumentTyper.addAll(siste.getValue().getKravdokumenterForÅrsaker());
-        }
-        if (årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
-            if (årsaker.contains(ÅrsakTilVurdering.UTSATT_BEHANDLING)) {
-                årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING, ÅrsakTilVurdering.UTSATT_BEHANDLING));
-            } else {
-                årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING));
-            }
-        }
-
-        return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker, kravDokumentTyper));
     }
 
     private LocalDateSegment<ÅrsakerTilVurdering> mergeSegmentsAndreDokumenter(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {

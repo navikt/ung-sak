@@ -46,10 +46,7 @@ import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
@@ -80,7 +77,6 @@ public class FagsakRestTjeneste {
     public static final String SISTE_FAGSAK_PATH = PATH + "/siste";
     public static final String SOK_PATH = PATH + "/sok";
     public static final String MATCH_PATH = PATH + "/match";
-    public static final String RELATERTE_SAKER_PATH = PATH + "/relatertesaker";
 
     public static final String BRUKER_PATH = PATH + "/bruker";
     public static final String RETTIGHETER_PATH = PATH + "/rettigheter";
@@ -88,22 +84,18 @@ public class FagsakRestTjeneste {
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
-    private PersoninfoAdapter personinfoAdapter;
-    private BehandlingRepository behandlingRepository;
-    private FagsakRepository fagsakRepository;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste, FagsakTjeneste fagsakTjeneste, BehandlingsoppretterTjeneste behandlingsoppretterTjeneste, PersoninfoAdapter personinfoAdapter, BehandlingRepository behandlingRepository, FagsakRepository fagsakRepository) {
+    public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
+                              FagsakTjeneste fagsakTjeneste,
+                              BehandlingsoppretterTjeneste behandlingsoppretterTjeneste) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
-        this.personinfoAdapter = personinfoAdapter;
-        this.behandlingRepository = behandlingRepository;
-        this.fagsakRepository = fagsakRepository;
     }
 
     @GET
