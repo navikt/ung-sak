@@ -3,10 +3,10 @@ package no.nav.ung.sak.domene.vedtak.observer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 
 @ApplicationScoped
@@ -37,6 +37,7 @@ public class VedtakFattetEventObserver {
         return event.getBehandling().erYtelseBehandling();
     }
 
+    @Deprecated
     private ProsessTaskData opprettTaskForPubliseringAvVedtakMedYtelse(BehandlingVedtakEvent event) {
         final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserVedtattYtelseHendelseTask.class);
         taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
