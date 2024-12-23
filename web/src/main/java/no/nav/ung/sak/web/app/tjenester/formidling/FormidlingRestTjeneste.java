@@ -28,11 +28,9 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.kodeverk.formidling.RolleType;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.Brevbestilling;
-import no.nav.ung.sak.formidling.dto.PartRequestDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.VedtaksbrevOperasjonerDto;
@@ -99,7 +97,7 @@ public class FormidlingRestTjeneste {
             dto.behandlingId(),
             DokumentMalType.INNVILGELSE_DOK,
             null,
-            dto.mottaker() != null ? new PartRequestDto(dto.mottaker().id(), dto.mottaker().type(), RolleType.BRUKER) : null,
+            null,
             dto.dokumentdata()
         ));
 

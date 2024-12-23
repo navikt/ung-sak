@@ -30,13 +30,6 @@ public record VedtaksbrevForhåndsvisDto(
     Long behandlingId,
 
     /**
-     * For brev som støtter flere mottakere
-     */
-    @JsonProperty("mottaker")
-    @Valid
-    MottakerDto mottaker,
-
-    /**
      * Angir om automatisk vedtaksbrev eller lagret manuell brev skal forhåndsvises, default er false
      */
     @JsonProperty("manuellBrev")

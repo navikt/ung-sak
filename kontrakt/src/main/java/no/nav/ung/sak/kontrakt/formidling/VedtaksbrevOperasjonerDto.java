@@ -18,5 +18,6 @@ public record VedtaksbrevOperasjonerDto(
     //TODO legg ved original html for redigering
     // og html som er redigert
     // eller putt i eget endepunkt
+    //TODO ta med dokumentMalType for å kunne skrive i frontend hva slags brev dette er?
 ) {
 }
