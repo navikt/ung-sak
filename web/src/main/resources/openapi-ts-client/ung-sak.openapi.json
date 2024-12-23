@@ -3059,23 +3059,6 @@
         "required" : [ "behandlingUuid" ],
         "type" : "object"
       },
-      "MottakerDto" : {
-        "properties" : {
-          "id" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          },
-          "type" : {
-            "enum" : [ "ORGNR", "AKTØRID" ],
-            "pattern" : "^[\\p{L}\\p{N}]+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "id", "type" ],
-        "type" : "object"
-      },
       "NyBehandlingDto" : {
         "properties" : {
           "behandlingArsakType" : {
@@ -4671,9 +4654,6 @@
           "manuellBrev" : {
             "nullable" : true,
             "type" : "boolean"
-          },
-          "mottaker" : {
-            "$ref" : "#/components/schemas/MottakerDto"
           }
         },
         "required" : [ "behandlingId" ],
