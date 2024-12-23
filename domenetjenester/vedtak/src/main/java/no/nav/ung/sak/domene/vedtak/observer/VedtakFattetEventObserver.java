@@ -24,7 +24,7 @@ public class VedtakFattetEventObserver {
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
-            var gruppe = new ProsessTaskGruppe(opprettTaskForPubliseringAvVedtak(event));
+            var gruppe = new ProsessTaskGruppe();
 
             if (erBehandlingAvRettTypeForAbakus(event)) {
                 gruppe.addNesteSekvensiell(opprettTaskForPubliseringAvVedtakMedYtelse(event));
@@ -45,10 +45,4 @@ public class VedtakFattetEventObserver {
         return taskData;
     }
 
-    private ProsessTaskData opprettTaskForPubliseringAvVedtak(BehandlingVedtakEvent event) {
-        final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserVedtakHendelseTask.class);
-        taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
-        taskData.setCallIdFraEksisterende();
-        return taskData;
-    }
 }

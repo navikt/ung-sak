@@ -141,10 +141,6 @@ spec:
       value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: teamforeldrepenger.familie-vedtakfattet-v1
-    - name: KAFKA_VEDTAKHENDELSE_TOPIC
-      value: privat-ung-vedtakhendelse
-    - name: KAFKA_VEDTAKHENDELSE_AIVEN_TOPIC
-      value: k9saksbehandling.ung-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-ung-stonadstatistikk-v1
     - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
