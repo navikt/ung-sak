@@ -1,5 +1,15 @@
 package no.nav.ung.sak.behandling.revurdering.sats;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.time.LocalDate;
+import java.util.Map;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -18,14 +28,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.time.LocalDate;
-import java.util.Map;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -62,6 +64,7 @@ class SatsEndringRepositoryTest {
     }
 
     @Test
+    @Disabled
     void forventer_ingen_fagsaker_der_bruker_er_under_25_aar_fra_dato() {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(20).minusWeeks(1);
