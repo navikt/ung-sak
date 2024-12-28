@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.formidling;
+package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -30,11 +30,11 @@ public record VedtaksbrevForhåndsvisDto(
     Long behandlingId,
 
     /**
-     * Angir om automatisk vedtaksbrev eller lagret manuell brev skal forhåndsvises, default er false
+     * Angir om automatisk vedtaksbrev (false) eller lagret redigert brev skal forhåndsvises (true), default er false. For fritekstbrev vil den alltid bruke redigert versjon
      */
-    @JsonProperty("manuellBrev")
+    @JsonProperty("redigertVersjon")
     @Valid
-    Boolean manuellBrev,
+    Boolean redigertVersjon,
 
     /**
      * TODO

@@ -32,8 +32,8 @@ import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.ung.sak.kontrakt.formidling.VedtaksbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.VedtaksbrevOperasjonerDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("")
@@ -67,7 +67,7 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
 
         return new VedtaksbrevOperasjonerDto(true,
-            false,
+            new VedtaksbrevOperasjonerDto.AutomatiskBrevOperasjoner(false, false),
             false,
             false,
             false);
