@@ -28,17 +28,27 @@ import no.nav.k9.felles.integrasjon.pdl.Navn;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 
 //TODO flytt opprettelsen i TestScenarioBuilder?
 public class PdlKlientFake implements Pdl {
-    private final String aktørid;
+    private final String fnr;
     private final Person person;
+    private static final FiktiveFnr fiktiveFnr = new FiktiveFnr();
 
-    public PdlKlientFake(String fornavn, String etternavn, String aktørid) {
-        this.aktørid = aktørid;
+    public PdlKlientFake(String fornavn, String etternavn, String fnr) {
+        this.fnr = fnr;
         // Create a test instance of Person
         person = lagPerson(fornavn, etternavn);
 
+    }
+
+    public static PdlKlientFake medDefaultPerson() {
+        return new PdlKlientFake("Test", "Testesen", gyldigFnr());
+    }
+
+    public static String gyldigFnr() {
+        return fiktiveFnr.nesteFnr();
     }
 
     public static Person lagPerson(String fornavn, String etternavn) {
@@ -78,7 +88,7 @@ public class PdlKlientFake implements Pdl {
 
     @Override
     public Identliste hentIdenter(HentIdenterQueryRequest q, IdentlisteResponseProjection p) {
-        return new Identliste(List.of(new IdentInformasjon(aktørid, IdentGruppe.AKTORID, false)));
+        return new Identliste(List.of(new IdentInformasjon(fnr, IdentGruppe.FOLKEREGISTERIDENT, false)));
     }
 
     @Override

@@ -40,11 +40,13 @@ class InnvilgelseTest {
     private BehandlingRepositoryProvider repositoryProvider;
 
     String navn = "Halvorsen Halvor";
+    String fnr = PdlKlientFake.gyldigFnr();
 
     @BeforeEach
     void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", "1111");
+
+        var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", fnr);
 
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
@@ -66,6 +68,7 @@ class InnvilgelseTest {
         var brevtekst = generertBrev.dokument().html();
         assertThatHtml(brevtekst).contains("<h1>NAV har innvilget søknaden din om ungdomsytelse</h1>");
         assertThatHtml(brevtekst).contains("Til: " + navn);
+        assertThatHtml(brevtekst).contains("Fødselsnummer: " + fnr);
 
     }
 

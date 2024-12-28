@@ -1,6 +1,8 @@
 package no.nav.ung.sak.formidling;
 
 
+import java.util.Objects;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.formidling.IdType;
@@ -47,20 +49,21 @@ public class BrevGenerererTjeneste {
 
     public GenerertBrev generer(Brevbestilling brevbestilling) {
         Behandling behandling = behandlingRepository.hentBehandling(brevbestilling.behandlingId());
-        PartResponseDto mottaker = hentMottaker(behandling);
+        var pdlMottaker = hentMottaker(behandling);
 
         // valider mal via regel hvis vedtaksbrev
 
         // lag brev json via datasamler og velg templateData
         var input = new TemplateInput(TemplateType.INNVILGELSE,
             new InnvilgelseDto(
-                FellesDto.automatisk(new MottakerDto(mottaker.navn(), mottaker.id()))
+                FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()))
             ));
 
 
         // konverter til pdf fra templateData
         PdfGenDokument dokument = pdfGen.lagDokument(input);
 
+        var mottaker = mapPartResponseDto(pdlMottaker);
         return new GenerertBrev(
             dokument,
             mottaker,
@@ -70,14 +73,20 @@ public class BrevGenerererTjeneste {
         );
     }
 
-    private PartResponseDto hentMottaker(Behandling behandling) {
+    private PartResponseDto mapPartResponseDto(PDLMottaker pdlMottaker) {
+        return new PartResponseDto(pdlMottaker.aktørId.getAktørId(), pdlMottaker.navn, IdType.AKTØRID, RolleType.BRUKER);
+    }
+
+    private PDLMottaker hentMottaker(Behandling behandling) {
         AktørId aktørId = behandling.getFagsak().getAktørId();
         var personIdent = aktørTjeneste.hentPersonIdentForAktørId(aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke person med aktørid"));
         PersoninfoBasis personinfoBasis = personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent);
 
-
-        PartResponseDto mottaker = new PartResponseDto(aktørId.getId(), personinfoBasis.getNavn(), IdType.AKTØRID, RolleType.BRUKER);
-        return mottaker;
+        String fnr = personIdent.getIdent();
+        Objects.requireNonNull(fnr);
+        return new PDLMottaker(fnr, aktørId, personinfoBasis.getNavn());
     }
+
+    record PDLMottaker(String fnr, AktørId aktørId, String navn) {}
 }

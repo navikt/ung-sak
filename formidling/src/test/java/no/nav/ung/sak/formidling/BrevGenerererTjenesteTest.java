@@ -52,7 +52,7 @@ class BrevGenerererTjenesteTest {
 
 
     String navn = "Halvorsen Halvor";
-    String aktørid = "1111";
+    String fnr = PdlKlientFake.gyldigFnr();
 
     @BeforeEach
     void setup() {
@@ -65,7 +65,7 @@ class BrevGenerererTjenesteTest {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad(ungdom);
         var behandling = scenarioBuilder.lagre(repositoryProvider);
 
-        var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", aktørid);
+        var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", fnr);
 
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
