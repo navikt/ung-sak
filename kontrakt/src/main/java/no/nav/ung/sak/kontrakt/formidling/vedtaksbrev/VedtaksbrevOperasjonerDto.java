@@ -1,6 +1,8 @@
 package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 
+import jakarta.validation.Valid;
+
 /**
  *
  * @param harBrev  true hvis det finnes brev for behandling
@@ -16,6 +18,7 @@ package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
  */
 public record VedtaksbrevOperasjonerDto(
     boolean harBrev,
+    @Valid
     AutomatiskBrevOperasjoner automatiskBrevOperasjoner,
     boolean fritekstbrev,
     boolean enableHindre,
