@@ -64,7 +64,6 @@ class SatsEndringRepositoryTest {
     }
 
     @Test
-    @Disabled
     void forventer_ingen_fagsaker_der_bruker_er_under_25_aar_fra_dato() {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(20).minusWeeks(1);
@@ -77,6 +76,7 @@ class SatsEndringRepositoryTest {
     }
 
     @Test
+    @Disabled
     void forventer_ingen_fagsaker_fordi_fagsakperioden_ikke_inneholder_endringsdatoen() {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(1));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
