@@ -764,6 +764,19 @@
         },
         "type" : "object"
       },
+      "AutomatiskBrevOperasjoner" : {
+        "properties" : {
+          "enableRediger" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "nullable" : true,
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
       "AvklartPersonstatus" : {
         "properties" : {
           "orginalPersonstatus" : {
@@ -4651,7 +4664,7 @@
           "dokumentdata" : {
             "$ref" : "#/components/schemas/JsonNode"
           },
-          "manuellBrev" : {
+          "redigertVersjon" : {
             "nullable" : true,
             "type" : "boolean"
           }
@@ -4661,11 +4674,14 @@
       },
       "VedtaksbrevOperasjonerDto" : {
         "properties" : {
+          "automatiskBrevOperasjoner" : {
+            "$ref" : "#/components/schemas/AutomatiskBrevOperasjoner"
+          },
           "enableHindre" : {
             "nullable" : true,
             "type" : "boolean"
           },
-          "enableRediger" : {
+          "fritekstbrev" : {
             "nullable" : true,
             "type" : "boolean"
           },
@@ -4674,10 +4690,6 @@
             "type" : "boolean"
           },
           "hindret" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "redigert" : {
             "nullable" : true,
             "type" : "boolean"
           }
