@@ -22,15 +22,13 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.kodeverk.formidling.IdType;
-import no.nav.ung.kodeverk.formidling.RolleType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
+import no.nav.ung.sak.formidling.domene.PdlPerson;
 import no.nav.ung.sak.formidling.dto.Brevbestilling;
-import no.nav.ung.sak.formidling.dto.PartResponseDto;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -78,7 +76,7 @@ class BrevGenerererTjenesteTest {
         var bestillBrevDto = new Brevbestilling(
             behandling.getId(),
             DokumentMalType.INNVILGELSE_DOK,
-            behandling.getFagsak().getSaksnummer(),
+            behandling.getFagsak().getSaksnummer().getVerdi(),
             null,
             objectMapper.createObjectNode()
         );
@@ -91,14 +89,11 @@ class BrevGenerererTjenesteTest {
             lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
         }
 
-        PartResponseDto mottaker = generertBrev.mottaker();
+        PdlPerson mottaker = generertBrev.mottaker();
         assertThat(mottaker.navn()).isEqualTo(navn);
-        assertThat(mottaker.id()).isEqualTo(ungdom.getAktørId());
-        assertThat(mottaker.type()).isEqualTo(IdType.AKTØRID);
-        assertThat(mottaker.rolleType()).isEqualTo(RolleType.BRUKER);
+        assertThat(mottaker.aktørId().getAktørId()).isEqualTo(ungdom.getAktørId());
 
-
-        PartResponseDto gjelder = generertBrev.gjelder();
+        PdlPerson gjelder = generertBrev.gjelder();
         assertThat(gjelder).isEqualTo(mottaker);
         assertThat(generertBrev.malType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
 

@@ -76,7 +76,7 @@ class InnvilgelseTest {
         return new Brevbestilling(
             behandling.getId(),
             DokumentMalType.INNVILGELSE_DOK,
-            behandling.getFagsak().getSaksnummer(),
+            behandling.getFagsak().getSaksnummer().getVerdi(),
             null,
             objectMapper.createObjectNode()
         );

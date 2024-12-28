@@ -18,7 +18,7 @@ public enum DokumentMalType implements Kodeverdi {
     INNVILGELSE_DOK("INNVILGELSE", "Innvilgelsesbrev", true),
     OPPHØR_DOK("OPPHOR", "Opphør brev", true),
     AVSLAG__DOK("AVSLAG", "Avslagsbrev", true),
-    FRITEKST_DOK("FRITKS", "Fritekst vedtaksbrev", true),
+    MANUELT_VEDTAK_DOK("MANUELL", "Fritekst vedtaksbrev", true),
 //    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false),
 //    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst", false),
 
