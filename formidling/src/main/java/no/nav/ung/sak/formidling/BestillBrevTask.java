@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
+import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.dto.PartRequestDto;
 
@@ -54,38 +55,51 @@ public class BestillBrevTask implements ProsessTaskHandler {
                 null)
             );
 
+        var dokArkivRequest = opprettJournalpostRequest(prosessTaskData, generertBrev);
+
+        var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
+    }
+
+    private OpprettJournalpostRequest opprettJournalpostRequest(ProsessTaskData prosessTaskData, GenerertBrev generertBrev) {
         String tittel = utledTittel(generertBrev.malType());
+
+        var avsenderMottaker = new OpprettJournalpostRequest.AvsenderMottaker(
+            generertBrev.mottaker().fnr(),
+            null,
+            null,
+            OpprettJournalpostRequest.AvsenderMottaker.IdType.FNR
+
+        );
+        var bruker = new OpprettJournalpostRequest.Bruker(
+            generertBrev.mottaker().fnr(),
+            OpprettJournalpostRequest.Bruker.BrukerIdType.FNR
+        );
+
+        var tilleggsopplysninger = new OpprettJournalpostRequest.Tilleggsopplysning(
+            OpprettJournalpostRequest.TILLEGGSOPPLYSNING_EKSTERNREF_NOKKEL,
+            prosessTaskData.getBehandlingUuid().toString());
+
+        var sak = OpprettJournalpostRequest.Sak.forSaksnummer(prosessTaskData.getSaksnummer());
+
+        var dokument = OpprettJournalpostRequest.Dokument.lagDokumentMedPdf(
+            tittel,
+            generertBrev.dokument().pdf(),
+            generertBrev.malType().getKode());
+
         var dokArkivRequest = new OpprettJournalpostRequest(
             "UTGAAENDE",
-            new OpprettJournalpostRequest.AvsenderMottaker(
-                generertBrev.mottaker().fnr(),
-                null,
-                null,
-                OpprettJournalpostRequest.AvsenderMottaker.IdType.FNR
-
-            ),
-            new OpprettJournalpostRequest.Bruker(
-                generertBrev.mottaker().fnr(),
-                OpprettJournalpostRequest.Bruker.BrukerIdType.FNR
-            ),
+            avsenderMottaker,
+            bruker,
             OpprettJournalpostRequest.OMSORG_PLEIE_OPPLAERINGSPENGER_TEMA,
             OpprettJournalpostRequest.OMSORG_PLEIE_OPPLAERINGSPENGER_BEHANDLINGSTEMA,
             tittel,
             null,
             OpprettJournalpostRequest.AUTOMATISK_JOURNALFORENDE_ENHET,
             UUID.randomUUID().toString(), //DokumentbestillingId
-            List.of(new OpprettJournalpostRequest.Tilleggsopplysning(
-                OpprettJournalpostRequest.TILLEGGSOPPLYSNING_EKSTERNREF_NOKKEL,
-                prosessTaskData.getBehandlingUuid().toString())),
-            OpprettJournalpostRequest.Sak.forSaksnummer(prosessTaskData.getSaksnummer()),
-            List.of(OpprettJournalpostRequest.Dokument.lagDokumentMedPdf(
-                tittel,
-                generertBrev.dokument().pdf(),
-                generertBrev.malType().getKode())
-
-            ));
-
-        var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
+            List.of(tilleggsopplysninger),
+            sak,
+            List.of(dokument));
+        return dokArkivRequest;
     }
 
     private String utledTittel(DokumentMalType dokumentMalType) {
