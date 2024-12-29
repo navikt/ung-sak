@@ -23,13 +23,15 @@ import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
+import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
+import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BestillBrevTaskTest {
+class BrevbestillingTaskTest {
 
     @Inject
     private EntityManager entityManager;
@@ -37,6 +39,7 @@ class BestillBrevTaskTest {
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private DokArkivKlient dokArkivKlient;
     private DokDistKlient dokDistKlient;
+    private BrevbestillingRepository brevbestillingRepository;
 
     private final String fnr = PdlKlientFake.gyldigFnr();
 
@@ -54,23 +57,36 @@ class BestillBrevTaskTest {
 
         dokArkivKlient = new DokArkivKlient();
         dokDistKlient = new DokDistKlient();
+        brevbestillingRepository = new BrevbestillingRepository(entityManager);
+
     }
 
     @Test
-    void skalLagePdfJournalføreOgDistribuere() {
+    void skalLagreBestillingLagePdfJournalføreOgDistribuere() {
         var ungdom = AktørId.dummy();
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad(ungdom);
         var behandling = scenarioBuilder.lagre(repositoryProvider);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
 
-        var dokumentBestillingId = UUID.randomUUID(); //TODO endre til id fra DB
+        BrevbestillingTask brevBestillingTask = new BrevbestillingTask(brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, dokDistKlient);
+        brevBestillingTask.doTask(lagTask(behandling));
 
-        BestillBrevTask bestillBrevTask = new BestillBrevTask(brevGenerererTjeneste, dokArkivKlient, dokDistKlient);
-        bestillBrevTask.doTask(lagTask(behandling));
+        BehandlingBrevbestillingEntitet behandlingBestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
+        assertThat(behandlingBestilling.getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(behandlingBestilling.isVedtaksbrev()).isTrue();
 
+
+        // TODO fortsett med å fullføre brevbestilling.
+        var bestilling = behandlingBestilling.getBestilling();
+        assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
+        assertThat(bestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
+        assertThat(bestilling.getJournalpostId()).isNotNull(); //TODO bruk verdi fra fake
+        assertThat(bestilling.getDistribusjonsId()).isNotNull(); //TODO bruk verdi fra fake
+
+        assertThat(dokArkivKlient.getRequests()).hasSize(1);
         var request = dokArkivKlient.getRequests().getFirst();
-        assertDokArkivRequest(request, dokumentBestillingId, behandling);
+        assertDokArkivRequest(request, bestilling.getBrevbestillingUuid(), behandling);
 
 
 
@@ -85,7 +101,7 @@ class BestillBrevTaskTest {
         assertThat(request.tittel()).isEqualTo(innvilgelseTittel);
         assertThat(request.kanal()).isNull();
         assertThat(request.journalfoerendeEnhet()).isEqualTo("9999");
-//        assertThat(request.eksternReferanseId()).isEqualTo(dokumentBestillingId.toString());
+        assertThat(request.eksternReferanseId()).isEqualTo(dokumentBestillingId.toString());
 
         // Verify AvsenderMottaker
         var avsenderMottaker = request.avsenderMottaker();
@@ -126,7 +142,7 @@ class BestillBrevTaskTest {
     }
 
     private static ProsessTaskData lagTask(Behandling behandling) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(BestillBrevTask.class);
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(BrevbestillingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
         prosessTaskData.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         prosessTaskData.setProperty(CommonTaskProperties.BEHANDLING_UUID, behandling.getUuid().toString());

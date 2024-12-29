@@ -9,11 +9,13 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.RolleType;
-import no.nav.ung.sak.behandling.revurdering.etterkontroll.saksbehandlingstid.ForsinketSaksbehandlingEtterkontrollOppretterTask;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
+import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
+import no.nav.ung.sak.formidling.domene.BrevMottaker;
+import no.nav.ung.sak.formidling.domene.BrevbestillingEntitetBuilder;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.dto.PartRequestDto;
@@ -24,28 +26,50 @@ import no.nav.ung.sak.formidling.dto.PartRequestDto;
  * https://dokarkiv-q2.dev.intern.nav.no/swagger-ui/index.html#/
  */
 //@ApplicationScoped
-@ProsessTask(value = ForsinketSaksbehandlingEtterkontrollOppretterTask.TASKTYPE)
+@ProsessTask(value = BrevbestillingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class BestillBrevTask implements ProsessTaskHandler {
+public class BrevbestillingTask implements ProsessTaskHandler {
 
+    public static final String TASKTYPE = "formidling.brevbestlling";
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
+    private BrevbestillingRepository brevbestillingRepository;
     private DokArkivKlient dokArkivKlient;
     private DokDistKlient dokDistKlient;
 
     // @Inject
-    public BestillBrevTask(BrevGenerererTjeneste brevGenerererTjeneste, DokArkivKlient dokArkivKlient, DokDistKlient dokDistKlient) {
+    public BrevbestillingTask(
+        BrevGenerererTjeneste brevGenerererTjeneste,
+        BrevbestillingRepository brevbestillingRepository,
+        DokArkivKlient dokArkivKlient,
+        DokDistKlient dokDistKlient) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
+        this.brevbestillingRepository = brevbestillingRepository;
         this.dokArkivKlient = dokArkivKlient;
         this.dokDistKlient = dokDistKlient;
     }
 
-    BestillBrevTask() {
+    BrevbestillingTask() {
     }
 
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
+
+        var b = new BrevbestillingEntitetBuilder()
+            .dokumentMalType(DokumentMalType.INNVILGELSE_DOK)
+            .mottaker(new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID))
+            .saksnummer(prosessTaskData.getSaksnummer())
+            .createBrevbestillingEntitet();
+
+        var bestilling = new BehandlingBrevbestillingEntitet(
+            Long.valueOf(prosessTaskData.getBehandlingId()),
+            true,
+            b
+        );
+
+        brevbestillingRepository.lagre(bestilling);
+
         var generertBrev = brevGenerererTjeneste.generer(
             new Brevbestilling(
                 Long.valueOf(prosessTaskData.getBehandlingId()),
@@ -53,7 +77,8 @@ public class BestillBrevTask implements ProsessTaskHandler {
                 prosessTaskData.getSaksnummer(),
                 new PartRequestDto(prosessTaskData.getAktørId(), IdType.AKTØRID, RolleType.BRUKER),
                 null)
-            );
+        );
+
 
         var dokArkivRequest = opprettJournalpostRequest(prosessTaskData, generertBrev);
 

@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 
 /**
  * https://confluence.adeo.no/display/BOA/opprettJournalpost
  */
+@ApplicationScoped
 public class DokArkivKlient {
+
+    public DokArkivKlient() {
+    }
 
     private List<OpprettJournalpostRequest> requests = new ArrayList();
 
