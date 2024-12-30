@@ -6,6 +6,9 @@ import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_ID_P
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -39,6 +42,8 @@ public class BrevbestillingTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "formidling.brevbestlling";
 
+    private static final Logger LOG = LoggerFactory.getLogger(BrevbestillingTask.class);
+
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private BrevbestillingRepository brevbestillingRepository;
     private DokArkivKlient dokArkivKlient;
@@ -63,6 +68,19 @@ public class BrevbestillingTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
 
+        var bestilling = BrevbestillingEntitet.nyBrevbestilling(
+                prosessTaskData.getSaksnummer(),
+                DokumentMalType.INNVILGELSE_DOK,
+                new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID));
+
+        var behandlingBestilling = new BehandlingBrevbestillingEntitet(
+                Long.valueOf(prosessTaskData.getBehandlingId()),
+                true,
+                bestilling
+        );
+
+        LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
+
         var generertBrev = brevGenerererTjeneste.generer(
             new Brevbestilling(
                 Long.valueOf(prosessTaskData.getBehandlingId()),
@@ -70,18 +88,6 @@ public class BrevbestillingTask implements ProsessTaskHandler {
                 prosessTaskData.getSaksnummer(),
                 new PartRequestDto(prosessTaskData.getAktørId(), IdType.AKTØRID, RolleType.BRUKER),
                 null)
-        );
-
-
-        var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-            prosessTaskData.getSaksnummer(),
-            DokumentMalType.INNVILGELSE_DOK,
-            new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID));
-
-        var behandlingBestilling = new BehandlingBrevbestillingEntitet(
-            Long.valueOf(prosessTaskData.getBehandlingId()),
-            true,
-            bestilling
         );
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
@@ -99,6 +105,9 @@ public class BrevbestillingTask implements ProsessTaskHandler {
         distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, behandlingBestilling.isVedtaksbrev() ?
             DistribusjonsType.VEDTAK.name() : DistribusjonsType.VIKTIG.name());
         prosessTaskTjeneste.lagre(distTask);
+        distTask.setCallIdFraEksisterende();
+
+        LOG.info("Brevbestilling journalført med journalpostId={}", bestilling.getJournalpostId());
 
     }
 

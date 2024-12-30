@@ -3,6 +3,9 @@ package no.nav.ung.sak.formidling;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -24,6 +27,8 @@ import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class BrevdistribusjonTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "formidling.brevdistribusjon";
+
+    private static final Logger LOG = LoggerFactory.getLogger(BrevdistribusjonTask.class);
 
     static final String BREVBESTILLING_ID_PARAM = "brevbestillingId";
     static final String BREVBESTILLING_DISTRIBUSJONSTYPE = "brevbestilling.distribusjonstype";
@@ -68,5 +73,6 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
         bestilling.fullført(response.bestillingsId());
         brevbestillingRepository.lagre(bestilling);
 
+        LOG.info("Brevbestilling OK {}", bestilling);
     }
 }

@@ -14,6 +14,9 @@ public class BrevMottaker {
     @Enumerated(EnumType.STRING)
     private IdType mottakerIdType;
 
+    public BrevMottaker() {
+    }
+
     public BrevMottaker(String mottakerId, IdType mottakerIdType) {
         this.mottakerId = mottakerId;
         this.mottakerIdType = mottakerIdType;

@@ -53,4 +53,13 @@ public class BehandlingBrevbestillingEntitet extends BaseEntitet {
         return vedtaksbrev;
     }
 
+    @Override
+    public String toString() {
+        return "BehandlingBrevbestillingEntitet{" +
+               "id=" + id +
+               ", behandlingId=" + behandlingId +
+               ", vedtaksbrev=" + vedtaksbrev +
+               ", brevbestillingEntitet=" + brevbestillingEntitet +
+               '}';
+    }
 }
