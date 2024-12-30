@@ -145,4 +145,19 @@ public class BrevbestillingEntitet extends BaseEntitet {
     public Long getId() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "BrevbestillingEntitet{" +
+               "id=" + id +
+               ", brevbestillingUuid=" + brevbestillingUuid +
+               ", saksnummer='" + saksnummer + '\'' +
+               ", templateType=" + templateType +
+               ", dokumentMalType=" + dokumentMalType +
+               ", status=" + status +
+               ", journalpostId='" + journalpostId + '\'' +
+               ", dokdistBestillingId='" + dokdistBestillingId + '\'' +
+               ", mottakerType=" + mottaker.getMottakerIdType() +
+               '}';
+    }
 }

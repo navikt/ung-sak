@@ -28,7 +28,7 @@ import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
-import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
+import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
@@ -46,7 +46,6 @@ class BrevbestillingTaskTest {
     private BehandlingRepositoryProvider repositoryProvider;
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private DokArkivKlient dokArkivKlient;
-    private DokDistKlient dokDistKlient;
     private BrevbestillingRepository brevbestillingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
@@ -65,7 +64,7 @@ class BrevbestillingTaskTest {
         );
 
         dokArkivKlient = new DokArkivKlient();
-        dokDistKlient = new DokDistKlient();
+
         brevbestillingRepository = new BrevbestillingRepository(entityManager);
 
     }
@@ -97,6 +96,7 @@ class BrevbestillingTaskTest {
         assertThat(distTasker).hasSize(1);
         var disttask = distTasker.getFirst();
         assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_ID_PARAM)).isEqualTo(bestilling.getId().toString());
+        assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE)).isEqualTo(DistribusjonsType.VEDTAK.name());
 
     }
 

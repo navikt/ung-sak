@@ -8,10 +8,6 @@ public record OpprettJournalpostResponse(
     boolean journalpostferdigstilt,
     String melding
 ) {
-    public boolean erFerdigstilt() {
-        return journalpostferdigstilt;
-    }
-
     public record Dokument(
         String dokumentInfoId
     ) {}

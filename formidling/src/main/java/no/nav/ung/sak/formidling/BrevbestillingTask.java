@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling;
 
+import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
 import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
+import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevMottaker;
 import no.nav.ung.sak.formidling.domene.BrevbestillingEntitetBuilder;
@@ -80,18 +82,20 @@ public class BrevbestillingTask implements ProsessTaskHandler {
             bestilling
         );
 
-        brevbestillingRepository.lagre(behandlingBestilling);
+        brevbestillingRepository.lagreForBehandling(behandlingBestilling);
 
         var dokArkivRequest = opprettJournalpostRequest(prosessTaskData, bestilling.getBrevbestillingUuid(), generertBrev);
         var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
         //TODO vurder å putte templateType i builder istedenfor her...
         bestilling.generertOgJournalført(generertBrev.templateType(), opprettJournalpostResponse.journalpostId());
 
-        brevbestillingRepository.lagre(behandlingBestilling);
+        brevbestillingRepository.lagreForBehandling(behandlingBestilling);
         var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
         distTask.setBehandling(prosessTaskData.getFagsakId(), Long.valueOf(prosessTaskData.getBehandlingId()));
         distTask.setSaksnummer(prosessTaskData.getSaksnummer());
         distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
+        distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, behandlingBestilling.isVedtaksbrev() ?
+            DistribusjonsType.VEDTAK.name() : DistribusjonsType.VIKTIG.name());
         prosessTaskTjeneste.lagre(distTask);
 
     }
