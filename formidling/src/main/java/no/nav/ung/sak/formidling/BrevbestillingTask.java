@@ -6,6 +6,8 @@ import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_ID_P
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -30,7 +32,7 @@ import no.nav.ung.sak.formidling.dto.PartRequestDto;
  * <p>
  * https://dokarkiv-q2.dev.intern.nav.no/swagger-ui/index.html#/
  */
-//@ApplicationScoped
+@ApplicationScoped
 @ProsessTask(value = BrevbestillingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class BrevbestillingTask implements ProsessTaskHandler {
@@ -42,7 +44,7 @@ public class BrevbestillingTask implements ProsessTaskHandler {
     private DokArkivKlient dokArkivKlient;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
-    // @Inject
+    @Inject
     public BrevbestillingTask(
         BrevGenerererTjeneste brevGenerererTjeneste,
         BrevbestillingRepository brevbestillingRepository,

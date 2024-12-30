@@ -26,7 +26,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
-import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
+import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
@@ -45,7 +45,7 @@ class BrevbestillingTaskTest {
     private EntityManager entityManager;
     private BehandlingRepositoryProvider repositoryProvider;
     private BrevGenerererTjeneste brevGenerererTjeneste;
-    private DokArkivKlient dokArkivKlient;
+    private DokArkivKlientFake dokArkivKlient;
     private BrevbestillingRepository brevbestillingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
@@ -63,7 +63,7 @@ class BrevbestillingTaskTest {
             new PdfGenKlient()
         );
 
-        dokArkivKlient = new DokArkivKlient();
+        dokArkivKlient = new DokArkivKlientFake();
 
         brevbestillingRepository = new BrevbestillingRepository(entityManager);
 
