@@ -86,7 +86,7 @@ public class BrevbestillingTask implements ProsessTaskHandler {
 
         var dokArkivRequest = opprettJournalpostRequest(prosessTaskData, bestilling.getBrevbestillingUuid(), generertBrev);
         var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
-        //TODO vurder å putte templateType i builder istedenfor her...
+        //TODO vurder å putte templateType ved new'ing  istedenfor her...
         bestilling.generertOgJournalført(generertBrev.templateType(), opprettJournalpostResponse.journalpostId());
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
