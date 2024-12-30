@@ -12,6 +12,7 @@ import no.nav.ung.kodeverk.formidling.RolleType;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
+import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevMottaker;
@@ -56,20 +57,6 @@ public class BrevbestillingTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
 
-        var b = new BrevbestillingEntitetBuilder()
-            .dokumentMalType(DokumentMalType.INNVILGELSE_DOK)
-            .mottaker(new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID))
-            .saksnummer(prosessTaskData.getSaksnummer())
-            .createBrevbestillingEntitet();
-
-        var bestilling = new BehandlingBrevbestillingEntitet(
-            Long.valueOf(prosessTaskData.getBehandlingId()),
-            true,
-            b
-        );
-
-        brevbestillingRepository.lagre(bestilling);
-
         var generertBrev = brevGenerererTjeneste.generer(
             new Brevbestilling(
                 Long.valueOf(prosessTaskData.getBehandlingId()),
@@ -79,13 +66,29 @@ public class BrevbestillingTask implements ProsessTaskHandler {
                 null)
         );
 
+        var bestilling = new BrevbestillingEntitetBuilder()
+            .dokumentMalType(DokumentMalType.INNVILGELSE_DOK)
+            .mottaker(new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID))
+            .saksnummer(prosessTaskData.getSaksnummer())
+            .build();
 
-        var dokArkivRequest = opprettJournalpostRequest(prosessTaskData, generertBrev);
+        var behandlingBestilling = new BehandlingBrevbestillingEntitet(
+            Long.valueOf(prosessTaskData.getBehandlingId()),
+            true,
+            bestilling
+        );
 
+        brevbestillingRepository.lagre(behandlingBestilling);
+
+        var dokArkivRequest = opprettJournalpostRequest(prosessTaskData, bestilling.getBrevbestillingUuid(), generertBrev);
         var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
+        //TODO vurder å putte templateType i builder istedenfor her...
+        bestilling.generertOgJournalført(generertBrev.templateType(), opprettJournalpostResponse.journalpostId());
+
+        brevbestillingRepository.lagre(behandlingBestilling);
     }
 
-    private OpprettJournalpostRequest opprettJournalpostRequest(ProsessTaskData prosessTaskData, GenerertBrev generertBrev) {
+    private OpprettJournalpostRequest opprettJournalpostRequest(ProsessTaskData prosessTaskData, UUID brevbestillingUuid, GenerertBrev generertBrev) {
         String tittel = utledTittel(generertBrev.malType());
 
         var avsenderMottaker = new OpprettJournalpostRequest.AvsenderMottaker(
@@ -101,7 +104,7 @@ public class BrevbestillingTask implements ProsessTaskHandler {
         );
 
         var tilleggsopplysninger = new OpprettJournalpostRequest.Tilleggsopplysning(
-            OpprettJournalpostRequest.TILLEGGSOPPLYSNING_EKSTERNREF_NOKKEL,
+            "ung.formidling.eRef",
             prosessTaskData.getBehandlingUuid().toString());
 
         var sak = OpprettJournalpostRequest.Sak.forSaksnummer(prosessTaskData.getSaksnummer());
@@ -111,20 +114,21 @@ public class BrevbestillingTask implements ProsessTaskHandler {
             generertBrev.dokument().pdf(),
             generertBrev.malType().getKode());
 
-        var dokArkivRequest = new OpprettJournalpostRequest(
-            "UTGAAENDE",
-            avsenderMottaker,
-            bruker,
-            OpprettJournalpostRequest.OMSORG_PLEIE_OPPLAERINGSPENGER_TEMA,
-            OpprettJournalpostRequest.OMSORG_PLEIE_OPPLAERINGSPENGER_BEHANDLINGSTEMA,
-            tittel,
-            null,
-            OpprettJournalpostRequest.AUTOMATISK_JOURNALFORENDE_ENHET,
-            UUID.randomUUID().toString(), //DokumentbestillingId
-            List.of(tilleggsopplysninger),
-            sak,
-            List.of(dokument));
-        return dokArkivRequest;
+
+        return new OpprettJournalpostRequestBuilder()
+            .journalpostType("UTGAAENDE")
+            .avsenderMottaker(avsenderMottaker)
+            .bruker(bruker)
+            .tema("OMS") //TODO endre for ung
+            .behandlingstema("ab0271")
+            .tittel(tittel)
+            .kanal(null)
+            .journalfoerendeEnhet("9999")
+            .eksternReferanseId(brevbestillingUuid.toString())
+            .tilleggsopplysninger(List.of(tilleggsopplysninger))
+            .sak(sak)
+            .dokumenter(List.of(dokument))
+            .build();
     }
 
     private String utledTittel(DokumentMalType dokumentMalType) {

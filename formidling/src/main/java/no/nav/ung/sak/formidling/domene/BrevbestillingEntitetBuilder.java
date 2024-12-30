@@ -1,11 +1,13 @@
 package no.nav.ung.sak.formidling.domene;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 
 public class BrevbestillingEntitetBuilder {
     private String saksnummer;
     private DokumentMalType dokumentMalType;
-    private String dokumentdata;
+    private JsonNode dokumentdata;
     private BrevMottaker mottaker;
 
     public BrevbestillingEntitetBuilder saksnummer(String saksnummer) {
@@ -18,8 +20,7 @@ public class BrevbestillingEntitetBuilder {
         return this;
     }
 
-
-    public BrevbestillingEntitetBuilder dokumentdata(String dokumentdata) {
+    public BrevbestillingEntitetBuilder dokumentdata(JsonNode dokumentdata) {
         this.dokumentdata = dokumentdata;
         return this;
     }
@@ -29,7 +30,7 @@ public class BrevbestillingEntitetBuilder {
         return this;
     }
 
-    public BrevbestillingEntitet createBrevbestillingEntitet() {
+    public BrevbestillingEntitet build() {
         return new BrevbestillingEntitet(saksnummer, dokumentMalType, BrevbestillingStatusType.NY, dokumentdata, mottaker);
     }
 }

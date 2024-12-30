@@ -15,6 +15,7 @@ import no.nav.k9.prosesstask.api.CommonTaskProperties;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -26,6 +27,7 @@ import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
+import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -62,7 +64,7 @@ class BrevbestillingTaskTest {
     }
 
     @Test
-    void skalLagreBestillingLagePdfJournalføreOgDistribuere() {
+    void skalLagreBestillingLagePdfJournalføre() {
         var ungdom = AktørId.dummy();
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad(ungdom);
         var behandling = scenarioBuilder.lagre(repositoryProvider);
@@ -76,20 +78,32 @@ class BrevbestillingTaskTest {
         assertThat(behandlingBestilling.getBehandlingId()).isEqualTo(behandling.getId());
         assertThat(behandlingBestilling.isVedtaksbrev()).isTrue();
 
-
-        // TODO fortsett med å fullføre brevbestilling.
         var bestilling = behandlingBestilling.getBestilling();
-        assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
+        assertThat(bestilling.getBrevbestillingUuid()).isNotNull();
         assertThat(bestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
-        assertThat(bestilling.getJournalpostId()).isNotNull(); //TODO bruk verdi fra fake
-        assertThat(bestilling.getDistribusjonsId()).isNotNull(); //TODO bruk verdi fra fake
+        assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
+        assertThat(bestilling.getTemplateType()).isEqualTo(TemplateType.INNVILGELSE);
+        assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.JOURNALFØRT);
+        assertThat(bestilling.getDokumentData()).isNull();
+        assertThat(bestilling.getDokdistBestillingId()).isNull();
+        assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
+        assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
 
         assertThat(dokArkivKlient.getRequests()).hasSize(1);
         var request = dokArkivKlient.getRequests().getFirst();
         assertDokArkivRequest(request, bestilling.getBrevbestillingUuid(), behandling);
+        assertThat(bestilling.getJournalpostId()).isEqualTo(dokArkivKlient.getResponses().getFirst().journalpostId());
 
+    }
 
+    @Test
+    void skalIkkeLagreBestillingHvisJournalføringFeiler() {
+        //TODO
+    }
 
+    @Test
+    void skalFeileHvisBehandlingIFeilTilstand() {
+        //TODO
     }
 
     private void assertDokArkivRequest(OpprettJournalpostRequest request, UUID dokumentBestillingId, Behandling behandling) {

@@ -18,6 +18,7 @@ public class DokArkivKlient {
     }
 
     private List<OpprettJournalpostRequest> requests = new ArrayList();
+    private List<OpprettJournalpostResponse> responses = new ArrayList();
 
     private final String journalpostId = "12345";
 
@@ -27,6 +28,13 @@ public class DokArkivKlient {
 
     public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request) {
         requests.add(request);
-        return new OpprettJournalpostResponse(journalpostId, Collections.emptyList(), true, "melding");
+        var opprettJournalpostResponse = new OpprettJournalpostResponse(journalpostId, Collections.emptyList(), true, "melding");
+        responses.add(opprettJournalpostResponse);
+
+        return opprettJournalpostResponse;
+    }
+
+    public List<OpprettJournalpostResponse> getResponses() {
+        return Collections.unmodifiableList(responses);
     }
 }

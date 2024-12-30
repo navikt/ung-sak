@@ -19,10 +19,6 @@ public record OpprettJournalpostRequest(
         Sak sak,
         List<Dokument> dokumenter
 ) {
-    public static final String OMSORG_PLEIE_OPPLAERINGSPENGER_BEHANDLINGSTEMA = "ab0271";
-    public static final String OMSORG_PLEIE_OPPLAERINGSPENGER_TEMA = "OMS";
-    public static final String AUTOMATISK_JOURNALFORENDE_ENHET = "9999";
-    public static final String TILLEGGSOPPLYSNING_EKSTERNREF_NOKKEL = "ung.formidling.eRef";
     private static final int MAKS_LENGDE_NAVN = 200;
 
     public OpprettJournalpostRequest {

@@ -18,4 +18,12 @@ public class BrevMottaker {
         this.mottakerId = mottakerId;
         this.mottakerIdType = mottakerIdType;
     }
+
+    public String getMottakerId() {
+        return mottakerId;
+    }
+
+    public IdType getMottakerIdType() {
+        return mottakerIdType;
+    }
 }
