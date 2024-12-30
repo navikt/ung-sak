@@ -1,11 +1,14 @@
 package no.nav.ung.sak.formidling;
 
+import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
+
 import java.util.List;
 import java.util.UUID;
 
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.RolleType;
@@ -13,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
-import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevMottaker;
 import no.nav.ung.sak.formidling.domene.BrevbestillingEntitetBuilder;
@@ -36,18 +38,18 @@ public class BrevbestillingTask implements ProsessTaskHandler {
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private BrevbestillingRepository brevbestillingRepository;
     private DokArkivKlient dokArkivKlient;
-    private DokDistKlient dokDistKlient;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     // @Inject
     public BrevbestillingTask(
         BrevGenerererTjeneste brevGenerererTjeneste,
         BrevbestillingRepository brevbestillingRepository,
         DokArkivKlient dokArkivKlient,
-        DokDistKlient dokDistKlient) {
+        ProsessTaskTjeneste prosessTaskTjeneste) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
         this.brevbestillingRepository = brevbestillingRepository;
         this.dokArkivKlient = dokArkivKlient;
-        this.dokDistKlient = dokDistKlient;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     BrevbestillingTask() {
@@ -86,6 +88,12 @@ public class BrevbestillingTask implements ProsessTaskHandler {
         bestilling.generertOgJournalført(generertBrev.templateType(), opprettJournalpostResponse.journalpostId());
 
         brevbestillingRepository.lagre(behandlingBestilling);
+        var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
+        distTask.setBehandling(prosessTaskData.getFagsakId(), Long.valueOf(prosessTaskData.getBehandlingId()));
+        distTask.setSaksnummer(prosessTaskData.getSaksnummer());
+        distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
+        prosessTaskTjeneste.lagre(distTask);
+
     }
 
     private OpprettJournalpostRequest opprettJournalpostRequest(ProsessTaskData prosessTaskData, UUID brevbestillingUuid, GenerertBrev generertBrev) {

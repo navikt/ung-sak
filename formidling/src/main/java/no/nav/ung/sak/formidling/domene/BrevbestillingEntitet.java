@@ -141,4 +141,8 @@ public class BrevbestillingEntitet extends BaseEntitet {
     public BrevMottaker getMottaker() {
         return mottaker;
     }
+
+    public Long getId() {
+        return id;
+    }
 }

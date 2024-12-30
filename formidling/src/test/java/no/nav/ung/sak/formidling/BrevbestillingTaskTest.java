@@ -2,6 +2,7 @@ package no.nav.ung.sak.formidling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,10 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.api.CommonTaskProperties;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
@@ -25,6 +30,7 @@ import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
+import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
@@ -42,13 +48,14 @@ class BrevbestillingTaskTest {
     private DokArkivKlient dokArkivKlient;
     private DokDistKlient dokDistKlient;
     private BrevbestillingRepository brevbestillingRepository;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     private final String fnr = PdlKlientFake.gyldigFnr();
 
     @BeforeEach
     void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-
+        prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         var pdlKlient = new PdlKlientFake("Test", "Testesen", fnr);
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
@@ -64,14 +71,14 @@ class BrevbestillingTaskTest {
     }
 
     @Test
-    void skalLagreBestillingLagePdfJournalføre() {
+    void skalLagreBestillingLagePdfJournalføreOgLageDistribusjonstask() {
         var ungdom = AktørId.dummy();
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad(ungdom);
         var behandling = scenarioBuilder.lagre(repositoryProvider);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
 
-        BrevbestillingTask brevBestillingTask = new BrevbestillingTask(brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, dokDistKlient);
+        BrevbestillingTask brevBestillingTask = new BrevbestillingTask(brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
         brevBestillingTask.doTask(lagTask(behandling));
 
         BehandlingBrevbestillingEntitet behandlingBestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
@@ -79,6 +86,21 @@ class BrevbestillingTaskTest {
         assertThat(behandlingBestilling.isVedtaksbrev()).isTrue();
 
         var bestilling = behandlingBestilling.getBestilling();
+        assertBrevbestilling(bestilling, behandling);
+
+        assertThat(dokArkivKlient.getRequests()).hasSize(1);
+        var request = dokArkivKlient.getRequests().getFirst();
+        assertDokArkivRequest(request, bestilling.getBrevbestillingUuid(), behandling);
+        assertThat(bestilling.getJournalpostId()).isEqualTo(dokArkivKlient.getResponses().getFirst().journalpostId());
+
+        List<ProsessTaskData> distTasker = prosessTaskTjeneste.finnAlle(BrevdistribusjonTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        assertThat(distTasker).hasSize(1);
+        var disttask = distTasker.getFirst();
+        assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_ID_PARAM)).isEqualTo(bestilling.getId().toString());
+
+    }
+
+    private static void assertBrevbestilling(BrevbestillingEntitet bestilling, Behandling behandling) {
         assertThat(bestilling.getBrevbestillingUuid()).isNotNull();
         assertThat(bestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
@@ -88,12 +110,6 @@ class BrevbestillingTaskTest {
         assertThat(bestilling.getDokdistBestillingId()).isNull();
         assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
         assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
-
-        assertThat(dokArkivKlient.getRequests()).hasSize(1);
-        var request = dokArkivKlient.getRequests().getFirst();
-        assertDokArkivRequest(request, bestilling.getBrevbestillingUuid(), behandling);
-        assertThat(bestilling.getJournalpostId()).isEqualTo(dokArkivKlient.getResponses().getFirst().journalpostId());
-
     }
 
     @Test
