@@ -21,7 +21,6 @@ import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
 import no.nav.ung.sak.formidling.domene.BrevMottaker;
 import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
-import no.nav.ung.sak.formidling.domene.BrevbestillingEntitetBuilder;
 import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 import no.nav.ung.sak.formidling.template.TemplateType;
 
@@ -42,11 +41,10 @@ class BrevdistribusjonTaskTest {
 
     @Test
     void skalDistribuere() {
-        var bestilling = new BrevbestillingEntitetBuilder()
-            .dokumentMalType(DokumentMalType.INNVILGELSE_DOK)
-            .mottaker(new BrevMottaker("123", IdType.AKTØRID))
-            .saksnummer("ABC")
-            .build();
+        var bestilling = BrevbestillingEntitet.nyBrevbestilling(
+            "ABC",
+            DokumentMalType.INNVILGELSE_DOK,
+            new BrevMottaker("123", IdType.AKTØRID));
 
         String jp123 = "jp123";
         bestilling.generertOgJournalført(TemplateType.INNVILGELSE, jp123);
@@ -74,7 +72,7 @@ class BrevdistribusjonTaskTest {
     }
 
     @Test
-    void skalFeileHvisIkkeJournalførtStatus(){
+    void skalFeileHvisIkkeJournalførtStatus() {
         //TODO
     }
 }

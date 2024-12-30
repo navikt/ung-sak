@@ -95,6 +95,10 @@ public class BrevbestillingEntitet extends BaseEntitet {
     public BrevbestillingEntitet() {
     }
 
+    public static BrevbestillingEntitet nyBrevbestilling(String saksnummer, DokumentMalType dokumentMalType, BrevMottaker mottaker) {
+        return new BrevbestillingEntitet(saksnummer, dokumentMalType, BrevbestillingStatusType.NY, null, mottaker);
+    }
+
     public UUID getBrevbestillingUuid() {
         return brevbestillingUuid;
     }

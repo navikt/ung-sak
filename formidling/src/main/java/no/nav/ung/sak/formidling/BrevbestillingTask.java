@@ -20,7 +20,7 @@ import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevMottaker;
-import no.nav.ung.sak.formidling.domene.BrevbestillingEntitetBuilder;
+import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.dto.PartRequestDto;
@@ -70,11 +70,11 @@ public class BrevbestillingTask implements ProsessTaskHandler {
                 null)
         );
 
-        var bestilling = new BrevbestillingEntitetBuilder()
-            .dokumentMalType(DokumentMalType.INNVILGELSE_DOK)
-            .mottaker(new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID))
-            .saksnummer(prosessTaskData.getSaksnummer())
-            .build();
+
+        var bestilling = BrevbestillingEntitet.nyBrevbestilling(
+            prosessTaskData.getSaksnummer(),
+            DokumentMalType.INNVILGELSE_DOK,
+            new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID));
 
         var behandlingBestilling = new BehandlingBrevbestillingEntitet(
             Long.valueOf(prosessTaskData.getBehandlingId()),
