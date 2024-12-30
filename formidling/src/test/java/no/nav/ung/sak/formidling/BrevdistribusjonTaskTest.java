@@ -16,7 +16,7 @@ import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
+import no.nav.ung.sak.formidling.dokdist.DokDistRestKlientFake;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
 import no.nav.ung.sak.formidling.domene.BrevMottaker;
@@ -30,12 +30,12 @@ class BrevdistribusjonTaskTest {
     @Inject
     private EntityManager entityManager;
 
-    private DokDistKlient dokDistKlient;
+    private DokDistRestKlientFake dokDistKlient;
     private BrevbestillingRepository brevbestillingRepository;
 
     @BeforeEach
     void setUp() {
-        dokDistKlient = new DokDistKlient();
+        dokDistKlient = new DokDistRestKlientFake();
         brevbestillingRepository = new BrevbestillingRepository(entityManager);
     }
 

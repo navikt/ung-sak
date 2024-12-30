@@ -3,22 +3,23 @@ package no.nav.ung.sak.formidling;
 
 import java.util.Objects;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.ung.sak.formidling.dokdist.DokDistKlient;
+import no.nav.ung.sak.formidling.dokdist.DokDistRestKlient;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
 import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 
 /**
- *
+ * Distribuerer en bestilling via dokumentdistribusjon
  */
-//@ApplicationScoped
+@ApplicationScoped
 @ProsessTask(value = BrevdistribusjonTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class BrevdistribusjonTask implements ProsessTaskHandler {
@@ -27,12 +28,12 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
     static final String BREVBESTILLING_ID_PARAM = "brevbestillingId";
     static final String BREVBESTILLING_DISTRIBUSJONSTYPE = "brevbestilling.distribusjonstype";
     private BrevbestillingRepository brevbestillingRepository;
-    private DokDistKlient dokDistKlient;
+    private DokDistRestKlient dokDistRestKlient;
 
     @Inject
-    public BrevdistribusjonTask(BrevbestillingRepository brevbestillingRepository, DokDistKlient dokDistKlient) {
+    public BrevdistribusjonTask(BrevbestillingRepository brevbestillingRepository, DokDistRestKlient dokDistRestKlient) {
         this.brevbestillingRepository = brevbestillingRepository;
-        this.dokDistKlient = dokDistKlient;
+        this.dokDistRestKlient = dokDistRestKlient;
     }
 
     public BrevdistribusjonTask() {
@@ -56,7 +57,7 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
             throw new IllegalStateException("Krever at bestillingen har journalpostId. Brevbestilling: " + bestilling);
         }
 
-        var response = dokDistKlient.distribuer(new DistribuerJournalpostRequest(
+        var response = dokDistRestKlient.distribuer(new DistribuerJournalpostRequest(
             bestilling.getJournalpostId(),
             Fagsystem.K9SAK.getOffisiellKode(),
             "UNG_SAK",
