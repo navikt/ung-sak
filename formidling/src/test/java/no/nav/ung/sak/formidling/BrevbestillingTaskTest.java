@@ -124,6 +124,12 @@ class BrevbestillingTaskTest {
         //TODO
     }
 
+    @Test
+    void skalTillateMaksEttVedtaksbrevForBehandling() {
+        //TODO
+    }
+
+
     private void assertDokArkivRequest(OpprettJournalpostRequest request, UUID dokumentBestillingId, Behandling behandling) {
         var innvilgelseTittel = "Ungdomsytelse Innvilgelse";
         // Verify main request fields

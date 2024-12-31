@@ -18,6 +18,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.formidling.template.TemplateType;
@@ -81,6 +82,13 @@ public class BrevbestillingEntitet extends BaseEntitet {
 
     @Embedded
     private BrevMottaker mottaker;
+
+    @Column(name = "aktiv", nullable = false, updatable = false)
+    private boolean aktiv = true;
+
+    @Version
+    @Column(name = "versjon", nullable = false)
+    private long versjon;
 
 
     public BrevbestillingEntitet(String saksnummer, DokumentMalType dokumentMalType, BrevbestillingStatusType status, JsonNode dokumentdata, BrevMottaker mottaker) {

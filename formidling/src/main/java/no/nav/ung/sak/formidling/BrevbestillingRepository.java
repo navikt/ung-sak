@@ -1,7 +1,6 @@
 package no.nav.ung.sak.formidling;
 
 import java.util.List;
-import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -22,7 +21,7 @@ public class BrevbestillingRepository {
 
     public List<BehandlingBrevbestillingEntitet> hentForBehandling(Long behandlingId) {
         TypedQuery<BehandlingBrevbestillingEntitet> query = entityManager.createQuery(
-            "from BehandlingBrevbestillingEntitet b where b.behandlingId = :behandlingId",
+            "from BehandlingBrevbestillingEntitet b where b.behandlingId = :behandlingId and aktiv = true",
             BehandlingBrevbestillingEntitet.class
         );
         query.setParameter("behandlingId", behandlingId);
@@ -41,7 +40,14 @@ public class BrevbestillingRepository {
     }
 
     public BrevbestillingEntitet hent(Long id) {
-        return Objects.requireNonNull(entityManager.find(BrevbestillingEntitet.class, id), "Fant ingen Brevbestilling med id " + id);
+        TypedQuery<BrevbestillingEntitet> query = entityManager.createQuery(
+            "from BrevbestillingEntitet b where b.id = :id and aktiv = true",
+            BrevbestillingEntitet.class
+        );
+        query.setParameter("id", id);
+
+        return query.getSingleResult();
+
     }
 
 }

@@ -5,6 +5,7 @@ import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_ID_P
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +82,8 @@ public class BrevbestillingTask extends BehandlingProsessTask {
             return;
         }
 
+        validerBrevbestillingForespørsel(behandling);
+
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer().getVerdi();
 
@@ -125,6 +128,17 @@ public class BrevbestillingTask extends BehandlingProsessTask {
 
         LOG.info("Brevbestilling journalført med journalpostId={}", bestilling.getJournalpostId());
 
+    }
+
+    private void validerBrevbestillingForespørsel(Behandling behandling) {
+        var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
+        var tidligereVedtaksbrev= tidligereBestillinger.stream().filter(BehandlingBrevbestillingEntitet::isVedtaksbrev).toList();
+        if (!tidligereVedtaksbrev.isEmpty()) {
+            String collect = tidligereVedtaksbrev.stream()
+                    .map(BehandlingBrevbestillingEntitet::toString)
+                    .collect(Collectors.joining(", "));
+            throw new IllegalStateException("Det finnes allerede en bestilling for vedtaksbrev for behandling: " + collect);
+        }
     }
 
 

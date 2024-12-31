@@ -32,6 +32,10 @@ public class BehandlingBrevbestillingEntitet extends BaseEntitet {
     @JoinColumn(name = "brevbestilling_id", nullable = false)
     private BrevbestillingEntitet brevbestillingEntitet;
 
+    @Column(name = "aktiv", nullable = false, updatable = false)
+    private boolean aktiv = true;
+
+
     public BehandlingBrevbestillingEntitet(Long behandlingId, boolean vedtaksbrev, BrevbestillingEntitet brevbestillingEntitet) {
         this.behandlingId = behandlingId;
         this.vedtaksbrev = vedtaksbrev;
