@@ -13,12 +13,16 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.RolleType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
@@ -38,12 +42,13 @@ import no.nav.ung.sak.formidling.dto.PartRequestDto;
 @ApplicationScoped
 @ProsessTask(value = BrevbestillingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class BrevbestillingTask implements ProsessTaskHandler {
+public class BrevbestillingTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.brevbestlling";
 
     private static final Logger LOG = LoggerFactory.getLogger(BrevbestillingTask.class);
 
+    private BehandlingRepository behandlingRepository;
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private BrevbestillingRepository brevbestillingRepository;
     private DokArkivKlient dokArkivKlient;
@@ -51,10 +56,12 @@ public class BrevbestillingTask implements ProsessTaskHandler {
 
     @Inject
     public BrevbestillingTask(
-        BrevGenerererTjeneste brevGenerererTjeneste,
-        BrevbestillingRepository brevbestillingRepository,
-        DokArkivKlient dokArkivKlient,
-        ProsessTaskTjeneste prosessTaskTjeneste) {
+            BehandlingRepository behandlingRepository,
+            BrevGenerererTjeneste brevGenerererTjeneste,
+            BrevbestillingRepository brevbestillingRepository,
+            DokArkivKlient dokArkivKlient,
+            ProsessTaskTjeneste prosessTaskTjeneste) {
+        this.behandlingRepository = behandlingRepository;
         this.brevGenerererTjeneste = brevGenerererTjeneste;
         this.brevbestillingRepository = brevbestillingRepository;
         this.dokArkivKlient = dokArkivKlient;
@@ -66,15 +73,24 @@ public class BrevbestillingTask implements ProsessTaskHandler {
 
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
+    protected void prosesser(ProsessTaskData prosessTaskData)  {
+        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+
+        if (behandling.getBehandlingResultatType() != BehandlingResultatType.INNVILGET) {
+            LOG.warn("Dropper bestilling av brev da kun innvilgelse er støttet foreløpig");
+            return;
+        }
+
+        Fagsak fagsak = behandling.getFagsak();
+        String saksnummer = fagsak.getSaksnummer().getVerdi();
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-                prosessTaskData.getSaksnummer(),
+                saksnummer,
                 DokumentMalType.INNVILGELSE_DOK,
-                new BrevMottaker(prosessTaskData.getAktørId(), IdType.AKTØRID));
+                new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
 
         var behandlingBestilling = new BehandlingBrevbestillingEntitet(
-                Long.valueOf(prosessTaskData.getBehandlingId()),
+                behandling.getId(),
                 true,
                 bestilling
         );
@@ -83,24 +99,24 @@ public class BrevbestillingTask implements ProsessTaskHandler {
 
         var generertBrev = brevGenerererTjeneste.generer(
             new Brevbestilling(
-                Long.valueOf(prosessTaskData.getBehandlingId()),
+                behandling.getId(),
                 DokumentMalType.INNVILGELSE_DOK,
-                prosessTaskData.getSaksnummer(),
-                new PartRequestDto(prosessTaskData.getAktørId(), IdType.AKTØRID, RolleType.BRUKER),
+                    saksnummer,
+                new PartRequestDto(fagsak.getAktørId().getAktørId(), IdType.AKTØRID, RolleType.BRUKER),
                 null)
         );
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
 
-        var dokArkivRequest = opprettJournalpostRequest(prosessTaskData, bestilling.getBrevbestillingUuid(), generertBrev);
+        var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);
         var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
         //TODO vurder å putte templateType ved new'ing  istedenfor her...
         bestilling.generertOgJournalført(generertBrev.templateType(), opprettJournalpostResponse.journalpostId());
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
         var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
-        distTask.setBehandling(prosessTaskData.getFagsakId(), Long.valueOf(prosessTaskData.getBehandlingId()));
-        distTask.setSaksnummer(prosessTaskData.getSaksnummer());
+        distTask.setBehandling(fagsak.getId(), behandling.getId());
+        distTask.setSaksnummer(fagsak.getSaksnummer().getVerdi());
         distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, behandlingBestilling.isVedtaksbrev() ?
             DistribusjonsType.VEDTAK.name() : DistribusjonsType.VIKTIG.name());
@@ -111,7 +127,8 @@ public class BrevbestillingTask implements ProsessTaskHandler {
 
     }
 
-    private OpprettJournalpostRequest opprettJournalpostRequest(ProsessTaskData prosessTaskData, UUID brevbestillingUuid, GenerertBrev generertBrev) {
+
+    private OpprettJournalpostRequest opprettJournalpostRequest(UUID brevbestillingUuid, GenerertBrev generertBrev, Behandling behandling) {
         String tittel = utledTittel(generertBrev.malType());
 
         var avsenderMottaker = new OpprettJournalpostRequest.AvsenderMottaker(
@@ -128,9 +145,9 @@ public class BrevbestillingTask implements ProsessTaskHandler {
 
         var tilleggsopplysninger = new OpprettJournalpostRequest.Tilleggsopplysning(
             "ung.formidling.eRef",
-            prosessTaskData.getBehandlingUuid().toString());
+            behandling.getUuid().toString());
 
-        var sak = OpprettJournalpostRequest.Sak.forSaksnummer(prosessTaskData.getSaksnummer());
+        var sak = OpprettJournalpostRequest.Sak.forSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
 
         var dokument = OpprettJournalpostRequest.Dokument.lagDokumentMedPdf(
             tittel,

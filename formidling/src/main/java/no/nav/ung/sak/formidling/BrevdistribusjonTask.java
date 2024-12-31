@@ -46,6 +46,7 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
+        //TODO set logcontext
         var bestillingId = Objects.requireNonNull(
             prosessTaskData.getPropertyValue(BREVBESTILLING_ID_PARAM), "Mangler brevbestilling");
 
