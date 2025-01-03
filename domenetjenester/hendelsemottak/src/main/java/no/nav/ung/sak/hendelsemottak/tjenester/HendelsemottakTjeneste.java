@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -47,16 +46,12 @@ public class HendelsemottakTjeneste {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
-    private LocalDate utledDato(LocalDate fagsakSluttdato, Hendelse payload, BehandlingÅrsakType behandlingÅrsak) {
-        var dødsdato = payload.getHendelsePeriode().getTom();
-        if (gjelderDødsfall(behandlingÅrsak) && dødsdato.isBefore(fagsakSluttdato)) {
+    private LocalDate utledDato(LocalDate fagsakSluttdato, Hendelse payload) {
+        var hendelseDato = payload.getHendelsePeriode().getTom();
+        if (hendelseDato.isBefore(fagsakSluttdato)) {
             return fagsakSluttdato;
         }
-        return dødsdato;
-    }
-
-    private static boolean gjelderDødsfall(BehandlingÅrsakType behandlingÅrsak) {
-        return Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN).contains(behandlingÅrsak);
+        return hendelseDato;
     }
 
     private List<FagsakerTilVurderingUtleder> finnMatchendeUtledere(HendelseType hendelseType) {
@@ -86,7 +81,7 @@ public class HendelsemottakTjeneste {
             ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsak.getKode());
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, payload.getHendelsePeriode().getFom().toString());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, utledDato(fagsak.getPeriode().getTomDato(), payload, behandlingÅrsak).toString());
+            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, utledDato(fagsak.getPeriode().getTomDato(), payload).toString());
             var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
             if (sisteBehandling.isPresent()) {
                 Behandling tilRevurdering = sisteBehandling.get();

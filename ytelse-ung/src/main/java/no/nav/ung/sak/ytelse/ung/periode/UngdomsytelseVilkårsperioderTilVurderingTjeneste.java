@@ -2,14 +2,17 @@ package no.nav.ung.sak.ytelse.ung.periode;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -22,6 +25,9 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.trigger.ProsessTriggere;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.ytelse.ung.inngangsvilkår.InngangsvilkårUtleder;
 import no.nav.ung.sak.ytelse.ung.startdatoer.UngdomsytelseSøknadsperiodeTjeneste;
 
@@ -34,6 +40,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
         // CDI
@@ -42,11 +49,12 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     @Inject
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
         @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-        BehandlingRepository behandlingRepository, UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste) {
+        BehandlingRepository behandlingRepository, UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste, ProsessTriggereRepository prosessTriggereRepository) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.ungdomsytelseSøknadsperiodeTjeneste = ungdomsytelseSøknadsperiodeTjeneste;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
 
@@ -108,7 +116,20 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
         // Kun perioder med endringer som overlapper med søkte perioder tas hensyn til
         var endretTidslinje = ungdomsprogramEndretTidslinje.intersection(søknadsperiodeTidslinje);
-        return endretTidslinje;
+
+        var tidslinjeFraOpphørshendelser = prosessTriggereRepository.hentGrunnlag(behandlingId)
+            .stream()
+            .map(ProsessTriggere::getTriggere)
+            .flatMap(Collection::stream)
+            .filter(t -> t.getÅrsak().equals(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM))
+            .map(Trigger::getPeriode)
+            .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
+            .reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
+
+
+
+        return endretTidslinje.crossJoin(tidslinjeFraOpphørshendelser).compress();
     }
 
 }
