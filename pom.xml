@@ -37,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>4.4.1</felles.version>
+        <felles.version>4.4.2</felles.version>
         <swagger.version>2.2.27</swagger.version>
         <junit.version>5.11.4</junit.version>
         <k9format.version>9.8.0</k9format.version>
@@ -46,7 +46,7 @@
         <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
         <flyway.version>11.1.0</flyway.version>
-        <pdfgen-core.version>1.1.36</pdfgen-core.version>
+        <pdfgen-core.version>1.1.38</pdfgen-core.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
