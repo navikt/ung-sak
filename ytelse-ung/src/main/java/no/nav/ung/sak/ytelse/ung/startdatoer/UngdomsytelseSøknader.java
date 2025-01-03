@@ -52,15 +52,10 @@ public class UngdomsytelseSøknader extends BaseEntitet {
             .stream()
             .map(UngdomsytelseSøktStartdato::new)
             .collect(Collectors.toSet());
-        // hibernate
-    }
-
-    public UngdomsytelseSøknader(UngdomsytelseSøktStartdato... startdatoer) {
-        this(Arrays.asList(startdatoer));
     }
 
     public UngdomsytelseSøknader(Collection<UngdomsytelseSøktStartdato> startdatoer) {
-        this.startdatoer = new LinkedHashSet<>(Objects.requireNonNull(startdatoer));
+        this.startdatoer = startdatoer.stream().map(UngdomsytelseSøktStartdato::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Long getId() {
