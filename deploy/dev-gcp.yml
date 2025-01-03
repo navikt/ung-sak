@@ -222,11 +222,19 @@ spec:
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
 
-    # Graphql services
+    # Saf
     - name: SAF_BASE_URL
       value: https://saf-q2.dev-fss-pub.nais.io
     - name: SAF_SCOPE
       value: api://dev-fss.teamdokumenthandtering.saf/.default
+    - name: DOKDISTFORDELING_URL
+      value: https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1
+    - name: DOKDISTFORDELING_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
+    - name: DOKARKIV_URL
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1
+    - name: DOKARKIV_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
 
     # Sikkerhet:
     - name: CLIENT_SCOPE

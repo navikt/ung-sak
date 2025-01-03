@@ -37,6 +37,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>skjaeringstidspunkt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>formidling</artifactId>
+        </dependency>
 
 		<!-- Prosjektinterne avhengigheter -->
 		<dependency>
