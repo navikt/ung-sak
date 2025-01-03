@@ -4198,21 +4198,8 @@
       },
       "SøktPeriode" : {
         "properties" : {
-          "arbeidsforholdRef" : {
-            "format" : "uuid",
-            "nullable" : true,
-            "type" : "string"
-          },
-          "arbeidsgiver" : {
-            "$ref" : "#/components/schemas/Arbeidsgiver"
-          },
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
-          },
-          "type" : {
-            "enum" : [ "AT", "SN", "FL", "DP", "SP_AV_DP", "PSB_AV_DP", "BA", "IKKE_YRKESAKTIV", "IKKE_YRKESAKTIV_UTEN_ERSTATNING", "MIDL_INAKTIV", "ANNET" ],
-            "nullable" : true,
-            "type" : "string"
           }
         },
         "required" : [ "periode" ],

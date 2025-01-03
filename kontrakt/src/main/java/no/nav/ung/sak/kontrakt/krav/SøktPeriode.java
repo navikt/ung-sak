@@ -24,42 +24,14 @@ public class SøktPeriode {
     @JsonProperty("periode")
     private Periode periode;
 
-    @Valid
-    @JsonProperty("type")
-    private UttakArbeidType type;
-
-    @Valid
-    @JsonProperty("arbeidsgiver")
-    private Arbeidsgiver arbeidsgiver;
-
-    @Valid
-    @JsonProperty("arbeidsforholdRef")
-    private InternArbeidsforholdRef arbeidsforholdRef;
 
     @JsonCreator
-    public SøktPeriode(@Valid @NotNull @JsonProperty("periode") Periode periode,
-                       @Valid @JsonProperty("type") UttakArbeidType type,
-                       @Valid @JsonProperty("arbeidsgiver") Arbeidsgiver arbeidsgiver,
-                       @Valid @JsonProperty("arbeidsforholdRef") InternArbeidsforholdRef arbeidsforholdRef) {
+    public SøktPeriode(@Valid @NotNull @JsonProperty("periode") Periode periode) {
         this.periode = periode;
-        this.type = type;
-        this.arbeidsgiver = arbeidsgiver;
-        this.arbeidsforholdRef = arbeidsforholdRef;
     }
 
     public Periode getPeriode() {
         return periode;
     }
 
-    public UttakArbeidType getType() {
-        return type;
-    }
-
-    public Arbeidsgiver getArbeidsgiver() {
-        return arbeidsgiver;
-    }
-
-    public InternArbeidsforholdRef getArbeidsforholdRef() {
-        return arbeidsforholdRef;
-    }
 }
