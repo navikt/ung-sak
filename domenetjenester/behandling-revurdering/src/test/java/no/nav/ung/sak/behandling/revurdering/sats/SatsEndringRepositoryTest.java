@@ -76,14 +76,14 @@ class SatsEndringRepositoryTest {
     }
 
     @Test
-    @Disabled
     void forventer_ingen_fagsaker_fordi_fagsakperioden_ikke_inneholder_endringsdatoen() {
-        Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(1));
-        LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
+        LocalDate dagensDato = LocalDate.now();
+        Periode fagsakPeriode = new Periode(LocalDate.parse("2024-12-01"), LocalDate.parse("2024-12-31"));
+        LocalDate fødselsdato = LocalDate.parse("1999-12-30"); // 25 år og 1 uke gammel
 
         klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false);
 
-        Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
+        Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(dagensDato);
 
         assertThat(fagsakerTilRevurdering.size()).isEqualTo(0);
     }
@@ -113,6 +113,16 @@ class SatsEndringRepositoryTest {
     }
 
     private void klargjørDatagrunnlag(Periode fagsakPeriode, Periode ungdomsprogramPeriode, LocalDate fødselsdato, boolean fagsakObselete, boolean harHøySatsFraFør) {
+        Map.of(
+            "fagsakPeriode", fagsakPeriode,
+            "ungdomsprogramPeriode", fagsakPeriode,
+            "fødselsdato", fødselsdato,
+            "fødselsdatoPluss301Måneder", fødselsdato.plusMonths(301).withDayOfMonth(1),
+            "tjuefemÅrFørDato", LocalDate.now().minusYears(25)
+        ).forEach((key, value) -> {
+            System.out.println(key + ": " + value);
+        });
+
         Fagsak fagsak = opprettFagsak(fagsakPeriode, fagsakObselete);
         Behandling behandling = opprettBehandlingFor(fagsak);
         opprettPersonopplysningGrunnlag(behandling, fødselsdato);
