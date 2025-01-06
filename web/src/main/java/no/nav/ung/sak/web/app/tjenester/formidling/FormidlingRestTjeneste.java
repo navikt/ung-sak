@@ -77,14 +77,15 @@ public class FormidlingRestTjeneste {
     @POST
     @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING})
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING, MediaType.TEXT_HTML})
     @Operation(description = "Forhåndsvise vedtaksbrev for en behandling", tags = "formidling",
         responses = @ApiResponse(
             responseCode = "200",
             description = "pdf",
             content = {
                 @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
-                @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary"))
+                @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary")),
+                @Content(mediaType = MediaType.TEXT_HTML, schema = @Schema(type = "string"))
                 }
             )
         )
@@ -101,14 +102,16 @@ public class FormidlingRestTjeneste {
             dto.dokumentdata()
         ));
 
-
-        Response.ResponseBuilder response = Response.ok(generertBrev.dokument().pdf());
-
         var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
-        if (mediaTypeReq.equals(PDF_MEDIA_STRING)) return response.build();
-        else return response //Kun for å få swagger til å laste ned pdf
-            .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
-            .build();
+
+        return switch (mediaTypeReq) {
+            case PDF_MEDIA_STRING -> Response.ok(generertBrev.dokument().pdf()).build();
+            case MediaType.TEXT_HTML -> Response.ok(generertBrev.dokument().html()).build();
+            default -> Response.ok(generertBrev.dokument().pdf()) //Kun for å få swagger til å laste ned pdf
+                .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
+                .build();
+
+        };
     }
 
 

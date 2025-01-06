@@ -6990,6 +6990,11 @@
                   "format" : "binary",
                   "type" : "string"
                 }
+              },
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
               }
             },
             "description" : "pdf"

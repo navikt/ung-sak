@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.vedtak.observer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.BrevbestillingTask;
 import no.nav.ung.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -59,16 +62,15 @@ public class VedtakFattetEventObserverTest {
     }
 
     @Test
-    //TODO endre til å sjekke brevtask
     public void publisererVedtakForIverksatteVedtak() {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
         verify(prosessTaskRepository, times(1)).lagre(prosessTaskGruppeCaptorCaptor.capture());
-//        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
-//            .flatMap(Collection::stream)
-//            .map(it -> it.getTask().getTaskType()))
-//            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, PubliserVedtakHendelseTask.TASKTYPE);
+        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
+            .flatMap(Collection::stream)
+            .map(it -> it.getTask().getTaskType()))
+            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, BrevbestillingTask.TASKTYPE);
     }
 
     @Test
@@ -80,16 +82,15 @@ public class VedtakFattetEventObserverTest {
     }
 
     @Test
-    //TODO endre til å sjekke brevtask
     public void publisererKunGenereltVedtakseventVedAvslag() {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
-//        verify(prosessTaskRepository, times(1)).lagre(prosessTaskGruppeCaptorCaptor.capture());
-//        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
-//            .flatMap(Collection::stream)
-//            .map(it -> it.getTask().getTaskType()))
-//            .containsExactly(PubliserVedtakHendelseTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
+        verify(prosessTaskRepository, times(1)).lagre(prosessTaskGruppeCaptorCaptor.capture());
+        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
+            .flatMap(Collection::stream)
+            .map(it -> it.getTask().getTaskType()))
+            .containsExactly(BrevbestillingTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
     private Behandling lagBehandling() {
