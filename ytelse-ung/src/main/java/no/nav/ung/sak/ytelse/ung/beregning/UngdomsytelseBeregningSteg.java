@@ -30,7 +30,6 @@ import java.time.LocalDate;
 public class UngdomsytelseBeregningSteg implements BehandlingSteg {
 
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
-    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsytelseBeregnDagsats beregnDagsatsTjeneste;
@@ -41,13 +40,11 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
 
     @Inject
     public UngdomsytelseBeregningSteg(BasisPersonopplysningTjeneste personopplysningTjeneste,
-                                      @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                       BehandlingRepository behandlingRepository,
                                       UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                                       UngdomsytelseBeregnDagsats beregnDagsatsTjeneste,
                                       VilkårTjeneste vilkårTjeneste) {
         this.personopplysningTjeneste = personopplysningTjeneste;
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.beregnDagsatsTjeneste = beregnDagsatsTjeneste;
@@ -57,12 +54,9 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(kontekst.getBehandlingId());
-        var perioderTilVurderingTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
-        var oppfyltVilkårTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.OPPFYLT));
-        var innvilgetPerioderTidslinje = perioderTilVurderingTidslinje.intersection(oppfyltVilkårTidslinje, StandardCombinators::leftOnly);
-        if (innvilgetPerioderTidslinje.isEmpty()) {
+        var oppfyltVilkårTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.OPPFYLT)).mapValue(it -> true);
+        if (oppfyltVilkårTidslinje.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
@@ -70,7 +64,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
         var beregningsdato = LocalDate.now();
         var harTriggerBeregnHøySats = behandling.getBehandlingÅrsaker().stream().anyMatch(it->it.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
-        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(BehandlingReferanse.fra(behandling), innvilgetPerioderTidslinje, fødselsdato, beregningsdato, harTriggerBeregnHøySats);
+        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(BehandlingReferanse.fra(behandling), oppfyltVilkårTidslinje, fødselsdato, beregningsdato, harTriggerBeregnHøySats);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
