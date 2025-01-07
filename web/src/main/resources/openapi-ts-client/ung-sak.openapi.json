@@ -6912,17 +6912,14 @@
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
         "operationId" : "tilgjengeligeVedtaksbrev",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          },
-          "description" : "behandlingId",
-          "required" : true
-        },
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "default" : {
             "content" : {
