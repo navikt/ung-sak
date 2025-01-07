@@ -568,15 +568,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "utenlandsoppholdÅrsaker" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektUtenlandsoppholdÅrsak"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "vedtakResultatTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektVedtakResultatType"
@@ -632,7 +623,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "utenlandsoppholdÅrsaker", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "AngittPersonDto" : {
@@ -2597,21 +2588,6 @@
         "type" : "object"
       },
       "KodeverdiSomObjektTilbakekrevingVidereBehandling" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektUtenlandsoppholdÅrsak" : {
         "properties" : {
           "kode" : {
             "type" : "string"
