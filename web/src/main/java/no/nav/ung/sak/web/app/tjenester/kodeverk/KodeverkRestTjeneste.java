@@ -138,7 +138,6 @@ public class KodeverkRestTjeneste {
             sortert(alle.språkkoder()),
             sortert(alle.vedtakResultatTyper()),
             sortert(alle.dokumentTypeIder()),
-            sortert(alle.utenlandsoppholdÅrsaker()),
             sortert(alle.årsakerTilVurdering()),
             new TreeMap<>(avslagårsakerGruppertPåVilkårType)
         );
@@ -206,7 +205,6 @@ public class KodeverkRestTjeneste {
             o.språkkoder(),
             o.vedtakResultatTyper(),
             o.dokumentTypeIder(),
-            o.utenlandsoppholdÅrsaker(),
             o.årsakerTilVurdering()
         );
 
