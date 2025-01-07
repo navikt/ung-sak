@@ -1,10 +1,8 @@
 package no.nav.ung.sak.domene.vedtak.ekstern;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -16,10 +14,6 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.Ytelse;
 import no.nav.ung.sak.domene.iay.modell.YtelseFilter;
@@ -31,7 +25,6 @@ import no.nav.ung.sak.typer.Saksnummer;
 public class OverlappendeYtelserTjeneste {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private BeregningsresultatRepository beregningsresultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     OverlappendeYtelserTjeneste() {
@@ -40,10 +33,8 @@ public class OverlappendeYtelserTjeneste {
 
     @Inject
     public OverlappendeYtelserTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                       BeregningsresultatRepository beregningsresultatRepository,
                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.beregningsresultatRepository = beregningsresultatRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
@@ -101,21 +92,9 @@ public class OverlappendeYtelserTjeneste {
         return new LocalDateTimeline<>(periodeSegmenter);
     }
 
+    // TODO: Implementer dersom vi skal ta hensyn til overlappende ytelser, ellers kan klassen fjernes
     private LocalDateTimeline<Boolean> hentTilkjentYtelseTidslinje(BehandlingReferanse ref) {
-        var tilkjentYtelsePerioder = beregningsresultatRepository.hentBeregningsresultatAggregat(ref.getBehandlingId())
-            .map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat)
-            .map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
-            .filter(perioder -> !perioder.isEmpty())
-            .map(perioder -> perioder.stream()
-                .filter(brPeriode -> utbetalingsgradStørreEnn0(brPeriode))
-                .map(brPeriode -> new LocalDateSegment<>(brPeriode.getPeriode().getFomDato(), brPeriode.getPeriode().getTomDato(), true))
-                .collect(Collectors.toSet()))
-            .orElse(Set.of());
-        return new LocalDateTimeline<>(tilkjentYtelsePerioder);
+        return LocalDateTimeline.empty();
     }
 
-    private boolean utbetalingsgradStørreEnn0(BeregningsresultatPeriode brPeriode) {
-        var utbetalingsgrad = brPeriode.getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO);
-        return utbetalingsgrad.compareTo(BigDecimal.ZERO) > 0;
-    }
 }

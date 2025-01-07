@@ -1,17 +1,31 @@
 package no.nav.ung.sak.økonomi.tilkjentytelse;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.*;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
@@ -19,16 +33,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
 
 @Dependent
 public class TilkjentYtelseTjeneste {
@@ -41,7 +49,7 @@ public class TilkjentYtelseTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
-    private BeregningsresultatRepository beregningsresultatRepository;
+    private UtledTilkjentYtelse utledTilkjentYtelse;
 
     private PersonopplysningRepository personopplysningRepository;
 
@@ -53,13 +61,13 @@ public class TilkjentYtelseTjeneste {
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
-                                  BeregningsresultatRepository beregningsresultatRepository,
+                                  UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse,
                                   PersonopplysningRepository personopplysningRepository
     ) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
-        this.beregningsresultatRepository = beregningsresultatRepository;
+        this.utledTilkjentYtelse = utledTilkjentYtelse;
         this.personopplysningRepository = personopplysningRepository;
     }
 
@@ -79,9 +87,9 @@ public class TilkjentYtelseTjeneste {
     }
 
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        MapperForTilkjentYtelse mapper = new MapperForTilkjentYtelse(behandling.getFagsakYtelseType());
-        List<TilkjentYtelsePeriodeV1> perioder = mapper.mapTilkjentYtelse(hentTilkjentYtelsePerioder(behandling).orElse(null));
+        List<TilkjentYtelsePeriodeV1> perioder = utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandlingId)
+            .map(MapperForTilkjentYtelse::mapTilkjentYtelse)
+            .orElse(Collections.emptyList());
         return new TilkjentYtelse(perioder);
     }
 
@@ -101,10 +109,6 @@ public class TilkjentYtelseTjeneste {
         validate(tilkjentYtelseOppdrag);
 
         return tilkjentYtelseOppdrag;
-    }
-
-    private Optional<BeregningsresultatEntitet> hentTilkjentYtelsePerioder(Behandling behandling) {
-        return beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
     }
 
     private void validate(TilkjentYtelseOppdrag tilkjentYtelseOppdrag) {

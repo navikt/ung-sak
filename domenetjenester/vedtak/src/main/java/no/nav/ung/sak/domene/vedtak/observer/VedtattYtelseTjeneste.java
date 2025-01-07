@@ -1,53 +1,52 @@
 package no.nav.ung.sak.domene.vedtak.observer;
 
+import static no.nav.ung.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.abakus.vedtak.ytelse.*;
+import no.nav.abakus.vedtak.ytelse.Aktør;
+import no.nav.abakus.vedtak.ytelse.Kildesystem;
+import no.nav.abakus.vedtak.ytelse.Periode;
+import no.nav.abakus.vedtak.ytelse.Status;
+import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.abakus.vedtak.ytelse.Ytelser;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.Optional;
-
-import static no.nav.ung.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelsePeriode;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
 
 @ApplicationScoped
 public class VedtattYtelseTjeneste {
 
     private BehandlingVedtakRepository vedtakRepository;
-    private BeregningsresultatRepository beregningsresultatRepository;
-    private Instance<YtelseTilleggsopplysningerTjeneste> tilleggsopplysningerTjenester;
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private UtledTilkjentYtelse utledTilkjentYtelse;
 
     public VedtattYtelseTjeneste() {
     }
 
     @Inject
-    public VedtattYtelseTjeneste(BehandlingVedtakRepository vedtakRepository, BeregningsresultatRepository beregningsresultatRepository,
-                                 @Any Instance<YtelseTilleggsopplysningerTjeneste> tilleggsopplysningerTjenester, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+    public VedtattYtelseTjeneste(BehandlingVedtakRepository vedtakRepository,
+                                 UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse) {
         this.vedtakRepository = vedtakRepository;
-        this.beregningsresultatRepository = beregningsresultatRepository;
-        this.tilleggsopplysningerTjenester = tilleggsopplysningerTjenester;
-        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.utledTilkjentYtelse = utledTilkjentYtelse;
     }
 
     public Ytelse genererYtelse(Behandling behandling) {
         final BehandlingVedtak vedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElseThrow();
-        Optional<BeregningsresultatEntitet> berResultat = beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId());
+        var resultat = utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandling.getId());
 
 
         final Aktør aktør = new Aktør();
@@ -60,23 +59,21 @@ public class VedtattYtelseTjeneste {
         ytelse.setAktør(aktør);
         ytelse.setYtelse(mapYtelser(behandling.getFagsakYtelseType()));
         ytelse.setYtelseStatus(mapStatus(behandling.getFagsak().getStatus()));
-        finnTjeneste(behandling.getFagsakYtelseType())
-            .ifPresent(it -> ytelse.setTilleggsopplysninger(JsonObjectMapper.toJson(it.generer(behandling),
-                PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere)));
-
-        ytelse.setPeriode(utledPeriode(vedtak, berResultat.orElse(null)));
-        ytelse.setAnvist(mapAnvisninger(berResultat.orElse(null)));
+        ytelse.setPeriode(utledPeriode(vedtak, resultat.orElse(null)));
+        ytelse.setAnvist(mapAnvisninger(resultat.orElse(null)));
         return ytelse;
     }
 
-    private Periode utledPeriode(BehandlingVedtak vedtak, BeregningsresultatEntitet beregningsresultat) {
+    private Periode utledPeriode(BehandlingVedtak vedtak, List<TilkjentYtelsePeriode> perioder) {
         final Periode periode = new Periode();
-        if (beregningsresultat != null) {
-            Optional<LocalDate> minFom = beregningsresultat.getBeregningsresultatPerioder().stream()
-                .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom)
+        if (perioder != null) {
+            Optional<LocalDate> minFom = perioder.stream()
+                .map(TilkjentYtelsePeriode::periode)
+                .map(DatoIntervallEntitet::getFomDato)
                 .min(Comparator.naturalOrder());
-            Optional<LocalDate> maxTom = beregningsresultat.getBeregningsresultatPerioder().stream()
-                .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeTom)
+            Optional<LocalDate> maxTom = perioder.stream()
+                .map(TilkjentYtelsePeriode::periode)
+                .map(DatoIntervallEntitet::getTomDato)
                 .max(Comparator.naturalOrder());
             if (minFom.isEmpty()) {
                 periode.setFom(vedtak.getVedtaksdato());
@@ -117,8 +114,4 @@ public class VedtattYtelseTjeneste {
         };
     }
 
-
-    private Optional<YtelseTilleggsopplysningerTjeneste> finnTjeneste(FagsakYtelseType fagsakYtelseType) {
-        return FagsakYtelseTypeRef.Lookup.find(tilleggsopplysningerTjenester, fagsakYtelseType);
-    }
 }

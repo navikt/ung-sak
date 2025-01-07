@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
@@ -28,7 +27,6 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
     protected OppgaveTjeneste oppgaveTjeneste;
-    protected InfotrygdFeedService infotrygdFeedService;
     private StønadstatistikkService stønadstatistikkService;
 
     protected OpprettProsessTaskIverksettTilkjentYtelseFelles() {
@@ -37,11 +35,9 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
 
     public OpprettProsessTaskIverksettTilkjentYtelseFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                                            OppgaveTjeneste oppgaveTjeneste,
-                                                           InfotrygdFeedService infotrygdFeedService,
                                                            StønadstatistikkService stønadstatistikkService) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.infotrygdFeedService = infotrygdFeedService;
         this.stønadstatistikkService = stønadstatistikkService;
     }
 
@@ -91,7 +87,6 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         // Opprettes som egen task da den er uavhengig av de andre
         fagsakProsessTaskRepository.lagreNyGruppe(opprettTaskVurderOppgaveTilbakekreving(behandling));
 
-        infotrygdFeedService.publiserHendelse(behandling);
         stønadstatistikkService.publiserHendelse(behandling);
     }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+                 version="3.0">
+
+    <sequence-generator name="SEQ_UNG_GR_UNGDOMSPROGRAMPERIODE" allocation-size="50" sequence-name="SEQ_UNG_GR_UNGDOMSPROGRAMPERIODE"/>
+    <sequence-generator name="SEQ_UNG_UNGDOMSPROGRAMPERIODER" allocation-size="50" sequence-name="SEQ_UNG_UNGDOMSPROGRAMPERIODER"/>
+    <sequence-generator name="SEQ_UNG_UNGDOMSPROGRAMPERIODE" allocation-size="50" sequence-name="SEQ_UNG_UNGDOMSPROGRAMPERIODE"/>
+
+    <entity class="no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag"/>
+    <entity class="no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode"/>
+
+</entity-mappings>

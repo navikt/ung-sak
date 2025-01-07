@@ -3,22 +3,17 @@ package no.nav.ung.sak.domene.vedtak.ekstern;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryFeil;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -29,6 +24,9 @@ import no.nav.ung.sak.domene.iay.modell.YtelseFilter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelsePeriode;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
 
 @ApplicationScoped
 public class VurderOmArenaYtelseSkalOpphøre {
@@ -40,7 +38,7 @@ public class VurderOmArenaYtelseSkalOpphøre {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OppgaveTjeneste oppgaveTjeneste;
-    private BeregningsresultatRepository beregningsresultatRepository;
+    private UtledTilkjentYtelse utledTilkjentYtelse;
 
     VurderOmArenaYtelseSkalOpphøre() {
         // for CDI proxy
@@ -50,18 +48,16 @@ public class VurderOmArenaYtelseSkalOpphøre {
     public VurderOmArenaYtelseSkalOpphøre(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                           BehandlingVedtakRepository behandlingVedtakRepository,
                                           OppgaveTjeneste oppgaveTjeneste,
-                                          BeregningsresultatRepository beregningsresultatRepository) {
+                                          UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse) {
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.beregningsresultatRepository = beregningsresultatRepository;
+        this.utledTilkjentYtelse = utledTilkjentYtelse;
     }
 
     void opprettOppgaveHvisArenaytelseSkalOpphøre(Long behandlingId, AktørId aktørId, LocalDate skjæringstidspunkt) {
         BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
-            .orElseThrow(() -> {
-                return BehandlingRepositoryFeil.FACTORY.fantIkkeBehandlingVedtak(behandlingId).toException();
-            });
+            .orElseThrow(() -> BehandlingRepositoryFeil.FACTORY.fantIkkeBehandlingVedtak(behandlingId).toException());
         if (!VedtakResultatType.INNVILGET.equals(vedtak.getVedtakResultatType())) {
             return;
         }
@@ -101,24 +97,13 @@ public class VurderOmArenaYtelseSkalOpphøre {
             return true;
         }
 
-        if (utbetalesDetTilBrukerDirekte(behandlingId)) {
-            // sjekk frem i tid også dersom bruker er mottaker (mot meldekort)
-            Optional<LocalDate> nesteArenaAnvistDatoEtterVedtaksdato = finnNesteArenaAnvistDatoEtterVedtaksdato(arenaYtelser, vedtaksDato, sisteArenaAnvistDatoFørVedtaksdato);
-            return (nesteArenaAnvistDatoEtterVedtaksdato.isPresent() &&
-                DatoIntervallEntitet.fraOgMedTilOgMed(sisteArenaAnvistDatoFørVedtaksdato, nesteArenaAnvistDatoEtterVedtaksdato.get()).inkluderer(førsteAnvistDato) &&
-                vedtaksDato.isAfter(nesteArenaAnvistDatoEtterVedtaksdato.get().minusDays(HALV_MELDEKORT_PERIODE)));
-        } else {
-            // sjekker ikke fremtidig datoer når det kun er for arbeidsgivers refusjon
-            return false;
-        }
+        // sjekk frem i tid også dersom bruker er mottaker (mot meldekort)
+        Optional<LocalDate> nesteArenaAnvistDatoEtterVedtaksdato = finnNesteArenaAnvistDatoEtterVedtaksdato(arenaYtelser, vedtaksDato, sisteArenaAnvistDatoFørVedtaksdato);
+        return (nesteArenaAnvistDatoEtterVedtaksdato.isPresent() &&
+            DatoIntervallEntitet.fraOgMedTilOgMed(sisteArenaAnvistDatoFørVedtaksdato, nesteArenaAnvistDatoEtterVedtaksdato.get()).inkluderer(førsteAnvistDato) &&
+            vedtaksDato.isAfter(nesteArenaAnvistDatoEtterVedtaksdato.get().minusDays(HALV_MELDEKORT_PERIODE)));
     }
 
-    private boolean utbetalesDetTilBrukerDirekte(Long behandlingId) {
-        return beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingId)
-            .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList()).stream()
-            .flatMap(brp -> brp.getBeregningsresultatAndelList().stream())
-            .anyMatch(ba -> ba.erBrukerMottaker() && ba.getDagsats() > 0);
-    }
 
     private Collection<Ytelse> hentArenaYtelser(Long behandlingId, AktørId aktørId, LocalDate skjæringstidspunkt) {
         var ytelseFilter = iayTjeneste.finnGrunnlag(behandlingId)
@@ -130,10 +115,11 @@ public class VurderOmArenaYtelseSkalOpphøre {
     }
 
     private Optional<LocalDate> finnFørsteAnvistDato(Long behandlingId) {
-        return beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingId)
-            .map(BeregningsresultatEntitet::getBeregningsresultatPerioder).orElse(Collections.emptyList()).stream()
-            .filter(brp -> brp.getBeregningsresultatAndelList().stream().anyMatch(a -> a.getDagsats() > 0))
-            .map(BeregningsresultatPeriode::getBeregningsresultatPeriodeFom)
+        return utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandlingId)
+            .stream()
+            .flatMap(Collection::stream)
+            .map(TilkjentYtelsePeriode::periode)
+            .map(DatoIntervallEntitet::getFomDato)
             .min(Comparator.naturalOrder());
     }
 

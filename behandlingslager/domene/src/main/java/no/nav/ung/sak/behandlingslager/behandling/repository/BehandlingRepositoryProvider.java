@@ -5,8 +5,6 @@ import java.util.Objects;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
@@ -28,7 +26,6 @@ public class BehandlingRepositoryProvider {
     private HistorikkRepository historikkRepository;
     private SøknadRepository søknadRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private BeregningsresultatRepository beregningsresultatRepository;
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -58,7 +55,6 @@ public class BehandlingRepositoryProvider {
 
         // behandling resultat aggregater
         this.vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-        this.beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
 
         // behandling støtte repositories
         this.historikkRepository = new HistorikkRepository(entityManager);
@@ -106,10 +102,6 @@ public class BehandlingRepositoryProvider {
 
     public BehandlingVedtakRepository getBehandlingVedtakRepository() {
         return behandlingVedtakRepository;
-    }
-
-    public BeregningsresultatRepository getBeregningsresultatRepository() {
-        return beregningsresultatRepository;
     }
 
     public BehandlingRevurderingRepository getBehandlingRevurderingRepository() {

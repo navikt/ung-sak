@@ -3,54 +3,40 @@ package no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.ung.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
 import no.nav.ung.sak.ytelse.beregning.BeregningsresultatMapper;
+import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseBeregningsresultatMapper;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
 
 @ApplicationScoped
 public class BeregningsresultatTjeneste {
 
-    private BeregningsresultatRepository beregningsresultatRepository;
-    private Instance<BeregningsresultatMapper> mappere;
+    private BeregningsresultatMapper mapper;
+    private UtledTilkjentYtelse utledTilkjentYtelse;
 
     public BeregningsresultatTjeneste() {
         // For CDI
     }
 
     @Inject
-    public BeregningsresultatTjeneste(BeregningsresultatRepository beregningsresultatRepository,
-                                      @Any Instance<BeregningsresultatMapper> mappere) {
-        this.beregningsresultatRepository = beregningsresultatRepository;
-        this.mappere = mappere;
+    public BeregningsresultatTjeneste(UngdomsytelseBeregningsresultatMapper ungdomsytelseBeregningsresultatMapper,
+                                      UngdomsytelseUtledTilkjentYtelse ungdomsytelseUtledTilkjentYtelse) {
+        this.utledTilkjentYtelse = ungdomsytelseUtledTilkjentYtelse;
+        this.mapper = ungdomsytelseBeregningsresultatMapper;
     }
 
     public Optional<BeregningsresultatDto> lagBeregningsresultatMedUttaksplan(Behandling behandling) {
-        Optional<BehandlingBeregningsresultatEntitet> beregningsresultatAggregatEntitet = beregningsresultatRepository
-            .hentBeregningsresultatAggregat(behandling.getId());
-        return beregningsresultatAggregatEntitet
-            .map(bresAggregat -> getMapper(behandling).map(behandling, bresAggregat));
-    }
-
-    private BeregningsresultatMapper getMapper(Behandling behandling) {
-        // Workaround for at BehandlingTypeRef skal finne mapper for BehandlingType.UNNTAK før de ytelsesspefikke mappere
-        return BehandlingTypeRef.Lookup.find(BeregningsresultatMapper.class, mappere, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseGet(() -> FagsakYtelseTypeRef.Lookup.find(mappere, behandling.getFagsakYtelseType())
-                .orElseThrow());
+        return utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandling.getId())
+            .map(it -> mapper.map(behandling, it));
     }
 
     public Optional<BeregningsresultatMedUtbetaltePeriodeDto> lagBeregningsresultatMedUtbetaltePerioder(Behandling behandling) {
-        Optional<BehandlingBeregningsresultatEntitet> beregningsresultatAggregatEntitet = beregningsresultatRepository
-            .hentBeregningsresultatAggregat(behandling.getId());
-        return beregningsresultatAggregatEntitet
-            .map(bresAggregat -> getMapper(behandling).mapMedUtbetaltePerioder(behandling, bresAggregat));
+        return utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandling.getId())
+            .map(it -> mapper.mapMedUtbetaltePerioder(behandling, it));
     }
 }

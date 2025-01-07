@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+        version="3.0">
+
+	<sequence-generator name="SEQ_UNG_GR_SOEKNADGRUNNLAG" allocation-size="50" sequence-name="SEQ_UNG_GR_SOEKNADGRUNNLAG" />
+	<sequence-generator name="SEQ_UNG_SOEKNADER" allocation-size="50" sequence-name="SEQ_UNG_SOEKNADER" />
+	<sequence-generator name="SEQ_UNG_SOEKT_STARTDATO" allocation-size="50" sequence-name="SEQ_UNG_SOEKT_STARTDATO" />
+
+	<entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato" />
+
+</entity-mappings>

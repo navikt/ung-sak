@@ -17,14 +17,14 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.uttak.UngdomsytelseUttakPeriodeDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseGrunnlag;
-import no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseSatsPerioder;
-import no.nav.ung.sak.ytelse.ung.uttak.UngdomsytelseUttakPerioder;
+import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 
 import java.util.Collections;
 import java.util.List;

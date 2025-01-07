@@ -1,9 +1,7 @@
 package no.nav.ung.sak.domene.vedtak.ekstern;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -11,17 +9,15 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.domene.iay.modell.Ytelse;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
+import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
 
 @ApplicationScoped
 public class VurderOverlappendeInfotrygdYtelser {
@@ -39,7 +35,7 @@ public class VurderOverlappendeInfotrygdYtelser {
 
     private OverlappendeYtelserTjeneste overlappendeYtelserTjeneste;
     private OppgaveTjeneste oppgaveTjeneste;
-    private BeregningsresultatRepository beregningsresultatRepository;
+    private UtledTilkjentYtelse utledTilkjentYtelse;
 
     VurderOverlappendeInfotrygdYtelser() {
         // for CDI
@@ -47,11 +43,10 @@ public class VurderOverlappendeInfotrygdYtelser {
 
     @Inject
     public VurderOverlappendeInfotrygdYtelser(OverlappendeYtelserTjeneste overlappendeYtelserTjeneste,
-                                              OppgaveTjeneste oppgaveTjeneste,
-                                              BeregningsresultatRepository beregningsresultatRepository) {
+                                              OppgaveTjeneste oppgaveTjeneste, UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse) {
         this.overlappendeYtelserTjeneste = overlappendeYtelserTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.beregningsresultatRepository = beregningsresultatRepository;
+        this.utledTilkjentYtelse = utledTilkjentYtelse;
     }
 
     /**
@@ -73,29 +68,24 @@ public class VurderOverlappendeInfotrygdYtelser {
             var overlappendeTilkjentYtelse = tilkjentYtelseTimeline.intersection(entry.getValue());
 
             var overlappendePerioderBeskrivelse = overlappendeTilkjentYtelse.stream()
-                .map(segment -> "" + segment.getValue().getPeriode() + " og utbetalingsgrad: " + segment.getValue().getLavestUtbetalingsgrad().orElse(BigDecimal.ZERO))
+                .map(segment -> segment.getLocalDateInterval() + " og utbetalingsgrad: " + segment.getValue().utbetalingsgrad())
                 .collect(Collectors.joining(", "));
-            var beskrivelse = "K9-ytelse '" + behandling.getFagsakYtelseType().getNavn() + "' er innvilget for saksnummer " + ref.getSaksnummer() +  " med overlappende perioder: " + overlappendePerioderBeskrivelse;
+            var beskrivelse = "K9-ytelse '" + behandling.getFagsakYtelseType().getNavn() + "' er innvilget for saksnummer " + ref.getSaksnummer() + " med overlappende perioder: " + overlappendePerioderBeskrivelse;
 
             var oppgaveId = switch (entry.getKey().getYtelseType()) {
-                case SYKEPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, SP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, SP_ANSV_ENHET_ID);
-                case FORELDREPENGER -> oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, FP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, FP_ANSV_ENHET_ID);
-                default -> throw new IllegalArgumentException("Utviklerfeil: Ingen VKY-oppgave for InfoTrygd skal sendes for " + entry.getKey().getYtelseType());
+                case SYKEPENGER ->
+                    oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, SP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, SP_ANSV_ENHET_ID);
+                case FORELDREPENGER ->
+                    oppgaveTjeneste.opprettVkyOppgaveOverlappendeYtelse(ref, beskrivelse, FP_OPPG_TEMA, BEH_TYPE_SAMHANDLING, FP_ANSV_ENHET_ID);
+                default ->
+                    throw new IllegalArgumentException("Utviklerfeil: Ingen VKY-oppgave for InfoTrygd skal sendes for " + entry.getKey().getYtelseType());
             };
             log.info("Opprettet VKY-oppgave med oppgaveId={} for overlappende InfoTrygd-ytelse: {}", oppgaveId, beskrivelse);
         }
     }
 
-    private LocalDateTimeline<BeregningsresultatPeriode> hentTilkjentYtelsePerioder(BehandlingReferanse ref) {
-        var segmenter = beregningsresultatRepository.hentBeregningsresultatAggregat(ref.getBehandlingId())
-            .map(BehandlingBeregningsresultatEntitet::getBgBeregningsresultat)
-            .map(BeregningsresultatEntitet::getBeregningsresultatPerioder)
-            .filter(perioder -> !perioder.isEmpty())
-            .map(perioder -> perioder.stream()
-                .map(brPeriode -> new LocalDateSegment<>(brPeriode.getPeriode().getFomDato(), brPeriode.getPeriode().getTomDato(), brPeriode))
-                .collect(Collectors.toSet()))
-            .orElse(Set.of());
-        return new LocalDateTimeline<>(segmenter);
+    private LocalDateTimeline<DagsatsOgUtbetalingsgrad> hentTilkjentYtelsePerioder(BehandlingReferanse ref) {
+        return utledTilkjentYtelse.utledTilkjentYtelseTidslinje(ref.getBehandlingId());
     }
 
 }

@@ -22,7 +22,6 @@ import org.mockito.quality.Strictness;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -61,8 +60,6 @@ public class OpprettProsessTaskIverksettTest {
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
 
-    @Mock
-    private InfotrygdFeedService infotrygdFeedService;
 
     @Mock
     private StønadstatistikkService stønadstatistikkService;
@@ -78,7 +75,7 @@ public class OpprettProsessTaskIverksettTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(fagsakProsessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, false);
+        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(fagsakProsessTaskRepository, oppgaveTjeneste, stønadstatistikkService);
     }
 
     @Test
@@ -96,7 +93,6 @@ public class OpprettProsessTaskIverksettTest {
             SendØkonomiOppdragTask.TASKTYPE,
             VurderOppgaveArenaTask.TASKTYPE,
             VurderOppgaveTilbakekrevingTask.TASKTYPE);
-        verify(infotrygdFeedService).publiserHendelse(behandling);
     }
 
     @Test
@@ -115,7 +111,6 @@ public class OpprettProsessTaskIverksettTest {
             SendØkonomiOppdragTask.TASKTYPE,
             VurderOppgaveArenaTask.TASKTYPE,
             VurderOppgaveTilbakekrevingTask.TASKTYPE);
-        verify(infotrygdFeedService).publiserHendelse(behandling);
     }
 
     private void mockOpprettTaskAvsluttOppgave() {
