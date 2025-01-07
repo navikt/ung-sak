@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
-import no.nav.abakus.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -46,7 +45,6 @@ import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.ung.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -96,7 +94,6 @@ public record StatiskeKodeverdier(
     @NotNull Set<Språkkode> språkkoder,
     @NotNull Set<VedtakResultatType> vedtakResultatTyper,
     @NotNull Set<DokumentTypeId> dokumentTypeIder,
-    @NotNull Set<UtenlandsoppholdÅrsak> utenlandsoppholdÅrsaker,
     @NotNull Set<ÅrsakTilVurdering> årsakerTilVurdering
 ) {
 
@@ -151,7 +148,6 @@ public record StatiskeKodeverdier(
             new HashSet<>(Språkkode.kodeMap().values()),
             alleEnumVerdier(VedtakResultatType.class),
             alleEnumVerdier(DokumentTypeId.class),
-            alleEnumVerdier(UtenlandsoppholdÅrsak.class),
             alleEnumVerdier(ÅrsakTilVurdering.class)
         );
     }
