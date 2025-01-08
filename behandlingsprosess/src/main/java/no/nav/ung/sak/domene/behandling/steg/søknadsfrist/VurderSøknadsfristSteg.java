@@ -31,7 +31,7 @@ import no.nav.ung.sak.behandlingslager.behandling.søknadsfrist.KravDokumentHold
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.perioder.SøknadsfristTjeneste;
+import no.nav.ung.sak.søknadsfrist.SøknadsfristTjeneste;
 
 @BehandlingStegRef(value = VURDER_SØKNADSFRIST)
 @BehandlingTypeRef

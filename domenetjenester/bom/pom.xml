@@ -40,6 +40,14 @@
 		</dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
+            <artifactId>perioder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>ungdomsprogram</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>produksjonsstyring</artifactId>
         </dependency>
 		<dependency>

@@ -18,9 +18,6 @@
         <module>behandlingsprosess</module>
         <module>formidling</module>
 
-        <!--Ytelsespesifikke moduler -->
-        <module>ytelse-ung</module>
-
         <!-- Web klient og server -->
         <module>web</module>
     </modules>
@@ -267,7 +264,16 @@
                 <artifactId>vedtak</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>perioder</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>ungdomsprogram</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>arbeidsforhold</artifactId>
