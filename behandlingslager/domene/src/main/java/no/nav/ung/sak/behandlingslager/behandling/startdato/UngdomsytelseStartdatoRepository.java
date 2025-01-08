@@ -50,8 +50,8 @@ public class UngdomsytelseStartdatoRepository {
         if (nyttGrunnlag.getOppgitteStartdatoer() != null) {
             entityManager.persist(nyttGrunnlag.getOppgitteStartdatoer());
         }
-        if (nyttGrunnlag.getRelevantSøknader() != null) {
-            entityManager.persist(nyttGrunnlag.getRelevantSøknader());
+        if (nyttGrunnlag.getRelevanteStartdatoer() != null) {
+            entityManager.persist(nyttGrunnlag.getRelevanteStartdatoer());
         }
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
@@ -66,7 +66,7 @@ public class UngdomsytelseStartdatoRepository {
     private Optional<UngdomsytelseStartdatoGrunnlag> hentEksisterendeGrunnlag(Long id) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseSøknadGrunnlag s " +
+                "FROM UngdomsytelseStartdatoGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId " +
                 "AND s.aktiv = true", UngdomsytelseStartdatoGrunnlag.class);
 
@@ -85,7 +85,7 @@ public class UngdomsytelseStartdatoRepository {
     public Optional<UngdomsytelseStartdatoGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseSøknadGrunnlag s " +
+                "FROM UngdomsytelseStartdatoGrunnlag s " +
                 "WHERE s.id = :grunnlagId", UngdomsytelseStartdatoGrunnlag.class);
 
         query.setParameter("grunnlagId", grunnlagId);

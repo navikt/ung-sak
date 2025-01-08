@@ -44,7 +44,7 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
      * @return Relevante søknadsperioder for denne behandlingen
      */
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        return finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getRelevantSøknader);
+        return finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getRelevanteStartdatoer);
     }
 
     /**

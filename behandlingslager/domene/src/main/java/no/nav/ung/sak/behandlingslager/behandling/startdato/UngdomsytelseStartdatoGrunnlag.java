@@ -72,7 +72,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         return oppgitteStartdatoer;
     }
 
-    public UngdomsytelseStartdatoer getRelevantSøknader() {
+    public UngdomsytelseStartdatoer getRelevanteStartdatoer() {
         return relevanteStartdatoer;
     }
 
@@ -84,12 +84,12 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    void leggTil(Collection<UngdomsytelseSøktStartdato> søknadsperioder) {
+    void leggTil(Collection<UngdomsytelseSøktStartdato> startdatoer) {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = this.oppgitteStartdatoer != null ? new HashSet<>(this.oppgitteStartdatoer.getStartdatoer()) : new HashSet<>(søknadsperioder);
-        perioder.addAll(søknadsperioder);
+        var perioder = this.oppgitteStartdatoer != null ? new HashSet<>(this.oppgitteStartdatoer.getStartdatoer()) : new HashSet<>(startdatoer);
+        perioder.addAll(startdatoer);
         this.oppgitteStartdatoer = new UngdomsytelseStartdatoer(perioder);
     }
 
