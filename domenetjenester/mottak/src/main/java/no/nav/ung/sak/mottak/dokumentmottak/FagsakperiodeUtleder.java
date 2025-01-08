@@ -12,7 +12,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ytelse.uttak.FinnForbrukteDager;
+import no.nav.ung.sak.domene.behandling.steg.uttak.FinnForbrukteDager;
 
 @Dependent
 public class FagsakperiodeUtleder {
