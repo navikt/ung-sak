@@ -18,8 +18,8 @@ class VedtattYtelseMapper {
             return List.of();
         }
         return perioder.stream()
-            .filter(periode -> periode.dagsats().compareTo(BigDecimal.ZERO) > 0)
-            .map(p -> map(p))
+            .filter(periode -> periode.dagsats()  > 0)
+            .map(VedtattYtelseMapper::map)
             .collect(Collectors.toList());
     }
 
@@ -29,7 +29,7 @@ class VedtattYtelseMapper {
         p.setFom(periode.periode().getFomDato());
         p.setTom(periode.periode().getTomDato());
         anvisning.setPeriode(p);
-        anvisning.setDagsats(new Desimaltall(periode.dagsats()));
+        anvisning.setDagsats(new Desimaltall(new BigDecimal(periode.dagsats())));
         anvisning.setUtbetalingsgrad(new Desimaltall(periode.utbetalingsgrad()));
         anvisning.setAndeler(List.of(new AnvistAndel(null, periode.dagsats().intValue(), periode.utbetalingsgrad().intValue(), 0, Inntektklasse.ARBEIDSTAKER_UTEN_FERIEPENGER, null)));
         return anvisning;

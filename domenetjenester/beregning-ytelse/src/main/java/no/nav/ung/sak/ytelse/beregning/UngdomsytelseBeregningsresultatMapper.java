@@ -60,7 +60,7 @@ public class UngdomsytelseBeregningsresultatMapper implements Beregningsresultat
 
     private Optional<LocalDate> finnSisteUtbetalingdato(List<TilkjentYtelsePeriode> tilkjentYtelsePerioder) {
         return tilkjentYtelsePerioder.stream()
-            .filter(p -> p.dagsats().compareTo(BigDecimal.ZERO) > 0)
+            .filter(p -> p.dagsats() > 0)
             .map(TilkjentYtelsePeriode::periode)
             .map(DatoIntervallEntitet::getTomDato)
             .max(Comparator.naturalOrder());

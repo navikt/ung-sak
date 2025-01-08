@@ -56,8 +56,8 @@ public class UngdomsytelseUtledTilkjentYtelse implements UtledTilkjentYtelse {
         return Optional.of(resultatTidslinje.toSegments().stream()
             .filter(s -> s.getValue().utbetalingsgrad().compareTo(BigDecimal.ZERO) > 0) // Filterer ut perioder med ingen utbetalingsgrad.
             .map(p -> new TilkjentYtelsePeriode(DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()),
-                p.getValue().dagsats(),
-                p.getValue().utbetalingsgrad())).toList());
+                p.getValue().dagsats().setScale(0, RoundingMode.HALF_UP).longValue(),
+                p.getValue().utbetalingsgrad().setScale(2, RoundingMode.HALF_UP))).toList());
     }
 
     @Override
@@ -65,7 +65,7 @@ public class UngdomsytelseUtledTilkjentYtelse implements UtledTilkjentYtelse {
         return utledTilkjentYtelsePerioder(behandlingId)
             .stream()
             .flatMap(Collection::stream)
-            .map(p -> new LocalDateTimeline<>(p.periode().getFomDato(), p.periode().getTomDato(), new DagsatsOgUtbetalingsgrad(p.dagsats(), p.utbetalingsgrad())))
+            .map(p -> new LocalDateTimeline<>(p.periode().getFomDato(), p.periode().getTomDato(), new DagsatsOgUtbetalingsgrad(new BigDecimal(p.dagsats()), p.utbetalingsgrad())))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
     }

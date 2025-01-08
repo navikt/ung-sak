@@ -6,7 +6,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public record TilkjentYtelsePeriode(
     DatoIntervallEntitet periode,
-    BigDecimal dagsats,
+    Long dagsats,
     BigDecimal utbetalingsgrad
 ) {
 }

@@ -1,6 +1,7 @@
 package no.nav.ung.sak.økonomi.tilkjentytelse;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -31,12 +32,12 @@ public class MapperForTilkjentYtelse {
     }
 
     private static TilkjentYtelsePeriodeV1 mapPeriode(TilkjentYtelsePeriode periode) {
-        if (periode.dagsats().compareTo(BigDecimal.ZERO) == 0) {
+        if (periode.dagsats() == 0) {
             logger.info("Periode {}-{} hadde ingen beløp over 0 og ble ignorert", periode.periode().getFomDato(), periode.periode().getTomDato());
             return null;
         }
         return new TilkjentYtelsePeriodeV1(periode.periode().getFomDato(), periode.periode().getTomDato(), List.of(
-            new TilkjentYtelseAndelV1(true, Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER, periode.dagsats().longValue(), SatsType.DAG, periode.utbetalingsgrad())));
+            new TilkjentYtelseAndelV1(true, Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER, periode.dagsats(), SatsType.DAG, periode.utbetalingsgrad())));
     }
 
 }
