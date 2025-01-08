@@ -60,10 +60,6 @@
 			<scope>test</scope>
 		</dependency>
         <dependency>
-            <groupId>no.nav.k9.felles.integrasjon</groupId>
-            <artifactId>k9-pdl-klient</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>grunnbelop</artifactId>
             <scope>test</scope>
