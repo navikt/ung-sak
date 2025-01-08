@@ -10,9 +10,9 @@
     <sequence-generator name="SEQ_UNG_UTTAK_PERIODER" allocation-size="50" sequence-name="SEQ_UNG_UTTAK_PERIODER"/>
     <sequence-generator name="SEQ_UNG_UTTAK_PERIODE" allocation-size="50" sequence-name="SEQ_UNG_UTTAK_PERIODE"/>
 
-    <entity class="no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseGrunnlag"/>
-    <entity class="no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseSatsPerioder"/>
-    <entity class="no.nav.ung.sak.ytelse.ung.beregning.UngdomsytelseSatsPeriode"/>
+    <entity class="no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag"/>
+    <entity class="no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode"/>
     <entity class="no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder"/>
     <entity class="no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode"/>
 
