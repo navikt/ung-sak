@@ -421,9 +421,12 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
             "regeloutput"
         ));
 
-        ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), new UngdomsytelseUttakPerioder(List.of(
+        var uttakperioder = new UngdomsytelseUttakPerioder(List.of(
             new UngdomsytelseUttakPeriode(BigDecimal.TEN, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
-        )));
+        ));
+        uttakperioder.setRegelInput("input");
+        uttakperioder.setRegelSporing("output");
+        ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), uttakperioder);
 
     }
 }
