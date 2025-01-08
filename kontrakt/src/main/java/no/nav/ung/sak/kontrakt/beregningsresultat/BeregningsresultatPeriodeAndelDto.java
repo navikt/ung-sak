@@ -91,7 +91,7 @@ public class BeregningsresultatPeriodeAndelDto {
     @JsonProperty(value = "refusjon")
     @Min(0)
     @Max(1000000)
-    private Integer refusjon;
+    private Integer refusjon = 0;
 
     @JsonProperty(value = "sisteUtbetalingsdato")
     private LocalDate sisteUtbetalingsdato;
