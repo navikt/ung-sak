@@ -49,7 +49,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
     void setUp() {
         behandlingBuilder = new BasicBehandlingBuilder(entityManager);
         repository = new UngdomsytelseGrunnlagRepository(entityManager);
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), mock(Saksnummer.class), LocalDate.now(), null);
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), mock(Saksnummer.class), LocalDate.now(), null);
         new FagsakRepository(entityManager).opprettNy(fagsak);
         behandling = behandlingBuilder.opprettNyBehandling(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
         var behandlingRepository = new BehandlingRepository(entityManager);
