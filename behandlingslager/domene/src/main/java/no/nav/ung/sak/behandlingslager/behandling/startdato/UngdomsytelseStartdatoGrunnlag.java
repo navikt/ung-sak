@@ -41,7 +41,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
      */
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "oppgitte_soeknader_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "oppgitte_startdatoer_id", nullable = false, updatable = false, unique = true)
     private UngdomsytelseStartdatoer oppgitteStartdatoer;
 
     @Column(name = "aktiv", nullable = false)
