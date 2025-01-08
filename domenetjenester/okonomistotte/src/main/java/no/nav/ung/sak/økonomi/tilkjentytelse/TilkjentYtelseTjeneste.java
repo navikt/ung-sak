@@ -24,7 +24,6 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
@@ -33,8 +32,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
-import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 
@@ -49,7 +48,7 @@ public class TilkjentYtelseTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
-    private UtledTilkjentYtelse utledTilkjentYtelse;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     private PersonopplysningRepository personopplysningRepository;
 
@@ -61,13 +60,13 @@ public class TilkjentYtelseTjeneste {
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
-                                  UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse,
+                                  UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse,
                                   PersonopplysningRepository personopplysningRepository
     ) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
-        this.utledTilkjentYtelse = utledTilkjentYtelse;
+        this.tilkjentYtelseUtleder = utledTilkjentYtelse;
         this.personopplysningRepository = personopplysningRepository;
     }
 
@@ -87,9 +86,7 @@ public class TilkjentYtelseTjeneste {
     }
 
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
-        List<TilkjentYtelsePeriodeV1> perioder = utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandlingId)
-            .map(MapperForTilkjentYtelse::mapTilkjentYtelse)
-            .orElse(Collections.emptyList());
+        List<TilkjentYtelsePeriodeV1> perioder = MapperForTilkjentYtelse.mapTilkjentYtelse(tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId));
         return new TilkjentYtelse(perioder);
     }
 

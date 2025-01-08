@@ -24,9 +24,8 @@ import no.nav.ung.sak.domene.iay.modell.YtelseFilter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelsePeriode;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
-import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @ApplicationScoped
 public class VurderOmArenaYtelseSkalOpphøre {
@@ -38,7 +37,7 @@ public class VurderOmArenaYtelseSkalOpphøre {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private OppgaveTjeneste oppgaveTjeneste;
-    private UtledTilkjentYtelse utledTilkjentYtelse;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     VurderOmArenaYtelseSkalOpphøre() {
         // for CDI proxy
@@ -48,11 +47,11 @@ public class VurderOmArenaYtelseSkalOpphøre {
     public VurderOmArenaYtelseSkalOpphøre(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                           BehandlingVedtakRepository behandlingVedtakRepository,
                                           OppgaveTjeneste oppgaveTjeneste,
-                                          UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse) {
+                                          UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse) {
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.utledTilkjentYtelse = utledTilkjentYtelse;
+        this.tilkjentYtelseUtleder = utledTilkjentYtelse;
     }
 
     void opprettOppgaveHvisArenaytelseSkalOpphøre(Long behandlingId, AktørId aktørId, LocalDate skjæringstidspunkt) {
@@ -115,12 +114,8 @@ public class VurderOmArenaYtelseSkalOpphøre {
     }
 
     private Optional<LocalDate> finnFørsteAnvistDato(Long behandlingId) {
-        return utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandlingId)
-            .stream()
-            .flatMap(Collection::stream)
-            .map(TilkjentYtelsePeriode::periode)
-            .map(DatoIntervallEntitet::getFomDato)
-            .min(Comparator.naturalOrder());
+        var tidslinje = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId);
+        return tidslinje.isEmpty() ? Optional.empty() : Optional.of(tidslinje.getMinLocalDate());
     }
 
     private LocalDate finnSisteArenaAnvistDatoFørVedtaksdato(Collection<Ytelse> ytelser, LocalDate vedtaksdato) {

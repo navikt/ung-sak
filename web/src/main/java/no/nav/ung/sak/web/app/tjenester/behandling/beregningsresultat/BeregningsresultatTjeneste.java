@@ -4,20 +4,21 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.ung.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
+import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 import no.nav.ung.sak.ytelse.beregning.BeregningsresultatMapper;
-import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseBeregningsresultatMapper;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @ApplicationScoped
 public class BeregningsresultatTjeneste {
 
     private BeregningsresultatMapper mapper;
-    private UtledTilkjentYtelse utledTilkjentYtelse;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     public BeregningsresultatTjeneste() {
         // For CDI
@@ -25,18 +26,18 @@ public class BeregningsresultatTjeneste {
 
     @Inject
     public BeregningsresultatTjeneste(UngdomsytelseBeregningsresultatMapper ungdomsytelseBeregningsresultatMapper,
-                                      UngdomsytelseUtledTilkjentYtelse ungdomsytelseUtledTilkjentYtelse) {
-        this.utledTilkjentYtelse = ungdomsytelseUtledTilkjentYtelse;
+                                      UngdomsytelseTilkjentYtelseUtleder ungdomsytelseUtledTilkjentYtelse) {
+        this.tilkjentYtelseUtleder = ungdomsytelseUtledTilkjentYtelse;
         this.mapper = ungdomsytelseBeregningsresultatMapper;
     }
 
     public Optional<BeregningsresultatDto> lagBeregningsresultatMedUttaksplan(Behandling behandling) {
-        return utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandling.getId())
-            .map(it -> mapper.map(behandling, it));
+        var tidslinje = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandling.getId());
+        return tidslinje.isEmpty() ? Optional.empty() : Optional.of(mapper.map(behandling, tidslinje));
     }
 
     public Optional<BeregningsresultatMedUtbetaltePeriodeDto> lagBeregningsresultatMedUtbetaltePerioder(Behandling behandling) {
-        return utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandling.getId())
-            .map(it -> mapper.mapMedUtbetaltePerioder(behandling, it));
+        var tidslinje = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandling.getId());
+        return tidslinje.isEmpty() ? Optional.empty() : Optional.of(mapper.mapMedUtbetaltePerioder(behandling, tidslinje));
     }
 }

@@ -16,8 +16,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.domene.iay.modell.Ytelse;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
-import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 
 @ApplicationScoped
 public class VurderOverlappendeInfotrygdYtelser {
@@ -35,7 +35,7 @@ public class VurderOverlappendeInfotrygdYtelser {
 
     private OverlappendeYtelserTjeneste overlappendeYtelserTjeneste;
     private OppgaveTjeneste oppgaveTjeneste;
-    private UtledTilkjentYtelse utledTilkjentYtelse;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     VurderOverlappendeInfotrygdYtelser() {
         // for CDI
@@ -43,10 +43,10 @@ public class VurderOverlappendeInfotrygdYtelser {
 
     @Inject
     public VurderOverlappendeInfotrygdYtelser(OverlappendeYtelserTjeneste overlappendeYtelserTjeneste,
-                                              OppgaveTjeneste oppgaveTjeneste, UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse) {
+                                              OppgaveTjeneste oppgaveTjeneste, UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse) {
         this.overlappendeYtelserTjeneste = overlappendeYtelserTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
-        this.utledTilkjentYtelse = utledTilkjentYtelse;
+        this.tilkjentYtelseUtleder = utledTilkjentYtelse;
     }
 
     /**
@@ -85,7 +85,7 @@ public class VurderOverlappendeInfotrygdYtelser {
     }
 
     private LocalDateTimeline<DagsatsOgUtbetalingsgrad> hentTilkjentYtelsePerioder(BehandlingReferanse ref) {
-        return utledTilkjentYtelse.utledTilkjentYtelseTidslinje(ref.getBehandlingId());
+        return tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(ref.getBehandlingId());
     }
 
 }

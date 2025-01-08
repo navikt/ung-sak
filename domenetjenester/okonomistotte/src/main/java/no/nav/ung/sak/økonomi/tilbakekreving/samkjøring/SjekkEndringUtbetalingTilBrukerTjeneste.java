@@ -1,6 +1,5 @@
 package no.nav.ung.sak.økonomi.tilbakekreving.samkjøring;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -12,12 +11,11 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelsePeriode;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
-import no.nav.ung.sak.ytelse.beregning.UtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @Dependent
 public class SjekkEndringUtbetalingTilBrukerTjeneste {
@@ -25,20 +23,20 @@ public class SjekkEndringUtbetalingTilBrukerTjeneste {
     private static final Logger logger = LoggerFactory.getLogger(SjekkEndringUtbetalingTilBrukerTjeneste.class);
 
     private final BehandlingRepository behandlingRepository;
-    private final UtledTilkjentYtelse utledTilkjentYtelse;
+    private final TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     @Inject
     public SjekkEndringUtbetalingTilBrukerTjeneste(BehandlingRepository behandlingRepository,
-                                                   UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse) {
+                                                   UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse) {
         this.behandlingRepository = behandlingRepository;
-        this.utledTilkjentYtelse = utledTilkjentYtelse;
+        this.tilkjentYtelseUtleder = utledTilkjentYtelse;
     }
 
     public LocalDateTimeline<Boolean> endringerUtbetalingTilBruker(Behandling behandling) {
         Behandling forrigeBehandling = finnSisteIkkeHenlagteBehandling(behandling).orElse(null);
-        var resultatNå = utledTilkjentYtelse.utledTilkjentYtelsePerioder(behandling.getId()).orElse(null);
+        var resultatNå = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandling.getId());
         var resultatFør = forrigeBehandling != null
-            ? utledTilkjentYtelse.utledTilkjentYtelsePerioder(forrigeBehandling.getId()).orElse(null)
+            ? tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(forrigeBehandling.getId())
             : null;
 
         LocalDateTimeline<Boolean> endringYtelse = endringerUtbetalingYtelseTilBruker(resultatNå, resultatFør);
@@ -49,23 +47,10 @@ public class SjekkEndringUtbetalingTilBrukerTjeneste {
         return endringYtelse;
     }
 
-    private LocalDateTimeline<Boolean> endringerUtbetalingYtelseTilBruker(List<TilkjentYtelsePeriode> resultatNå, List<TilkjentYtelsePeriode> resultatFør) {
-        LocalDateTimeline<Long> ytelseTilBrukerNå = ytelseTilBrukerTidsinje(resultatNå);
-        LocalDateTimeline<Long> ytelseTilBrukerFør = ytelseTilBrukerTidsinje(resultatFør);
-        LocalDateTimeline<Long> differanse = ytelseTilBrukerNå.crossJoin(ytelseTilBrukerFør, DIFFERANSE);
+    private LocalDateTimeline<Boolean> endringerUtbetalingYtelseTilBruker(LocalDateTimeline<DagsatsOgUtbetalingsgrad> resultatNå, LocalDateTimeline<DagsatsOgUtbetalingsgrad> resultatFør) {
+        LocalDateTimeline<Long> differanse = resultatNå.crossJoin(resultatFør, DIFFERANSE);
         return differanse.filterValue(p -> p != 0L).mapValue(v -> true);
     }
-
-
-    private LocalDateTimeline<Long> ytelseTilBrukerTidsinje(List<TilkjentYtelsePeriode> perioder) {
-        if (perioder == null) {
-            return LocalDateTimeline.empty();
-        }
-        return perioder.stream().map(p -> new LocalDateTimeline<>(p.periode().getFomDato(), p.periode().getTomDato(), p.dagsats().longValue()))
-            .reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
-    }
-
 
     private Optional<Behandling> finnSisteIkkeHenlagteBehandling(Behandling aktuellBehandling) {
         Optional<Behandling> forrige = aktuellBehandling.getOriginalBehandlingId().map(behandlingRepository::hentBehandling);
@@ -75,6 +60,6 @@ public class SjekkEndringUtbetalingTilBrukerTjeneste {
         return forrige;
     }
 
-    private static final LocalDateSegmentCombinator<Long, Long, Long> DIFFERANSE = (intervall, lhs, rhs) -> new LocalDateSegment<>(intervall, (lhs != null ? lhs.getValue() : 0L) - (rhs != null ? rhs.getValue() : 0));
+    private static final LocalDateSegmentCombinator<DagsatsOgUtbetalingsgrad, DagsatsOgUtbetalingsgrad, Long> DIFFERANSE = (intervall, lhs, rhs) -> new LocalDateSegment<>(intervall, (lhs != null ? lhs.getValue().dagsats() : 0L) - (rhs != null ? rhs.getValue().dagsats() : 0));
 
 }

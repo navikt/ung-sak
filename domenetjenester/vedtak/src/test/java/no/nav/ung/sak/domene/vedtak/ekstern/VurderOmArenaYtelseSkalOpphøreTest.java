@@ -48,7 +48,7 @@ import no.nav.ung.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseUtledTilkjentYtelse;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -61,7 +61,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private Repository repository;
-    private UngdomsytelseUtledTilkjentYtelse utledTilkjentYtelse;
+    private UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse;
 
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final String SAK_ID = "1200095";
@@ -83,7 +83,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         repository = new Repository(entityManager);
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
-        utledTilkjentYtelse = new UngdomsytelseUtledTilkjentYtelse(ungdomsytelseGrunnlagRepository);
+        utledTilkjentYtelse = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
 
         stp = LocalDate.parse("2020-08-08");
         scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
