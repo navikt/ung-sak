@@ -59,7 +59,7 @@ public class BehandlingRepositoryProvider {
         // behandling støtte repositories
         this.historikkRepository = new HistorikkRepository(entityManager);
         this.behandlingVedtakRepository = new BehandlingVedtakRepository(entityManager, behandlingRepository);
-        this.behandlingRevurderingRepository = new BehandlingRevurderingRepository(entityManager, behandlingRepository, søknadRepository,
+        this.behandlingRevurderingRepository = new BehandlingRevurderingRepository(entityManager, behandlingRepository,
             behandlingLåsRepository);
 
         // ********
