@@ -4,8 +4,8 @@
         xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
         version="3.0">
 
-	<sequence-generator name="SEQ_UNG_GR_SOEKNADGRUNNLAG" allocation-size="50" sequence-name="SEQ_UNG_GR_SOEKNADGRUNNLAG" />
-	<sequence-generator name="SEQ_UNG_SOEKNADER" allocation-size="50" sequence-name="SEQ_UNG_SOEKNADER" />
+	<sequence-generator name="SEQ_UNG_GR_STARTDATO" allocation-size="50" sequence-name="SEQ_UNG_GR_STARTDATO" />
+	<sequence-generator name="SEQ_UNG_STARTDATOER" allocation-size="50" sequence-name="SEQ_UNG_STARTDATOER" />
 	<sequence-generator name="SEQ_UNG_SOEKT_STARTDATO" allocation-size="50" sequence-name="SEQ_UNG_SOEKT_STARTDATO" />
 
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag" />

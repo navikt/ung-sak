@@ -37,7 +37,7 @@ public class UngdomsytelseStartdatoRepository {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseStartdatoGrunnlag(behandlingId, it))
             .orElse(new UngdomsytelseStartdatoGrunnlag(behandlingId));
-        nyttGrunnlag.setRelevanteSøknader(søknader);
+        nyttGrunnlag.setRelevanteStartdatoer(søknader);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
@@ -47,8 +47,8 @@ public class UngdomsytelseStartdatoRepository {
     private void persister(Optional<UngdomsytelseStartdatoGrunnlag> eksisterendeGrunnlag, UngdomsytelseStartdatoGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
 
-        if (nyttGrunnlag.getOppgitteSøknader() != null) {
-            entityManager.persist(nyttGrunnlag.getOppgitteSøknader());
+        if (nyttGrunnlag.getOppgitteStartdatoer() != null) {
+            entityManager.persist(nyttGrunnlag.getOppgitteStartdatoer());
         }
         if (nyttGrunnlag.getRelevantSøknader() != null) {
             entityManager.persist(nyttGrunnlag.getRelevantSøknader());

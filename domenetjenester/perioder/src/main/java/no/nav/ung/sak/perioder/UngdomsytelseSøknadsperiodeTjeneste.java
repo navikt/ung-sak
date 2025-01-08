@@ -54,7 +54,7 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
      * @return Alle perioder fra alle behandlinger
      */
     public NavigableSet<DatoIntervallEntitet> utledFullstendigPeriode(Long behandlingId) {
-        return finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getOppgitteSøknader);
+        return finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer);
     }
 
     private NavigableSet<DatoIntervallEntitet> finnPerioder(Long behandlingId,

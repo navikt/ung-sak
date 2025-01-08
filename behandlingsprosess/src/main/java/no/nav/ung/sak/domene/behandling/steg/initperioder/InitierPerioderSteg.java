@@ -88,7 +88,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
         List<LocalDate> gyldigeStartdatoer = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId())
             .getLocalDateIntervals().stream().map(it -> it.getFomDato()).toList();
 
-        var relevantePerioder = grunnlag.getOppgitteSøknader()
+        var relevantePerioder = grunnlag.getOppgitteStartdatoer()
             .getStartdatoer()
             .stream()
             .filter(it -> gyldigeStartdatoer.contains(it.getStartdato())) // Filtrer ut søknader med startdato som ikke matcher ungdomsprogramperioden.

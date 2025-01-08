@@ -24,13 +24,13 @@ import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 
-@Entity(name = "UngdomsytelseSøknader")
-@Table(name = "UNG_SOEKNADER")
+@Entity(name = "UngdomsytelseStartdatoer")
+@Table(name = "UNG_STARTDATOER")
 @Immutable
 public class UngdomsytelseStartdatoer extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKNADER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_STARTDATOER")
     private Long id;
 
     @ChangeTracked
@@ -87,7 +87,7 @@ public class UngdomsytelseStartdatoer extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "UngdomsytelseSøknader{" +
+        return "UngdomsytelseStartdatoer{" +
             ", perioder=" + startdatoer +
             '}';
     }

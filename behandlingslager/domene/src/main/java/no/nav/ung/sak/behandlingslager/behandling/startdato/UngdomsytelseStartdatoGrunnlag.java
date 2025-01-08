@@ -17,12 +17,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
-@Entity(name = "UngdomsytelseSøknadGrunnlag")
-@Table(name = "UNG_GR_SOEKNADGRUNNLAG")
+@Entity(name = "UngdomsytelseStartdatoGrunnlag")
+@Table(name = "UNG_GR_STARTDATO")
 public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_GR_SOEKNADGRUNNLAG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_GR_STARTDATO")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
@@ -34,7 +34,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @JoinColumn(name = "relevante_soeknader_id", nullable = true, updatable = false, unique = true)
-    private UngdomsytelseStartdatoer relevanteSøknader;
+    private UngdomsytelseStartdatoer relevanteStartdatoer;
 
     /**
      * Alle søknadsperioder med krav som har kommet inn i denne og tidligere behandlinger
@@ -42,7 +42,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @JoinColumn(name = "oppgitte_soeknader_id", nullable = false, updatable = false, unique = true)
-    private UngdomsytelseStartdatoer oppgitteSøknader;
+    private UngdomsytelseStartdatoer oppgitteStartdatoer;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -56,8 +56,8 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
 
     UngdomsytelseStartdatoGrunnlag(Long behandlingId, UngdomsytelseStartdatoGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
-        this.oppgitteSøknader = grunnlag.oppgitteSøknader;
-        this.relevanteSøknader = grunnlag.relevanteSøknader;
+        this.oppgitteStartdatoer = grunnlag.oppgitteStartdatoer;
+        this.relevanteStartdatoer = grunnlag.relevanteStartdatoer;
     }
 
     public UngdomsytelseStartdatoGrunnlag(Long behandlingId) {
@@ -68,12 +68,12 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         return id;
     }
 
-    public UngdomsytelseStartdatoer getOppgitteSøknader() {
-        return oppgitteSøknader;
+    public UngdomsytelseStartdatoer getOppgitteStartdatoer() {
+        return oppgitteStartdatoer;
     }
 
     public UngdomsytelseStartdatoer getRelevantSøknader() {
-        return relevanteSøknader;
+        return relevanteStartdatoer;
     }
 
     public boolean isAktiv() {
@@ -88,14 +88,14 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = this.oppgitteSøknader != null ? new HashSet<>(this.oppgitteSøknader.getStartdatoer()) : new HashSet<>(søknadsperioder);
+        var perioder = this.oppgitteStartdatoer != null ? new HashSet<>(this.oppgitteStartdatoer.getStartdatoer()) : new HashSet<>(søknadsperioder);
         perioder.addAll(søknadsperioder);
-        this.oppgitteSøknader = new UngdomsytelseStartdatoer(perioder);
+        this.oppgitteStartdatoer = new UngdomsytelseStartdatoer(perioder);
     }
 
-    void setRelevanteSøknader(UngdomsytelseStartdatoer relevanteSøknader) {
+    void setRelevanteStartdatoer(UngdomsytelseStartdatoer relevanteSøknader) {
         Objects.requireNonNull(relevanteSøknader);
-        this.relevanteSøknader = relevanteSøknader;
+        this.relevanteStartdatoer = relevanteSøknader;
     }
 
     @Override
@@ -103,12 +103,12 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UngdomsytelseStartdatoGrunnlag that = (UngdomsytelseStartdatoGrunnlag) o;
-        return Objects.equals(oppgitteSøknader, that.oppgitteSøknader)
-            && Objects.equals(relevanteSøknader, that.relevanteSøknader);
+        return Objects.equals(oppgitteStartdatoer, that.oppgitteStartdatoer)
+            && Objects.equals(relevanteStartdatoer, that.relevanteStartdatoer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgitteSøknader, relevanteSøknader);
+        return Objects.hash(oppgitteStartdatoer, relevanteStartdatoer);
     }
 }
