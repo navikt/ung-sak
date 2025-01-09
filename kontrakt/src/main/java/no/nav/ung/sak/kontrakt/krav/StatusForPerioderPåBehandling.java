@@ -25,11 +25,6 @@ public class StatusForPerioderPåBehandling {
 
     @Valid
     @Size
-    @JsonProperty("perioderMedRegisterendring")
-    private Set<PeriodeMedRegisterendring> perioderMedRegisterendring;
-
-    @Valid
-    @Size
     @JsonProperty("perioderMedÅrsak")
     private List<PeriodeMedÅrsaker> perioderMedÅrsak;
 
@@ -43,32 +38,20 @@ public class StatusForPerioderPåBehandling {
     @JsonProperty("dokumenterTilBehandling")
     private List<KravDokumentMedSøktePerioder> dokumenterTilBehandling;
 
-    @Valid
-    @Size
-    @JsonProperty("perioderMedÅrsakPerKravstiller")
-    private List<PerioderMedÅrsakPerKravstiller> perioderMedÅrsakPerKravstiller;
 
     @JsonCreator
     public StatusForPerioderPåBehandling(@Valid @Size @JsonProperty("perioderTilVurdering") Set<Periode> perioderTilVurdering,
-                                         @Valid @Size @JsonProperty("perioderMedRegisterendring") Set<PeriodeMedRegisterendring> perioderMedRegisterendring,
                                          @Valid @Size @JsonProperty("perioderMedÅrsak") List<PeriodeMedÅrsaker> perioderMedÅrsak,
                                          @Valid @Size @JsonProperty("årsakMedPerioder") List<ÅrsakMedPerioder> årsakMedPerioder,
-                                         @Valid @Size @JsonProperty("dokumenterTilBehandling") List<KravDokumentMedSøktePerioder> dokumenterTilBehandling,
-                                         @Valid @Size @JsonProperty("perioderMedÅrsakPerKravstiller") List<PerioderMedÅrsakPerKravstiller> perioderMedÅrsakPerKravstiller) {
+                                         @Valid @Size @JsonProperty("dokumenterTilBehandling") List<KravDokumentMedSøktePerioder> dokumenterTilBehandling) {
         this.perioderTilVurdering = perioderTilVurdering;
-        this.perioderMedRegisterendring = perioderMedRegisterendring;
         this.perioderMedÅrsak = perioderMedÅrsak;
         this.årsakMedPerioder = årsakMedPerioder;
         this.dokumenterTilBehandling = dokumenterTilBehandling;
-        this.perioderMedÅrsakPerKravstiller = perioderMedÅrsakPerKravstiller;
     }
 
     public Set<Periode> getPerioderTilVurdering() {
         return perioderTilVurdering;
-    }
-
-    public Set<PeriodeMedRegisterendring> getPerioderMedRegisterendring() {
-        return perioderMedRegisterendring;
     }
 
     public List<PeriodeMedÅrsaker> getPerioderMedÅrsak() {
@@ -83,7 +66,4 @@ public class StatusForPerioderPåBehandling {
         return dokumenterTilBehandling;
     }
 
-    public List<PerioderMedÅrsakPerKravstiller> getPerioderMedÅrsakPerKravstiller() {
-        return perioderMedÅrsakPerKravstiller;
-    }
 }

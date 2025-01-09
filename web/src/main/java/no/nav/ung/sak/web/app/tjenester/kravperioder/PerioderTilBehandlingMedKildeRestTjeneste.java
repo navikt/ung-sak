@@ -4,9 +4,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,13 +34,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedUtfall;
-import no.nav.ung.sak.kontrakt.krav.PeriodeMedÅrsaker;
 import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
-import no.nav.ung.sak.kontrakt.krav.ÅrsakMedPerioder;
-import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.søknadsfrist.UngdomsytelseVurdererSøknadsfristTjeneste;
+import no.nav.ung.sak.trigger.ProsessTriggere;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped
@@ -55,15 +52,21 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public static final String BEHANDLING_PERIODER_MED_VILKÅR = "/behandling/perioder-med-vilkar";
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private UngdomsytelseVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     public PerioderTilBehandlingMedKildeRestTjeneste() {
     }
 
     @Inject
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
-                                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                                     UngdomsytelseVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+                                                     ProsessTriggereRepository prosessTriggereRepository) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     @GET
@@ -137,14 +140,13 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
     private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var perioderTilVurdering = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(ref.getBehandlingId());
-        var mappetPeriodeTilVurdering = perioderTilVurdering.stream().map(p -> new Periode(p.getFomDato(), p.getTomDato())).collect(Collectors.toSet());
-        // TODO: Lag utledning av data som trengs herfra. Hardkoder noen verdier foreløpig
-        return new StatusForPerioderPåBehandling(mappetPeriodeTilVurdering,
-            Set.of(),
-            mappetPeriodeTilVurdering.stream().map(p -> new PeriodeMedÅrsaker(p, Set.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER))).toList(),
-            List.of(new ÅrsakMedPerioder(ÅrsakTilVurdering.ENDRING_FRA_BRUKER, mappetPeriodeTilVurdering)),
-            Collections.emptyList(),
-            Collections.emptyList()
+        var kravdokumenterTilBehandling = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
+        var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
+        return UtledStatusForPerioderPåBehandling.utledStatus(
+            perioderTilVurdering,
+            kravdokumenterTilBehandling,
+            prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList()
         );
     }
+
 }
