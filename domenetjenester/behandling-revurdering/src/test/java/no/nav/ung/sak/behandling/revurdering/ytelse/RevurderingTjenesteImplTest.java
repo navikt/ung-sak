@@ -25,7 +25,6 @@ import no.nav.ung.sak.behandling.revurdering.BeregningRevurderingTestUtil;
 import no.nav.ung.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjenesteFelles;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.ung.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -51,10 +50,6 @@ public class RevurderingTjenesteImplTest {
     private HistorikkRepository historikkRepository;
 
     private BehandlingRepositoryProvider repositoryProvider;
-
-    @Inject
-    @FagsakYtelseTypeRef
-    private RevurderingEndring revurderingEndring;
 
     @Inject
     @Any

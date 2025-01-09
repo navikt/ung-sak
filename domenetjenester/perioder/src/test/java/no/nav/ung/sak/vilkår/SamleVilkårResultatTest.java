@@ -2,6 +2,7 @@ package no.nav.ung.sak.vilkår;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.atIndex;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,25 +24,22 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 
-public class VilkårTjenesteSamletUtfallTest {
+class SamleVilkårResultatTest {
+
+
 
     @Test
     void ingen_samlet_utfall() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.OMSORGEN_FOR, toTimeline(List.of()),
             VilkårType.UTVIDETRETT, toTimeline(List.of()));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, input.keySet());
+        var output = SamleVilkårResultat.samletVilkårUtfall(input, input.keySet());
         assertThat(output).isEmpty();
     }
 
     @Test
     void har_samlet_utfall_ikke_oppfylt_når_ett_ikke_er_det() throws Exception {
-
-        var vilkårTjeneste = new VilkårTjeneste();
-
         LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
         LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
 
@@ -50,7 +48,7 @@ public class VilkårTjenesteSamletUtfallTest {
             .leggTil(new VilkårBuilder(VilkårType.UTVIDETRETT).leggTil(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT)))
             .build();
 
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene);
+        var output = SamleVilkårResultat.samleVilkårUtfall(vilkårene);
 
         assertThat(output).isNotEmpty();
 
@@ -66,18 +64,16 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_begge_vilkårene() throws Exception {
         var t = List.of(
-            new Tuple("2021-02-01", "9999-12-31"),
-            new Tuple("2020-08-01", "9999-12-31"));
-        var allePerioder = Tuple.allePerioder(t);
-
-        var vilkårTjeneste = new VilkårTjeneste();
+            new VilkårTjenesteSamletUtfallTest.Tuple("2021-02-01", "9999-12-31"),
+            new VilkårTjenesteSamletUtfallTest.Tuple("2020-08-01", "9999-12-31"));
+        var allePerioder = VilkårTjenesteSamletUtfallTest.Tuple.allePerioder(t);
 
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.OMSORGEN_FOR).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(0).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
             .leggTil(new VilkårBuilder(VilkårType.UTVIDETRETT).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(1).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
             .build();
 
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene);
+        var output = SamleVilkårResultat.samleVilkårUtfall(vilkårene);
         assertThat(output).isNotEmpty();
 
         // sjekk intervaller ok
@@ -95,8 +91,6 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_begge_vilkårene_med_flere_overlappende_perioder_IKKE_OPPFYLT() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.OMSORGEN_FOR)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-08-01", "9999-12-31").medUtfall(Utfall.IKKE_OPPFYLT)))
@@ -105,7 +99,7 @@ public class VilkårTjenesteSamletUtfallTest {
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2022-01-01", "9999-12-31").medUtfall(Utfall.OPPFYLT)))
             .build();
 
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene);
+        var output = SamleVilkårResultat.samleVilkårUtfall(vilkårene);
         assertThat(output).isNotEmpty();
 
         var outputIntervaller = List.copyOf(output.getLocalDateIntervals());
@@ -144,8 +138,6 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_begge_vilkårene_med_flere_overlappende_perioder_OPPFYLT() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         var vilkårene = Vilkårene.builder()
             .leggTil(new VilkårBuilder(VilkårType.OMSORGEN_FOR)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-08-01", "9999-12-31").medUtfall(Utfall.OPPFYLT)))
@@ -154,7 +146,7 @@ public class VilkårTjenesteSamletUtfallTest {
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2022-01-01", "9999-12-31").medUtfall(Utfall.OPPFYLT)))
             .build();
 
-        var output = vilkårTjeneste.samleVilkårUtfall(vilkårene);
+        var output = SamleVilkårResultat.samleVilkårUtfall(vilkårene);
         assertThat(output).isNotEmpty();
 
         var outputIntervaller = List.copyOf(output.getLocalDateIntervals());
@@ -193,8 +185,6 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_minst_omsorgfor_vilkår() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
         LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
 
@@ -204,7 +194,7 @@ public class VilkårTjenesteSamletUtfallTest {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.OMSORGEN_FOR, toTimeline(vilkårOmsorgFor),
             VilkårType.UTVIDETRETT, toTimeline(vilkårUtvidetRett));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.OMSORGEN_FOR));
+        var output = SamleVilkårResultat.samletVilkårUtfall(input, Set.of(VilkårType.OMSORGEN_FOR));
 
         assertThat(output).isNotEmpty();
 
@@ -225,8 +215,6 @@ public class VilkårTjenesteSamletUtfallTest {
     @Test
     void har_samlet_utfall_oppfylt_for_minst_utvidetrett_vilkår() throws Exception {
 
-        var vilkårTjeneste = new VilkårTjeneste();
-
         LocalDate f1 = LocalDate.now(), t1 = f1.plusDays(10);
         LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
 
@@ -238,7 +226,7 @@ public class VilkårTjenesteSamletUtfallTest {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
             VilkårType.OMSORGEN_FOR, toTimeline(vilkårOmsorgFor),
             VilkårType.UTVIDETRETT, toTimeline(vilkårUtvidetRett));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.UTVIDETRETT));
+        var output = SamleVilkårResultat.samletVilkårUtfall(input, Set.of(VilkårType.UTVIDETRETT));
 
         assertThat(output).isNotEmpty();
 
@@ -256,18 +244,8 @@ public class VilkårTjenesteSamletUtfallTest {
     }
 
     private LocalDateTimeline<VilkårPeriode> toTimeline(List<VilkårPeriode> vilkårOmsorgFor) {
-        return new LocalDateTimeline<VilkårPeriode>(vilkårOmsorgFor.stream().map(v -> new LocalDateSegment<>(v.getFom(), v.getTom(), v)).collect(Collectors.toList()));
+        return new LocalDateTimeline<>(vilkårOmsorgFor.stream().map(v -> new LocalDateSegment<>(v.getFom(), v.getTom(), v)).collect(Collectors.toList()));
     }
 
-    record Tuple(LocalDate d0, LocalDate d1) {
 
-        Tuple(String d0, String d1) {
-            this(LocalDate.parse(d0), LocalDate.parse(d1));
-        }
-
-        static LocalDateTimeline<Boolean> allePerioder(List<Tuple> liste) {
-            var segmenter = liste.stream().map(v -> new LocalDateSegment<>(v.d0, v.d1, true)).toList();
-            return new LocalDateTimeline<Boolean>(segmenter, (i, v1, v2) -> new LocalDateSegment<>(i, v1.getValue()));
-        }
-    }
 }

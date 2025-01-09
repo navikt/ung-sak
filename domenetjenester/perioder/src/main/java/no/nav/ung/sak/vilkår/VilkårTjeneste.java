@@ -1,6 +1,5 @@
 package no.nav.ung.sak.vilkår;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,8 +14,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
-import io.opentelemetry.instrumentation.annotations.SpanAttribute;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -288,11 +285,6 @@ public class VilkårTjeneste {
         return behandlingRepository.hentBehandling(behandlingId);
     }
 
-    @WithSpan
-    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, @SpanAttribute("vilkarType") VilkårType vilkårType) {
-        return utledPerioderTilVurderingUfiltrert(ref, vilkårType);
-    }
-
     public TreeSet<DatoIntervallEntitet> utledPerioderSomIkkeVurderes(BehandlingReferanse ref, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {
         var vilkår = hentVilkårResultat(ref.getBehandlingId()).getVilkår(vilkårType);
         var perioder = vilkår.stream().flatMap(v -> v.getPerioder().stream())
@@ -303,45 +295,8 @@ public class VilkårTjeneste {
                 .noneMatch(tilVurdering -> tilVurdering.inkluderer(vilkårsperiode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref, VilkårType vilkårType) {
-        var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType());
-        var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), vilkårType));
-        var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
-        if (!utvidetTilVUrdering.isEmpty()) {
-            perioder.addAll(utvidetTilVUrdering);
-        }
-        return perioder;
-    }
-
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {
         return vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-    }
-
-    public boolean erNoenVilkårHeltAvslått(Long behandlingId, VilkårType vilkårType, LocalDate fom, LocalDate tom) {
-        var vilkårene = hentVilkårResultat(behandlingId);
-        if (vilkårene.getHarAvslåtteVilkårsPerioder()) {
-            boolean heltAvslått = true;
-            var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-            for (var v : vilkårene.getVilkårTidslinjer(periode).entrySet()) {
-                var timeline = v.getValue();
-                if (timeline.isEmpty()) {
-                    continue;
-                }
-                if (v.getKey() == vilkårType) {
-                    // skip oss selv
-                    continue;
-                }
-                var altAvslått = timeline.toSegments().stream().allMatch(vp -> vp.getValue().getUtfall() == Utfall.IKKE_OPPFYLT);
-                if (altAvslått) {
-                    log.info("Alle perioder avslått for vilkår {}, maksPeriode={}", v.getKey(), periode);
-                    return true;
-                }
-
-                heltAvslått = false;
-            }
-            return heltAvslått;
-        }
-        return false;
     }
 
     public LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat(Long behandlingId) {
@@ -353,12 +308,11 @@ public class VilkårTjeneste {
         if (allePerioder.isEmpty()) {
             return LocalDateTimeline.empty();
         }
-        var maksPeriode = DatoIntervallEntitet.fra(allePerioder.getMinLocalDate(), allePerioder.getMaxLocalDate());
-        return samleVilkårUtfall(vilkårene.get(), maksPeriode);
+        return SamleVilkårResultat.samleVilkårUtfall(vilkårene.get());
     }
 
-    LocalDateTimeline<VilkårUtfallSamlet> samleVilkårUtfall(Vilkårene vilkårene, DatoIntervallEntitet maksPeriode) {
-        var timelinePerVilkår = vilkårene.getVilkårTidslinjer(maksPeriode);
+    LocalDateTimeline<VilkårUtfallSamlet> samleVilkårUtfall(Vilkårene vilkårene) {
+        var timelinePerVilkår = vilkårene.getVilkårTidslinjer();
         Set<VilkårType> alleForventedeVilkårTyper = timelinePerVilkår.keySet();
         var timeline = new LocalDateTimeline<List<VilkårUtfall>>(List.of());
 
@@ -369,7 +323,7 @@ public class VilkårTjeneste {
 
         var samletUtfall = timeline.mapValue(VilkårUtfallSamlet::fra)
             .filterValue(v -> v.getUnderliggendeVilkårUtfall().stream().map(VilkårUtfall::getVilkårType).collect(Collectors.toSet()).containsAll(alleForventedeVilkårTyper));
-        log.info("forventendeVilkårTyper={}, maksPeriode={}, timelinePerVilkår={}, samletUtfall={}", alleForventedeVilkårTyper, maksPeriode, timelinePerVilkår, samletUtfall);
+        log.info("forventendeVilkårTyper={}, timelinePerVilkår={}, samletUtfall={}", alleForventedeVilkårTyper, timelinePerVilkår, samletUtfall);
 
         return samletUtfall;
     }

@@ -27,7 +27,6 @@ public enum BehandlingResultatType implements Kodeverdi {
     INNVILGET("INNVILGET", "Innvilget"),
     DELVIS_INNVILGET("DELVIS_INNVILGET", "Delvis innvilget"),
     AVSLÅTT("AVSLÅTT", "Avslått"),
-    /** @deprecated OPPHØR brukes ikke lenger, om det er opphør (mot OS) beregnes i k9-oppdrag */
     OPPHØR("OPPHØR", "Opphør"),
     HENLAGT_SØKNAD_TRUKKET("HENLAGT_SØKNAD_TRUKKET", "Henlagt, søknaden er trukket", true),
     HENLAGT_FEILOPPRETTET("HENLAGT_FEILOPPRETTET", "Henlagt, søknaden er feilopprettet", true),
@@ -38,7 +37,6 @@ public enum BehandlingResultatType implements Kodeverdi {
     HENLAGT_MASKINELT("HENLAGT_MASKINELT", "Henlagt maskinelt", true),
     INNVILGET_ENDRING("INNVILGET_ENDRING", "Endring innvilget"),
     INGEN_ENDRING("INGEN_ENDRING", "Ingen endring"),
-    MANGLER_BEREGNINGSREGLER("MANGLER_BEREGNINGSREGLER", "Mangler beregningsregler", true),
     ;
 
     private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD;

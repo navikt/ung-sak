@@ -147,9 +147,9 @@ public class Vilkårene extends BaseEntitet {
         }
     }
 
-    public Map<VilkårType, LocalDateTimeline<VilkårPeriode>> getVilkårTidslinjer(DatoIntervallEntitet maksPeriode) {
+    public Map<VilkårType, LocalDateTimeline<VilkårPeriode>> getVilkårTidslinjer() {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> map = new EnumMap<>(VilkårType.class);
-        vilkårne.forEach(v -> map.put(v.getVilkårType(), getVilkårTimeline(v.getVilkårType(), maksPeriode.getFomDato(), maksPeriode.getTomDato())));
+        vilkårne.forEach(v -> map.put(v.getVilkårType(), getVilkårTimeline(v.getVilkårType())));
         return map;
     }
 
