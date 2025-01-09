@@ -27,17 +27,21 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedUtfall;
 import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.søknadsfrist.UngdomsytelseVurdererSøknadsfristTjeneste;
+import no.nav.ung.sak.søknadsfrist.SøknadsfristTjenesteProvider;
+import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
@@ -52,7 +56,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public static final String BEHANDLING_PERIODER_MED_VILKÅR = "/behandling/perioder-med-vilkar";
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private UngdomsytelseVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private ProsessTriggereRepository prosessTriggereRepository;
 
     public PerioderTilBehandlingMedKildeRestTjeneste() {
@@ -61,11 +65,11 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     @Inject
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                     UngdomsytelseVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+                                                     SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
                                                      ProsessTriggereRepository prosessTriggereRepository) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
         this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
@@ -140,7 +144,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
     private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var perioderTilVurdering = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(ref.getBehandlingId());
-        var kravdokumenterTilBehandling = søknadsfristTjeneste.hentPerioderTilVurdering(ref);
+        var kravdokumenterTilBehandling = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
         return UtledStatusForPerioderPåBehandling.utledStatus(
             perioderTilVurdering,

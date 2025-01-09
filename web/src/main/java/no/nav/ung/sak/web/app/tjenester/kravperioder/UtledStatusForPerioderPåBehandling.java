@@ -9,12 +9,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentType;
@@ -32,7 +30,7 @@ class UtledStatusForPerioderPåBehandling {
     public static final Set<BehandlingÅrsakType> RELEVANTE_ÅRSAKER = Set.of(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
 
     static StatusForPerioderPåBehandling utledStatus(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                                     Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> kravdokumenterTilBehandling,
+                                                     Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
                                                      List<Trigger> prosesstriggere) {
         var mappetPeriodeTilVurdering = mapPerioderTilVurdering(perioderTilVurdering);
         var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere);
@@ -56,7 +54,7 @@ class UtledStatusForPerioderPåBehandling {
             .toList();
     }
 
-    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> kravdokumenterTilBehandling, List<Trigger> prosesstriggere) {
+    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling, List<Trigger> prosesstriggere) {
         var søknadtidslinje = finnFørsteSøknadTidslinje(kravdokumenterTilBehandling);
         var årsakerFraTriggere = finnÅrsakerFraTriggereTidslinje(prosesstriggere);
         return søknadtidslinje.crossJoin(årsakerFraTriggere, StandardCombinators::union);
@@ -86,7 +84,7 @@ class UtledStatusForPerioderPåBehandling {
             .orElse(LocalDateTimeline.empty());
     }
 
-    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnFørsteSøknadTidslinje(Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> kravdokumenterTilBehandling) {
+    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnFørsteSøknadTidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling) {
         return kravdokumenterTilBehandling.values().stream()
             .flatMap(Collection::stream)
             .map(SøktPeriode::getPeriode)
@@ -96,7 +94,7 @@ class UtledStatusForPerioderPåBehandling {
     }
 
 
-    private static List<KravDokumentMedSøktePerioder> mapKravTilDto(Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> relevanteDokumenterMedPeriode) {
+    private static List<KravDokumentMedSøktePerioder> mapKravTilDto(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> relevanteDokumenterMedPeriode) {
         return relevanteDokumenterMedPeriode.entrySet()
             .stream()
             .map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
