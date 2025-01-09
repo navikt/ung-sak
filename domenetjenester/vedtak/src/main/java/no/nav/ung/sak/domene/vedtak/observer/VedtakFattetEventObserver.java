@@ -13,6 +13,7 @@ import no.nav.ung.sak.formidling.BrevbestillingTask;
 @ApplicationScoped
 public class VedtakFattetEventObserver {
 
+    public static final String BREVBESTILLING_TASKTYPE = "formidling.brevbestilling";
     private ProsessTaskTjeneste taskTjeneste;
 
     public VedtakFattetEventObserver() {
@@ -25,6 +26,7 @@ public class VedtakFattetEventObserver {
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
+           //TODO flytt til formidling pakke
             var gruppe = new ProsessTaskGruppe(opprettTaskForBrevbestilling(event));
 
             if (erBehandlingAvRettTypeForAbakus(event)) {
@@ -35,7 +37,8 @@ public class VedtakFattetEventObserver {
     }
 
     private static ProsessTaskData opprettTaskForBrevbestilling(BehandlingVedtakEvent event) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(BrevbestillingTask.class);
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(BrevbestillingTask.class
+        );
         prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId());
         return prosessTaskData;
     }

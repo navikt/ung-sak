@@ -15,6 +15,8 @@ import no.nav.k9.søknad.JsonUtils;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
@@ -26,18 +28,21 @@ import no.nav.ung.sak.typer.AktørId;
 
 /**
  * Test for brevtekster for innvilgelse. Lager ikke pdf, men bruker html for å validere.
+ * For manuell verifikasjon av pdf kan env variabel LAGRE_PDF brukes.
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class InnvilgelseTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
-    private ObjectMapper objectMapper = JsonUtils.getObjectMapper();
+    private final ObjectMapper objectMapper = JsonUtils.getObjectMapper();
 
 
     @Inject
     private EntityManager entityManager;
     private BehandlingRepositoryProvider repositoryProvider;
+    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     String navn = "Halvorsen Halvor";
     String fnr = PdlKlientFake.gyldigFnr();
@@ -45,6 +50,8 @@ class InnvilgelseTest {
     @BeforeEach
     void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
+        ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
 
         var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", fnr);
 
@@ -52,7 +59,9 @@ class InnvilgelseTest {
             repositoryProvider.getBehandlingRepository(),
             new PersonBasisTjeneste(pdlKlient),
             new AktørTjeneste(pdlKlient),
-            new PdfGenKlient(true)
+            new PdfGenKlient(System.getenv("LAGRE_PDF") == null),
+            ungdomsytelseGrunnlagRepository,
+            ungdomsprogramPeriodeRepository
         );
     }
 
@@ -63,13 +72,21 @@ class InnvilgelseTest {
         var behandling = scenarioBuilder.lagre(repositoryProvider);
 
         var bestillBrevDto = lagBestilling(behandling);
-        GenerertBrev generertBrev = brevGenerererTjeneste.generer(bestillBrevDto);
+        GenerertBrev generertBrev = genererBrev(bestillBrevDto);
 
         var brevtekst = generertBrev.dokument().html();
         assertThatHtml(brevtekst).contains("<h1>NAV har innvilget søknaden din om ungdomsytelse</h1>");
         assertThatHtml(brevtekst).contains("Til: " + navn);
         assertThatHtml(brevtekst).contains("Fødselsnummer: " + fnr);
 
+    }
+
+    private GenerertBrev genererBrev(Brevbestilling bestillBrevDto) {
+        GenerertBrev generertBrev = brevGenerererTjeneste.generer(bestillBrevDto);
+        if (System.getenv("LAGRE_PDF") != null) {
+            PdfUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
+        }
+        return generertBrev;
     }
 
     private Brevbestilling lagBestilling(Behandling behandling) {

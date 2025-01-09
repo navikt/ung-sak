@@ -23,6 +23,8 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
@@ -49,6 +51,8 @@ class BrevbestillingTaskTest {
     private DokArkivKlientFake dokArkivKlient;
     private BrevbestillingRepository brevbestillingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     private final String fnr = PdlKlientFake.gyldigFnr();
 
@@ -56,13 +60,17 @@ class BrevbestillingTaskTest {
     void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
+        ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
+        ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         var pdlKlient = new PdlKlientFake("Test", "Testesen", fnr);
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
             new PersonBasisTjeneste(pdlKlient),
             new AktørTjeneste(pdlKlient),
-            new PdfGenKlient()
+            new PdfGenKlient(),
+            ungdomsytelseGrunnlagRepository,
+            ungdomsprogramPeriodeRepository
         );
 
         dokArkivKlient = new DokArkivKlientFake();

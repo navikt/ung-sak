@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -70,6 +69,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakTestUtil;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
+import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personstatus;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -543,7 +543,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
         behandlingRepo.lagre(behandling, lås);
-        Long behandlingId = behandling.getId();
 
         lagrePersonopplysning(repositoryProvider, behandling);
         lagreSøknad(repositoryProvider);

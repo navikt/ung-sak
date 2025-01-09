@@ -42,6 +42,25 @@ public class Personas {
         return this;
     }
 
+
+
+    public Personas ungdom(AktørId aktørId, LocalDate fødselsdato) {
+        if (this.aktørId == null) {
+            this.aktørId = aktørId;
+            this.fødselsdato = fødselsdato;
+        } else {
+            throw new IllegalArgumentException("En Personas har kun en aktørId, allerede satt til " + this.aktørId + ", angitt=" + aktørId);
+        }
+        builder.leggTilPersonopplysninger(persInfoBuilder
+            .aktørId(aktørId)
+            .fødselsdato(fødselsdato)
+            .brukerKjønn(NavBrukerKjønn.MANN)
+            .sivilstand(SivilstandType.UGIFT)
+            .region(Region.NORDEN));
+
+        return this;
+    }
+
     public Personas barn(AktørId aktørId, LocalDate fødselsdato) {
         barn(aktørId, fødselsdato, null);
         return this;
