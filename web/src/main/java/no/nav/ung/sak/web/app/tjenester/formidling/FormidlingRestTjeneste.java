@@ -28,10 +28,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
@@ -95,13 +93,7 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
     ) {
-        GenerertBrev generertBrev = brevGenerererTjeneste.generer(new Brevbestilling(
-            dto.behandlingId(),
-            DokumentMalType.INNVILGELSE_DOK,
-            null,
-            null,
-            dto.dokumentdata()
-        ));
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
 
         var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 

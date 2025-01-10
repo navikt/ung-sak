@@ -6,30 +6,30 @@
 
         {{#if resultat.enDagsats}}
             <p>Du har rett til ungdomsytelse fra {{ytelseFom}} i {{antallDager}} dager.
-                Du får utbetalt {{currency_no tilkjentePerioder.[0].dagsats true}} kroner dagen, før skatt.</p>
+                Du får utbetalt {{currency_no tilkjentePerioder.[0].tilkjentYtelse.dagsats true}} kroner dagen, før skatt.</p>
         {{else}}
             <p>Du har rett til ungdomsytelse fra {{ytelseFom}} i {{antallDager}} dager.</p>
             {{#each tilkjentePerioder}}
-                <p>{{> felles/periode periode}} får du utbetalt {{currency_no dagsats true}} kroner dagen, før skatt.</p>
+                <p>{{> felles/periode periode}} får du utbetalt {{currency_no tilkjentYtelse.dagsats true}} kroner dagen, før skatt.</p>
             {{/each}}
         {{/if}}
 
-        <p>NAV utbetaler pengene innen den 25. i hver måned. Informasjon om utbetaling finner du under
+        <p>Nav utbetaler pengene innen den 25. i hver måned. Informasjon om utbetaling finner du under
             utbetalingsoversikten på "Min side".</p>
 
         <p>Du får ungdomsytelse fordi du er med ungdomsprogrammet. Ungdomsprogrammet skal sikre deg inntekt mens du
-            samarbeider med veileder i NAV om tiltak som skal hjelpe deg med arbeid.</p>
+            samarbeider med veileder i Nav om tiltak som skal hjelpe deg med arbeid.</p>
 
-        <p>Utbetalingene fra NAV kan endre seg etterhvert som du får eller mister inntekt. Det er derfor viktig at du
+        <p>Utbetalingene fra Nav kan endre seg etterhvert som du får eller mister inntekt. Det er derfor viktig at du
             melder i fra om endringer i din inntekt på <a href="https://nav.no/ungdomsytelse/endring">nav.no/ungdomsytelse/endring</a>
             og informerer veileder. Hvis du ikke
-            gir beskjed om endringer i inntekten, kan NAV kreve penger tilbake, så det er viktig å gi beskjed med en
+            gir beskjed om endringer i inntekten, kan Nav kreve penger tilbake, så det er viktig å gi beskjed med en
             gang det skjer endringer.</p>
 
         {{#if resultat.ettGbeløp}}
             Nav bruker grunnbeløpet på {{currency_no gbeløpPerioder.[0].gBeløp true}} kroner for å regne ut hvor mye du får.
         {{else}}
-             <p>Nav bruker et grunnbeløp for for å regne ut hvor mye du får.</p>
+             <p>Nav bruker et grunnbeløp for å regne ut hvor mye du får.</p>
             <ul>
                 {{#each gbeløpPerioder}}
                     <li>{{> felles/periode periode}} bruker Nav grunnbeløpet på {{currency_no gBeløp true}} kroner.</li>
@@ -38,31 +38,33 @@
         {{/if}}
 
         {{#if resultat.lavSats}}
-            Siden du er under {{satser.aldersgrenseLav}} år så får du {{satser.høy}} prosent av grunnbeløpet.
+            Siden du er under {{satser.aldersgrenseLav}} år så får du {{satser.lav}} ganger grunnbeløpet.
         {{else if resultat.høySats}}
-            <p>Siden du er over {{satser.aldersgrenseLav}} år så får du {{satser.lav}} prosent av
+            <p>Siden du er over {{satser.aldersgrenseLav}} år så får du {{satser.høy}} ganger
                 grunnbeløpet{{#if resultat.oppnårMaksAlder}} til måneden du fyller {{satser.aldersgrenseHøy}} år{{/if}}.</p>
         {{else if resultat.variendeSats}}
-           <p>Du får {{satser.høy}} prosent av grunnbeløpet mens du er under {{satser.aldersgrenseLav}} år
-                og {{satser.lav}} prosent av grunnbeløpet fra måneden etter du fyller {{satser.aldersgrenseLav}} år.</p>
+           <p>Du får {{satser.høy}} ganger grunnbeløpet mens du er under {{satser.aldersgrenseLav}} år
+                og {{satser.lav}} ganger grunnbeløpet fra måneden etter du fyller {{satser.aldersgrenseLav}} år.</p>
         {{/if}}
 
 
         {{#if resultat.enDagsats}}
-            <p>NAV regner med 260 virkedager per år utenom helger og ferie. For å regne ut hva du får per dag, deles
+            <p>Nav regner med 260 virkedager per år utenom helger og ferie. For å regne ut hva du får per dag, deles
             årsbeløpet på antall dager.
-            {{#with tilkjentePerioder.[0]}}
+            {{#with tilkjentePerioder.[0].tilkjentYtelse}}
                 Det betyr at du har rett på {{satsFaktor}} x {{currency_no gBeløp true}} =
                 {{currency_no årsbeløp true}} kroner i året. Dette gir en dagsats på {{currency_no dagsats true}}
                     kroner.</p>
             {{/with}}
         {{else}}
-            <p>NAV regner med 260 virkedager per år utenom helger og ferie. For å regne ut hva du får per dag, deles
+            <p>Nav regner med 260 virkedager per år utenom helger og ferie. For å regne ut hva du får per dag, deles
                 årsbeløpet på antall dager.</p>
             <ul>
                 {{#each tilkjentePerioder}}
-                    <li>{{> felles/periode periode}} har du rett på {{satsFaktor}} x {{currency_no gBeløp true}} =
+                    <li>{{> felles/periode periode}}
+                        {{#with tilkjentYtelse}}har du rett på {{satsFaktor}} x {{currency_no gBeløp true}} =
                         {{currency_no årsbeløp true}} kroner i årsbeløp. Dette gir en dagsats på {{currency_no dagsats true}} kroner i perioden.
+                        {{/with}}
                     </li>
                 {{/each}}
             </ul>

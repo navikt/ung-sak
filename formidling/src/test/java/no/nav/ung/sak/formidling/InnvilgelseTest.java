@@ -25,6 +25,8 @@ import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 /**
  * Test for brevtekster for innvilgelse. Lager ikke pdf, men bruker html for å validere.
@@ -43,6 +45,7 @@ class InnvilgelseTest {
     private BehandlingRepositoryProvider repositoryProvider;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     String navn = "Halvorsen Halvor";
     String fnr = PdlKlientFake.gyldigFnr();
@@ -52,6 +55,7 @@ class InnvilgelseTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
+        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
 
         var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", fnr);
 
@@ -61,8 +65,8 @@ class InnvilgelseTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(System.getenv("LAGRE_PDF") == null),
             ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeRepository
-        );
+            ungdomsprogramPeriodeRepository,
+            tilkjentYtelseUtleder);
     }
 
     @Test

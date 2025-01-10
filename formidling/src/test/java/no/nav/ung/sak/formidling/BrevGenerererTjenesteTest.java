@@ -49,6 +49,8 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 /**
  * Tester at pdf blir generert riktig.
@@ -61,6 +63,7 @@ class BrevGenerererTjenesteTest {
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     @Inject
     private EntityManager entityManager;
@@ -76,12 +79,15 @@ class BrevGenerererTjenesteTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
+        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
 
     }
 
 
     @Test
     void skal_lage_innvilgelsesbrev_pdf() {
+        var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", fnr);
+
         int alder = 19;
         var fødselsdato = LocalDate.now().minusYears(alder);
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
@@ -103,6 +109,7 @@ class BrevGenerererTjenesteTest {
         scenario.medRegisterOpplysninger(personInformasjon);
 
         var behandling = scenario.lagre(repositoryProvider);
+        behandling.avsluttBehandling();
 
         UngdomsytelseSatser høySats = new UngdomsytelseSatser(
             BigDecimal.valueOf(608.31), BigDecimal.valueOf(118620), BigDecimal.valueOf(1.3333), UngdomsytelseSatsType.LAV, 0, 0);
@@ -126,7 +133,6 @@ class BrevGenerererTjenesteTest {
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(periode.getFom(), TIDENES_ENDE)));
 
 
-        var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", fnr);
 
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
@@ -134,7 +140,8 @@ class BrevGenerererTjenesteTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeRepository
+            ungdomsprogramPeriodeRepository,
+            tilkjentYtelseUtleder
         );
 
 
@@ -173,8 +180,8 @@ class BrevGenerererTjenesteTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeRepository
-        );
+            ungdomsprogramPeriodeRepository,
+            tilkjentYtelseUtleder);
 
         // Lag innvilgelsesbrev
         var bestillBrevDto = new Brevbestilling(

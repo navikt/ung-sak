@@ -38,6 +38,8 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -53,6 +55,7 @@ class BrevbestillingTaskTest {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     private final String fnr = PdlKlientFake.gyldigFnr();
 
@@ -62,6 +65,7 @@ class BrevbestillingTaskTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
+        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         var pdlKlient = new PdlKlientFake("Test", "Testesen", fnr);
         brevGenerererTjeneste = new BrevGenerererTjeneste(
@@ -70,8 +74,8 @@ class BrevbestillingTaskTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeRepository
-        );
+            ungdomsprogramPeriodeRepository,
+            tilkjentYtelseUtleder);
 
         dokArkivKlient = new DokArkivKlientFake();
 

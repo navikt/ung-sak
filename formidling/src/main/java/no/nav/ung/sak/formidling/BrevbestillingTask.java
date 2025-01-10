@@ -18,7 +18,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
-import no.nav.ung.kodeverk.formidling.RolleType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -32,8 +31,6 @@ import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevMottaker;
 import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.Brevbestilling;
-import no.nav.ung.sak.formidling.dto.PartRequestDto;
 
 /**
  * https://confluence.adeo.no/pages/viewpage.action?pageId=377701645
@@ -99,15 +96,8 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         );
 
         LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
-
-        var generertBrev = brevGenerererTjeneste.generer(
-            new Brevbestilling(
-                behandling.getId(),
-                DokumentMalType.INNVILGELSE_DOK,
-                    saksnummer,
-                new PartRequestDto(fagsak.getAktørId().getAktørId(), IdType.AKTØRID, RolleType.BRUKER),
-                null)
-        );
+        
+        var generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
 
