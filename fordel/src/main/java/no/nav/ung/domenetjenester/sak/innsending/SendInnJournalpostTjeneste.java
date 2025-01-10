@@ -7,7 +7,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.domenetjenester.sak.UngSakSendInnJournalpostTask;
 import no.nav.ung.fordel.repo.journalpost.JournalpostInnsendingEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
@@ -16,7 +16,7 @@ import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 public class SendInnJournalpostTjeneste {
 
     private final JournalpostRepository journalpostInnsendingRepository;
-    private final ProsessTaskRepository prosessTaskRepository;
+    private final ProsessTaskTjeneste prosessTaskTjeneste;
 
     /**
      * et utsettelsevindu gjør at vi venter for å se om flere meldinger av samme type / på samme sak er klare før vi sender inn.
@@ -27,14 +27,14 @@ public class SendInnJournalpostTjeneste {
 
     @Inject
     SendInnJournalpostTjeneste(JournalpostRepository journalpostInnsendingRepository,
-                               ProsessTaskRepository prosessTaskRepository,
+                               ProsessTaskTjeneste prosessTaskTjeneste,
                                @KonfigVerdi(value = "K9_INNSENDING_VENTING_VINDU", required = false) String utsettelse) {
 
         if (utsettelse != null && !utsettelse.isBlank()) {
             this.utsettelseVindu = Duration.parse(utsettelse);
         }
         this.journalpostInnsendingRepository = journalpostInnsendingRepository;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
 
@@ -57,6 +57,6 @@ public class SendInnJournalpostTjeneste {
 
         data.setSaksnummer(innsending.getSaksnummer().getVerdi());
         data.setProperty(UngSakSendInnJournalpostTask.PROPERTY_YTELSE_TYPE, innsending.getYtelseType().getKode());
-        prosessTaskRepository.lagre(data);
+        prosessTaskTjeneste.lagre(data);
     }
 }

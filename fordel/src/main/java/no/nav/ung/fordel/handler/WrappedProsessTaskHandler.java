@@ -5,7 +5,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 
 public abstract class WrappedProsessTaskHandler implements ProsessTaskHandler {
 
-    private FordelProsessTaskTjeneste tjenester;
+    private final FordelProsessTaskTjeneste tjenester;
 
     public WrappedProsessTaskHandler(FordelProsessTaskTjeneste fordelProsessTaskTjeneste) {
         this.tjenester = fordelProsessTaskTjeneste;
@@ -24,7 +24,7 @@ public abstract class WrappedProsessTaskHandler implements ProsessTaskHandler {
         if (nesteStegMm != null) {
             tjenester.getMeldingTjeneste().oppdaterMottattMelding(nesteStegMm);
             postcondition(nesteStegMm);
-            tjenester.getProsessTaskRepository().lagre(nesteStegMm.getProsessTaskData());
+            tjenester.getProsessTaskTjeneste().lagre(nesteStegMm.getProsessTaskData());
         }
     }
 

@@ -13,7 +13,6 @@ import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.kodeverdi.Tema;
