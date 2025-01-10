@@ -96,7 +96,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         );
 
         LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
-        
+
         var generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);

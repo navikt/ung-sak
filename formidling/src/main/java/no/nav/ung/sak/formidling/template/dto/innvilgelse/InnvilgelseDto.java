@@ -13,7 +13,7 @@ public record InnvilgelseDto(
     FellesDto felles,
     ResultatFlaggDto resultat,
     LocalDate ytelseFom,
-    int antallDager,
+    long antallDager,
     Set<TilkjentPeriodeDto> tilkjentePerioder,
     Set<GbeløpPeriodeDto> gbeløpPerioder,
     SatserDto satser) implements TemplateData {}

@@ -4,7 +4,6 @@ package no.nav.ung.sak.formidling;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -29,6 +29,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
+import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.domene.GrunnlagOgTilkjentYtelse;
 import no.nav.ung.sak.formidling.domene.PdlPerson;
@@ -145,6 +146,9 @@ public class BrevGenerererTjeneste {
                 new PeriodeDto(it.getFom(), it.getTom()), it.getValue()))
             .collect(Collectors.toSet());
 
+        var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(tilkjentYtelseTidslinje);
+        var antallDager = tilkjentYtelseTidslinje.disjoint(helger).getLocalDateIntervals().stream().mapToLong(LocalDateInterval::totalDays).sum();
+
         var input = new TemplateInput(TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
@@ -153,9 +157,9 @@ public class BrevGenerererTjeneste {
                     satsTyper.stream().allMatch(it -> it == UngdomsytelseSatsType.LAV),
                     satsTyper.stream().allMatch(it -> it == UngdomsytelseSatsType.HØY),
                     satsTyper.contains(UngdomsytelseSatsType.LAV) && satsTyper.contains(UngdomsytelseSatsType.HØY),
-                    pdlMottaker.fødselsdato().plusYears(Sats.HØY.getTomAlder()).with(TemporalAdjusters.lastDayOfMonth()).isBefore(grunnlagOgTilkjentYtelseTimeline.getMaxLocalDate())),
+                    grunnlagOgTilkjentYtelseTimeline.getMaxLocalDate().isAfter(pdlMottaker.fødselsdato().plusYears(Sats.HØY.getTomAlder()))),
                 grunnlagOgTilkjentYtelseTimeline.getMinLocalDate(),
-                500, // TODO regne ut
+                antallDager, // TODO regne ut
                 tilkjentePerioder,
                 gBeløpPerioder,
                 new SatserDto(nyesteHøySats.orElse(null), nyesteLavSats.orElse(null), Sats.LAV.getTomAlder(), Sats.HØY.getTomAlder())));
