@@ -9,7 +9,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.ung.fordel.handler.FordelProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
-import no.nav.ung.fordel.kodeverdi.BehandlingType;
+import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import no.nav.ung.fordel.repo.MeldingRepository;
 import no.nav.ung.fordel.repo.ProduksjonsstyringOppgaveEntitet;
@@ -118,7 +118,7 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
              * Utlandsbrev har egen behandlingstype -- og vises som
              * "Utland" under "Gjelder" i Gosys.
              */
-            data.setBehandlingType(BehandlingType.UTLAND);
+            data.setBehandlingType(FordelBehandlingType.UTLAND);
         }
     }
 

@@ -12,7 +12,7 @@ import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
 import no.nav.ung.domenetjenester.oppgave.behandlendeenhet.BehandlendeEnhet;
 import no.nav.ung.domenetjenester.oppgave.behandlendeenhet.BehandlendeEnhetService;
-import no.nav.ung.fordel.kodeverdi.BehandlingType;
+import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import no.nav.ung.fordel.kodeverdi.Tema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
@@ -42,7 +42,7 @@ public class GosysOppgaveService {
 
     public String opprettOppgave(Tema tema,
                                  BehandlingTema behandlingTema,
-                                 BehandlingType behandlingType,
+                                 FordelBehandlingType fordelBehandlingType,
                                  AktørId søkersAktørId,
                                  JournalpostId journalpostId,
                                  String beskrivelse,
@@ -70,7 +70,7 @@ public class GosysOppgaveService {
             .medOppgavetype(oppgaveType.getKode())
             .medBehandlesAvApplikasjon(fagsaksystem.getKode())
             .medJournalpostId(journalpostId.getVerdi())
-            .medBehandlingstype(behandlingType != null ? behandlingType.getOffisiellKode() : null);
+            .medBehandlingstype(fordelBehandlingType != null ? fordelBehandlingType.getOffisiellKode() : null);
 
 
         var oppgave = klient.opprettetOppgave(request.build());

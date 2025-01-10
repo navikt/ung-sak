@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum BehandlingType implements Kodeverdi {
+public enum FordelBehandlingType implements Kodeverdi {
 
     DIGITAL_SØKNAD("DIGITAL_SØKNAD","ae0227", "Digital søknad"),
     UTBETALING("UTBETALING","ae0007", "Utbetaling"),
@@ -24,9 +24,9 @@ public enum BehandlingType implements Kodeverdi {
     UDEFINERT("-", null, "Ikke definert"),
     ;
 
-    private static final Map<String, BehandlingType> KODER = new LinkedHashMap<>();
-    private static final Map<String, BehandlingType> OFFISIELLE_KODER = new LinkedHashMap<>();
-    private static final Map<String, BehandlingType> ALLE_TERMNAVN = new LinkedHashMap<>();
+    private static final Map<String, FordelBehandlingType> KODER = new LinkedHashMap<>();
+    private static final Map<String, FordelBehandlingType> OFFISIELLE_KODER = new LinkedHashMap<>();
+    private static final Map<String, FordelBehandlingType> ALLE_TERMNAVN = new LinkedHashMap<>();
 
     public static final String KODEVERK = "BEHANDLING_TEMA";
 
@@ -52,14 +52,14 @@ public enum BehandlingType implements Kodeverdi {
     @JsonIgnore
     private String termnavn;
 
-    private BehandlingType(String kode, String offisiellKode, String termnavn) {
+    private FordelBehandlingType(String kode, String offisiellKode, String termnavn) {
         this.kode = kode;
         this.offisiellKode = offisiellKode;
         this.termnavn = termnavn;
     }
 
     @JsonCreator
-    public static BehandlingType fraKode(@JsonProperty("kode") String kode) {
+    public static FordelBehandlingType fraKode(@JsonProperty("kode") String kode) {
         if (kode == null) {
             return null;
         }
@@ -70,21 +70,21 @@ public enum BehandlingType implements Kodeverdi {
         return ad;
     }
 
-    public static BehandlingType fraKodeDefaultUdefinert(@JsonProperty("kode") String kode) {
+    public static FordelBehandlingType fraKodeDefaultUdefinert(@JsonProperty("kode") String kode) {
         if (kode == null) {
             return UDEFINERT;
         }
         return KODER.getOrDefault(kode, UDEFINERT);
     }
 
-    public static BehandlingType fraOffisiellKode(String kode) {
+    public static FordelBehandlingType fraOffisiellKode(String kode) {
         if (kode == null) {
             return UDEFINERT;
         }
         return OFFISIELLE_KODER.getOrDefault(kode, UDEFINERT);
     }
 
-    public static BehandlingType fraTermNavn(String termnavn) {
+    public static FordelBehandlingType fraTermNavn(String termnavn) {
         if (termnavn == null) {
             return UDEFINERT;
         }

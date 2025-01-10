@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
-import no.nav.ung.fordel.kodeverdi.BehandlingType;
+import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import no.nav.ung.fordel.kodeverdi.Tema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
@@ -364,22 +364,22 @@ public class MottattMelding {
         }
     }
 
-    public Optional<BehandlingType> getBehandlingType() {
+    public Optional<FordelBehandlingType> getBehandlingType() {
         var propertyValue = prosessTaskData.getPropertyValue(BEHANDLINGSTYPE_KEY);
         if (propertyValue != null) {
-            return Optional.ofNullable(BehandlingType.fraKode(propertyValue));
+            return Optional.ofNullable(FordelBehandlingType.fraKode(propertyValue));
         }
         return Optional.empty();
     }
 
-    public void setBehandlingType(BehandlingType behandlingType) {
-        Objects.requireNonNull(behandlingType);
-        prosessTaskData.setProperty(BEHANDLINGSTYPE_KEY, behandlingType.getKode());
+    public void setBehandlingType(FordelBehandlingType fordelBehandlingType) {
+        Objects.requireNonNull(fordelBehandlingType);
+        prosessTaskData.setProperty(BEHANDLINGSTYPE_KEY, fordelBehandlingType.getKode());
     }
 
     public boolean erEttersendelse() {
-        Optional<BehandlingType> behandlingType = getBehandlingType();
-        return behandlingType.isPresent() && behandlingType.get() == BehandlingType.DIGITAL_ETTERSENDELSE;
+        Optional<FordelBehandlingType> behandlingType = getBehandlingType();
+        return behandlingType.isPresent() && behandlingType.get() == FordelBehandlingType.DIGITAL_ETTERSENDELSE;
     }
 
     public Optional<String> getDokumentTittel() {

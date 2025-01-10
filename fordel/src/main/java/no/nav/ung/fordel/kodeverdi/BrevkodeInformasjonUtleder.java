@@ -37,8 +37,8 @@ public final class BrevkodeInformasjonUtleder {
         final List<BrevkodeInformasjon> brevkodeliste = new ArrayList<>();
         // Fra Brukerdialog:
 
-        brevkodeliste.add(new BrevkodeInformasjon("UNG Søknad", null, "Søknad om ungdomsytelse - UNG Søknad", FagsakYtelseType.UNGDOMSYTELSE, null, BehandlingType.DIGITAL_SØKNAD, false));
-        brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, "Endringssøknad for ungdomsytelsen - UNG Endringssøknad", FagsakYtelseType.UNGDOMSYTELSE, null, BehandlingType.DIGITAL_SØKNAD, false));
+        brevkodeliste.add(new BrevkodeInformasjon("UNG Søknad", null, "Søknad om ungdomsytelse - UNG Søknad", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
+        brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, "Endringssøknad for ungdomsytelsen - UNG Endringssøknad", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
 
         final Map<String, BrevkodeInformasjon> titler = new HashMap<>();
         brevkodeliste.forEach(bi -> {
@@ -54,7 +54,7 @@ public final class BrevkodeInformasjonUtleder {
         private final String tittel;
         private final FagsakYtelseType ytelseType;
         private final BehandlingTema behandlingTema;
-        private final BehandlingType behandlingTypeHvisStrukturert;
+        private final FordelBehandlingType fordelBehandlingTypeHvisStrukturert;
         private final boolean ettersendelse;
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel) {
@@ -66,13 +66,13 @@ public final class BrevkodeInformasjonUtleder {
         }
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel, FagsakYtelseType ytelseType,
-                BehandlingTema behandlingTema, BehandlingType behandlingTypeHvisStrukturert, boolean ettersendelse) {
+                                   BehandlingTema behandlingTema, FordelBehandlingType fordelBehandlingTypeHvisStrukturert, boolean ettersendelse) {
             this.brevkode = brevkode;
             this.alternativBrevkode = alternativBrevkode;
             this.tittel = tittel;
             this.ytelseType = ytelseType;
             this.behandlingTema = behandlingTema;
-            this.behandlingTypeHvisStrukturert = behandlingTypeHvisStrukturert;
+            this.fordelBehandlingTypeHvisStrukturert = fordelBehandlingTypeHvisStrukturert;
             this.ettersendelse = ettersendelse;
         }
 
@@ -96,8 +96,8 @@ public final class BrevkodeInformasjonUtleder {
             return Optional.ofNullable(behandlingTema);
         }
 
-        public Optional<BehandlingType> getBehandlingTypeHvisStrukturert() {
-            return Optional.ofNullable(behandlingTypeHvisStrukturert);
+        public Optional<FordelBehandlingType> getBehandlingTypeHvisStrukturert() {
+            return Optional.ofNullable(fordelBehandlingTypeHvisStrukturert);
         }
 
         public boolean isEttersendelse() {

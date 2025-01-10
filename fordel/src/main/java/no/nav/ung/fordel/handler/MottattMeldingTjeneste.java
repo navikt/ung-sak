@@ -5,7 +5,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.ung.fordel.kodeverdi.BehandlingType;
+import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
 import no.nav.ung.fordel.repo.MeldingRepository;
 import no.nav.ung.fordel.repo.MottattMeldingEntitet;
 
@@ -65,7 +65,7 @@ public class MottattMeldingTjeneste {
         Optional.ofNullable(tema).ifPresent(entitet::setTema);
         Optional.ofNullable(behandlingstema).ifPresent(entitet::setBehandlingstema);
 
-        mm.getBehandlingType().map(BehandlingType::getKode).ifPresent(entitet::setBehandlingstype);
+        mm.getBehandlingType().map(FordelBehandlingType::getKode).ifPresent(entitet::setBehandlingstype);
         Optional.ofNullable(mm.getBrevkode()).ifPresent(entitet::setBrevkode);
         Optional.ofNullable(mm.getSøknadId()).ifPresent(entitet::setSøknadId);
         mm.getPayloadAsString().ifPresent(entitet::setPayload);
