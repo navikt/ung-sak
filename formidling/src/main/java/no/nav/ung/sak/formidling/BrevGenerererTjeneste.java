@@ -100,7 +100,6 @@ public class BrevGenerererTjeneste {
         var satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
 
         var pdlMottaker = hentMottaker(behandling);
-        var periode = new PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(260));
 
         var grunnlagOgTilkjentYtelseTimeline = tilkjentYtelseTidslinje.intersection(satsTidslinje, sammenstillGrunnlagOgTilkjentYtelse())
             .compress();
@@ -159,7 +158,7 @@ public class BrevGenerererTjeneste {
                     satsTyper.contains(UngdomsytelseSatsType.LAV) && satsTyper.contains(UngdomsytelseSatsType.HØY),
                     grunnlagOgTilkjentYtelseTimeline.getMaxLocalDate().isAfter(pdlMottaker.fødselsdato().plusYears(Sats.HØY.getTomAlder()))),
                 grunnlagOgTilkjentYtelseTimeline.getMinLocalDate(),
-                antallDager, // TODO regne ut
+                antallDager,
                 tilkjentePerioder,
                 gBeløpPerioder,
                 new SatserDto(nyesteHøySats.orElse(null), nyesteLavSats.orElse(null), Sats.LAV.getTomAlder(), Sats.HØY.getTomAlder())));
