@@ -36,13 +36,13 @@ public class TilJournalføringTjeneste {
         this.safTjeneste = safTjeneste;
     }
 
-    public boolean tilJournalføring(JournalpostId journalpostId, Optional<String> sakId, Tema tema, String aktørId, boolean tilGenerellSak) {
-        LOG.info("Forsøker ferdigstillelse av journalpostId={}, mot sak={} (generell={})", journalpostId, sakId, tilGenerellSak);
+    public boolean tilJournalføring(JournalpostId journalpostId, Optional<String> sakId, Tema tema, String aktørId) {
+        LOG.info("Forsøker ferdigstillelse av journalpostId={}, mot sak={}", journalpostId, sakId);
         if (aktørId.isEmpty()) {
             throw new IllegalArgumentException("AktørId er påkrevd");
         }
 
-        oppdaterJournalpost(sakId, journalpostId, aktørId, tema, tilGenerellSak);
+        oppdaterJournalpost(sakId, journalpostId, aktørId, tema);
 
         dokTjeneste.ferdigstillJournalpost(journalpostId);
         return true;
@@ -72,18 +72,13 @@ public class TilJournalføringTjeneste {
     }
 
 
-    private void oppdaterJournalpost(Optional<String> sakId, JournalpostId journalpostId, String aktørId, no.nav.ung.fordel.kodeverdi.Tema tema, boolean tilGenerellSak) {
+    private void oppdaterJournalpost(Optional<String> sakId, JournalpostId journalpostId, String aktørId, no.nav.ung.fordel.kodeverdi.Tema tema) {
         var oppdaterJournalpostRequest = new OppdaterJournalpostRequest();
         var bruker = new Bruker(aktørId, BrukerIdType.AKTOERID);
         oppdaterJournalpostRequest.setBruker(bruker);
         oppdaterJournalpostRequest.setTema(tema.getOffisiellKode());
 
-        final Sak sak;
-        if (tilGenerellSak) {
-            sak = new Sak(null, null, no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype.GENERELL_SAK);
-        } else {
-            sak = new Sak(ARKIV_SAK_SYSTEM, sakId.orElseThrow(), no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype.FAGSAK);
-        }
+        Sak sak = new Sak(ARKIV_SAK_SYSTEM, sakId.orElseThrow(), no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype.FAGSAK);
         oppdaterJournalpostRequest.setSak(sak);
 
         dokTjeneste.oppdaterJournalpost(journalpostId, oppdaterJournalpostRequest);

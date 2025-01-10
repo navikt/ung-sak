@@ -64,7 +64,6 @@ public class MottattMelding {
 
     // Gosysoppgave fremfor innsending.
     private static final String JOURNALFORING_TILOPPGAVE = "journalforing.tilOppgave";
-    private static final String JOURNALFORING_PAAGENERELL = "journalforing.paaGenerell";
     private static final String JOURNALFORING_OPPDATERT_BRUKER = "journalforing.oppdatertBruker";
 
 
@@ -463,15 +462,6 @@ public class MottattMelding {
         if (propertyValue == null) {
             return false;
         }
-        return Boolean.parseBoolean(propertyValue);
-    }
-
-    public void setJournalforingPaaGenerell(boolean journalforingPaaGenerell) {
-        prosessTaskData.setProperty(JOURNALFORING_PAAGENERELL, Boolean.toString(journalforingPaaGenerell));
-    }
-
-    public boolean isJournalforingPaaGenerell() {
-        var propertyValue = prosessTaskData.getPropertyValue(JOURNALFORING_PAAGENERELL);
         return Boolean.parseBoolean(propertyValue);
     }
 

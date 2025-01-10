@@ -38,7 +38,7 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
 
     @Override
     public void precondition(MottattMelding dataWrapper) {
-        if (dataWrapper.getSaksnummer().isEmpty() && !dataWrapper.isJournalforingPaaGenerell()) {
+        if (dataWrapper.getSaksnummer().isEmpty()) {
             throw new IllegalStateException("Mangler påkrevd saksnummer.");
         }
         if (dataWrapper.getAktørId().isEmpty()) {
@@ -54,11 +54,10 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
         final var journalpostIder = dataWrapper.getJournalPostIder();
         final var endeligJournalførteJournalPostIder = dataWrapper.getEndeligJournalførteJournalPostIder();
         final var journalpostId = utledNesteJournalpostId(journalpostIder, endeligJournalførteJournalPostIder);
-        final boolean journalforingPaaGenerell = dataWrapper.isJournalforingPaaGenerell();
         final var saksnummer = dataWrapper.getSaksnummer();
 
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
-            log.info("Journalpost med id={} er allerede journaført på sak={} (generell={})", journalpostId, saksnummer.orElse("UNDEFINED"), journalforingPaaGenerell);
+            log.info("Journalpost med id={} er allerede journaført på sak={}", journalpostId, saksnummer.orElse("UNDEFINED"));
             journalpostRepository.markerJournalposterBehandlet(journalpostId);
 
             var oppdatertPoster = new HashSet<>(endeligJournalførteJournalPostIder);
@@ -69,9 +68,8 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
                 if (journalpostId != null && !journalføringTjeneste.tilJournalføring(journalpostId,
                     saksnummer,
                     dataWrapper.getTema(),
-                    dataWrapper.getAktørId().orElseThrow(),
-                    journalforingPaaGenerell)) {
-                    log.info("Får ikke ferdigstilt journalpost med id={} på sak={} (generell={})", journalpostId, saksnummer.orElse("UNDEFINED"), journalforingPaaGenerell);
+                    dataWrapper.getAktørId().orElseThrow())) {
+                    log.info("Får ikke ferdigstilt journalpost med id={} på sak={}", journalpostId, saksnummer.orElse("UNDEFINED"));
                     // TODO: Vurder hva vi gjør med forsendelsen når det er flere her som ikke
                     throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
                 } else if (journalpostId != null) {
@@ -102,14 +100,10 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
             if (dataWrapper.isJournalforingTilOppgave()) {
                 return dataWrapper.nesteSteg(OpprettOppgaveTask.TASKTYPE);
             }
-            if (dataWrapper.isJournalforingPaaGenerell()) {
-                return null;
-            }
-
             return dataWrapper.nesteSteg(sendtInnDokumentTask());
 
         } else {
-            log.info("Ferdigstilt journalpost med id={} på sak={} (generell={}), prøver resterende {} journalposter. ", journalpostId, saksnummer.orElse("UNDEFINED"), journalforingPaaGenerell, journalpostIder.size() - dataWrapper.getEndeligJournalførteJournalPostIder().size());
+            log.info("Ferdigstilt journalpost med id={} på sak={}, prøver resterende {} journalposter. ", journalpostId, saksnummer.orElse("UNDEFINED"), journalpostIder.size() - dataWrapper.getEndeligJournalførteJournalPostIder().size());
             return dataWrapper.nesteSteg(endeligJouralføringTask());
         }
     }
