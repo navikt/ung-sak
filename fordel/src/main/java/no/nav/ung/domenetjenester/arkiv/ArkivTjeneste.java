@@ -99,8 +99,6 @@ public class ArkivTjeneste {
             return new AktørId(bruker.getId());
         } else if (BrukerIdType.FNR.equals(bruker.getType())) {
             return personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(bruker.getId())).orElseThrow();
-        } else if (BrukerIdType.ORGNR.equals(bruker.getType())) {
-            return null;
         }
         throw new IllegalArgumentException("Ukjent brukerType=" + bruker.getType());
     }
