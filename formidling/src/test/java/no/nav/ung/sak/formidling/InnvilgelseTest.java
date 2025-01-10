@@ -3,6 +3,7 @@ package no.nav.ung.sak.formidling;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -69,8 +70,10 @@ class InnvilgelseTest {
             tilkjentYtelseUtleder);
     }
 
-    @Test
-    void standard_innvilgelse() {
+    @Test()
+    @DisplayName("Verifiserer faste tekster og mottaker")
+    //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
+    void skalHaAlleStandardtekster() {
         var ungdom = AktørId.dummy();
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad(ungdom);
         var behandling = scenarioBuilder.lagre(repositoryProvider);
@@ -84,6 +87,42 @@ class InnvilgelseTest {
         assertThatHtml(brevtekst).contains("Fødselsnummer: " + fnr);
 
     }
+
+    @DisplayName("Innvilgelse med riktig fom dato, maks antall dager, lav sats, grunnbeløp, hjemmel")
+    //Denne testen sjekker også at teksten kommer i riktig rekkefølge
+    void standardInnvilgelse() {
+
+    }
+
+    void høySats() {
+
+    }
+
+    void høySatsMaksAlder() {
+
+    }
+
+    //dekker flere dagsatser også
+    void lavOgHøySats() {
+
+    }
+
+    void antallDagerUnder260() {
+
+    }
+
+    void periodisertBarneTillegg() {
+
+    }
+
+    @DisplayName("Pdf'en skal ha logo og tekst og riktig antall sider")
+    void pdfStrukturTest() {
+
+    }
+
+
+
+
 
     private GenerertBrev genererBrev(Brevbestilling bestillBrevDto) {
         GenerertBrev generertBrev = brevGenerererTjeneste.generer(bestillBrevDto);
