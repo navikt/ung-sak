@@ -17,7 +17,6 @@ public enum Tema implements Kodeverdi {
 
     FORELDRE_OG_SVANGERSKAPSPENGER("FOR_SVA", "FOR"),
     OMS("OMS", "OMS"), // Omsorgspenger, Pleiepenger og opplæringspenger
-    FRI("FRI", "FRI"), // FRISINN
     UNG("UNG", "UNG"), // Ungdomsytelse
     UDEFINERT("-", null),
     ;
