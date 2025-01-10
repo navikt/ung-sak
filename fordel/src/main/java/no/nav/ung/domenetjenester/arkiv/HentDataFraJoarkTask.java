@@ -79,7 +79,7 @@ public class HentDataFraJoarkTask extends WrappedProsessTaskHandler {
         // Gjøres felles for alle journalposter som ikke er ignorerte/allerde mottatt
         var aktørId = journalpostInfo.getAktørId();
         var mottattTidspunkt = journalpostInfo.getForsendelseTidspunkt();
-        dataWrapper.setAktørId(aktørId.map(AktørId::getId).orElse(null)); // aktørid på journalpost kan være null for inntektsmelding bla.
+        dataWrapper.setAktørId(aktørId.map(AktørId::getId).orElseThrow());
         dataWrapper.setForsendelseMottattTidspunkt(mottattTidspunkt);
         oppdaterBeskrivelse(journalpostInfo, dataWrapper);
         dataWrapper.setPayload(journalpostInfo.getStrukturertPayload());
