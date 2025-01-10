@@ -36,12 +36,6 @@ public class ProduksjonsstyringOppgaveEntitet {
     @Column(name = "oppgave_id")
     private String oppgaveId;
 
-    @Column(name = "arbeidsgiver", updatable = false)
-    private String arbeidsgiver;
-
-    @Column(name = "arbeidsforhold_id", updatable = false)
-    private String arbeidsforholdId;
-
     @Column(name = "beskrivelse")
     private String beskrivelse;
 
@@ -60,8 +54,6 @@ public class ProduksjonsstyringOppgaveEntitet {
 
     private ProduksjonsstyringOppgaveEntitet(String journalpostId,
                                              String aktørId,
-                                             String arbeidsgiver,
-                                             String arbeidsforholdId,
                                              FagsakYtelseType ytelseType,
                                              BehandlingTema behandlingstema,
                                              String beskrivelse,
@@ -72,8 +64,6 @@ public class ProduksjonsstyringOppgaveEntitet {
         this.fagsakSystem = (fagsakSystem == null) ? null : fagsakSystem.getKode();
         this.oppgaveType = Objects.requireNonNull(oppgaveType, "oppgaveType").getKode();
         this.ytelseType = ytelseType == null ? null : ytelseType.getKode(); // ikke påkrevd pga PLEIEPENGER (kan ikke mappe entydig til Barn eller Nærstående) p.t.
-        this.arbeidsgiver = arbeidsgiver;
-        this.arbeidsforholdId = arbeidsforholdId;
         this.beskrivelse = beskrivelse;
         this.behandlingstema = behandlingstema == null ? null : behandlingstema.getKode();
     }
@@ -98,8 +88,6 @@ public class ProduksjonsstyringOppgaveEntitet {
     public static class Builder {
         private String journalpostId;
         private String aktørId;
-        private String arbeidsforholdId;
-        private String arbeidsgiver;
         private FagsakYtelseType ytelseType;
         private String beskrivelse;
         private GosysKonstanter.Fagsaksystem fagsaksystem;
@@ -116,10 +104,6 @@ public class ProduksjonsstyringOppgaveEntitet {
             return this;
         }
 
-        public Builder withArbeidsforholdId(String arbeidsforholdId) {
-            this.arbeidsforholdId = arbeidsforholdId;
-            return this;
-        }
 
         public Builder withYtelseType(FagsakYtelseType ytelseType) {
             this.ytelseType = ytelseType;
@@ -141,11 +125,6 @@ public class ProduksjonsstyringOppgaveEntitet {
             return this;
         }
 
-        public Builder withArbeidsgiverOrgNummer(String arbeidsgiver) {
-            this.arbeidsgiver = arbeidsgiver;
-            return this;
-        }
-
         public Builder withBehandlingTema(BehandlingTema behandlingTema) {
             this.behandlingstema = behandlingTema;
             return this;
@@ -155,8 +134,6 @@ public class ProduksjonsstyringOppgaveEntitet {
             return new ProduksjonsstyringOppgaveEntitet(
                 journalpostId,
                 aktørId,
-                arbeidsgiver,
-                arbeidsforholdId,
                 ytelseType,
                 behandlingstema,
                 beskrivelse,
