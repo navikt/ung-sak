@@ -26,10 +26,6 @@ public class MottattMeldingTjeneste {
         this.meldingRepository = meldingRepository;
     }
 
-    MeldingRepository getMeldingRepository() {
-        return meldingRepository;
-    }
-
     void initLogContext(MottattMelding mm) {
         // Utvider felt x_prosess med mer kontekst i tilfelle feil. Dette ryddes automatisk av ProsessTask etter kjøring.
 
