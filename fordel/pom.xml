@@ -88,6 +88,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>mottak</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>hendelsemottak</artifactId>
+        </dependency>
 
     </dependencies>
 
