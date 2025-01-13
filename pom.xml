@@ -845,7 +845,7 @@
             </releases>
         </repository>
     </repositories>
-    
+
     <scm>
         <connection>scm:git:https://github.com/navikt/ung-sak.git</connection>
         <developerConnection>scm:git:https://github.com/navikt/ung-sak.git</developerConnection>
