@@ -831,6 +831,10 @@
             <name>Maven Central</name>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
 		<repository>
             <!-- bruker SNAPSHOT versjon av eclipse-transformer (0.3.0-SNAPSHOT) -->
             <id>ossrh</id>
@@ -841,7 +845,7 @@
             </releases>
         </repository>
     </repositories>
-
+    
     <scm>
         <connection>scm:git:https://github.com/navikt/ung-sak.git</connection>
         <developerConnection>scm:git:https://github.com/navikt/ung-sak.git</developerConnection>
