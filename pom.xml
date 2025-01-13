@@ -42,7 +42,7 @@
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
-        <flyway.version>11.1.0</flyway.version>
+        <flyway.version>11.1.1</flyway.version>
         <pdfgen-core.version>1.1.38</pdfgen-core.version>
     </properties>
 
