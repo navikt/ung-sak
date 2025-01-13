@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.sak.tilgangskontroll.api.AbacBehandlingStatus;
+import no.nav.ung.sak.tilgangskontroll.api.AbacFagsakStatus;
 
 public final class AbacUtil {
 

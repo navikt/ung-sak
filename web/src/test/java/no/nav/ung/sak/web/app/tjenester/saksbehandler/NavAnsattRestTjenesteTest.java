@@ -5,6 +5,7 @@ import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.sikkerhet.context.domene.IdentType;
 import no.nav.k9.sikkerhet.context.domene.OidcCredential;
 import no.nav.ung.sak.kontrakt.abac.InnloggetAnsattDto;
+import no.nav.ung.sak.tilgangskontroll.tilganger.AnsattTilgangerTjeneste;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,22 +30,14 @@ public class NavAnsattRestTjenesteTest {
 
     @BeforeEach
     public void setUp() {
-        navAnsattRestTjeneste = new NavAnsattRestTjeneste(
-            "Saksbehandler",
+        var tilgangerTjeneste = new AnsattTilgangerTjeneste("Saksbehandler",
             "Veileder",
             "Beslutter",
             "Overstyrer",
             "EgenAnsatt",
             "Kode6",
-            "Kode7",
-            true
-        ) {
-            @Override
-            protected boolean brukMockBrukerLokalt() {
-                //gjør at vi kan teste-prod-kode isdf å treffe shortcut til mock-saksbehandler som brukes lokalt
-                return false;
-            }
-        };
+            "Kode7","Drift");
+        navAnsattRestTjeneste = new NavAnsattRestTjeneste(tilgangerTjeneste,true);
     }
 
     @AfterEach

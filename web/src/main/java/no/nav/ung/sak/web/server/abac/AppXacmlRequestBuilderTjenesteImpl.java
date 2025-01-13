@@ -14,6 +14,7 @@ import no.nav.k9.felles.sikkerhet.pdp.XacmlRequestBuilderTjeneste;
 import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlAttributeSet;
 import no.nav.k9.felles.sikkerhet.pdp.xacml.XacmlRequestBuilder;
 import no.nav.k9.felles.util.Tuple;
+import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 
 @Dependent
 @Alternative
