@@ -15,13 +15,6 @@
           "journalpostId" : {
             "type" : "string"
           },
-          "kanalReferanse" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$",
-            "type" : "string"
-          },
           "payload" : {
             "maxLength" : 392000,
             "minLength" : 0,
@@ -58,13 +51,6 @@
             "type" : "string"
           },
           "journalpostId" : {
-            "type" : "string"
-          },
-          "kanalReferanse" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$",
             "type" : "string"
           },
           "payload" : {
