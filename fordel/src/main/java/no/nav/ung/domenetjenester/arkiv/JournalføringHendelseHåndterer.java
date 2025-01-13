@@ -15,7 +15,7 @@ import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
-import no.nav.ung.fordel.kodeverdi.Tema;
+import no.nav.ung.fordel.kodeverdi.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.sak.typer.JournalpostId;
 
@@ -44,7 +44,7 @@ public class JournalføringHendelseHåndterer {
         var eksisterendeData = ProsessTaskData.forProsessTask(HentDataFraJoarkTask.class);
         eksisterendeData.setCallIdFraEksisterende();
         var melding = new MottattMelding(eksisterendeData);
-        melding.setTema(Tema.fraKodeDefaultUdefinert(payload.getTemaNytt()));
+        melding.setTema(OmrådeTema.fraKodeDefaultUdefinert(payload.getTemaNytt()));
         melding.setBehandlingTema(BehandlingTema.fraOffisiellKode((payload.getBehandlingstema())));
         melding.setJournalPostId(new JournalpostId(Long.toString(payload.getJournalpostId())));
         melding.setJournalføringHendelsetype(JournalføringHendelsetype.fraKode(payload.getHendelsesType()).orElse(null));

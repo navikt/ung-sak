@@ -14,7 +14,7 @@ import jakarta.inject.Inject;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.Topic;
-import no.nav.ung.fordel.kodeverdi.Tema;
+import no.nav.ung.fordel.kodeverdi.OmrådeTema;
 
 /*
  * Dokumentasjon https://confluence.adeo.no/pages/viewpage.action?pageId=432217859
@@ -25,8 +25,8 @@ public class JournalHendelseStream implements KafkaIntegration {
     private static final Logger LOG = LoggerFactory.getLogger(JournalHendelseStream.class);
     private static final String HENDELSE_MOTTATT = "JournalpostMottatt";
     private static final String HENDELSE_ENDRET = "TemaEndret";
-    private static final String TEMA_OMS = Tema.OMS.getOffisiellKode();
-    private static final String TEMA_UNG = Tema.UNG.getOffisiellKode();
+    private static final String TEMA_OMS = OmrådeTema.OMS.getOffisiellKode();
+    private static final String TEMA_UNG = OmrådeTema.UNG.getOffisiellKode();
 
     private KafkaStreams stream;
     private Topic<String, JournalfoeringHendelseRecord> topic;

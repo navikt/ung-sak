@@ -14,7 +14,7 @@ import no.nav.ung.domenetjenester.oppgave.behandlendeenhet.BehandlendeEnhet;
 import no.nav.ung.domenetjenester.oppgave.behandlendeenhet.BehandlendeEnhetService;
 import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
-import no.nav.ung.fordel.kodeverdi.Tema;
+import no.nav.ung.fordel.kodeverdi.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.VirkedagUtil;
 import no.nav.ung.sak.typer.AktørId;
@@ -40,7 +40,7 @@ public class GosysOppgaveService {
         this.behandlendeEnhetService = behandlendeEnhetService;
     }
 
-    public String opprettOppgave(Tema tema,
+    public String opprettOppgave(OmrådeTema områdeTema,
                                  BehandlingTema behandlingTema,
                                  FordelBehandlingType fordelBehandlingType,
                                  AktørId søkersAktørId,
@@ -51,13 +51,13 @@ public class GosysOppgaveService {
     ) {
 
 
-        var eksisterendeOppgave = hentEksisterendeOppgave(tema, søkersAktørId, journalpostId);
+        var eksisterendeOppgave = hentEksisterendeOppgave(områdeTema, søkersAktørId, journalpostId);
         if (eksisterendeOppgave != null) {
             return eksisterendeOppgave;
         }
 
 
-        BehandlendeEnhet behandlendeEnhet = behandlendeEnhetService.hentBehandlendeEnhet(tema, behandlingTema, søkersAktørId);
+        BehandlendeEnhet behandlendeEnhet = behandlendeEnhetService.hentBehandlendeEnhet(områdeTema, behandlingTema, søkersAktørId);
 
         var request = createRestRequestBuilder(
             søkersAktørId,
@@ -65,7 +65,7 @@ public class GosysOppgaveService {
             beskrivelse,
             Prioritet.NORM,
             FRIST_I_DAGER,
-            tema.getOffisiellKode()
+            områdeTema.getOffisiellKode()
         ).medBehandlingstema(behandlingTema.getOffisiellKode())
             .medOppgavetype(oppgaveType.getKode())
             .medBehandlesAvApplikasjon(fagsaksystem.getKode())
@@ -90,11 +90,11 @@ public class GosysOppgaveService {
             .medPrioritet(prioritet);
     }
 
-    private String hentEksisterendeOppgave(Tema tema, AktørId søkersAktørId, JournalpostId journalpostId) {
-        return hentEksisterendeOppgave(tema, søkersAktørId, journalpostId, false);
+    private String hentEksisterendeOppgave(OmrådeTema områdeTema, AktørId søkersAktørId, JournalpostId journalpostId) {
+        return hentEksisterendeOppgave(områdeTema, søkersAktørId, journalpostId, false);
     }
 
-    public String hentEksisterendeOppgave(Tema tema, AktørId søkersAktørId, JournalpostId journalpostId, boolean kunÅpneOppgaver) {
+    public String hentEksisterendeOppgave(OmrådeTema områdeTema, AktørId søkersAktørId, JournalpostId journalpostId, boolean kunÅpneOppgaver) {
         // TODO: Utvid klient med mulighet for å finne oppgaver med gitt journalpostid
         return null;
     }

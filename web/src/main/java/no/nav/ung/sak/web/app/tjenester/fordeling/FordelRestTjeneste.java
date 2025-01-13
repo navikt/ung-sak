@@ -206,7 +206,6 @@ public class FordelRestTjeneste {
 
         List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
             .map(this::mapJournalpost)
-            .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
             .collect(Collectors.toList());
 
         dokumentmottakTjeneste.dokumenterAnkommet(saksdokumenter);
@@ -249,8 +248,6 @@ public class FordelRestTjeneste {
             .medType(mottattJournalpost.getType())
             .medJournalpostId(mottattJournalpost.getJournalpostId());
 
-        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
-
         if (payload.isPresent()) {
             builder.medPayload(payload.get()); // NOSONAR
         }
@@ -272,8 +269,6 @@ public class FordelRestTjeneste {
             .medElektroniskSøknad(payload.isPresent())
             .medType(mottattJournalpost.getType())
             .medJournalpostId(mottattJournalpost.getJournalpostId());
-
-        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
 
         payload.ifPresent(builder::medPayload);
 

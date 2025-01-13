@@ -75,9 +75,6 @@ public class MottattDokument extends BaseEntitet {
     @Column(name = "kildesystem")
     private String kildesystem;
 
-    @Column(name = "kanalreferanse", updatable = false)
-    private String kanalreferanse;
-
     /** Arbeidsgiver referanse - orgnummer eller privat arbeidsgiver fnr. */
     @Column(name = "arbeidsgiver")
     private String arbeidsgiver;
@@ -141,10 +138,6 @@ public class MottattDokument extends BaseEntitet {
 
     public String getKildesystem() {
         return kildesystem;
-    }
-
-    public String getKanalreferanse() {
-        return kanalreferanse;
     }
 
     public String getFeilmelding() {
@@ -224,10 +217,6 @@ public class MottattDokument extends BaseEntitet {
         this.kildesystem = systemnavn;
     }
 
-    public void setKanalreferanse(String kanalreferanse) {
-        this.kanalreferanse = kanalreferanse;
-    }
-
     public void setFeilmeldingOgOppdaterStatus(String feilmelding) {
         this.feilmelding = feilmelding;
         setStatus(feilmelding == null ? DokumentStatus.GYLDIG : DokumentStatus.UGYLDIG);
@@ -273,11 +262,6 @@ public class MottattDokument extends BaseEntitet {
 
         public Builder medMottattTidspunkt(LocalDateTime mottattTidspunkt) {
             mottatteDokumentMal.mottattTidspunkt = mottattTidspunkt;
-            return this;
-        }
-
-        public Builder medKanalreferanse(String kanalreferanse) {
-            mottatteDokumentMal.kanalreferanse = kanalreferanse;
             return this;
         }
 
@@ -348,7 +332,6 @@ public class MottattDokument extends BaseEntitet {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<journalpostId=" + journalpostId
-            + ", kanalReferanse=" + kanalreferanse
             + ", arbeidsgiver=" + arbeidsgiver
             + ", type=" + type
             + ", journalpostId=" + journalpostId

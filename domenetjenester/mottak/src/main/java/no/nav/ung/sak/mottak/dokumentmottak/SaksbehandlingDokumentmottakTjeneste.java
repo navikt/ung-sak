@@ -68,7 +68,6 @@ public class SaksbehandlingDokumentmottakTjeneste {
                 .medFagsakId(saksdokument.getFagsakId());
 
             builder.medMottattTidspunkt(mottattTidspunkt);
-            builder.medKanalreferanse(saksdokument.getKanalreferanse());
 
             if (saksdokument.getJournalpostId() != null) {
                 builder.medJournalPostId(new JournalpostId(saksdokument.getJournalpostId().getVerdi()));

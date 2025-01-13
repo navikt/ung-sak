@@ -4,7 +4,7 @@ import java.util.List;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.fordel.kodeverdi.Tema;
+import no.nav.ung.fordel.kodeverdi.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -24,22 +24,22 @@ public class BehandlendeEnhetService {
         this.enhetsTjeneste = enhetsTjeneste;
     }
 
-    public BehandlendeEnhet hentBehandlendeEnhet(Tema tema, BehandlingTema behandlingTema, AktørId hovedAktør) {
+    public BehandlendeEnhet hentBehandlendeEnhet(OmrådeTema områdeTema, BehandlingTema behandlingTema, AktørId hovedAktør) {
         GeografiskTilknytning gjeldendeGeografiskTilknytning = hentGjeldendeGeografiskeTilknytning(
             hovedAktør
         );
-        return finnBehandledeEnhet(gjeldendeGeografiskTilknytning, tema, behandlingTema);
+        return finnBehandledeEnhet(gjeldendeGeografiskTilknytning, områdeTema, behandlingTema);
     }
 
-    BehandlendeEnhet finnBehandledeEnhet(GeografiskTilknytning geografiskTilknytning, Tema tema, BehandlingTema behandlingTema) {
+    BehandlendeEnhet finnBehandledeEnhet(GeografiskTilknytning geografiskTilknytning, OmrådeTema områdeTema, BehandlingTema behandlingTema) {
 
-        List<OrganisasjonsEnhet> aktiveEnheter = enhetsTjeneste.hentFordelingEnhetId(tema, behandlingTema, geografiskTilknytning);
+        List<OrganisasjonsEnhet> aktiveEnheter = enhetsTjeneste.hentFordelingEnhetId(områdeTema, behandlingTema, geografiskTilknytning);
 
         if (aktiveEnheter.isEmpty()) {
-            throw new IllegalStateException("Forventet å få minst en behandlende enhet: tema=" + tema);
+            throw new IllegalStateException("Forventet å få minst en behandlende enhet: tema=" + områdeTema);
         }
         if (aktiveEnheter.size() != 1) {
-            throw new IllegalStateException(String.format("Forventet å få én behandlende enhet for tema %s, fikk %s.", tema, aktiveEnheter.size()));
+            throw new IllegalStateException(String.format("Forventet å få én behandlende enhet for tema %s, fikk %s.", områdeTema, aktiveEnheter.size()));
         }
         OrganisasjonsEnhet organisasjonsenhet = aktiveEnheter.get(0);
         return new BehandlendeEnhet(organisasjonsenhet.getEnhetId(), organisasjonsenhet.getEnhetNavn());

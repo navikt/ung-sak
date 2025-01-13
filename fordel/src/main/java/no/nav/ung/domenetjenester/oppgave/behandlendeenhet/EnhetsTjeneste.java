@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
 
-import no.nav.ung.fordel.kodeverdi.Tema;
+import no.nav.ung.fordel.kodeverdi.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
@@ -27,9 +27,9 @@ public class EnhetsTjeneste {
         this.arbeidsfordelingTjeneste = arbeidsfordelingTjeneste;
     }
 
-    List<OrganisasjonsEnhet> hentFordelingEnhetId(Tema tema, BehandlingTema behandlingsTema, GeografiskTilknytning geo) {
+    List<OrganisasjonsEnhet> hentFordelingEnhetId(OmrådeTema områdeTema, BehandlingTema behandlingsTema, GeografiskTilknytning geo) {
         var request = ArbeidsfordelingRequest.ny()
-                .medTema(tema.getOffisiellKode())
+                .medTema(områdeTema.getOffisiellKode())
                 .medBehandlingstema(behandlingsTema == null ? null : behandlingsTema.getOffisiellKode())
                 .medDiskresjonskode(geo.getDiskresjonskode().getKode())
                 .medGeografiskOmraade(geo.getTilknytning())

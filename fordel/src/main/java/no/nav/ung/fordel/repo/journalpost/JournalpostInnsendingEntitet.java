@@ -30,8 +30,6 @@ public class JournalpostInnsendingEntitet {
     private String aktørId;
     @Column(name = "saksnummer")
     private String saksnummer;
-    @Column(name = "kanal_referanse")
-    private String kanalReferanse;
     @Column(name = "status")
     private String status = Status.UBEHANDLET.getDbKode();
     @Column(name = "ytelse_type")
@@ -97,9 +95,6 @@ public class JournalpostInnsendingEntitet {
         this.status = Objects.requireNonNull(status, "status").getDbKode();
     }
 
-    public String getKanalReferanse() {
-        return kanalReferanse;
-    }
 
     public FagsakYtelseType getYtelseType() {
         return FagsakYtelseType.fraKode(ytelseType);

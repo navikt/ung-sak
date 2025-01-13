@@ -21,7 +21,7 @@ import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
 import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
-import no.nav.ung.fordel.kodeverdi.Tema;
+import no.nav.ung.fordel.kodeverdi.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -318,17 +318,17 @@ public class MottattMelding {
         return Optional.ofNullable(prosessTaskData.getPropertyValue(ORIGINAL_JOURNALPOSTID_KEY)).map(JournalpostId::new);
     }
 
-    public Tema getTema() {
+    public OmrådeTema getTema() {
         var propertyValue = prosessTaskData.getPropertyValue(TEMA_KEY);
         if (propertyValue != null) {
-            return Tema.fraKode(propertyValue);
+            return OmrådeTema.fraKode(propertyValue);
         }
         return null;
     }
 
-    public void setTema(Tema tema) {
-        Objects.requireNonNull(tema);
-        prosessTaskData.setProperty(TEMA_KEY, tema.getKode());
+    public void setTema(OmrådeTema områdeTema) {
+        Objects.requireNonNull(områdeTema);
+        prosessTaskData.setProperty(TEMA_KEY, områdeTema.getKode());
     }
 
     public BehandlingTema getBehandlingTema() {

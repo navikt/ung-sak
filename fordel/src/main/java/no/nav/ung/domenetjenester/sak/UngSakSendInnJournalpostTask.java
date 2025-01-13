@@ -75,7 +75,6 @@ public class UngSakSendInnJournalpostTask implements ProsessTaskHandler {
                     saksnummer,
                     new JournalpostId(journalpost.getJournalpostId().getVerdi()),
                     ytelseType,
-                    journalpost.getKanalReferanse(),
                     journalpost.getBrevkode(),
                     journalpost.getInnsendingstidspunkt(),
                     journalpost.getPayload()));
@@ -84,7 +83,7 @@ public class UngSakSendInnJournalpostTask implements ProsessTaskHandler {
         if (!dtoer.isEmpty()) {
             List<InngåendeSaksdokument> saksdokumenter = dtoer.stream()
                 .map(this::mapJournalpost)
-                .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
+                .sorted(Comparator.comparing(InngåendeSaksdokument::getForsendelseMottatt))
                 .collect(Collectors.toList());
 
             dokumentMottakTjeneste.dokumenterAnkommet(saksdokumenter);
@@ -97,8 +96,6 @@ public class UngSakSendInnJournalpostTask implements ProsessTaskHandler {
     }
 
     private InngåendeSaksdokument mapJournalpost(JournalpostMottakDto mottattJournalpost) {
-        JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
-
         Saksnummer saksnummer = mottattJournalpost.getSaksnummer();
         Optional<Fagsak> fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false);
         if (fagsak.isEmpty()) {
@@ -113,7 +110,6 @@ public class UngSakSendInnJournalpostTask implements ProsessTaskHandler {
             .medType(mottattJournalpost.getType())
             .medJournalpostId(mottattJournalpost.getJournalpostId());
 
-        builder.medKanalreferanse(mottattJournalpost.getKanalReferanse());
         builder.medPayload(payload);
 
         LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt())

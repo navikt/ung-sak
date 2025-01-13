@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum Tema implements Kodeverdi {
+public enum OmrådeTema implements Kodeverdi {
 
     FORELDRE_OG_SVANGERSKAPSPENGER("FOR_SVA", "FOR"),
     OMS("OMS", "OMS"), // Omsorgspenger, Pleiepenger og opplæringspenger
@@ -21,8 +21,8 @@ public enum Tema implements Kodeverdi {
     UDEFINERT("-", null),
     ;
 
-    private static final Map<String, Tema> KODER = new LinkedHashMap<>();
-    private static final Map<String, Tema> OFFISIELLE_KODER = new LinkedHashMap<>();
+    private static final Map<String, OmrådeTema> KODER = new LinkedHashMap<>();
+    private static final Map<String, OmrådeTema> OFFISIELLE_KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "TEMA";
 
@@ -42,13 +42,13 @@ public enum Tema implements Kodeverdi {
     @JsonIgnore
     private String offisiellKode;
 
-    private Tema(String kode, String offisiellKode) {
+    private OmrådeTema(String kode, String offisiellKode) {
         this.kode = kode;
         this.offisiellKode = offisiellKode;
     }
 
     @JsonCreator
-    public static Tema fraKode(@JsonProperty("kode") String kode) {
+    public static OmrådeTema fraKode(@JsonProperty("kode") String kode) {
         if (kode == null) {
             return null;
         }
@@ -59,14 +59,14 @@ public enum Tema implements Kodeverdi {
         return ad;
     }
 
-    public static Tema fraKodeDefaultUdefinert(@JsonProperty("kode") String kode) {
+    public static OmrådeTema fraKodeDefaultUdefinert(@JsonProperty("kode") String kode) {
         if (kode == null) {
             return UDEFINERT;
         }
         return KODER.getOrDefault(kode, UDEFINERT);
     }
 
-    public static Tema fraOffisiellKode(String kode) {
+    public static OmrådeTema fraOffisiellKode(String kode) {
         if (kode == null) {
             return UDEFINERT;
         }

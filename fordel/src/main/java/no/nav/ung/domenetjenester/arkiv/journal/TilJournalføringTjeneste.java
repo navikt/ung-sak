@@ -18,7 +18,7 @@ import no.nav.ung.domenetjenester.arkiv.dok.model.Bruker;
 import no.nav.ung.domenetjenester.arkiv.dok.model.BrukerIdType;
 import no.nav.ung.domenetjenester.arkiv.dok.model.OppdaterJournalpostRequest;
 import no.nav.ung.domenetjenester.arkiv.dok.model.Sak;
-import no.nav.ung.fordel.kodeverdi.Tema;
+import no.nav.ung.fordel.kodeverdi.OmrådeTema;
 import no.nav.ung.sak.typer.JournalpostId;
 
 
@@ -36,13 +36,13 @@ public class TilJournalføringTjeneste {
         this.safTjeneste = safTjeneste;
     }
 
-    public boolean tilJournalføring(JournalpostId journalpostId, Optional<String> sakId, Tema tema, String aktørId) {
+    public boolean tilJournalføring(JournalpostId journalpostId, Optional<String> sakId, OmrådeTema områdeTema, String aktørId) {
         LOG.info("Forsøker ferdigstillelse av journalpostId={}, mot sak={}", journalpostId, sakId);
         if (aktørId.isEmpty()) {
             throw new IllegalArgumentException("AktørId er påkrevd");
         }
 
-        oppdaterJournalpost(sakId, journalpostId, aktørId, tema);
+        oppdaterJournalpost(sakId, journalpostId, aktørId, områdeTema);
 
         dokTjeneste.ferdigstillJournalpost(journalpostId);
         return true;
@@ -72,11 +72,11 @@ public class TilJournalføringTjeneste {
     }
 
 
-    private void oppdaterJournalpost(Optional<String> sakId, JournalpostId journalpostId, String aktørId, no.nav.ung.fordel.kodeverdi.Tema tema) {
+    private void oppdaterJournalpost(Optional<String> sakId, JournalpostId journalpostId, String aktørId, OmrådeTema områdeTema) {
         var oppdaterJournalpostRequest = new OppdaterJournalpostRequest();
         var bruker = new Bruker(aktørId, BrukerIdType.AKTOERID);
         oppdaterJournalpostRequest.setBruker(bruker);
-        oppdaterJournalpostRequest.setTema(tema.getOffisiellKode());
+        oppdaterJournalpostRequest.setTema(områdeTema.getOffisiellKode());
 
         Sak sak = new Sak(ARKIV_SAK_SYSTEM, sakId.orElseThrow(), no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype.FAGSAK);
         oppdaterJournalpostRequest.setSak(sak);
