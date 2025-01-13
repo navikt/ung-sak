@@ -12,9 +12,9 @@ import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
 import no.nav.ung.domenetjenester.oppgave.behandlendeenhet.BehandlendeEnhet;
 import no.nav.ung.domenetjenester.oppgave.behandlendeenhet.BehandlendeEnhetService;
-import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
+import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
-import no.nav.ung.fordel.kodeverdi.OmrådeTema;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.VirkedagUtil;
 import no.nav.ung.sak.typer.AktørId;
@@ -61,7 +61,7 @@ public class GosysOppgaveService {
 
         var request = createRestRequestBuilder(
             søkersAktørId,
-            behandlendeEnhet.nummer,
+            behandlendeEnhet.nummer(),
             beskrivelse,
             Prioritet.NORM,
             FRIST_I_DAGER,

@@ -5,7 +5,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.ung.fordel.kodeverdi.FordelBehandlingType;
+import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
 import no.nav.ung.fordel.repo.MeldingRepository;
 import no.nav.ung.fordel.repo.MottattMeldingEntitet;
 

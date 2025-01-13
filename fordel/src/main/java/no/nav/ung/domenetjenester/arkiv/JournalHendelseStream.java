@@ -14,7 +14,7 @@ import jakarta.inject.Inject;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.Topic;
-import no.nav.ung.fordel.kodeverdi.OmrådeTema;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 
 /*
  * Dokumentasjon https://confluence.adeo.no/pages/viewpage.action?pageId=432217859

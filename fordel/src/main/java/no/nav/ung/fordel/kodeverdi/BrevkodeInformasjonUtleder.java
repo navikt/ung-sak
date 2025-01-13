@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
 
 
 public final class BrevkodeInformasjonUtleder {

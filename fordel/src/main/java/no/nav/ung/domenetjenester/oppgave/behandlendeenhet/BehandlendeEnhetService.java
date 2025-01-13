@@ -4,7 +4,7 @@ import java.util.List;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.fordel.kodeverdi.OmrådeTema;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -16,10 +16,10 @@ import no.nav.ung.sak.typer.AktørId;
 public class BehandlendeEnhetService {
 
     private PersoninfoAdapter personinfoAdapter;
-    private EnhetsTjeneste enhetsTjeneste;
+    private no.nav.ung.sak.produksjonsstyring.behandlingenhet.EnhetsTjeneste enhetsTjeneste;
 
     @Inject
-    public BehandlendeEnhetService(PersoninfoAdapter personinfoAdapter, EnhetsTjeneste enhetsTjeneste) {
+    public BehandlendeEnhetService(PersoninfoAdapter personinfoAdapter, no.nav.ung.sak.produksjonsstyring.behandlingenhet.EnhetsTjeneste enhetsTjeneste) {
         this.personinfoAdapter = personinfoAdapter;
         this.enhetsTjeneste = enhetsTjeneste;
     }

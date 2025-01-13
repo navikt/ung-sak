@@ -16,9 +16,11 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
+import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
@@ -33,10 +35,6 @@ public class EnhetsTjeneste {
         OrganisasjonsEnhet enhetKlage;
         List<OrganisasjonsEnhet> alleBehandlendeEnheter;
         LocalDate sisteInnhenting = LocalDate.MIN;
-
-        Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(String enhetId) {
-            return alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
-        }
     }
 
     private static final String NK_ENHET_ID = "4292";
@@ -79,21 +77,20 @@ public class EnhetsTjeneste {
         return Optional.empty();
     }
 
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkRegistrerteRelasjoner(FagsakYtelseType ytelseType,
-                                                                         String enhetId,
-                                                                         AktørId hovedAktør,
-                                                                         Collection<AktørId> alleAktører) {
-        var cacheEntry = oppdaterEnhetCache(ytelseType);
-        if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || NK_ENHET_ID.equals(enhetId)) {
-            return Optional.empty();
-        }
-        if (harNoenDiskresjonskode6(alleAktører)) {
-            return Optional.of(cacheEntry.enhetKode6);
-        }
-        if (cacheEntry.finnOrganisasjonsEnhet(enhetId).isEmpty()) {
-            return Optional.of(hentEnhetSjekkKunAktør(hovedAktør, ytelseType));
-        }
-        return Optional.empty();
+    public List<OrganisasjonsEnhet> hentFordelingEnhetId(OmrådeTema områdeTema, BehandlingTema behandlingsTema, GeografiskTilknytning geo) {
+        var request = ArbeidsfordelingRequest.ny()
+            .medTema(områdeTema.getOffisiellKode())
+            .medBehandlingstema(behandlingsTema == null ? null : behandlingsTema.getOffisiellKode())
+            .medDiskresjonskode(geo.getDiskresjonskode().getKode())
+            .medGeografiskOmraade(geo.getTilknytning())
+            .build();
+
+        return arbeidsfordelingTjeneste
+            .finnEnhet(request)
+            .stream()
+            .filter(response -> "AKTIV".equalsIgnoreCase(response.getStatus()))
+            .map(r -> new OrganisasjonsEnhet(r.getEnhetNr(), r.getEnhetNavn()))
+            .collect(Collectors.toList());
     }
 
     OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {

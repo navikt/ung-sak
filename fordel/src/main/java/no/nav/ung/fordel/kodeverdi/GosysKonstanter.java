@@ -3,16 +3,6 @@ package no.nav.ung.fordel.kodeverdi;
 public class GosysKonstanter {
     private GosysKonstanter() {}
 
-    public enum TemaGruppe {
-        FAMILIE("FMLI");
-        final String dto;
-        TemaGruppe(String dto) {
-            this.dto = dto;
-        }
-        public String getKode() {
-            return dto;
-        }
-    }
     public enum OppgaveType {
         GENERELL("GEN"),
         JOURNALFØRING("JFR"),
@@ -35,13 +25,7 @@ public class GosysKonstanter {
             return null;
         }
     }
-    public enum Prioritet {
-        NORMAL("NORM");
-        final String dto;
-        Prioritet(String dto) {
-            this.dto = dto;
-        }
-    }
+
     public enum Fagsaksystem {
         INFOTRYGD("IT00"),
         K9("FS39");
@@ -63,20 +47,5 @@ public class GosysKonstanter {
             return null;
         }
     }
-    public enum JournalpostSystem {
-        JOARK("AS36");
-        final String dto;
-        JournalpostSystem(String dto) {
-            this.dto = dto;
-        }
-    }
 
-    public enum Status {
-        FERDIGSTILT("FERDIGSTILT"),
-        FEILREGISTRERT("FEILREGISTRERT");
-        final String dto;
-        Status(String dto) {
-            this.dto = dto;
-        }
-    }
 }
