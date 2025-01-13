@@ -47,20 +47,9 @@ public class UngdomsytelseStartdatoer extends BaseEntitet {
         // hibernate
     }
 
-    public UngdomsytelseStartdatoer(UngdomsytelseStartdatoer periode) {
-        this.startdatoer = periode.getStartdatoer()
-            .stream()
-            .map(UngdomsytelseSøktStartdato::new)
-            .collect(Collectors.toSet());
-        // hibernate
-    }
-
-    public UngdomsytelseStartdatoer(UngdomsytelseSøktStartdato... startdatoer) {
-        this(Arrays.asList(startdatoer));
-    }
 
     public UngdomsytelseStartdatoer(Collection<UngdomsytelseSøktStartdato> startdatoer) {
-        this.startdatoer = new LinkedHashSet<>(Objects.requireNonNull(startdatoer));
+        this.startdatoer = startdatoer.stream().map(UngdomsytelseSøktStartdato::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Long getId() {

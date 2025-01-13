@@ -59,7 +59,7 @@ class VilkårDtoMapper {
         if (aktuelleVilkårsperioder == null) {
             return false;
         }
-        boolean match = aktuelleVilkårsperioder.contains(vilkårPeriode.getPeriode());
+        boolean match = aktuelleVilkårsperioder.stream().anyMatch(p -> p.overlapper(vilkårPeriode.getPeriode()));
         if (match) {
             return true;
         }
