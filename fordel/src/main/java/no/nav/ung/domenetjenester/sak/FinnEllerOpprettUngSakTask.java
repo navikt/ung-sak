@@ -9,8 +9,11 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.ung.fordel.handler.FordelProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
-import no.nav.ung.fordel.repo.MeldingRepository;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.kontrakt.søknad.innsending.InnsendingInnhold;
+import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
+import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadInnsending;
 import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
@@ -25,7 +28,7 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
 
     @Inject
     public FinnEllerOpprettUngSakTask(FordelProsessTaskTjeneste fordelProsessTaskTjeneste,
-                                      UngdomsytelseSøknadMottaker søknadMottakTjenester) {
+                                      @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) UngdomsytelseSøknadMottaker søknadMottakTjenester) {
         super(fordelProsessTaskTjeneste);
         this.søknadMottakTjenester = søknadMottakTjenester;
     }

@@ -331,13 +331,13 @@
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.ung.sak.ytelse</groupId>
-                <artifactId>ytelse-ung</artifactId>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>formidling</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>formidling</artifactId>
+                <artifactId>fordel</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -23,7 +23,7 @@ import jakarta.inject.Inject;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.domenetjenester.arkiv.test.VtpKafkaAvroSerde;
+import no.nav.ung.domenetjenester.personhendelser.test.VtpKafkaAvroSerde;
 import no.nav.ung.fordel.kafka.Topic;
 
 @Dependent

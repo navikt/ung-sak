@@ -136,6 +136,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
+            <artifactId>fordel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>tilgangskontroll</artifactId>
         </dependency>
 
