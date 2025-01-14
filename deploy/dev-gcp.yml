@@ -222,7 +222,7 @@ spec:
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
     - name : SKJERMET_PERSON_URL
-      value : https://skjermede-personer-pip.dev.intern.nav.no/skjermet
+      value : https://skjermede-personer-pip.intern.dev.nav.no/skjermet
     - name : SKJERMET_PERSON_SCOPE
       value : api://dev-gcp.nom.skjermede-personer-pip/.default
     # Saf
