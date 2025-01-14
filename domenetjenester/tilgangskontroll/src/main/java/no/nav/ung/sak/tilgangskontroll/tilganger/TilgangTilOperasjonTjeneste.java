@@ -43,7 +43,7 @@ public class TilgangTilOperasjonTjeneste {
     }
 
     private static Set<IkkeTilgangÅrsak> sjekkTilgangTilLesFagsak(TilgangerBruker tilganger) {
-        return tilganger.kanVeilede() || tilganger.kanSaksbehandle() ? Set.of() : Set.of(IkkeTilgangÅrsak.HAR_IKKE_TILGANG_Å_LESE_FAGSAK);
+        return tilganger.kanVeilede() || tilganger.kanSaksbehandle() ? Set.of() : Set.of(IkkeTilgangÅrsak.ER_IKKE_VEILEDER_ELLER_SAKSBEHANDLER);
     }
 
     private static Set<IkkeTilgangÅrsak> sjekkTilgangTilOppdaterFagsak(TilgangerBruker tilganger, TilgangsbeslutningInput.Saksinformasjon saksinformasjon) {

@@ -2,7 +2,6 @@ package no.nav.ung.sak.tilgangskontroll.tilganger;
 
 public enum IkkeTilgangÅrsak {
     HAR_IKKE_TILGANG_TIL_APPLIKASJONEN,
-    HAR_IKKE_TILGANG_Å_LESE_FAGSAK,
     ER_IKKE_BESLUTTER,
     ER_IKKE_SAKSBEHANDLER,
     ER_IKKE_OVERSTYRER,
