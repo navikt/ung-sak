@@ -49,7 +49,7 @@ public class PolicyDecisionPoint {
     }
 
     private Set<IkkeTilgangÅrsak> sjekkTilganger(TilgangerBruker tilganger, TilgangsbeslutningInput input) {
-        Set<IkkeTilgangÅrsak> valideringsfeil = validerInpt(input);
+        Set<IkkeTilgangÅrsak> valideringsfeil = validerInput(input);
         if (!valideringsfeil.isEmpty()) {
             return valideringsfeil;
         }
@@ -60,7 +60,7 @@ public class PolicyDecisionPoint {
         return ikkeTilgangÅrsaker;
     }
 
-    private static Set<IkkeTilgangÅrsak> validerInpt(TilgangsbeslutningInput input) {
+    private static Set<IkkeTilgangÅrsak> validerInput(TilgangsbeslutningInput input) {
         if (input.getOperasjon().getResource() == TilgangsbeslutningInput.ResourceType.FAGSAK && input.getAktørIder().isEmpty() && input.getPersonIdenter().isEmpty()) {
             logger.warn("Har fagsak-resource, men fikk ikke noen personer. Gir ikke tilgang.");
             return Set.of(IkkeTilgangÅrsak.TEKNISK_FEIL);
