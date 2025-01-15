@@ -7087,6 +7087,45 @@
         }
       }
     },
+    "/health/isAlive" : {
+      "get" : {
+        "operationId" : "isAlive",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/health/isReady" : {
+      "get" : {
+        "operationId" : "isReady",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/health/preStop" : {
+      "get" : {
+        "operationId" : "preStop",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
     "/historikk" : {
       "get" : {
         "description" : "Henter alle historikkinnslag for en gitt sak.",
