@@ -150,7 +150,7 @@ class BrevGenerererTjenesteTest {
 
         assertThat(erPdf(generertBrev.dokument().pdf())).isTrue();
         if (System.getenv("LAGRE_PDF") != null) {
-            PdfUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
+            BrevUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
         }
 
         PdlPerson mottaker = generertBrev.mottaker();
@@ -162,7 +162,7 @@ class BrevGenerererTjenesteTest {
         assertThat(generertBrev.malType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
 
         var brevtekst = generertBrev.dokument().html();
-        assertThatHtml(brevtekst).contains("Til: " + navn);
+        assertThatHtml(brevtekst).containsText("Til: " + navn);
 
     }
 
@@ -197,7 +197,7 @@ class BrevGenerererTjenesteTest {
 
         assertThat(erPdf(generertBrev.dokument().pdf())).isTrue();
         if (System.getenv("LAGRE_PDF") != null) {
-            PdfUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
+            BrevUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
         }
 
         PdlPerson mottaker = generertBrev.mottaker();
@@ -209,7 +209,7 @@ class BrevGenerererTjenesteTest {
         assertThat(generertBrev.malType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
 
         var brevtekst = generertBrev.dokument().html();
-        assertThatHtml(brevtekst).contains("Til: " + navn);
+        assertThatHtml(brevtekst).containsText("Til: " + navn);
 
     }
 
