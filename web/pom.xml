@@ -15,7 +15,7 @@
 
     <properties>
         <swagger-ui.version>5.18.2</swagger-ui.version>
-        <jetty.version>12.0.15</jetty.version>
+        <jetty.version>12.0.16</jetty.version>
     </properties>
 
 
@@ -120,13 +120,19 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
+            <artifactId>perioder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>ungdomsprogram</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>hendelsemottak</artifactId>
         </dependency>
-
-        <!-- Ytelsespesifikke moduler -->
         <dependency>
-            <groupId>no.nav.k9.sak.ytelse</groupId>
-            <artifactId>ytelse-ung</artifactId>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>formidling</artifactId>
         </dependency>
 
 
@@ -292,6 +298,10 @@
             <groupId>no.nav.k9.felles.sikkerhet</groupId>
             <artifactId>k9-felles-sikkerhet-testutilities</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>mottak</artifactId>
         </dependency>
     </dependencies>
 

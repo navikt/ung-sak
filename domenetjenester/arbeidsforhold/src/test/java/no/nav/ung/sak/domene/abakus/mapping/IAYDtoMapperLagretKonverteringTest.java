@@ -1,13 +1,20 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.ung.kodeverk.Fagsystem;
-import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.ung.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -22,14 +29,6 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.typer.Saksnummer;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class IAYDtoMapperLagretKonverteringTest {
 
@@ -59,39 +58,12 @@ public class IAYDtoMapperLagretKonverteringTest {
             new Opptjeningsnøkkel(null, ORGNR, null));
         var inntektspostBuilder = inntektBuilder.getInntektspostBuilder();
 
-        var aktørArbeidBuilder = aggregatBuilder.getAktørArbeidBuilder(aktørId);
-        var yrkesaktivitetBuilder = aktørArbeidBuilder.getYrkesaktivitetBuilderForNøkkelAvType(
-            new Opptjeningsnøkkel(null, ORGNR, null),
-            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-
         var aktørYtelseBuilder = aggregatBuilder.getAktørYtelseBuilder(aktørId);
         aktørYtelseBuilder.leggTilYtelse(lagYtelse());
-
-        var aktivitetsAvtaleBuilder = yrkesaktivitetBuilder.getAktivitetsAvtaleBuilder();
-        var permisjonBuilder = yrkesaktivitetBuilder.getPermisjonBuilder();
 
         var fraOgMed = DATO.minusWeeks(1);
         var tilOgMed = DATO.plusMonths(1);
 
-        var permisjon = permisjonBuilder
-            .medProsentsats(BigDecimal.valueOf(100))
-            .medPeriode(fraOgMed, tilOgMed)
-            .medPermisjonsbeskrivelseType(PermisjonsbeskrivelseType.PERMISJON)
-            .build();
-
-        var aktivitetsAvtale = aktivitetsAvtaleBuilder
-            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed))
-            .medSisteLønnsendringsdato(fraOgMed);
-
-        var yrkesaktivitet = yrkesaktivitetBuilder
-            .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-            .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
-            .leggTilAktivitetsAvtale(aktivitetsAvtale)
-            .leggTilPermisjon(permisjon)
-            .build();
-
-        var aktørArbeid = aktørArbeidBuilder
-            .leggTilYrkesaktivitet(yrkesaktivitetBuilder);
 
         var inntektspost = inntektspostBuilder
             .medBeløp(BigDecimal.TEN)
@@ -101,14 +73,13 @@ public class IAYDtoMapperLagretKonverteringTest {
 
         inntektBuilder
             .leggTilInntektspost(inntektspost)
-            .medArbeidsgiver(yrkesaktivitet.getArbeidsgiver())
+            .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
             .medInntektsKilde(InntektsKilde.INNTEKT_OPPTJENING);
 
         InntektArbeidYtelseAggregatBuilder.AktørInntektBuilder aktørInntekt = aktørInntektBuilder
             .leggTilInntekt(inntektBuilder);
 
         aggregatBuilder.leggTilAktørInntekt(aktørInntekt);
-        aggregatBuilder.leggTilAktørArbeid(aktørArbeid);
         aggregatBuilder.leggTilAktørYtelse(aktørYtelseBuilder);
 
         iayTjeneste.lagreIayAggregat(behandlingId, aggregatBuilder);
@@ -127,9 +98,9 @@ public class IAYDtoMapperLagretKonverteringTest {
     private YtelseBuilder lagYtelse() {
         Saksnummer sakId = new Saksnummer("1200094");
         YtelseBuilder ytelselseBuilder = YtelseBuilder.oppdatere(Optional.empty())
-                .medKilde(Fagsystem.K9SAK)  // FIXME: Bytt til UNG_SAK når det er støttet
-                .medYtelseType(FagsakYtelseType.SYKEPENGER)
-                .medSaksnummer(sakId);
+            .medKilde(Fagsystem.K9SAK)  // FIXME: Bytt til UNG_SAK når det er støttet
+            .medYtelseType(FagsakYtelseType.SYKEPENGER)
+            .medSaksnummer(sakId);
 
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder.medKilde(Fagsystem.INFOTRYGD)

@@ -26,9 +26,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.søknadsfrist.SøknadsfristTilstandDto;
-import no.nav.ung.sak.perioder.KravDokument;
-import no.nav.ung.sak.perioder.SøknadsfristTjenesteProvider;
-import no.nav.ung.sak.perioder.VurdertSøktPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
+import no.nav.ung.sak.søknadsfrist.KravDokument;
+import no.nav.ung.sak.søknadsfrist.SøknadsfristTjenesteProvider;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 @ApplicationScoped

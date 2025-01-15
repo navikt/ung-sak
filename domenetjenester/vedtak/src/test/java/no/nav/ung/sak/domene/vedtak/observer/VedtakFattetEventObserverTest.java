@@ -23,16 +23,17 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
-import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
+import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.BrevbestillingTask;
 import no.nav.ung.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -69,7 +70,7 @@ public class VedtakFattetEventObserverTest {
         assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
             .flatMap(Collection::stream)
             .map(it -> it.getTask().getTaskType()))
-            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, PubliserVedtakHendelseTask.TASKTYPE);
+            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, BrevbestillingTask.TASKTYPE);
     }
 
     @Test
@@ -89,7 +90,7 @@ public class VedtakFattetEventObserverTest {
         assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
             .flatMap(Collection::stream)
             .map(it -> it.getTask().getTaskType()))
-            .containsExactly(PubliserVedtakHendelseTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
+            .containsExactly(BrevbestillingTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
     private Behandling lagBehandling() {

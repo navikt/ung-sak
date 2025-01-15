@@ -13,10 +13,6 @@ public class Opptjeningsnøkkel {
     private String orgNummer;
     private String aktørId;
 
-    public Opptjeningsnøkkel(Yrkesaktivitet yrkesaktivitet) {
-        this(yrkesaktivitet.getArbeidsforholdRef(), yrkesaktivitet.getArbeidsgiver());
-    }
-
     public Opptjeningsnøkkel(Arbeidsgiver arbeidsgiver) {
         this(null, arbeidsgiver);
     }

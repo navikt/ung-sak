@@ -44,6 +44,9 @@ public class KodeverdiEnumLogFilter extends Filter<ILoggingEvent> {
 
     @Override
     public FilterReply decide(final ILoggingEvent event) {
+        if (event.getArgumentArray() == null){
+            return FilterReply.NEUTRAL;
+        }
         for(int i = 0; i < event.getArgumentArray().length; i++) {
             final Object arg = event.getArgumentArray()[i];
             // Her kan vi avgrense til enkelte klasser viss vi ønsker

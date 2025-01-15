@@ -1,0 +1,94 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>no.nav.ung.sak</groupId>
+		<artifactId>ung-sak</artifactId>
+		<version>${revision}${sha1}${changelist}</version>
+	</parent>
+
+	<artifactId>formidling</artifactId>
+	<packaging>jar</packaging>
+	<name>ung-sak :: Formidling </name>
+
+    <dependencies>
+		<dependency>
+			<groupId>no.nav.k9.felles</groupId>
+			<artifactId>k9-felles-db</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.ung.sak</groupId>
+			<artifactId>domenetjenester-bom</artifactId>
+		</dependency>
+        <!-- PDFGEN -->
+        <dependency>
+            <groupId>no.nav.pdfgen</groupId>
+            <artifactId>pdfgen-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.verapdf</groupId>
+                    <artifactId>validation-model</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- TODO flytt til parent eller hent transitativt -->
+        <dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+        <!-- TODO flytt til parent eller hent transitativt -->
+        <dependency>
+            <groupId>org.verapdf</groupId>
+            <artifactId>validation-model-jakarta</artifactId>
+            <version>1.26.5</version>
+        </dependency>
+
+		<!-- Test avhengigheter -->
+		<dependency>
+			<groupId>no.nav.ung.sak</groupId>
+			<artifactId>behandlingslager-testutilities</artifactId>
+			<scope>test</scope>
+		</dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>pdfgen/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-pdfgen-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

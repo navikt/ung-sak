@@ -1,13 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.kodeverk;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.kodeverk.uttak.UtenlandsoppholdÅrsak;
-import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
-import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
-import org.junit.jupiter.api.Test;
-import org.opentest4j.AssertionFailedError;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,7 +8,15 @@ import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
+import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 
 /**
  * Meininga med denne er å teste at serialisering og deserialisering av Kodeverdi typer fungerer, både
@@ -31,8 +32,8 @@ public class StatiskeKodeverdierDeSerialiseringTest {
     private final ObjectMapper openapiMapper = omr.getOpenapiObjektMapper();
 
     // Disse er allereie som standard serialisert som rein kode string
-    private static final String[] notDefaultObjectSerialized = new String[] {
-        UtenlandsoppholdÅrsak.KODEVERK, ÅrsakTilVurdering.ENDRING_FRA_BRUKER.getKodeverk(),
+    private static final String[] notDefaultObjectSerialized = new String[]{
+        ÅrsakTilVurdering.ENDRING_FRA_BRUKER.getKodeverk(),
     };
 
     private boolean isDefaultObjectSerialized(final Kodeverdi kv) {
@@ -41,7 +42,7 @@ public class StatiskeKodeverdierDeSerialiseringTest {
 
     private <KV extends Kodeverdi> void checkDefaultObjectMapperKodeverdi(KV kv) throws JsonProcessingException {
         final String serialisert = defaultObjektMapper.writeValueAsString(kv);
-        if(isDefaultObjectSerialized(kv)) {
+        if (isDefaultObjectSerialized(kv)) {
             assertThat(serialisert).startsWith("{");
             assertThat(serialisert).containsIgnoringWhitespaces("\"kode\": \"" + kv.getKode() + "\"");
             assertThat(serialisert).endsWith("}");
@@ -74,7 +75,7 @@ public class StatiskeKodeverdierDeSerialiseringTest {
         final boolean isAnon = kv.getClass().isAnonymousClass();
         final Class<?> cls = isAnon ? kv.getClass().getEnclosingClass() : kv.getClass();
         final boolean isEnum = cls.isEnum();
-        if(isEnum) {
+        if (isEnum) {
             try {
                 assertThat(serialisert)
                     .as("kodeverk: %s, klasse: %s toString ikkje lik", kv.getKodeverk(), cls.getSimpleName())
@@ -97,12 +98,12 @@ public class StatiskeKodeverdierDeSerialiseringTest {
     public void testAlleStatiske() throws IllegalAccessException, JsonProcessingException, NoSuchFieldException, InvocationTargetException {
         final StatiskeKodeverdier alle = StatiskeKodeverdier.alle;
         final RecordComponent[] comps = StatiskeKodeverdier.class.getRecordComponents();
-        for(var comp : comps) {
+        for (var comp : comps) {
             final Method accessor = comp.getAccessor();
-            if(accessor.getReturnType() == java.util.Set.class) {
-                final Set<?> set = (Set<?>)accessor.invoke(alle);
-                for(Object o : set) {
-                    if(o instanceof Kodeverdi) {
+            if (accessor.getReturnType() == java.util.Set.class) {
+                final Set<?> set = (Set<?>) accessor.invoke(alle);
+                for (Object o : set) {
+                    if (o instanceof Kodeverdi) {
                         checkDefaultObjectMapperKodeverdi((Kodeverdi) o);
                         checkStringObjectMapperKodeverdi((Kodeverdi) o);
                         checkOpenapiObjectMapperKodeverdi((Kodeverdi) o);

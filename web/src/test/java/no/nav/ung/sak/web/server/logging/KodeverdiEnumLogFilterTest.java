@@ -75,6 +75,28 @@ public class KodeverdiEnumLogFilterTest {
     }
 
     @Test
+    void testIngenArgumenter() {
+        log.error("hei");
+        assertThat(appender.list)
+            .extracting(ILoggingEvent::getFormattedMessage)
+            .containsExactly("hei");
+    }
+
+
+    @Test
+    void testStacktrace() {
+        try {
+            throw new IllegalArgumentException("Boo");
+        } catch (IllegalArgumentException e) {
+            log.warn("Feilet med exception", e);
+        }
+        assertThat(appender.list).hasSize(1);
+        assertThat(appender.list.getFirst().getFormattedMessage()).isEqualTo("Feilet med exception");
+        assertThat(appender.list.getFirst().getThrowableProxy().getMessage()).isEqualTo("Boo");
+        assertThat(appender.list.getFirst().getThrowableProxy().getClassName()).isEqualTo(IllegalArgumentException.class.getName());
+    }
+
+    @Test
     public void testLoggingAvKodeverdiSet() {
         final Set<Kodeverdi> set = new OrderedHashSet<>();
         final var enum1 = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;

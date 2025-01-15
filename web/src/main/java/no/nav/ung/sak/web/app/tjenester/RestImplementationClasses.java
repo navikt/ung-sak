@@ -12,8 +12,6 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.OverlapendeYtelserRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
@@ -25,11 +23,11 @@ import no.nav.ung.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRe
 import no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.brukerdialog.BrukerdialogRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.formidling.FormidlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
@@ -59,6 +57,7 @@ public class RestImplementationClasses {
         classes.add(BehandlingBackendRestTjeneste.class);
         classes.add(AksjonspunktRestTjeneste.class);
         classes.add(DokumentRestTjeneste.class);
+        classes.add(FormidlingRestTjeneste.class);
         classes.add(HistorikkRestTjeneste.class);
         classes.add(KodeverkRestTjeneste.class);
         classes.add(SøknadsfristRestTjeneste.class);
@@ -69,8 +68,6 @@ public class RestImplementationClasses {
         classes.add(PerioderTilBehandlingMedKildeRestTjeneste.class);
         classes.add(PersonRestTjeneste.class);
         classes.add(SøknadRestTjeneste.class);
-        classes.add(InntektArbeidYtelseRestTjeneste.class);
-        classes.add(ArbeidsgiverRestTjeneste.class);
         classes.add(VilkårRestTjeneste.class);
         classes.add(IntegrasjonstatusRestTjeneste.class);
         classes.add(PipRestTjeneste.class);
@@ -81,7 +78,6 @@ public class RestImplementationClasses {
         classes.add(OverlapendeYtelserRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);
         classes.add(LosRestTjeneste.class);
-        classes.add(BrukerdialogRestTjeneste.class);
 
         classes.add(UngdomsytelseRestTjeneste.class);
 

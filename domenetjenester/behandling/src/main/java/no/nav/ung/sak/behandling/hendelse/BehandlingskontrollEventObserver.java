@@ -187,9 +187,7 @@ public class BehandlingskontrollEventObserver {
             behandling.getType(),
             behandling.getBehandlingstidFrist(),
             fagsak.getPeriode().tilPeriode(),
-            fagsak.getAktørId(),
-            fagsak.getPleietrengendeAktørId(),
-            fagsak.getRelatertPersonAktørId()
+            fagsak.getAktørId()
         );
 
         taskData.setPayload(dtoTilJson(dto));

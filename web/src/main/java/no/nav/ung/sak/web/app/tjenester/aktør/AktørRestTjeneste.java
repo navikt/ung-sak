@@ -92,12 +92,9 @@ public class AktørRestTjeneste {
                         f.getStatus(),
                         periode,
                         personDto,
-                        f.getPleietrengendeAktørId(),
-                        f.getRelatertPersonAktørId(),
                         null,
-                        f.getSkalTilInfotrygd(),
                         f.getOpprettetTidspunkt(),
-                        f.getEndretTidspunkt(), false)
+                        f.getEndretTidspunkt())
                     );
                 }
                 aktoerInfoDto.setFagsaker(fagsakDtoer);

@@ -11,7 +11,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
-import no.nav.ung.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.ung.sak.domene.iay.modell.Ytelse;
 import no.nav.ung.sak.domene.iay.modell.YtelseFilter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -30,71 +29,6 @@ public class IAYGrunnlagDiff {
 
     public DiffResult diffResultat(boolean onlyCheckTrackedFields) {
         return new IAYDiffsjekker(onlyCheckTrackedFields).getDiffEntity().diff(grunnlag1, grunnlag2);
-    }
-
-    public boolean erEndringPåInntektsmelding() {
-        var eksisterende = Optional.ofNullable(grunnlag1).flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger);
-        var nye = Optional.ofNullable(grunnlag2).flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger);
-
-        // quick check
-        if (eksisterende.isPresent() != nye.isPresent()) {
-            return true;
-        } else if (eksisterende.isEmpty()) {
-            return false;
-        } else {
-            if (eksisterende.get().getAlleInntektsmeldinger().size() != nye.get().getAlleInntektsmeldinger().size()) {
-                return true;
-            } else {
-                DiffResult diff = new IAYDiffsjekker().getDiffEntity().diff(eksisterende.get(), nye.get());
-                return !diff.isEmpty();
-            }
-        }
-    }
-
-    public boolean erEndringPåAktørArbeidForAktør(LocalDate skjæringstidspunkt, AktørId aktørId) {
-        var eksisterendeAktørArbeid = Optional.ofNullable(grunnlag1).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
-        var nyAktørArbeid = Optional.ofNullable(grunnlag2).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
-
-        // quick check
-        if (eksisterendeAktørArbeid.isPresent() != nyAktørArbeid.isPresent()) {
-            return true;
-        } else if (eksisterendeAktørArbeid.isEmpty()) {
-            return false;
-        } else {
-            var eksisterendeFilter = new YrkesaktivitetFilter(null, eksisterendeAktørArbeid).før(skjæringstidspunkt);
-            var nyFilter = new YrkesaktivitetFilter(null, nyAktørArbeid).før(skjæringstidspunkt);
-            if (eksisterendeFilter.getYrkesaktiviteter().size() != nyFilter.getYrkesaktiviteter().size()
-                || eksisterendeFilter.getAnsettelsesPerioder().size() != nyFilter.getAnsettelsesPerioder().size()) {
-                return true;
-            }
-        }
-
-        // deep check
-        DiffResult diff = new IAYDiffsjekker().getDiffEntity().diff(eksisterendeAktørArbeid.get(), nyAktørArbeid.get());
-        return !diff.isEmpty();
-    }
-
-    public boolean erEndringPåAktørArbeidForAktør(DatoIntervallEntitet periode, AktørId aktørId) {
-        var eksisterendeAktørArbeid = Optional.ofNullable(grunnlag1).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
-        var nyAktørArbeid = Optional.ofNullable(grunnlag2).flatMap(it -> it.getAktørArbeidFraRegister(aktørId));
-
-        // quick check
-        if (eksisterendeAktørArbeid.isPresent() != nyAktørArbeid.isPresent()) {
-            return true;
-        } else if (eksisterendeAktørArbeid.isEmpty()) {
-            return false;
-        } else {
-            var eksisterendeFilter = new YrkesaktivitetFilter(null, eksisterendeAktørArbeid).i(periode);
-            var nyFilter = new YrkesaktivitetFilter(null, nyAktørArbeid).i(periode);
-            if (eksisterendeFilter.getYrkesaktiviteter().size() != nyFilter.getYrkesaktiviteter().size()
-                || eksisterendeFilter.getAnsettelsesPerioder().size() != nyFilter.getAnsettelsesPerioder().size()) {
-                return true;
-            }
-        }
-
-        // deep check
-        DiffResult diff = new IAYDiffsjekker().getDiffEntity().diff(eksisterendeAktørArbeid.get(), nyAktørArbeid.get());
-        return !diff.isEmpty();
     }
 
     public boolean erEndringPåAktørInntektForAktør(LocalDate skjæringstidspunkt, AktørId aktørId) {

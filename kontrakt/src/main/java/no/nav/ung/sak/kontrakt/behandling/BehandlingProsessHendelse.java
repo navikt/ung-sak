@@ -189,20 +189,6 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "fagsakPeriode", required = false)
     private Periode fagsakPeriode;
 
-    /**
-     * (Optional) AktørId for angitt pleietrengende (barn, eller nærstående).
-     */
-    @Valid
-    @JsonProperty(value = "pleietrengendeAktørId")
-    private AktørId pleietrengendeAktørId;
-
-    /**
-     * (Optional) AktørId for angitt relatert annen part (eks. annen forelder.
-     */
-    @Valid
-    @JsonProperty(value = "relatertPartAktørId", required = false)
-    private AktørId relatertPartAktørId;
-
     @Valid
     @JsonProperty(value = "aksjonspunktTilstander", required = true)
     private List<AksjonspunktTilstandDto> aksjonspunktTilstand;
@@ -252,8 +238,6 @@ public class BehandlingProsessHendelse {
         this.aksjonspunktKoderMedStatusListe = kopierFra.aksjonspunktKoderMedStatusListe;
         this.ansvarligSaksbehandlerForTotrinn = kopierFra.ansvarligSaksbehandlerForTotrinn;
         this.fagsakPeriode = kopierFra.fagsakPeriode;
-        this.pleietrengendeAktørId = kopierFra.pleietrengendeAktørId;
-        this.relatertPartAktørId = kopierFra.relatertPartAktørId;
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
         this.nyeKrav = kopierFra.nyeKrav;
@@ -458,16 +442,6 @@ public class BehandlingProsessHendelse {
 
         public Builder medFagsakPeriode(Periode periode) {
             kladd.fagsakPeriode = periode;
-            return this;
-        }
-
-        public Builder medRelatertPartAktørId(AktørId aktørId) {
-            kladd.relatertPartAktørId = aktørId;
-            return this;
-        }
-
-        public Builder medPleietrengendeAktørId(AktørId aktørId) {
-            kladd.pleietrengendeAktørId = aktørId;
             return this;
         }
 

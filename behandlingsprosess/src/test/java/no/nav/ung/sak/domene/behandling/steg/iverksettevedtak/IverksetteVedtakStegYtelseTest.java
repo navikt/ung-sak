@@ -18,7 +18,6 @@ import org.mockito.quality.Strictness;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -78,9 +77,6 @@ public class IverksetteVedtakStegYtelseTest {
     private OppgaveTjeneste oppgaveTjeneste;
 
     @Mock
-    private InfotrygdFeedService infotrygdFeedService;
-
-    @Mock
     private StønadstatistikkService stønadstatistikkService;
 
     private IverksetteVedtakSteg iverksetteVedtakSteg;
@@ -95,7 +91,7 @@ public class IverksetteVedtakStegYtelseTest {
         historikkRepository = repositoryProvider.getHistorikkRepository();
 
 
-        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, false));
+        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, stønadstatistikkService));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse);

@@ -40,7 +40,6 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     // Endringer på felles opplysninger om nattevåk/beredskap
     REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON("REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "Endring i felles opplysninger om nattevåk/beredskap"),
     HENDELSE_DØD_BRUKER("HENDELSE_DØD_BRUKER", "Dødsfall bruker"),
-    HENDELSE_DØD_PLEIETRENGENDE("HENDELSE_DØD_PLEIETRENGENDE", "Dødsfall pleietrengende"),
     // Vurderes på nytt pga G_REGULERING
     G_REGULERING("G_REGULERING", "G-regulering"),
     REVURDERER_BEREGNING("REVURDERER_BEREGNING", "Endring opplysninger som påvirker beregningsgrunnlaget."),
@@ -63,7 +62,6 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON);
         sammenheng.put(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON);
         sammenheng.put(BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON, REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON);
-        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, HENDELSE_DØD_PLEIETRENGENDE);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER);
         sammenheng.put(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING, REVURDERER_NY_INNTEKTSMELDING);
         sammenheng.put(BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK, REVURDERER_ENDRING_FERIEPENGER);

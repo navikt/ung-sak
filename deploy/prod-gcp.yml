@@ -119,10 +119,6 @@ spec:
       value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
       value: teamforeldrepenger.familie-vedtakfattet-v1
-    - name: KAFKA_VEDTAKHENDELSE_TOPIC
-      value: privat-ung-vedtakhendelse
-    - name: KAFKA_VEDTAKHENDELSE_AIVEN_TOPIC
-      value: k9saksbehandling.ung-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-ung-stonadstatistikk-v1
     - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
@@ -197,11 +193,19 @@ spec:
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
 
-    # Graphql services
+    # Saf
     - name: SAF_BASE_URL
       value: https://saf.prod-fss-pub.nais.io
     - name: SAF_SCOPE
       value: api://prod-fss.teamdokumenthandtering.saf/.default
+    - name: DOKDISTFORDELING_URL
+      value: https://dokdistfordeling.prod-fss-pub.nais.io/rest/v1
+    - name: DOKDISTFORDELING_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.saf/.default
+    - name: DOKARKIV_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1
+    - name: DOKARKIV_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
 
     # Sikkerhet:
     - name: CLIENT_SCOPE

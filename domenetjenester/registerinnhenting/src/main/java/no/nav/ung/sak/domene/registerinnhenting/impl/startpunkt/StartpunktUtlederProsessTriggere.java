@@ -1,10 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl.startpunkt;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Objects;
@@ -27,10 +22,7 @@ import no.nav.ung.sak.trigger.Trigger;
 
 @ApplicationScoped
 @GrunnlagRef(ProsessTriggere.class)
-@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
-@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef
 class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
 
     private static final Logger log = LoggerFactory.getLogger(StartpunktUtlederProsessTriggere.class);
