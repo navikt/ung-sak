@@ -1,12 +1,12 @@
-package no.nav.ung.sak.tilgangskontroll.rest.pdl;
+package no.nav.ung.sak.tilgangskontroll.integrasjon.pdl;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.sak.tilgangskontroll.rest.pdl.dto.AdressebeskyttelseGradering;
-import no.nav.ung.sak.tilgangskontroll.rest.pdl.dto.PipPerson;
+import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.AdressebeskyttelseGradering;
+import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.PipPerson;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;

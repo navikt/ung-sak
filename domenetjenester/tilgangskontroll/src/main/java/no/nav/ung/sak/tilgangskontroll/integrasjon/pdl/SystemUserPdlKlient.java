@@ -1,4 +1,4 @@
-package no.nav.ung.sak.tilgangskontroll.rest.pdl;
+package no.nav.ung.sak.tilgangskontroll.integrasjon.pdl;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

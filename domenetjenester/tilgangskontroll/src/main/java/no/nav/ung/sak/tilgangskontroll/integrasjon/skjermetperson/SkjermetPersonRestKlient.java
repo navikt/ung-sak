@@ -1,4 +1,4 @@
-package no.nav.ung.sak.tilgangskontroll.rest.skjermetperson;
+package no.nav.ung.sak.tilgangskontroll.integrasjon.skjermetperson;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

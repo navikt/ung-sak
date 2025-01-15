@@ -1,4 +1,4 @@
-package no.nav.ung.sak.tilgangskontroll.rest.pdl.dto;
+package no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
