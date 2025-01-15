@@ -3,8 +3,8 @@ package no.nav.ung.sak.tilgangskontroll.tilganger;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.util.LRUCache;
-import no.nav.ung.sak.tilgangskontroll.rest.pdl.SystemUserPdlKlient;
 import no.nav.ung.sak.tilgangskontroll.rest.pdl.PersonPipRestKlient;
+import no.nav.ung.sak.tilgangskontroll.rest.pdl.SystemUserPdlKlient;
 import no.nav.ung.sak.tilgangskontroll.rest.pdl.dto.AdressebeskyttelseGradering;
 import no.nav.ung.sak.tilgangskontroll.rest.skjermetperson.SkjermetPersonRestKlient;
 import no.nav.ung.sak.typer.AktørId;
@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.EnumSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -27,11 +25,9 @@ public class PersonDiskresjonskodeTjeneste {
     private SystemUserPdlKlient pdlKlient;
     private SkjermetPersonRestKlient skjermetPersonRestKlient;
 
-    private Duration cacheExpiration = Duration.ofHours(1);
-    private int cacheSize = 10;
+    private final LRUCache<PersonIdent, Set<Diskresjonskode>> personIdentTilDiskresjonskodeCache = new LRUCache<>(10, Duration.ofHours(1).toMillis());
+    private final LRUCache<AktørId, PersonIdent> aktørIdTilPersonIdentCache = new LRUCache<>(10, Duration.ofHours(1).toMillis());
 
-    private final LRUCache<AktørId, Set<Diskresjonskode>> cacheAktørIdTilDiskresjonskode = new LRUCache<>(cacheSize, cacheExpiration.toMillis());
-    private final LRUCache<PersonIdent, Set<Diskresjonskode>> cachePersonIdentTilDiskresjonskode = new LRUCache<>(cacheSize, cacheExpiration.toMillis());
 
     PersonDiskresjonskodeTjeneste() {
     }
@@ -43,37 +39,35 @@ public class PersonDiskresjonskodeTjeneste {
         this.skjermetPersonRestKlient = skjermetPersonRestKlient;
     }
 
-    public Set<Diskresjonskode> hentDiskresjonskoder(AktørId aktørId) {
-        Set<Diskresjonskode> cachetVerdi = cacheAktørIdTilDiskresjonskode.get(aktørId);
-        if (cachetVerdi != null) {
-            return cachetVerdi;
-        }
-        Set<Diskresjonskode> diskresjonskode = EnumSet.noneOf(Diskresjonskode.class);
-        diskresjonskode.addAll(hentAdressebeskyttelseFraPdl(aktørId));
-        if (erPersonSkjermet(aktørId)){
-            diskresjonskode.add(Diskresjonskode.SKJERMET);
-        }
-        cacheAktørIdTilDiskresjonskode.put(aktørId, diskresjonskode);
-        return diskresjonskode;
+    public Set<Diskresjonskode> hentDiskresjonskoder(Collection<AktørId> aktørIder, Collection<PersonIdent> personIdenter) {
+        Set<PersonIdent> allePersonIdenter = new LinkedHashSet<>();
+        allePersonIdenter.addAll(personIdenter);
+        allePersonIdenter.addAll(aktørIder.stream().map(this::hentPersonIdent).toList());
+
+        return allePersonIdenter.stream()
+            .flatMap(personIdent -> hentDiskresjonskoder(personIdent).stream())
+            .collect(Collectors.toSet());
+    }
+
+    private PersonIdent hentPersonIdent(AktørId aktørId) {
+        return CacheOppfriskingHåndterer.hentOmIkkeICache(aktørId, aktørIdTilPersonIdentCache, this::internHentPersonIdent);
+    }
+
+    private PersonIdent internHentPersonIdent(AktørId aktørId) {
+        return PersonIdent.fra(pdlKlient.hentPersonIdentForAktørId(aktørId.getAktørId()).orElseThrow());
     }
 
     public Set<Diskresjonskode> hentDiskresjonskoder(PersonIdent personIdent) {
-        Set<Diskresjonskode> cachetVerdi = cachePersonIdentTilDiskresjonskode.get(personIdent);
-        if (cachetVerdi != null) {
-            return cachetVerdi;
-        }
-        Set<Diskresjonskode> diskresjonskode = EnumSet.noneOf(Diskresjonskode.class);
-        diskresjonskode.addAll(hentAdressebeskyttelseFraPdl(personIdent));
-        if (erPersonSkjermet(personIdent)){
-            diskresjonskode.add(Diskresjonskode.SKJERMET);
-        }
-        cachePersonIdentTilDiskresjonskode.put(personIdent, diskresjonskode);
-        return diskresjonskode;
+        return CacheOppfriskingHåndterer.hentOmIkkeICache(personIdent, personIdentTilDiskresjonskodeCache, this::internHentDiskresjonskoder);
     }
 
-    public Boolean erPersonSkjermet(AktørId aktørId) {
-        String personIdent = pdlKlient.hentPersonIdentForAktørId(aktørId.getId()).orElseThrow();
-        return erPersonSkjermet(new PersonIdent(personIdent));
+    public Set<Diskresjonskode> internHentDiskresjonskoder(PersonIdent personIdent) {
+        Set<Diskresjonskode> diskresjonskode = EnumSet.noneOf(Diskresjonskode.class);
+        diskresjonskode.addAll(hentAdressebeskyttelseFraPdl(personIdent));
+        if (erPersonSkjermet(personIdent)) {
+            diskresjonskode.add(Diskresjonskode.SKJERMET);
+        }
+        return diskresjonskode;
     }
 
     private Boolean erPersonSkjermet(PersonIdent personIdent) {
@@ -84,11 +78,6 @@ public class PersonDiskresjonskodeTjeneste {
         } else {
             return skjermet;
         }
-    }
-
-    private Set<Diskresjonskode> hentAdressebeskyttelseFraPdl(AktørId aktørId) {
-        String personIdent = pdlKlient.hentPersonIdentForAktørId(aktørId.getId()).orElseThrow();
-        return hentAdressebeskyttelseFraPdl(new PersonIdent(personIdent));
     }
 
     private Set<Diskresjonskode> hentAdressebeskyttelseFraPdl(PersonIdent personIdent) {

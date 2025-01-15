@@ -11,6 +11,11 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import java.net.URI;
 import java.util.Optional;
 
+/**
+ * Denne finnes for at applikasjonen kan konvertere aktør-id til personIdent (FNR/DNR) i forbindelse med tilgangskontroll.
+ *
+ * DISCLAIMER: Denne tjenesten skal kun benyttes når det er aktuelt å spørre med system-token, for all annen bruk, benytt PdlKlient direkte
+ */
 @ApplicationScoped
 @ScopedRestIntegration(scopeKey = "pdl.scope", defaultScope = "api://prod-fss.pdl.pdl-api/.default")
 public class SystemUserPdlKlient {

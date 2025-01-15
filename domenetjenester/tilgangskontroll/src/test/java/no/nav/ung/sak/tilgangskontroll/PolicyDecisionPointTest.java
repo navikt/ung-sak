@@ -8,32 +8,53 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 import no.nav.ung.sak.tilgangskontroll.api.AbacBehandlingStatus;
 import no.nav.ung.sak.tilgangskontroll.api.AbacFagsakStatus;
+import no.nav.ung.sak.tilgangskontroll.rest.pdl.PersonPipRestKlient;
+import no.nav.ung.sak.tilgangskontroll.rest.pdl.SystemUserPdlKlient;
+import no.nav.ung.sak.tilgangskontroll.rest.pdl.dto.AdressebeskyttelseGradering;
+import no.nav.ung.sak.tilgangskontroll.rest.skjermetperson.SkjermetPersonRestKlient;
 import no.nav.ung.sak.tilgangskontroll.tilganger.*;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PolicyDecisionPointTest {
 
+    public static final String AKTØR_ID = "1234567890123";
+    public static final String FNR = "12345678901";
     private AnsattTilgangerTjeneste ansattTilgangerTjeneste = Mockito.mock(AnsattTilgangerTjeneste.class);
-    private PersonDiskresjonskodeTjeneste personDiskresjonskodeTjeneste = Mockito.mock(PersonDiskresjonskodeTjeneste.class);
+    private PersonPipRestKlient personPipRestKlient = Mockito.mock(PersonPipRestKlient.class);
+    private SystemUserPdlKlient systemUserPdlKlient = Mockito.mock(SystemUserPdlKlient.class);
+    private SkjermetPersonRestKlient skjermetPersonRestKlient = Mockito.mock(SkjermetPersonRestKlient.class);
+    private PersonDiskresjonskodeTjeneste personDiskresjonskodeTjeneste = new PersonDiskresjonskodeTjeneste(personPipRestKlient, systemUserPdlKlient, skjermetPersonRestKlient);
     private TilgangTilPersonTjeneste tilgangTilPersonTjeneste = new TilgangTilPersonTjeneste(personDiskresjonskodeTjeneste);
     private TilgangTilOperasjonTjeneste tilgangTilOperasjonTjeneste = new TilgangTilOperasjonTjeneste();
 
     private PolicyDecisionPoint pdp = new PolicyDecisionPoint(ansattTilgangerTjeneste, tilgangTilPersonTjeneste, tilgangTilOperasjonTjeneste);
 
+    private Set<AdressebeskyttelseGradering> adressebeskyttelser = new HashSet<>();
+    private Boolean erPersonSkjermet = false;
+
+    @BeforeEach
+    void setup(){
+        Mockito.when(systemUserPdlKlient.hentPersonIdentForAktørId(Mockito.eq(AKTØR_ID))).thenReturn(Optional.of(FNR));
+    }
+
     @Test
     void veileder_skal_ha_tilgang_til_å_lese_fagsak_med_bruker_uten_beskyttelsesbehov() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -46,11 +67,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_skal_ha_tilgang_til_å_lese_fagsak_med_bruker_uten_beskyttelsesbehov() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -63,11 +86,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_lese_sak_med_kode6_person_uten_spesifikk_tilgang() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of(Diskresjonskode.KODE6));
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -80,11 +105,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_lese_sak_med_kode7_person_uten_spesifikk_tilgang() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of(Diskresjonskode.KODE7));
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.FORTROLIG));
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -97,11 +124,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_lese_sak_med_skjermet_person_uten_spesifikk_tilgang() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of(Diskresjonskode.SKJERMET));
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(true);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -114,11 +143,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_kan_ikke_lese_sak_med_kode6_person_uten_spesifikk_tilgang() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of(Diskresjonskode.KODE6));
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -131,11 +162,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_kan_ikke_lese_sak_med_kode7_person_uten_spesifikk_tilgang() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of(Diskresjonskode.KODE7));
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.FORTROLIG));
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -148,11 +181,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_med_spesifikk_tilgang_tiL_kode6_kan_lese_sak_med_kode6_person() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of(Diskresjonskode.KODE6));
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgangMedKode6());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "read");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -165,11 +200,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_skal_ha_tilgang_til_å_opprette_fagsak() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "create");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
 
@@ -180,11 +217,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_skal_ha_tilgang_til_å_behandle_ordinært_aksjonspunkt() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "update");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -198,11 +237,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_behandle_aksjonspunkt() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "update");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.UTREDES.getEksternKode());
@@ -216,11 +257,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void beslutter_skal_ha_tilgang_til_å_beslutte_sak() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(besluttertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "update");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.FATTE_VEDTAK.getEksternKode());
@@ -234,12 +277,14 @@ class PolicyDecisionPointTest {
 
     @Test
     void beslutter_kan_ikke_beslutte_sak_hen_har_saksbehandlet_selv() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         TilgangerBruker besluttertilgang = besluttertilgang();
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(besluttertilgang);
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "update");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.FATTE_VEDTAK.getEksternKode());
@@ -254,11 +299,13 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_kan_ikke_beslutte_sak() {
-        Mockito.when(personDiskresjonskodeTjeneste.hentDiskresjonskoder(Mockito.any(AktørId.class))).thenReturn(Set.of());
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
         PdpRequest request = new PdpRequest();
-        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of("1234567890123"));
+        request.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, List.of(AKTØR_ID));
         request.put(AbacAttributter.XACML_1_0_ACTION_ACTION_ID, "update");
         request.put(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, BeskyttetRessursKoder.FAGSAK);
         request.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, AbacBehandlingStatus.FATTE_VEDTAK.getEksternKode());
