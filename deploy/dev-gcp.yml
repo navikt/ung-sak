@@ -225,6 +225,11 @@ spec:
       value : https://skjermede-personer-pip.intern.dev.nav.no/skjermet
     - name : SKJERMET_PERSON_SCOPE
       value : api://dev-gcp.nom.skjermede-personer-pip/.default
+    - name : PDL_PIP_URL
+      value : https://pdl-pip-api.dev.intern.nav.no/api/v1/person
+    - name : PDL_PIP_SCOPE
+      value : api://dev-fss.pdl.pdl-pip-api/.default
+
     # Saf
     - name: SAF_BASE_URL
       value: https://saf-q2.dev-fss-pub.nais.io

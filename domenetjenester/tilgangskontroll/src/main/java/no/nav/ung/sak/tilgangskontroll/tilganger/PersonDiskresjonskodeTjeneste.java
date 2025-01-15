@@ -2,9 +2,11 @@ package no.nav.ung.sak.tilgangskontroll.tilganger;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.k9.felles.util.LRUCache;
-import no.nav.ung.sak.tilgangskontroll.rest.SkjermetPersonRestKlient;
+import no.nav.ung.sak.tilgangskontroll.rest.pdl.SystemUserPdlKlient;
+import no.nav.ung.sak.tilgangskontroll.rest.pdl.PersonPipRestKlient;
+import no.nav.ung.sak.tilgangskontroll.rest.pdl.dto.AdressebeskyttelseGradering;
+import no.nav.ung.sak.tilgangskontroll.rest.skjermetperson.SkjermetPersonRestKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.slf4j.Logger;
@@ -12,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,21 +23,23 @@ public class PersonDiskresjonskodeTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonDiskresjonskodeTjeneste.class);
 
-    private PdlKlient pdlKlient;
+    private PersonPipRestKlient pdlPipKlient;
+    private SystemUserPdlKlient pdlKlient;
     private SkjermetPersonRestKlient skjermetPersonRestKlient;
 
     private Duration cacheExpiration = Duration.ofHours(1);
     private int cacheSize = 10;
 
-    private LRUCache<AktørId, Set<Diskresjonskode>> cacheAktørIdTilDiskresjonskode = new LRUCache<>(cacheSize, cacheExpiration.toMillis());
-    private LRUCache<PersonIdent, Set<Diskresjonskode>> cachePersonIdentTilDiskresjonskode = new LRUCache<>(cacheSize, cacheExpiration.toMillis());
+    private final LRUCache<AktørId, Set<Diskresjonskode>> cacheAktørIdTilDiskresjonskode = new LRUCache<>(cacheSize, cacheExpiration.toMillis());
+    private final LRUCache<PersonIdent, Set<Diskresjonskode>> cachePersonIdentTilDiskresjonskode = new LRUCache<>(cacheSize, cacheExpiration.toMillis());
 
     PersonDiskresjonskodeTjeneste() {
     }
 
     @Inject
-    public PersonDiskresjonskodeTjeneste(PdlKlient pdlKlient, SkjermetPersonRestKlient skjermetPersonRestKlient) {
-        this.pdlKlient = pdlKlient;
+    public PersonDiskresjonskodeTjeneste(PersonPipRestKlient pdlKlient, SystemUserPdlKlient pdlKlient1, SkjermetPersonRestKlient skjermetPersonRestKlient) {
+        this.pdlPipKlient = pdlKlient;
+        this.pdlKlient = pdlKlient1;
         this.skjermetPersonRestKlient = skjermetPersonRestKlient;
     }
 
@@ -84,28 +87,17 @@ public class PersonDiskresjonskodeTjeneste {
     }
 
     private Set<Diskresjonskode> hentAdressebeskyttelseFraPdl(AktørId aktørId) {
-        //TODO kan bruke eget endepunkt hos PDL for å gjøre dette kjappere, men foreløpig ikke behov pga lavt volum
-        var query = new HentPersonQueryRequest();
-        query.setIdent(aktørId.getId());
-        var projection = new PersonResponseProjection()
-            .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-        var person = pdlKlient.hentPerson(query, projection);
-        return diskresjonskodeFor(person.getAdressebeskyttelse());
+        String personIdent = pdlKlient.hentPersonIdentForAktørId(aktørId.getId()).orElseThrow();
+        return hentAdressebeskyttelseFraPdl(new PersonIdent(personIdent));
     }
 
     private Set<Diskresjonskode> hentAdressebeskyttelseFraPdl(PersonIdent personIdent) {
-        //TODO kan bruke eget endepunkt hos PDL for å gjøre dette kjappere, men foreløpig ikke behov pga lavt volum
-        var query = new HentPersonQueryRequest();
-        query.setIdent(personIdent.getIdent());
-        var projection = new PersonResponseProjection()
-            .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-        var person = pdlKlient.hentPerson(query, projection);
-        return diskresjonskodeFor(person.getAdressebeskyttelse());
+        var adressebeskyttelseKoder = pdlPipKlient.hentAdressebeskyttelse(personIdent);
+        return diskresjonskodeFor(adressebeskyttelseKoder);
     }
 
-    static Set<Diskresjonskode> diskresjonskodeFor(List<no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse> adressebeskyttelse) {
-        return adressebeskyttelse.stream()
-            .map(no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse::getGradering)
+    static Set<Diskresjonskode> diskresjonskodeFor(Set<AdressebeskyttelseGradering> adressebeskyttelser) {
+        return adressebeskyttelser.stream()
             .map(PersonDiskresjonskodeTjeneste::tilDiskresjonskode)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
@@ -115,7 +107,7 @@ public class PersonDiskresjonskodeTjeneste {
         return switch (adressebeskyttelseGradering) {
             case STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG -> Diskresjonskode.KODE6;
             case FORTROLIG -> Diskresjonskode.KODE7;
-            default -> null;
+            case UGRADERT -> null;
         };
     }
 }
