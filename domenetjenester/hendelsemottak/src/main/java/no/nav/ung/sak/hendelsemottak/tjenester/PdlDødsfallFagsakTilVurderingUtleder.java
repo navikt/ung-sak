@@ -36,7 +36,7 @@ import no.nav.ung.sak.typer.AktørId;
 public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
 
-    private static final Logger logger = LoggerFactory.getLogger(PdlFødselFagsakTilVurderingUtleder.class);
+    private static final Logger logger = LoggerFactory.getLogger(PdlSøkerHarFåttBarnFagsakTilVurderingUtleder.class);
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
