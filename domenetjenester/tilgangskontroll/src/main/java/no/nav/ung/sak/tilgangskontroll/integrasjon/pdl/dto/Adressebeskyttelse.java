@@ -1,6 +1,7 @@
 package no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -10,11 +11,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Adressebeskyttelse {
     private String gradering;
 
-    public String getGradering() {
-        return gradering;
+    @JsonCreator
+    public Adressebeskyttelse(String gradering) {
+        this.gradering = gradering;
     }
 
-    public void setGradering(String s) {
-        this.gradering = s;
+    public String getGradering() {
+        return gradering;
     }
 }

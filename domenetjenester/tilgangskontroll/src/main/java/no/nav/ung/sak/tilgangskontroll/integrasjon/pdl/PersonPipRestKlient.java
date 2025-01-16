@@ -7,6 +7,7 @@ import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.AdressebeskyttelseGradering;
 import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.PipPerson;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -33,14 +34,19 @@ public class PersonPipRestKlient {
         this.urlPdlPip = tilUri(urlPdlPip);
     }
 
+    public PipPerson hentPersoninformasjon(AktørId aktørId) {
+        Set<Header> headers = Set.of(
+            new BasicHeader("ident", aktørId.getAktørId())
+        );
+        return restClient.get(urlPdlPip, headers, PipPerson.class);
+    }
+
     public Set<AdressebeskyttelseGradering> hentAdressebeskyttelse(PersonIdent personIdent) {
         Set<Header> headers = Set.of(
             new BasicHeader("ident", personIdent.getIdent())
         );
         PipPerson response = restClient.get(urlPdlPip, headers, PipPerson.class);
-        return Arrays.stream(response.getPerson().getAdressebeskyttelse())
-            .map(it -> AdressebeskyttelseGradering.fraKode(it.getGradering()))
-            .collect(Collectors.toSet());
+        return response.getAdressebeskyttelseGradering();
     }
 
     private static URI tilUri(String url) {
