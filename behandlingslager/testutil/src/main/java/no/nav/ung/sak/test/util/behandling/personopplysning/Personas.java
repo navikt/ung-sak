@@ -45,6 +45,10 @@ public class Personas {
 
 
     public Personas ungdom(AktørId aktørId, LocalDate fødselsdato) {
+        return ungdom(aktørId, fødselsdato, "Test Testesen");
+    }
+
+    public Personas ungdom(AktørId aktørId, LocalDate fødselsdato, String navn) {
         if (this.aktørId == null) {
             this.aktørId = aktørId;
             this.fødselsdato = fødselsdato;
@@ -54,6 +58,7 @@ public class Personas {
         builder.leggTilPersonopplysninger(persInfoBuilder
             .aktørId(aktørId)
             .fødselsdato(fødselsdato)
+            .navn(navn)
             .brukerKjønn(NavBrukerKjønn.MANN)
             .sivilstand(SivilstandType.UGIFT)
             .region(Region.NORDEN));

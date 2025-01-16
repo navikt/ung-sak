@@ -19,7 +19,7 @@ public class BrevUtils {
     }
 
     public static void lagrePdf(byte[] data, String filename) {
-        Path directory = null;
+        Path directory;
         try {
             directory = Files.createDirectories(Paths.get("pdfresultater"));
         } catch (IOException e) {

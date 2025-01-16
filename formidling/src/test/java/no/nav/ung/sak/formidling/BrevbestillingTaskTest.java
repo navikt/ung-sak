@@ -17,7 +17,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -27,7 +26,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
@@ -37,7 +35,6 @@ import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
@@ -57,7 +54,7 @@ class BrevbestillingTaskTest {
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
-    private final String fnr = PdlKlientFake.gyldigFnr();
+    private String fnr;
 
     @BeforeEach
     void setUp() {
@@ -67,15 +64,16 @@ class BrevbestillingTaskTest {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
-        var pdlKlient = new PdlKlientFake("Test", "Testesen", fnr);
+        var pdlKlient = PdlKlientFake.medTilfeldigFnr();
+        fnr = pdlKlient.fnr();
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
-            new PersonBasisTjeneste(pdlKlient),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             ungdomsytelseGrunnlagRepository,
             ungdomsprogramPeriodeRepository,
-            tilkjentYtelseUtleder);
+            tilkjentYtelseUtleder,
+            repositoryProvider.getPersonopplysningRepository());
 
         dokArkivKlient = new DokArkivKlientFake();
 
@@ -85,11 +83,9 @@ class BrevbestillingTaskTest {
 
     @Test
     void skalLagreBestillingLagePdfJournalføreOgLageDistribusjonstask() {
-        var ungdom = AktørId.dummy();
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad(ungdom);
-        var behandling = scenarioBuilder.lagre(repositoryProvider);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
+
+        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        var behandling = scenarioBuilder.getBehandling();
 
         BrevbestillingTask brevBestillingTask = new BrevbestillingTask(behandlingRepository, brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
         brevBestillingTask.doTask(lagTask(behandling));
@@ -125,6 +121,9 @@ class BrevbestillingTaskTest {
         assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
         assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
     }
+
+
+
 
     @Test
     void skalIkkeLagreBestillingHvisJournalføringFeiler() {

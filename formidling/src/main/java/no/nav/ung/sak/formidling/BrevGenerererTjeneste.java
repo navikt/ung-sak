@@ -20,20 +20,20 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
-import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.domene.GrunnlagOgTilkjentYtelse;
 import no.nav.ung.sak.formidling.domene.PdlPerson;
-import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
@@ -57,29 +57,29 @@ public class BrevGenerererTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(BrevGenerererTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
-    private PersonBasisTjeneste personBasisTjeneste;
     private AktørTjeneste aktørTjeneste;
     private PdfGenKlient pdfGen;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
+    private PersonopplysningRepository personopplysningRepository;
 
     @Inject
     public BrevGenerererTjeneste(
         BehandlingRepository behandlingRepository,
-        PersonBasisTjeneste personBasisTjeneste,
         AktørTjeneste aktørTjeneste,
         PdfGenKlient pdfGen,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-        TilkjentYtelseUtleder tilkjentYtelseUtleder) {
+        TilkjentYtelseUtleder tilkjentYtelseUtleder,
+        PersonopplysningRepository personopplysningRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.personBasisTjeneste = personBasisTjeneste;
         this.aktørTjeneste = aktørTjeneste;
         this.pdfGen = pdfGen;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
     public BrevGenerererTjeneste() {
@@ -200,62 +200,21 @@ public class BrevGenerererTjeneste {
         return decimal.setScale(0, RoundingMode.HALF_UP);
     }
 
-    public GenerertBrev generer(Brevbestilling brevbestilling) {
-        Behandling behandling = behandlingRepository.hentBehandling(brevbestilling.behandlingId());
-        var pdlMottaker = hentMottaker(behandling);
-
-        // valider mal via regel hvis vedtaksbrev
-
-        // lag brev json via datasamler og velg templateData
-        PeriodeDto periode = new PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(260));
-        var input = new TemplateInput(TemplateType.INNVILGELSE,
-            new InnvilgelseDto(
-                FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
-                new ResultatFlaggDto(true,
-                    true,
-                    true,
-                    false,
-                    false,
-                    false),
-                LocalDate.now(),
-                500,
-                Set.of(
-                    new TilkjentPeriodeDto(
-                        periode,
-                        new TilkjentYtelseDto(
-                            400,
-                            BigDecimal.valueOf(4.22),
-                            200000,
-                            100000)
-                    )
-                ),
-                Set.of(
-                    new GbeløpPeriodeDto(periode, 200000)
-                ),
-                new SatserDto(BigDecimal.TWO, BigDecimal.TEN, 10, 20)));
-
-
-        // konverter til pdf fra templateData
-        PdfGenDokument dokument = pdfGen.lagDokument(input);
-
-        return new GenerertBrev(
-            dokument,
-            pdlMottaker,
-            pdlMottaker,
-            brevbestilling.malType(),
-            input.templateType()
-        );
-    }
-
     private PdlPerson hentMottaker(Behandling behandling) {
+        PersonopplysningGrunnlagEntitet personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandling.getId());
+        PersonopplysningEntitet personopplysning = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getPersonopplysning(behandling.getAktørId());
+
+        LocalDate fødselsdato = personopplysning.getFødselsdato();
+        String navn = personopplysning.getNavn();
+
         AktørId aktørId = behandling.getFagsak().getAktørId();
         var personIdent = aktørTjeneste.hentPersonIdentForAktørId(aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke person med aktørid"));
-        PersoninfoBasis personinfoBasis = personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent);
 
         String fnr = personIdent.getIdent();
         Objects.requireNonNull(fnr);
-        return new PdlPerson(fnr, aktørId, personinfoBasis.getNavn(), personinfoBasis.getFødselsdato());
+
+        return new PdlPerson(fnr, aktørId, navn, fødselsdato);
     }
 
 

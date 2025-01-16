@@ -4,31 +4,23 @@ import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 
 import java.time.LocalDate;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.søknad.JsonUtils;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.Brevbestilling;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestGrunnlag;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
@@ -41,7 +33,6 @@ import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 class InnvilgelseTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
-    private final ObjectMapper objectMapper = JsonUtils.getObjectMapper();
 
 
     @Inject
@@ -50,9 +41,12 @@ class InnvilgelseTest {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
+    private PersonopplysningRepository personopplysningRepository;
 
     String navn = "Halvorsen Halvor";
-    String fnr = PdlKlientFake.gyldigFnr();
+    PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    String fnr = pdlKlient.fnr();
+
 
     @BeforeEach
     void setup() {
@@ -60,24 +54,27 @@ class InnvilgelseTest {
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
-
-        var pdlKlient = new PdlKlientFake("Halvor", "Halvorsen", fnr);
+        personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
 
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
-            new PersonBasisTjeneste(pdlKlient),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(System.getenv("LAGRE_PDF") == null),
             ungdomsytelseGrunnlagRepository,
             ungdomsprogramPeriodeRepository,
-            tilkjentYtelseUtleder);
+            tilkjentYtelseUtleder,
+            personopplysningRepository);
     }
 
     @Test()
     @DisplayName("Verifiserer faste tekster og mottaker")
     //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
     void skalHaAlleStandardtekster() {
-        var behandling = lagAvsluttetBehandling();
+        TestScenarioBuilder scenarioBuilder = BrevScenarioer
+            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+
+        var ungTestGrunnlag = scenarioBuilder.getUngTestGrunnlag();
+        var behandling = scenarioBuilder.getBehandling();
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
 
@@ -85,7 +82,7 @@ class InnvilgelseTest {
 
         assertThatHtml(brevtekst).containsTextsOnceInSequence(
             BrevUtils.brevDatoString(LocalDate.now()), //vedtaksdato
-            "Til: " + navn,
+            "Til: " + ungTestGrunnlag.navn(),
             "Fødselsnummer: " + fnr,
             "Du har rett til å klage",
             "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage",
@@ -103,16 +100,6 @@ class InnvilgelseTest {
 
     }
 
-    @NotNull
-    private Behandling lagAvsluttetBehandling() {
-        UngTestGrunnlag ungTestGrunnlag = UngTestGrunnlag.standardInnvilget(LocalDate.of(2024, 12, 1));
-
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
-        behandling.avsluttBehandling();
-        return behandling;
-    }
 
     @DisplayName("Innvilgelse med riktig fom dato, maks antall dager, lav sats, grunnbeløp, hjemmel")
     //Denne testen sjekker også at teksten kommer i riktig rekkefølge
@@ -153,24 +140,6 @@ class InnvilgelseTest {
             BrevUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
         }
         return generertBrev;
-    }
-
-    private GenerertBrev genererBrev(Brevbestilling bestillBrevDto) {
-        GenerertBrev generertBrev = brevGenerererTjeneste.generer(bestillBrevDto);
-        if (System.getenv("LAGRE_PDF") != null) {
-            BrevUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
-        }
-        return generertBrev;
-    }
-
-    private Brevbestilling lagBestilling(Behandling behandling) {
-        return new Brevbestilling(
-            behandling.getId(),
-            DokumentMalType.INNVILGELSE_DOK,
-            behandling.getFagsak().getSaksnummer().getVerdi(),
-            null,
-            objectMapper.createObjectNode()
-        );
     }
 
 

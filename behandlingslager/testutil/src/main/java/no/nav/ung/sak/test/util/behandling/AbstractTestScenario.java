@@ -409,6 +409,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return (S) this;
     }
 
+    public UngTestGrunnlag getUngTestGrunnlag() {
+        return ungTestGrunnlag;
+    }
+
     public Behandling buildOgLagreMedUng(
         BehandlingRepositoryProvider repositoryProvider,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
@@ -422,7 +426,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             var fødselsdato = LocalDate.now().minusYears(ungTestGrunnlag.alder());
             PersonInformasjon personInformasjon = opprettBuilderForRegisteropplysninger()
                 .medPersonas()
-                .ungdom(ungdom, fødselsdato)
+                .ungdom(ungdom, fødselsdato, ungTestGrunnlag.navn())
                 .statsborgerskap(Landkoder.NOR)
                 .personstatus(PersonstatusType.BOSA)
                 .build();

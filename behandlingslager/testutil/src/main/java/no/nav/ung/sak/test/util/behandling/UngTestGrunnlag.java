@@ -28,6 +28,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
  */
 public record UngTestGrunnlag(
     int alder,
+    String navn,
     List<UngdomsprogramPeriode> programPerioder,
     LocalDateTimeline<UngdomsytelseSatser> satser,
     UngdomsytelseUttakPerioder uttakPerioder,
@@ -36,6 +37,7 @@ public record UngTestGrunnlag(
 ) {
 
     private static final BigDecimal G_BELØP_24 = BigDecimal.valueOf(124028);
+    public static final String DEFAULT_NAVN = "Ung Testesen";
 
 
     /**
@@ -55,6 +57,7 @@ public record UngTestGrunnlag(
 
         return new UngTestGrunnlag(
             19,
+            DEFAULT_NAVN,
             programPerioder,
             satser,
             uttaksPerioder(p),
