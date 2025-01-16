@@ -118,10 +118,6 @@ public class JournalpostMottakDto {
         return base64EncodedPayload;
     }
 
-    public String getBase64EncodedPayload() {
-        return base64EncodedPayload;
-    }
-
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<"
