@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.util.LRUCache;
 import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.PersonPipRestKlient;
 import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.AdressebeskyttelseGradering;
-import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.PipPerson;
+import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.PipPersondataResponse;
 import no.nav.ung.sak.tilgangskontroll.integrasjon.skjermetperson.SkjermetPersonRestKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -25,7 +25,7 @@ public class PersonDiskresjonskodeTjeneste {
     private PersonPipRestKlient pdlPipKlient;
     private SkjermetPersonRestKlient skjermetPersonRestKlient;
 
-    private final LRUCache<AktørId, PipPerson> aktørIdTilPersonCache = new LRUCache<>(10, Duration.ofHours(1).toMillis());
+    private final LRUCache<AktørId, PipPersondataResponse> aktørIdTilPersonCache = new LRUCache<>(10, Duration.ofHours(1).toMillis());
     private final LRUCache<PersonIdent, Boolean> personIdentTilSkjermetCache = new LRUCache<>(10, Duration.ofHours(1).toMillis());
     private final LRUCache<PersonIdent, Set<Diskresjonskode>> personIdentTilDiskresjonskodeCache = new LRUCache<>(10, Duration.ofHours(1).toMillis());
 
@@ -43,7 +43,7 @@ public class PersonDiskresjonskodeTjeneste {
         Set<Diskresjonskode> alleDiskresjonskoder = new HashSet<>();
 
         //først ut diskresjonskoder (og personIdent) for personer som er representert med aktørId
-        Map<AktørId, PipPerson> aktørIdTilPersoninformasjon = aktørIder.stream()
+        Map<AktørId, PipPersondataResponse> aktørIdTilPersoninformasjon = aktørIder.stream()
             .collect(Collectors.toMap(Function.identity(), aktørId -> CacheOppfriskingHåndterer.hentOmIkkeICache(aktørId, aktørIdTilPersonCache, aktøId -> pdlPipKlient.hentPersoninformasjon(aktørId))));
         Set<AdressebeskyttelseGradering> adressebeskyttelser = aktørIdTilPersoninformasjon.values().stream().flatMap(it -> it.getAdressebeskyttelseGradering().stream()).collect(Collectors.toSet());
         alleDiskresjonskoder.addAll(diskresjonskodeFor(adressebeskyttelser));

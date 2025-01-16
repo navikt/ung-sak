@@ -8,15 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Adressebeskyttelse {
-    private String gradering;
+public record Adressebeskyttelse (String gradering) {
 
-    @JsonCreator
-    public Adressebeskyttelse(String gradering) {
-        this.gradering = gradering;
-    }
-
-    public String getGradering() {
-        return gradering;
+    public static Adressebeskyttelse fraEnum(AdressebeskyttelseGradering gradering) {
+        return new Adressebeskyttelse(gradering.name());
     }
 }
