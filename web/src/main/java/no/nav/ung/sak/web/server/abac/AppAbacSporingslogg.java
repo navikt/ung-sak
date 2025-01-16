@@ -9,6 +9,7 @@ import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.felles.log.sporingslogg.Sporingsdata;
 import no.nav.k9.felles.sikkerhet.abac.DefaultAbacSporingslogg;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 
 /**
  * Egen sporingslogg implementasjon for å utvide med egne felter.

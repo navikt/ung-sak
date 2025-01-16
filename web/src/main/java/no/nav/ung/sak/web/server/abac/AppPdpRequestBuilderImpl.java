@@ -12,6 +12,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -134,6 +134,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>formidling</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>tilgangskontroll</artifactId>
+        </dependency>
 
 
         <!-- Server Provided Libraries. Transitive avhengigheter som ikke burde

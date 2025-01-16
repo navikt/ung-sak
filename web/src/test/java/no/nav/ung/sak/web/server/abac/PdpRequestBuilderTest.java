@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
+import no.nav.ung.sak.tilgangskontroll.api.AbacBehandlingStatus;
+import no.nav.ung.sak.tilgangskontroll.api.AbacFagsakStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

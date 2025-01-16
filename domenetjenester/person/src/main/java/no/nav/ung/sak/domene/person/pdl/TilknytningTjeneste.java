@@ -48,15 +48,11 @@ public class TilknytningTjeneste {
     }
 
     private static Diskresjonskode tilDiskresjonskode(AdressebeskyttelseGradering adressebeskyttelseGradering) {
-        switch (adressebeskyttelseGradering) {
-            case STRENGT_FORTROLIG_UTLAND:
-            case STRENGT_FORTROLIG:
-                return KODE6;
-            case FORTROLIG:
-                return KODE7;
-            default:
-                return null;
-        }
+        return switch (adressebeskyttelseGradering) {
+            case STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG -> KODE6;
+            case FORTROLIG -> KODE7;
+            case UGRADERT -> null;
+        };
     }
 
     private String getTilknytning(no.nav.k9.felles.integrasjon.pdl.GeografiskTilknytning gt) {

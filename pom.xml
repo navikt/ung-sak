@@ -205,6 +205,11 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
+                <artifactId>tilgangskontroll</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>inngangsvilkar</artifactId>
                 <version>${project.version}</version>
             </dependency>
