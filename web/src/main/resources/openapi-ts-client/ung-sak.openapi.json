@@ -1643,14 +1643,6 @@
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
           },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "ytelseType" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
