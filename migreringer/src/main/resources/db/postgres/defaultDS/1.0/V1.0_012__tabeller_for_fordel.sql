@@ -3,7 +3,7 @@ create table mottatt_melding
     id                   bigint                           not null
         primary key,
     journalpostid        varchar(50)                      not null,
-    områdeTema                 varchar(50),
+    tema                 varchar(50),
     behandlingstype      varchar(50),
     behandlingstema      varchar(50),
     brevkode             varchar(50),
@@ -15,7 +15,7 @@ create table mottatt_melding
 
 comment on table mottatt_melding is 'Metadata fra mottatte meldinger per journalpostid';
 comment on column mottatt_melding.journalpostid is 'journalpostid - naturlig nøkkel for tabellen';
-comment on column mottatt_melding.områdeTema is 'områdeTema fra joark';
+comment on column mottatt_melding.tema is 'tema fra joark';
 comment on column mottatt_melding.behandlingstype is 'behandlingstype fra joark';
 comment on column mottatt_melding.behandlingstema is 'behandlingstema fra joark';
 comment on column mottatt_melding.brevkode is 'brevkode fra joark';
@@ -25,7 +25,7 @@ create unique index uidx_mottatt_melding_journalpostid
     on mottatt_melding (journalpostid);
 
 create index uidx_mottatt_melding_soeknadid_tema_behandlingstema
-    on mottatt_melding (soeknad_id, områdeTema, behandlingstema);
+    on mottatt_melding (soeknad_id, tema, behandlingstema);
 
 create index idx_mottatt_melding_brevkode
     on mottatt_melding (brevkode);
