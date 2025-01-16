@@ -1,0 +1,6 @@
+{"søknadId":"1d533f68-3d36-40d9-a160-12b2d54c535c","id":"01EY69KZ7HAE26X535Z3TP3EC3","språk":"nb","mottatt":"2021-02-10T15:42:59.952311Z","søker":
+	{"fødselsnummer":"111","fornavn":"a","mellomnavn":"b","etternavn":"cc","fødselsdato":"1982-11-27","aktørId":"1342134123422"},"mottakerFnr":"123","mottakerNavn":"x","harAleneomsorg":false,"harUtvidetRett":false,"erYrkesaktiv":true,"arbeiderINorge":true,"arbeidssituasjon":["ARBEIDSTAKER"],"antallDagerBruktIÅr":null,"barn":[
+	{"identitetsnummer":"33","navn":"f","fødselsdato":"2016-07-02","aleneOmOmsorgen":false,"utvidetRett":false},
+	{"identitetsnummer":"32","navn":"e","fødselsdato":"2018-10-23","aleneOmOmsorgen":false,"utvidetRett":false}],"type":"KORONA","korona":
+	{"antallDagerSomSkalOverføres":15,"stengingsperiode":
+	{"fraOgMed":"2021-01-01","tilOgMed":"2021-12-31"}},"overføring":null,"fordeling":null,"harBekreftetOpplysninger":true,"harForståttRettigheterOgPlikter":true}
