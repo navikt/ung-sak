@@ -31,6 +31,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.geografisk.Region;
 import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.kodeverk.person.SivilstandType;
@@ -66,6 +67,9 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakTestUtil;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
@@ -124,6 +128,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private boolean manueltOpprettet;
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
+    private UngTestGrunnlag ungTestGrunnlag;
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
         this.fagsakBuilder = FagsakBuilder
@@ -396,6 +401,70 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
         return behandling;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S medUngTestGrunnlag(UngTestGrunnlag ungTestGrunnlag) {
+        this.ungTestGrunnlag = ungTestGrunnlag;
+        return (S) this;
+    }
+
+    public Behandling buildOgLagreMedUng(
+        BehandlingRepositoryProvider repositoryProvider,
+        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository
+    ) {
+        if (ungTestGrunnlag == null) throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
+
+        // Default Person
+        if (personer == null) {
+            var ungdom = getDefaultBrukerAktørId();
+            var fødselsdato = LocalDate.now().minusYears(ungTestGrunnlag.alder());
+            PersonInformasjon personInformasjon = opprettBuilderForRegisteropplysninger()
+                .medPersonas()
+                .ungdom(ungdom, fødselsdato)
+                .statsborgerskap(Landkoder.NOR)
+                .personstatus(PersonstatusType.BOSA)
+                .build();
+            medRegisterOpplysninger(personInformasjon);
+        }
+
+        //Vilkår
+        if (ungTestGrunnlag.aldersvilkår() != null) {
+            ungTestGrunnlag.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        }
+
+        if (ungTestGrunnlag.ungdomsprogramvilkår() != null) {
+            ungTestGrunnlag.ungdomsprogramvilkår().forEach(it -> leggTilVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        }
+
+        build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
+
+        //Ung ting
+        buildUng(ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        return behandling;
+    }
+
+    private void buildUng(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+
+        if (ungTestGrunnlag.satser() != null) {
+            ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(
+                ungTestGrunnlag.satser(),
+                "regelInputSats",
+                "regelSporing"
+            ));
+        }
+
+        if (ungTestGrunnlag.uttakPerioder() != null) {
+            ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), ungTestGrunnlag.uttakPerioder());
+        }
+
+        if (ungTestGrunnlag.programPerioder() != null) {
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), ungTestGrunnlag.programPerioder());
+        }
+
+
+
     }
 
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {
