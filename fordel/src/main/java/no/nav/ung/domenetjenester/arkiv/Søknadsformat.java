@@ -26,11 +26,6 @@ public enum Søknadsformat {
                 jsonNode = jsonNode.get("data");
             } // else ta formatet som det er
 
-            if (jsonNode.hasNonNull("k9format")) {
-                // legacy wrapper fra brukerdialog når midlertidig journalfører gammelt k9format
-                jsonNode = jsonNode.get("k9format");
-            }
-
             JsonNode søknad;
             if (jsonNode.hasNonNull("søknad")) {
                 søknad = jsonNode.get("søknad");
