@@ -1,0 +1,41 @@
+{
+  "id": 200000,
+  "tildeltEnhetsnr": "2990",
+  "endretAvEnhetsnr": "2990",
+  "opprettetAvEnhetsnr": "2990",
+  "tilordnetRessurs": "Z111111",
+  "tema": "OMS",
+  "behandlingstema": "ab0061",
+  "oppgavetype": "VURD_HENV",
+  "versjon": 2,
+  "beskrivelse": "****",
+  "fristFerdigstillelse": "2021-03-15",
+  "aktivDato": "2021-03-11",
+  "opprettetTidspunkt": "2021-03-11T12:58:54.9+01:00",
+  "opprettetAv": "Z111111",
+  "endretAv": "Z111111",
+  "endretTidspunkt": "2021-03-11T12:59:30.785+01:00",
+  "prioritet": "NORM",
+  "status": "AAPNET",
+  "statuskategori": "AAPEN",
+  "ident": {
+    "identType": "AKTOERID",
+    "verdi": "2000000000000",
+    "folkeregisterident": "20000000000",
+    "registrert_dato": {
+      "year": 2020,
+      "month": "JULY",
+      "monthValue": 7,
+      "dayOfMonth": 7,
+      "chronology": {
+        "calendarType": "iso8601",
+        "id": "ISO"
+      },
+      "era": "CE",
+      "dayOfWeek": "TUESDAY",
+      "leapYear": true,
+      "dayOfYear": 189
+    }
+  },
+  "metadata": {}
+}
