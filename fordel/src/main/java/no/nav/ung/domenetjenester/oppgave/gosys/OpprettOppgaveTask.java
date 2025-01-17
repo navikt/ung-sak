@@ -50,7 +50,6 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
 
     @Override
     public MottattMelding doTask(MottattMelding data) {
-        sjekkUtlandstilsnitt(data);
 
         try {
             /*
@@ -108,17 +107,6 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
         } catch (Exception e) {
             log.warn("Uventet feil ved kjøring av OpprettOppgaveTask", e);
             throw e;
-        }
-    }
-
-    private void sjekkUtlandstilsnitt(MottattMelding data) {
-        final String SKJEMANUMMER_UTLAND = "UTL";
-        if (SKJEMANUMMER_UTLAND.equals(data.getBrevkode())) {
-            /*
-             * Utlandsbrev har egen behandlingstype -- og vises som
-             * "Utland" under "Gjelder" i Gosys.
-             */
-            data.setBehandlingType(FordelBehandlingType.UTLAND);
         }
     }
 

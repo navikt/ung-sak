@@ -75,7 +75,7 @@ create table produksjonsstyring_oppgave
         constraint pk_produksjonsstyring_oppgave
             primary key,
     aktoer_id         varchar(50),
-    ytelse_type       varchar(50),
+    ytelse_type       varchar(50) not null,
     fagsak_system     varchar(50),
     behandlingstema   varchar(50),
     oppgave_type      varchar(50)                            not null,

@@ -24,7 +24,7 @@ public class ProduksjonsstyringOppgaveEntitet {
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
-    @Column(name = "ytelse_type")
+    @Column(name = "ytelse_type", nullable = false)
     private String ytelseType;
 
     @Column(name = "fagsak_system", nullable = false)
@@ -63,7 +63,7 @@ public class ProduksjonsstyringOppgaveEntitet {
         this.aktørId = aktørId;
         this.fagsakSystem = (fagsakSystem == null) ? null : fagsakSystem.getKode();
         this.oppgaveType = Objects.requireNonNull(oppgaveType, "oppgaveType").getKode();
-        this.ytelseType = ytelseType == null ? null : ytelseType.getKode(); // ikke påkrevd pga PLEIEPENGER (kan ikke mappe entydig til Barn eller Nærstående) p.t.
+        this.ytelseType = ytelseType.getKode();
         this.beskrivelse = beskrivelse;
         this.behandlingstema = behandlingstema == null ? null : behandlingstema.getKode();
     }
