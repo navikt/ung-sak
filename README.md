@@ -20,7 +20,7 @@ Kjør `no.nav.ung.sak.db.util.Databaseskjemainitialisering` for å få med skjem
 2. Start webserver fra f.eks. IDE
    Start `JettyDevServer --vtp` 
 
-Swagger: http://localhost:8080/ung/sak/swagger
+Swagger: http://localhost:8901/ung/sak/swagger
 
 ### Generering av openapi spesifikasjon og typescript klient.
 
