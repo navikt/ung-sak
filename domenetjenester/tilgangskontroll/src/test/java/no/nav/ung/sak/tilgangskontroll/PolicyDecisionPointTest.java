@@ -9,18 +9,15 @@ import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 import no.nav.ung.sak.tilgangskontroll.api.AbacBehandlingStatus;
 import no.nav.ung.sak.tilgangskontroll.api.AbacFagsakStatus;
 import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.PersonPipRestKlient;
-import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.SystemUserPdlKlient;
-import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.AdressebeskyttelseGradering;
+import no.nav.ung.sak.tilgangskontroll.integrasjon.pdl.dto.*;
 import no.nav.ung.sak.tilgangskontroll.integrasjon.skjermetperson.SkjermetPersonRestKlient;
 import no.nav.ung.sak.tilgangskontroll.tilganger.*;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,26 +28,22 @@ class PolicyDecisionPointTest {
     public static final String FNR = "12345678901";
     private AnsattTilgangerTjeneste ansattTilgangerTjeneste = Mockito.mock(AnsattTilgangerTjeneste.class);
     private PersonPipRestKlient personPipRestKlient = Mockito.mock(PersonPipRestKlient.class);
-    private SystemUserPdlKlient systemUserPdlKlient = Mockito.mock(SystemUserPdlKlient.class);
     private SkjermetPersonRestKlient skjermetPersonRestKlient = Mockito.mock(SkjermetPersonRestKlient.class);
-    private PersonDiskresjonskodeTjeneste personDiskresjonskodeTjeneste = new PersonDiskresjonskodeTjeneste(personPipRestKlient, systemUserPdlKlient, skjermetPersonRestKlient);
+    private PersonDiskresjonskodeTjeneste personDiskresjonskodeTjeneste = new PersonDiskresjonskodeTjeneste(personPipRestKlient, skjermetPersonRestKlient);
     private TilgangTilPersonTjeneste tilgangTilPersonTjeneste = new TilgangTilPersonTjeneste(personDiskresjonskodeTjeneste);
     private TilgangTilOperasjonTjeneste tilgangTilOperasjonTjeneste = new TilgangTilOperasjonTjeneste();
 
     private PolicyDecisionPoint pdp = new PolicyDecisionPoint(ansattTilgangerTjeneste, tilgangTilPersonTjeneste, tilgangTilOperasjonTjeneste);
 
-    private Set<AdressebeskyttelseGradering> adressebeskyttelser = new HashSet<>();
-    private Boolean erPersonSkjermet = false;
-
-    @BeforeEach
-    void setup(){
-        Mockito.when(systemUserPdlKlient.hentPersonIdentForAktørId(Mockito.eq(AKTØR_ID))).thenReturn(Optional.of(FNR));
+    void mockPerson(PersonIdent personIdent, AktørId aktørId, boolean erSkjermet, Set<AdressebeskyttelseGradering> adressebeskyttelser) {
+        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(personIdent))).thenReturn(adressebeskyttelser);
+        Mockito.when(personPipRestKlient.hentPersoninformasjon(Mockito.eq(aktørId))).thenReturn(new PipPersondataResponse(AKTØR_ID, new PipPerson(adressebeskyttelser.stream().map(Adressebeskyttelse::fraEnum).toArray(Adressebeskyttelse[]::new)), new PipIdenter(List.of(new PipIdent(FNR, false, "FOLKEREGISTERIDENT")))));
+        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(personIdent))).thenReturn(erSkjermet);
     }
 
     @Test
     void veileder_skal_ha_tilgang_til_å_lese_fagsak_med_bruker_uten_beskyttelsesbehov() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
         PdpRequest request = new PdpRequest();
@@ -67,9 +60,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_skal_ha_tilgang_til_å_lese_fagsak_med_bruker_uten_beskyttelsesbehov() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
-
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
         PdpRequest request = new PdpRequest();
@@ -86,8 +77,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_lese_sak_med_kode6_person_uten_spesifikk_tilgang() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
@@ -105,8 +95,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_lese_sak_med_kode7_person_uten_spesifikk_tilgang() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.FORTROLIG));
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
@@ -124,8 +113,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_lese_sak_med_skjermet_person_uten_spesifikk_tilgang() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(true);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), true, Set.of());
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
@@ -143,8 +131,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_kan_ikke_lese_sak_med_kode6_person_uten_spesifikk_tilgang() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
@@ -162,8 +149,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_kan_ikke_lese_sak_med_kode7_person_uten_spesifikk_tilgang() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.FORTROLIG));
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of(AdressebeskyttelseGradering.FORTROLIG));
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
@@ -181,8 +167,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_med_spesifikk_tilgang_tiL_kode6_kan_lese_sak_med_kode6_person() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgangMedKode6());
 
@@ -200,8 +185,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_skal_ha_tilgang_til_å_opprette_fagsak() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
@@ -217,8 +201,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_skal_ha_tilgang_til_å_behandle_ordinært_aksjonspunkt() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
@@ -237,8 +220,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void veileder_kan_ikke_behandle_aksjonspunkt() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(veiledertilgang());
 
@@ -257,8 +239,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void beslutter_skal_ha_tilgang_til_å_beslutte_sak() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(besluttertilgang());
 
@@ -277,8 +258,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void beslutter_kan_ikke_beslutte_sak_hen_har_saksbehandlet_selv() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
 
         TilgangerBruker besluttertilgang = besluttertilgang();
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(besluttertilgang);
@@ -299,8 +279,7 @@ class PolicyDecisionPointTest {
 
     @Test
     void saksbehandler_kan_ikke_beslutte_sak() {
-        Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(Set.of());
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(PersonIdent.fra(FNR)))).thenReturn(false);
+        mockPerson(PersonIdent.fra(FNR), new AktørId(AKTØR_ID), false, Set.of());
 
         Mockito.when(ansattTilgangerTjeneste.tilgangerForInnloggetBruker()).thenReturn(saksbehandlertilgang());
 
