@@ -6,13 +6,14 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStatusEvent;
 
 @ApplicationScoped
+//TODO denne brukes ikke i ung-sak enda, og lager unødvendige tasker. Vurder å slett og heller kopiere på nytt når relevant
 public class InnsynEventObserver {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
