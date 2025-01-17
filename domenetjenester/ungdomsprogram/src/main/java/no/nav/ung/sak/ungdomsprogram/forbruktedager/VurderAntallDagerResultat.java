@@ -1,4 +1,4 @@
-package domene.ungdomsprogram.forbruktedager;
+package no.nav.ung.sak.ungdomsprogram.forbruktedager;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 

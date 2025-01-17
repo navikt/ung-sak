@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -21,6 +20,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurder
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.vilkår.InngangsvilkårUtleder;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
 

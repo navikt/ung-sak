@@ -1,4 +1,4 @@
-package domene.ungdomsprogram;
+package no.nav.ung.sak.ungdomsprogram;
 
 
 import java.util.Collection;

@@ -1,9 +1,7 @@
-package domene.ungdomsprogram;
+package no.nav.ung.sak.ungdomsprogram;
 
 import java.util.Optional;
 
-import domene.ungdomsprogram.forbruktedager.FinnForbrukteDager;
-import domene.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -17,6 +15,8 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 
 @Dependent
 public class UngdomsprogramPeriodeTjeneste {

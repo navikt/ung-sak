@@ -12,8 +12,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import domene.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -47,6 +45,8 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.SatserDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.TilkjentPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.TilkjentYtelseDto;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 
