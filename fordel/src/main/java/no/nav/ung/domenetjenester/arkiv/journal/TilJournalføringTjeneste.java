@@ -36,13 +36,13 @@ public class TilJournalføringTjeneste {
         this.safTjeneste = safTjeneste;
     }
 
-    public boolean tilJournalføring(JournalpostId journalpostId, Optional<String> sakId, OmrådeTema områdeTema, String aktørId) {
+    public boolean tilJournalføring(JournalpostId journalpostId, Optional<String> sakId, OmrådeTema tema, String aktørId) {
         LOG.info("Forsøker ferdigstillelse av journalpostId={}, mot sak={}", journalpostId, sakId);
         if (aktørId.isEmpty()) {
             throw new IllegalArgumentException("AktørId er påkrevd");
         }
 
-        oppdaterJournalpost(sakId, journalpostId, aktørId, områdeTema);
+        oppdaterJournalpost(sakId, journalpostId, aktørId, tema);
 
         dokTjeneste.ferdigstillJournalpost(journalpostId);
         return true;
@@ -72,11 +72,11 @@ public class TilJournalføringTjeneste {
     }
 
 
-    private void oppdaterJournalpost(Optional<String> sakId, JournalpostId journalpostId, String aktørId, OmrådeTema områdeTema) {
+    private void oppdaterJournalpost(Optional<String> sakId, JournalpostId journalpostId, String aktørId, OmrådeTema tema) {
         var oppdaterJournalpostRequest = new OppdaterJournalpostRequest();
         var bruker = new Bruker(aktørId, BrukerIdType.AKTOERID);
         oppdaterJournalpostRequest.setBruker(bruker);
-        oppdaterJournalpostRequest.setTema(områdeTema.getOffisiellKode());
+        oppdaterJournalpostRequest.setTema(tema.getOffisiellKode());
 
         Sak sak = new Sak(ARKIV_SAK_SYSTEM, sakId.orElseThrow(), no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype.FAGSAK);
         oppdaterJournalpostRequest.setSak(sak);

@@ -326,9 +326,9 @@ public class MottattMelding {
         return null;
     }
 
-    public void setTema(OmrådeTema områdeTema) {
-        Objects.requireNonNull(områdeTema);
-        prosessTaskData.setProperty(TEMA_KEY, områdeTema.getKode());
+    public void setTema(OmrådeTema tema) {
+        Objects.requireNonNull(tema);
+        prosessTaskData.setProperty(TEMA_KEY, tema.getKode());
     }
 
     public BehandlingTema getBehandlingTema() {

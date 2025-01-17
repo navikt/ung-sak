@@ -77,9 +77,9 @@ public class EnhetsTjeneste {
         return Optional.empty();
     }
 
-    public List<OrganisasjonsEnhet> hentFordelingEnhetId(OmrådeTema områdeTema, BehandlingTema behandlingsTema, GeografiskTilknytning geo) {
+    public List<OrganisasjonsEnhet> hentFordelingEnhetId(OmrådeTema tema, BehandlingTema behandlingsTema, GeografiskTilknytning geo) {
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(områdeTema.getOffisiellKode())
+            .medTema(tema.getOffisiellKode())
             .medBehandlingstema(behandlingsTema == null ? null : behandlingsTema.getOffisiellKode())
             .medDiskresjonskode(geo.getDiskresjonskode().getKode())
             .medGeografiskOmraade(geo.getTilknytning())

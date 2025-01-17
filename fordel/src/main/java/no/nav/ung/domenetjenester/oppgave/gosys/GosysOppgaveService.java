@@ -40,7 +40,7 @@ public class GosysOppgaveService {
         this.behandlendeEnhetService = behandlendeEnhetService;
     }
 
-    public String opprettOppgave(OmrådeTema områdeTema,
+    public String opprettOppgave(OmrådeTema tema,
                                  BehandlingTema behandlingTema,
                                  FordelBehandlingType fordelBehandlingType,
                                  AktørId søkersAktørId,
@@ -51,13 +51,13 @@ public class GosysOppgaveService {
     ) {
 
 
-        var eksisterendeOppgave = hentEksisterendeOppgave(områdeTema, søkersAktørId, journalpostId);
+        var eksisterendeOppgave = hentEksisterendeOppgave(tema, søkersAktørId, journalpostId);
         if (eksisterendeOppgave != null) {
             return eksisterendeOppgave;
         }
 
 
-        BehandlendeEnhet behandlendeEnhet = behandlendeEnhetService.hentBehandlendeEnhet(områdeTema, behandlingTema, søkersAktørId);
+        BehandlendeEnhet behandlendeEnhet = behandlendeEnhetService.hentBehandlendeEnhet(tema, behandlingTema, søkersAktørId);
 
         var request = createRestRequestBuilder(
             søkersAktørId,
@@ -65,7 +65,7 @@ public class GosysOppgaveService {
             beskrivelse,
             Prioritet.NORM,
             FRIST_I_DAGER,
-            områdeTema.getOffisiellKode()
+            tema.getOffisiellKode()
         ).medBehandlingstema(behandlingTema.getOffisiellKode())
             .medOppgavetype(oppgaveType.getKode())
             .medBehandlesAvApplikasjon(fagsaksystem.getKode())
@@ -90,11 +90,11 @@ public class GosysOppgaveService {
             .medPrioritet(prioritet);
     }
 
-    private String hentEksisterendeOppgave(OmrådeTema områdeTema, AktørId søkersAktørId, JournalpostId journalpostId) {
-        return hentEksisterendeOppgave(områdeTema, søkersAktørId, journalpostId, false);
+    private String hentEksisterendeOppgave(OmrådeTema tema, AktørId søkersAktørId, JournalpostId journalpostId) {
+        return hentEksisterendeOppgave(tema, søkersAktørId, journalpostId, false);
     }
 
-    public String hentEksisterendeOppgave(OmrådeTema områdeTema, AktørId søkersAktørId, JournalpostId journalpostId, boolean kunÅpneOppgaver) {
+    public String hentEksisterendeOppgave(OmrådeTema tema, AktørId søkersAktørId, JournalpostId journalpostId, boolean kunÅpneOppgaver) {
         // TODO: Utvid klient med mulighet for å finne oppgaver med gitt journalpostid
         return null;
     }

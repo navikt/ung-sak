@@ -24,22 +24,22 @@ public class BehandlendeEnhetService {
         this.enhetsTjeneste = enhetsTjeneste;
     }
 
-    public BehandlendeEnhet hentBehandlendeEnhet(OmrådeTema områdeTema, BehandlingTema behandlingTema, AktørId hovedAktør) {
+    public BehandlendeEnhet hentBehandlendeEnhet(OmrådeTema tema, BehandlingTema behandlingTema, AktørId hovedAktør) {
         GeografiskTilknytning gjeldendeGeografiskTilknytning = hentGjeldendeGeografiskeTilknytning(
             hovedAktør
         );
-        return finnBehandledeEnhet(gjeldendeGeografiskTilknytning, områdeTema, behandlingTema);
+        return finnBehandledeEnhet(gjeldendeGeografiskTilknytning, tema, behandlingTema);
     }
 
-    BehandlendeEnhet finnBehandledeEnhet(GeografiskTilknytning geografiskTilknytning, OmrådeTema områdeTema, BehandlingTema behandlingTema) {
+    BehandlendeEnhet finnBehandledeEnhet(GeografiskTilknytning geografiskTilknytning, OmrådeTema tema, BehandlingTema behandlingTema) {
 
-        List<OrganisasjonsEnhet> aktiveEnheter = enhetsTjeneste.hentFordelingEnhetId(områdeTema, behandlingTema, geografiskTilknytning);
+        List<OrganisasjonsEnhet> aktiveEnheter = enhetsTjeneste.hentFordelingEnhetId(tema, behandlingTema, geografiskTilknytning);
 
         if (aktiveEnheter.isEmpty()) {
-            throw new IllegalStateException("Forventet å få minst en behandlende enhet: tema=" + områdeTema);
+            throw new IllegalStateException("Forventet å få minst en behandlende enhet: tema=" + tema);
         }
         if (aktiveEnheter.size() != 1) {
-            throw new IllegalStateException(String.format("Forventet å få én behandlende enhet for tema %s, fikk %s.", områdeTema, aktiveEnheter.size()));
+            throw new IllegalStateException(String.format("Forventet å få én behandlende enhet for tema %s, fikk %s.", tema, aktiveEnheter.size()));
         }
         OrganisasjonsEnhet organisasjonsenhet = aktiveEnheter.get(0);
         return new BehandlendeEnhet(organisasjonsenhet.getEnhetId(), organisasjonsenhet.getEnhetNavn());
