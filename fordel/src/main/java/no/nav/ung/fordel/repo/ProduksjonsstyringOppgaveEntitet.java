@@ -14,7 +14,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 @Entity(name = "ProduksjonsstyringOppgaveEntitet")
-@Table(name = "PRODUKSJONSSTYRING_OPPGAVE")
+@Table(name = "FORDEL_PRODUKSJONSSTYRING_OPPGAVE")
 public class ProduksjonsstyringOppgaveEntitet {
 
     @Id

@@ -19,13 +19,13 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity(name = "MottattMelding")
-@Table(name = "MOTTATT_MELDING")
+@Table(name = "FORDEL_MOTTATT_MELDING")
 @DynamicInsert
 @DynamicUpdate
 public class MottattMeldingEntitet {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.SEQUENCE, generator = "SEQ_MOTTATT_MELDING")
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.SEQUENCE, generator = "SEQ_FORDEL_MOTTATT_MELDING")
     @Column(name = "id")
     private Long id;
 

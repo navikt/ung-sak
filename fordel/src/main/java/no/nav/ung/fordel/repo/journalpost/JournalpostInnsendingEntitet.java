@@ -20,7 +20,7 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @Entity(name = "JournalpostInnsendingEntitet")
-@Table(name = "JOURNALPOST_INNSENDING")
+@Table(name = "FORDEL_JOURNALPOST_INNSENDING")
 public class JournalpostInnsendingEntitet {
 
     @Id

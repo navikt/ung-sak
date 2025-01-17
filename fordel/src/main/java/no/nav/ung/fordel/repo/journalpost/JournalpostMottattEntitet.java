@@ -14,7 +14,7 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "JournalpostMottattEntitet")
-@Table(name = "JOURNALPOST_MOTTATT")
+@Table(name = "FORDEL_JOURNALPOST_MOTTATT")
 public class JournalpostMottattEntitet {
 
     public enum Status {

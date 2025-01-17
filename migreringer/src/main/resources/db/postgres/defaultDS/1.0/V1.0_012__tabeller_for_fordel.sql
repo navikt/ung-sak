@@ -1,4 +1,4 @@
-create table mottatt_melding
+create table fordel_mottatt_melding
 (
     id                   bigint                           not null
         primary key,
@@ -13,28 +13,28 @@ create table mottatt_melding
     payload              text
 );
 
-comment on table mottatt_melding is 'Metadata fra mottatte meldinger per journalpostid';
-comment on column mottatt_melding.journalpostid is 'journalpostid - naturlig nøkkel for tabellen';
-comment on column mottatt_melding.tema is 'tema fra joark';
-comment on column mottatt_melding.behandlingstype is 'behandlingstype fra joark';
-comment on column mottatt_melding.behandlingstema is 'behandlingstema fra joark';
-comment on column mottatt_melding.brevkode is 'brevkode fra joark';
-comment on column mottatt_melding.soeknad_id is 'søknad id generert av system som har lagd søknad';
+comment on table fordel_mottatt_melding is 'Metadata fra mottatte meldinger per journalpostid';
+comment on column fordel_mottatt_melding.journalpostid is 'journalpostid - naturlig nøkkel for tabellen';
+comment on column fordel_mottatt_melding.tema is 'tema fra joark';
+comment on column fordel_mottatt_melding.behandlingstype is 'behandlingstype fra joark';
+comment on column fordel_mottatt_melding.behandlingstema is 'behandlingstema fra joark';
+comment on column fordel_mottatt_melding.brevkode is 'brevkode fra joark';
+comment on column fordel_mottatt_melding.soeknad_id is 'søknad id generert av system som har lagd søknad';
 
-create unique index uidx_mottatt_melding_journalpostid
-    on mottatt_melding (journalpostid);
+create unique index uidx_fordel_mottatt_melding_journalpostid
+    on fordel_mottatt_melding (journalpostid);
 
-create index uidx_mottatt_melding_soeknadid_tema_behandlingstema
-    on mottatt_melding (soeknad_id, tema, behandlingstema);
+create index uidx_fordel_mottatt_melding_soeknadid_tema_behandlingstema
+    on fordel_mottatt_melding (soeknad_id, tema, behandlingstema);
 
-create index idx_mottatt_melding_brevkode
-    on mottatt_melding (brevkode);
+create index idx_fordel_mottatt_melding_brevkode
+    on fordel_mottatt_melding (brevkode);
 
 
-create table journalpost_innsending
+create table fordel_journalpost_innsending
 (
     journalpost_id       varchar(50)  not null
-        constraint pk_journalpost_innsending
+        constraint pk_fordel_journalpost_innsending
             primary key,
     ytelse_type          varchar(50)  not null,
     aktoer_id            varchar(50)  not null,
@@ -47,32 +47,32 @@ create table journalpost_innsending
     payload              text
 );
 
-comment on table journalpost_innsending is 'Inneholder hvilke journalposter oversendes til saksystem.';
-comment on column journalpost_innsending.journalpost_id is 'Primary Key. Journalposten denne tabellen inneholder ekstra informasjon om.';
-comment on column journalpost_innsending.ytelse_type is 'Ytelsetype (fagsak ytelsetype) som journalpost gjelder.';
-comment on column journalpost_innsending.aktoer_id is 'Aktøren som journalpost gjelder for.';
-comment on column journalpost_innsending.saksnummer is 'Saksnummer som journalpost gjelder for.';
-comment on column journalpost_innsending.status is 'Status på søknaden: UBEHANDLET, INNSENDT';
-comment on column journalpost_innsending.brevkode is 'Brevkode (fra saf/joark) for journalpost.';
-comment on column journalpost_innsending.innsendingstidspunkt is 'Tidspunkt melding var originalt sendt inn til Nav (enten fra kildesystem) eller tidspunkt mottatt (dersom første ikke er angitt i melding)';
-comment on column journalpost_innsending.payload is 'payload fra journal';
+comment on table fordel_journalpost_innsending is 'Inneholder hvilke journalposter oversendes til saksystem.';
+comment on column fordel_journalpost_innsending.journalpost_id is 'Primary Key. Journalposten denne tabellen inneholder ekstra informasjon om.';
+comment on column fordel_journalpost_innsending.ytelse_type is 'Ytelsetype (fagsak ytelsetype) som journalpost gjelder.';
+comment on column fordel_journalpost_innsending.aktoer_id is 'Aktøren som journalpost gjelder for.';
+comment on column fordel_journalpost_innsending.saksnummer is 'Saksnummer som journalpost gjelder for.';
+comment on column fordel_journalpost_innsending.status is 'Status på søknaden: UBEHANDLET, INNSENDT';
+comment on column fordel_journalpost_innsending.brevkode is 'Brevkode (fra saf/joark) for journalpost.';
+comment on column fordel_journalpost_innsending.innsendingstidspunkt is 'Tidspunkt melding var originalt sendt inn til Nav (enten fra kildesystem) eller tidspunkt mottatt (dersom første ikke er angitt i melding)';
+comment on column fordel_journalpost_innsending.payload is 'payload fra journal';
 
-create unique index uidx_journalpost_innsending_jpid
-    on journalpost_innsending (journalpost_id);
+create unique index uidx_fordel_journalpost_innsending_jpid
+    on fordel_journalpost_innsending (journalpost_id);
 
-create index idx_journalpost_innsending_aktoerid
-    on journalpost_innsending (aktoer_id);
+create index idx_fordel_journalpost_innsending_aktoerid
+    on fordel_journalpost_innsending (aktoer_id);
 
-create index idx_journalpost_innsending_saksnr
-    on journalpost_innsending (saksnummer);
+create index idx_fordel_journalpost_innsending_saksnr
+    on fordel_journalpost_innsending (saksnummer);
 
-create index idx_journalpost_innsending_opprtid
-    on journalpost_innsending (opprettet_tid);
+create index idx_fordel_journalpost_innsending_opprtid
+    on fordel_journalpost_innsending (opprettet_tid);
 
-create table produksjonsstyring_oppgave
+create table fordel_produksjonsstyring_oppgave
 (
     journalpost_id    varchar(50)                            not null
-        constraint pk_produksjonsstyring_oppgave
+        constraint pk_fordel_produksjonsstyring_oppgave
             primary key,
     aktoer_id         varchar(50),
     ytelse_type       varchar(50) not null,
@@ -85,28 +85,28 @@ create table produksjonsstyring_oppgave
     endret_tid        timestamp(3)
 );
 
-comment on table produksjonsstyring_oppgave is 'Inneholder sporingsinformasjon for oppgaver opprettet i Gosys.';
-comment on column produksjonsstyring_oppgave.journalpost_id is 'Primary Key. Journalposten oppgaven er opprettet for.';
-comment on column produksjonsstyring_oppgave.aktoer_id is 'Aktøren som oppgaven gjelder for.';
-comment on column produksjonsstyring_oppgave.ytelse_type is 'FagsakYtelseType oppgave gjelder';
-comment on column produksjonsstyring_oppgave.fagsak_system is 'Fagsaksystem oppgave skal knyttes til gjennom Gosys (IT00, FS39, ): Offisiell kode';
-comment on column produksjonsstyring_oppgave.oppgave_type is 'OppgaveType oppgave skal knyttes til i Gosys (GEN, JFR, VUR, ): Offisiell kode';
-comment on column produksjonsstyring_oppgave.oppgave_id is 'Oppgave id tilknyttet gjennom Gosys';
-comment on column produksjonsstyring_oppgave.beskrivelse is 'Beskrivelse tilordnet oppgave (hint til saksbehandler)';
+comment on table fordel_produksjonsstyring_oppgave is 'Inneholder sporingsinformasjon for oppgaver opprettet i Gosys.';
+comment on column fordel_produksjonsstyring_oppgave.journalpost_id is 'Primary Key. Journalposten oppgaven er opprettet for.';
+comment on column fordel_produksjonsstyring_oppgave.aktoer_id is 'Aktøren som oppgaven gjelder for.';
+comment on column fordel_produksjonsstyring_oppgave.ytelse_type is 'FagsakYtelseType oppgave gjelder';
+comment on column fordel_produksjonsstyring_oppgave.fagsak_system is 'Fagsaksystem oppgave skal knyttes til gjennom Gosys (IT00, FS39, ): Offisiell kode';
+comment on column fordel_produksjonsstyring_oppgave.oppgave_type is 'OppgaveType oppgave skal knyttes til i Gosys (GEN, JFR, VUR, ): Offisiell kode';
+comment on column fordel_produksjonsstyring_oppgave.oppgave_id is 'Oppgave id tilknyttet gjennom Gosys';
+comment on column fordel_produksjonsstyring_oppgave.beskrivelse is 'Beskrivelse tilordnet oppgave (hint til saksbehandler)';
 
-create unique index uidx_produksjonsstyring_oppgave_jpid
-    on produksjonsstyring_oppgave (journalpost_id);
+create unique index uidx_fordel_produksjonsstyring_oppgave_jpid
+    on fordel_produksjonsstyring_oppgave (journalpost_id);
 
-create unique index uidx_produksjonsstyring_oppgave_oppgid
-    on produksjonsstyring_oppgave (oppgave_id);
+create unique index uidx_fordel_produksjonsstyring_oppgave_oppgid
+    on fordel_produksjonsstyring_oppgave (oppgave_id);
 
-create index idx_produksjonsstyring_oppgave_aktorid
-    on produksjonsstyring_oppgave (aktoer_id);
+create index idx_fordel_produksjonsstyring_oppgave_aktorid
+    on fordel_produksjonsstyring_oppgave (aktoer_id);
 
-create table journalpost_mottatt
+create table fordel_journalpost_mottatt
 (
     journalpost_id    varchar(50) not null
-        constraint pk_journalpost_mottatt
+        constraint pk_fordel_journalpost_mottatt
             primary key,
     aktoer_id         varchar(50),
     kanal             varchar(100),
@@ -120,31 +120,31 @@ create table journalpost_mottatt
     endret_tid        timestamp
 );
 
-comment on table journalpost_mottatt is 'Inneholder hvilke journalposter mottatt i fordel.';
-comment on column journalpost_mottatt.journalpost_id is 'Primary Key. Journalposten denne tabellen inneholder ekstra informasjon om.';
-comment on column journalpost_mottatt.aktoer_id is 'Aktøren som journalpost gjelder for.';
-comment on column journalpost_mottatt.kanal is 'Kanal journalpost innsendt på.';
-comment on column journalpost_mottatt.status is 'Status på søknaden: UBEHANDLET, INNSENDT';
-comment on column journalpost_mottatt.brevkode is 'Brevkode (fra saf/joark) for journalpost.';
-comment on column journalpost_mottatt.behandling_tema is 'BehandlingTema journalpost er registrert på.';
-comment on column journalpost_mottatt.mottatt_tidspunkt is 'Tidspunkt melding var originalt sendt inn til Nav (enten fra kildesystem) eller tidspunkt mottatt';
-comment on column journalpost_mottatt.payload is 'Innhold som skal sendes til fagsystem';
+comment on table fordel_journalpost_mottatt is 'Inneholder hvilke journalposter mottatt i fordel.';
+comment on column fordel_journalpost_mottatt.journalpost_id is 'Primary Key. Journalposten denne tabellen inneholder ekstra informasjon om.';
+comment on column fordel_journalpost_mottatt.aktoer_id is 'Aktøren som journalpost gjelder for.';
+comment on column fordel_journalpost_mottatt.kanal is 'Kanal journalpost innsendt på.';
+comment on column fordel_journalpost_mottatt.status is 'Status på søknaden: UBEHANDLET, INNSENDT';
+comment on column fordel_journalpost_mottatt.brevkode is 'Brevkode (fra saf/joark) for journalpost.';
+comment on column fordel_journalpost_mottatt.behandling_tema is 'BehandlingTema journalpost er registrert på.';
+comment on column fordel_journalpost_mottatt.mottatt_tidspunkt is 'Tidspunkt melding var originalt sendt inn til Nav (enten fra kildesystem) eller tidspunkt mottatt';
+comment on column fordel_journalpost_mottatt.payload is 'Innhold som skal sendes til fagsystem';
 
 
 
-create unique index uidx_journalpost_mottatt_jpid
-    on journalpost_mottatt (journalpost_id);
+create unique index uidx_fordel_journalpost_mottatt_jpid
+    on fordel_journalpost_mottatt (journalpost_id);
 
-create index idx_journalpost_mottatt_aktorid
-    on journalpost_mottatt (aktoer_id);
+create index idx_fordel_journalpost_mottatt_aktorid
+    on fordel_journalpost_mottatt (aktoer_id);
 
-create index idx_journalpost_mottatt_opprtid
-    on journalpost_mottatt (opprettet_tid);
+create index idx_fordel_journalpost_mottatt_opprtid
+    on fordel_journalpost_mottatt (opprettet_tid);
 
-create index idx_journalpost_mottatt_mottatid
-    on journalpost_mottatt (mottatt_tidspunkt);
+create index idx_fordel_journalpost_mottatt_mottatid
+    on fordel_journalpost_mottatt (mottatt_tidspunkt);
 
-create table inngaaende_hendelse
+create table fordel_inngaaende_hendelse
 (
     id                       bigint                                       not null
         primary key,
@@ -161,14 +161,14 @@ create table inngaaende_hendelse
     endret_tid               timestamp(3)
 );
 
-create index idx_inngaaende_hendelse_aktoer_id_aktorid
-    on inngaaende_hendelse (aktoer_id);
+create index idx_fordel_inngaaende_hendelse_aktoer_id_aktorid
+    on fordel_inngaaende_hendelse (aktoer_id);
 
 
-create sequence seq_mottatt_melding
+create sequence seq_fordel_mottatt_melding
     minvalue 10000000
     increment by 50;
 
-create sequence seq_inngaaende_hendelse
+create sequence seq_fordel_inngaaende_hendelse
     minvalue 1000000
     increment by 50;

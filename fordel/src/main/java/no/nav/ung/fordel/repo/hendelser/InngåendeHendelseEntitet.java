@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.hendelser.HendelseType;
 
 @Entity(name = "InngåendeHendelse")
-@Table(name = "INNGAAENDE_HENDELSE")
+@Table(name = "FORDEL_INNGAAENDE_HENDELSE")
 public class InngåendeHendelseEntitet {
     public enum HåndtertStatusType {
         MOTTATT("MOTTATT"),
@@ -30,7 +30,7 @@ public class InngåendeHendelseEntitet {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_INNGAAENDE_HENDELSE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_FORDEL_INNGAAENDE_HENDELSE")
     @Column(name = "id")
     private Long id;
 
