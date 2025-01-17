@@ -30,12 +30,16 @@ public enum BehandlingTema implements Kodeverdi {
 
     public static final String KODEVERK = "BEHANDLING_TEMA";
     private static final Map<String, BehandlingTema> KODER = new LinkedHashMap<>();
+    private static final Map<String, BehandlingTema> OFFISIELLE_KODER = new LinkedHashMap<>();
     private static final Map<FagsakYtelseType, BehandlingTema> YTELSE_TYPE_TIL_TEMA = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
                 throw new IllegalArgumentException("Duplikat kode: " + v.kode);
+            }
+            if (v.offisiellKode != null) {
+                OFFISIELLE_KODER.putIfAbsent(v.offisiellKode, v);
             }
             if (YTELSE_TYPE_TIL_TEMA.putIfAbsent(v.fagsakYtelseType, v) != null) {
                 throw new IllegalArgumentException("Duplikat ytelseType -> tema: " + v);
@@ -86,6 +90,13 @@ public enum BehandlingTema implements Kodeverdi {
             throw new IllegalArgumentException("Ukjent BehandlingTema: for input " + node);
         }
         return ad;
+    }
+
+    public static BehandlingTema fraOffisiellKode(String kode) {
+        if (kode == null) {
+            return UDEFINERT;
+        }
+        return OFFISIELLE_KODER.getOrDefault(kode, UDEFINERT);
     }
 
     public static Map<String, BehandlingTema> kodeMap() {

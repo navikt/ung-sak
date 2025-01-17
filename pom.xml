@@ -17,6 +17,7 @@
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
         <module>formidling</module>
+        <module>fordel</module>
 
         <!-- Web klient og server -->
         <module>web</module>
@@ -44,6 +45,7 @@
         <jandex.version>3.2.3</jandex.version>
         <flyway.version>11.1.1</flyway.version>
         <pdfgen-core.version>1.1.39</pdfgen-core.version>
+        <confluent.platform.version>7.8.0</confluent.platform.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -377,6 +379,12 @@
 
             <!-- 3dje parts NAV felleskomponenter -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
+            <dependency>
+                <groupId>no.nav.teamdokumenthandtering</groupId>
+                <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
+                <version>08271806</version>
+            </dependency>
+
 
             <!-- EKSTRA TEST AVHENGIGHETER FOR LOKAL WEBSERVER -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
@@ -553,6 +561,23 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-database-postgresql</artifactId>
                 <version>${flyway.version}</version>
+            </dependency>
+
+            <!-- Kafka -->
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-streams-avro-serde</artifactId>
+                <version>${confluent.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-avro-serializer</artifactId>
+                <version>${confluent.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>1.12.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
