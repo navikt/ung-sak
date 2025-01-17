@@ -18,11 +18,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 public enum FordelBehandlingType implements Kodeverdi {
 
     DIGITAL_SØKNAD("DIGITAL_SØKNAD","ae0227", "Digital søknad"),
-    UTBETALING("UTBETALING","ae0007", "Utbetaling"),
-    OVERFØRING("OVERFØRING","ae0085", "Overføring"),
     DIGITAL_ETTERSENDELSE("DIGITAL_ETTERSENDELSE", "ae0246", "Digital ettersendelse"),
-    ANSATTE("ANSATTE", "ae0249", "Ansatte"),
-    UTLAND("UTLAND", "ae0106", "Utland"),
     UDEFINERT("-", null, "Ikke definert"),
     ;
 
