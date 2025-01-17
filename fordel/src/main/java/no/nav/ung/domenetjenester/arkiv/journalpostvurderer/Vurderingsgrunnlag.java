@@ -8,7 +8,8 @@ import no.nav.ung.fordel.handler.MottattMelding;
 record Vurderingsgrunnlag(
         MottattMelding melding,
         JournalpostInfo journalpostInfo) {
-    private static final String FAGSAK_SYSTEM_K9 = "K9";
+    // TODO: Endre til UNG når dette støttes
+    private static final String FAGSAK_SYSTEM_UNG = "K9";
 
     boolean erEndeligJournalført() {
         return JournalføringHendelsetype.ENDELING_JOURNALFØRT == melding.getJournalføringHendelsetype().orElse(null);
@@ -18,8 +19,8 @@ record Vurderingsgrunnlag(
         return JournalføringHendelsetype.MOTTATT == melding.getJournalføringHendelsetype().orElse(null);
     }
 
-    boolean tilhørerK9() {
-        return FAGSAK_SYSTEM_K9.equals(journalpostInfo.getFagsakSystem().orElse(null)) &&
+    boolean tilhørerUng() {
+        return FAGSAK_SYSTEM_UNG.equals(journalpostInfo.getFagsakSystem().orElse(null)) &&
                 journalpostInfo.getFagsakId().isPresent();
     }
 

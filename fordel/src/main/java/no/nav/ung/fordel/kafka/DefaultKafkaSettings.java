@@ -145,7 +145,7 @@ public class DefaultKafkaSettings implements KafkaSettings {
     @Override
     public Properties toStreamPropertiesWith(String navn) {
         final Properties props = baseProperties();
-        var streamId = String.format("stream-%s-k9-fordel", navn);
+        var streamId = String.format("stream-%s-ung-sak", navn);
         var clientId = String.format("%s-%s", streamId, clientId());
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, streamId);
         props.put(StreamsConfig.CLIENT_ID_CONFIG, clientId);

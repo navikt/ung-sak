@@ -27,19 +27,6 @@
             <groupId>io.confluent</groupId>
             <artifactId>kafka-streams-avro-serde</artifactId>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>no.nav.ung.sak</groupId>-->
-<!--            <artifactId>kodeverk</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>no.nav.ung.sak</groupId>-->
-<!--            <artifactId>dokumentarkiv</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>no.nav.ung.sak</groupId>-->
-<!--            <artifactId>person</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>mottak</artifactId>

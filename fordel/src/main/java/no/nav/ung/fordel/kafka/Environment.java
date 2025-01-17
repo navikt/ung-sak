@@ -1,7 +1,7 @@
 package no.nav.ung.fordel.kafka;
 
 public enum Environment {
-    PROD("p"), Q0("q0"), Q1("q1"), T4("t4");
+    PROD("p"), Q2("q2");
 
     private String kode;
 

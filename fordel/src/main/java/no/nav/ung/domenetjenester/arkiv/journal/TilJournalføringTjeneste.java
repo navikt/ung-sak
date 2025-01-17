@@ -25,6 +25,7 @@ import no.nav.ung.sak.typer.JournalpostId;
 @Dependent
 public class TilJournalføringTjeneste {
 
+    // TODO: Endre til UNG når dette støttes
     private static final String ARKIV_SAK_SYSTEM = "K9";
     private static final Logger LOG = LoggerFactory.getLogger(TilJournalføringTjeneste.class);
     private DokTjeneste dokTjeneste;

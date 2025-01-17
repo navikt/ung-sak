@@ -66,7 +66,7 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
         KStream<String, Personhendelse> hendelserViSkalHåndtere = builder.stream(topic.getTopic(), consumed)
             .filter((key, value) -> erHendelseTypeViSkalHåndtere(value));
 
-        log.info("Publiserer hendelser til K9-sak og Ung-sak");
+        log.info("Publiserer hendelser til Ung-sak");
         hendelserViSkalHåndtere
             .split()
             .branch(this::harPåvirketUngFagsakForHendelse, Branched.withConsumer(ks -> ks.foreach(this::håndterUngSakHendelse)))
@@ -118,18 +118,13 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
             } catch (Exception e) {
                 i++;
                 if (i == 1) {
-                    log.warn(getTopicName() + " :: Feilet ved filtrering av PDL-hendelse=" + personhendelse.getHendelseId() + " mot k9-sak, 1. gang. Prøver én ekstra gang", e);
+                    log.warn(getTopicName() + " :: Feilet ved filtrering av PDL-hendelse=" + personhendelse.getHendelseId() + " mot ung-sak, 1. gang. Prøver én ekstra gang", e);
                 } else {
-                    log.warn(getTopicName() + " :: Feilet ved filtrering av PDL-hendelse=" + personhendelse.getHendelseId() + " mot k9-sak, 2. gang.", e);
+                    log.warn(getTopicName() + " :: Feilet ved filtrering av PDL-hendelse=" + personhendelse.getHendelseId() + " mot ung-sak, 2. gang.", e);
                     return true; // Lar denne gå videre slik at det kan feile i en prosesstask. Kan ikke kaste exception her fordi det vil stoppe streamen.
                 }
             }
         }
-    }
-
-    private void håndterK9SakHendelse(String key, Personhendelse value) {
-        log.info("Hendelse påvirket K9-fagsak: {}", value);
-        hendelseHåndterer.handleMessage(value);
     }
 
     private void håndterUngSakHendelse(String key, Personhendelse value) {

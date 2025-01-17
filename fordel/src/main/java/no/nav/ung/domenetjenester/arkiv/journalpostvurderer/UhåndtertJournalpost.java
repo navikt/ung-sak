@@ -37,8 +37,8 @@ public class UhåndtertJournalpost implements Journalpostvurderer {
     }
 
     private VurdertJournalpost vurderEndeligJournalørt(Vurderingsgrunnlag vurderingsgrunnlag) {
-        if (!vurderingsgrunnlag.tilhørerK9()) {
-            log.info(vurderingsgrunnlag.logMelding("Endelig journalført mot != K9"));
+        if (!vurderingsgrunnlag.tilhørerUng()) {
+            log.info(vurderingsgrunnlag.logMelding("Endelig journalført mot != ung"));
         }
         return ikkeHåndtert();
     }

@@ -59,7 +59,7 @@ public class PdlLeesahOversetter {
     private Optional<Hendelse> oversettDødsfallDersomKomplettData(Personhendelse personhendelse, HendelseInfo hendelseInfo) {
         if (personhendelse.getDoedsfall() == null || personhendelse.getDoedsfall().getDoedsdato() == null) {
             logger.info("Ignorerer dødsfallhendelse fordi det mangler dødsdato. endringstype {}, hendelseId {}", hendelseInfo.getHendelseId(), personhendelse.getEndringstype());
-            // Kan ikke sende inn hendelse til k9-sak dersom den ikke har noen dødsdato - ikke mulig å vurdere periode den gjelder for
+            // Kan ikke sende inn hendelse til ung-sak dersom den ikke har noen dødsdato - ikke mulig å vurdere periode den gjelder for
             // Denne situasjonen antas bare å oppstå for hendelser med endringstype ANNULLERT, OPPHOERT
             return Optional.empty();
         }
