@@ -8,7 +8,7 @@ create table mottatt_melding
     behandlingstema      varchar(50),
     brevkode             varchar(50),
     soeknad_id           varchar(50),
-    opprettet_tid        timestamp default LOCALTIMESTAMP not null,
+    opprettet_tid        timestamp default timezone('utc'::text, now()) not null,
     endret_tid           timestamp,
     payload              text
 );
@@ -81,7 +81,7 @@ create table produksjonsstyring_oppgave
     oppgave_type      varchar(50)                            not null,
     oppgave_id        varchar(50),
     beskrivelse       text,
-    opprettet_tid     timestamp(3) default CURRENT_TIMESTAMP not null,
+    opprettet_tid     timestamp(3) default timezone('utc'::text, now()) not null,
     endret_tid        timestamp(3)
 );
 
@@ -116,7 +116,7 @@ create table journalpost_mottatt
     behandling_tema   varchar(50),
     mottatt_tidspunkt timestamp   not null,
     payload           text,
-    opprettet_tid     timestamp default LOCALTIMESTAMP,
+    opprettet_tid     timestamp default timezone('utc'::text, now()),
     endret_tid        timestamp
 );
 
@@ -156,7 +156,7 @@ create table inngaaende_hendelse
     haandtert_status         varchar(100) default 'MOTTATT'::character varying,
     haandtert_av_hendelse_id varchar(100),
     opprettet_av             varchar(20)  default 'VL'::character varying not null,
-    opprettet_tid            timestamp(3) default CURRENT_TIMESTAMP       not null,
+    opprettet_tid            timestamp(3) default timezone('utc'::text, now())    not null,
     endret_av                varchar(20),
     endret_tid               timestamp(3)
 );
