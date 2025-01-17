@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -67,7 +68,7 @@ class BrevGenerererTjenesteTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeRepository,
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             tilkjentYtelseUtleder,
             repositoryProvider.getPersonopplysningRepository());
 

@@ -2,6 +2,8 @@ package domene.ungdomsprogram;
 
 import java.util.Optional;
 
+import domene.ungdomsprogram.forbruktedager.FinnForbrukteDager;
+import domene.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -31,6 +33,11 @@ public class UngdomsprogramPeriodeTjeneste {
     public LocalDateTimeline<Boolean> finnPeriodeTidslinje(Long behandlingId) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
         return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
+    }
+
+    public VurderAntallDagerResultat finnTilgjengeligeDager(Long behandlingId) {
+        var grunnlag = finnPeriodeTidslinje(behandlingId);
+        return FinnForbrukteDager.finnForbrukteDager(grunnlag);
     }
 
     /**

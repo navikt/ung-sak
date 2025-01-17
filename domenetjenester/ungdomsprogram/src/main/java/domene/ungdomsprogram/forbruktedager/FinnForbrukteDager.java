@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.uttak;
+package domene.ungdomsprogram.forbruktedager;
 
 import java.util.List;
 

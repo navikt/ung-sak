@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -25,12 +25,10 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.domene.GrunnlagOgTilkjentYtelse;
 import no.nav.ung.sak.formidling.domene.PdlPerson;
@@ -60,7 +58,7 @@ public class BrevGenerererTjeneste {
     private AktørTjeneste aktørTjeneste;
     private PdfGenKlient pdfGen;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private PersonopplysningRepository personopplysningRepository;
 
@@ -70,14 +68,14 @@ public class BrevGenerererTjeneste {
         AktørTjeneste aktørTjeneste,
         PdfGenKlient pdfGen,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
         TilkjentYtelseUtleder tilkjentYtelseUtleder,
         PersonopplysningRepository personopplysningRepository) {
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.pdfGen = pdfGen;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
         this.personopplysningRepository = personopplysningRepository;
     }
@@ -145,9 +143,11 @@ public class BrevGenerererTjeneste {
                 new PeriodeDto(it.getFom(), it.getTom()), it.getValue()))
             .collect(Collectors.toSet());
 
-        var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(tilkjentYtelseTidslinje);
-        var antallDager = tilkjentYtelseTidslinje.disjoint(helger).getLocalDateIntervals().stream().mapToLong(LocalDateInterval::totalDays).sum();
 
+        long antallDager = ungdomsprogramPeriodeTjeneste.finnTilgjengeligeDager(behandlingId).forbrukteDager();
+        if (antallDager <= 0) {
+            throw new IllegalStateException("Antall tilgjenglige dager = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
+        }
         var input = new TemplateInput(TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
