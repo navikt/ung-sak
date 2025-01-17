@@ -42,7 +42,7 @@ import no.nav.ung.sak.formidling.domene.GenerertBrev;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class BrevbestillingTask extends BehandlingProsessTask {
 
-    public static final String TASKTYPE = "formidling.brevbestlling";
+    public static final String TASKTYPE = "formidling.brevbestilling";
 
     private static final Logger LOG = LoggerFactory.getLogger(BrevbestillingTask.class);
 
