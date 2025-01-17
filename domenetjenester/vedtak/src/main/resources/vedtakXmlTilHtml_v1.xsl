@@ -10,7 +10,7 @@
                 <!--Fagopplysninger-->
                 <h3>Fagsak ID <xsl:value-of select="fagsakId" /> </h3>
                 <strong>Fagsaktype: &#160;</strong><xsl:value-of select="fagsakType" /> &#xa; <br />
-                <strong>Tema: &#160;</strong><xsl:value-of select="områdeTema" /> &#xa; <br />
+                <strong>Tema: &#160;</strong><xsl:value-of select="tema" /> &#xa; <br />
                 <strong>Behandlingstema: &#160;</strong><xsl:value-of select="behandlingsTema" /> <br />
                 <!--Skal saksbehanderID være med om det ikke ligger i xml ?-->
                 <strong>Ansvarlig SaksbehandlerId: &#160;</strong><xsl:value-of select="ansvarligSaksbehandlerIdent" /> <br />
@@ -500,7 +500,7 @@
             <xsl:for-each select="relaterteYtelser/relatertYtelse"><br/>
                 Type : <xsl:value-of select="type" /><br />
                 Tilstand : <xsl:value-of select="tilstand" /><br />
-                Tema : <xsl:value-of select="områdeTema" /><br />
+                Tema : <xsl:value-of select="tema" /><br />
                 Behandlingstema : <xsl:value-of select="behandlingstema" /><br />
 
                 <xsl:call-template name="datoKonverteringHvisFinnes">

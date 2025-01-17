@@ -5,7 +5,7 @@ query ($journalpostId: String!) {
     journalposttype
     journalstatus
     kanal
-    områdeTema
+    tema
     behandlingstema
     sak {
       arkivsaksnummer

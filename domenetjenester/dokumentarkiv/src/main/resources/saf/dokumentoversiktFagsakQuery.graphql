@@ -6,7 +6,7 @@ query ($fagsakId: String!, $fagsaksystem: String!) {
             journalposttype
             journalstatus
             kanal
-            områdeTema
+            tema
             behandlingstema
             sak {
                 arkivsaksnummer
