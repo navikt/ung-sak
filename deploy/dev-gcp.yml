@@ -22,6 +22,9 @@ spec:
     timeout: 5
     periodSeconds: 10
     failureThreshold: 27
+  preStopHook:
+    http:
+      path: /ung/sak/internal/health/preStop
   replicas:
     min: 2
     max: 2
@@ -89,6 +92,7 @@ spec:
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
         - host: "norg2.dev-fss-pub.nais.io"
+        - host: "dokarkiv-q2.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: ung-sak
@@ -151,6 +155,12 @@ spec:
       value: omsorgspenger.k9-rapid-v2
     - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
       value: k9saksbehandling.k9-infotrygd-feed-hendelse
+    - name: HENDELSE_PERSON_LEESAH_TOPIC
+      value: pdl.leesah-v1
+    - name: KAFKA_JOURNAL_TOPIC
+      value: teamdokumenthandtering.aapen-dok-journalfoering
+
+
 
     # Baseurl
     - name: SCHEMA_REGISTRY_URL
@@ -241,6 +251,8 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.saf/.default
     - name: DOKARKIV_URL
       value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
       value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
 
@@ -262,6 +274,8 @@ spec:
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
+    - name: INNSENDING_HENDELSER_FORSINKELSE
+      value: "PT1M"
 
       # Audit logging
     - name: AUDITLOGGER_ENABLED

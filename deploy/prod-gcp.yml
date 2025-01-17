@@ -22,6 +22,9 @@ spec:
     timeout: 5
     periodSeconds: 10
     failureThreshold: 27
+  preStopHook:
+    http:
+      path: /ung/sak/internal/health/preStop
   replicas:
     min: 2
     max: 2
@@ -89,6 +92,7 @@ spec:
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
         - host: "norg2.prod-fss-pub.nais.io"
+        - host: "dokarkiv.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: ung-sak
@@ -233,6 +237,8 @@ spec:
       value: api://prod-fss.teamdokumenthandtering.saf/.default
     - name: DOKARKIV_URL
       value: https://dokarkiv.prod-fss-pub.nais.io/rest/journalpostapi/v1
+    - name: DOKARKIV_BASE_URL
+      value: https://dokarkiv.prod-fss-pub.nais.io
     - name: DOKARKIV_SCOPE
       value: api://prod-fss.teamdokumenthandtering.dokarkiv/.default
 
@@ -255,6 +261,8 @@ spec:
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
+    - name: INNSENDING_HENDELSER_FORSINKELSE
+      value: "PT1H"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

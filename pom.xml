@@ -17,6 +17,7 @@
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
         <module>formidling</module>
+        <module>fordel</module>
 
         <!-- Web klient og server -->
         <module>web</module>
@@ -44,6 +45,7 @@
         <jandex.version>3.2.3</jandex.version>
         <flyway.version>11.2.0</flyway.version>
         <pdfgen-core.version>1.1.39</pdfgen-core.version>
+        <confluent.platform.version>7.8.0</confluent.platform.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -152,6 +154,11 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-core-jakarta</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
             <dependency>
@@ -329,13 +336,13 @@
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.ung.sak.ytelse</groupId>
-                <artifactId>ytelse-ung</artifactId>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>formidling</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>formidling</artifactId>
+                <artifactId>fordel</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -377,6 +384,12 @@
 
             <!-- 3dje parts NAV felleskomponenter -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
+            <dependency>
+                <groupId>no.nav.teamdokumenthandtering</groupId>
+                <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
+                <version>08271806</version>
+            </dependency>
+
 
             <!-- EKSTRA TEST AVHENGIGHETER FOR LOKAL WEBSERVER -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
@@ -553,6 +566,23 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-database-postgresql</artifactId>
                 <version>${flyway.version}</version>
+            </dependency>
+
+            <!-- Kafka -->
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-streams-avro-serde</artifactId>
+                <version>${confluent.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-avro-serializer</artifactId>
+                <version>${confluent.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>1.12.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -805,6 +835,10 @@
             <id>central</id>
             <name>Maven Central</name>
             <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
         </repository>
 		<repository>
             <!-- bruker SNAPSHOT versjon av eclipse-transformer (0.3.0-SNAPSHOT) -->

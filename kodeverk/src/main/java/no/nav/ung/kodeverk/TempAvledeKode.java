@@ -25,8 +25,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 @Deprecated(since = "2020-09-17")
 public class TempAvledeKode {
 
-    private final static Logger logger = LoggerFactory.getLogger(TempAvledeKode.class);
-
     @SuppressWarnings("rawtypes")
     public static String getVerdi(Class<?> cls, Object node, String key) {
         String kode;
@@ -41,19 +39,6 @@ public class TempAvledeKode {
                 kode = (String) ((Map) node).get(key);
             } else {
                 throw new IllegalArgumentException("Støtter ikke node av type: " + node.getClass() + " for klasse:" + cls.getName());
-            }
-            try {
-                String kodeverk = "uspesifisert";
-                if (node instanceof JsonNode) {
-                    kodeverk = ((JsonNode) node).get("kodeverk").asText();
-                } else if (node instanceof TextNode) {
-                    kodeverk = ((TextNode) node).asText();
-                } else if (node instanceof Map) {
-                    kodeverk = (String) ((Map) node).get("kodeverk");
-                }
-                logger.info("Kodeverk: mottok kodeverdiobjekt som ikke var String - kode {} fra kodeverk {} ", kode, kodeverk);
-            } catch (Exception e) {
-                logger.info("Kodeverk: tempavledekode kalt uten at det finnes kodeverk - kode {}", kode);
             }
         }
         return kode;
