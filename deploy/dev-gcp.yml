@@ -270,6 +270,8 @@ spec:
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
+    - name: INNSENDING_HENDELSER_FORSINKELSE
+      value: "PT1M"
 
       # Audit logging
     - name: AUDITLOGGER_ENABLED
