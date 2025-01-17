@@ -57,7 +57,7 @@ class BrevGenerererTjenesteTest {
 
 
     @Test
-    void skal_lage_innvilgelsesbrev_pdf() {
+    void skal_lage_vedtakspdf() {
 
         var scenario = BrevScenarioer.lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
         var ungTestGrunnlag = scenario.getUngTestGrunnlag();
@@ -77,9 +77,6 @@ class BrevGenerererTjenesteTest {
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
 
         assertThat(erPdf(generertBrev.dokument().pdf())).isTrue();
-        if (System.getenv("LAGRE_PDF") != null) {
-            BrevUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
-        }
 
         PdlPerson mottaker = generertBrev.mottaker();
         assertThat(mottaker.navn()).isEqualTo(ungTestGrunnlag.navn());

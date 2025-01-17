@@ -33,15 +33,14 @@ import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 /**
- * Test for brevtekster for innvilgelse. Lager ikke pdf, men bruker html for å validere.
+ * Test for brevtekster for innvilgelse. Bruker html for å validere.
  * For manuell verifikasjon av pdf kan env variabel LAGRE_PDF brukes.
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class InnvilgelseTest {
+class BrevGenerererInnvilgelseTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
-
 
     @Inject
     private EntityManager entityManager;
