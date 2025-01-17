@@ -423,10 +423,9 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         // Default Person
         if (personer == null) {
             var ungdom = getDefaultBrukerAktørId();
-            var fødselsdato = LocalDate.now().minusYears(ungTestGrunnlag.alder());
             PersonInformasjon personInformasjon = opprettBuilderForRegisteropplysninger()
                 .medPersonas()
-                .ungdom(ungdom, fødselsdato, ungTestGrunnlag.navn())
+                .ungdom(ungdom, ungTestGrunnlag.fødselsdato(), ungTestGrunnlag.navn())
                 .statsborgerskap(Landkoder.NOR)
                 .personstatus(PersonstatusType.BOSA)
                 .build();

@@ -5,14 +5,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import domene.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -108,7 +109,7 @@ public class BrevGenerererTjeneste {
             .distinct()
             .toList();
 
-        Set<TilkjentPeriodeDto> tilkjentePerioder = grunnlagOgTilkjentYtelseTimeline
+        List<TilkjentPeriodeDto> tilkjentePerioder = grunnlagOgTilkjentYtelseTimeline
             .mapSegment(
                 it1 -> new TilkjentYtelseDto(
                     it1.dagsats(),
@@ -116,12 +117,14 @@ public class BrevGenerererTjeneste {
                     it1.grunnbeløp(),
                     it1.årsbeløp()
                 ))
-            .compress().stream().map(
+            .compress().stream()
+            .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval)) //eldste først for tilkjent perioder
+            .map(
                 it -> new TilkjentPeriodeDto(
                     new PeriodeDto(it.getFom(), it.getTom()),
                     it.getValue()
                 )
-            ).collect(Collectors.toSet());
+            ).toList();
 
 
         var satsTyper = sortertGrunnlagOgTilkjentYtelseVerdier.stream().map(GrunnlagOgTilkjentYtelse::satsType).collect(Collectors.toSet());
@@ -144,7 +147,8 @@ public class BrevGenerererTjeneste {
             .collect(Collectors.toSet());
 
 
-        long antallDager = ungdomsprogramPeriodeTjeneste.finnTilgjengeligeDager(behandlingId).forbrukteDager();
+        VurderAntallDagerResultat vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnTilgjengeligeDager(behandlingId);
+        long antallDager = vurderAntallDagerResultat.forbrukteDager();
         if (antallDager <= 0) {
             throw new IllegalStateException("Antall tilgjenglige dager = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
         }
@@ -156,7 +160,7 @@ public class BrevGenerererTjeneste {
                     satsTyper.stream().allMatch(it -> it == UngdomsytelseSatsType.LAV),
                     satsTyper.stream().allMatch(it -> it == UngdomsytelseSatsType.HØY),
                     satsTyper.contains(UngdomsytelseSatsType.LAV) && satsTyper.contains(UngdomsytelseSatsType.HØY),
-                    grunnlagOgTilkjentYtelseTimeline.getMaxLocalDate().isAfter(pdlMottaker.fødselsdato().plusYears(Sats.HØY.getTomAlder()))),
+                    vurderAntallDagerResultat.tidslinjeNokDager().getMaxLocalDate().isAfter(pdlMottaker.fødselsdato().plusYears(Sats.HØY.getTomAlder()))),
                 grunnlagOgTilkjentYtelseTimeline.getMinLocalDate(),
                 antallDager,
                 tilkjentePerioder,

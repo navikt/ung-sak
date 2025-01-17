@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.template.dto.innvilgelse;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.ung.sak.formidling.template.TemplateData;
@@ -14,6 +15,6 @@ public record InnvilgelseDto(
     ResultatFlaggDto resultat,
     LocalDate ytelseFom,
     long antallDager,
-    Set<TilkjentPeriodeDto> tilkjentePerioder,
+    List<TilkjentPeriodeDto> tilkjentePerioder,
     Set<GbeløpPeriodeDto> gbeløpPerioder,
     SatserDto satser) implements TemplateData {}

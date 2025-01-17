@@ -3,8 +3,12 @@ package no.nav.ung.sak.formidling;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +29,6 @@ import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestGrunnlag;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
@@ -110,7 +113,7 @@ class InnvilgelseTest {
     @Test
     void standardInnvilgelse() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = UngTestGrunnlag.standardInnvilget(fom);
+        var ungTestGrunnlag = BrevScenarioer.innvilget19år(fom);
 
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
 
@@ -137,35 +140,124 @@ class InnvilgelseTest {
 
     }
 
+    @Test
     void høySats() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = BrevScenarioer.innvilget27år(fom);
+
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
+
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+
+        behandling.avsluttBehandling();
+
+        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
+            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+        ).containsTextsOnceInSequence(
+            "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
+            "Du får utbetalt 954 kroner dagen, før skatt.",
+            "Siden du er over 25 år så får du 2 ganger grunnbeløpet."
+        );
 
     }
 
-    void høySatsMaksAlder() {
+    @DisplayName("blir 29 i løpet av programmet og får mindre enn maks antall dager")
+    @Test
+    void høySatsMaksAlder6MndIProgrammet() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var fødselsdato = LocalDate.of(1996, 5, 15); //Blir 29 etter 6 mnd/130 dager i programmet
+        var ungTestGrunnlag = BrevScenarioer.innvilget29År(fom, fødselsdato);
 
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
+
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+
+        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
+            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+        ).containsTextsOnceInSequence(
+            "Du har rett til ungdomsytelse fra 1. desember 2024 i 130 dager.",
+            "Du får utbetalt 954 kroner dagen, før skatt.",
+            "Siden du er over 25 år så får du 2 ganger grunnbeløpet til måneden du fyller 29 år."
+        );
     }
 
     //dekker flere dagsatser også
+    @Test
     void lavOgHøySats() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var fødselsdato = LocalDate.of(1999, 5, 15); //Blir 26 etter 6 mnd/130 dager i programmet
+        var ungTestGrunnlag = BrevScenarioer.innvilget26År(fom, fødselsdato);
 
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
+
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+
+        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
+            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+        ).containsTextsOnceInSequence(
+            "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
+            "Fra 1. desember 2024 til 31. mai 2025 får du utbetalt 636 kroner dagen, før skatt",
+            "Fra 1. juni 2025 til 1. desember 2025 får du utbetalt 954 kroner dagen, før skatt.",
+            "Du får 1.33 ganger grunnbeløpet mens du er under 25 år og 2 ganger grunnbeløpet fra måneden etter du fyller 25 år."
+        );
     }
 
-    void antallDagerUnder260() {
+    @Test
+    void pdfStrukturTest() throws IOException {
 
-    }
+        //Lager ny fordi default PdfgenKlient lager ikke pdf
+       var brevGenerererTjeneste = new BrevGenerererTjeneste(
+            repositoryProvider.getBehandlingRepository(),
+            new AktørTjeneste(pdlKlient),
+            new PdfGenKlient(false),
+            ungdomsytelseGrunnlagRepository,
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
+            tilkjentYtelseUtleder,
+            personopplysningRepository);
 
-    void periodisertBarneTillegg() {
+        TestScenarioBuilder scenarioBuilder = BrevScenarioer
+            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
 
-    }
+        var behandling = scenarioBuilder.getBehandling();
 
-    @DisplayName("Pdf'en skal ha logo og tekst og riktig antall sider")
-    void pdfStrukturTest() {
+        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId(), brevGenerererTjeneste);
+
+        var pdf = generertBrev.dokument().pdf();
+
+        try (PDDocument pdDocument = Loader.loadPDF(pdf)) {
+            assertThat(pdDocument.getNumberOfPages()).isEqualTo(2);
+            String pdfTekst = new PDFTextStripper().getText(pdDocument);
+            assertThat(pdfTekst).isNotEmpty();
+            assertThat(pdfTekst).contains("Nav har innvilget søknaden din om ungdomsytelse");
+        }
 
     }
 
 
     private GenerertBrev genererVedtaksbrevBrev(Long behandlingId) {
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId);
+        return genererVedtaksbrevBrev(behandlingId, brevGenerererTjeneste);
+    }
+
+
+    private GenerertBrev genererVedtaksbrevBrev(Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste1) {
+        GenerertBrev generertBrev = brevGenerererTjeneste1.genererVedtaksbrev(behandlingId);
         if (System.getenv("LAGRE_PDF") != null) {
             BrevUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
         }
