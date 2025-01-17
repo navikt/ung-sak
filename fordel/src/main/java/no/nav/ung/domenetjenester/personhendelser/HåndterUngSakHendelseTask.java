@@ -1,26 +1,25 @@
 package no.nav.ung.domenetjenester.personhendelser;
 
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.søknad.JsonUtils;
 import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
 import no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.fraJson;
+import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.toJson;
 
 @ApplicationScoped
 @ProsessTask(HåndterUngSakHendelseTask.TASKNAME)
@@ -97,19 +96,5 @@ public class HåndterUngSakHendelseTask implements ProsessTaskHandler {
         prosessTaskTjeneste.lagre(prosessTaskData);
     }
 
-    static String toJson(Hendelse hendelse) {
-        try {
-            return JsonUtils.getObjectMapper().writeValueAsString(hendelse);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Kunne ikke serialisere hendelse", e);
-        }
-    }
 
-    static Hendelse fraJson(String hendelse) {
-        try {
-            return JsonUtils.getObjectMapper().readValue(hendelse, Hendelse.class);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Kunne ikke deserialisere hendelse", e);
-        }
-    }
 }

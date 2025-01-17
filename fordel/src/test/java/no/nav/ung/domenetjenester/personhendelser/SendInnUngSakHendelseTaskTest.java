@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 
+import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.toJson;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -64,7 +65,7 @@ class SendInnUngSakHendelseTaskTest {
                 .medDødsdato(LocalDate.now())
                 .build();
         var hendelseInfo = hendelse.getHendelseInfo();
-        var payload = HåndterUngSakHendelseTask.toJson(hendelse);
+        var payload = toJson(hendelse);
 
         InngåendeHendelseEntitet inngåendeHendelse = InngåendeHendelseEntitet.builder()
                 .id(inngåendeHendelseId)

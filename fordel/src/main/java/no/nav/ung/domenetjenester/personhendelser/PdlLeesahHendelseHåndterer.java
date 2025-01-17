@@ -1,7 +1,5 @@
 package no.nav.ung.domenetjenester.personhendelser;
 
-import java.util.UUID;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
@@ -11,6 +9,10 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
+
+import java.util.UUID;
+
+import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.toJson;
 
 
 @Transactional
@@ -37,7 +39,7 @@ public class PdlLeesahHendelseHåndterer {
         final Hendelse oversattHendelse = oversetter.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
 
         final var prosessTaskData = ProsessTaskData.forProsessTask(HåndterUngSakHendelseTask.class);
-        prosessTaskData.setPayload(HåndterUngSakHendelseTask.toJson(oversattHendelse));
+        prosessTaskData.setPayload(toJson(oversattHendelse));
         prosessTaskData.setCallId(MDCOperations.getCallId());
         prosessTaskTjeneste.lagre(prosessTaskData);
     }
@@ -48,7 +50,7 @@ public class PdlLeesahHendelseHåndterer {
         final Hendelse oversattHendelse = oversetter.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
 
         final var prosessTaskData = ProsessTaskData.forProsessTask(HåndterUngSakHendelseTask.class);
-        prosessTaskData.setPayload(HåndterUngSakHendelseTask.toJson(oversattHendelse));
+        prosessTaskData.setPayload(toJson(oversattHendelse));
         prosessTaskData.setCallId(MDCOperations.getCallId());
         prosessTaskTjeneste.lagre(prosessTaskData);
     }

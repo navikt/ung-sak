@@ -1,11 +1,6 @@
 package no.nav.ung.domenetjenester.personhendelser;
 
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -14,8 +9,12 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
 import no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelsemottakTjeneste;
-import no.nav.ung.sak.kontrakt.hendelser.HendelseDto;
-import no.nav.ung.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.fraJson;
 
 @ApplicationScoped
 @ProsessTask(SendInnUngHendelseTask.TASKNAME)
@@ -56,9 +55,7 @@ public class SendInnUngHendelseTask implements ProsessTaskHandler {
 
         // Siste hendelse antas å representere mest relevant informasjon sammenlignet med tidligere hendelser
         log.info("Oppdaterer med hendelseId={}, antall relaterte hendelser={}", inngåendeHendelseId, alleUhåndterteHendelser.size() - 1);
-        var aktørId = new AktørId(inngåendeHendelse.getAktørId());
-        var hendelse = HåndterUngSakHendelseTask.fraJson(sisteUhåndterte.getPayload());
-        var dto = new HendelseDto(hendelse, aktørId);
+        var hendelse = fraJson(sisteUhåndterte.getPayload());
         hendelsemottakTjeneste.mottaHendelse(hendelse);
 
         // Alle anses som håndterte etter dette, og får status oppdatert som én gruppe
