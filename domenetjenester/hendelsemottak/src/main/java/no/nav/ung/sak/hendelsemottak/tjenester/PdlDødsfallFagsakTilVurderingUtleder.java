@@ -72,22 +72,29 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
             var personInfo = hentPersonInformasjon(aktør);
             var aktuellDato = finnAktuellDato(personInfo);
 
-            // Sjekker om det gjelder dødshendelse for søker
-            var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
-            if (fagsakForAktør.isPresent()) {
-                if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
-                    fagsakÅrsakMap.put(fagsakForAktør.get(), BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
-                    break;
-                }
-            }
-
-            // Sjekker om det gjelder dødshendelse for barn av søker
-            finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomBarnAvSøker(aktør, aktuellDato)
-                .stream()
-                .filter(f -> deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId))
-                .filter(f -> erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId))
-                .forEach(f -> fagsakÅrsakMap.put(f, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN));
+            fagsakÅrsakMap.putAll(finnPåvirketFagsak(aktør, aktuellDato, hendelseId));
         }
+
+        return fagsakÅrsakMap;
+    }
+
+    private HashMap<Fagsak, BehandlingÅrsakType> finnPåvirketFagsak(AktørId aktør, LocalDate aktuellDato, String hendelseId) {
+        var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
+
+        // Sjekker om det gjelder dødshendelse for søker
+        var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
+        if (fagsakForAktør.isPresent()) {
+            if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
+                fagsakÅrsakMap.put(fagsakForAktør.get(), BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
+            }
+        }
+
+        // Sjekker om det gjelder dødshendelse for barn av søker
+        finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomBarnAvSøker(aktør, aktuellDato)
+            .stream()
+            .filter(f -> deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId))
+            .filter(f -> erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId))
+            .forEach(f -> fagsakÅrsakMap.put(f, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN));
 
         return fagsakÅrsakMap;
     }

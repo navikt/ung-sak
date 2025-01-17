@@ -116,27 +116,6 @@ public class PdlSøkerHarFåttBarnFagsakTilVurderingUtleder implements FagsakerT
         return pdlKlient.hentPerson(query, projection);
     }
 
-    private Set<AktørId> finnAktørIdForPersonerRelatertTil(Person personFraPdl) {
-        var relaterteIdenter = personFraPdl.getForelderBarnRelasjon()
-            .stream()
-            .filter(it -> AKTUELLE_RELASJONSROLLER.contains(it.getRelatertPersonsRolle()))
-            .map(ForelderBarnRelasjon::getRelatertPersonsIdent)
-            .toList();
-
-        var hentIdenterBolkQueryRequest = new HentIdenterBolkQueryRequest();
-        hentIdenterBolkQueryRequest.setIdenter(relaterteIdenter);
-        hentIdenterBolkQueryRequest.setGrupper(List.of(IdentGruppe.AKTORID));
-        hentIdenterBolkQueryRequest.setHistorikk(true);
-        var hentIdenterBolkProjection = new HentIdenterBolkResultResponseProjection().identer(
-            new IdentInformasjonResponseProjection()
-                .ident());
-        var hentIdenterBolkResults = pdlKlient.hentIdenterBolkResults(hentIdenterBolkQueryRequest, hentIdenterBolkProjection);
-        return hentIdenterBolkResults.stream()
-            .flatMap(it -> it.getIdenter().stream().map(IdentInformasjon::getIdent))
-            .map(AktørId::new)
-            .collect(Collectors.toSet());
-    }
-
     private boolean deltarIProgramPåHendelsedato(Fagsak fagsak, LocalDate relevantDato, String hendelseId) {
         Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandlingOpt.isEmpty()) {

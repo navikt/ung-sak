@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,7 @@ class HendelsemottakTjenesteTest {
     private BehandlingRepository behandlingRepository;
 
     private final FagsakerTilVurderingUtleder fagsakerTilVurderingUtleder = mock(FagsakerTilVurderingUtleder.class);
+    private final PdlKlient pdlKlient = mock(PdlKlient.class);
 
     private HendelsemottakTjeneste hendelsemottakTjeneste;
     private Behandling behandling;
@@ -52,7 +54,7 @@ class HendelsemottakTjenesteTest {
 
     @BeforeEach
     void setUp() {
-        hendelsemottakTjeneste = new HendelsemottakTjeneste(new UnitTestLookupInstanceImpl<>(fagsakerTilVurderingUtleder), behandlingRepository, fagsakProsessTaskRepository);
+        hendelsemottakTjeneste = new HendelsemottakTjeneste(new UnitTestLookupInstanceImpl<>(fagsakerTilVurderingUtleder), behandlingRepository, fagsakProsessTaskRepository, pdlKlient);
         fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AKTØR_ID, new Saksnummer("SAKEN"), LocalDate.now(), FAGSAK_TOM);
         fagsakRepository.opprettNy(fagsak);
         behandling = Behandling.forFørstegangssøknad(fagsak).build();

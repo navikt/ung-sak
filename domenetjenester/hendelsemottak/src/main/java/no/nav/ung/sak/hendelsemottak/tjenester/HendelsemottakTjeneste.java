@@ -1,11 +1,16 @@
 package no.nav.ung.sak.hendelsemottak.tjenester;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import no.nav.k9.felles.integrasjon.pdl.*;
+import no.nav.ung.sak.kontrakt.hendelser.HarFåttBarnHendelse;
+import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +37,7 @@ public class HendelsemottakTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private PdlKlient pdlKlient;
 
     HendelsemottakTjeneste() {
         // CDI
@@ -40,14 +46,15 @@ public class HendelsemottakTjeneste {
     @Inject
     public HendelsemottakTjeneste(@Any Instance<FagsakerTilVurderingUtleder> utledere,
                                   BehandlingRepository behandlingRepository,
-                                  FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+                                  FagsakProsessTaskRepository fagsakProsessTaskRepository, PdlKlient pdlKlient) {
         this.utledere = utledere;
         this.behandlingRepository = behandlingRepository;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.pdlKlient = pdlKlient;
     }
 
-    private LocalDate utledDato(LocalDate fagsakSluttdato, Hendelse payload) {
-        var hendelseDato = payload.getHendelsePeriode().getTom();
+    private LocalDate utledDato(LocalDate fagsakSluttdato, Periode hendelsePeriode) {
+        var hendelseDato = hendelsePeriode.getTom();
         if (hendelseDato.isBefore(fagsakSluttdato)) {
             return fagsakSluttdato;
         }
@@ -80,8 +87,19 @@ public class HendelsemottakTjeneste {
 
             ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsak.getKode());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, payload.getHendelsePeriode().getFom().toString());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, utledDato(fagsak.getPeriode().getTomDato(), payload).toString());
+
+            Periode hendelsePeriode;
+            if (payload instanceof HarFåttBarnHendelse) {
+                HarFåttBarnHendelse harFåttBarnHendelse = (HarFåttBarnHendelse) payload;
+                Person barnInfo = hentPersonInformasjon(harFåttBarnHendelse.getBarnIdent().getIdent());
+                LocalDate aktuellDato = finnAktuellDato(barnInfo);
+                hendelsePeriode = new Periode(aktuellDato, aktuellDato);
+            } else {
+                hendelsePeriode = payload.getHendelsePeriode();
+            }
+
+            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, hendelsePeriode.getFom().toString());
+            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, utledDato(fagsak.getPeriode().getTomDato(), hendelsePeriode).toString());
             var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
             if (sisteBehandling.isPresent()) {
                 Behandling tilRevurdering = sisteBehandling.get();
@@ -93,6 +111,23 @@ public class HendelsemottakTjeneste {
 
         }
         return kandidaterTilRevurdering;
+    }
+
+    private Person hentPersonInformasjon(String ident) {
+        var query = new HentPersonQueryRequest();
+        query.setIdent(ident);
+        var projection = new PersonResponseProjection()
+            .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
+            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsRolle()
+                .relatertPersonsIdent().minRolleForPerson());
+        return pdlKlient.hentPerson(query, projection);
+    }
+
+    private LocalDate finnAktuellDato(Person personFraPdl) {
+        return personFraPdl.getFoedselsdato().stream()
+            .map(Foedselsdato::getFoedselsdato)
+            .filter(Objects::nonNull)
+            .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
     }
 
 }
