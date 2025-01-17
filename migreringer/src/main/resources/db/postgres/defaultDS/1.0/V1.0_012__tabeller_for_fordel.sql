@@ -86,7 +86,7 @@ create table produksjonsstyring_oppgave
 );
 
 comment on table produksjonsstyring_oppgave is 'Inneholder sporingsinformasjon for oppgaver opprettet i Gosys.';
-comment on column produksjonsstyring_oppgave.journalpost_id is 'Primary Key. Journalposten denne tabellen inneholder ekstra informasjon om.';
+comment on column produksjonsstyring_oppgave.journalpost_id is 'Primary Key. Journalposten oppgaven er opprettet for.';
 comment on column produksjonsstyring_oppgave.aktoer_id is 'Aktøren som oppgaven gjelder for.';
 comment on column produksjonsstyring_oppgave.ytelse_type is 'FagsakYtelseType oppgave gjelder';
 comment on column produksjonsstyring_oppgave.fagsak_system is 'Fagsaksystem oppgave skal knyttes til gjennom Gosys (IT00, FS39, ): Offisiell kode';
