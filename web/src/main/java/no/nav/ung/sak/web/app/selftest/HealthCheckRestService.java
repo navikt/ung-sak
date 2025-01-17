@@ -46,7 +46,7 @@ public class HealthCheckRestService {
     }
 
     @GET
-    @Path("isAlive")
+    @Path("/isAlive")
     public Response isAlive() {
         Response.ResponseBuilder builder;
         if (JettyServer.KILL_APPLICATION.get()) {
@@ -64,7 +64,7 @@ public class HealthCheckRestService {
     }
 
     @GET
-    @Path("isReady")
+    @Path("/isReady")
     public Response isReady() {
         Response.ResponseBuilder builder;
         if (selftestService.kritiskTjenesteFeilet()) {
@@ -82,7 +82,7 @@ public class HealthCheckRestService {
     }
 
     @GET
-    @Path("preStop")
+    @Path("/preStop")
     public Response preStop() {
         starterService.stopServices();
         return Response.ok(RESPONSE_OK).build();
