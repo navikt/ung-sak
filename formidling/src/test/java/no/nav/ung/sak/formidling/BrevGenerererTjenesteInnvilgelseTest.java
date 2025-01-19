@@ -12,6 +12,7 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
@@ -54,10 +55,12 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
+    private TestInfo testInfo;
 
 
     @BeforeEach
-    void setup() {
+    void setup(TestInfo testInfo) {
+        this.testInfo = testInfo;
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
@@ -257,7 +260,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
     private GenerertBrev genererVedtaksbrevBrev(Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste1) {
         GenerertBrev generertBrev = brevGenerererTjeneste1.genererVedtaksbrev(behandlingId);
         if (System.getenv("LAGRE_PDF") != null) {
-            BrevUtils.lagrePdf(generertBrev.dokument().pdf(), generertBrev.malType().name());
+            BrevUtils.lagrePdf(generertBrev, testInfo);
         }
         return generertBrev;
     }
