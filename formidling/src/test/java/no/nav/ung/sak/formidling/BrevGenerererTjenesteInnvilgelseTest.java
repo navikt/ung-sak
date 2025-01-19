@@ -18,6 +18,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -28,6 +29,7 @@ import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.UngTestGrunnlag;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
@@ -38,7 +40,7 @@ import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevGenerererInnvilgelseTest {
+class BrevGenerererTjenesteInnvilgelseTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
 
@@ -114,11 +116,7 @@ class BrevGenerererInnvilgelseTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19år(fom);
 
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
+        var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
@@ -144,12 +142,7 @@ class BrevGenerererInnvilgelseTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget27år(fom);
 
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-
-        behandling.avsluttBehandling();
+        var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
 
@@ -172,11 +165,7 @@ class BrevGenerererInnvilgelseTest {
         var fødselsdato = LocalDate.of(1996, 5, 15); //Blir 29 etter 6 mnd/130 dager i programmet
         var ungTestGrunnlag = BrevScenarioer.innvilget29År(fom, fødselsdato);
 
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
+        var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
 
@@ -198,11 +187,7 @@ class BrevGenerererInnvilgelseTest {
         var fødselsdato = LocalDate.of(1999, 5, 15); //Blir 26 etter 6 mnd/130 dager i programmet
         var ungTestGrunnlag = BrevScenarioer.innvilget26År(fom, fødselsdato);
 
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
+        var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
 
@@ -249,6 +234,14 @@ class BrevGenerererInnvilgelseTest {
 
     }
 
+    private Behandling lagScenario(UngTestGrunnlag ungTestGrunnlag) {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
+
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+        return behandling;
+    }
 
     private GenerertBrev genererVedtaksbrevBrev(Long behandlingId) {
         return genererVedtaksbrevBrev(behandlingId, brevGenerererTjeneste);
