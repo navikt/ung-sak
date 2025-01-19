@@ -57,6 +57,16 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
         return this;
     }
 
+    public HtmlAssert doesNotContainText(CharSequence... texts) {
+        assertThat(actualTextTrimmed).doesNotContain(texts);
+        return this;
+    }
+
+    public HtmlAssert doesNotContainHtml(CharSequence... texts) {
+        assertThat(actualHtmlTrimmed).doesNotContain(texts);
+        return this;
+    }
+
     private void assertThatContainsOnceInSequence(String actual, CharSequence... seq) {
         assertThat(actual).containsSubsequence(seq);
         var soft = new SoftAssertions();

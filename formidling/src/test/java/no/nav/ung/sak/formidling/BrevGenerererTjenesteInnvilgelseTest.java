@@ -154,6 +154,9 @@ class BrevGenerererTjenesteInnvilgelseTest {
             "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
             "Du får utbetalt 954 kroner dagen, før skatt.",
             "Siden du er over 25 år så får du 2 ganger grunnbeløpet."
+        ).doesNotContainText(
+            "636",
+            "under 25 år"
         );
 
     }
@@ -177,7 +180,10 @@ class BrevGenerererTjenesteInnvilgelseTest {
             "Du har rett til ungdomsytelse fra 1. desember 2024 i 130 dager.",
             "Du får utbetalt 954 kroner dagen, før skatt.",
             "Siden du er over 25 år så får du 2 ganger grunnbeløpet til måneden du fyller 29 år."
-        );
+        ).doesNotContainText(
+            "636",
+            "under 25 år"
+        );;
     }
 
     //dekker flere dagsatser også
