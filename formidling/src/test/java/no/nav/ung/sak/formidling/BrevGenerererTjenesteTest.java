@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
@@ -20,6 +21,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
 import no.nav.ung.sak.formidling.domene.PdlPerson;
+import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
@@ -44,6 +46,8 @@ class BrevGenerererTjenesteTest {
 
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    @Inject
+    private PersonopplysningRepository personopplysningRepository;
 
     @BeforeEach
     void setup() {
@@ -63,14 +67,19 @@ class BrevGenerererTjenesteTest {
         var ungTestGrunnlag = scenario.getUngTestGrunnlag();
         var behandling = scenario.getBehandling();
 
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
-            ungdomsytelseGrunnlagRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             tilkjentYtelseUtleder,
-            repositoryProvider.getPersonopplysningRepository());
+            repositoryProvider.getPersonopplysningRepository(),
+
+            new InnvilgelseInnholdBygger(
+                ungdomsytelseGrunnlagRepository,
+                ungdomsprogramPeriodeTjeneste,
+                tilkjentYtelseUtleder,
+                personopplysningRepository));
 
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());

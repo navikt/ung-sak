@@ -27,6 +27,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.domene.GenerertBrev;
+import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -67,14 +68,18 @@ class BrevGenerererTjenesteInnvilgelseTest {
         tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
         personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
 
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(System.getenv("LAGRE_PDF") == null),
-            ungdomsytelseGrunnlagRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             tilkjentYtelseUtleder,
-            personopplysningRepository);
+            personopplysningRepository,
+            new InnvilgelseInnholdBygger(
+                ungdomsytelseGrunnlagRepository,
+                ungdomsprogramPeriodeTjeneste,
+                tilkjentYtelseUtleder,
+                personopplysningRepository));
     }
 
     @Test()
@@ -216,14 +221,18 @@ class BrevGenerererTjenesteInnvilgelseTest {
     void pdfStrukturTest() throws IOException {
 
         //Lager ny fordi default PdfgenKlient lager ikke pdf
-       var brevGenerererTjeneste = new BrevGenerererTjeneste(
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        var brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(false),
-            ungdomsytelseGrunnlagRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             tilkjentYtelseUtleder,
-            personopplysningRepository);
+            personopplysningRepository,
+           new InnvilgelseInnholdBygger(
+               ungdomsytelseGrunnlagRepository,
+               ungdomsprogramPeriodeTjeneste,
+               tilkjentYtelseUtleder,
+               personopplysningRepository));
 
         TestScenarioBuilder scenarioBuilder = BrevScenarioer
             .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);

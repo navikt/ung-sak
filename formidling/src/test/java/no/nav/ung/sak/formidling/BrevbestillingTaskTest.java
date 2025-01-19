@@ -32,6 +32,7 @@ import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.Distri
 import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
 import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
+import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -67,14 +68,18 @@ class BrevbestillingTaskTest {
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         var pdlKlient = PdlKlientFake.medTilfeldigFnr();
         fnr = pdlKlient.fnr();
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
         brevGenerererTjeneste = new BrevGenerererTjeneste(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
-            ungdomsytelseGrunnlagRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             tilkjentYtelseUtleder,
-            repositoryProvider.getPersonopplysningRepository());
+            repositoryProvider.getPersonopplysningRepository(),
+            new InnvilgelseInnholdBygger(
+                ungdomsytelseGrunnlagRepository,
+                ungdomsprogramPeriodeTjeneste,
+                tilkjentYtelseUtleder,
+                repositoryProvider.getPersonopplysningRepository()));
 
         dokArkivKlient = new DokArkivKlientFake();
 
