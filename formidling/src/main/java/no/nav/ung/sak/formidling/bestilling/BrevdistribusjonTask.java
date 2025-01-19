@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.bestilling;
 
 
 import java.util.Objects;
@@ -16,8 +16,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.formidling.dokdist.DokDistRestKlient;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
-import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
-import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 
 /**
  * Distribuerer en bestilling via dokumentdistribusjon

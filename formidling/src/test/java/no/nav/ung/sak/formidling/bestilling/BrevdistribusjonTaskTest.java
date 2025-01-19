@@ -1,7 +1,7 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.bestilling;
 
-import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
-import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
+import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
+import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +19,6 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.dokdist.DokDistRestKlientFake;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
-import no.nav.ung.sak.formidling.domene.BrevMottaker;
-import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
-import no.nav.ung.sak.formidling.domene.BrevbestillingStatusType;
 import no.nav.ung.sak.formidling.template.TemplateType;
 
 @ExtendWith(CdiAwareExtension.class)

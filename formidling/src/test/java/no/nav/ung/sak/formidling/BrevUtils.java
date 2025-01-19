@@ -13,8 +13,6 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.TestInfo;
 
-import no.nav.ung.sak.formidling.domene.GenerertBrev;
-
 public class BrevUtils {
 
     static DateTimeFormatter norwegianFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("no-NO"));

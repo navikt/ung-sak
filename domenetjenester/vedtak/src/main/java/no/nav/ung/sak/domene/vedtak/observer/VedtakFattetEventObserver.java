@@ -8,7 +8,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
-import no.nav.ung.sak.formidling.BrevbestillingTask;
+import no.nav.ung.sak.formidling.bestilling.BrevbestillingTask;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {

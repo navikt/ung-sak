@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.domene;
+package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

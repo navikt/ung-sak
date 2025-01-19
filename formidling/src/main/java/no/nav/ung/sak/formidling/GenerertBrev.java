@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.domene;
+package no.nav.ung.sak.formidling;
 
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;

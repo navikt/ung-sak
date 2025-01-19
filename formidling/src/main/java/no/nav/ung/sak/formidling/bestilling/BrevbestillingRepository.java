@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.bestilling;
 
 import java.util.List;
 
@@ -6,8 +6,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
-import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
 
 @Dependent
 public class BrevbestillingRepository {

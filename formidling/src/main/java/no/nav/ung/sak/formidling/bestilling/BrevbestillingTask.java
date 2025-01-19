@@ -1,7 +1,7 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.bestilling;
 
-import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
-import static no.nav.ung.sak.formidling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
+import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
+import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,19 +23,17 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
+import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
-import no.nav.ung.sak.formidling.domene.BehandlingBrevbestillingEntitet;
-import no.nav.ung.sak.formidling.domene.BrevMottaker;
-import no.nav.ung.sak.formidling.domene.BrevbestillingEntitet;
-import no.nav.ung.sak.formidling.domene.GenerertBrev;
 
 /**
- * https://confluence.adeo.no/pages/viewpage.action?pageId=377701645
+ * <a href="https://confluence.adeo.no/pages/viewpage.action?pageId=377701645">dokarkiv doc</a>
  * <p>
- * https://dokarkiv-q2.dev.intern.nav.no/swagger-ui/index.html#/
+ * <a href="https://dokarkiv-q2.dev.intern.nav.no/swagger-ui/index.html#/">dokarkiv-q2.dev swagger</a>
  */
 @ApplicationScoped
 @ProsessTask(value = BrevbestillingTask.TASKTYPE)
