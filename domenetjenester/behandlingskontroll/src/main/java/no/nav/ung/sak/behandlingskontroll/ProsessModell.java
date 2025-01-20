@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse.ung.prosess;
+package no.nav.ung.sak.behandlingskontroll;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -6,9 +6,6 @@ import jakarta.enterprise.inject.Produces;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellImpl;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 
