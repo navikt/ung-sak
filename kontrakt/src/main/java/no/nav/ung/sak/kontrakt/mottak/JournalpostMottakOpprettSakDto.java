@@ -38,12 +38,11 @@ public class JournalpostMottakOpprettSakDto extends JournalpostMottakDto {
         Saksnummer saksnummer,
         JournalpostId journalpostId,
         FagsakYtelseType ytelseType,
-        String kanalReferanse,
         Brevkode type,
         LocalDateTime forsendelseMottattTidspunkt,
         String payloadRawString
     ) {
-        super(saksnummer, journalpostId, ytelseType, kanalReferanse, type, forsendelseMottattTidspunkt, payloadRawString);
+        super(saksnummer, journalpostId, ytelseType, type, forsendelseMottattTidspunkt, payloadRawString);
         this.aktørId = aktørId;
         this.periode = periode;
 

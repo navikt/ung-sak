@@ -16,6 +16,7 @@
     <properties>
         <swagger-ui.version>5.18.2</swagger-ui.version>
         <jetty.version>12.0.16</jetty.version>
+        <metrics.version>4.2.29</metrics.version>
     </properties>
 
 
@@ -48,6 +49,12 @@
                 <groupId>org.webjars</groupId>
                 <artifactId>swagger-ui</artifactId>
                 <version>${swagger-ui.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-healthchecks</artifactId>
+                <version>${metrics.version}</version>
             </dependency>
 
             <dependency>
@@ -133,6 +140,10 @@
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>formidling</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>fordel</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
@@ -229,7 +240,10 @@
         </dependency>
 
         <!-- Metrics, logging, helse- og healthchecks -->
-
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-healthchecks</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
