@@ -42,12 +42,10 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
     }
 
     private int dumpVilkår(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
-        try (var response = restTjeneste.getVilkårV3(new BehandlingUuidDto(behandling.getUuid()))) {
-            Object entity = response.getEntity();
-            if (entity != null) {
-                dumpMottaker.newFile(basePath + "/" + relativePath + ".json");
-                ow.writeValue(dumpMottaker.getOutputStream(), entity);
-            }
+        try {
+            var vilkårListe = restTjeneste.getVilkårV3(new BehandlingUuidDto(behandling.getUuid()));
+            dumpMottaker.newFile(basePath + "/" + relativePath + ".json");
+            ow.writeValue(dumpMottaker.getOutputStream(), vilkårListe);
         } catch (Exception e) {
             dumpMottaker.newFile(basePath + "/" + relativePath + "-ERROR.txt");
             dumpMottaker.write(e);

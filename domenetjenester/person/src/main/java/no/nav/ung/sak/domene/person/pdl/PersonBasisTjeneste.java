@@ -21,6 +21,7 @@ import no.nav.k9.felles.integrasjon.pdl.KjoennResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.KjoennType;
 import no.nav.k9.felles.integrasjon.pdl.Navn;
 import no.nav.k9.felles.integrasjon.pdl.NavnResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
@@ -36,7 +37,7 @@ import no.nav.ung.sak.typer.PersonIdent;
 @ApplicationScoped
 public class PersonBasisTjeneste {
 
-    private PdlKlient pdlKlient;
+    private Pdl pdlKlient;
     private boolean isProd = Environment.current().isProd();
 
     PersonBasisTjeneste() {
@@ -44,7 +45,7 @@ public class PersonBasisTjeneste {
     }
 
     @Inject
-    public PersonBasisTjeneste(PdlKlient pdlKlient) {
+    public PersonBasisTjeneste(Pdl pdlKlient) {
         this.pdlKlient = pdlKlient;
     }
 

@@ -14,8 +14,8 @@ import no.nav.ung.sak.kontrakt.søknadsfrist.KravDokumenType;
 import no.nav.ung.sak.kontrakt.søknadsfrist.KravDokumentStatus;
 import no.nav.ung.sak.kontrakt.søknadsfrist.SøknadsfristPeriodeDto;
 import no.nav.ung.sak.kontrakt.søknadsfrist.SøknadsfristTilstandDto;
-import no.nav.ung.sak.perioder.KravDokument;
-import no.nav.ung.sak.perioder.VurdertSøktPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
+import no.nav.ung.sak.søknadsfrist.KravDokument;
 
 public class MapTilSøknadsfristDto {
 

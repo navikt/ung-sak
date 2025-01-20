@@ -20,9 +20,6 @@ public class InntektArbeidYtelseAggregat {
     private Set<AktørInntekt> aktørInntekt = new LinkedHashSet<>();
 
     @ChangeTracked
-    private Set<AktørArbeid> aktørArbeid = new LinkedHashSet<>();
-
-    @ChangeTracked
     private Set<AktørYtelse> aktørYtelse = new LinkedHashSet<>();
 
     @DiffIgnore
@@ -46,11 +43,6 @@ public class InntektArbeidYtelseAggregat {
         this.setAktørInntekt(kopierFra.getAktørInntekt().stream().map(ai -> {
             AktørInntekt aktørInntekt = new AktørInntekt(ai);
             return aktørInntekt;
-        }).collect(Collectors.toList()));
-
-        this.setAktørArbeid(kopierFra.getAktørArbeid().stream().map(aktørArbied -> {
-            AktørArbeid aktørArbeid = new AktørArbeid(aktørArbied);
-            return aktørArbeid;
         }).collect(Collectors.toList()));
 
         this.setAktørYtelse(kopierFra.getAktørYtelse().stream().map(ay -> {
@@ -92,21 +84,12 @@ public class InntektArbeidYtelseAggregat {
         this.aktørInntekt.add(aktørInntekt);
     }
 
-    void leggTilAktørArbeid(AktørArbeid aktørArbeid) {
-        this.aktørArbeid.add(aktørArbeid);
-    }
 
     void leggTilAktørYtelse(AktørYtelse aktørYtelse) {
         this.aktørYtelse.add(aktørYtelse);
     }
 
-    public Collection<AktørArbeid> getAktørArbeid() {
-        return Collections.unmodifiableSet(aktørArbeid);
-    }
 
-    void setAktørArbeid(Collection<AktørArbeid> aktørArbeid) {
-        this.aktørArbeid = new LinkedHashSet<>(aktørArbeid);
-    }
 
     public Collection<AktørYtelse> getAktørYtelse() {
         return Collections.unmodifiableSet(aktørYtelse);
@@ -125,20 +108,18 @@ public class InntektArbeidYtelseAggregat {
         }
         InntektArbeidYtelseAggregat other = (InntektArbeidYtelseAggregat) obj;
         return Objects.equals(this.getAktørInntekt(), other.getAktørInntekt())
-            && Objects.equals(this.getAktørArbeid(), other.getAktørArbeid())
             && Objects.equals(this.getAktørYtelse(), other.getAktørYtelse());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(aktørInntekt, aktørArbeid, aktørYtelse);
+        return Objects.hash(aktørInntekt, aktørYtelse);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" +
             "aktørInntekt=" + aktørInntekt +
-            ", aktørArbeid=" + aktørArbeid +
             ", aktørYtelse=" + aktørYtelse +
             '>';
     }

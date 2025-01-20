@@ -1,104 +1,6 @@
 {
   "components" : {
     "schemas" : {
-      "AbacJournalpostMottakDto" : {
-        "properties" : {
-          "forsendelseMottatt" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          },
-          "forsendelseMottattTidspunkt" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "kanalReferanse" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$",
-            "type" : "string"
-          },
-          "payload" : {
-            "maxLength" : 392000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\-_=]*$",
-            "type" : "string"
-          },
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "type" : {
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "forsendelseMottattTidspunkt", "journalpostId", "saksnummer", "type", "ytelseType" ],
-        "type" : "object"
-      },
-      "AbacJournalpostMottakOpprettSakDto" : {
-        "properties" : {
-          "aktørId" : {
-            "type" : "string"
-          },
-          "forsendelseMottatt" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          },
-          "forsendelseMottattTidspunkt" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "kanalReferanse" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$",
-            "type" : "string"
-          },
-          "payload" : {
-            "maxLength" : 392000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\-_=]*$",
-            "type" : "string"
-          },
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "type" : {
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "aktørId", "forsendelseMottattTidspunkt", "journalpostId", "periode", "saksnummer", "type", "ytelseType" ],
-        "type" : "object"
-      },
       "AbakusKodeverkIaygrunnlag" : {
         "properties" : {
           "virksomhetType" : {
@@ -181,7 +83,7 @@
             "type" : "string"
           },
           "vilkarType" : {
-            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
+            "enum" : [ "FP_VK_0", "FP_VK_2", "K9_VK_1", "K9_VK_3", "K9_VK_5_3", "K9_VK_2_a", "K9_VK_2_b", "FP_VK_3", "FP_VK_34", "FP_VK_21", "FP_VK_23", "FP_VK_41", "K9_VK_16", "K9_VK_20", "K9_VK_21", "K9_VK_22", "K9_VK_17", "K9_VK_9_6", "UNG_VK_XXX", "-" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -244,15 +146,6 @@
           "arbeidTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "arbeidsforholdHandlingTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidsforholdHandlingType"
             },
             "maxItems" : 1000,
             "minItems" : 1,
@@ -513,15 +406,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "permisjonsbeskrivelseTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektPermisjonsbeskrivelseType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "personstatusTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektPersonstatusType"
@@ -594,15 +478,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "utenlandsoppholdÅrsaker" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektUtenlandsoppholdÅrsak"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "vedtakResultatTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektVedtakResultatType"
@@ -658,7 +533,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidsforholdHandlingTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "permisjonsbeskrivelseTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "utenlandsoppholdÅrsaker", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "AngittPersonDto" : {
@@ -707,23 +582,6 @@
         },
         "type" : "object"
       },
-      "ArbeidsforholdIdDto" : {
-        "properties" : {
-          "eksternArbeidsforholdId" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "internArbeidsforholdId" : {
-            "format" : "uuid",
-            "nullable" : true,
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
       "Arbeidsgiver" : {
         "properties" : {
           "arbeidsgiverAktørId" : {
@@ -745,70 +603,22 @@
       },
       "ArbeidsgiverDto" : {
         "properties" : {
-          "aktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "fødselsdato" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          },
-          "navn" : {
-            "maxLength" : 200,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "organisasjonsNummer" : {
-            "nullable" : true,
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
-      "ArbeidsgiverOpplysningerDto" : {
-        "properties" : {
-          "arbeidsforholdreferanser" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ArbeidsforholdIdDto"
-            },
-            "maxItems" : 2147483647,
-            "minItems" : 0,
-            "type" : "array"
-          },
-          "fødselsdato" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          },
           "identifikator" : {
             "nullable" : true,
-            "pattern" : "^\\d+$",
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "identifikatorGUI" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "nullable" : true,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
             "type" : "string"
           },
           "navn" : {
             "nullable" : true,
             "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
             "type" : "string"
-          },
-          "personIdentifikator" : {
-            "nullable" : true,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "arbeidsforholdreferanser" ],
-        "type" : "object"
-      },
-      "ArbeidsgiverOversiktDto" : {
-        "properties" : {
-          "arbeidsgivere" : {
-            "additionalProperties" : {
-              "$ref" : "#/components/schemas/ArbeidsgiverOpplysningerDto"
-            },
-            "type" : "object"
           }
         },
         "type" : "object"
@@ -851,6 +661,19 @@
             "enum" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ],
             "nullable" : true,
             "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "AutomatiskBrevOperasjoner" : {
+        "properties" : {
+          "enableRediger" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "nullable" : true,
+            "type" : "boolean"
           }
         },
         "type" : "object"
@@ -1228,7 +1051,7 @@
             "type" : "string"
           },
           "stegType" : {
-            "enum" : [ "BERYT", "PRECONDITION_BERGRUNN", "FAST_BERGRUNN", "VURDER_OPPTJ_PERIODE", "FASTSETT_STP_BER", "FVEDSTEG", "VURDER_VILKAR_BERGRUNN", "VURDER_REF_BERGRUNN", "FORDEL_BERGRUNN", "FORBRES", "FORS_BERGRUNN", "FORS_BERGRUNN_2", "VURDER_MANUELT_BREV", "FORVEDSTEG", "BERYT_OPPDRAG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INPER", "INREG", "INSØK", "INREG_AVSL", "IVEDSTEG", "KOFAK", "KOARB", "KOMPLETT_FOR_BEREGNING", "INNINN", "KOFAKBER", "KOFAKUT", "KOFAK_LOP_MEDL", "VURDEROP", "SIMOPP", "START", "VRSLREV", "VULOMED", "VURDER_FARESIGNALER", "VURDINNSYN", "VURDERKOMPLETT", "VURDER_STARTDATO_UTTAKSREGLER", "VURDER_TILKOMMET_INNTEKT", "POSTCONDITION_KOMPLETTHET", "VARIANT_FILTER", "VURDER_MEDISINSK", "VURDER_NODVENDIGHET", "VURDER_INSTITUSJON", "VURDER_GJENNOMGATT_OPPLAERING", "POST_MEDISINSK", "VURDERMV", "VURDER_OMSORG_FOR", "VURDER_ALDER", "VURDER_ALDER_BARN", "VURDER_OPPTJ_FAKTA", "VURDER_OPPTJ", "VURDER_TILBAKETREKK", "VURDER_UTLAND", "VURDER_UTTAK", "VURDER_UTTAK_V2", "BEKREFT_UTTAK", "MANUELL_VILKÅRSVURDERING", "MANUELL_TILKJENNING_YTELSE", "OVERGANG_FRA_INFOTRYGD", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "VURDER_ANTALL_DAGER" ],
+            "enum" : [ "BERYT", "PRECONDITION_BERGRUNN", "FAST_BERGRUNN", "VURDER_OPPTJ_PERIODE", "FASTSETT_STP_BER", "FVEDSTEG", "VURDER_VILKAR_BERGRUNN", "VURDER_REF_BERGRUNN", "FORDEL_BERGRUNN", "FORBRES", "FORS_BERGRUNN", "FORS_BERGRUNN_2", "VURDER_MANUELT_BREV", "FORVEDSTEG", "BERYT_OPPDRAG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INPER", "INREG", "INSØK", "INREG_AVSL", "IVEDSTEG", "KOFAK", "KOARB", "KOMPLETT_FOR_BEREGNING", "INNINN", "KOFAKBER", "KOFAKUT", "KOFAK_LOP_MEDL", "VURDEROP", "SIMOPP", "START", "VRSLREV", "VULOMED", "VURDER_FARESIGNALER", "VURDINNSYN", "VURDERKOMPLETT", "VURDER_STARTDATO_UTTAKSREGLER", "VURDER_TILKOMMET_INNTEKT", "POSTCONDITION_KOMPLETTHET", "VARIANT_FILTER", "VURDER_MEDISINSK", "VURDER_NODVENDIGHET", "VURDER_INSTITUSJON", "VURDER_GJENNOMGATT_OPPLAERING", "POST_MEDISINSK", "VURDERMV", "VURDER_OMSORG_FOR", "VURDER_ALDER", "VURDER_ALDER_BARN", "VURDER_OPPTJ_FAKTA", "VURDER_OPPTJ", "VURDER_TILBAKETREKK", "VURDER_UTLAND", "VURDER_UTTAK", "VURDER_UTTAK_V2", "BEKREFT_UTTAK", "MANUELL_VILKÅRSVURDERING", "MANUELL_TILKJENNING_YTELSE", "OVERGANG_FRA_INFOTRYGD", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -1756,10 +1579,6 @@
             "nullable" : true,
             "type" : "string"
           },
-          "erPbSak" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
           "gyldigPeriode" : {
             "$ref" : "#/components/schemas/Periode"
           },
@@ -1775,24 +1594,12 @@
           "person" : {
             "$ref" : "#/components/schemas/PersonDto"
           },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "saksnummer" : {
             "type" : "string"
           },
           "sakstype" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
-          },
-          "skalBehandlesAvInfotrygd" : {
-            "nullable" : true,
-            "type" : "boolean"
           },
           "status" : {
             "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
@@ -1812,20 +1619,8 @@
             "nullable" : true,
             "type" : "string"
           },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "saksnummer" : {
             "type" : "string"
-          },
-          "skalBehandlesAvInfotrygd" : {
-            "nullable" : true,
-            "type" : "boolean"
           },
           "status" : {
             "nullable" : true,
@@ -1840,74 +1635,6 @@
         "required" : [ "saksnummer", "ytelseType" ],
         "type" : "object"
       },
-      "FinnEllerOpprettSak" : {
-        "properties" : {
-          "aktørId" : {
-            "type" : "string"
-          },
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "saksnummer" : {
-            "maxLength" : 19,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9]*$",
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "aktørId", "periode" ],
-        "type" : "object"
-      },
-      "FinnEllerOpprettSakFnr" : {
-        "properties" : {
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengende" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPerson" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "saksnummer" : {
-            "maxLength" : 19,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9]*$",
-            "type" : "string"
-          },
-          "søker" : {
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "periode", "søker" ],
-        "type" : "object"
-      },
       "FinnSak" : {
         "properties" : {
           "aktørId" : {
@@ -1915,14 +1642,6 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
           },
           "ytelseType" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
@@ -1966,24 +1685,6 @@
           }
         },
         "required" : [ "behandlingId", "behandlingVersjon" ],
-        "type" : "object"
-      },
-      "HarGyldigOmsorgsdagerVedtakDto" : {
-        "properties" : {
-          "harInnvilgedeBehandlinger" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "saksnummer" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "vedtaksdato" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          }
-        },
         "type" : "object"
       },
       "Hendelse" : {
@@ -2076,22 +1777,9 @@
         "required" : [ "aktørIder" ],
         "type" : "object"
       },
-      "HentSisteGyldigeVedtakForAktørInputDto" : {
-        "properties" : {
-          "pleietrengendeAktørId" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "pleietrengendeAktørId" ],
-        "type" : "object"
-      },
       "HentSøknadPerioderDto" : {
         "properties" : {
           "bruker" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "pleietrengende" : {
             "nullable" : true,
             "type" : "string"
           },
@@ -2180,93 +1868,6 @@
         "required" : [ "brukernavn", "funksjonellTid", "navn" ],
         "type" : "object"
       },
-      "InntektArbeidYtelseArbeidsforholdV2Dto" : {
-        "properties" : {
-          "aksjonspunktÅrsaker" : {
-            "items" : {
-              "enum" : [ "MANGLENDE_INNTEKTSMELDING", "INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD", "OVERGANG_ARBEIDSFORHOLDS_ID_UNDER_YTELSE" ],
-              "nullable" : true,
-              "type" : "string"
-            },
-            "nullable" : true,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "arbeidsforhold" : {
-            "$ref" : "#/components/schemas/ArbeidsforholdIdDto"
-          },
-          "arbeidsgiver" : {
-            "$ref" : "#/components/schemas/Arbeidsgiver"
-          },
-          "begrunnelse" : {
-            "maxLength" : 400,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "handlingType" : {
-            "enum" : [ "-", "BRUK", "LAGT_TIL_AV_SAKSBEHANDLER", "BASERT_PÅ_INNTEKTSMELDING", "BRUK_UTEN_INNTEKTSMELDING", "IKKE_BRUK", "NYTT_ARBEIDSFORHOLD", "SLÅTT_SAMMEN_MED_ANNET", "BRUK_MED_OVERSTYRT_PERIODE", "INNTEKT_IKKE_MED_I_BG" ],
-            "type" : "string"
-          },
-          "id" : {
-            "nullable" : true,
-            "pattern" : "^[\\p{Alnum}\\-\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "inntektsmeldinger" : {
-            "items" : {
-              "$ref" : "#/components/schemas/MottattInntektsmeldingDto"
-            },
-            "nullable" : true,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "kilde" : {
-            "items" : {
-              "enum" : [ "AA-Registeret", "A-Inntekt", "Inntektsmelding", "Saksbehandler" ],
-              "nullable" : true,
-              "type" : "string"
-            },
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "perioder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/PeriodeDto"
-            },
-            "nullable" : true,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "permisjoner" : {
-            "items" : {
-              "$ref" : "#/components/schemas/PermisjonDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          },
-          "stillingsprosent" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 500.00,
-            "minimum" : 0.00,
-            "nullable" : true,
-            "type" : "number"
-          },
-          "yrkestittel" : {
-            "maxLength" : 400,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "arbeidsgiver", "handlingType", "kilde" ],
-        "type" : "object"
-      },
       "InntrekkBeslutning" : {
         "properties" : {
           "brukInntrekk" : {
@@ -2285,6 +1886,9 @@
         "required" : [ "journalpostId" ],
         "type" : "object"
       },
+      "JsonNode" : {
+        "type" : "object"
+      },
       "KodeverdiSomObjektAktivitetStatus" : {
         "properties" : {
           "kode" : {
@@ -2301,21 +1905,6 @@
         "type" : "object"
       },
       "KodeverdiSomObjektArbeidType" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektArbeidsforholdHandlingType" : {
         "properties" : {
           "kode" : {
             "type" : "string"
@@ -2735,21 +2324,6 @@
         "required" : [ "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
-      "KodeverdiSomObjektPermisjonsbeskrivelseType" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
       "KodeverdiSomObjektPersonstatusType" : {
         "properties" : {
           "kode" : {
@@ -2856,21 +2430,6 @@
         "type" : "object"
       },
       "KodeverdiSomObjektTilbakekrevingVidereBehandling" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektUtenlandsoppholdÅrsak" : {
         "properties" : {
           "kode" : {
             "type" : "string"
@@ -3091,9 +2650,13 @@
           },
           "person" : {
             "$ref" : "#/components/schemas/KodeverkPerson"
+          },
+          "vilkårtype" : {
+            "enum" : [ "FP_VK_0", "FP_VK_2", "K9_VK_1", "K9_VK_3", "K9_VK_5_3", "K9_VK_2_a", "K9_VK_2_b", "FP_VK_3", "FP_VK_34", "FP_VK_21", "FP_VK_23", "FP_VK_41", "K9_VK_16", "K9_VK_20", "K9_VK_21", "K9_VK_22", "K9_VK_17", "K9_VK_9_6", "UNG_VK_XXX", "-" ],
+            "type" : "string"
           }
         },
-        "required" : [ "arbeidsforhold", "behandling", "fagsystem", "historikk", "iaygrunnlag", "medlem", "opptjening", "person" ],
+        "required" : [ "arbeidsforhold", "behandling", "fagsystem", "historikk", "iaygrunnlag", "medlem", "opptjening", "person", "vilkårtype" ],
         "type" : "object"
       },
       "KravDokumentMedSøktePerioder" : {
@@ -3249,33 +2812,11 @@
       },
       "LosOpplysningerSomManglerIKlageDto" : {
         "properties" : {
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
           "utenlandstilsnitt" : {
             "nullable" : true,
             "type" : "boolean"
           }
         },
-        "type" : "object"
-      },
-      "ManglendeVedleggDto" : {
-        "properties" : {
-          "arbeidsgiver" : {
-            "$ref" : "#/components/schemas/ArbeidsgiverDto"
-          },
-          "brukerHarSagtAtIkkeKommer" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "dokumentType" : {
-            "enum" : [ "INNTEKTSMELDING", "LEGEERKLÆRING", "UDEFINERT" ],
-            "nullable" : true,
-            "type" : "string"
-          }
-        },
-        "required" : [ "dokumentType" ],
         "type" : "object"
       },
       "MatchFagsak" : {
@@ -3286,26 +2827,6 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengendeIdenter" : {
-            "items" : {
-              "nullable" : true,
-              "type" : "string"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          },
-          "relatertPersonIdenter" : {
-            "items" : {
-              "nullable" : true,
-              "type" : "string"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
           },
           "ytelseType" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
@@ -3369,30 +2890,6 @@
         "required" : [ "behandlingUuid" ],
         "type" : "object"
       },
-      "MottattInntektsmeldingDto" : {
-        "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 400,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "mottattTidspunkt" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
-          "status" : {
-            "enum" : [ "MOTTATT", "BEHANDLER", "GYLDIG", "HENLAGT", "UGYLDIG" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "journalpostId", "mottattTidspunkt", "status" ],
-        "type" : "object"
-      },
       "NyBehandlingDto" : {
         "properties" : {
           "behandlingArsakType" : {
@@ -3426,9 +2923,6 @@
             "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
             "type" : "string"
           },
-          "gjelderBruker" : {
-            "type" : "boolean"
-          },
           "gyldigAktørId" : {
             "type" : "string"
           },
@@ -3439,7 +2933,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "gjelderBruker", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
+        "required" : [ "begrunnelse", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
@@ -3471,7 +2965,7 @@
       "OpprettNotatDto" : {
         "properties" : {
           "notatGjelderType" : {
-            "enum" : [ "FAGSAK", "PLEIETRENGENDE" ],
+            "enum" : [ "FAGSAK" ],
             "type" : "string"
           },
           "notatTekst" : {
@@ -3592,20 +3086,6 @@
         "required" : [ "fom", "tom" ],
         "type" : "object"
       },
-      "PeriodeDto" : {
-        "properties" : {
-          "fom" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "tom" : {
-            "format" : "date",
-            "type" : "string"
-          }
-        },
-        "required" : [ "fom", "tom" ],
-        "type" : "object"
-      },
       "PeriodeMedRegisterendring" : {
         "properties" : {
           "periode" : {
@@ -3635,7 +3115,7 @@
           },
           "årsaker" : {
             "items" : {
-              "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_PLEIETRENGENDE", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
+              "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
               "nullable" : true,
               "type" : "string"
             },
@@ -3669,32 +3149,6 @@
           }
         },
         "required" : [ "kravstiller" ],
-        "type" : "object"
-      },
-      "PermisjonDto" : {
-        "properties" : {
-          "permisjonFom" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "permisjonTom" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "permisjonsprosent" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 200.00,
-            "minimum" : 0.00,
-            "nullable" : true,
-            "type" : "number"
-          },
-          "type" : {
-            "enum" : [ "-", "PERMISJON", "UTDANNINGSPERMISJON", "UTDANNINGSPERMISJON_IKKE_LOVFESTET", "UTDANNINGSPERMISJON_LOVFESTET", "VELFERDSPERMISJON", "ANNEN_PERMISJON_IKKE_LOVFESTET", "ANNEN_PERMISJON_LOVFESTET", "PERMISJON_MED_FORELDREPENGER", "PERMITTERING", "PERMISJON_VED_MILITÆRTJENESTE" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "permisjonFom", "permisjonTom", "type" ],
         "type" : "object"
       },
       "PersonDto" : {
@@ -3888,9 +3342,6 @@
             "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
             "nullable" : true,
             "type" : "string"
-          },
-          "pleietrengendePart" : {
-            "$ref" : "#/components/schemas/PersonopplysningDto"
           },
           "region" : {
             "enum" : [ "NORDEN", "EOS", "ANNET", "-" ],
@@ -4147,41 +3598,6 @@
         "required" : [ "referanse" ],
         "type" : "object"
       },
-      "RelatertSakDto" : {
-        "properties" : {
-          "relaterteSøkere" : {
-            "items" : {
-              "$ref" : "#/components/schemas/RelatertSøkerDto"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
-      "RelatertSøkerDto" : {
-        "properties" : {
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "søkerIdent" : {
-            "type" : "string"
-          },
-          "søkerNavn" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "åpenBehandling" : {
-            "type" : "boolean"
-          }
-        },
-        "required" : [ "saksnummer", "søkerIdent", "søkerNavn", "åpenBehandling" ],
-        "type" : "object"
-      },
       "ResourceLink" : {
         "properties" : {
           "href" : {
@@ -4240,10 +3656,6 @@
             "minItems" : 0,
             "nullable" : true,
             "type" : "array"
-          },
-          "sakSkalTilInfotrygd" : {
-            "nullable" : true,
-            "type" : "boolean"
           }
         },
         "type" : "object"
@@ -4542,15 +3954,6 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
-          "manglendeVedlegg" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ManglendeVedleggDto"
-            },
-            "maxItems" : 20,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          },
           "mottattDato" : {
             "format" : "date",
             "type" : "string"
@@ -4613,21 +4016,8 @@
       },
       "SøktPeriode" : {
         "properties" : {
-          "arbeidsforholdRef" : {
-            "format" : "uuid",
-            "nullable" : true,
-            "type" : "string"
-          },
-          "arbeidsgiver" : {
-            "$ref" : "#/components/schemas/Arbeidsgiver"
-          },
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
-          },
-          "type" : {
-            "enum" : [ "AT", "SN", "FL", "DP", "SP_AV_DP", "PSB_AV_DP", "BA", "IKKE_YRKESAKTIV", "IKKE_YRKESAKTIV_UTEN_ERSTATNING", "MIDL_INAKTIV", "ANNET" ],
-            "nullable" : true,
-            "type" : "string"
           }
         },
         "required" : [ "periode" ],
@@ -4842,42 +4232,6 @@
         "required" : [ "andeler", "periode" ],
         "type" : "object"
       },
-      "TotrinnsArbeidsforholdDto" : {
-        "properties" : {
-          "arbeidsforholdHandlingType" : {
-            "enum" : [ "-", "BRUK", "LAGT_TIL_AV_SAKSBEHANDLER", "BASERT_PÅ_INNTEKTSMELDING", "BRUK_UTEN_INNTEKTSMELDING", "IKKE_BRUK", "NYTT_ARBEIDSFORHOLD", "SLÅTT_SAMMEN_MED_ANNET", "BRUK_MED_OVERSTYRT_PERIODE", "INNTEKT_IKKE_MED_I_BG" ],
-            "nullable" : true,
-            "type" : "string"
-          },
-          "arbeidsforholdId" : {
-            "maxLength" : 50,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "brukPermisjon" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "navn" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "organisasjonsnummer" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[1-9][0-9\\-.]{6,20}+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "navn" ],
-        "type" : "object"
-      },
       "TotrinnsBeregningDto" : {
         "properties" : {
           "faktaOmBeregningTilfeller" : {
@@ -4915,15 +4269,6 @@
             "nullable" : true,
             "pattern" : "^[\\p{Alnum}]+$",
             "type" : "string"
-          },
-          "arbeidsforholdDtos" : {
-            "items" : {
-              "$ref" : "#/components/schemas/TotrinnsArbeidsforholdDto"
-            },
-            "maxItems" : 200,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
           },
           "beregningDto" : {
             "$ref" : "#/components/schemas/TotrinnsBeregningDto"
@@ -5011,7 +4356,8 @@
             "type" : "number"
           },
           "dagsatsBarnetillegg" : {
-            "type" : "number"
+            "format" : "int32",
+            "type" : "integer"
           },
           "fom" : {
             "format" : "date",
@@ -5038,7 +4384,7 @@
       "UngdomsytelseUttakPeriodeDto" : {
         "properties" : {
           "avslagsårsak" : {
-            "enum" : [ "IKKE_NOK_DAGER" ],
+            "enum" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -5112,6 +4458,49 @@
         "required" : [ "varseltekst" ],
         "type" : "object"
       },
+      "VedtaksbrevForhåndsvisDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "dokumentdata" : {
+            "$ref" : "#/components/schemas/JsonNode"
+          },
+          "redigertVersjon" : {
+            "nullable" : true,
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
+      "VedtaksbrevOperasjonerDto" : {
+        "properties" : {
+          "automatiskBrevOperasjoner" : {
+            "$ref" : "#/components/schemas/AutomatiskBrevOperasjoner"
+          },
+          "enableHindre" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "fritekstbrev" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "harBrev" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "hindret" : {
+            "nullable" : true,
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
       "VenteårsakSomObjekt" : {
         "properties" : {
           "kanVelges" : {
@@ -5128,59 +4517,6 @@
           }
         },
         "required" : [ "kanVelges", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "VilkårDto" : {
-        "properties" : {
-          "avslagKode" : {
-            "nullable" : true,
-            "pattern" : "^[\\p{Alnum}\\p{Space}]+$",
-            "type" : "string"
-          },
-          "evaluering" : {
-            "maxLength" : 1000000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$",
-            "readOnly" : true,
-            "type" : "string"
-          },
-          "input" : {
-            "maxLength" : 1000000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$",
-            "readOnly" : true,
-            "type" : "string"
-          },
-          "lovReferanse" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{P}\\p{Space}\\p{L}\\p{Sc}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "merknadParametere" : {
-            "additionalProperties" : {
-              "nullable" : true,
-              "type" : "string"
-            },
-            "type" : "object"
-          },
-          "overstyrbar" : {
-            "nullable" : true,
-            "type" : "boolean"
-          },
-          "vilkarStatus" : {
-            "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
-            "type" : "string"
-          },
-          "vilkarType" : {
-            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "vilkarStatus", "vilkarType" ],
         "type" : "object"
       },
       "VilkårMedPerioderDto" : {
@@ -5204,7 +4540,7 @@
             "type" : "array"
           },
           "vilkarType" : {
-            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
+            "enum" : [ "FP_VK_0", "FP_VK_2", "K9_VK_1", "K9_VK_3", "K9_VK_5_3", "K9_VK_2_a", "K9_VK_2_b", "FP_VK_3", "FP_VK_34", "FP_VK_21", "FP_VK_23", "FP_VK_41", "K9_VK_16", "K9_VK_20", "K9_VK_21", "K9_VK_22", "K9_VK_17", "K9_VK_9_6", "UNG_VK_XXX", "-" ],
             "type" : "string"
           }
         },
@@ -5263,10 +4599,6 @@
           "vurderesIBehandlingen" : {
             "nullable" : true,
             "type" : "boolean"
-          },
-          "vurdersIBehandlingen" : {
-            "nullable" : true,
-            "type" : "boolean"
           }
         },
         "required" : [ "periode", "vilkarStatus" ],
@@ -5309,7 +4641,7 @@
             "type" : "array"
           },
           "årsak" : {
-            "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_PLEIETRENGENDE", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
+            "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
             "type" : "string"
           }
         },
@@ -5630,36 +4962,6 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/behandling/arbeidsgiver" : {
-      "get" : {
-        "description" : "Henter informasjon om alle arbeidsgivere knyttet til bruker",
-        "operationId" : "getArbeidsgiverOpplysninger",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ArbeidsgiverOversiktDto"
-                }
-              }
-            },
-            "description" : "Returnerer ArbeidsgiverOversiktDto"
-          }
-        },
-        "summary" : "Henter informasjon om alle arbeidsgivere (navn, fødselsnr for privat arbeidsgiver osv)",
-        "tags" : [ "arbeidsgiver" ]
-      }
-    },
     "/behandling/backend-root" : {
       "get" : {
         "description" : "Hent behandling gitt id for backend",
@@ -5806,66 +5108,6 @@
         "tags" : [ "beregningsresultat" ]
       }
     },
-    "/behandling/iay/arbeidsforhold-v2" : {
-      "get" : {
-        "description" : "Hent informasjon om innhentet og avklart inntekter, arbeid og ytelser",
-        "operationId" : "getArbeidsforhold",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InntektArbeidYtelseArbeidsforholdV2Dto"
-                }
-              }
-            },
-            "description" : "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
-          }
-        },
-        "summary" : "Returnerer info om innhentet og avklart inntekter/arbeid og ytelser for bruker, inkludert hva bruker har vedlagt søknad.",
-        "tags" : [ "inntekt-arbeid-ytelse" ]
-      }
-    },
-    "/behandling/iay/im-arbeidsforhold-v2" : {
-      "post" : {
-        "description" : "Hent arbeidsforhold fra inntektsmeldinger",
-        "operationId" : "hentArbeidsforholdIdFraInntektsmeldinger",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MatchFagsak"
-              }
-            }
-          },
-          "description" : "Match-kritierer for å lete opp fagsaken med inntektsmeldinger"
-        },
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InntektArbeidYtelseArbeidsforholdV2Dto"
-                }
-              }
-            },
-            "description" : "Returnerer InntektArbeidYtelseDto, null hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
-          }
-        },
-        "summary" : "Returnerer arbeidsforhold oppgitt på inntektsmeldinger",
-        "tags" : [ "inntekt-arbeid-ytelse" ]
-      }
-    },
     "/behandling/kontrollresultat" : {
       "get" : {
         "deprecated" : true,
@@ -5931,7 +5173,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -5961,11 +5203,11 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/StatusForPerioderPåBehandling"
+                  "$ref" : "#/components/schemas/StatusForPerioderPåBehandlingInkludertVilkår"
                 }
               }
             },
@@ -6352,15 +5594,18 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VilkårDto"
+                  "items" : {
+                    "$ref" : "#/components/schemas/VilkårMedPerioderDto"
+                  },
+                  "type" : "array"
                 }
               }
             },
-            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
+            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer"
           }
         },
         "tags" : [ "vilkår" ]
@@ -6382,14 +5627,7 @@
         } ],
         "responses" : {
           "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/VilkårMedPerioderDto"
-                }
-              }
-            },
-            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
+            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer"
           }
         },
         "summary" : "Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering).",
@@ -6411,7 +5649,7 @@
           }
         } ],
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6419,7 +5657,7 @@
                 }
               }
             },
-            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer (GUI støtter ikke NOT_FOUND p.t.)"
+            "description" : "Returnerer vilkår på behandling, tom liste hvis ikke eksisterer"
           }
         },
         "tags" : [ "vilkår" ]
@@ -6887,35 +6125,6 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/brukerdialog/omsorgsdager-kronisk-sykt-barn/har-gyldig-vedtak" : {
-      "post" : {
-        "description" : "Returnerer nyeste gyldige vedtak for en gitt aktørId",
-        "operationId" : "hentSisteGyldigeVedtakForAktorId",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/HentSisteGyldigeVedtakForAktørInputDto"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/HarGyldigOmsorgsdagerVedtakDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Returnerer nyeste gyldige vedtak for en gitt aktørId",
-        "tags" : [ "brukerdialog" ]
-      }
-    },
     "/diagnostikk/sak" : {
       "post" : {
         "description" : "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak",
@@ -7211,34 +6420,6 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/fagsak/relatertesaker" : {
-      "get" : {
-        "description" : "Hent liste over saket tilknyttet en pleietrengende",
-        "operationId" : "hentRelaterteSaker",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/RelatertSakDto"
-                }
-              }
-            }
-          }
-        },
-        "tags" : [ "fagsak" ]
-      }
-    },
     "/fagsak/rettigheter" : {
       "get" : {
         "description" : "Hent rettigheter for saksnummer",
@@ -7385,97 +6566,6 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/fordel/fagsak/opprett" : {
-      "post" : {
-        "description" : "Finn eller opprett ny sak.",
-        "operationId" : "opprettSak",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FinnEllerOpprettSak"
-              }
-            }
-          },
-          "description" : "Oppretter fagsak"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SaksnummerDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eller opprett ny fagsak",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/fordel/fagsak/opprett/fnr" : {
-      "post" : {
-        "deprecated" : true,
-        "description" : "Finn eller opprett ny sak basert på D-/fødselsnummer.",
-        "operationId" : "opprettSakMedFnr",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FinnEllerOpprettSakFnr"
-              }
-            }
-          },
-          "description" : "Oppretter fagsak"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SaksnummerDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eller opprett ny fagsak basert på D-/fødselsnummer.",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/fordel/fagsak/opprett/journalpost" : {
-      "post" : {
-        "description" : "Finn eller opprett sak med gitt saksnummer og motta ny journalpost",
-        "operationId" : "opprettSakOgMottaJournalpost",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/AbacJournalpostMottakOpprettSakDto"
-              }
-            }
-          },
-          "description" : "Krever saksnummer, journalpostId, aktørId, periode og ytelseType"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "type" : "void"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eller opprett sak med gitt saksnummer og motta ny journalpost",
-        "tags" : [ "fordel" ]
-      }
-    },
     "/fordel/fagsak/sok" : {
       "post" : {
         "description" : "Finn eksisterende sak.",
@@ -7503,39 +6593,6 @@
           }
         },
         "summary" : "Finn eksisterende fagsak",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/fordel/journalposter" : {
-      "post" : {
-        "description" : "Ny journalpost skal behandles.",
-        "operationId" : "mottaJournalposter",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "items" : {
-                  "$ref" : "#/components/schemas/AbacJournalpostMottakDto"
-                },
-                "type" : "array"
-              }
-            }
-          },
-          "description" : "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "type" : "void"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)",
         "tags" : [ "fordel" ]
       }
     },
@@ -7567,6 +6624,74 @@
         },
         "summary" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
         "tags" : [ "fordel" ]
+      }
+    },
+    "/formidling/vedtaksbrev" : {
+      "get" : {
+        "description" : "Operasjoner som er mulig for vedtaksbrev",
+        "operationId" : "tilgjengeligeVedtaksbrev",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VedtaksbrevOperasjonerDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/formidling/vedtaksbrev/forhaandsvis" : {
+      "post" : {
+        "description" : "Forhåndsvise vedtaksbrev for en behandling",
+        "operationId" : "forhåndsvisVedtaksbrev",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "pdf"
+          }
+        },
+        "tags" : [ "formidling" ]
       }
     },
     "/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
@@ -7688,6 +6813,45 @@
           "default" : {
             "content" : {
               "text/plain" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/health/isAlive" : {
+      "get" : {
+        "operationId" : "isAlive",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/health/isReady" : {
+      "get" : {
+        "operationId" : "isReady",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
+    "/health/preStop" : {
+      "get" : {
+        "operationId" : "preStop",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
             },
             "description" : "default response"
           }

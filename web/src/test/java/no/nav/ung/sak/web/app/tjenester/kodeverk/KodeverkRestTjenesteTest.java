@@ -75,7 +75,6 @@ public class KodeverkRestTjenesteTest {
         // Sjekk nokon av verdiane. Kan legge til fleire viss ein ønsker.
         checkResponseSet(response.aktivitetStatuser(), statiske.aktivitetStatuser());
         checkResponseSet(response.arbeidskategorier(), statiske.arbeidskategorier());
-        checkResponseSet(response.arbeidsforholdHandlingTyper(), statiske.arbeidsforholdHandlingTyper());
         checkResponseSet(response.avslagsårsaker(), statiske.avslagsårsaker());
 
         // Sjekk spesialtilfelle i respons, Avslagsprsaker gruppert pr vilkårtype.

@@ -1,11 +1,9 @@
 package no.nav.ung.sak.web.app.tjenester.fagsak;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -79,73 +77,27 @@ public class FagsakApplikasjonTjeneste {
 
     /**
      * Finner matchende fagsaker for ytelse+bruker+periode .
-     * Hvis pleietrengende/relatertAnnenPart oppgis matches disse også. Merk dersom fagsak har pleietrengende/relatertAnnenPart OG det ikke
-     * oppgis som input, vil ikke fagsaken matche.
      * Dette er lagt på som begrensning, slik at all tilgangskontroll håndteres før søker utføres (caller må kjenne til alle personer han ønsker
      * å søke etter).
      */
     public List<FagsakInfoDto> matchFagsaker(FagsakYtelseType ytelseType,
                                              PersonIdent bruker,
-                                             Periode periode,
-                                             List<PersonIdent> pleietrengendeIdenter,
-                                             List<PersonIdent> relatertAnnenPartIdenter) {
-
-        class MatchIdenter {
-            private final Map<AktørId, PersonIdent> mapPleietrengende;
-            private final Map<AktørId, PersonIdent> mapRelatertAnnenPart;
-
-            MatchIdenter(List<PersonIdent> pleietrengendeIdenter, List<PersonIdent> relatertAnnenPartIdenter) {
-                this.mapPleietrengende = new LinkedHashMap<>();
-                this.mapRelatertAnnenPart = new LinkedHashMap<>();
-                if (pleietrengendeIdenter != null) {
-                    pleietrengendeIdenter.forEach(id -> leggTil(mapPleietrengende, id));
-                }
-                if (relatertAnnenPartIdenter != null) {
-                    relatertAnnenPartIdenter.forEach(id -> leggTil(mapRelatertAnnenPart, id));
-                }
-            }
-
-            private void leggTil(Map<AktørId, PersonIdent> map, PersonIdent ident) {
-                if (ident.erAktørId()) {
-                    map.put(new AktørId(ident.getAktørId()), ident);
-                } else if (ident.erNorskIdent()) {
-                    AktørId aktørId = finnAktørId(ident);
-                    map.put(aktørId, ident);
-                }
-            }
-
-            Map<AktørId, PersonIdent> getPleietrengende() {
-                return Collections.unmodifiableMap(mapPleietrengende);
-            }
-
-            Map<AktørId, PersonIdent> getRelatertAnnenPart() {
-                return Collections.unmodifiableMap(mapRelatertAnnenPart);
-            }
-
-        }
-        var identMap = new MatchIdenter(pleietrengendeIdenter, relatertAnnenPartIdenter);
+                                             Periode periode) {
 
         var fom = periode == null ? null : periode.getFom();
         var tom = periode == null ? null : periode.getTom();
 
         AktørId brukerAktørId = finnAktørId(bruker);
 
-        Set<AktørId> pleietrengendeAktørIder = identMap.getPleietrengende().keySet();
-        Set<AktørId> relatertAnnenPartAktørIder = identMap.getRelatertAnnenPart().keySet();
 
-        var fagsaker = fagsakRepository.finnFagsakRelatertTilEnAvAktører(ytelseType, brukerAktørId, pleietrengendeAktørIder, relatertAnnenPartAktørIder, fom, tom);
+        var fagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, brukerAktørId, fom, tom);
         return fagsaker.stream()
-            .map(f -> {
-                return new FagsakInfoDto(f.getSaksnummer(),
-                    f.getYtelseType(),
-                    f.getStatus(),
-                    new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato()),
-                    personinfoAdapter.hentIdentForAktørId(f.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker")),
-                    identMap.getPleietrengende().get(f.getPleietrengendeAktørId()),
-                    identMap.getRelatertAnnenPart().get(f.getRelatertPersonAktørId()),
-                    f.getSkalTilInfotrygd()
-                );
-            })
+            .map(f -> new FagsakInfoDto(f.getSaksnummer(),
+                f.getYtelseType(),
+                f.getStatus(),
+                new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato()),
+                personinfoAdapter.hentIdentForAktørId(f.getAktørId()).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for bruker"))
+            ))
             .collect(Collectors.toList());
 
     }

@@ -29,7 +29,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
 import no.nav.ung.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.felles.Kildesystem;
@@ -40,17 +39,14 @@ public class InnsynEventTjeneste {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final MottatteDokumentRepository mottatteDokumentRepository;
-    private final UtlandVurdererTjeneste utlandVurdererTjeneste;
     private final BrukerdialoginnsynMeldingProducer producer;
 
     @Inject
     public InnsynEventTjeneste(
             MottatteDokumentRepository mottatteDokumentRepository,
-            UtlandVurdererTjeneste utlandVurdererTjeneste,
             BrukerdialoginnsynMeldingProducer producer
     ) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.utlandVurdererTjeneste = utlandVurdererTjeneste;
         this.producer = producer;
     }
 
@@ -70,7 +66,7 @@ public class InnsynEventTjeneste {
             mapBehandingStatus(behandling, aksjonspunkter),
             mapSøknaderOgEttersendelser(behandling),
             aksjonspunkter,
-            utlandVurdererTjeneste.erUtenlandssak(behandling),
+            false,
             mapFagsak(fagsak)
         );
 
@@ -113,7 +109,7 @@ public class InnsynEventTjeneste {
 
 
     private no.nav.k9.innsyn.sak.Fagsak mapFagsak(Fagsak fagsak) {
-        return new no.nav.k9.innsyn.sak.Fagsak(new Saksnummer(fagsak.getSaksnummer().getVerdi()), new AktørId(fagsak.getAktørId().getId()), new AktørId(fagsak.getPleietrengendeAktørId().getId()), no.nav.k9.innsyn.sak.FagsakYtelseType.fraKode(fagsak.getYtelseType().getKode()));
+        return new no.nav.k9.innsyn.sak.Fagsak(new Saksnummer(fagsak.getSaksnummer().getVerdi()), new AktørId(fagsak.getAktørId().getId()), null, no.nav.k9.innsyn.sak.FagsakYtelseType.fraKode(fagsak.getYtelseType().getKode()));
     }
 
     private Set<InnsendingInfo> mapSøknaderOgEttersendelser(Behandling b) {

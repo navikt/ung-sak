@@ -8,6 +8,7 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import no.nav.ung.sak.web.app.selftest.HealthCheckRestService;
 import no.nav.ung.sak.web.server.metrics.PrometheusRestService;
 
 

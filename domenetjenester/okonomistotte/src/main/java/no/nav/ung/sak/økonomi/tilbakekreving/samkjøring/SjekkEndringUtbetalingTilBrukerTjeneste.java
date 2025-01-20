@@ -1,8 +1,5 @@
 package no.nav.ung.sak.økonomi.tilbakekreving.samkjøring;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -10,103 +7,49 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
+import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @Dependent
 public class SjekkEndringUtbetalingTilBrukerTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(SjekkEndringUtbetalingTilBrukerTjeneste.class);
 
-    private BeregningsresultatRepository beregningsresultatRepository;
-    private BehandlingRepository behandlingRepository;
+    private final BehandlingRepository behandlingRepository;
+    private final TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     @Inject
-    public SjekkEndringUtbetalingTilBrukerTjeneste(BeregningsresultatRepository beregningsresultatRepository, BehandlingRepository behandlingRepository) {
-        this.beregningsresultatRepository = beregningsresultatRepository;
+    public SjekkEndringUtbetalingTilBrukerTjeneste(BehandlingRepository behandlingRepository,
+                                                   UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse) {
         this.behandlingRepository = behandlingRepository;
+        this.tilkjentYtelseUtleder = utledTilkjentYtelse;
     }
 
     public LocalDateTimeline<Boolean> endringerUtbetalingTilBruker(Behandling behandling) {
         Behandling forrigeBehandling = finnSisteIkkeHenlagteBehandling(behandling).orElse(null);
-        BeregningsresultatEntitet resultatNå = beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId()).orElse(null);
-        BeregningsresultatEntitet resultatFør = forrigeBehandling != null
-            ? beregningsresultatRepository.hentEndeligBeregningsresultat(forrigeBehandling.getId()).orElse(null)
+        var resultatNå = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandling.getId());
+        var resultatFør = forrigeBehandling != null
+            ? tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(forrigeBehandling.getId())
             : null;
 
-        FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
-        LocalDateTimeline<Boolean> endringYtelse = endringerUtbetalingYtelseTilBruker(fagsakYtelseType, resultatNå, resultatFør);
-        LocalDateTimeline<Boolean> endringFeriepenger = endringerUtbetalingFeriepengerTilBruker(resultatNå, resultatFør);
+        LocalDateTimeline<Boolean> endringYtelse = endringerUtbetalingYtelseTilBruker(resultatNå, resultatFør);
         if (Environment.current().isDev()) {
             logger.info("Sammenlignet resultat fra behandling {} med inneværende {}", (forrigeBehandling != null ? forrigeBehandling.getId() : null), behandling.getId());
             logger.info("Endring ytelse {}", endringYtelse);
-            logger.info("Endring feriepenger {}", endringFeriepenger);
         }
-        return endringYtelse.crossJoin(endringFeriepenger, StandardCombinators::alwaysTrueForMatch);
+        return endringYtelse;
     }
 
-    private LocalDateTimeline<Boolean> endringerUtbetalingYtelseTilBruker(FagsakYtelseType fagsakYtelseType, BeregningsresultatEntitet resultatNå, BeregningsresultatEntitet resultatFør) {
-        LocalDateTimeline<Long> ytelseTilBrukerNå = ytelseTilBrukerTidsinje(resultatNå);
-        LocalDateTimeline<Long> ytelseTilBrukerFør = ytelseTilBrukerTidsinje(resultatFør);
-
-        LocalDateTimeline<Long> differanse = ytelseTilBrukerNå.crossJoin(ytelseTilBrukerFør, DIFFERANSE);
-        LocalDateTimeline<Boolean> harDifferanse = differanse.filterValue(p -> p != 0L).mapValue(v -> true);
-        return fagsakYtelseType == FagsakYtelseType.OMP
-            ? harDifferanse
-            : Hjelpetidslinjer.fjernHelger(harDifferanse);
-    }
-
-    private LocalDateTimeline<Boolean> endringerUtbetalingFeriepengerTilBruker(BeregningsresultatEntitet resultatNå, BeregningsresultatEntitet resultatFør) {
-        LocalDateTimeline<Long> ytelseTilBrukerNå = feriepengerTilBrukerTidsinje(resultatNå);
-        LocalDateTimeline<Long> ytelseTilBrukerFør = feriepengerTilBrukerTidsinje(resultatFør);
-        LocalDateTimeline<Long> differanse = ytelseTilBrukerNå.crossJoin(ytelseTilBrukerFør, DIFFERANSE);
+    private LocalDateTimeline<Boolean> endringerUtbetalingYtelseTilBruker(LocalDateTimeline<DagsatsOgUtbetalingsgrad> resultatNå, LocalDateTimeline<DagsatsOgUtbetalingsgrad> resultatFør) {
+        LocalDateTimeline<Long> differanse = resultatNå.crossJoin(resultatFør, DIFFERANSE);
         return differanse.filterValue(p -> p != 0L).mapValue(v -> true);
-    }
-
-    private LocalDateTimeline<Long> ytelseTilBrukerTidsinje(BeregningsresultatEntitet beregningsresultat) {
-        if (beregningsresultat == null) {
-            return LocalDateTimeline.empty();
-        }
-        List<LocalDateSegment<Long>> segmenter = new ArrayList<>();
-        for (BeregningsresultatPeriode periode : beregningsresultat.getBeregningsresultatPerioder()) {
-            LocalDateInterval intervall = periode.getPeriode().toLocalDateInterval();
-            for (BeregningsresultatAndel andel : periode.getBeregningsresultatAndelList()) {
-                if (andel.erBrukerMottaker()) {
-                    segmenter.add(new LocalDateSegment<>(intervall, (long) andel.getDagsats()));
-                }
-            }
-        }
-
-        return new LocalDateTimeline<>(segmenter, SUM);
-    }
-
-    private LocalDateTimeline<Long> feriepengerTilBrukerTidsinje(BeregningsresultatEntitet beregningsresultat) {
-        if (beregningsresultat == null) {
-            return LocalDateTimeline.empty();
-        }
-        List<LocalDateSegment<Long>> segmenter = new ArrayList<>();
-        for (BeregningsresultatPeriode periode : beregningsresultat.getBeregningsresultatPerioder()) {
-            int feriepengeOpptjeningsÅr = periode.getPeriode().getFomDato().getYear();
-            LocalDateInterval feriepengerUtbetales = new LocalDateInterval(LocalDate.of(feriepengeOpptjeningsÅr + 1, 5, 1), LocalDate.of(feriepengeOpptjeningsÅr + 1, 5, 31));
-            for (BeregningsresultatAndel andel : periode.getBeregningsresultatAndelList()) {
-                if (andel.erBrukerMottaker()) {
-                    segmenter.add(new LocalDateSegment<>(feriepengerUtbetales, (long) andel.getDagsats()));
-                }
-            }
-        }
-        return new LocalDateTimeline<>(segmenter, (interval, lhs, rhs) -> new LocalDateSegment<>(interval, lhs.getValue() + rhs.getValue()));
     }
 
     private Optional<Behandling> finnSisteIkkeHenlagteBehandling(Behandling aktuellBehandling) {
@@ -117,7 +60,6 @@ public class SjekkEndringUtbetalingTilBrukerTjeneste {
         return forrige;
     }
 
-    private static final LocalDateSegmentCombinator<Long, Long, Long> DIFFERANSE = (intervall, lhs, rhs) -> new LocalDateSegment<>(intervall, (lhs != null ? lhs.getValue() : 0L) - (rhs != null ? rhs.getValue() : 0));
-    private static final LocalDateSegmentCombinator<Long, Long, Long> SUM = (interval, lhs, rhs) -> new LocalDateSegment<>(interval, lhs.getValue() + rhs.getValue());
+    private static final LocalDateSegmentCombinator<DagsatsOgUtbetalingsgrad, DagsatsOgUtbetalingsgrad, Long> DIFFERANSE = (intervall, lhs, rhs) -> new LocalDateSegment<>(intervall, (lhs != null ? lhs.getValue().dagsats() : 0L) - (rhs != null ? rhs.getValue().dagsats() : 0));
 
 }

@@ -29,11 +29,13 @@
         <module>produksjonsstyring</module>
         <module>registerinnhenting</module>
         <module>vedtak</module>
+        <module>ungdomsprogram</module>
+        <module>perioder</module>
         <module>skjaeringstidspunkt</module>
         <module>bom</module>
         <module>grunnbelop</module>
-
         <module>behandlingskontroll</module>
+        <module>tilgangskontroll</module>
     </modules>
 
 </project>

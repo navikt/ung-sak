@@ -35,14 +35,14 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingProsessHendelse;
-import no.nav.ung.sak.perioder.KravDokument;
-import no.nav.ung.sak.perioder.SøktPeriode;
-import no.nav.ung.sak.perioder.VurderSøknadsfristTjeneste;
-import no.nav.ung.sak.perioder.VurdertSøktPeriode;
-import no.nav.ung.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.Kildesystem;
+import no.nav.ung.sak.søknadsfrist.KravDokument;
+import no.nav.ung.sak.søknadsfrist.SøktPeriode;
+import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
 
 @Dependent
 public class BehandlingProsessHendelseMapper {
@@ -94,8 +94,6 @@ public class BehandlingProsessHendelseMapper {
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
             .medBehandlendeEnhet(behandling.getBehandlendeEnhet())
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
-            .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
-            .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
             .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)

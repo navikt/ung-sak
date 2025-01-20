@@ -34,8 +34,5 @@ public class AbakusInntektArbeidYtelseGrunnlag extends InntektArbeidYtelseGrunnl
         return Optional.of(this.koblingReferanse);
     }
 
-    @Override
-    public void fjernSaksbehandlet() {
-        super.fjernSaksbehandlet();
-    }
+
 }

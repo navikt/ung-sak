@@ -1,5 +1,14 @@
 package no.nav.ung.sak.domene.vedtak.observer;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -13,11 +22,11 @@ import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
 import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -27,15 +36,9 @@ import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.hendelse.vedtak.VurderOmVedtakPåvirkerAndreSakerTask;
 import no.nav.ung.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
 
+@Deprecated//TODO denne publiserer melding til eksterne om vedtak fattet. Vurder om nødvendig for UNG etterhvert som detaljene for samhandling er landet
 @ApplicationScoped
 @ProsessTask(PubliserVedtattYtelseHendelseTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)

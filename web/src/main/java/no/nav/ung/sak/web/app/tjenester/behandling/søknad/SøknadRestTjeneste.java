@@ -83,7 +83,7 @@ public class SøknadRestTjeneste {
     @Operation(description = "Henter søknadsperioder på siste fagsak på ytelse, bruker, og pleieptrengende", tags = "søknad", summary = ("Finner søknadspperioder på siste fagsak"))
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public List<Periode> hentSøknadPerioder(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchHentSøknadAttributter.class) HentSøknadPerioderDto hentSøknadPerioder) {
-        return søknadDtoTjeneste.hentSøknadperioderPåFagsak(hentSøknadPerioder.getYtelseType(), hentSøknadPerioder.getBruker(), hentSøknadPerioder.getPleietrengende());
+        return søknadDtoTjeneste.hentSøknadperioderPåFagsak(hentSøknadPerioder.getYtelseType(), hentSøknadPerioder.getBruker());
     }
 
     @POST
@@ -107,9 +107,6 @@ public class SøknadRestTjeneste {
 
             Optional.ofNullable(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(FNR_TYPE, v));
             Optional.ofNullable(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(AKTØR_ID_TYPE, v));
-
-            Optional.ofNullable(m.getPleietrengende()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(FNR_TYPE, v));
-            Optional.ofNullable(m.getPleietrengende()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(AKTØR_ID_TYPE, v));
 
             // må ha minst en aktørid
             if (abac.getVerdier(FNR_TYPE).isEmpty() && abac.getVerdier(AKTØR_ID_TYPE).isEmpty()) {

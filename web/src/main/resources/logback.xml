@@ -2,9 +2,10 @@
 <configuration>
 
     <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="no.nav.ung.sak.web.server.logging.KodeverdiEnumLogFilter" />
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
-                <maxLength>15000</maxLength>
+                <maxLength>13000</maxLength>
                 <maxDepthPerThrowable>200</maxDepthPerThrowable>
                 <shortenedClassNameLength>70</shortenedClassNameLength>
                 <exclude>\$\$_Weld</exclude>
@@ -14,6 +15,7 @@
                 <exclude>org\.eclipse\.jetty\.server\.HttpChannel</exclude>
                 <exclude>org\.eclipse\.jetty\.servlet</exclude>
                 <exclude>org\.eclipse\.jetty\.util\.thread\.strategy</exclude>
+                <exclude>org\.eclipse\.jetty\.ee9\.nested</exclude>
                 <exclude>org\.jboss\.weld\.bean</exclude>
                 <exclude>org\.jboss\.weld\.interceptor</exclude>
                 <exclude>org\.jboss\.resteasy\.core</exclude>

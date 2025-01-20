@@ -52,9 +52,8 @@ public class FordelHendelseRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Finn saker påvirket av hendelse", summary = ("Finn saker påvirket av hendelse"), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public PåvirkedeSaker finnPåvirkedeFagsaker(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HendelseDto dto) {
-        var aktørId = dto.getAktørId();
         var hendelse = dto.getHendelse();
 
         var fagsaker = hendelsemottakTjeneste.finnFagsakerTilVurdering(hendelse).keySet();
@@ -70,8 +69,7 @@ public class FordelHendelseRestTjeneste {
     @Operation(description = "Mottak av dokument.", tags = "fordel")
     @PollTaskAfterTransaction
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public PåvirkedeSaker innsending(@Parameter(description = "Hendelse innsendt.") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid HendelseDto dto) {
-        var aktørId = dto.getAktørId();
+    public PåvirkedeSaker innsending(@Parameter(description = "Hendelse innsendt.") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid HendelseDto dto) {
         var hendelse = dto.getHendelse();
 
         var fagsaker = hendelsemottakTjeneste.mottaHendelse(hendelse).keySet();

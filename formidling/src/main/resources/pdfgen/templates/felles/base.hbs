@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC
+        "-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN" "">
+
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="subject" content="Brev for ungdomsytelsen"/>
+    <meta name="description" content="Brev for ungdomsytelsen"/>
+    <meta name="keywords" content="Brev nav ungdomsytelsen" />
+    <meta name="author" content="NAV IT"/>
+    <title>Brev for ungdomsytelsen</title>
+    {{> felles/style }}
+</head>
+
+<body>
+<header>
+    <div id="nav_logo_container" >
+        <img id="nav_logo" src="{{ image "Navlogo.png" }}" alt="nav logo"/>
+    </div>
+
+    <p style="text-align: right">
+        {{felles.brevDato}}
+    </p>
+
+    {{> felles/adressatdetaljer }}
+
+</header>
+
+<section style="height: 20cm;" data-hidden="data-hidden">
+    {{> @partial-block}}
+</section>
+
+<footer style="position: running(footer)">
+    <span class="vedtakid">{{ vedtakid }}</span>
+    <span class="sidetall">side <span id="pagenumber"></span> av <span id="pagecount"></span></span>
+</footer>
+
+</body>
+</html>

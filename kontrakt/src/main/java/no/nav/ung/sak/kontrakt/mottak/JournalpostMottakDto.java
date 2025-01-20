@@ -64,21 +64,15 @@ public class JournalpostMottakDto {
     @NotNull
     private Brevkode type;
 
-    @JsonProperty(value = "kanalReferanse")
-    @Pattern(regexp = "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$")
-    @Size(max = 100)
-    private String kanalReferanse;
 
     public JournalpostMottakDto(Saksnummer saksnummer,
                                 JournalpostId journalpostId,
                                 FagsakYtelseType ytelseType,
-                                String kanalReferanse,
                                 Brevkode type,
                                 LocalDateTime forsendelseMottattTidspunkt,
                                 String payloadRawString) {
         this.saksnummer = saksnummer;
         this.journalpostId = journalpostId;
-        this.kanalReferanse = kanalReferanse;
         this.type = type;
         this.forsendelseMottattTidspunkt = Objects.requireNonNull(forsendelseMottattTidspunkt, "forsendelseMottattTidspunkt");
         this.forsendelseMottatt = this.forsendelseMottattTidspunkt.toLocalDate();
@@ -120,8 +114,8 @@ public class JournalpostMottakDto {
         return ytelseType;
     }
 
-    public String getKanalReferanse() {
-        return kanalReferanse;
+    public String getBase64EncodedPayload() {
+        return base64EncodedPayload;
     }
 
     @Override

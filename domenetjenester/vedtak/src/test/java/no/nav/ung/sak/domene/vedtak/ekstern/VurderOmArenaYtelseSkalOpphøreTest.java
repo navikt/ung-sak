@@ -1,23 +1,40 @@
 package no.nav.ung.sak.domene.vedtak.ekstern;
 
+import static java.util.Optional.empty;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.Fagsystem;
-import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
+import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
@@ -31,19 +48,7 @@ import no.nav.ung.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.Optional.empty;
-import static org.assertj.core.api.Assertions.assertThat;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -56,7 +61,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private Repository repository;
-    private BeregningsresultatRepository beregningsresultatRepository;
+    private UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse;
 
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final String SAK_ID = "1200095";
@@ -69,8 +74,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
 
     private Behandling behandling;
 
-    private BeregningsresultatEntitet.Builder beregningsresultatBuilder;
-    private BeregningsresultatPeriode.Builder brPeriodebuilder;
+    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
 
     @BeforeEach
     public void setup() {
@@ -78,12 +82,13 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         repository = new Repository(entityManager);
-        beregningsresultatRepository = new BeregningsresultatRepository(entityManager);
+        ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
+        utledTilkjentYtelse = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
 
         stp = LocalDate.parse("2020-08-08");
         scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(iayTjeneste, behandlingVedtakRepository, null, beregningsresultatRepository);
+        vurdereOmArenaYtelseSkalOpphør = new VurderOmArenaYtelseSkalOpphøre(iayTjeneste, behandlingVedtakRepository, null, utledTilkjentYtelse);
     }
 
 
@@ -345,10 +350,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         iayTjeneste.lagreIayAggregat(behandling.getId(), aggregatBuilder);
 
         // Legg til beregningresultat
-        beregningsresultatBuilder = BeregningsresultatEntitet.builder();
-        brPeriodebuilder = BeregningsresultatPeriode.builder();
-        BeregningsresultatEntitet beregningsresultat = byggBeregningsresultat(intervall.getFomDato(), intervall.getTomDato());
-        beregningsresultatRepository.lagre(behandling, beregningsresultat);
+        lagreSatsOgUttak(intervall.getFomDato(), intervall.getTomDato());
 
         // Legg til behandling resultat
         repository.lagre(behandling);
@@ -403,29 +405,28 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         return ytelseAnvistList;
     }
 
-    private BeregningsresultatEntitet byggBeregningsresultat(LocalDate fom, LocalDate tom) {
-        BeregningsresultatEntitet beregningsresultat = beregningsresultatBuilder
-            .medRegelInput("clob1")
-            .medRegelSporing("clob2")
-            .build();
-        byggBeregningsresultatPeriode(beregningsresultat, fom, tom);
-        return beregningsresultat;
-    }
 
-    private BeregningsresultatPeriode byggBeregningsresultatPeriode(BeregningsresultatEntitet beregningsresultat,
-                                                                    LocalDate fom, LocalDate tom) {
-        var brPeriode = brPeriodebuilder
-            .medBeregningsresultatPeriodeFomOgTom(fom, tom)
-            .build(beregningsresultat);
-        BeregningsresultatAndel.builder()
-            .medDagsats(10)
-            .medStillingsprosent(BigDecimal.valueOf(100))
-            .medUtbetalingsgrad(BigDecimal.valueOf(100))
-            .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
-            .medDagsatsFraBg(10)
-            .medBrukerErMottaker(true)
-            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
-            .buildFor(brPeriode);
-        return brPeriode;
+    private void lagreSatsOgUttak(LocalDate fom, LocalDate tom) {
+
+        ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment(
+                    fom, tom,
+                    new UngdomsytelseSatser(
+                        BigDecimal.TEN,
+                        BigDecimal.TEN,
+                        BigDecimal.TEN, UngdomsytelseSatsType.HØY, 0, 0))
+            )),
+            "regelinput",
+            "regeloutput"
+        ));
+
+        var uttakperioder = new UngdomsytelseUttakPerioder(List.of(
+            new UngdomsytelseUttakPeriode(BigDecimal.TEN, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
+        ));
+        uttakperioder.setRegelInput("input");
+        uttakperioder.setRegelSporing("output");
+        ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), uttakperioder);
+
     }
 }

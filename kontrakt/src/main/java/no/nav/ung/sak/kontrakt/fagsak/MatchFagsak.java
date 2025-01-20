@@ -1,11 +1,5 @@
 package no.nav.ung.sak.kontrakt.fagsak;
 
-import java.util.List;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -15,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -38,32 +34,16 @@ public class MatchFagsak {
     @Valid
     private PersonIdent brukerIdent;
 
-    @JsonInclude(value = Include.NON_ABSENT)
-    @JsonProperty(value = "pleietrengendeIdenter", required = false)
-    @Size(max = 20)
-    @Valid
-    private List<PersonIdent> pleietrengendeIdenter;
-
-    @JsonInclude(value = Include.NON_ABSENT)
-    @JsonProperty(value = "relatertPersonIdenter", required = false)
-    @Size(max = 20)
-    @Valid
-    private List<PersonIdent> relatertPersonIdenter;
-
     protected MatchFagsak() {
         //
     }
 
     public MatchFagsak(@Valid @NotNull FagsakYtelseType ytelseType,
                        @Valid Periode gyldigPeriode,
-                       @Valid PersonIdent brukerIdent,
-                       @Valid List<PersonIdent> pleietrengendeIdenter,
-                       @Valid List<PersonIdent> relatertPersonIdenter) {
+                       @Valid PersonIdent brukerIdent) {
         this.ytelseType = ytelseType;
         this.periode = gyldigPeriode;
         this.brukerIdent = brukerIdent;
-        this.pleietrengendeIdenter = pleietrengendeIdenter;
-        this.relatertPersonIdenter = relatertPersonIdenter;
     }
 
     public FagsakYtelseType getYtelseType() {
@@ -76,14 +56,6 @@ public class MatchFagsak {
 
     public PersonIdent getBruker() {
         return brukerIdent;
-    }
-
-    public List<PersonIdent> getPleietrengendeIdenter() {
-        return pleietrengendeIdenter;
-    }
-
-    public List<PersonIdent> getRelatertPersonIdenter() {
-        return relatertPersonIdenter;
     }
 
 }

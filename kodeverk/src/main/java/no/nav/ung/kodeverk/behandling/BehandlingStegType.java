@@ -84,15 +84,14 @@ public enum BehandlingStegType implements Kodeverdi {
     VURDER_OPPTJENINGSVILKÅR("VURDER_OPPTJ", "Vurder opptjeningsvilkåret", UTREDES),
     VURDER_TILBAKETREKK("VURDER_TILBAKETREKK", "Vurder tilbaketrekk", UTREDES),
     VURDER_UTLAND("VURDER_UTLAND", "Vurder utland (SED)", UTREDES),
-    VURDER_UTTAK("VURDER_UTTAK", "Vurder uttaksvilkår", UTREDES),
+    VURDER_UTTAK("VURDER_UTTAK", "Vurder antall dager og uttak", UTREDES),
     VURDER_UTTAK_V2("VURDER_UTTAK_V2", "Uttak", UTREDES),
     BEKREFT_UTTAK("BEKREFT_UTTAK", "Bekreft uttak", UTREDES),
     MANUELL_VILKÅRSVURDERING("MANUELL_VILKÅRSVURDERING", "Manuell vilkårsvurdering", UTREDES),
     MANUELL_TILKJENNING_YTELSE("MANUELL_TILKJENNING_YTELSE", "Manuell tilkjenning av ytelse", UTREDES),
     OVERGANG_FRA_INFOTRYGD("OVERGANG_FRA_INFOTRYGD", "Direkte overgang fra infotrygd", UTREDES),
     VURDER_UNGDOMSPROGRAMVILKÅR("VURDER_UNGDOMSPROGRAMVILKÅR", "Vurder deltakelse i ungdomsprogrammet", UTREDES),
-    UNGDOMSYTELSE_BEREGNING("UNGDOMSYTELSE_BEREGNING", "Beregner sats for ungdomsytelsen", UTREDES),
-    VURDER_ANTALL_DAGER("VURDER_ANTALL_DAGER", "Vurder antall dager", UTREDES);
+    UNGDOMSYTELSE_BEREGNING("UNGDOMSYTELSE_BEREGNING", "Beregner sats for ungdomsytelsen", UTREDES);
 
     private static final Map<String, BehandlingStegType> KODER = new LinkedHashMap<>();
 

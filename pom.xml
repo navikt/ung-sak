@@ -16,9 +16,8 @@
         <module>behandlingslager</module>
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
-
-        <!--Ytelsespesifikke moduler -->
-        <module>ytelse-ung</module>
+        <module>formidling</module>
+        <module>fordel</module>
 
         <!-- Web klient og server -->
         <module>web</module>
@@ -36,16 +35,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>4.3.0</felles.version>
-        <swagger.version>2.2.26</swagger.version>
-        <junit.version>5.11.3</junit.version>
-        <k9format.version>9.7.1</k9format.version>
-        <jackson.version>2.18.1</jackson.version>
+        <felles.version>4.4.6</felles.version>
+        <swagger.version>2.2.28</swagger.version>
+        <junit.version>5.11.4</junit.version>
+        <k9format.version>9.8.0</k9format.version>
+        <jackson.version>2.18.2</jackson.version>
         <asm.version>9.7.1</asm.version>
-        <kotlin-stdlib.version>2.0.21</kotlin-stdlib.version>
+        <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
-        <flyway.version>11.0.0</flyway.version>
-
+        <flyway.version>11.2.0</flyway.version>
+        <pdfgen-core.version>1.1.39</pdfgen-core.version>
+        <confluent.platform.version>7.8.0</confluent.platform.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -77,7 +77,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>8.0.1.Final</version>
+                <version>8.0.2.Final</version>
             </dependency>
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
@@ -120,7 +120,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.6.4</version>
+                <version>2.7.4</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -157,9 +157,14 @@
                 <version>${swagger.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.10.0</version>
+                <version>2.12.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -203,6 +208,11 @@
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandlingskontroll</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>tilgangskontroll</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -266,7 +276,16 @@
                 <artifactId>vedtak</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>perioder</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>ungdomsprogram</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>arbeidsforhold</artifactId>
@@ -317,8 +336,13 @@
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak.ytelse</groupId>
-                <artifactId>ytelse-ung</artifactId>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>formidling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>fordel</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -326,6 +350,12 @@
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
                 <version>2.6.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.pdfgen</groupId>
+                <artifactId>pdfgen-core</artifactId>
+                <version>${pdfgen-core.version}</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
@@ -354,6 +384,12 @@
 
             <!-- 3dje parts NAV felleskomponenter -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
+            <dependency>
+                <groupId>no.nav.teamdokumenthandtering</groupId>
+                <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
+                <version>08271806</version>
+            </dependency>
+
 
             <!-- EKSTRA TEST AVHENGIGHETER FOR LOKAL WEBSERVER -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
@@ -410,7 +446,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.14.2</version>
+                <version>5.15.2</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -445,18 +481,12 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.17.1</version>
+                <version>1.17.2</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
-                <version>${kotlin-stdlib.version}</version>
-            </dependency>
-            <dependency>
-                <!-- lagt her for å sikre dependencyConvergence -->
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-common</artifactId>
                 <version>${kotlin-stdlib.version}</version>
             </dependency>
             <dependency>
@@ -525,7 +555,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.4</version>
+                <version>42.7.5</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
@@ -536,6 +566,23 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-database-postgresql</artifactId>
                 <version>${flyway.version}</version>
+            </dependency>
+
+            <!-- Kafka -->
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-streams-avro-serde</artifactId>
+                <version>${confluent.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-avro-serializer</artifactId>
+                <version>${confluent.platform.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>1.12.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -580,7 +627,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-remote-resources-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -788,6 +835,10 @@
             <id>central</id>
             <name>Maven Central</name>
             <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
         </repository>
 		<repository>
             <!-- bruker SNAPSHOT versjon av eclipse-transformer (0.3.0-SNAPSHOT) -->

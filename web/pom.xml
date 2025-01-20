@@ -15,7 +15,8 @@
 
     <properties>
         <swagger-ui.version>5.18.2</swagger-ui.version>
-        <jetty.version>12.0.15</jetty.version>
+        <jetty.version>12.0.16</jetty.version>
+        <metrics.version>4.2.30</metrics.version>
     </properties>
 
 
@@ -48,6 +49,12 @@
                 <groupId>org.webjars</groupId>
                 <artifactId>swagger-ui</artifactId>
                 <version>${swagger-ui.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-healthchecks</artifactId>
+                <version>${metrics.version}</version>
             </dependency>
 
             <dependency>
@@ -120,14 +127,29 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
+            <artifactId>perioder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>ungdomsprogram</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>hendelsemottak</artifactId>
         </dependency>
-
-        <!-- Ytelsespesifikke moduler -->
         <dependency>
-            <groupId>no.nav.k9.sak.ytelse</groupId>
-            <artifactId>ytelse-ung</artifactId>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>formidling</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>fordel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>tilgangskontroll</artifactId>
+        </dependency>
+
 
         <!-- Server Provided Libraries. Transitive avhengigheter som ikke burde
             vært her da de trekkes inn av server. -->
@@ -218,7 +240,10 @@
         </dependency>
 
         <!-- Metrics, logging, helse- og healthchecks -->
-
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-healthchecks</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
@@ -285,6 +310,10 @@
             <groupId>no.nav.k9.felles.sikkerhet</groupId>
             <artifactId>k9-felles-sikkerhet-testutilities</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>mottak</artifactId>
         </dependency>
     </dependencies>
 

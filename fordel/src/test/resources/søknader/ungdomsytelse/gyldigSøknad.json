@@ -1,0 +1,17 @@
+{
+  "søknad": {
+    "versjon": "1.0.0",
+    "søknadId": "${søknadId}",
+    "mottattDato": "2019-10-20T07:15:36.124Z",
+    "språk": "nb",
+    "ytelse": {
+      "søknadsperiode": [
+        "2021-01-21/2021-01-31"
+      ],
+      "type": "UNGDOMSYTELSE"
+    },
+    "søker": {
+      "norskIdentitetsnummer": "12345678901"
+    }
+  }
+}

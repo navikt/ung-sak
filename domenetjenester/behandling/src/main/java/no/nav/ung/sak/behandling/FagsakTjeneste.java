@@ -51,30 +51,18 @@ public class FagsakTjeneste {
         return fagsakRepository.hentForBruker(aktørId);
     }
 
-    public Optional<Fagsak> finnesEnFagsakSomOverlapper(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
-        var potensielleFagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, pleietrengende, relatertPersonAktørId, fom, tom);
+    public Optional<Fagsak> finnesEnFagsakSomOverlapper(FagsakYtelseType ytelseType, AktørId bruker, LocalDate fom, LocalDate tom) {
+        var potensielleFagsaker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, fom, tom);
         if (potensielleFagsaker.isEmpty()) {
             return Optional.empty();
         }
         return potensielleFagsaker.stream().max(Comparator.comparing(Fagsak::getPeriode));
     }
 
-    public boolean finnesEnFagsakForMinstEnAvAktørene(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengende, AktørId relatertPersonAktørId, LocalDate fom, LocalDate tom) {
+    public boolean finnesEnFagsakForMinstEnAvAktørene(FagsakYtelseType ytelseType, AktørId bruker, LocalDate fom, LocalDate tom) {
         if (bruker != null) {
-            final var fagSakerPåBruker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, null, null, fom, tom);
+            final var fagSakerPåBruker = fagsakRepository.finnFagsakRelatertTil(ytelseType, bruker, fom, tom);
             if (!fagSakerPåBruker.isEmpty()) {
-                return true;
-            }
-        }
-        if (pleietrengende != null) {
-            final var fagSakerPåPleietrengende = fagsakRepository.finnFagsakRelatertTil(ytelseType, pleietrengende, null, fom, tom);
-            if (!fagSakerPåPleietrengende.isEmpty()) {
-                return true;
-            }
-        }
-        if (relatertPersonAktørId != null) {
-            final var fagSakerPåRelatertPerson = fagsakRepository.finnFagsakRelatertTil(ytelseType, null, relatertPersonAktørId, fom, tom);
-            if (!fagSakerPåRelatertPerson.isEmpty()) {
                 return true;
             }
         }

@@ -27,14 +27,6 @@ public class JournalpostMottakOpprettSakDto extends JournalpostMottakDto {
     @Digits(integer = 19, fraction = 0)
     private String aktørId;
 
-    @JsonProperty(value = "pleietrengendeAktørId")
-    @Digits(integer = 19, fraction = 0)
-    private String pleietrengendeAktørId;
-
-    @JsonProperty(value = "relatertPersonAktørId")
-    @Digits(integer = 19, fraction = 0)
-    private String relatertPersonAktørId;
-
     @JsonProperty(value = "periode", required = true)
     @NotNull
     @Valid
@@ -42,21 +34,16 @@ public class JournalpostMottakOpprettSakDto extends JournalpostMottakDto {
 
     public JournalpostMottakOpprettSakDto(
         String aktørId,
-        String pleietrengendeAktørId,
-        String relatertPersonAktørId,
         Periode periode,
         Saksnummer saksnummer,
         JournalpostId journalpostId,
         FagsakYtelseType ytelseType,
-        String kanalReferanse,
         Brevkode type,
         LocalDateTime forsendelseMottattTidspunkt,
         String payloadRawString
     ) {
-        super(saksnummer, journalpostId, ytelseType, kanalReferanse, type, forsendelseMottattTidspunkt, payloadRawString);
+        super(saksnummer, journalpostId, ytelseType, type, forsendelseMottattTidspunkt, payloadRawString);
         this.aktørId = aktørId;
-        this.pleietrengendeAktørId = pleietrengendeAktørId;
-        this.relatertPersonAktørId = relatertPersonAktørId;
         this.periode = periode;
 
     }
@@ -74,11 +61,4 @@ public class JournalpostMottakOpprettSakDto extends JournalpostMottakDto {
         return aktørId;
     }
 
-    public String getPleietrengendeAktørId() {
-        return pleietrengendeAktørId;
-    }
-
-    public String getRelatertPersonAktørId() {
-        return relatertPersonAktørId;
-    }
 }
