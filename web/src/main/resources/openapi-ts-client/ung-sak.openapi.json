@@ -1651,6 +1651,27 @@
         "required" : [ "aktørId", "ytelseType" ],
         "type" : "object"
       },
+      "FødselsHendelse" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/Hendelse"
+        }, {
+          "properties" : {
+            "barnIdent" : {
+              "type" : "string"
+            },
+            "fødselsdato" : {
+              "format" : "date",
+              "type" : "string"
+            },
+            "hendelseInfo" : {
+              "$ref" : "#/components/schemas/HendelseInfo"
+            }
+          },
+          "type" : "object"
+        } ],
+        "required" : [ "barnIdent", "fødselsdato", "hendelseInfo" ],
+        "type" : "object"
+      },
       "GjenopptaBehandlingDto" : {
         "properties" : {
           "behandlingId" : {
@@ -1667,23 +1688,6 @@
           }
         },
         "required" : [ "behandlingId", "behandlingVersjon" ],
-        "type" : "object"
-      },
-      "HarFåttBarnHendelse" : {
-        "allOf" : [ {
-          "$ref" : "#/components/schemas/Hendelse"
-        }, {
-          "properties" : {
-            "barnIdent" : {
-              "type" : "string"
-            },
-            "hendelseInfo" : {
-              "$ref" : "#/components/schemas/HendelseInfo"
-            }
-          },
-          "type" : "object"
-        } ],
-        "required" : [ "barnIdent", "hendelseInfo" ],
         "type" : "object"
       },
       "Hendelse" : {
