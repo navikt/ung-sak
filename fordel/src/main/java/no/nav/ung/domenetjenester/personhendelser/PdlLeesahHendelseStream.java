@@ -152,7 +152,7 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
     }
 
     private void håndterUngSakHendelse(String key, Personhendelse value) {
-        log.info("Hendelse påvirket Ung-fagsak: {}", value);
+        log.info("Hendelse påvirket Ung-fagsak. id={}, Endringstype={}, Opplysningstype={}", value.getHendelseId(), value.getEndringstype(), value.getOpplysningstype());
         hendelseHåndterer.handleUngSakMessage(value);
     }
 
