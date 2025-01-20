@@ -26,8 +26,10 @@ public class AppPepImpl extends no.nav.k9.felles.sikkerhet.abac.PepImpl {
                       PdpRequestBuilder pdpRequestBuilder,
                       AbacSporingslogg sporingslogg,
                       @KonfigVerdi(value = "pip.users", required = false) String pipUsers,
-                      @KonfigVerdi(value = "AZURE_APP_PRE_AUTHORIZED_APPS",required = false) String preAuthorized) {
-        super(pdpKlient, pdpRequestBuilder, sporingslogg, pipUsers, preAuthorized);
+                      @KonfigVerdi(value = "AZURE_APP_PRE_AUTHORIZED_APPS",required = false) String preAuthorized,
+                      //Konfigureres av app, format, kommaseparert: <cluster>:<namespace>:<app>  eks dev-fss:k9saksbehandling:k9-sak
+                      @KonfigVerdi(value = "PIP_APPS", required = false) String pipAllowedApps) {
+        super(pdpKlient, pdpRequestBuilder, sporingslogg, pipUsers, preAuthorized, pipAllowedApps);
     }
 
     /**
