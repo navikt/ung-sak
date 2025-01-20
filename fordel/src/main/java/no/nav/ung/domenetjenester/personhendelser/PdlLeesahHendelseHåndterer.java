@@ -8,6 +8,7 @@ import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.person.pdl.leesah.Personhendelse;
+import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseUtils;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 
 import java.util.UUID;
@@ -20,7 +21,6 @@ import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.toJson;
 @ApplicationScoped
 public class PdlLeesahHendelseHåndterer {
 
-    private PdlLeesahOversetter oversetter;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public PdlLeesahHendelseHåndterer() {
@@ -28,29 +28,15 @@ public class PdlLeesahHendelseHåndterer {
     }
 
     @Inject
-    public PdlLeesahHendelseHåndterer(PdlLeesahOversetter oversetter, ProsessTaskTjeneste prosessTaskTjeneste) {
-        this.oversetter = oversetter;
+    public PdlLeesahHendelseHåndterer(ProsessTaskTjeneste prosessTaskTjeneste) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    void handleMessage(Personhendelse personhendelse) {
+    void håndterHendelse(String key, Personhendelse personhendelse) {
         setCallIdForHendelse(personhendelse);
 
-        final Hendelse oversattHendelse = oversetter.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
-
         final var prosessTaskData = ProsessTaskData.forProsessTask(HåndterUngSakHendelseTask.class);
-        prosessTaskData.setPayload(toJson(oversattHendelse));
-        prosessTaskData.setCallId(MDCOperations.getCallId());
-        prosessTaskTjeneste.lagre(prosessTaskData);
-    }
-
-    void handleUngSakMessage(Personhendelse personhendelse) {
-        setCallIdForHendelse(personhendelse);
-
-        final Hendelse oversattHendelse = oversetter.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
-
-        final var prosessTaskData = ProsessTaskData.forProsessTask(HåndterUngSakHendelseTask.class);
-        prosessTaskData.setPayload(toJson(oversattHendelse));
+        prosessTaskData.setPayload(PersonhendelseUtils.tilJson(personhendelse));
         prosessTaskData.setCallId(MDCOperations.getCallId());
         prosessTaskTjeneste.lagre(prosessTaskData);
     }

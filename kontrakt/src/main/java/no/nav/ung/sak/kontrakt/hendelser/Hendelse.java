@@ -11,14 +11,14 @@ import no.nav.ung.sak.typer.Periode;
 @Valid
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(value = {
-    @JsonSubTypes.Type(name = Hendelse.HAR_FÅTT_BARN, value = HarFåttBarnHendelse.class),
+    @JsonSubTypes.Type(name = Hendelse.FOEDSEL, value = FødselsHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.DOEDSFALL, value = DødsfallHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_OPPHOER, value = UngdomsprogramOpphørHendelse.class),
 })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public interface Hendelse {
 
-    String HAR_FÅTT_BARN = "HAR_FAATT_BARN";
+    String FOEDSEL = "FOEDSEL_V1";
     String DOEDSFALL = "DOEDSFALL_V1";
     String UNGDOMSPROGRAM_OPPHOER = "UNGDOMSPROGRAM_OPPHOER";
 

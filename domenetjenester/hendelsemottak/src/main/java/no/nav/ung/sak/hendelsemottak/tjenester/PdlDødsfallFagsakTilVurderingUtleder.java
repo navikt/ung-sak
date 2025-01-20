@@ -1,25 +1,8 @@
 package no.nav.ung.sak.hendelsemottak.tjenester;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
-import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
-import no.nav.k9.felles.integrasjon.pdl.Person;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
@@ -30,13 +13,19 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @ApplicationScoped
 @HendelseTypeRef("PDL_DØDSFALL")
 public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
 
-    private static final Logger logger = LoggerFactory.getLogger(PdlSøkerHarFåttBarnFagsakTilVurderingUtleder.class);
+    private static final Logger logger = LoggerFactory.getLogger(PdlDødsfallFagsakTilVurderingUtleder.class);
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;

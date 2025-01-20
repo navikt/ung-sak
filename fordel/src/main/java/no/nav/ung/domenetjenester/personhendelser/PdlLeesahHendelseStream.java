@@ -1,38 +1,33 @@
 package no.nav.ung.domenetjenester.personhendelser;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Serde;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.Topology;
-import org.apache.kafka.streams.kstream.Branched;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.ung.fordel.kafka.AivenKafkaSettings;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.KafkaSettings;
 import no.nav.ung.fordel.kafka.Topic;
-import no.nav.ung.sak.kontrakt.hendelser.DødsfallHendelse;
-import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 
 @ApplicationScoped
 public class PdlLeesahHendelseStream implements KafkaIntegration {
 
     private static final Logger log = LoggerFactory.getLogger(PdlLeesahHendelseStream.class);
+
     private KafkaStreams stream;
     private PdlLeesahHendelseFiltrerer hendelseFiltrerer;
     private String kafkaAvroSerdeClass;
@@ -63,14 +58,12 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
         final Consumed<String, Personhendelse> consumed = Consumed.with(keySerde, valueSerde);
 
         final StreamsBuilder builder = new StreamsBuilder();
-        KStream<String, Personhendelse> hendelserViSkalHåndtere = builder.stream(topic.getTopic(), consumed)
-            .filter((key, value) -> erHendelseTypeViSkalHåndtere(value));
+        builder.stream(topic.getTopic(), consumed)
+            .peek(this::loggHendelse)
+            .filter(hendelseFiltrerer::erHendelseTypeViSkalHåndtere)
+            .filter(hendelseFiltrerer::harPåvirketUngFagsakForHendelse)
+            .foreach(hendelseHåndterer::håndterHendelse);
 
-        log.info("Publiserer hendelser til Ung-sak");
-        hendelserViSkalHåndtere
-            .split()
-            .branch(this::harPåvirketUngFagsakForHendelse, Branched.withConsumer(ks -> ks.foreach(this::håndterUngSakHendelse)))
-            .noDefaultBranch();
 
         final Topology topology = builder.build();
 
@@ -92,54 +85,10 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
         }
     }
 
-    private boolean erHendelseTypeViSkalHåndtere(Personhendelse personhendelse) {
+    private void loggHendelse(String key, Personhendelse personhendelse) {
         log.info("Mottok en hendelse fra PDL: hendelseId={} opplysningstype={} endringstype={} master={} opprettet={} tidligereHendelseId={}",
             personhendelse.getHendelseId(), personhendelse.getOpplysningstype(), personhendelse.getEndringstype(),
             personhendelse.getMaster(), personhendelse.getOpprettet(), personhendelse.getTidligereHendelseId());
-
-        var støttetHendelse = hendelseFiltrerer.oversettStøttetPersonhendelse(personhendelse);
-        return støttetHendelse.isPresent();
-    }
-
-    private boolean harPåvirketUngFagsakForHendelse(String key, Personhendelse personhendelse) {
-        var oversattHendelse = hendelseFiltrerer.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
-
-        int i = 0;
-        while (true) {
-            try {
-                // Kaller eksternt system ung-sak
-                var aktørerMedPåvirketFagsak = hendelseFiltrerer.finnAktørerMedPåvirketUngFagsak(oversattHendelse);
-                boolean harMinstEnPåvirketFagsak = !aktørerMedPåvirketFagsak.isEmpty();
-                if (Environment.current().isDev() && !harMinstEnPåvirketFagsak) {
-                    log.info("Ignorerer hendelse da det ikke fantes noen påvirket fagsak. Hendelse var {}", toString(oversattHendelse));
-                }
-                log.info("Fant {} påvirkede ung saker for hendelseId={}", aktørerMedPåvirketFagsak.size(), oversattHendelse.getHendelseInfo().getHendelseId());
-                return harMinstEnPåvirketFagsak;
-            } catch (Exception e) {
-                i++;
-                if (i == 1) {
-                    log.warn(getTopicName() + " :: Feilet ved filtrering av PDL-hendelse=" + personhendelse.getHendelseId() + " mot ung-sak, 1. gang. Prøver én ekstra gang", e);
-                } else {
-                    log.warn(getTopicName() + " :: Feilet ved filtrering av PDL-hendelse=" + personhendelse.getHendelseId() + " mot ung-sak, 2. gang.", e);
-                    return true; // Lar denne gå videre slik at det kan feile i en prosesstask. Kan ikke kaste exception her fordi det vil stoppe streamen.
-                }
-            }
-        }
-    }
-
-    private void håndterUngSakHendelse(String key, Personhendelse value) {
-        log.info("Hendelse påvirket Ung-fagsak: {}", value);
-        hendelseHåndterer.handleUngSakMessage(value);
-    }
-
-    private static String toString(Hendelse oversattHendelse) {
-        if (oversattHendelse == null) {
-            return "null";
-        }
-        if (oversattHendelse instanceof DødsfallHendelse dødsfallHendelse) {
-            return "dødshendelse med aktørIder " + dødsfallHendelse.getHendelseInfo().getAktørIder() + "og  periode " + dødsfallHendelse.getHendelsePeriode();
-        }
-        return oversattHendelse.getClass().toString();
     }
 
     private <L> Serde<L> configureSchemaRegistry(KafkaSettings kafkaSettings, Serde<L> serde, boolean isKey) {

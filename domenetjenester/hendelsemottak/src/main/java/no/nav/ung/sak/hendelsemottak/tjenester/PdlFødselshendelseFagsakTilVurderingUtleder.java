@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.kontrakt.hendelser.HarFåttBarnHendelse;
+import no.nav.ung.sak.kontrakt.hendelser.FødselsHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -21,13 +21,12 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 @HendelseTypeRef("PDL_FORELDERBARNRELASJON")
-public class PdlSøkerHarFåttBarnFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
+public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
-    private static final Logger logger = LoggerFactory.getLogger(PdlSøkerHarFåttBarnFagsakTilVurderingUtleder.class);
+    private static final Logger logger = LoggerFactory.getLogger(PdlFødselshendelseFagsakTilVurderingUtleder.class);
     public static final Set<ForelderBarnRelasjonRolle> AKTUELLE_RELASJONSROLLER = Set.of(ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.MEDMOR);
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
@@ -35,16 +34,16 @@ public class PdlSøkerHarFåttBarnFagsakTilVurderingUtleder implements FagsakerT
     private PersonopplysningRepository personopplysningRepository;
     private PdlKlient pdlKlient;
 
-    public PdlSøkerHarFåttBarnFagsakTilVurderingUtleder() {
+    public PdlFødselshendelseFagsakTilVurderingUtleder() {
         // For CDI
     }
 
     @Inject
-    public PdlSøkerHarFåttBarnFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
-                                                        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                                        FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
-                                                        PersonopplysningRepository personopplysningRepository,
-                                                        PdlKlient pdlKlient) {
+    public PdlFødselshendelseFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
+                                                       UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                                       FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
+                                                       PersonopplysningRepository personopplysningRepository,
+                                                       PdlKlient pdlKlient) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
@@ -55,11 +54,11 @@ public class PdlSøkerHarFåttBarnFagsakTilVurderingUtleder implements FagsakerT
 
     @Override
     public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
-        HarFåttBarnHendelse harFåttBarnHendelse = (HarFåttBarnHendelse) hendelse;
-        String hendelseId = harFåttBarnHendelse.getHendelseInfo().getHendelseId();
+        FødselsHendelse fødselsHendelse = (FødselsHendelse) hendelse;
+        String hendelseId = fødselsHendelse.getHendelseInfo().getHendelseId();
 
-        List<AktørId> forelderAktørIder = harFåttBarnHendelse.getHendelseInfo().getAktørIder();
-        PersonIdent barnIdent = harFåttBarnHendelse.getBarnIdent();
+        List<AktørId> forelderAktørIder = fødselsHendelse.getHendelseInfo().getAktørIder();
+        PersonIdent barnIdent = fødselsHendelse.getBarnIdent();
         Person barnInfo = hentPersonInformasjon(barnIdent.getIdent());
         LocalDate aktuellDato = finnAktuellDato(barnInfo);
 

@@ -16,29 +16,36 @@ import no.nav.ung.sak.typer.PersonIdent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonTypeName(Hendelse.HAR_FÅTT_BARN)
-public class HarFåttBarnHendelse implements Hendelse {
+@JsonTypeName(Hendelse.FOEDSEL)
+public class FødselsHendelse implements Hendelse {
 
-    private static final HendelseType HENDELSETYPE_HAR_FÅTT_BARN = HendelseType.PDL_FORELDER_BARN_RELASJON;
+    private static final HendelseType HENDELSETYPE_FØDSEL = HendelseType.PDL_FORELDER_BARN_RELASJON;
 
     @JsonProperty(value = "hendelseInfo", required = true)
     @NotNull
     @Valid
     private HendelseInfo hendelseInfo;
 
+    @JsonProperty(value = "fødselsdato", required = true)
+    @NotNull
+    @Valid
+    private LocalDate fødselsdato;
+
     @JsonProperty(value = "barnIdent", required = true)
     @NotNull
     @Valid
     private PersonIdent barnIdent;
 
-    private HarFåttBarnHendelse() {
+    private FødselsHendelse() {
     }
 
     @JsonCreator
-    public HarFåttBarnHendelse(@JsonProperty("hendelseInfo") @Valid @NotNull HendelseInfo hendelseInfo,
-                               @JsonProperty("barnIdent") @Valid @NotNull PersonIdent barnIdent) {
+    public FødselsHendelse(@JsonProperty("hendelseInfo") @Valid @NotNull HendelseInfo hendelseInfo,
+                           @JsonProperty("fødselsdato") @Valid @NotNull LocalDate fødselsdato,
+                           @JsonProperty("barnIdent") @Valid @NotNull PersonIdent barnIdent) {
         this.hendelseInfo = hendelseInfo;
         this.barnIdent = barnIdent;
+        this.fødselsdato = fødselsdato;
     }
 
     @Override
@@ -48,12 +55,12 @@ public class HarFåttBarnHendelse implements Hendelse {
 
     @Override
     public HendelseType getHendelseType() {
-        return HENDELSETYPE_HAR_FÅTT_BARN;
+        return HENDELSETYPE_FØDSEL;
     }
 
     @Override
     public Periode getHendelsePeriode() {
-        throw new UnsupportedOperationException("Fødselsdato på barnet må hentes fra PDL");
+        return new Periode(fødselsdato, fødselsdato);
     }
 
     public PersonIdent getBarnIdent() {
@@ -61,14 +68,19 @@ public class HarFåttBarnHendelse implements Hendelse {
     }
 
     public static class Builder {
-        private HarFåttBarnHendelse mal;
+        private FødselsHendelse mal;
 
         public Builder() {
-            this.mal = new HarFåttBarnHendelse();
+            this.mal = new FødselsHendelse();
         }
 
         public Builder medHendelseInfo(HendelseInfo hendelseInfo) {
             mal.hendelseInfo = hendelseInfo;
+            return this;
+        }
+
+        public Builder medFødselsdato(LocalDate fødselsdato) {
+            mal.fødselsdato = fødselsdato;
             return this;
         }
 
@@ -77,7 +89,7 @@ public class HarFåttBarnHendelse implements Hendelse {
             return this;
         }
 
-        public HarFåttBarnHendelse build() {
+        public FødselsHendelse build() {
             return mal;
         }
     }
