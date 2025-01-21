@@ -13,7 +13,6 @@ import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,9 +65,9 @@ class PdlLeesahHendelseHåndtererTest {
 
         // Assert
         var taskData = captureAndVerifyTaskData(1);
-        assertThat(taskData.getTaskType()).isEqualTo(HåndterUngSakHendelseTask.TASKNAME);
+        assertThat(taskData.getTaskType()).isEqualTo(HåndterPdlHendelseTask.TASKNAME);
 
-        var task = new HåndterUngSakHendelseTask(prosessTaskTjeneste, hendelseRepository, forsinkelseTjeneste, hendelseFiltrerer, oversetter);
+        var task = new HåndterPdlHendelseTask(prosessTaskTjeneste, hendelseRepository, forsinkelseTjeneste, hendelseFiltrerer, oversetter);
         task.doTask(taskData);
         verify(hendelseRepository).lagreInngåendeHendelse(any(InngåendeHendelseEntitet.class));
 
@@ -92,9 +91,9 @@ class PdlLeesahHendelseHåndtererTest {
 
         // Assert
         var taskData = captureAndVerifyTaskData(1);
-        assertThat(taskData.getTaskType()).isEqualTo(HåndterUngSakHendelseTask.TASKNAME);
+        assertThat(taskData.getTaskType()).isEqualTo(HåndterPdlHendelseTask.TASKNAME);
 
-        var task = new HåndterUngSakHendelseTask(prosessTaskTjeneste, hendelseRepository, forsinkelseTjeneste, hendelseFiltrerer, oversetter);
+        var task = new HåndterPdlHendelseTask(prosessTaskTjeneste, hendelseRepository, forsinkelseTjeneste, hendelseFiltrerer, oversetter);
         task.doTask(taskData);
         verify(hendelseRepository).lagreInngåendeHendelse(any(InngåendeHendelseEntitet.class));
 

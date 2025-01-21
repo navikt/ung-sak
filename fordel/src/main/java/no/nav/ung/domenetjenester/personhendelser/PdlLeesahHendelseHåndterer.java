@@ -9,11 +9,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseUtils;
-import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 
 import java.util.UUID;
-
-import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.toJson;
 
 
 @Transactional
@@ -35,7 +32,7 @@ public class PdlLeesahHendelseHåndterer {
     void håndterHendelse(String key, Personhendelse personhendelse) {
         setCallIdForHendelse(personhendelse);
 
-        final var prosessTaskData = ProsessTaskData.forProsessTask(HåndterUngSakHendelseTask.class);
+        final var prosessTaskData = ProsessTaskData.forProsessTask(HåndterPdlHendelseTask.class);
         prosessTaskData.setPayload(PersonhendelseUtils.tilJson(personhendelse));
         prosessTaskData.setCallId(MDCOperations.getCallId());
         prosessTaskTjeneste.lagre(prosessTaskData);

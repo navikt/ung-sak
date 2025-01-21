@@ -21,11 +21,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
-@ProsessTask(HåndterUngSakHendelseTask.TASKNAME)
-public class HåndterUngSakHendelseTask implements ProsessTaskHandler {
+@ProsessTask(HåndterPdlHendelseTask.TASKNAME)
+public class HåndterPdlHendelseTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "ung.hendelseHåndterer";
-    private static final Logger LOG = LoggerFactory.getLogger(HåndterUngSakHendelseTask.class);
+    public static final String TASKNAME = "ung.pdl.hendelseHåndterer";
+    private static final Logger LOG = LoggerFactory.getLogger(HåndterPdlHendelseTask.class);
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private HendelseRepository hendelseRepository;
@@ -33,15 +33,15 @@ public class HåndterUngSakHendelseTask implements ProsessTaskHandler {
     private PdlLeesahHendelseFiltrerer hendelseFiltrerer;
     private PdlLeesahOversetter pdlLeesahOversetter;
 
-    public HåndterUngSakHendelseTask() {
+    public HåndterPdlHendelseTask() {
         // CDI
     }
 
     @Inject
-    public HåndterUngSakHendelseTask(ProsessTaskTjeneste prosessTaskTjeneste,
-                                     HendelseRepository hendelseRepository,
-                                     ForsinkelseTjeneste forsinkelseTjeneste,
-                                     PdlLeesahHendelseFiltrerer hendelseFiltrerer, PdlLeesahOversetter pdlLeesahOversetter) {
+    public HåndterPdlHendelseTask(ProsessTaskTjeneste prosessTaskTjeneste,
+                                  HendelseRepository hendelseRepository,
+                                  ForsinkelseTjeneste forsinkelseTjeneste,
+                                  PdlLeesahHendelseFiltrerer hendelseFiltrerer, PdlLeesahOversetter pdlLeesahOversetter) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.hendelseRepository = hendelseRepository;
         this.forsinkelseTjeneste = forsinkelseTjeneste;
