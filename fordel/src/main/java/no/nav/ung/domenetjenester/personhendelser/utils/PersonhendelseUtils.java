@@ -20,6 +20,8 @@ public class PersonhendelseUtils {
 
     static final String FAR = "FAR";
     static final String MOR = "MOR";
+    static final String MEDMOR = "MEDMOR";
+    static final Set<String> FORELDRE = Set.of(FAR, MOR, MEDMOR);
 
     private static final int FNR_LENGTH = 11;
 
@@ -48,11 +50,11 @@ public class PersonhendelseUtils {
         return FORELDERBARNRELASJON_V1.contentEquals(personhendelse.getOpplysningstype().toString().trim().toUpperCase());
     }
 
-    public static boolean rolleForPersonErFarEllerMor(Personhendelse personhendelse) {
+    public static boolean rolleForPersonErForeldre(Personhendelse personhendelse) {
         ForelderBarnRelasjon forelderBarnRelasjon = personhendelse.getForelderBarnRelasjon();
         CharSequence rolleForPerson = forelderBarnRelasjon.getMinRolleForPerson().toString().trim().toUpperCase();
 
-        return FAR.contentEquals(rolleForPerson) || MOR.contentEquals(rolleForPerson);
+        return FORELDRE.contains(rolleForPerson);
     }
 
     public static String tilJson(Personhendelse personhendelse) {

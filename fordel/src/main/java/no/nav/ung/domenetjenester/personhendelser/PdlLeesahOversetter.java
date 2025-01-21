@@ -100,7 +100,7 @@ public class PdlLeesahOversetter {
 
         String rolleForPerson = forelderBarnRelasjon.getMinRolleForPerson().toString();
 
-        if (!PersonhendelseUtils.rolleForPersonErFarEllerMor(personhendelse)) {
+        if (!PersonhendelseUtils.rolleForPersonErForeldre(personhendelse)) {
             logger.info("Ignorerer forelderBarnRelasjon fordi rollen for personen verken er far eller mor. rolleForPerson {}. endringstype {}, hendelseId {}", rolleForPerson, hendelseInfo.getHendelseId(), endringstype);
             return Optional.empty();
         }
