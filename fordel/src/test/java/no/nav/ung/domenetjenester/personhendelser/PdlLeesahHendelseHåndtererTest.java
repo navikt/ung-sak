@@ -8,7 +8,7 @@ import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseTestUtils;
 import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
 import no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet;
-import no.nav.ung.sak.kontrakt.hendelser.FødselsHendelse;
+import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.typer.AktørId;
@@ -103,7 +103,7 @@ class PdlLeesahHendelseHåndtererTest {
 
     private static Optional<Hendelse> byggFødselshendelse(Personhendelse personhendelse, LocalDate fødselsdato) {
         return Optional.of(
-            new FødselsHendelse.Builder()
+            new FødselHendelse.Builder()
                 .medBarnIdent(new PersonIdent(personhendelse.getForelderBarnRelasjon().getRelatertPersonsIdent().toString()))
                 .medFødselsdato(fødselsdato)
                 .medHendelseInfo(new HendelseInfo.Builder()

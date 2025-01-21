@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
 import no.nav.ung.sak.kontrakt.hendelser.DødsfallHendelse;
-import no.nav.ung.sak.kontrakt.hendelser.FødselsHendelse;
+import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.typer.AktørId;
@@ -125,9 +125,9 @@ public class PdlLeesahOversetter {
             return Optional.empty();
         }
 
-        logger.info("Oppretter FødselsHendelse for {} med barn født {}. hendelseId {}", rolleForPerson, fødselsdato, hendelseInfo.getHendelseId());
+        logger.info("Oppretter FødselHendelse for {} med barn født {}. hendelseId {}", rolleForPerson, fødselsdato, hendelseInfo.getHendelseId());
 
-        FødselsHendelse fødselHendelse = new FødselsHendelse.Builder()
+        FødselHendelse fødselHendelse = new FødselHendelse.Builder()
             .medHendelseInfo(hendelseInfo)
             .medBarnIdent(barnPersonIdent)
             .medFødselsdato(fødselsdato)

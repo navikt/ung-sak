@@ -5,7 +5,7 @@ import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
 import no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelsemottakTjeneste;
 import no.nav.ung.sak.kontrakt.hendelser.DødsfallHendelse;
-import no.nav.ung.sak.kontrakt.hendelser.FødselsHendelse;
+import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.typer.AktørId;
@@ -74,7 +74,7 @@ class SendInnUngSakHendelseTaskTest {
         var prosessTaskData = ProsessTaskData.forProsessTask(SendInnUngHendelseTask.class);
         prosessTaskData.setProperty(SendInnUngHendelseTask.INNGÅENDE_HENDELSE_ID, "" + inngåendeHendelseId);
 
-        FødselsHendelse dødsfallHendelse = new FødselsHendelse.Builder()
+        FødselHendelse dødsfallHendelse = new FødselHendelse.Builder()
             .medHendelseInfo(new HendelseInfo.Builder()
                 .medHendelseId("123")
                 .leggTilAktør(new AktørId(aktørId))

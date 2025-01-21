@@ -17,7 +17,7 @@ import no.nav.ung.sak.typer.PersonIdent;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonTypeName(Hendelse.FOEDSEL)
-public class FødselsHendelse implements Hendelse {
+public class FødselHendelse implements Hendelse {
 
     private static final HendelseType HENDELSETYPE_FØDSEL = HendelseType.PDL_FORELDER_BARN_RELASJON;
 
@@ -36,13 +36,13 @@ public class FødselsHendelse implements Hendelse {
     @Valid
     private PersonIdent barnIdent;
 
-    private FødselsHendelse() {
+    private FødselHendelse() {
     }
 
     @JsonCreator
-    public FødselsHendelse(@JsonProperty("hendelseInfo") @Valid @NotNull HendelseInfo hendelseInfo,
-                           @JsonProperty("fødselsdato") @Valid @NotNull LocalDate fødselsdato,
-                           @JsonProperty("barnIdent") @Valid @NotNull PersonIdent barnIdent) {
+    public FødselHendelse(@JsonProperty("hendelseInfo") @Valid @NotNull HendelseInfo hendelseInfo,
+                          @JsonProperty("fødselsdato") @Valid @NotNull LocalDate fødselsdato,
+                          @JsonProperty("barnIdent") @Valid @NotNull PersonIdent barnIdent) {
         this.hendelseInfo = hendelseInfo;
         this.barnIdent = barnIdent;
         this.fødselsdato = fødselsdato;
@@ -68,10 +68,10 @@ public class FødselsHendelse implements Hendelse {
     }
 
     public static class Builder {
-        private FødselsHendelse mal;
+        private FødselHendelse mal;
 
         public Builder() {
-            this.mal = new FødselsHendelse();
+            this.mal = new FødselHendelse();
         }
 
         public Builder medHendelseInfo(HendelseInfo hendelseInfo) {
@@ -89,7 +89,7 @@ public class FødselsHendelse implements Hendelse {
             return this;
         }
 
-        public FødselsHendelse build() {
+        public FødselHendelse build() {
             return mal;
         }
     }

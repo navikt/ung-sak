@@ -11,7 +11,7 @@ import no.nav.ung.sak.typer.Periode;
 @Valid
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(value = {
-    @JsonSubTypes.Type(name = Hendelse.FOEDSEL, value = FødselsHendelse.class),
+    @JsonSubTypes.Type(name = Hendelse.FOEDSEL, value = FødselHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.DOEDSFALL, value = DødsfallHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_OPPHOER, value = UngdomsprogramOpphørHendelse.class),
 })
