@@ -5,11 +5,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.person.pdl.leesah.Personhendelse;
+import no.nav.ung.domenetjenester.personhendelser.test.VtpKafkaAvroSerde;
 import no.nav.ung.fordel.kafka.AivenKafkaSettings;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.KafkaSettings;
 import no.nav.ung.fordel.kafka.Topic;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.security.auth.SecurityProtocol;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -22,6 +26,9 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.Properties;
+
+import static no.nav.k9.felles.sikkerhet.abac.PepImpl.ENV;
 
 @ApplicationScoped
 public class PdlLeesahHendelseStream implements KafkaIntegration {
@@ -33,6 +40,7 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
     private String kafkaAvroSerdeClass;
     private Topic<String, Personhendelse> topic;
     private PdlLeesahHendelseHåndterer hendelseHåndterer;
+    private final boolean isDeployment = ENV.isProd() || ENV.isDev();
 
     PdlLeesahHendelseStream() {
     }
@@ -68,11 +76,27 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
         final Topology topology = builder.build();
 
         var kafkaProperties = kafkaSettings.toStreamPropertiesWith(topic.getConsumerClientId(), keySerde, valueSerde);
+        if (!isDeployment) {
+            overrideMedVtpProps(kafkaProperties);
+
+        }
         kafkaProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // TODO: Fjern denne, bare nødvendig ved førstegangsoppstart (default = NONE)
         return new KafkaStreams(topology, kafkaProperties);
     }
 
+    private void overrideMedVtpProps(Properties props) {
+        props.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SASL_SSL.name);
+        props.setProperty(SaslConfigs.SASL_MECHANISM, "PLAIN");
+        String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
+        String jaasCfg = String.format(jaasTemplate, "vtp", "vtp");
+        props.setProperty(SaslConfigs.SASL_JAAS_CONFIG, jaasCfg);
+
+    }
+
     private Serde<Personhendelse> getSerdeValue(String kafkaAvroSerdeClass) {
+        if (!isDeployment) {
+            return new VtpKafkaAvroSerde<>();
+        }
         if (kafkaAvroSerdeClass != null && !kafkaAvroSerdeClass.isBlank()) {
             try {
                 return (Serde<Personhendelse>) Class.forName(kafkaAvroSerdeClass).getDeclaredConstructor().newInstance();
@@ -92,7 +116,7 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
     }
 
     private <L> Serde<L> configureSchemaRegistry(KafkaSettings kafkaSettings, Serde<L> serde, boolean isKey) {
-        if (kafkaSettings.getSchemaRegistryUrl() != null && !kafkaSettings.getSchemaRegistryUrl().isEmpty()) {
+        if (isDeployment && kafkaSettings.getSchemaRegistryUrl() != null && !kafkaSettings.getSchemaRegistryUrl().isEmpty()) {
             boolean spesfikkAvroSerialiserer = kafkaAvroSerdeClass != null;
 
             var properties = new HashMap<String, Object>(kafkaSettings.schemaRegistryProps());

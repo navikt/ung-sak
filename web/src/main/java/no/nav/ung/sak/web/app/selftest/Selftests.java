@@ -34,7 +34,7 @@ public class Selftests {
     @Inject
     public Selftests(HealthCheckRegistry registry,
                      @Any Instance<ExtHealthCheck> healthChecks,
-                     @KonfigVerdi(value = "application.name") String applicationName) {
+                     @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String applicationName) {
 
         this.registry = registry;
         this.healthChecks = healthChecks;
