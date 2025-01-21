@@ -44,7 +44,7 @@ public class FinnFagsakerForAktørTjeneste {
         return query.getResultList();
     }
 
-    private boolean harRelevantFagsakForAktørSomBarnAvSøker(AktørId aktørId) {
+    private boolean finnesSakMedBarn(AktørId barnAktørId) {
         Query query = entityManager.createNativeQuery(
                 "SELECT f.* FROM GR_PERSONOPPLYSNING gr " +
                     "inner join PO_INFORMASJON informasjon on informasjon.id = gr.registrert_informasjon_id " +
@@ -56,7 +56,7 @@ public class FinnFagsakerForAktørTjeneste {
                     "and relasjon.til_aktoer_id = :aktoer_id ",
                 Fagsak.class)
             .setParameter("relasjonsrolle", RelasjonsRolleType.BARN.getKode())
-            .setParameter("aktoer_id", aktørId.getId());
+            .setParameter("aktoer_id", barnAktørId.getId());
 
         return !query.getResultList().isEmpty();
     }
@@ -65,12 +65,12 @@ public class FinnFagsakerForAktørTjeneste {
         return fagsakRepository.hentForBruker(aktør).stream().filter(f -> f.getPeriode().overlapper(relevantDato, AbstractLocalDateInterval.TIDENES_ENDE)).findFirst();
     }
 
-    private boolean harRelevantFagsakForAktørSomSøker(AktørId aktør) {
-        return !fagsakRepository.hentForBruker(aktør).isEmpty();
+    private boolean finnesSakMedSøker(AktørId søkerAktørId) {
+        return !fagsakRepository.hentForBruker(søkerAktørId).isEmpty();
     }
 
 
     public boolean harRelevantFagsakForAktør(AktørId aktør) {
-        return harRelevantFagsakForAktørSomSøker(aktør) || harRelevantFagsakForAktørSomBarnAvSøker(aktør);
+        return finnesSakMedSøker(aktør) || finnesSakMedBarn(aktør);
     }
 }
