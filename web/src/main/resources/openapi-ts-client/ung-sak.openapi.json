@@ -1651,7 +1651,7 @@
         "required" : [ "aktørId", "ytelseType" ],
         "type" : "object"
       },
-      "FødselsHendelse" : {
+      "FødselHendelse" : {
         "allOf" : [ {
           "$ref" : "#/components/schemas/Hendelse"
         }, {
