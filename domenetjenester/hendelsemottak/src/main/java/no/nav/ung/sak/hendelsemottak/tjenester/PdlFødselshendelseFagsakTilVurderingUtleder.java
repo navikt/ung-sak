@@ -65,7 +65,6 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
         var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
 
         for (AktørId aktør : forelderAktørIder) {
-            // ser så etter eksisterende fagsaker på foreldre som trengs å oppdateres med fødselsdato
             Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
