@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.vedtak.observer;
 
+import static no.nav.ung.sak.domene.vedtak.observer.VedtakFattetEventObserver.BREVBESTILLING_TASKTYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -33,7 +34,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.formidling.BrevbestillingTask;
 import no.nav.ung.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -70,7 +70,7 @@ public class VedtakFattetEventObserverTest {
         assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
             .flatMap(Collection::stream)
             .map(it -> it.getTask().getTaskType()))
-            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, BrevbestillingTask.TASKTYPE);
+            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, BREVBESTILLING_TASKTYPE);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class VedtakFattetEventObserverTest {
         assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
             .flatMap(Collection::stream)
             .map(it -> it.getTask().getTaskType()))
-            .containsExactly(BrevbestillingTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
+            .containsExactly(BREVBESTILLING_TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
     private Behandling lagBehandling() {

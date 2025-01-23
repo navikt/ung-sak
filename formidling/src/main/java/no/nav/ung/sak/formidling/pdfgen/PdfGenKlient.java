@@ -76,7 +76,7 @@ public class PdfGenKlient {
 
 
     public PdfGenDokument lagDokument(TemplateInput payload) {
-        JsonNode templateData = pdfgenObjectMapper.convertValue(payload.templateData(), JsonNode.class);
+        JsonNode templateData = pdfgenObjectMapper.convertValue(payload.templateDto(), JsonNode.class);
         return lagDokument(payload.templateType().getPath(), payload.templateType().getDir(), templateData);
     }
 

@@ -6,13 +6,13 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.behandling.steg.uttak.FinnForbrukteDager;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 
 @Dependent
 public class FagsakperiodeUtleder {

@@ -1,11 +1,22 @@
 package no.nav.ung.sak.domene.behandling.steg.initperioder;
 
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import domene.ungdomsprogram.UngdomsprogramTjeneste;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -14,14 +25,8 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.typer.JournalpostId;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
 
 @ApplicationScoped
 @BehandlingStegRef(value = INIT_PERIODER)

@@ -14,10 +14,10 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 public class LagGrunnbeløpFaktorTidslinje {
 
     static LocalDateTimeline<Sats> lagGrunnbeløpFaktorTidslinje(LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
-        var førsteMuligeDato = fødselsdato.plusYears(18).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
-        LocalDate tjuefemårsdagen = fødselsdato.plusYears(25);
+        var førsteMuligeDato = fødselsdato.plusYears(LAV.getFomAlder()).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+        LocalDate tjuefemårsdagen = fødselsdato.plusYears(HØY.getFomAlder());
         var datoForEndringAvSats = tjuefemårsdagen.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
-        var sisteMuligeDato = fødselsdato.plusYears(29).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+        var sisteMuligeDato = fødselsdato.plusYears(HØY.getTomAlder()).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
 
         var regnUtHøySats = harTriggerBeregnHøySats || beregningsdato.isAfter(tjuefemårsdagen);
         if (regnUtHøySats) {
