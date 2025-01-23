@@ -25,7 +25,7 @@ protocol PersonhendelseProto {
 		Endringstype endringstype;
 		union { null, string } tidligereHendelseId = null; // Peker til tidligere hendelse ved korrigering og annullering.
 
-		no.nav.person.pdl.leesah.doedfoedtbarn.DoedfoedtBarn? doedfoedtBarn = null;
+		union { null, no.nav.person.pdl.leesah.doedfoedtbarn.DoedfoedtBarn } doedfoedtBarn = null;
 		union { null, no.nav.person.pdl.leesah.doedsfall.Doedsfall } doedsfall = null;
 		union { null, no.nav.person.pdl.leesah.foedsel.Foedsel } foedsel = null;
 		union { null, no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon } forelderBarnRelasjon = null;

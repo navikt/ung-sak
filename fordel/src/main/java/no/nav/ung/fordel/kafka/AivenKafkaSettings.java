@@ -28,7 +28,6 @@ import static no.nav.k9.felles.sikkerhet.abac.PepImpl.ENV;
 public class AivenKafkaSettings implements KafkaSettings {
 
     private final String bootstrapServers;
-    private final String applicationId;
     private final String trustStorePath;
     private final String credstorePassword;
     private final String keyStorePath;
@@ -55,7 +54,6 @@ public class AivenKafkaSettings implements KafkaSettings {
         this.keyStorePath = keystorePath;
         this.credstorePassword = credstorePassword;
         this.vtpOverride = vtpOverride;
-        this.applicationId = ApplicationIdUtil.get();
     }
 
     private String getBootstrapServers() {
@@ -63,33 +61,14 @@ public class AivenKafkaSettings implements KafkaSettings {
     }
 
     @Override
-    public Properties toStreamPropertiesWith(String clientId, Serde<?> keySerde, Serde<?> valueSerde) {
-        Properties props = new Properties();
+    public Properties toStreamPropertiesWith(String streamNavn, Serde<?> keySerde, Serde<?> valueSerde) {
+        Properties props = baseProperties();
 
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, applicationId);
+        var streamId = String.format("stream-%s-ung-sak", streamNavn);
+        var clientId = String.format("%s-%s", streamId, clientId());
+
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, streamId);
         props.put(StreamsConfig.CLIENT_ID_CONFIG, clientId);
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-
-        // Sikkerhet - miljø eller lokal
-        if (isDeployment) {
-            props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
-            props.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
-            props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks");
-            props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
-        } else {
-            props.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SASL_SSL.name);
-            props.setProperty(SaslConfigs.SASL_MECHANISM, "PLAIN");
-            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
-            String jaasCfg = String.format(jaasTemplate, "vtp", "vtp");
-            props.setProperty(SaslConfigs.SASL_JAAS_CONFIG, jaasCfg);
-        }
-        if (keyStorePath != null && trustStorePath != null) {
-            // Lokalt vil disse allerede være satt i JettyDevServer, for VTP, dev og prod settes de her.
-            props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, keyStorePath);
-            props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, vtpOverride != null ? vtpOverride : credstorePassword);
-            props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, trustStorePath);
-            props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, credstorePassword);
-        }
 
         // Serde
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, keySerde.getClass());
@@ -141,23 +120,26 @@ public class AivenKafkaSettings implements KafkaSettings {
 
         props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServers());
 
-        // Sikkerhet
-        if (vtpOverride != null) {
-            props.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
-            props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_PLAINTEXT");
-            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
-            props.put(SaslConfigs.SASL_JAAS_CONFIG, String.format(jaasTemplate, "vtp", "vtp"));
-        } else {
+        // Sikkerhet - miljø eller lokal
+        if (isDeployment) {
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
             props.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
             props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks");
+            props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
+        } else {
+            props.setProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SASL_SSL.name);
+            props.setProperty(SaslConfigs.SASL_MECHANISM, "PLAIN");
+            String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
+            String jaasCfg = String.format(jaasTemplate, "vtp", "vtp");
+            props.setProperty(SaslConfigs.SASL_JAAS_CONFIG, jaasCfg);
+        }
+        if (keyStorePath != null && trustStorePath != null) {
+            // Lokalt vil disse allerede være satt i JettyDevServer, for VTP, dev og prod settes de her.
+            props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, keyStorePath);
+            props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, vtpOverride != null ? vtpOverride : credstorePassword);
             props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, trustStorePath);
             props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, credstorePassword);
-            props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PKCS12");
-            props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, keyStorePath);
-            props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, credstorePassword);
         }
-
 
         return props;
     }
