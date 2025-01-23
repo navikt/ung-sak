@@ -1,11 +1,8 @@
 package no.nav.ung.fordel.kafka.utils;
 
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import no.nav.ung.domenetjenester.personhendelser.test.VtpKafkaAvroSerde;
 import no.nav.ung.fordel.kafka.AivenKafkaSettings;
 import no.nav.ung.fordel.kafka.Topic;
-import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Serde;
 
 import java.util.Map;
@@ -16,10 +13,6 @@ public class KafkaUtils {
 
     public static String getBasicAuth(String schemaRegistryUsername, String schemaRegistryPassword) {
         return schemaRegistryUsername + ":" + schemaRegistryPassword;
-    }
-
-    public static <V extends SpecificRecord> Serde<V> getValueSerde(boolean isDeployment) {
-        return isDeployment ? new SpecificAvroSerde<V>() : new VtpKafkaAvroSerde<V>();
     }
 
     public static <K, V> Topic<K, V> configureAvroTopic(String topicName, AivenKafkaSettings kafkaSettings, Serde<K> serdeKey, Serde<V> serdeValue) {

@@ -1,9 +1,11 @@
 package no.nav.ung.domenetjenester.arkiv;
 
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.domenetjenester.arkiv.test.VtpJournalføringshendelserKafkaAvroSerde;
 import no.nav.ung.fordel.kafka.AivenKafkaSettings;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.Topic;
@@ -45,7 +47,8 @@ public class JournalHendelseStream implements KafkaIntegration {
     public JournalHendelseStream(@KonfigVerdi(value = "kafka.journal.topic") String topicName,
                                  JournalføringHendelseHåndterer journalføringHendelseHåndterer,
                                  AivenKafkaSettings kafkaSettings) {
-        this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), KafkaUtils.getValueSerde(isDeployment));
+        Serde<JournalfoeringHendelseRecord> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new VtpJournalføringshendelserKafkaAvroSerde<>();
+        this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), valueSerde);
         this.stream = createKafkaStreams(topic, journalføringHendelseHåndterer, kafkaSettings);
     }
 

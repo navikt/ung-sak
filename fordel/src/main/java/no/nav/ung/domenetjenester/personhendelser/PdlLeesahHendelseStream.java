@@ -1,9 +1,11 @@
 package no.nav.ung.domenetjenester.personhendelser;
 
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.person.pdl.leesah.Personhendelse;
+import no.nav.ung.domenetjenester.personhendelser.test.PdlPersonHendelserKafkaAvroSerde;
 import no.nav.ung.fordel.kafka.AivenKafkaSettings;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.KafkaSettings;
@@ -41,7 +43,8 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
                                    AivenKafkaSettings kafkaSettings,
                                    @KonfigVerdi(value = "hendelse.person.leesah.topic") String topicName,
                                    @KonfigVerdi(value = "kafka.avro.serde.class", required = false) String kafkaAvroSerdeClass) {
-        this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), KafkaUtils.getValueSerde(isDeployment));
+        Serde<Personhendelse> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new PdlPersonHendelserKafkaAvroSerde<>();
+        this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), valueSerde);
         this.stream = createKafkaStreams(topic, hendelseFiltrerer, hendelseHåndterer, kafkaSettings);
 
         log.info("isDeployment={}, kafkaAvroSerdeClass={}", isDeployment, kafkaAvroSerdeClass);

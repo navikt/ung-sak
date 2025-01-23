@@ -1,4 +1,4 @@
-package no.nav.ung.domenetjenester.personhendelser.test;
+package no.nav.ung.domenetjenester.arkiv.test;
 
 import java.util.Map;
 
@@ -10,11 +10,11 @@ import org.apache.kafka.common.serialization.Serializer;
 
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 
-public class VtpKafkaAvroSerde<T extends SpecificRecord> implements Serde<T> {
+public class VtpJournalføringshendelserKafkaAvroSerde<T extends SpecificRecord> implements Serde<T> {
     private final Serde<T> inner;
 
-    public VtpKafkaAvroSerde() {
-        this.inner = Serdes.serdeFrom(new SpecificAvroSerializer(), new VtpKafkaAvroDeserializer());
+    public VtpJournalføringshendelserKafkaAvroSerde() {
+        this.inner = Serdes.serdeFrom(new SpecificAvroSerializer(), new VtpJournalføringshendelserKafkaAvroDeserializer());
     }
 
     public Serializer<T> serializer() {
