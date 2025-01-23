@@ -17,6 +17,7 @@ public class InngåendeSaksdokument {
     private Boolean elektroniskSøknad;
     private String payload;
     private UUID forsendelseId;
+    private String kanalreferanse;
     private String journalEnhet;
     private Brevkode type;
     private FagsakYtelseType fagsakYtelseType;
@@ -55,6 +56,10 @@ public class InngåendeSaksdokument {
 
     public UUID getForsendelseId() {
         return forsendelseId;
+    }
+
+    public String getKanalreferanse() {
+        return kanalreferanse;
     }
 
     public String getJournalEnhet() {
@@ -106,6 +111,11 @@ public class InngåendeSaksdokument {
 
         public InngåendeSaksdokument.Builder medElektroniskSøknad(Boolean elektroniskSøknad) {
             this.kladd.elektroniskSøknad = elektroniskSøknad;
+            return this;
+        }
+
+        public InngåendeSaksdokument.Builder medKanalreferanse(String kanalreferanse) {
+            this.kladd.kanalreferanse = kanalreferanse;
             return this;
         }
 

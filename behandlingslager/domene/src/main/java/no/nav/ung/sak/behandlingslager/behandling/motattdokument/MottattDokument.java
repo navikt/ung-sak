@@ -8,6 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.engine.jdbc.ClobProxy;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -22,11 +26,6 @@ import jakarta.persistence.PersistenceException;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.engine.jdbc.ClobProxy;
-
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
@@ -74,6 +73,9 @@ public class MottattDokument extends BaseEntitet {
     /** avsenders kildesystem. */
     @Column(name = "kildesystem")
     private String kildesystem;
+
+    @Column(name = "kanalreferanse", updatable = false)
+    private String kanalreferanse;
 
     /** Arbeidsgiver referanse - orgnummer eller privat arbeidsgiver fnr. */
     @Column(name = "arbeidsgiver")
@@ -138,6 +140,10 @@ public class MottattDokument extends BaseEntitet {
 
     public String getKildesystem() {
         return kildesystem;
+    }
+
+    public String getKanalreferanse() {
+        return kanalreferanse;
     }
 
     public String getFeilmelding() {
@@ -217,6 +223,10 @@ public class MottattDokument extends BaseEntitet {
         this.kildesystem = systemnavn;
     }
 
+    public void setKanalreferanse(String kanalreferanse) {
+        this.kanalreferanse = kanalreferanse;
+    }
+
     public void setFeilmeldingOgOppdaterStatus(String feilmelding) {
         this.feilmelding = feilmelding;
         setStatus(feilmelding == null ? DokumentStatus.GYLDIG : DokumentStatus.UGYLDIG);
@@ -262,6 +272,11 @@ public class MottattDokument extends BaseEntitet {
 
         public Builder medMottattTidspunkt(LocalDateTime mottattTidspunkt) {
             mottatteDokumentMal.mottattTidspunkt = mottattTidspunkt;
+            return this;
+        }
+
+        public Builder medKanalreferanse(String kanalreferanse) {
+            mottatteDokumentMal.kanalreferanse = kanalreferanse;
             return this;
         }
 
@@ -332,6 +347,7 @@ public class MottattDokument extends BaseEntitet {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<journalpostId=" + journalpostId
+            + ", kanalReferanse=" + kanalreferanse
             + ", arbeidsgiver=" + arbeidsgiver
             + ", type=" + type
             + ", journalpostId=" + journalpostId

@@ -7,11 +7,6 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -19,6 +14,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -64,15 +63,21 @@ public class JournalpostMottakDto {
     @NotNull
     private Brevkode type;
 
+    @JsonProperty(value = "kanalReferanse")
+    @Pattern(regexp = "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$")
+    @Size(max = 100)
+    private String kanalReferanse;
 
     public JournalpostMottakDto(Saksnummer saksnummer,
                                 JournalpostId journalpostId,
                                 FagsakYtelseType ytelseType,
+                                String kanalReferanse,
                                 Brevkode type,
                                 LocalDateTime forsendelseMottattTidspunkt,
                                 String payloadRawString) {
         this.saksnummer = saksnummer;
         this.journalpostId = journalpostId;
+        this.kanalReferanse = kanalReferanse;
         this.type = type;
         this.forsendelseMottattTidspunkt = Objects.requireNonNull(forsendelseMottattTidspunkt, "forsendelseMottattTidspunkt");
         this.forsendelseMottatt = this.forsendelseMottattTidspunkt.toLocalDate();
@@ -114,8 +119,8 @@ public class JournalpostMottakDto {
         return ytelseType;
     }
 
-    public String getBase64EncodedPayload() {
-        return base64EncodedPayload;
+    public String getKanalReferanse() {
+        return kanalReferanse;
     }
 
     @Override
