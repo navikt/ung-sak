@@ -44,7 +44,7 @@
         <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
         <flyway.version>11.2.0</flyway.version>
-        <pdfgen-core.version>1.1.39</pdfgen-core.version>
+        <pdfgen-core.version>1.1.40</pdfgen-core.version>
         <confluent.platform.version>7.8.0</confluent.platform.version>
     </properties>
 
