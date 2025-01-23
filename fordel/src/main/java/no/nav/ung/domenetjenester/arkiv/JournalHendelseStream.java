@@ -9,7 +9,6 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
@@ -19,7 +18,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 /*
  * Dokumentasjon https://confluence.adeo.no/pages/viewpage.action?pageId=432217859
  */
-@ApplicationScoped
+//@ApplicationScoped
 public class JournalHendelseStream implements KafkaIntegration {
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalHendelseStream.class);

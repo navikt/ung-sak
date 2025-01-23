@@ -2,11 +2,10 @@ package no.nav.ung.sak.web.app.selftest.checks;
 
 import org.apache.kafka.streams.KafkaStreams;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.domenetjenester.arkiv.JournalHendelseStream;
 
-@ApplicationScoped
+//@ApplicationScoped
 public class JournalføringHendelseStreamHealthCheck extends ExtHealthCheck {
 
     private JournalHendelseStream consumer;

@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -36,7 +35,7 @@ import no.nav.ung.fordel.kafka.Topic;
 import no.nav.ung.sak.kontrakt.hendelser.DødsfallHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 
-@ApplicationScoped
+//@ApplicationScoped
 public class PdlLeesahHendelseStream implements KafkaIntegration {
 
     private static final Logger log = LoggerFactory.getLogger(PdlLeesahHendelseStream.class);
