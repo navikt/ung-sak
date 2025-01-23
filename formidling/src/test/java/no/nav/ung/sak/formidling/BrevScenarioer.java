@@ -22,7 +22,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestGrunnlag;
+import no.nav.ung.sak.test.util.behandling.UngTestscenario;
 
 public class BrevScenarioer {
 
@@ -30,9 +30,9 @@ public class BrevScenarioer {
     private static final BigDecimal G_BELØP_24 = BigDecimal.valueOf(124028);
 
     public static TestScenarioBuilder lagAvsluttetStandardBehandling(BehandlingRepositoryProvider repositoryProvider1, UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository1, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository1) {
-        UngTestGrunnlag ungTestGrunnlag = innvilget19år(LocalDate.of(2024, 12, 1));
+        UngTestscenario ungTestscenario = innvilget19år(LocalDate.of(2024, 12, 1));
 
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestGrunnlag);
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
         var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider1, ungdomsytelseGrunnlagRepository1, ungdomsprogramPeriodeRepository1);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
@@ -44,14 +44,14 @@ public class BrevScenarioer {
      * 19 år ungdom med full ungdomsperiode, ingen inntektsgradering og ingen barn
      *
      */
-    public static UngTestGrunnlag innvilget19år(LocalDate fom) {
+    public static UngTestscenario innvilget19år(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusYears(1));
 
         var satser = new LocalDateTimeline<>(p, lavSatsBuilder().build());
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), TIDENES_ENDE));
 
-        return new UngTestGrunnlag(
+        return new UngTestscenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -65,7 +65,7 @@ public class BrevScenarioer {
      * 27 år ungdom med full ungdomsperiode, ingen inntektsgradering og ingen barn, høy sats
      *
      */
-    public static UngTestGrunnlag innvilget27år(LocalDate fom) {
+    public static UngTestscenario innvilget27år(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusYears(1));
 
         var satser = new LocalDateTimeline<>(p,
@@ -73,7 +73,7 @@ public class BrevScenarioer {
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), TIDENES_ENDE));
 
-        return new UngTestGrunnlag(
+        return new UngTestscenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -87,14 +87,14 @@ public class BrevScenarioer {
      * 29 år ungdom med ungdomsprogramperiode fram til 29 år, ingen inntektsgradering og ingen barn, høy sats
      *
      */
-    public static UngTestGrunnlag innvilget29År(LocalDate fom, LocalDate fødselsdato) {
+    public static UngTestscenario innvilget29År(LocalDate fom, LocalDate fødselsdato) {
         var p = new LocalDateInterval(fom, fødselsdato.plusYears(29).with(TemporalAdjusters.lastDayOfMonth()));
 
         var satser = new LocalDateTimeline<>(p, høySatsBuilder().build());
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        return new UngTestGrunnlag(
+        return new UngTestscenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -109,7 +109,7 @@ public class BrevScenarioer {
      * ingen inntektsgradering og ingen barn, høy sats
      *
      */
-    public static UngTestGrunnlag innvilget26År(LocalDate fom, LocalDate fødselsdato) {
+    public static UngTestscenario innvilget26År(LocalDate fom, LocalDate fødselsdato) {
         LocalDate tom26årmnd = fødselsdato.plusYears(26).with(TemporalAdjusters.lastDayOfMonth());
         var p = new LocalDateInterval(fom, fom.plusYears(1));
 
@@ -120,7 +120,7 @@ public class BrevScenarioer {
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        return new UngTestGrunnlag(
+        return new UngTestscenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,

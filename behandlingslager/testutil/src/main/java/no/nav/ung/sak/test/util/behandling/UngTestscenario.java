@@ -19,7 +19,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
  * @param ungdomsprogramvilkår - timeline med ungdomsprogramvilkår oppfylt og ikke oppfylt
  * @param fødselsdato
  */
-public record UngTestGrunnlag(
+public record UngTestscenario(
     String navn,
     List<UngdomsprogramPeriode> programPerioder,
     LocalDateTimeline<UngdomsytelseSatser> satser,

@@ -35,9 +35,9 @@ public class UngdomsprogramPeriodeTjeneste {
         return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
     }
 
-    public VurderAntallDagerResultat finnTilgjengeligeDager(Long behandlingId) {
-        var grunnlag = finnPeriodeTidslinje(behandlingId);
-        return FinnForbrukteDager.finnForbrukteDager(grunnlag);
+    public VurderAntallDagerResultat finnVirkedagerTidslinje(Long behandlingId) {
+        var tidslinje = finnPeriodeTidslinje(behandlingId);
+        return FinnForbrukteDager.finnForbrukteDager(tidslinje);
     }
 
     /**

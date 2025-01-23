@@ -128,7 +128,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private boolean manueltOpprettet;
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
-    private UngTestGrunnlag ungTestGrunnlag;
+    private UngTestscenario ungTestscenario;
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
         this.fagsakBuilder = FagsakBuilder
@@ -404,13 +404,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     @SuppressWarnings("unchecked")
-    public S medUngTestGrunnlag(UngTestGrunnlag ungTestGrunnlag) {
-        this.ungTestGrunnlag = ungTestGrunnlag;
+    public S medUngTestGrunnlag(UngTestscenario ungTestscenario) {
+        this.ungTestscenario = ungTestscenario;
         return (S) this;
     }
 
-    public UngTestGrunnlag getUngTestGrunnlag() {
-        return ungTestGrunnlag;
+    public UngTestscenario getUngTestGrunnlag() {
+        return ungTestscenario;
     }
 
     public Behandling buildOgLagreMedUng(
@@ -418,14 +418,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository
     ) {
-        if (ungTestGrunnlag == null) throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
+        if (ungTestscenario == null) throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
 
         // Default Person
         if (personer == null) {
             var ungdom = getDefaultBrukerAktørId();
             PersonInformasjon personInformasjon = opprettBuilderForRegisteropplysninger()
                 .medPersonas()
-                .ungdom(ungdom, ungTestGrunnlag.fødselsdato(), ungTestGrunnlag.navn())
+                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn())
                 .statsborgerskap(Landkoder.NOR)
                 .personstatus(PersonstatusType.BOSA)
                 .build();
@@ -433,12 +433,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         //Vilkår
-        if (ungTestGrunnlag.aldersvilkår() != null) {
-            ungTestGrunnlag.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        if (ungTestscenario.aldersvilkår() != null) {
+            ungTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
         }
 
-        if (ungTestGrunnlag.ungdomsprogramvilkår() != null) {
-            ungTestGrunnlag.ungdomsprogramvilkår().forEach(it -> leggTilVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        if (ungTestscenario.ungdomsprogramvilkår() != null) {
+            ungTestscenario.ungdomsprogramvilkår().forEach(it -> leggTilVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, it.getValue(), new Periode(it.getFom(), it.getTom())));
         }
 
         build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
@@ -450,20 +450,20 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     private void buildUng(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
 
-        if (ungTestGrunnlag.satser() != null) {
+        if (ungTestscenario.satser() != null) {
             ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(
-                ungTestGrunnlag.satser(),
+                ungTestscenario.satser(),
                 "regelInputSats",
                 "regelSporing"
             ));
         }
 
-        if (ungTestGrunnlag.uttakPerioder() != null) {
-            ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), ungTestGrunnlag.uttakPerioder());
+        if (ungTestscenario.uttakPerioder() != null) {
+            ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), ungTestscenario.uttakPerioder());
         }
 
-        if (ungTestGrunnlag.programPerioder() != null) {
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), ungTestGrunnlag.programPerioder());
+        if (ungTestscenario.programPerioder() != null) {
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), ungTestscenario.programPerioder());
         }
 
 

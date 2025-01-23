@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
 /**
- * Intermidiary objekt for å periodisere felter for beregning og tilkjent ytelse i brev.
+ * Intermediary objekt for å periodisere felter for beregning og tilkjent ytelse i brev.
  */
 public record GrunnlagOgTilkjentYtelse(
     long dagsats,

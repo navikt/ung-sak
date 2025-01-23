@@ -75,12 +75,12 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var ytelseFom = grunnlagOgTilkjentYtelseTidslinje.getMinLocalDate();
         var satser = lagSatsDto(grunnlagOgTilkjentYtelseTidslinje);
 
-        var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnTilgjengeligeDager(behandlingId);
+        var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnVirkedagerTidslinje(behandlingId);
         var resultatFlagg = lagResultatFlaggDto(grunnlagOgTilkjentYtelseTidslinje, vurderAntallDagerResultat, behandling);
 
         long antallDager = vurderAntallDagerResultat.forbrukteDager();
         if (antallDager <= 0) {
-            throw new IllegalStateException("Antall tilgjenglige dager = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
+            throw new IllegalStateException("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
         }
 
         return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
