@@ -11,24 +11,15 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
-import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.dokument.arkiv.journal.SafAdapter;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.mottak.FinnSak;
-import no.nav.ung.sak.mottak.SøknadMottakTjenesteContainer;
-import no.nav.ung.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 
