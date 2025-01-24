@@ -1,6 +1,8 @@
 package no.nav.ung.sak.formidling;
 
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -59,6 +61,8 @@ public class BrevGenerererTjeneste {
     }
 
     public GenerertBrev genererVedtaksbrev(Long behandlingId) {
+        Instant metodeStart = Instant.now();
+
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (!behandling.erAvsluttet()) {
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
@@ -73,7 +77,10 @@ public class BrevGenerererTjeneste {
 
         var pdlMottaker = hentMottaker(behandling);
 
+        var innholdTid = Instant.now();
         var resultat = innvilgelseInnholdBygger.bygg(behandling);
+        LOG.info("Tid bygger: {} ms", Duration.between(innholdTid, Instant.now()).toMillis());
+
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
@@ -84,6 +91,7 @@ public class BrevGenerererTjeneste {
 
         PdfGenDokument dokument = pdfGen.lagDokument(input);
 
+        LOG.info("Tid vedtaksbrev: {} ms", Duration.between(metodeStart, Instant.now()).toMillis());
         return new GenerertBrev(
             dokument,
             pdlMottaker,

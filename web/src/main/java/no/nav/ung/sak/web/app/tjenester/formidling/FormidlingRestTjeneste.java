@@ -5,6 +5,9 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,6 +29,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
@@ -34,6 +38,8 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 
 @Path("")
 @ApplicationScoped
@@ -42,14 +48,19 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 public class FormidlingRestTjeneste {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
+    private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
     private static final MediaType PDF_MEDIA_TYPE = MediaType.valueOf(PDF_MEDIA_STRING);
 
 
     @Inject
-    public FormidlingRestTjeneste(BrevGenerererTjeneste brevGenerererTjeneste) {
+    public FormidlingRestTjeneste(
+        BrevGenerererTjeneste brevGenerererTjeneste,
+        TilkjentYtelseUtleder tilkjentYtelseUtleder) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
+        this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
     }
 
     FormidlingRestTjeneste() {
@@ -64,6 +75,13 @@ public class FormidlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public VedtaksbrevOperasjonerDto tilgjengeligeVedtaksbrev(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
+
+        LocalDateTimeline<DagsatsOgUtbetalingsgrad> tilkjentYtelseTidslinje =
+            tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(dto.getBehandlingId());
+        if (tilkjentYtelseTidslinje.isEmpty()) {
+            LOG.warn("Behandling har ingen tilkjent ytelse. Støtter ikke vedtaksbrev for avslag foreløpig.");
+            return VedtaksbrevOperasjonerDto.ingenBrev();
+        }
 
         return new VedtaksbrevOperasjonerDto(true,
             new VedtaksbrevOperasjonerDto.AutomatiskBrevOperasjoner(false, false),
@@ -85,9 +103,9 @@ public class FormidlingRestTjeneste {
                 @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = MediaType.TEXT_HTML, schema = @Schema(type = "string"))
-                }
-            )
+            }
         )
+    )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisVedtaksbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
