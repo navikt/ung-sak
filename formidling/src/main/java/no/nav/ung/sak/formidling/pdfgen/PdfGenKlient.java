@@ -15,6 +15,8 @@ import org.verapdf.gf.foundry.VeraGreenfieldFoundryProvider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openhtmltopdf.slf4j.Slf4jLogger;
+import com.openhtmltopdf.util.XRLog;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -42,6 +44,7 @@ public class PdfGenKlient {
         this.ignorePdf = Objects.requireNonNullElse(ignorePdf, false);
         System.setProperty("sun2d.cmm", "sun2d.cmm.kcms.KcmsServiceProvider");
         VeraGreenfieldFoundryProvider.initialise();
+        XRLog.setLoggerImpl(new Slf4jLogger());
         Environment initialEnvironment = new Environment(
             Collections.emptyMap(),
             new PDFGenResource(getResource("templates/")),
