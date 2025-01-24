@@ -28,6 +28,10 @@ public record VedtaksbrevOperasjonerDto(
     // eller putt i eget endepunkt
     //TODO ta med dokumentMalType for å kunne skrive i frontend hva slags brev dette er? Kan være nyttig hvis man f.eks. går fra avslag til innvilgelse.
 ) {
+
+    public static VedtaksbrevOperasjonerDto ingenBrev() {
+        return new VedtaksbrevOperasjonerDto(false, null, false, false, false);
+    }
     /**
      * @param enableRediger true hvis brevet kan redigeres
      * @param redigert true hvis brevet er redigert
