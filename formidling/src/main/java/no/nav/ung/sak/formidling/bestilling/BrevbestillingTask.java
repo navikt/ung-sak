@@ -15,7 +15,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -71,13 +70,14 @@ public class BrevbestillingTask extends BehandlingProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData)  {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+        validerBrevbestillingForespørsel(behandling);
 
-        if (behandling.getBehandlingResultatType() != BehandlingResultatType.INNVILGET) {
-            LOG.warn("Dropper bestilling av brev da kun innvilgelse er støttet foreløpig");
+        var generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
+        if (generertBrev == null) {
+            LOG.info("Ingen brev generert.");
             return;
         }
 
-        validerBrevbestillingForespørsel(behandling);
 
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer().getVerdi();
@@ -95,7 +95,8 @@ public class BrevbestillingTask extends BehandlingProsessTask {
 
         LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
 
-        var generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
+
+
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
 
