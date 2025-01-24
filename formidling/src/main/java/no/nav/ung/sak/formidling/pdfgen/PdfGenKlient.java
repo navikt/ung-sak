@@ -4,6 +4,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -86,7 +88,9 @@ public class PdfGenKlient {
         if (ignorePdf) {
             return new PdfGenDokument(null, html);
         }
+        var pdfStartInstant = Instant.now();
         byte[] pdfa = CreatePdfKt.createPDFA(html);
+        log.info("Tid pdfgenerering: {} ms", Duration.between(pdfStartInstant, Instant.now()).toMillis());
         return new PdfGenDokument(pdfa, html);
     }
 
