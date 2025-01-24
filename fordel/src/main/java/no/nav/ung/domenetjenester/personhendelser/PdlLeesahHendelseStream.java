@@ -41,13 +41,10 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
     public PdlLeesahHendelseStream(PdlLeesahHendelseHåndterer hendelseHåndterer,
                                    PdlLeesahHendelseFiltrerer hendelseFiltrerer,
                                    AivenKafkaSettings kafkaSettings,
-                                   @KonfigVerdi(value = "hendelse.person.leesah.topic") String topicName,
-                                   @KonfigVerdi(value = "kafka.avro.serde.class", required = false) String kafkaAvroSerdeClass) {
+                                   @KonfigVerdi(value = "hendelse.person.leesah.topic") String topicName) {
         Serde<Personhendelse> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new PdlPersonHendelserKafkaAvroSerde<>();
         this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), valueSerde);
         this.stream = createKafkaStreams(topic, hendelseFiltrerer, hendelseHåndterer, kafkaSettings);
-
-        log.info("isDeployment={}, kafkaAvroSerdeClass={}", isDeployment, kafkaAvroSerdeClass);
     }
 
     @SuppressWarnings("resource")
