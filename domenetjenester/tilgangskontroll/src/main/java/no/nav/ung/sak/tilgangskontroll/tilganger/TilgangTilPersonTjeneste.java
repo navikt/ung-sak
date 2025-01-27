@@ -1,5 +1,6 @@
 package no.nav.ung.sak.tilgangskontroll.tilganger;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.typer.AktørId;
@@ -24,6 +25,7 @@ public class TilgangTilPersonTjeneste {
         this.personDiskresjonskodeTjeneste = personDiskresjonskodeTjeneste;
     }
 
+    @WithSpan
     public Set<IkkeTilgangÅrsak> sjekkTilgangTilPersoner(TilgangerBruker tilganger, List<AktørId> aktørIder, List<PersonIdent> personIdenter) {
         try {
             return internSjekkTilgangTilPersoner(tilganger, aktørIder, personIdenter);

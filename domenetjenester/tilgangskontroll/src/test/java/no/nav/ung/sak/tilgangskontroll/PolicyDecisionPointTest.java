@@ -38,7 +38,7 @@ class PolicyDecisionPointTest {
     void mockPerson(PersonIdent personIdent, AktørId aktørId, boolean erSkjermet, Set<AdressebeskyttelseGradering> adressebeskyttelser) {
         Mockito.when(personPipRestKlient.hentAdressebeskyttelse(Mockito.eq(personIdent))).thenReturn(adressebeskyttelser);
         Mockito.when(personPipRestKlient.hentPersoninformasjon(Mockito.eq(aktørId))).thenReturn(new PipPersondataResponse(AKTØR_ID, new PipPerson(adressebeskyttelser.stream().map(Adressebeskyttelse::fraEnum).toArray(Adressebeskyttelse[]::new)), new PipIdenter(List.of(new PipIdent(FNR, false, "FOLKEREGISTERIDENT")))));
-        Mockito.when(skjermetPersonRestKlient.personErSkjermet(Mockito.eq(personIdent))).thenReturn(erSkjermet);
+        Mockito.when(skjermetPersonRestKlient.erPersonSkjermet(Mockito.eq(personIdent))).thenReturn(erSkjermet);
     }
 
     @Test

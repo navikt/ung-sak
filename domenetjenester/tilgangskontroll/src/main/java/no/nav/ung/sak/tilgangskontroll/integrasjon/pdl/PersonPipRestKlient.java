@@ -1,5 +1,6 @@
 package no.nav.ung.sak.tilgangskontroll.integrasjon.pdl;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
@@ -32,6 +33,7 @@ public class PersonPipRestKlient {
         this.urlPdlPip = tilUri(urlPdlPip);
     }
 
+    @WithSpan
     public PipPersondataResponse hentPersoninformasjon(AktørId aktørId) {
         Set<Header> headers = Set.of(
             new BasicHeader("ident", aktørId.getAktørId())
@@ -39,6 +41,7 @@ public class PersonPipRestKlient {
         return restClient.get(urlPdlPip, headers, PipPersondataResponse.class);
     }
 
+    @WithSpan
     public Set<AdressebeskyttelseGradering> hentAdressebeskyttelse(PersonIdent personIdent) {
         Set<Header> headers = Set.of(
             new BasicHeader("ident", personIdent.getIdent())

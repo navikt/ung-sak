@@ -27,6 +27,10 @@
             <artifactId>k9-pdl-klient</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-testutilities</artifactId>
             <scope>test</scope>

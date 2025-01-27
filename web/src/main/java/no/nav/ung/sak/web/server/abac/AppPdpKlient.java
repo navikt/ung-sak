@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.tilgangskontroll.PolicyDecisionPoint;
 
 @Dependent
