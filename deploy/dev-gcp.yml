@@ -40,7 +40,7 @@ spec:
         - id: "grafana-lgtm"
   resources:
     limits:
-      cpu: "500m"
+      cpu: "4000m"
       memory: "2048Mi"
     requests:
       cpu: "200m"
