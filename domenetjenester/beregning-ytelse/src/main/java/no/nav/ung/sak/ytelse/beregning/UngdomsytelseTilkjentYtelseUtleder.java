@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.time.Period;
 import java.util.stream.Stream;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -27,6 +28,7 @@ public class UngdomsytelseTilkjentYtelseUtleder implements TilkjentYtelseUtleder
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
+    @WithSpan
     @Override
     public LocalDateTimeline<DagsatsOgUtbetalingsgrad> utledTilkjentYtelseTidslinje(Long behandlingId) {
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId);

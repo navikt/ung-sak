@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -32,6 +31,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.geografisk.Region;
 import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.kodeverk.person.SivilstandType;
@@ -67,9 +67,13 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakTestUtil;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
+import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personstatus;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -124,6 +128,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private boolean manueltOpprettet;
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
+    private UngTestscenario ungTestscenario;
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
         this.fagsakBuilder = FagsakBuilder
@@ -398,6 +403,73 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return behandling;
     }
 
+    @SuppressWarnings("unchecked")
+    public S medUngTestGrunnlag(UngTestscenario ungTestscenario) {
+        this.ungTestscenario = ungTestscenario;
+        return (S) this;
+    }
+
+    public UngTestscenario getUngTestGrunnlag() {
+        return ungTestscenario;
+    }
+
+    public Behandling buildOgLagreMedUng(
+        BehandlingRepositoryProvider repositoryProvider,
+        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository
+    ) {
+        if (ungTestscenario == null) throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
+
+        // Default Person
+        if (personer == null) {
+            var ungdom = getDefaultBrukerAktørId();
+            PersonInformasjon personInformasjon = opprettBuilderForRegisteropplysninger()
+                .medPersonas()
+                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn())
+                .statsborgerskap(Landkoder.NOR)
+                .personstatus(PersonstatusType.BOSA)
+                .build();
+            medRegisterOpplysninger(personInformasjon);
+        }
+
+        //Vilkår
+        if (ungTestscenario.aldersvilkår() != null) {
+            ungTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        }
+
+        if (ungTestscenario.ungdomsprogramvilkår() != null) {
+            ungTestscenario.ungdomsprogramvilkår().forEach(it -> leggTilVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        }
+
+        build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
+
+        //Ung ting
+        buildUng(ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        return behandling;
+    }
+
+    private void buildUng(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+
+        if (ungTestscenario.satser() != null) {
+            ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(
+                ungTestscenario.satser(),
+                "regelInputSats",
+                "regelSporing"
+            ));
+        }
+
+        if (ungTestscenario.uttakPerioder() != null) {
+            ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), ungTestscenario.uttakPerioder());
+        }
+
+        if (ungTestscenario.programPerioder() != null) {
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), ungTestscenario.programPerioder());
+        }
+
+
+
+    }
+
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {
         if (mockBehandlingRepository != null && behandling != null) {
             return mockBehandlingRepository;
@@ -543,7 +615,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
         behandlingRepo.lagre(behandling, lås);
-        Long behandlingId = behandling.getId();
 
         lagrePersonopplysning(repositoryProvider, behandling);
         lagreSøknad(repositoryProvider);

@@ -5,7 +5,6 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_UNGDOMSPR
 import java.util.List;
 import java.util.NavigableSet;
 
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -30,6 +29,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 @BehandlingStegRef(value = VURDER_UNGDOMSPROGRAMVILKÅR)
 @BehandlingTypeRef

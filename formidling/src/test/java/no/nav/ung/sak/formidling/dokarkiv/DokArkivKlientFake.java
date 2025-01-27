@@ -13,8 +13,8 @@ public class DokArkivKlientFake implements DokArkivKlient {
     public DokArkivKlientFake() {
     }
 
-    private List<OpprettJournalpostRequest> requests = new ArrayList();
-    private List<OpprettJournalpostResponse> responses = new ArrayList();
+    private final List<OpprettJournalpostRequest> requests = new ArrayList<>();
+    private final List<OpprettJournalpostResponse> responses = new ArrayList<>();
 
     private final String journalpostId = "12345";
 

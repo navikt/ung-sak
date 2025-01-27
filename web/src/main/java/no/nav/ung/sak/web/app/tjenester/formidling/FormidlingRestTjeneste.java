@@ -4,6 +4,11 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 import java.util.Objects;
+import java.util.concurrent.Semaphore;
+
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,16 +31,17 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
-import no.nav.ung.sak.formidling.domene.GenerertBrev;
-import no.nav.ung.sak.formidling.dto.Brevbestilling;
+import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
+import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 
 @Path("")
 @ApplicationScoped
@@ -44,14 +50,21 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 public class FormidlingRestTjeneste {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
+    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
+    private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
     private static final MediaType PDF_MEDIA_TYPE = MediaType.valueOf(PDF_MEDIA_STRING);
 
+    private static final int MAX_ANTALL_SAMTIDIGE_FORHÅNDSVISNINGER = 2; //kan justeres sammen med minne for applikasjonen
+    private static final Semaphore SEMAFOR_SAMTIDIGE_FORHÅNDSVISNINGER = new Semaphore(MAX_ANTALL_SAMTIDIGE_FORHÅNDSVISNINGER);
 
     @Inject
-    public FormidlingRestTjeneste(BrevGenerererTjeneste brevGenerererTjeneste) {
+    public FormidlingRestTjeneste(
+        BrevGenerererTjeneste brevGenerererTjeneste,
+        TilkjentYtelseUtleder tilkjentYtelseUtleder) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
+        this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
     }
 
     FormidlingRestTjeneste() {
@@ -66,6 +79,13 @@ public class FormidlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public VedtaksbrevOperasjonerDto tilgjengeligeVedtaksbrev(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
+
+        LocalDateTimeline<DagsatsOgUtbetalingsgrad> tilkjentYtelseTidslinje =
+            tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(dto.getBehandlingId());
+        if (tilkjentYtelseTidslinje.isEmpty()) {
+            LOG.warn("Behandling har ingen tilkjent ytelse. Støtter ikke vedtaksbrev for avslag foreløpig.");
+            return VedtaksbrevOperasjonerDto.ingenBrev();
+        }
 
         return new VedtaksbrevOperasjonerDto(true,
             new VedtaksbrevOperasjonerDto.AutomatiskBrevOperasjoner(false, false),
@@ -87,21 +107,28 @@ public class FormidlingRestTjeneste {
                 @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = MediaType.TEXT_HTML, schema = @Schema(type = "string"))
-                }
-            )
+            }
         )
+    )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisVedtaksbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
-    ) {
-        GenerertBrev generertBrev = brevGenerererTjeneste.generer(new Brevbestilling(
-            dto.behandlingId(),
-            DokumentMalType.INNVILGELSE_DOK,
-            null,
-            null,
-            dto.dokumentdata()
-        ));
+    ) throws InterruptedException {
+        // Semafor her for å begrense hvor mange samtidige forhåndsvisninger som kjøres for å unngå OutOfMemoryError.
+        // Operasjonen både bruker noe tid, og mye minne, så uten begrensning er det er fullt mulig å knele applikasjonen
+        // ved å forhåndsvise flere ganger på kort tid.
+        SEMAFOR_SAMTIDIGE_FORHÅNDSVISNINGER.acquire();
+        try {
+            return doForhåndsvisVedtaksbrev(dto, request);
+        } finally {
+            SEMAFOR_SAMTIDIGE_FORHÅNDSVISNINGER.release();
+        }
+    }
+
+    @WithSpan //span her for å kunne skille venting på semafor fra resten
+    private Response doForhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, HttpServletRequest request) {
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
 
         var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 

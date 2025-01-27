@@ -82,7 +82,7 @@ public class PersonDiskresjonskodeTjeneste {
     }
 
     private Boolean internErPersonSkjermet(PersonIdent personIdent) {
-        Boolean skjermet = skjermetPersonRestKlient.personErSkjermet(personIdent);
+        Boolean skjermet = skjermetPersonRestKlient.erPersonSkjermet(personIdent);
         if (skjermet == null) {
             logger.warn("Fikk tomt resultat for skjerming. Behandler som at person er skjermet");
             return true;

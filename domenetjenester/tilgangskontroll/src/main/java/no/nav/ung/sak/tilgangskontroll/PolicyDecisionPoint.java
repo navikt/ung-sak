@@ -1,5 +1,6 @@
 package no.nav.ung.sak.tilgangskontroll;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.sikkerhet.abac.Decision;
@@ -36,6 +37,7 @@ public class PolicyDecisionPoint {
         this.tilgangTilOperasjonTjeneste = tilgangTilOperasjonTjeneste;
     }
 
+    @WithSpan
     public Tilgangsbeslutning vurderTilgangForInnloggetBruker(PdpRequest pdpRequest) {
         TilgangsbeslutningInput input = new TilgangsbeslutningInput(pdpRequest);
         boolean harTilgang = vurderTilgangForInnloggetBruker(input);

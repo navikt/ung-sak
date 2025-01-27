@@ -1,5 +1,6 @@
 package no.nav.ung.sak.tilgangskontroll.integrasjon.skjermetperson;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
@@ -26,7 +27,8 @@ public class SkjermetPersonRestKlient {
         this.urlSkjermetPerson = tilUri(urlSkjermetPerson);
     }
 
-    public Boolean personErSkjermet(PersonIdent personIdent) {
+    @WithSpan
+    public Boolean erPersonSkjermet(PersonIdent personIdent) {
         String response = restClient.post(urlSkjermetPerson, new SkjermetRequestDto(personIdent.getIdent()), String.class);
         if ("true".equalsIgnoreCase(response)) {
             return true;

@@ -46,6 +46,17 @@
             <artifactId>validation-model-jakarta</artifactId>
             <version>1.26.5</version>
         </dependency>
+        <!-- TODO brukes bare for å sette loglevel. Prøv å endre pdfgen-core til å gjøre dette for oss -->
+        <dependency>
+            <groupId>io.github.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-core</artifactId>
+            <version>1.1.24</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-slf4j</artifactId>
+            <version>1.1.24</version>
+        </dependency>
 
 		<!-- Test avhengigheter -->
 		<dependency>
@@ -53,6 +64,11 @@
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
