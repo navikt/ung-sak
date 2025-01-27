@@ -159,7 +159,7 @@ public class JettyServer {
     protected void migrerDatabaser() throws IOException {
         EnvironmentClass environmentClass = getEnvironmentClass();
 
-        try (HikariDataSource migreringDs = DatasourceUtil.createDatasource(envVarPrefix, environmentClass, 2)) {
+        try (HikariDataSource migreringDs = DatasourceUtil.createDatasource(envVarPrefix, environmentClass, 12)) {
             var flywayRepairOnFail = Boolean.valueOf(ENV.getProperty("FLYWAY_REPAIR_ON_FAIL", "false"));
             DatabaseScript.migrate(migreringDs, null, flywayRepairOnFail);
         }
