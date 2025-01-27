@@ -11,6 +11,7 @@ import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.KafkaSettings;
 import no.nav.ung.fordel.kafka.Topic;
 import no.nav.ung.fordel.kafka.utils.KafkaUtils;
+import no.nav.ung.fordel.util.RequestContextHandler;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
@@ -65,8 +66,8 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
         builder.stream(topic.getTopic(), consumed)
             .peek(PdlLeesahHendelseStream::loggHendelse)
             .filter(hendelseFiltrerer::erHendelseTypeViSkalHåndtere)
-            .filter(hendelseFiltrerer::harPåvirketUngFagsakForHendelse)
-            .foreach(hendelseHåndterer::håndterHendelse);
+            .filter((key, personhendelse) -> RequestContextHandler.doReturnWithRequestContext((() -> hendelseFiltrerer.harPåvirketUngFagsakForHendelse(key, personhendelse))))
+            .foreach((key, personhendelse) -> RequestContextHandler.doWithRequestContext(() -> hendelseHåndterer.håndterHendelse(key, personhendelse)));
 
 
         final Topology topology = builder.build();

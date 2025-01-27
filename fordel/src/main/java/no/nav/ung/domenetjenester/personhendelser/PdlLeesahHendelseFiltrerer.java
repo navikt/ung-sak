@@ -1,6 +1,6 @@
 package no.nav.ung.domenetjenester.personhendelser;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseUtils;
@@ -14,11 +14,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-@Dependent
+@ApplicationScoped
 public class PdlLeesahHendelseFiltrerer {
 
-    private final HendelsemottakTjeneste hendelsemottakTjeneste;
+    private HendelsemottakTjeneste hendelsemottakTjeneste;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
+
+    public PdlLeesahHendelseFiltrerer() {
+    }
 
     @Inject
     public PdlLeesahHendelseFiltrerer(HendelsemottakTjeneste hendelsemottakTjeneste, FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
