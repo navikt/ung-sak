@@ -658,25 +658,6 @@
         },
         "type" : "object"
       },
-      "Arbeidsgiver" : {
-        "properties" : {
-          "arbeidsgiverAktørId" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          },
-          "arbeidsgiverOrgnr" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
       "ArbeidsgiverDto" : {
         "properties" : {
           "identifikator" : {
@@ -2822,7 +2803,7 @@
             "type" : "array"
           },
           "type" : {
-            "enum" : [ "INNTEKTSMELDING", "SØKNAD" ],
+            "enum" : [ "SØKNAD" ],
             "type" : "string"
           }
         },
@@ -3222,15 +3203,6 @@
         "required" : [ "fom", "tom" ],
         "type" : "object"
       },
-      "PeriodeMedRegisterendring" : {
-        "properties" : {
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          }
-        },
-        "required" : [ "periode" ],
-        "type" : "object"
-      },
       "PeriodeMedUtfall" : {
         "properties" : {
           "periode" : {
@@ -3251,7 +3223,7 @@
           },
           "årsaker" : {
             "items" : {
-              "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
+              "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "OPPHØR_UNGDOMSPROGRAM", "G_REGULERING", "REVURDERER_BEREGNING", "FØRSTEGANGSVURDERING" ],
               "nullable" : true,
               "type" : "string"
             },
@@ -3263,28 +3235,6 @@
           }
         },
         "required" : [ "periode" ],
-        "type" : "object"
-      },
-      "PerioderMedÅrsakPerKravstiller" : {
-        "properties" : {
-          "arbeidsgiver" : {
-            "$ref" : "#/components/schemas/Arbeidsgiver"
-          },
-          "kravstiller" : {
-            "enum" : [ "BRUKER", "ARBEIDSGIVER" ],
-            "type" : "string"
-          },
-          "perioderMedÅrsak" : {
-            "items" : {
-              "$ref" : "#/components/schemas/PeriodeMedÅrsaker"
-            },
-            "maxItems" : 2147483647,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          }
-        },
-        "required" : [ "kravstiller" ],
         "type" : "object"
       },
       "PersonDto" : {
@@ -3947,28 +3897,9 @@
             "nullable" : true,
             "type" : "array"
           },
-          "perioderMedRegisterendring" : {
-            "items" : {
-              "$ref" : "#/components/schemas/PeriodeMedRegisterendring"
-            },
-            "maxItems" : 2147483647,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "perioderMedÅrsak" : {
             "items" : {
               "$ref" : "#/components/schemas/PeriodeMedÅrsaker"
-            },
-            "maxItems" : 2147483647,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          },
-          "perioderMedÅrsakPerKravstiller" : {
-            "items" : {
-              "$ref" : "#/components/schemas/PerioderMedÅrsakPerKravstiller"
             },
             "maxItems" : 2147483647,
             "minItems" : 0,
@@ -4777,7 +4708,7 @@
             "type" : "array"
           },
           "årsak" : {
-            "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
+            "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "OPPHØR_UNGDOMSPROGRAM", "G_REGULERING", "REVURDERER_BEREGNING", "FØRSTEGANGSVURDERING" ],
             "type" : "string"
           }
         },
