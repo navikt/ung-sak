@@ -2,6 +2,7 @@ package no.nav.ung.sak.ungdomsprogram;
 
 import java.util.Optional;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -35,6 +36,7 @@ public class UngdomsprogramPeriodeTjeneste {
         return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
     }
 
+    @WithSpan
     public VurderAntallDagerResultat finnVirkedagerTidslinje(Long behandlingId) {
         var tidslinje = finnPeriodeTidslinje(behandlingId);
         return FinnForbrukteDager.finnForbrukteDager(tidslinje);

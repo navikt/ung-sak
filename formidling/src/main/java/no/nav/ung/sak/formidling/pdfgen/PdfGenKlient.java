@@ -9,6 +9,8 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Objects;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import no.nav.k9.felles.log.trace.OpentelemetrySpanWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.verapdf.gf.foundry.VeraGreenfieldFoundryProvider;
@@ -80,19 +82,26 @@ public class PdfGenKlient {
     }
 
 
+    @WithSpan
     public PdfGenDokument lagDokument(TemplateInput payload) {
         JsonNode templateData = pdfgenObjectMapper.convertValue(payload.templateDto(), JsonNode.class);
         return lagDokument(payload.templateType().getPath(), payload.templateType().getDir(), templateData);
     }
 
     private PdfGenDokument lagDokument(String templateNavn, String dir, JsonNode payload) {
-        String html = CreateHtmlKt.createHtml(templateNavn, dir, payload);
+        String html = OpentelemetrySpanWrapper.forApplikasjon().span("pdfgen.lagDokument.crateHtml",
+            span -> span.setAttribute("templateNavn", templateNavn).setAttribute("templateDir", dir),
+            () -> CreateHtmlKt.createHtml(templateNavn, dir, payload)
+        );
         Objects.requireNonNull(html);
         if (ignorePdf) {
             return new PdfGenDokument(null, html);
         }
         var pdfStartInstant = Instant.now();
-        byte[] pdfa = CreatePdfKt.createPDFA(html);
+        byte[] pdfa = OpentelemetrySpanWrapper.forApplikasjon().span("pdfgen.lagDokument.creatPDFA",
+            span -> span.setAttribute("templateNavn", templateNavn).setAttribute("templateDir", dir),
+            () -> CreatePdfKt.createPDFA(html)
+        );
         log.info("Tid pdfgenerering: {} ms", Duration.between(pdfStartInstant, Instant.now()).toMillis());
         return new PdfGenDokument(pdfa, html);
     }
