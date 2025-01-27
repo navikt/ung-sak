@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -57,6 +58,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     public InnvilgelseInnholdBygger() {
     }
 
+    @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling) {
         Long behandlingId = behandling.getId();
