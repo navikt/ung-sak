@@ -4,7 +4,11 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 import java.util.Objects;
+import java.util.concurrent.Semaphore;
+import java.util.function.Function;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import no.nav.k9.felles.log.trace.OpentelemetrySpanWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +58,8 @@ public class FormidlingRestTjeneste {
     private static final String PDF_MEDIA_STRING = "application/pdf";
     private static final MediaType PDF_MEDIA_TYPE = MediaType.valueOf(PDF_MEDIA_STRING);
 
+    private static final int MAX_ANTALL_SAMTIDIGE_FORHÅNDSVISNINGER = 2; //kan justeres sammen med minne for applikasjonen
+    private static final Semaphore SEMAPHORE_SAMTIDIGE_FORHÅNDSVISNINGER = new Semaphore(MAX_ANTALL_SAMTIDIGE_FORHÅNDSVISNINGER);
 
     @Inject
     public FormidlingRestTjeneste(
@@ -110,7 +116,20 @@ public class FormidlingRestTjeneste {
     public Response forhåndsvisVedtaksbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
-    ) {
+    ) throws InterruptedException {
+        // Semafor her for å begrense hvor mange samtidige forhåndsvisninger som kjøres for å unngå OutOfMemoryError.
+        // Operasjonen både bruker noe tid, og mye minne, så uten begrensning er det er fullt mulig å knele applikasjonen
+        // ved å forhåndsvise flere ganger på kort tid.
+        SEMAPHORE_SAMTIDIGE_FORHÅNDSVISNINGER.acquire();
+        try {
+            return doForhåndsvisVedtaksbrev(dto, request);
+        } finally {
+            SEMAPHORE_SAMTIDIGE_FORHÅNDSVISNINGER.release();
+        }
+    }
+
+    @WithSpan //span her for å kunne skille venting på semafor fra resten
+    private Response doForhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, HttpServletRequest request) {
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
 
         var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
