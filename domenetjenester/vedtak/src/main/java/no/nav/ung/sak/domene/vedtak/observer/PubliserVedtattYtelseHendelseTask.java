@@ -66,8 +66,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         ProsessTaskTjeneste taskTjeneste,
         @Any Instance<InformasjonselementerUtleder> informasjonselementer,
         @KonfigVerdi("kafka.fattevedtak.topic") String topic,
-        @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServersAiven,
-        @KonfigVerdi("bootstrap.servers") String bootstrapServersOnPrem,
+        @KonfigVerdi(value = "KAFKA_BROKERS") String kafkaBrokers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
@@ -81,7 +80,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         boolean kjørerIMiljø = Environment.current().isProd() || Environment.current().isDev();
         if (kjørerIMiljø) {
             var aivenPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(bootstrapServersAiven);
+                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
 
             Properties aivenProps = aivenPropsBuilder
                 .truststorePath(trustStorePath)
@@ -94,7 +93,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         } else {
             //konfigurasjon for bruk mot VTP
             var onPremPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(bootstrapServersOnPrem);
+                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
 
             Properties onPremProps = onPremPropsBuilder
                 .username("vtp")
