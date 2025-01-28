@@ -9,6 +9,7 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
@@ -31,6 +32,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     private UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
     private UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram;
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
         // CDI
@@ -38,12 +40,14 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     @Inject
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
-            @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder,
-            UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
-            UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram) {
+        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder,
+        UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
+        UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram,
+        ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.ungdomsytelseSøknadsperiodeTjeneste = ungdomsytelseSøknadsperiodeTjeneste;
         this.utledPeriodeTilVurderingFraUngdomsprogram = utledPeriodeTilVurderingFraUngdomsprogram;
+        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
     }
 
 
@@ -91,7 +95,10 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var tidslinjeForRelevanteEndringerIUngdomsprogram = utledPeriodeTilVurderingFraUngdomsprogram.finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(behandlingId);
         var relevantePerioderTidslinje = TidslinjeUtil.tilTidslinje(ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId));
-        var tidslinjeTilVurdering = tidslinjeForRelevanteEndringerIUngdomsprogram.crossJoin(relevantePerioderTidslinje);
+
+        final var tidslinjeFraTrigger = prosessTriggerPeriodeUtleder.utledTidslinjeFraProsesstriggere(behandlingId);
+
+        var tidslinjeTilVurdering = tidslinjeForRelevanteEndringerIUngdomsprogram.crossJoin(relevantePerioderTidslinje).crossJoin(tidslinjeFraTrigger);
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering);
     }
 
