@@ -95,9 +95,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var tidslinjeForRelevanteEndringerIUngdomsprogram = utledPeriodeTilVurderingFraUngdomsprogram.finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(behandlingId);
         var relevantePerioderTidslinje = TidslinjeUtil.tilTidslinje(ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId));
-
         final var tidslinjeFraTrigger = prosessTriggerPeriodeUtleder.utledTidslinjeFraProsesstriggere(behandlingId);
-
         var tidslinjeTilVurdering = tidslinjeForRelevanteEndringerIUngdomsprogram.crossJoin(relevantePerioderTidslinje).crossJoin(tidslinjeFraTrigger);
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering);
     }
