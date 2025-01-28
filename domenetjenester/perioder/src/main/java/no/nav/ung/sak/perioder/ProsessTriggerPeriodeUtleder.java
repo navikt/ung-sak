@@ -28,6 +28,10 @@ public class ProsessTriggerPeriodeUtleder {
         this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
+    /** Utleder tidslinje for perioder til vurdering basert på relevante triggere
+     * @param behandligId BehandlingId
+     * @return Tidslinje for perioder til vurdering
+     */
     LocalDateTimeline<Boolean> utledTidslinjeFraProsesstriggere(Long behandligId) {
         return prosessTriggereRepository.hentGrunnlag(behandligId)
             .stream()
