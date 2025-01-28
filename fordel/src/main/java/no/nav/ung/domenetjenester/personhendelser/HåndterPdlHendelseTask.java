@@ -7,6 +7,8 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.person.pdl.leesah.Personhendelse;
+import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseUtils;
 import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
 import no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
@@ -18,40 +20,41 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.fraJson;
-import static no.nav.ung.domenetjenester.personhendelser.HendelseMapper.toJson;
-
 @ApplicationScoped
-@ProsessTask(HåndterUngSakHendelseTask.TASKNAME)
-public class HåndterUngSakHendelseTask implements ProsessTaskHandler {
+@ProsessTask(HåndterPdlHendelseTask.TASKNAME)
+public class HåndterPdlHendelseTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "ung.hendelseHåndterer";
-    private static final Logger LOG = LoggerFactory.getLogger(HåndterUngSakHendelseTask.class);
+    public static final String TASKNAME = "ung.pdl.hendelseHåndterer";
+    private static final Logger LOG = LoggerFactory.getLogger(HåndterPdlHendelseTask.class);
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private HendelseRepository hendelseRepository;
     private ForsinkelseTjeneste forsinkelseTjeneste;
     private PdlLeesahHendelseFiltrerer hendelseFiltrerer;
+    private PdlLeesahOversetter pdlLeesahOversetter;
 
-    public HåndterUngSakHendelseTask() {
+    public HåndterPdlHendelseTask() {
         // CDI
     }
 
     @Inject
-    public HåndterUngSakHendelseTask(ProsessTaskTjeneste prosessTaskTjeneste,
-                                     HendelseRepository hendelseRepository,
-                                     ForsinkelseTjeneste forsinkelseTjeneste,
-                                     PdlLeesahHendelseFiltrerer hendelseFiltrerer) {
+    public HåndterPdlHendelseTask(ProsessTaskTjeneste prosessTaskTjeneste,
+                                  HendelseRepository hendelseRepository,
+                                  ForsinkelseTjeneste forsinkelseTjeneste,
+                                  PdlLeesahHendelseFiltrerer hendelseFiltrerer, PdlLeesahOversetter pdlLeesahOversetter) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.hendelseRepository = hendelseRepository;
         this.forsinkelseTjeneste = forsinkelseTjeneste;
         this.hendelseFiltrerer = hendelseFiltrerer;
+        this.pdlLeesahOversetter = pdlLeesahOversetter;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         final String payload = prosessTaskData.getPayloadAsString();
-        final Hendelse oversattHendelse = fraJson(payload);
+        Personhendelse personhendelse = PersonhendelseUtils.fraJson(payload);
+        final Hendelse oversattHendelse = pdlLeesahOversetter.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
+
         LOG.info("Håndterer hendelseId={}", oversattHendelse.getHendelseInfo().getHendelseId());
 
         final List<AktørId> aktørerMedPåvirketFagsak = hendelseFiltrerer.finnAktørerMedPåvirketUngFagsak(oversattHendelse);
@@ -73,7 +76,7 @@ public class HåndterUngSakHendelseTask implements ProsessTaskHandler {
 
     private InngåendeHendelseEntitet lagreInngåendeHendelse(AktørId aktørId, Hendelse hendelse, InngåendeHendelseEntitet.HåndtertStatusType håndtertStatusType) {
         final HendelseInfo hendelseInfo = hendelse.getHendelseInfo();
-        final String payload = toJson(hendelse);
+        final String payload = HendelseMapper.toJson(hendelse);
         InngåendeHendelseEntitet inngåendeHendelse = InngåendeHendelseEntitet.builder()
             .aktørId(aktørId.getAktørId())
             .hendelseType(hendelse.getHendelseType())

@@ -1,7 +1,18 @@
 package no.nav.ung.domenetjenester.arkiv;
 
-import java.time.Duration;
-
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.domenetjenester.arkiv.test.VtpJournalføringshendelserKafkaAvroSerde;
+import no.nav.ung.fordel.kafka.AivenKafkaSettings;
+import no.nav.ung.fordel.kafka.KafkaIntegration;
+import no.nav.ung.fordel.kafka.Topic;
+import no.nav.ung.fordel.kafka.utils.KafkaUtils;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
@@ -9,12 +20,9 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
-import no.nav.ung.fordel.kafka.KafkaIntegration;
-import no.nav.ung.fordel.kafka.Topic;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import java.time.Duration;
+
+import static no.nav.k9.felles.sikkerhet.abac.PepImpl.ENV;
 
 /*
  * Dokumentasjon https://confluence.adeo.no/pages/viewpage.action?pageId=432217859
@@ -27,6 +35,7 @@ public class JournalHendelseStream implements KafkaIntegration {
     private static final String HENDELSE_ENDRET = "TemaEndret";
     private static final String TEMA_OMS = OmrådeTema.OMS.getOffisiellKode();
     private static final String TEMA_UNG = OmrådeTema.UNG.getOffisiellKode();
+    private final boolean isDeployment = ENV.isProd() || ENV.isDev();
 
     private KafkaStreams stream;
     private Topic<String, JournalfoeringHendelseRecord> topic;
@@ -35,33 +44,38 @@ public class JournalHendelseStream implements KafkaIntegration {
     }
 
     @Inject
-    public JournalHendelseStream(JournalføringHendelseHåndterer journalføringHendelseHåndterer,
-                                 JournalHendelseProperties journalHendelseProperties) {
-        this.topic = journalHendelseProperties.getTopic();
-        this.stream = createKafkaStreams(topic, journalføringHendelseHåndterer, journalHendelseProperties);
+    public JournalHendelseStream(@KonfigVerdi(value = "kafka.journal.topic") String topicName,
+                                 JournalføringHendelseHåndterer journalføringHendelseHåndterer,
+                                 AivenKafkaSettings kafkaSettings) {
+        Serde<JournalfoeringHendelseRecord> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new VtpJournalføringshendelserKafkaAvroSerde<>();
+        this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), valueSerde);
+        this.stream = createKafkaStreams(topic, journalføringHendelseHåndterer, kafkaSettings);
     }
-
 
 
     @SuppressWarnings("resource")
     private static KafkaStreams createKafkaStreams(Topic<String, JournalfoeringHendelseRecord> topic,
                                                    JournalføringHendelseHåndterer journalføringHendelseHåndterer,
-                                                   JournalHendelseProperties properties) {
+                                                   AivenKafkaSettings kafkaSettings) {
+
+        Serde<String> serdeKey = topic.getSerdeKey();
+        Serde<JournalfoeringHendelseRecord> serdeValue = topic.getSerdeValue();
 
         final Consumed<String, JournalfoeringHendelseRecord> consumed = Consumed
-                // Ved tap av offset spilles på nytt, 7 dager retention - anses som akseptabelt
+            // Ved tap av offset spilles på nytt, 7 dager retention - anses som akseptabelt
             .<String, JournalfoeringHendelseRecord>with(Topology.AutoOffsetReset.EARLIEST)
-            .withKeySerde(topic.getSerdeKey())
-            .withValueSerde(topic.getSerdeValue());
+            .withKeySerde(serdeKey)
+            .withValueSerde(serdeValue);
 
         final StreamsBuilder builder = new StreamsBuilder();
         builder.stream(topic.getTopic(), consumed)
-                // TODO: Bytt til tema UNG før lansering av ungdomsytelsen
+            // TODO: Bytt til tema UNG før lansering av ungdomsytelsen
             .filter((key, value) -> TEMA_OMS.equals(value.getTemaNytt()))
             .filter((key, value) -> hendelseSkalHåndteres(value))
             .foreach(journalføringHendelseHåndterer::handleMessage);
 
-        return new KafkaStreams(builder.build(), properties.getProperties());
+        var kafkaProperties = kafkaSettings.toStreamPropertiesWith(topic.getConsumerClientId(), serdeKey, serdeValue);
+        return new KafkaStreams(builder.build(), kafkaProperties);
     }
 
     private static boolean hendelseSkalHåndteres(JournalfoeringHendelseRecord payload) {

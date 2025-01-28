@@ -1,8 +1,8 @@
 package no.nav.ung.fordel.kafka;
 
-import java.util.Objects;
-
 import org.apache.kafka.common.serialization.Serde;
+
+import java.util.Objects;
 
 public class Topic<K, V> {
 

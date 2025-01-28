@@ -1,82 +1,6 @@
 {
   "components" : {
     "schemas" : {
-      "AbacJournalpostMottakDto" : {
-        "properties" : {
-          "forsendelseMottatt" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          },
-          "forsendelseMottattTidspunkt" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "payload" : {
-            "maxLength" : 392000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\-_=]*$",
-            "type" : "string"
-          },
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "type" : {
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "forsendelseMottattTidspunkt", "journalpostId", "saksnummer", "type", "ytelseType" ],
-        "type" : "object"
-      },
-      "AbacJournalpostMottakOpprettSakDto" : {
-        "properties" : {
-          "aktørId" : {
-            "type" : "string"
-          },
-          "forsendelseMottatt" : {
-            "format" : "date",
-            "nullable" : true,
-            "type" : "string"
-          },
-          "forsendelseMottattTidspunkt" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "payload" : {
-            "maxLength" : 392000,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9\\-_=]*$",
-            "type" : "string"
-          },
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "type" : {
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "aktørId", "forsendelseMottattTidspunkt", "journalpostId", "periode", "saksnummer", "type", "ytelseType" ],
-        "type" : "object"
-      },
       "AbakusKodeverkIaygrunnlag" : {
         "properties" : {
           "virksomhetType" : {
@@ -1692,66 +1616,6 @@
         "required" : [ "saksnummer", "ytelseType" ],
         "type" : "object"
       },
-      "FinnEllerOpprettSak" : {
-        "properties" : {
-          "aktørId" : {
-            "type" : "string"
-          },
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "pleietrengendeAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "relatertPersonAktørId" : {
-            "nullable" : true,
-            "type" : "string"
-          },
-          "saksnummer" : {
-            "maxLength" : 19,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9]*$",
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "aktørId", "periode" ],
-        "type" : "object"
-      },
-      "FinnEllerOpprettSakFnr" : {
-        "properties" : {
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "saksnummer" : {
-            "maxLength" : 19,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[a-zA-Z0-9]*$",
-            "type" : "string"
-          },
-          "søker" : {
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "nullable" : true,
-            "pattern" : "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "periode", "søker" ],
-        "type" : "object"
-      },
       "FinnSak" : {
         "properties" : {
           "aktørId" : {
@@ -1773,6 +1637,9 @@
           "$ref" : "#/components/schemas/Hendelse"
         }, {
           "properties" : {
+            "barnIdent" : {
+              "type" : "string"
+            },
             "fødselsdato" : {
               "format" : "date",
               "type" : "string"
@@ -1783,7 +1650,7 @@
           },
           "type" : "object"
         } ],
-        "required" : [ "fødselsdato", "hendelseInfo" ],
+        "required" : [ "barnIdent", "fødselsdato", "hendelseInfo" ],
         "type" : "object"
       },
       "GjenopptaBehandlingDto" : {
@@ -6633,97 +6500,6 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/fordel/fagsak/opprett" : {
-      "post" : {
-        "description" : "Finn eller opprett ny sak.",
-        "operationId" : "opprettSak",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FinnEllerOpprettSak"
-              }
-            }
-          },
-          "description" : "Oppretter fagsak"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SaksnummerDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eller opprett ny fagsak",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/fordel/fagsak/opprett/fnr" : {
-      "post" : {
-        "deprecated" : true,
-        "description" : "Finn eller opprett ny sak basert på D-/fødselsnummer.",
-        "operationId" : "opprettSakMedFnr",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FinnEllerOpprettSakFnr"
-              }
-            }
-          },
-          "description" : "Oppretter fagsak"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/SaksnummerDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eller opprett ny fagsak basert på D-/fødselsnummer.",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/fordel/fagsak/opprett/journalpost" : {
-      "post" : {
-        "description" : "Finn eller opprett sak med gitt saksnummer og motta ny journalpost",
-        "operationId" : "opprettSakOgMottaJournalpost",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/AbacJournalpostMottakOpprettSakDto"
-              }
-            }
-          },
-          "description" : "Krever saksnummer, journalpostId, aktørId, periode og ytelseType"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "type" : "void"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eller opprett sak med gitt saksnummer og motta ny journalpost",
-        "tags" : [ "fordel" ]
-      }
-    },
     "/fordel/fagsak/sok" : {
       "post" : {
         "description" : "Finn eksisterende sak.",
@@ -6751,39 +6527,6 @@
           }
         },
         "summary" : "Finn eksisterende fagsak",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/fordel/journalposter" : {
-      "post" : {
-        "description" : "Ny journalpost skal behandles.",
-        "operationId" : "mottaJournalposter",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "items" : {
-                  "$ref" : "#/components/schemas/AbacJournalpostMottakDto"
-                },
-                "type" : "array"
-              }
-            }
-          },
-          "description" : "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "type" : "void"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)",
         "tags" : [ "fordel" ]
       }
     },
