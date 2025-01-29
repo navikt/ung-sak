@@ -81,7 +81,6 @@ public class InnhentDokumentTjenesteTest {
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
-    private DokumentmottakerFelles dokumentmottakerFelles;
 
     @BeforeEach
     public void oppsett() {
@@ -89,13 +88,8 @@ public class InnhentDokumentTjenesteTest {
 
         MockitoAnnotations.initMocks(this);
 
-        dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(
-            prosessTaskTjeneste,
-            historikkinnslagTjeneste));
-
         innhentDokumentTjeneste = Mockito.spy(new InnhentDokumentTjeneste(
             new UnitTestLookupInstanceImpl<>(dokumentmottaker),
-            dokumentmottakerFelles,
             behandlingsoppretter,
             repositoryProvider,
             behandlingProsesseringTjeneste,
@@ -106,89 +100,19 @@ public class InnhentDokumentTjenesteTest {
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
         when(behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(any(Behandling.class), anyBoolean(), anyBoolean())).thenReturn(new ProsessTaskGruppe());
 
-        when(dokumentmottaker.getBehandlingÅrsakType(Brevkode.INNTEKTSMELDING)).thenReturn(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+        when(dokumentmottaker.getBehandlingÅrsakType(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)).thenReturn(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT);
     }
 
-    @Test
-    public void skal_oppdatere_ukomplett_behandling_med_IM_dersom_fagsak_har_avsluttet_behandling_og_åpen_behandling_og_kompletthet_ikke_passert() {
-        // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        behandling.avsluttBehandling();
-        BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, behandlingLås);
-
-        TestScenarioBuilder revurderingScenario = TestScenarioBuilder.builderMedSøknad()
-            .medFagsakId(behandling.getFagsakId())
-            .medBehandlingStegStart(BehandlingStegType.VURDER_UTLAND)
-            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
-        Behandling revurderingBehandling = revurderingScenario.lagre(repositoryProvider);
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
-
-        // Act
-        innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
-
-        // Assert
-        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false, false);
-        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
-    }
 
     @Test
-    public void skal_oppdatere_behandling_vurdere_kompletthet_og_spole_til_nytt_startpunkt_dersom_fagsak_har_avsluttet_behandling_har_åpen_behandling_og_kompletthet_passert() {
-        // Arrange - opprette avsluttet førstegangsbehandling
-        var scenario = TestScenarioBuilder.builderMedSøknad();
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        behandling.avsluttBehandling();
-        BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
-        behandlingRepository.lagre(behandling, behandlingLås);
-
-        // Arrange - opprette revurdering som har passert kompletthet
-        TestScenarioBuilder revurderingScenario = TestScenarioBuilder.builderMedSøknad()
-            .medFagsakId(behandling.getFagsakId())
-            .medBehandlingStegStart(BehandlingStegType.FORESLÅ_VEDTAK)
-            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
-        Behandling revurderingBehandling = revurderingScenario.lagre(repositoryProvider);
-
-        // Arrange - bygg dok
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(revurderingBehandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
-
-        // Act
-        innhentDokumentTjeneste.mottaDokument(revurderingBehandling.getFagsak(), List.of(mottattDokument));
-
-        // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(revurderingBehandling, false, false);
-        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), revurderingBehandling);
-    }
-
-    @Test
-    public void skal_lagre_dokument_og_vurdere_kompletthet_dersom_inntektsmelding_på_åpen_behandling() {
-        // Arrange - opprette åpen behandling
-        var scenario = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingStegStart(BehandlingStegType.INNHENT_SØKNADOPP);
-        Behandling behandling = scenario.lagre(repositoryProvider);
-        opprettAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD, LocalDateTime.now());
-
-        // Arrange - bygg dok
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
-
-        // Act
-        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
-
-        // Assert - sjekk flyt
-        verify(behandlingProsesseringTjeneste).opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, false, false);
-        verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), behandling);
-    }
-
-    @Test
-    public void skal_lagre_dokument_og_vurdere_kompletthet_dersom_inntektsmelding_etterlyst() {
+    public void skal_lagre_dokument__dersom_inntektrapportering_på_åpen_behandling() {
         // Arrange - opprette åpen behandling
         var scenario = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingStegStart(BehandlingStegType.INNHENT_REGISTEROPP);
         Behandling behandling = scenario.lagre(repositoryProvider);
-        opprettAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING, LocalDateTime.now().plusDays(1));
 
         // Arrange - bygg dok
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
+        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING);
 
         // Act
         innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
@@ -199,7 +123,7 @@ public class InnhentDokumentTjenesteTest {
     }
 
     @Test
-    public void skal_opprette_revurdering_dersom_inntektsmelding_på_avsluttet_behandling() {
+    public void skal_opprette_revurdering_dersom_inntektrapportering_på_avsluttet_behandling() {
         // Arrange - opprette avsluttet førstegangsbehandling
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
@@ -213,8 +137,8 @@ public class InnhentDokumentTjenesteTest {
         when(revurdering.getFagsak()).thenReturn(behandling.getFagsak());
         when(revurdering.getAktørId()).thenReturn(behandling.getAktørId());
 
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.INNTEKTSMELDING);
-        when(behandlingsoppretter.opprettNyBehandlingFra(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).thenReturn(revurdering);
+        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(behandling.getFagsakId(), "", now(), "123", Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING);
+        when(behandlingsoppretter.opprettNyBehandlingFra(behandling, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)).thenReturn(revurdering);
 
         // Act
         innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(mottattDokument));
@@ -227,7 +151,7 @@ public class InnhentDokumentTjenesteTest {
     public void skal_opprette_førstegangsbehandling() {
 
         Fagsak fagsak = DokumentmottakTestUtil.byggFagsak(AktørId.dummy(), new Saksnummer("123"), fagsakRepository);
-        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(123L, "", now(), "123", Brevkode.INNTEKTSMELDING);
+        MottattDokument mottattDokument = DokumentmottakTestUtil.byggMottattDokument(123L, "", now(), "123", Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING);
         Behandling førstegangsbehandling = mock(Behandling.class);
         when(førstegangsbehandling.getFagsak()).thenReturn(fagsak);
         when(førstegangsbehandling.getAktørId()).thenReturn(AktørId.dummy());
@@ -242,12 +166,4 @@ public class InnhentDokumentTjenesteTest {
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), førstegangsbehandling);
     }
 
-    private Aksjonspunkt opprettAksjonspunkt(Behandling behandling,
-                                             AksjonspunktDefinisjon aksjonspunktDefinisjon,
-                                             LocalDateTime frist) {
-
-        Aksjonspunkt aksjonspunkt = aksjonspunktRepository.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
-        aksjonspunktRepository.setFrist(aksjonspunkt, frist, Venteårsak.UDEFINERT, null);
-        return aksjonspunkt;
-    }
 }

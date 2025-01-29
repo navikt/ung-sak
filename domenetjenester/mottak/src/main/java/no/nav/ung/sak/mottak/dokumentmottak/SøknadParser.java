@@ -1,14 +1,11 @@
 package no.nav.ung.sak.mottak.dokumentmottak;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
-
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+
+import java.util.Objects;
 
 @Dependent
 public class SøknadParser {
@@ -21,11 +18,5 @@ public class SøknadParser {
         } catch (Exception e) {
             throw new DokumentValideringException("Parsefeil i søknad", e);
         }
-    }
-
-    public Collection<Søknad> parseSøknader(Collection<MottattDokument> mottatteDokumenter) {
-        return mottatteDokumenter.stream()
-            .map(this::parseSøknad)
-            .collect(Collectors.toList());
     }
 }

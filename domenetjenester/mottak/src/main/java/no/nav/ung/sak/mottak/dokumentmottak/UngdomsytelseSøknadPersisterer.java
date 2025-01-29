@@ -56,10 +56,10 @@ public class UngdomsytelseSøknadPersisterer {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    public void lagreSøknadsperioder(List<Periode> søknadsperioder, JournalpostId journalpostId, Long behandlingId) {
+    public void lagreSøknadsperioder(List<LocalDate> startDatoer, JournalpostId journalpostId, Long behandlingId) {
         final List<UngdomsytelseSøktStartdato> søknadsperiodeliste = new ArrayList<>();
-        søknadsperioder.stream()
-            .map(s -> new UngdomsytelseSøktStartdato(s.getFraOgMed(), journalpostId))
+        startDatoer.stream()
+            .map(it -> new UngdomsytelseSøktStartdato(it, journalpostId))
             .forEach(søknadsperiodeliste::add);
 
         ungdomsytelseStartdatoRepository.lagre(behandlingId, søknadsperiodeliste);

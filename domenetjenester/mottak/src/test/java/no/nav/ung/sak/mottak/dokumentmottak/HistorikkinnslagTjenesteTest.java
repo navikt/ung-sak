@@ -57,7 +57,7 @@ public class HistorikkinnslagTjenesteTest {
         Behandling behandling = scenario.lagMocked();
         // Arrange
 
-        String brevkode = Brevkode.PLEIEPENGER_BARN_SOKNAD.getOffisiellKode();
+        String brevkode = Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode();
         var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL, Variantformat.ARKIV);
         var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL);
         var respons = new Journalpost();
@@ -88,13 +88,13 @@ public class HistorikkinnslagTjenesteTest {
     }
 
     @Test
-    public void skalLagreHistorikkinnslagForInntektsmelding() {
+    public void skalLagreHistorikkinnslagForInntektrapportering() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
 
         Behandling behandling = scenario.lagMocked();
         // Arrange
 
-        String brevkode = Brevkode.INNTEKTSMELDING.getOffisiellKode();
+        String brevkode = Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode();
         var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL, Variantformat.ARKIV);
         var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL);
         var respons = new Journalpost();
@@ -118,7 +118,7 @@ public class HistorikkinnslagTjenesteTest {
         assertThat(dokumentLinker).hasSize(2);
         assertThat(dokumentLinker.get(0).getDokumentId()).isEqualTo(HOVEDDOKUMENT_DOKUMENT_ID);
         assertThat(dokumentLinker.get(0).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
-        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Inntektsmelding");
+        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Inntektsrapportering");
         assertThat(dokumentLinker.get(1).getDokumentId()).isEqualTo(VEDLEGG_DOKUMENT_ID);
         assertThat(dokumentLinker.get(1).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
         assertThat(dokumentLinker.get(1).getLinkTekst()).isEqualTo("Vedlegg");

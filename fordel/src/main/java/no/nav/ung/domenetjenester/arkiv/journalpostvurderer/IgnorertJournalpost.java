@@ -63,6 +63,7 @@ public class IgnorertJournalpost implements Journalpostvurderer {
 
     private boolean ignorer(Vurderingsgrunnlag vurderingsgrunnlag) {
         var brevkode = vurderingsgrunnlag.journalpostInfo().getBrevkode();
-        return brevkode == null || !brevkode.equals(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode());
+        return brevkode == null ||
+            !(brevkode.equals(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode()) || brevkode.equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode()));
     }
 }

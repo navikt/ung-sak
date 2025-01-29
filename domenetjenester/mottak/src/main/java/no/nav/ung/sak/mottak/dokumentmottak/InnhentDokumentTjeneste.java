@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.k9.søknad.ytelse.ung.v1.UngSøknadstype;
+import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,6 @@ public class InnhentDokumentTjeneste {
 
     private final Instance<Dokumentmottaker> mottakere;
     private final Behandlingsoppretter behandlingsoppretter;
-    private final DokumentmottakerFelles dokumentMottakerFelles;
     private final BehandlingRevurderingRepository revurderingRepository;
     private final BehandlingRepository behandlingRepository;
     private final BehandlingLåsRepository behandlingLåsRepository;
@@ -59,14 +60,12 @@ public class InnhentDokumentTjeneste {
 
     @Inject
     public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
-                                   DokumentmottakerFelles dokumentMottakerFelles,
                                    Behandlingsoppretter behandlingsoppretter,
                                    BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                    ProsessTaskTjeneste prosessTaskTjeneste,
                                    FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.mottakere = mottakere;
-        this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
@@ -164,7 +163,15 @@ public class InnhentDokumentTjeneste {
     }
 
     private ProsessTaskData asynkStartBehandling(Behandling behandling) {
-        return dokumentMottakerFelles.opprettTaskForÅStarteBehandling(behandling);
+        return opprettTaskForÅStarteBehandling(behandling);
+    }
+
+
+    private ProsessTaskData opprettTaskForÅStarteBehandling(Behandling behandling) {
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(StartBehandlingTask.class);
+        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        prosessTaskData.setCallIdFraEksisterende();
+        return prosessTaskData;
     }
 
     private Boolean erBehandlingAvsluttet(Optional<Behandling> sisteYtelsesbehandling) {

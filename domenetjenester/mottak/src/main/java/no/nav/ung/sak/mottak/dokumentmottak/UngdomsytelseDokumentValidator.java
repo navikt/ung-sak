@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.søknad.ytelse.ung.v1.UngSøknadstype;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.søknad.ytelse.ung.v1.UngdomsytelseSøknadValidator;
