@@ -1,13 +1,7 @@
 package no.nav.ung.sak.formidling;
 
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -27,6 +21,10 @@ import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 @ApplicationScoped
 public class BrevGenerererTjeneste {
@@ -60,38 +58,32 @@ public class BrevGenerererTjeneste {
     public BrevGenerererTjeneste() {
     }
 
+    @WithSpan
     public GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        Instant metodeStart = Instant.now();
+        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId));
+    }
 
+    @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
+    private GenerertBrev doGenererVedtaksbrev(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (!behandling.erAvsluttet()) {
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
         }
 
-        LocalDateTimeline<DagsatsOgUtbetalingsgrad> tilkjentYtelseTidslinje =
-            tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId);
+        LocalDateTimeline<DagsatsOgUtbetalingsgrad> tilkjentYtelseTidslinje = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId);
         if (tilkjentYtelseTidslinje.isEmpty()) {
             LOG.warn("Behandling har ingen tilkjent ytelse. Støtter ikke vedtaksbrev for avslag foreløpig. BehandlingResultat={}", behandling.getBehandlingResultatType());
             return null;
         }
-
         var pdlMottaker = hentMottaker(behandling);
-
-        var innholdTid = Instant.now();
         var resultat = innvilgelseInnholdBygger.bygg(behandling);
-        LOG.info("Tid bygger: {} ms", Duration.between(innholdTid, Instant.now()).toMillis());
-
-
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
                 FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
                 resultat.templateInnholdDto()
             )
         );
-
         PdfGenDokument dokument = pdfGen.lagDokument(input);
-
-        LOG.info("Tid vedtaksbrev: {} ms", Duration.between(metodeStart, Instant.now()).toMillis());
         return new GenerertBrev(
             dokument,
             pdlMottaker,
