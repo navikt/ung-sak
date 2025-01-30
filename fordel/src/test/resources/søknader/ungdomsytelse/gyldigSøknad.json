@@ -5,10 +5,12 @@
     "mottattDato": "2019-10-20T07:15:36.124Z",
     "språk": "nb",
     "ytelse": {
-      "søknadsperiode": [
-        "2021-01-21/2021-01-31"
+      "søktFraDatoer": [
+        "2021-01-21"
       ],
-      "type": "UNGDOMSYTELSE"
+      "inntekter": null,
+      "type": "UNGDOMSYTELSE",
+      "søknadType": "DELTAKELSE_SØKNAD"
     },
     "søker": {
       "norskIdentitetsnummer": "12345678901"
