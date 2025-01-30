@@ -41,7 +41,7 @@
         <k9format.version>9.8.0</k9format.version>
         <jackson.version>2.18.2</jackson.version>
         <asm.version>9.7.1</asm.version>
-        <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
+        <kotlin-stdlib.version>2.1.10</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
         <flyway.version>11.2.0</flyway.version>
         <pdfgen-core.version>1.1.40</pdfgen-core.version>
@@ -487,7 +487,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.17.2</version>
+                <version>1.18.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
