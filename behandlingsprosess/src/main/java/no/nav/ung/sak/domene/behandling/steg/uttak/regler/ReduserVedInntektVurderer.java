@@ -7,7 +7,6 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,6 +16,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Reduserer utbetaling dersom det er rapportert inntekt. Den aldersbestemte satsen reduseres med 66% av den rapporterte inntekten omregnet til dagsats.
+ * Dagsats for rapporterte inntekter regnes ved å bruke antall virkedager i perioden den er innmeldt for.
+ */
 public class ReduserVedInntektVurderer implements UttakRegelVurderer {
 
     public static final BigDecimal REDUKSJONSGRAD = BigDecimal.valueOf(0.66);
