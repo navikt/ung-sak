@@ -70,7 +70,8 @@ public class VurderUttakSteg implements BehandlingSteg {
             .findFirst()
             .map(PersonopplysningEntitet::getDødsdato);
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato);
+        // TODO: Map verdier for sats og rapporterte inntekter
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato, LocalDateTimeline.empty(), LocalDateTimeline.empty());
         ungdomsytelseUttakPerioder.ifPresent(it -> ungdomsytelseGrunnlagRepository.lagre(behandlingId, it));
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

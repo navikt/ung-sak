@@ -1,27 +1,12 @@
 package no.nav.ung.sak.domene.behandling.steg.uttak;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.LogLevel;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
-import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.AvslagIkkeNokDagerVurderer;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.AvslagVedDødVurderer;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InnvilgetUttakVurderer;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.UttakDelResultat;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
+import no.nav.ung.sak.domene.behandling.steg.uttak.regler.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
@@ -31,7 +16,9 @@ class VurderUttakTjeneste {
 
     static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
                                                             LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
-                                                            Optional<LocalDate> søkersDødsdato) {
+                                                            Optional<LocalDate> søkersDødsdato,
+                                                            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
+                                                            LocalDateTimeline<Set<RapportertInntekt>> rapporterteInntekterTidslinje) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
@@ -41,10 +28,17 @@ class VurderUttakTjeneste {
 
         // Finner tidslinje med nok dager tilgjengelig
         List<UttakDelResultat> delresultater = new ArrayList<>();
-        final var nokDagerDelresultat = new InnvilgetUttakVurderer(godkjentePerioder, ungdomsprogramtidslinje, levendeBrukerTidslinje).vurder();
+        final var nokDagerDelresultat = new InnvilgetUttakVurderer(
+            godkjentePerioder,
+            ungdomsprogramtidslinje,
+            levendeBrukerTidslinje,
+            rapporterteInntekterTidslinje,
+            satsTidslinje).vurder();
         delresultater.add(nokDagerDelresultat);
+
         final var uttakAvslagEtterSøkersDødDelResultat = new AvslagVedDødVurderer(nokDagerDelresultat.restTidslinjeTilVurdering(), levendeBrukerTidslinje).vurder();
         delresultater.add(uttakAvslagEtterSøkersDødDelResultat);
+
         final var ikkeNokDagerPeriodeDelResultat = new AvslagIkkeNokDagerVurderer(uttakAvslagEtterSøkersDødDelResultat.restTidslinjeTilVurdering()).vurder();
         delresultater.add(ikkeNokDagerPeriodeDelResultat);
 
@@ -65,7 +59,7 @@ class VurderUttakTjeneste {
                     newMap.putAll(m1);
                     return newMap;
                 })
-                .map(it -> JsonObjectMapper.toJson(it, JsonMappingFeil.FACTORY::jsonMappingFeil))
+                .map(EvaluationPropertiesJsonMapper::mapToJson)
                 .orElse("");
     }
 
@@ -82,12 +76,6 @@ class VurderUttakTjeneste {
                 .replaceFirst(":søkersDødsdato", søkersDødsdato.map(Objects::toString).map(it -> "\"" + it + "\"").orElse("null"));
     }
 
-    interface JsonMappingFeil extends DeklarerteFeil {
 
-        JsonMappingFeil FACTORY = FeilFactory.create(JsonMappingFeil.class);
-
-        @TekniskFeil(feilkode = "UNG-34524", feilmelding = "JSON-mapping feil: %s", logLevel = LogLevel.WARN)
-        Feil jsonMappingFeil(JsonProcessingException e);
-    }
 
 }

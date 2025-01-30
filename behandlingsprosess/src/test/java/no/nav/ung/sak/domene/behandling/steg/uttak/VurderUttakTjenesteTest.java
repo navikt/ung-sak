@@ -4,12 +4,15 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.domene.behandling.steg.uttak.regler.RapportertInntekt;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -17,9 +20,12 @@ class VurderUttakTjenesteTest {
 
     private final Optional<LocalDate> INGEN_DØDSDATO = Optional.empty();
 
+    private final LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = LocalDateTimeline.empty();
+    private final LocalDateTimeline<Set<RapportertInntekt>> rapporterteInntekterTidslinje = LocalDateTimeline.empty();
+
     @Test
     void skal_returnere_tomt_resultat_dersom_ingen_vilkår_oppfylt() {
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(LocalDateTimeline.empty(), LocalDateTimeline.empty(), INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(LocalDateTimeline.empty(), LocalDateTimeline.empty(), INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isEmpty();
     }
@@ -34,7 +40,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -55,7 +61,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -76,7 +82,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(mandag_to_uker_før, søndag, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, søndag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, søndag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -98,7 +104,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(mandag_to_uker_før, fredag, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, fredag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, fredag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -119,7 +125,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -139,7 +145,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -165,7 +171,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -194,7 +200,7 @@ class VurderUttakTjenesteTest {
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom1, tom1, true),
             new LocalDateSegment<>(fom2, tom2, true)
-        )), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        )), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -228,7 +234,7 @@ class VurderUttakTjenesteTest {
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom1, tom1, true),
             new LocalDateSegment<>(fom2, tom2, true)
-        )), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        )), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -276,7 +282,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom2, tom2, true),
             new LocalDateSegment<>(fom3, tom3, true)
 
-        )), ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        )), ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -332,7 +338,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom3, tom3, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(søknadsperioder, ungdomsprogramtidslinje, INGEN_DØDSDATO);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(søknadsperioder, ungdomsprogramtidslinje, INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(2);
@@ -361,7 +367,7 @@ class VurderUttakTjenesteTest {
         ));
 
         var dødsdato = fom.plusWeeks(10);
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, Optional.of(dødsdato));
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, Optional.of(dødsdato), satsTidslinje, rapporterteInntekterTidslinje);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
