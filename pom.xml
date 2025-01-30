@@ -38,7 +38,7 @@
         <felles.version>4.4.7</felles.version>
         <swagger.version>2.2.28</swagger.version>
         <junit.version>5.11.4</junit.version>
-        <k9format.version>9.8.0</k9format.version>
+        <k9format.version>10.1.1</k9format.version>
         <jackson.version>2.18.2</jackson.version>
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.1.10</kotlin-stdlib.version>
@@ -330,11 +330,6 @@
                 <artifactId>innsyn</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
-           <dependency>
-                <groupId>no.nav.k9</groupId>
-                <artifactId>inntektsmelding-v1</artifactId>
-                <version>${k9format.version}</version>
-            </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>formidling</artifactId>
@@ -458,11 +453,6 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
                 <version>3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.5</version>
             </dependency>
             <dependency>
                 <groupId>org.xerial.snappy</groupId>

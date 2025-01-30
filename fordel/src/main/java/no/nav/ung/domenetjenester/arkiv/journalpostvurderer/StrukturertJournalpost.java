@@ -60,7 +60,8 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Override
     public boolean skalVurdere(Vurderingsgrunnlag vurderingsgrunnlag) {
-        return vurderingsgrunnlag.journalpostInfo().getBrevkode().equals(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode());
+        return vurderingsgrunnlag.journalpostInfo().getBrevkode().equals(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode()) ||
+            vurderingsgrunnlag.journalpostInfo().getBrevkode().equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode());
     }
 
     private void mapBrevkodeInformasjon(MottattMelding dataWrapper, JournalpostInfo journalpostInfo) {

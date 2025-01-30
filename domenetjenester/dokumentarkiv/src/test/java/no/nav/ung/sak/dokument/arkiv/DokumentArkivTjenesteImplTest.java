@@ -132,9 +132,9 @@ public class DokumentArkivTjenesteImplTest {
     }
 
     @Test
-    public void skalRetunereDokumenttypeInntektsmelding() {
+    public void skalRetunereDokumenttypeInntektsrapportering() {
         Journalpost journalpost = byggJournalpostMedFlereDokumenter(List.of(
-            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.INNTEKTSMELDING),
+            byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING),
             byggDokumentInfo(ArkivFilType.PDF, Variantformat.ARKIV, Brevkode.UDEFINERT)
         ));
         Dokumentoversikt dokumentoversikt = new Dokumentoversikt(List.of(journalpost), null);

@@ -1,0 +1,24 @@
+{
+  "versjon": "1.0.0",
+  "søknadId": "123214",
+  "mottattDato": "2019-10-20T07:15:36.124Z",
+  "språk": "nb",
+  "ytelse": {
+    "søktFraDatoer": [],
+    "inntekter": {
+      "oppgittePeriodeinntekter": [
+        {
+          "periode": "2021-01-21/2021-01-31",
+          "arbeidstakerOgFrilansInntekt": 100,
+          "næringsinntekt": null,
+          "ytelse": null
+        }
+      ]
+    },
+    "type": "UNGDOMSYTELSE",
+    "søknadType": "RAPPORTERING_SØKNAD"
+  },
+  "søker": {
+    "norskIdentitetsnummer": "12345678901"
+  }
+}

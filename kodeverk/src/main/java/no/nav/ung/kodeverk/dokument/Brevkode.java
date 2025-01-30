@@ -31,6 +31,7 @@ public class Brevkode implements Kodeverdi {
 
     public static final int VEDLEGG_RANGERING = 99;
     public static final int INNTEKTSMELDING_RANGERING = 10;
+    public static final int INNTEKTRAPPORTERING_RANGERING = 10;
     public static final int SØKNAD_RANGERING = 1;
 
     public static final String SØKNAD_OMS_UTVIDETRETT_MA_KODE = "SØKNAD_OMS_UTVIDETRETT_MA";
@@ -47,7 +48,6 @@ public class Brevkode implements Kodeverdi {
     public static final String FRAVÆRSKORRIGERING_IM_OMS_KODE = "FRAVÆRSKORRIGERING_IM_OMS";
     public static final String INNTEKTSMELDING_KODE = "INNTEKTSMELDING";
     // Match mot Deprecated {@link no.nav.ung.kodeverk.dokument.DokumentTypeId}
-    public static final Brevkode INNTEKTSMELDING = new Brevkode(INNTEKTSMELDING_KODE, "4936", INNTEKTSMELDING_RANGERING);
     public static final Brevkode LEGEERKLÆRING = new Brevkode("LEGEERKLÆRING", "I000023", VEDLEGG_RANGERING);
     public static final Brevkode INNTEKTKOMP_FRILANS = new Brevkode("INNTEKTKOMP_FRILANS", "NAV 00-03.02", SØKNAD_RANGERING);
     /**
@@ -91,6 +91,8 @@ public class Brevkode implements Kodeverdi {
      */
     public static final String UNGDOMSYTELSE_SOKNAD_KODE = "UNGDOMSYTELSE_SOKNAD";
     public static final Brevkode UNGDOMSYTELSE_SOKNAD = new Brevkode(UNGDOMSYTELSE_SOKNAD_KODE, "UNG Søknad", SØKNAD_RANGERING);
+    public static final String UNGDOMSYTELSE_INNTEKTRAPPORTERING_KODE = "UNGDOMSYTELSE_INNTEKTRAPPORTERING";
+    public static final Brevkode UNGDOMSYTELSE_INNTEKTRAPPORTERING = new Brevkode(UNGDOMSYTELSE_INNTEKTRAPPORTERING_KODE, "UNG Inntektrapportering", INNTEKTRAPPORTERING_RANGERING);
 
 
     // Default
@@ -99,6 +101,8 @@ public class Brevkode implements Kodeverdi {
     private String offisiellKode;
 
     public static final Set<Brevkode> SØKNAD_TYPER = Set.of(
+        UNGDOMSYTELSE_SOKNAD,
+        // TODO: FJERN DISSE
         PLEIEPENGER_BARN_SOKNAD,
         OPPLÆRINGSPENGER_SOKNAD,
         SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE,
@@ -109,16 +113,6 @@ public class Brevkode implements Kodeverdi {
         SØKNAD_OMS_UTVIDETRETT_MA,
         SØKNAD_OMS_UTVIDETRETT_AO,
         INNTEKTKOMP_FRILANS);
-
-    public static final Set<Brevkode> ETTERSENDELSE_TYPER = Set.of(
-        ETTERSENDELSE_PLEIEPENGER_SYKT_BARN,
-        ETTERSENDELSE_PLEIEPENGER_LIVETS_SLUTTFASE,
-        ETTERSENDELSE_UTBETALING_OMS,
-        ETTERSENDELSE_UTBETALING_OMS_AT,
-        ETTERSENDELSE_OMS_UTVIDETRETT_KS,
-        ETTERSENDELSE_OMS_UTVIDETRETT_MA,
-        ETTERSENDELSE_OMS_UTVIDETRETT_AO
-        );
 
     @JsonValue
     private String kode;

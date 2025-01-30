@@ -86,6 +86,10 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     //ungdomsytelsespesifikt
     RE_TRIGGER_BEREGNING_HØY_SATS("RE_TRIGGER_BEREGNING_HØY_SATS", "Beregn høy sats"),
 
+    // Innrapportering av inntekt
+    RE_RAPPORTERING_INNTEKT("RE-RAPPORTERING-INNTEKT", "Rapportering av inntekt"),
+
+
     UDEFINERT("-", "Ikke definert"),
 
     ;

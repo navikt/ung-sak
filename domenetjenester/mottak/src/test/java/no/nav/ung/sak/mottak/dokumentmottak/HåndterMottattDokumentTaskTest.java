@@ -42,8 +42,6 @@ class HåndterMottattDokumentTaskTest {
 
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     @Inject
-    private DokumentmottakerFelles dokumentmottakerFelles;
-    @Inject
     private Behandlingsoppretter behandlingsoppretter;
     @Inject
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
@@ -93,7 +91,6 @@ class HåndterMottattDokumentTaskTest {
 
         innhentDokumentTjeneste = new InnhentDokumentTjeneste(
             new UnitTestLookupInstanceImpl<>(dokumentmottaker),
-            dokumentmottakerFelles,
             behandlingsoppretter,
             behandlingRepositoryProvider,
             null,
