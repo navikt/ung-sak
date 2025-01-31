@@ -23,18 +23,15 @@ public class InnvilgetUttakVurderer implements UttakRegelVurderer {
 
     private final LocalDateTimeline<Boolean> perioderTilVurdering;
     private final LocalDateTimeline<Boolean> ungdomsprogramtidslinje;
-    private final LocalDateTimeline<Boolean> levendeBrukerTidslinje;
     private final LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje;
     private final LocalDateTimeline<UngdomsytelseSatser> satstidslinje;
 
     public InnvilgetUttakVurderer(LocalDateTimeline<Boolean> perioderTilVurdering,
                                   LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
-                                  LocalDateTimeline<Boolean> levendeBrukerTidslinje,
                                   LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje,
                                   LocalDateTimeline<UngdomsytelseSatser> satstidslinje) {
         this.perioderTilVurdering = perioderTilVurdering;
         this.ungdomsprogramtidslinje = ungdomsprogramtidslinje;
-        this.levendeBrukerTidslinje = levendeBrukerTidslinje;
         this.rapportertInntektTidslinje = rapportertInntektTidslinje;
         this.satstidslinje = satstidslinje;
     }
@@ -47,14 +44,17 @@ public class InnvilgetUttakVurderer implements UttakRegelVurderer {
     private UttakDelResultat finnResultatNokDager() {
         final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(ungdomsprogramtidslinje);
         final var tidslinjeNokDagerTilVurdering = vurderAntallDagerResultat.tidslinjeNokDager().intersection(perioderTilVurdering);
-        var tidslinjeNokDagerOgUtbetaling = finnTidslinjeNokDagerOgUtbetaling(tidslinjeNokDagerTilVurdering, levendeBrukerTidslinje);
+
+
         final var uttakPerioder = new ArrayList<UngdomsytelseUttakPeriode>();
-        final var redusertUtbetalingsgradResultat = new ReduserVedInntektVurderer(tidslinjeNokDagerOgUtbetaling, rapportertInntektTidslinje, satstidslinje).vurder();
+        final var redusertUtbetalingsgradResultat = new ReduserVedInntektVurderer(tidslinjeNokDagerTilVurdering, rapportertInntektTidslinje, satstidslinje).vurder();
+
+
         uttakPerioder.addAll(redusertUtbetalingsgradResultat.resultatPerioder());
         uttakPerioder.addAll(mapTilUttakPerioderMedNokDagerOgUtbetaling(redusertUtbetalingsgradResultat.restTidslinjeTilVurdering()));
         return new UttakDelResultat(
             uttakPerioder,
-            perioderTilVurdering.disjoint(tidslinjeNokDagerOgUtbetaling),
+            perioderTilVurdering.disjoint(tidslinjeNokDagerTilVurdering),
             Map.of("perioderNokDager", vurderAntallDagerResultat.tidslinjeNokDager().getLocalDateIntervals().toString(),
                 "forbrukteDager", String.valueOf(vurderAntallDagerResultat.forbrukteDager()),
                 "redusertUtbetalingsgrad", EvaluationPropertiesJsonMapper.mapToJson(redusertUtbetalingsgradResultat.regelSporing()))
@@ -67,12 +67,6 @@ public class InnvilgetUttakVurderer implements UttakRegelVurderer {
             .stream()
             .map(p -> new UngdomsytelseUttakPeriode(BigDecimal.valueOf(100), DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())))
             .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private static LocalDateTimeline<Boolean> finnTidslinjeNokDagerOgUtbetaling(LocalDateTimeline<Boolean> tidslinjeNokDagerTilVurdering,
-                                                                                LocalDateTimeline<Boolean> levendeBrukerTidslinje) {
-        return tidslinjeNokDagerTilVurdering
-            .intersection(levendeBrukerTidslinje);
     }
 
 

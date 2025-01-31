@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.uttak;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.*;
 
@@ -25,25 +26,26 @@ class VurderUttakTjeneste {
 
         var levendeBrukerTidslinje = søkersDødsdato.map(d -> new LocalDateTimeline<>(TIDENES_BEGYNNELSE, d, true)).orElse(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, TIDENES_ENDE, true));
 
+        List<UttakDelResultat> delresultater = new ArrayList<>();
+        // Finner avslag ved dødsfall
+        final var uttakAvslagEtterSøkersDødDelResultat = new AvslagVedDødVurderer(godkjentePerioder, levendeBrukerTidslinje).vurder();
+        delresultater.add(uttakAvslagEtterSøkersDødDelResultat);
 
         // Finner tidslinje med nok dager tilgjengelig
-        List<UttakDelResultat> delresultater = new ArrayList<>();
         final var nokDagerDelresultat = new InnvilgetUttakVurderer(
-            godkjentePerioder,
+            uttakAvslagEtterSøkersDødDelResultat.restTidslinjeTilVurdering(),
             ungdomsprogramtidslinje,
-            levendeBrukerTidslinje,
             rapporterteInntekterTidslinje,
             satsTidslinje).vurder();
         delresultater.add(nokDagerDelresultat);
 
-        final var uttakAvslagEtterSøkersDødDelResultat = new AvslagVedDødVurderer(nokDagerDelresultat.restTidslinjeTilVurdering(), levendeBrukerTidslinje).vurder();
-        delresultater.add(uttakAvslagEtterSøkersDødDelResultat);
-
-        final var ikkeNokDagerPeriodeDelResultat = new AvslagIkkeNokDagerVurderer(uttakAvslagEtterSøkersDødDelResultat.restTidslinjeTilVurdering()).vurder();
+        // Resterende perioder avslås pga ikke nok dager
+        final var ikkeNokDagerPeriodeDelResultat = new AvslagIkkeNokDagerVurderer(nokDagerDelresultat.restTidslinjeTilVurdering()).vurder();
         delresultater.add(ikkeNokDagerPeriodeDelResultat);
 
         final var uttakPerioder = delresultater.stream().map(UttakDelResultat::resultatPerioder)
                 .flatMap(List::stream)
+            .sorted(Comparator.comparing(UngdomsytelseUttakPeriode::getPeriode))
                 .toList();
 
         var ungdomsytelseUttakPerioder = new UngdomsytelseUttakPerioder(uttakPerioder);
