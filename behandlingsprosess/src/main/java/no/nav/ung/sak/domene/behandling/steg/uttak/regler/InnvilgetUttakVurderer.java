@@ -24,12 +24,12 @@ public class InnvilgetUttakVurderer implements UttakRegelVurderer {
     private final LocalDateTimeline<Boolean> perioderTilVurdering;
     private final LocalDateTimeline<Boolean> ungdomsprogramtidslinje;
     private final LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje;
-    private final LocalDateTimeline<UngdomsytelseSatser> satstidslinje;
+    private final LocalDateTimeline<BigDecimal> satstidslinje;
 
     public InnvilgetUttakVurderer(LocalDateTimeline<Boolean> perioderTilVurdering,
                                   LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
                                   LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje,
-                                  LocalDateTimeline<UngdomsytelseSatser> satstidslinje) {
+                                  LocalDateTimeline<BigDecimal> satstidslinje) {
         this.perioderTilVurdering = perioderTilVurdering;
         this.ungdomsprogramtidslinje = ungdomsprogramtidslinje;
         this.rapportertInntektTidslinje = rapportertInntektTidslinje;
@@ -47,8 +47,8 @@ public class InnvilgetUttakVurderer implements UttakRegelVurderer {
 
 
         final var uttakPerioder = new ArrayList<UngdomsytelseUttakPeriode>();
+        // Reduksjon ved rapportert inntekt
         final var redusertUtbetalingsgradResultat = new ReduserVedInntektVurderer(tidslinjeNokDagerTilVurdering, rapportertInntektTidslinje, satstidslinje).vurder();
-
 
         uttakPerioder.addAll(redusertUtbetalingsgradResultat.resultatPerioder());
         uttakPerioder.addAll(mapTilUttakPerioderMedNokDagerOgUtbetaling(redusertUtbetalingsgradResultat.restTidslinjeTilVurdering()));

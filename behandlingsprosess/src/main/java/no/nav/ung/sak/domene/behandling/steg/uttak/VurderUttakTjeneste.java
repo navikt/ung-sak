@@ -6,6 +6,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -18,7 +19,7 @@ class VurderUttakTjeneste {
     static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
                                                             LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
                                                             Optional<LocalDate> søkersDødsdato,
-                                                            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
+                                                            LocalDateTimeline<BigDecimal> satsTidslinje,
                                                             LocalDateTimeline<Set<RapportertInntekt>> rapporterteInntekterTidslinje) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();

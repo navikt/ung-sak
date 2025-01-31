@@ -20,7 +20,7 @@ class VurderUttakTjenesteTest {
 
     private final Optional<LocalDate> INGEN_DØDSDATO = Optional.empty();
 
-    private final LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = LocalDateTimeline.empty();
+    private final LocalDateTimeline<BigDecimal> satsTidslinje = LocalDateTimeline.empty();
     private final LocalDateTimeline<Set<RapportertInntekt>> rapporterteInntekterTidslinje = LocalDateTimeline.empty();
 
     @Test
