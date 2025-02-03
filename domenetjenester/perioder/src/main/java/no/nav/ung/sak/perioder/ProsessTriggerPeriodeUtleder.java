@@ -18,7 +18,8 @@ public class ProsessTriggerPeriodeUtleder {
         BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
         BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
-        BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS
+        BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
+        BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT
     );
     private final ProsessTriggereRepository prosessTriggereRepository;
 
