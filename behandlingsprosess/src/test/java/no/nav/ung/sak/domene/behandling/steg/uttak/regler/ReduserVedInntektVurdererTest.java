@@ -21,8 +21,8 @@ class ReduserVedInntektVurdererTest {
     @Test
     void skal_returnere_ingen_perioder_ved_tom_tidslinje_til_vurdering() {
 
-        final var fom = LocalDate.now();
-        final var tom = LocalDate.now();
+        final var fom = LocalDate.of(2025, 1, 31);
+        final var tom = LocalDate.of(2025, 1, 31);
         final var resultat = new ReduserVedInntektVurderer(
             LocalDateTimeline.empty(),
             new LocalDateTimeline<>(fom, tom, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.TEN))),
@@ -44,8 +44,8 @@ class ReduserVedInntektVurdererTest {
     @Test
     void skal_returnere_periode_på_en_dag_med_likt_beløp_for_rapportert_inntekt_og_dagsats() {
         // Arrange
-        final var fom = LocalDate.now();
-        final var tom = LocalDate.now();
+        final var fom = LocalDate.of(2025, 1, 31);
+        final var tom = LocalDate.of(2025, 1, 31);
         final var tidslinjeTilVurdering = new LocalDateTimeline<>(fom, tom, true);
         final var rapportertInntektTidslinje = new LocalDateTimeline<>(fom, tom, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(100))));
         final var aldersbestemtSatsTidslinje = new LocalDateTimeline<>(fom, tom, BigDecimal.valueOf(100));
