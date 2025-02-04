@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.RapportertInntekt;
@@ -29,7 +28,6 @@ public class RapportertInntektMapper {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
-
     public LocalDateTimeline<Set<RapportertInntekt>> map(Long behandlingId) {
         // Henter iay-grunnlag (kall til abakus)
         final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
@@ -37,7 +35,6 @@ public class RapportertInntektMapper {
         final var sorterteInntekttidslinjerPåMottattdato = finnSorterteInntektstidslinjer(iayGrunnlag);
 
         var resultatTidslinje = new LocalDateTimeline<Set<RapportertInntekt>>(List.of());
-
         for (InntektForMottattidspunkt journalpostMedInntekttidslinje : sorterteInntekttidslinjerPåMottattdato) {
             // Dersom vi ikke allerede har lagt til en rapportert inntekt for perioden legger vi den til i resultattidslinjen
             if (!resultatTidslinje.intersects(journalpostMedInntekttidslinje.tidslinje())) {
@@ -45,7 +42,6 @@ public class RapportertInntektMapper {
                 resultatTidslinje = resultatTidslinje.crossJoin(journalpostMedInntekttidslinje.tidslinje());
             }
         }
-
 
         return resultatTidslinje;
     }
@@ -58,12 +54,10 @@ public class RapportertInntektMapper {
             .toList();
     }
 
-
     private static InntektForMottattidspunkt finnInntekterPrMottattidspunkt(OppgittOpptjening o) {
         final var res = new ArrayList<LocalDateSegment<Set<RapportertInntekt>>>();
         res.addAll(finnArbeidOgFrilansSegmenter(o));
         res.addAll(finnNæringssegmenter(o));
-
         return new InntektForMottattidspunkt(o.getInnsendingstidspunkt(), new LocalDateTimeline<>(res, StandardCombinators::union));
     }
 
@@ -86,7 +80,6 @@ public class RapportertInntektMapper {
                     it.getInntekt())
                 ))).toList();
     }
-
 
     private record InntektForMottattidspunkt(LocalDateTime mottattTidspunkt,
                                              LocalDateTimeline<Set<RapportertInntekt>> tidslinje

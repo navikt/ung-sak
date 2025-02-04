@@ -2,19 +2,15 @@ package no.nav.ung.sak.domene.behandling.steg.uttak.regler;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
-import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ReduserVedInntektVurdererTest {
 
@@ -24,12 +20,11 @@ class ReduserVedInntektVurdererTest {
         final var fom = LocalDate.of(2025, 1, 31);
         final var tom = LocalDate.of(2025, 1, 31);
         final var resultat = new ReduserVedInntektVurderer(
-            LocalDateTimeline.empty(),
             new LocalDateTimeline<>(fom, tom, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.TEN))),
             new LocalDateTimeline<>(fom, tom, BigDecimal.TEN)
-        ).vurder();
+        ).vurder(LocalDateTimeline.empty());
 
-        assertThat(resultat.resultatPerioder().size()).isEqualTo(0);
+        assertThat(resultat.resultatTidslinje().size()).isEqualTo(0);
         assertThat(resultat.restTidslinjeTilVurdering().isEmpty()).isTrue();
         assertThat(resultat.regelSporing().get("inntektdagsatsperioder")).isEqualTo(
             """
@@ -52,17 +47,12 @@ class ReduserVedInntektVurdererTest {
 
         // Act
         final var resultat = new ReduserVedInntektVurderer(
-            tidslinjeTilVurdering,
             rapportertInntektTidslinje,
             aldersbestemtSatsTidslinje
-        ).vurder();
+        ).vurder(tidslinjeTilVurdering);
 
         // Assert
-        assertThat(resultat.resultatPerioder().size()).isEqualTo(1);
-        final var uttakPeriode = resultat.resultatPerioder().get(0);
-        assertThat(uttakPeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(34))).isEqualTo(0);
-        assertThat(uttakPeriode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
-
+        sammenlignTidslinjer(new LocalDateTimeline<>(fom, tom, UttakResultat.forInnvilgelse(BigDecimal.valueOf(34))), resultat.resultatTidslinje());
         assertThat(resultat.restTidslinjeTilVurdering().isEmpty()).isTrue();
         assertThat(resultat.regelSporing().get("inntektdagsatsperioder")).isEqualTo(
             """
@@ -88,21 +78,16 @@ class ReduserVedInntektVurdererTest {
 
         // Act
         final var resultat = new ReduserVedInntektVurderer(
-            tidslinjeTilVurdering,
             rapportertInntektTidslinje,
             aldersbestemtSatsTidslinje
-        ).vurder();
+        ).vurder(tidslinjeTilVurdering);
 
         // Assert
-        assertThat(resultat.resultatPerioder().size()).isEqualTo(2);
-        final var uttakPeriode = resultat.resultatPerioder().get(0);
-        assertThat(uttakPeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(34))).isEqualTo(0);
-        assertThat(uttakPeriode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom));
-
-        final var uttakPeriode2 = resultat.resultatPerioder().get(1);
-        assertThat(uttakPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(7.6))).isEqualTo(0);
-        assertThat(uttakPeriode2.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom.plusDays(1), tom));
-
+        final var forventetResultat = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, fom, UttakResultat.forInnvilgelse(BigDecimal.valueOf(34))),
+            new LocalDateSegment<>(fom.plusDays(1), tom, UttakResultat.forInnvilgelse(BigDecimal.valueOf(7.6)))
+        ));
+        sammenlignTidslinjer(forventetResultat, resultat.resultatTidslinje());
         assertThat(resultat.restTidslinjeTilVurdering().isEmpty()).isTrue();
         assertThat(resultat.regelSporing().get("inntektdagsatsperioder")).isEqualTo(
             """
@@ -130,21 +115,16 @@ class ReduserVedInntektVurdererTest {
 
         // Act
         final var resultat = new ReduserVedInntektVurderer(
-            tidslinjeTilVurdering,
             rapportertInntektTidslinje,
             aldersbestemtSatsTidslinje
-        ).vurder();
+        ).vurder(tidslinjeTilVurdering);
 
         // Assert
-        assertThat(resultat.resultatPerioder().size()).isEqualTo(2);
-        final var uttakPeriode = resultat.resultatPerioder().get(0);
-        assertThat(uttakPeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(34))).isEqualTo(0);
-        assertThat(uttakPeriode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom));
-
-        final var uttakPeriode2 = resultat.resultatPerioder().get(1);
-        assertThat(uttakPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(56))).isEqualTo(0);
-        assertThat(uttakPeriode2.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom.plusDays(1), tom));
-
+        final var forventetResultat = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, fom, UttakResultat.forInnvilgelse(BigDecimal.valueOf(34))),
+            new LocalDateSegment<>(fom.plusDays(1), tom, UttakResultat.forInnvilgelse(BigDecimal.valueOf(56)))
+        ));
+        sammenlignTidslinjer(forventetResultat, resultat.resultatTidslinje());
         assertThat(resultat.restTidslinjeTilVurdering().isEmpty()).isTrue();
         assertThat(resultat.regelSporing().get("inntektdagsatsperioder")).isEqualTo(
             """
@@ -166,17 +146,13 @@ class ReduserVedInntektVurdererTest {
 
         // Act
         final var resultat = new ReduserVedInntektVurderer(
-            tidslinjeTilVurdering,
             rapportertInntektTidslinje,
             aldersbestemtSatsTidslinje
-        ).vurder();
+        ).vurder(tidslinjeTilVurdering);
 
         // Assert
-        assertThat(resultat.resultatPerioder().size()).isEqualTo(1);
-        final var uttakPeriode = resultat.resultatPerioder().get(0);
-        assertThat(uttakPeriode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
-        assertThat(uttakPeriode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
-
+        final var forventetResultat = new LocalDateTimeline<>(fom, tom, UttakResultat.forInnvilgelse(BigDecimal.ZERO));
+        sammenlignTidslinjer(forventetResultat, resultat.resultatTidslinje());
         assertThat(resultat.restTidslinjeTilVurdering().isEmpty()).isTrue();
         assertThat(resultat.regelSporing().get("inntektdagsatsperioder")).isEqualTo(
             """
@@ -198,17 +174,13 @@ class ReduserVedInntektVurdererTest {
 
         // Act
         final var resultat = new ReduserVedInntektVurderer(
-            tidslinjeTilVurdering,
             rapportertInntektTidslinje,
             aldersbestemtSatsTidslinje
-        ).vurder();
+        ).vurder(tidslinjeTilVurdering);
 
         // Assert
-        assertThat(resultat.resultatPerioder().size()).isEqualTo(1);
-        final var uttakPeriode = resultat.resultatPerioder().get(0);
-        assertThat(uttakPeriode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
-        assertThat(uttakPeriode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
-
+        final var forventetResultat = new LocalDateTimeline<>(fom, tom, UttakResultat.forInnvilgelse(BigDecimal.ZERO));
+        sammenlignTidslinjer(forventetResultat, resultat.resultatTidslinje());
         assertThat(resultat.restTidslinjeTilVurdering().isEmpty()).isTrue();
         assertThat(resultat.regelSporing().get("inntektdagsatsperioder")).isEqualTo(
             """
@@ -231,18 +203,16 @@ class ReduserVedInntektVurdererTest {
 
         // Act
         final var resultat = new ReduserVedInntektVurderer(
-            tidslinjeTilVurdering,
             rapportertInntektTidslinje,
             aldersbestemtSatsTidslinje
-        ).vurder();
+        ).vurder(tidslinjeTilVurdering);
 
         // Assert
-        assertThat(resultat.resultatPerioder().size()).isEqualTo(1);
-        final var uttakPeriode = resultat.resultatPerioder().get(0);
-        assertThat(uttakPeriode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
-        assertThat(uttakPeriode.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom.minusDays(1)));
-
-        assertThat(resultat.restTidslinjeTilVurdering().size()).isEqualTo(1);
+        final var forventetResultat = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom.minusDays(1), UttakResultat.forInnvilgelse(BigDecimal.ZERO)),
+            new LocalDateSegment<>(tom, tom, UttakResultat.forInnvilgelse(BigDecimal.valueOf(100)))
+        ));
+        sammenlignTidslinjer(forventetResultat, resultat.resultatTidslinje());
         assertThat(resultat.regelSporing().get("inntektdagsatsperioder")).isEqualTo(
             """
                 [{
@@ -250,6 +220,17 @@ class ReduserVedInntektVurdererTest {
                     "periode": "2025-02-03/2025-02-06"
                 }]"""
         );
+    }
+
+    private static void sammenlignTidslinjer(LocalDateTimeline<UttakResultat> forventetResultat, LocalDateTimeline<UttakResultat> faktisk) {
+        assertThat(faktisk.getLocalDateIntervals()).isEqualTo(forventetResultat.getLocalDateIntervals());
+        final var iterator = faktisk.toSegments().iterator();
+        while (iterator.hasNext()) {
+            final var faktiskSegment = iterator.next();
+            final var forventetSegment = forventetResultat.getSegment(faktiskSegment.getLocalDateInterval());
+            assertThat(faktiskSegment.getValue().utbetalingsgrad().compareTo(forventetSegment.getValue().utbetalingsgrad())).isEqualTo(0);
+            assertThat(faktiskSegment.getValue().avslagsårsak()).isEqualTo(forventetSegment.getValue().avslagsårsak());
+        }
     }
 
 }

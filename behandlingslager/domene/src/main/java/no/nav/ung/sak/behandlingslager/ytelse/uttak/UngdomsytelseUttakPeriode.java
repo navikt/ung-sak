@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.ytelse.uttak;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.Column;
@@ -51,6 +52,12 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
                                      DatoIntervallEntitet periode) {
         this.utbetalingsgrad = utbetalingsgrad;
         this.periode = periode.toRange();
+    }
+
+    public UngdomsytelseUttakPeriode(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad, UngdomsytelseUttakAvslagsårsak avslagsårsak) {
+        this.periode = Range.closed(fom, tom);
+        this.utbetalingsgrad = utbetalingsgrad;
+        this.avslagsårsak = avslagsårsak;
     }
 
     public UngdomsytelseUttakPeriode(UngdomsytelseUttakAvslagsårsak avslagsårsak,

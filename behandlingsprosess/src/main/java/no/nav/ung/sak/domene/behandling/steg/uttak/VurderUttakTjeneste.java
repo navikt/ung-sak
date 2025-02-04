@@ -1,10 +1,9 @@
 package no.nav.ung.sak.domene.behandling.steg.uttak;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
-import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.*;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,27 +26,15 @@ class VurderUttakTjeneste {
 
         var levendeBrukerTidslinje = søkersDødsdato.map(d -> new LocalDateTimeline<>(TIDENES_BEGYNNELSE, d, true)).orElse(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, TIDENES_ENDE, true));
 
-        List<UttakDelResultat> delresultater = new ArrayList<>();
-        // Finner avslag ved dødsfall
-        final var uttakAvslagEtterSøkersDødDelResultat = new AvslagVedDødVurderer(godkjentePerioder, levendeBrukerTidslinje).vurder();
-        delresultater.add(uttakAvslagEtterSøkersDødDelResultat);
+        final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(ungdomsprogramtidslinje);
 
-        // Finner tidslinje med nok dager tilgjengelig
-        final var nokDagerDelresultat = new InnvilgetUttakVurderer(
-            uttakAvslagEtterSøkersDødDelResultat.restTidslinjeTilVurdering(),
-            ungdomsprogramtidslinje,
-            rapporterteInntekterTidslinje,
-            satsTidslinje).vurder();
-        delresultater.add(nokDagerDelresultat);
+        var delresultater = List.of(
+                new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
+                new ReduserVedInntektVurderer(rapporterteInntekterTidslinje, satsTidslinje).vurder(godkjentePerioder),
+                new AvslagIkkeNokDagerVurderer(vurderAntallDagerResultat.tidslinjeNokDager()).vurder(godkjentePerioder)
+            );
 
-        // Resterende perioder avslås pga ikke nok dager
-        final var ikkeNokDagerPeriodeDelResultat = new AvslagIkkeNokDagerVurderer(nokDagerDelresultat.restTidslinjeTilVurdering()).vurder();
-        delresultater.add(ikkeNokDagerPeriodeDelResultat);
-
-        final var uttakPerioder = delresultater.stream().map(UttakDelResultat::resultatPerioder)
-                .flatMap(List::stream)
-            .sorted(Comparator.comparing(UngdomsytelseUttakPeriode::getPeriode))
-                .toList();
+        final var uttakPerioder = UttaksperiodeMapper.mapTilUttaksperioder(delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList());
 
         var ungdomsytelseUttakPerioder = new UngdomsytelseUttakPerioder(uttakPerioder);
         ungdomsytelseUttakPerioder.setRegelInput(lagRegelInput(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato));
@@ -57,28 +44,27 @@ class VurderUttakTjeneste {
 
     private static String lagSporing(List<UttakDelResultat> delresultater) {
         return delresultater.stream().map(UttakDelResultat::regelSporing)
-                .reduce((m1, m2) -> {
-                    final var newMap = new HashMap<>(m2);
-                    newMap.putAll(m1);
-                    return newMap;
-                })
-                .map(EvaluationPropertiesJsonMapper::mapToJson)
-                .orElse("");
+            .reduce((m1, m2) -> {
+                final var newMap = new HashMap<>(m2);
+                newMap.putAll(m1);
+                return newMap;
+            })
+            .map(EvaluationPropertiesJsonMapper::mapToJson)
+            .orElse("");
     }
 
     private static String lagRegelInput(LocalDateTimeline<Boolean> godkjentePerioder, LocalDateTimeline<Boolean> ungdomsprogramtidslinje, Optional<LocalDate> søkersDødsdato) {
         return """
-                {
-                    "godkjentePerioder": ":godkjentePerioder",
-                    "ungdomsprogramtidslinje": ":ungdomsprogramtidslinje",
-                    "søkersDødsdato": :søkersDødsdato
-                }
-                """.stripLeading()
-                .replaceFirst(":godkjentePerioder", godkjentePerioder.getLocalDateIntervals().toString())
-                .replaceFirst(":ungdomsprogramtidslinje", ungdomsprogramtidslinje.getLocalDateIntervals().toString())
-                .replaceFirst(":søkersDødsdato", søkersDødsdato.map(Objects::toString).map(it -> "\"" + it + "\"").orElse("null"));
+            {
+                "godkjentePerioder": ":godkjentePerioder",
+                "ungdomsprogramtidslinje": ":ungdomsprogramtidslinje",
+                "søkersDødsdato": :søkersDødsdato
+            }
+            """.stripLeading()
+            .replaceFirst(":godkjentePerioder", godkjentePerioder.getLocalDateIntervals().toString())
+            .replaceFirst(":ungdomsprogramtidslinje", ungdomsprogramtidslinje.getLocalDateIntervals().toString())
+            .replaceFirst(":søkersDødsdato", søkersDødsdato.map(Objects::toString).map(it -> "\"" + it + "\"").orElse("null"));
     }
-
 
 
 }

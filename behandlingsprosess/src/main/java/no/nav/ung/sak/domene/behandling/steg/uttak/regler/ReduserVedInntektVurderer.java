@@ -23,33 +23,31 @@ public class ReduserVedInntektVurderer implements UttakRegelVurderer {
 
     public static final BigDecimal REDUKSJONSGRAD = BigDecimal.valueOf(0.66);
     public static final BigDecimal HUNDRE_PROSENT = BigDecimal.valueOf(100);
-    private LocalDateTimeline<Boolean> tidslinjeTilVurdering;
     private LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje;
     private LocalDateTimeline<BigDecimal> aldersbestemtSatsTidslinje;
 
-    public ReduserVedInntektVurderer(LocalDateTimeline<Boolean> tidslinjeTilVurdering,
-                                     LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje,
+    public ReduserVedInntektVurderer(LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje,
                                      LocalDateTimeline<BigDecimal> aldersbestemtSatsTidslinje) {
-        this.tidslinjeTilVurdering = tidslinjeTilVurdering;
         this.rapportertInntektTidslinje = rapportertInntektTidslinje;
         this.aldersbestemtSatsTidslinje = aldersbestemtSatsTidslinje;
     }
 
     @Override
-    public UttakDelResultat vurder() {
+    public UttakDelResultat vurder(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
 
         // Lager tidslinje oppgitt inntekt pr dag (virkedag)
         final var dagsatsTidslinje = lagDagsatsTidslinje();
         // Beregner reduksjon ut i fra aldersbestemt sats
         final var redusertUtbetalingsgradTidslinje = aldersbestemtSatsTidslinje
             .intersection(tidslinjeTilVurdering)
-            .combine(dagsatsTidslinje, ReduserVedInntektVurderer::beregnUtbetalingsgrad, LocalDateTimeline.JoinStyle.INNER_JOIN);
+            .combine(dagsatsTidslinje, ReduserVedInntektVurderer::beregnUtbetalingsgrad, LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         // Mapper utbetalingsgrad til uttaksperioder
-        final var uttaksperioder = mapTilUttaksperioder(redusertUtbetalingsgradTidslinje);
+        final var uttaksperioder = redusertUtbetalingsgradTidslinje.mapValue(UttakResultat::forInnvilgelse);
 
         final var dagsatsperiodeJsonArray = lagJsonArray(dagsatsTidslinje, "dagsats");
         final var utbetalingsgradPerioderJsonArray = lagJsonArray(redusertUtbetalingsgradTidslinje, "utbetalingsgrad");
+
 
         return new UttakDelResultat(uttaksperioder,
             tidslinjeTilVurdering.disjoint(redusertUtbetalingsgradTidslinje),
@@ -72,6 +70,7 @@ public class ReduserVedInntektVurderer implements UttakRegelVurderer {
         return dagsatsperiodeJsonArray;
     }
 
+
     private static ArrayList<UngdomsytelseUttakPeriode> mapTilUttaksperioder(LocalDateTimeline<BigDecimal> redusertUtbetalingsgradTidslinje) {
         return redusertUtbetalingsgradTidslinje
             .stream()
@@ -81,7 +80,7 @@ public class ReduserVedInntektVurderer implements UttakRegelVurderer {
 
     private static LocalDateSegment<BigDecimal> beregnUtbetalingsgrad(LocalDateInterval di, LocalDateSegment<BigDecimal> lhs, LocalDateSegment<BigDecimal> rhs) {
         return new LocalDateSegment<>(
-            di, finnUtbetalingsgrad(lhs.getValue(), rhs.getValue()));
+            di, finnUtbetalingsgrad(lhs.getValue(), rhs == null ? BigDecimal.ZERO : rhs.getValue()));
     }
 
     private static BigDecimal finnUtbetalingsgrad(BigDecimal aldersbestemtSats, BigDecimal inntektDagsats) {
