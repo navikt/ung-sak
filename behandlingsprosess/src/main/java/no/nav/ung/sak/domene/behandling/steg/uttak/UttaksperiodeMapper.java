@@ -28,17 +28,26 @@ public class UttaksperiodeMapper {
 
     private static LocalDateSegmentCombinator<UttakResultat, UttakResultat, UttakResultat> kombinerUttaksresultater() {
         return (di, lhs, rhs) -> {
+            // Hvis en av segmentene er null, bruk det andre
             if (lhs == null) {
                 return new LocalDateSegment<>(di, rhs.getValue());
             } else if (rhs == null) {
                 return new LocalDateSegment<>(di, lhs.getValue());
-            } else if (lhs.getValue().avslagsårsak() != null && rhs.getValue().avslagsårsak() != null) {
+            }
+
+            // Hvis begge segmentene er avslått, velg den høyest prioriterte avslagsårsaken
+            if (lhs.getValue().avslagsårsak() != null && rhs.getValue().avslagsårsak() != null) {
                 return velgPrioritertAvslagsårsak(di, lhs, rhs);
-            } else if (lhs.getValue().avslagsårsak() != null) {
+            }
+
+            // Hvis ett av segmentene er avslått, bruk dette
+            if (lhs.getValue().avslagsårsak() != null) {
                 return new LocalDateSegment<>(di, lhs.getValue());
             } else if (rhs.getValue().avslagsårsak() != null) {
                 return new LocalDateSegment<>(di, rhs.getValue());
             }
+
+            // Forventer ikke å ha to regler som begge gir innvilget i samme periode
             throw new IllegalStateException("Fant to overlappende segmenter for innvilgelse");
         };
     }
