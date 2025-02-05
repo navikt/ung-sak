@@ -14,7 +14,6 @@ import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_
 
 class VurderUttakTjeneste {
 
-
     static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
                                                             LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
                                                             Optional<LocalDate> søkersDødsdato,
@@ -26,12 +25,10 @@ class VurderUttakTjeneste {
 
         var levendeBrukerTidslinje = søkersDødsdato.map(d -> new LocalDateTimeline<>(TIDENES_BEGYNNELSE, d, true)).orElse(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, TIDENES_ENDE, true));
 
-        final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(ungdomsprogramtidslinje);
-
         var delresultater = List.of(
                 new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
                 new ReduserVedInntektVurderer(rapporterteInntekterTidslinje, satsTidslinje).vurder(godkjentePerioder),
-                new AvslagIkkeNokDagerVurderer(vurderAntallDagerResultat.tidslinjeNokDager()).vurder(godkjentePerioder)
+                new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder)
             );
 
         final var uttakPerioder = UttaksperiodeMapper.mapTilUttaksperioder(delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList());

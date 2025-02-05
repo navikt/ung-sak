@@ -2,8 +2,8 @@ package no.nav.ung.sak.domene.behandling.steg.uttak.regler;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 /**
@@ -11,19 +11,19 @@ import java.util.Map;
  */
 public class AvslagIkkeNokDagerVurderer implements UttakRegelVurderer {
 
+    private final LocalDateTimeline<Boolean> ungdomsprogramtidslinje;
 
-    private final LocalDateTimeline<Boolean> nokDagerTidslinje;
-
-    public AvslagIkkeNokDagerVurderer(LocalDateTimeline<Boolean> nokDagerTidslinje) {
-        this.nokDagerTidslinje = nokDagerTidslinje;
+    public AvslagIkkeNokDagerVurderer(LocalDateTimeline<Boolean> ungdomsprogramtidslinje) {
+        this.ungdomsprogramtidslinje = ungdomsprogramtidslinje;
     }
 
     @Override
     public UttakDelResultat vurder(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        return finnUttaksperioderAvslagEtterDød(tidslinjeTilVurdering);
+        final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(ungdomsprogramtidslinje);
+        return finnUttaksperioderAvslagEtterDød(tidslinjeTilVurdering, vurderAntallDagerResultat.tidslinjeNokDager());
     }
 
-    private UttakDelResultat finnUttaksperioderAvslagEtterDød(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+    private UttakDelResultat finnUttaksperioderAvslagEtterDød(LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<Boolean> nokDagerTidslinje) {
         final var ikkeNokDagerTidslinje = tidslinjeTilVurdering.disjoint(nokDagerTidslinje);
         return new UttakDelResultat(ikkeNokDagerTidslinje.mapValue(it -> UttakResultat.forAvslag(UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER)),
             LocalDateTimeline.empty(),
