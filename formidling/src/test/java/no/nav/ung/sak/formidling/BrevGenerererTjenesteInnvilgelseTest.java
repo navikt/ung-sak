@@ -93,7 +93,6 @@ class BrevGenerererTjenesteInnvilgelseTest {
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
-            tilkjentYtelseUtleder,
             personopplysningRepository,
             new InnvilgelseInnholdBygger(
                 ungdomsytelseGrunnlagRepository,

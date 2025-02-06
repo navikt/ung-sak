@@ -80,7 +80,6 @@ class BrevGenerererTjenesteTest {
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
-            tilkjentYtelseUtleder,
             repositoryProvider.getPersonopplysningRepository(),
 
             new InnvilgelseInnholdBygger(

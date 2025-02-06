@@ -27,7 +27,6 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 
 @ApplicationScoped
 public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
@@ -37,7 +36,6 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private BehandlingRepository behandlingRepository;
     private AktørTjeneste aktørTjeneste;
     private PdfGenKlient pdfGen;
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private PersonopplysningRepository personopplysningRepository;
     //Gjør om til Instance<VedtaksbrevInnholdBygger> når flere maler kommer på plass, og hent vha en type
     private InnvilgelseInnholdBygger innvilgelseInnholdBygger;
@@ -48,14 +46,12 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         BehandlingRepository behandlingRepository,
         AktørTjeneste aktørTjeneste,
         PdfGenKlient pdfGen,
-        TilkjentYtelseUtleder tilkjentYtelseUtleder,
         PersonopplysningRepository personopplysningRepository,
         InnvilgelseInnholdBygger innvilgelseInnholdBygger,
         DetaljertResultatUtleder detaljertResultatUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.pdfGen = pdfGen;
-        this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
         this.personopplysningRepository = personopplysningRepository;
         this.innvilgelseInnholdBygger = innvilgelseInnholdBygger;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
