@@ -20,6 +20,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
  * @param aldersvilkår         - timeline med aldersvilkår oppfylt og ikke oppfylt
  * @param ungdomsprogramvilkår - timeline med ungdomsprogramvilkår oppfylt og ikke oppfylt
  * @param fødselsdato
+ * @param søknadStartDato      - startdatoer fra søknad
  */
 public record UngTestscenario(
     String navn,
@@ -29,7 +30,8 @@ public record UngTestscenario(
     LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder,
     LocalDateTimeline<Utfall> aldersvilkår,
     LocalDateTimeline<Utfall> ungdomsprogramvilkår,
-    LocalDate fødselsdato) {
+    LocalDate fødselsdato,
+    List<LocalDate> søknadStartDato) {
 }
 
 

@@ -95,9 +95,6 @@ public class BrevbestillingTask extends BehandlingProsessTask {
 
         LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
 
-
-
-
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
 
         var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);

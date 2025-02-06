@@ -16,7 +16,7 @@ public class UtledPeriodeTilVurderingFraUngdomsprogram {
     private final ProsessTriggereRepository prosessTriggereRepository;
 
     @Inject
-    UtledPeriodeTilVurderingFraUngdomsprogram(ProsessTriggereRepository prosessTriggereRepository) {
+    public UtledPeriodeTilVurderingFraUngdomsprogram(ProsessTriggereRepository prosessTriggereRepository) {
         this.prosessTriggereRepository = prosessTriggereRepository;
     }
 

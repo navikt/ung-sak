@@ -53,6 +53,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -418,8 +421,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         BehandlingRepositoryProvider repositoryProvider,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-        TilkjentYtelseRepository tilkjentYtelseRepository) {
-        if (ungTestscenario == null) throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
+        TilkjentYtelseRepository tilkjentYtelseRepository,
+        UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
+        if (ungTestscenario == null)
+            throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
 
         // Default Person
         if (personer == null) {
@@ -445,13 +450,11 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
 
         //Ung ting
-        buildUng(ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
+        buildUng(ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository);
         return behandling;
     }
 
-    private void buildUng(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-                          UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-    TilkjentYtelseRepository tilkjentYtelseRepository) {
+    private void buildUng(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository) {
 
         if (ungTestscenario.satser() != null) {
             ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(
@@ -467,6 +470,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         if (ungTestscenario.programPerioder() != null) {
             ungdomsprogramPeriodeRepository.lagre(behandling.getId(), ungTestscenario.programPerioder());
+
+        }
+
+        if (ungTestscenario.søknadStartDato() != null) {
+            List<UngdomsytelseSøktStartdato> starDatoer = ungTestscenario.søknadStartDato().stream().map(it -> new UngdomsytelseSøktStartdato(it, new JournalpostId("123")))
+                .toList();
+            ungdomsytelseStartdatoRepository.lagre(behandling.getId(), starDatoer);
+            ungdomsytelseStartdatoRepository.lagreRelevanteSøknader(behandling.getId(), new UngdomsytelseStartdatoer(starDatoer));
         }
 
         if (ungTestscenario.tilkjentYtelsePerioder() != null) {
