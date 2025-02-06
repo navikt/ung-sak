@@ -59,7 +59,7 @@ class SatsEndringRepositoryTest {
         assertThat(fagsakTilRevurdering.getKey().getPeriode().getFomDato()).isEqualTo(fagsakPeriode.getFom());
         assertThat(fagsakTilRevurdering.getKey().getPeriode().getTomDato()).isEqualTo(fagsakPeriode.getTom());
 
-        LocalDate endringsdato = fødselsdato.plusMonths(1).withDayOfMonth(1);
+        LocalDate endringsdato = fødselsdato.plusYears(25);
         assertThat(fagsakTilRevurdering.getValue()).isEqualTo(endringsdato);
     }
 

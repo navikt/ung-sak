@@ -72,6 +72,6 @@ public class SatsEndringRepository {
 
     private LocalDate mapTilEndringsdato(Tuple tuple) {
         Date fødselsdatoString = tuple.get(1, Date.class);
-        return LocalDate.parse(fødselsdatoString.toString()).plusMonths(1).withDayOfMonth(1);
+        return LocalDate.parse(fødselsdatoString.toString()).plusYears(25);
     }
 }
