@@ -215,7 +215,7 @@ class UngdomsytelseBeregnDagsatsTest {
         assertThat(first.getValue().dagsats()).isEqualByComparingTo(BigDecimal.valueOf(608.31));
 
         var second = iterator.next();
-        assertThat(second.getFom()).isEqualTo(datoForGRegulering.minusMonths(1));
+        assertThat(second.getFom()).isEqualTo(tjuefemårsdag);
         assertThat(second.getTom()).isEqualTo(datoForGRegulering.minusDays(1));
         assertThat(second.getValue().grunnbeløpFaktor()).isEqualByComparingTo(BigDecimal.valueOf(2));
         assertThat(second.getValue().grunnbeløp()).isEqualByComparingTo(BigDecimal.valueOf(118620));
