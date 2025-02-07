@@ -1,9 +1,6 @@
-FROM ghcr.io/navikt/baseimages/temurin:21
+FROM ghcr.io/navikt/sif-baseimages/java:21-202502070902Z
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/ung-sak
-
-RUN mkdir /app/lib
-RUN mkdir /app/conf
 
 ENV JAVA_OPTS="-XX:+UseParallelGC -XX:MaxRAMPercentage=75.0 -XX:ActiveProcessorCount=4 -Djdk.virtualThreadScheduler.parallelism=8 -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo "
 
