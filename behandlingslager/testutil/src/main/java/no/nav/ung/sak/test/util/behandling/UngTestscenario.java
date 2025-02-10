@@ -6,6 +6,8 @@ import java.util.List;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 
@@ -24,6 +26,7 @@ public record UngTestscenario(
     List<UngdomsprogramPeriode> programPerioder,
     LocalDateTimeline<UngdomsytelseSatser> satser,
     UngdomsytelseUttakPerioder uttakPerioder,
+    LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder,
     LocalDateTimeline<Utfall> aldersvilkår,
     LocalDateTimeline<Utfall> ungdomsprogramvilkår,
     LocalDate fødselsdato) {

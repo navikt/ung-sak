@@ -82,7 +82,7 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
         return new Builder();
     }
 
-    private static class Builder {
+    public static class Builder {
 
         private DatoIntervallEntitet periode;
         private BigDecimal uredusertBeløp;

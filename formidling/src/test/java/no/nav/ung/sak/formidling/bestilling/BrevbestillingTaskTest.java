@@ -93,7 +93,7 @@ class BrevbestillingTaskTest {
     @Test
     void skalLagreBestillingLagePdfJournalføreOgLageDistribusjonstask() {
 
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
         var behandling = scenarioBuilder.getBehandling();
 
         BrevbestillingTask brevBestillingTask = new BrevbestillingTask(behandlingRepository, brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);

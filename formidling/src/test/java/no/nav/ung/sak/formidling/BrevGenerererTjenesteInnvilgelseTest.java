@@ -89,7 +89,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
     //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
     void skalHaAlleStandardtekster() {
         TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
 
         var ungTestGrunnlag = scenarioBuilder.getUngTestGrunnlag();
         var behandling = scenarioBuilder.getBehandling();
@@ -237,7 +237,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
                personopplysningRepository));
 
         TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
 
         var behandling = scenarioBuilder.getBehandling();
 
@@ -257,7 +257,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
     private Behandling lagScenario(UngTestscenario ungTestscenario) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         return behandling;

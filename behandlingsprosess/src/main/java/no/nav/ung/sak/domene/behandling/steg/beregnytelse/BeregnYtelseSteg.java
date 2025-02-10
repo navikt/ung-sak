@@ -34,9 +34,11 @@ public class BeregnYtelseSteg implements BehandlingSteg {
 
     public BeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                             TilkjentYtelseRepository tilkjentYtelseRepository,
+                            RapportertInntektMapper rapportertInntektMapper,
                             Stønadperiodeutleder stønadperiodeutleder) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.rapportertInntektMapper = rapportertInntektMapper;
         this.stønadperiodeutleder = stønadperiodeutleder;
     }
 
@@ -61,14 +63,16 @@ public class BeregnYtelseSteg implements BehandlingSteg {
             .getPerioder()
             .stream()
             .filter(it -> it.getAvslagsårsak() != null)
-            .map(it -> new LocalDateTimeline(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
+            .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
 
         final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(godkjentUttakTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
 
 
-        return null;
+        tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje);
+
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     private static boolean harMatchendeStønadsperiode(LocalDateSegment<Set<RapportertInntekt>> s, LocalDateTimeline<Boolean> stønadTidslinje) {

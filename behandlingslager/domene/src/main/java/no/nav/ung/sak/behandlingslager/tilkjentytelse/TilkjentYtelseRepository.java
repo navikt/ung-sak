@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class TilkjentYtelseRepository {
             .medPerioder(perioder)
             .build();
         entityManager.persist(ny);
+        entityManager.flush();
     }
 
     public Optional<TilkjentYtelse> hentTilkjentYtelse(Long behandlingId) {
@@ -62,4 +64,17 @@ public class TilkjentYtelseRepository {
         return new LocalDateTimeline<>(segments);
     }
 
+    public void lagre(Long behandlingId, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje) {
+        final var tilkjentYtelsePerioder = tilkjentYtelseTidslinje.toSegments().stream()
+            .map(it -> TilkjentYtelsePeriode.ny()
+                .medUtbetalingsgrad(it.getValue().utbetalingsgrad())
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+                .medDagsats(it.getValue().dagsats())
+                .medReduksjon(it.getValue().reduksjon())
+                .medRedusertBeløp(it.getValue().redusertBeløp())
+                .medUredusertBeløp(it.getValue().uredusertBeløp())
+                .build()).toList();
+
+        lagre(behandlingId, tilkjentYtelsePerioder);
+    }
 }
