@@ -43,18 +43,9 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
         this.avslagsårsak = ungdomsytelseUttakPeriode.getAvslagsårsak();
     }
 
-    public UngdomsytelseUttakPeriode(DatoIntervallEntitet periode) {
-        this.periode = periode.toRange();
-    }
 
     public UngdomsytelseUttakPeriode(LocalDate fom, LocalDate tom, UngdomsytelseUttakAvslagsårsak avslagsårsak) {
         this.periode = Range.closed(fom, tom);
-        this.avslagsårsak = avslagsårsak;
-    }
-
-    public UngdomsytelseUttakPeriode(UngdomsytelseUttakAvslagsårsak avslagsårsak,
-                                     DatoIntervallEntitet periode) {
-        this.periode = periode.toRange();
         this.avslagsårsak = avslagsårsak;
     }
 

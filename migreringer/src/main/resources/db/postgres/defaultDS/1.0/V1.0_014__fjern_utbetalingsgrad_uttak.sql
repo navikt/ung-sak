@@ -1,1 +1,1 @@
-alter table tilkjent_ytelse_periode drop column utbetalingsgrad;
+alter table ung_uttak_periode drop column utbetalingsgrad;

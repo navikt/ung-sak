@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,7 +89,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY, antallBarn, barnetilleggDagsats);
 
         var uttakperioder1 = new UngdomsytelseUttakPerioder(List.of(new UngdomsytelseUttakPeriode(
-                DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now())
+                LocalDate.now(), LocalDate.now(), UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER
         )));
         uttakperioder1.setRegelInput("En input");
         uttakperioder1.setRegelSporing("En sporing");
