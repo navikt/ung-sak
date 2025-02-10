@@ -4,6 +4,8 @@ create table tilkjent_ytelse
     behandling_id     bigint not null references behandling(id),
     aktiv             boolean not null,
     opprettet_tid     timestamp default CURRENT_TIMESTAMP not null,
+    opprettet_av         varchar(20),
+    endret_av         varchar(20),
     endret_tid        timestamp
 );
 
@@ -36,6 +38,8 @@ create table tilkjent_ytelse_periode
     dagsats           numeric not null,
     utbetalingsgrad   int not null,
     opprettet_tid     timestamp default CURRENT_TIMESTAMP not null,
+    opprettet_av         varchar(20),
+    endret_av         varchar(20),
     endret_tid        timestamp
 );
 
