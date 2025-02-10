@@ -71,7 +71,7 @@ public class VurderUttakSteg implements BehandlingSteg {
             .findFirst()
             .map(PersonopplysningEntitet::getDødsdato);
 
-        var ungdomsytelseUttakPerioder = VurderAvslåttUttakTjeneste.vurderUttakAvslag(
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(
             godkjentePerioder,
             ungdomsprogramtidslinje,
             søkersDødsdato

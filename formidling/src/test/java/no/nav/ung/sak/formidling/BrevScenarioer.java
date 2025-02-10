@@ -133,8 +133,7 @@ public class BrevScenarioer {
     private static UngdomsytelseUttakPerioder uttaksPerioder(LocalDateInterval p) {
         UngdomsytelseUttakPerioder uttakperioder = new UngdomsytelseUttakPerioder(
             List.of(new UngdomsytelseUttakPeriode(
-                    DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato()))
-            ));
+                DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato()))));
         uttakperioder.setRegelInput("regelInputUttak");
         uttakperioder.setRegelSporing("regelSporingUttak");
         return uttakperioder;

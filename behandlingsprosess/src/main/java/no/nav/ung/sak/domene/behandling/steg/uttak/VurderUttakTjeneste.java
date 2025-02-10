@@ -10,11 +10,11 @@ import java.util.*;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
-class VurderAvslåttUttakTjeneste {
+class VurderUttakTjeneste {
 
-    static Optional<UngdomsytelseUttakPerioder> vurderUttakAvslag(LocalDateTimeline<Boolean> godkjentePerioder,
-                                                                  LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
-                                                                  Optional<LocalDate> søkersDødsdato) {
+    static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
+                                                            LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
+                                                            Optional<LocalDate> søkersDødsdato) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
@@ -23,10 +23,12 @@ class VurderAvslåttUttakTjeneste {
 
         var delresultater = List.of(
                 new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
-                new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder)
+                new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder),
+            new InnvilgHelePeriodenVurderer().vurder(godkjentePerioder) // innvilger hele perioden og prioriterer så avslag i mapping dersom det finnes
             );
 
-        final var uttakPerioder = UttaksperiodeMapper.mapTilUttaksperioder(delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList());
+        final var resultattidslinjer = delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList();
+        final var uttakPerioder = UttaksperiodeMapper.mapTilUttaksperioder(resultattidslinjer);
 
         var ungdomsytelseUttakPerioder = new UngdomsytelseUttakPerioder(uttakPerioder);
         ungdomsytelseUttakPerioder.setRegelInput(lagRegelInput(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato));
