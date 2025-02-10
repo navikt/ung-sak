@@ -6,7 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import java.util.Map;
 
 public record UttakDelResultat(
-    LocalDateTimeline<UttakResultat> resultatTidslinje,
+    LocalDateTimeline<UttakAvslagResultat> resultatTidslinje,
     LocalDateTimeline<Boolean> restTidslinjeTilVurdering,
     Map<String, String> regelSporing
 ) {}

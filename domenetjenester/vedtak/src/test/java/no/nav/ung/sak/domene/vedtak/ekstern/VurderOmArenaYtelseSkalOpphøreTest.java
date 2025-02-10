@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,6 +76,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
     private Behandling behandling;
 
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @BeforeEach
     public void setup() {
@@ -83,7 +85,8 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         repository = new Repository(entityManager);
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
-        utledTilkjentYtelse = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
+        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
+        utledTilkjentYtelse = new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository);
 
         stp = LocalDate.parse("2020-08-08");
         scenario = TestScenarioBuilder.builderMedSøknad(AKTØR_ID);
@@ -422,7 +425,7 @@ public class VurderOmArenaYtelseSkalOpphøreTest {
         ));
 
         var uttakperioder = new UngdomsytelseUttakPerioder(List.of(
-            new UngdomsytelseUttakPeriode(BigDecimal.TEN, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
+            new UngdomsytelseUttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
         ));
         uttakperioder.setRegelInput("input");
         uttakperioder.setRegelSporing("output");

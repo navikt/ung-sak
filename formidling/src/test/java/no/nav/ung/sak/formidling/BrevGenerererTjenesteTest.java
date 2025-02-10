@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.nio.charset.StandardCharsets;
 
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,7 @@ class BrevGenerererTjenesteTest {
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     @Inject
     private PersonopplysningRepository personopplysningRepository;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @BeforeEach
     void setup() {
@@ -53,7 +55,8 @@ class BrevGenerererTjenesteTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
+        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
+        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository);
 
     }
 

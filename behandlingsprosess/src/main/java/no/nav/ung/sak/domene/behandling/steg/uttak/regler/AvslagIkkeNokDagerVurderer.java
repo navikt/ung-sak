@@ -25,7 +25,7 @@ public class AvslagIkkeNokDagerVurderer implements UttakRegelVurderer {
 
     private UttakDelResultat finnUttaksperioderAvslagEtterDød(LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<Boolean> nokDagerTidslinje) {
         final var ikkeNokDagerTidslinje = tidslinjeTilVurdering.disjoint(nokDagerTidslinje);
-        return new UttakDelResultat(ikkeNokDagerTidslinje.mapValue(it -> UttakResultat.forAvslag(UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER)),
+        return new UttakDelResultat(ikkeNokDagerTidslinje.mapValue(it -> UttakAvslagResultat.medÅrsak(UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER)),
             LocalDateTimeline.empty(),
             Map.of("perioderNokDager", nokDagerTidslinje.getLocalDateIntervals().toString(),
                 "perioderUtenNokDager", tidslinjeTilVurdering.getLocalDateIntervals().toString()));

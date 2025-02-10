@@ -25,7 +25,7 @@ public class AvslagVedDødVurderer implements UttakRegelVurderer {
     private UttakDelResultat finnUttaksperioderAvslagEtterDød(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         var avslåttEtterSøkersDødTidslinje = tidslinjeTilVurdering.disjoint(levendeBrukerTidslinje);
         return new UttakDelResultat(
-            avslåttEtterSøkersDødTidslinje.mapValue(it -> UttakResultat.forAvslag(UngdomsytelseUttakAvslagsårsak.SØKERS_DØDSFALL)),
+            avslåttEtterSøkersDødTidslinje.mapValue(it -> UttakAvslagResultat.medÅrsak(UngdomsytelseUttakAvslagsårsak.SØKERS_DØDSFALL)),
             tidslinjeTilVurdering.disjoint(avslåttEtterSøkersDødTidslinje),
             Map.of("avslåttEtterSøkersDødTidslinje", avslåttEtterSøkersDødTidslinje.getLocalDateIntervals().toString()));
     }

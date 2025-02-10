@@ -3,22 +3,18 @@ package no.nav.ung.sak.domene.behandling.steg.uttak;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.*;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
-class VurderUttakTjeneste {
+class VurderAvslåttUttakTjeneste {
 
-    static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
-                                                            LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
-                                                            Optional<LocalDate> søkersDødsdato,
-                                                            LocalDateTimeline<BigDecimal> satsTidslinje,
-                                                            LocalDateTimeline<Set<RapportertInntekt>> rapporterteInntekterTidslinje) {
+    static Optional<UngdomsytelseUttakPerioder> vurderUttakAvslag(LocalDateTimeline<Boolean> godkjentePerioder,
+                                                                  LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
+                                                                  Optional<LocalDate> søkersDødsdato) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
@@ -27,7 +23,6 @@ class VurderUttakTjeneste {
 
         var delresultater = List.of(
                 new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
-                new ReduserVedInntektVurderer(rapporterteInntekterTidslinje, satsTidslinje).vurder(godkjentePerioder),
                 new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder)
             );
 
