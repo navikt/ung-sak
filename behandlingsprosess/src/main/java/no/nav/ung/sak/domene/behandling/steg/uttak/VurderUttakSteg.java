@@ -28,19 +28,16 @@ public class VurderUttakSteg implements BehandlingSteg {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private PersonopplysningRepository personopplysningRepository;
-    private RapportertInntektMapper rapportertInntektMapper;
 
     @Inject
     public VurderUttakSteg(VilkårTjeneste vilkårTjeneste,
                            UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                            UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-                           PersonopplysningRepository personopplysningRepository,
-                           RapportertInntektMapper rapportertInntektMapper) {
+                           PersonopplysningRepository personopplysningRepository) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.personopplysningRepository = personopplysningRepository;
-        this.rapportertInntektMapper = rapportertInntektMapper;
     }
 
     public VurderUttakSteg() {
