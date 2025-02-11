@@ -1,24 +1,15 @@
 package no.nav.ung.sak.behandlingslager.ytelse.uttak;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import org.hibernate.annotations.Type;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import no.nav.ung.kodeverk.ungdomsytelse.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
+import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
-import no.nav.ung.kodeverk.ungdomsytelse.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
+import org.hibernate.annotations.Type;
+
+import java.time.LocalDate;
 
 @Entity(name = "UngdomsytelseUttakPeriode")
 @Table(name = "UNG_UTTAK_PERIODE")
@@ -32,9 +23,6 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
-    @Column(name = "utbetalingsgrad", nullable = false)
-    private BigDecimal utbetalingsgrad;
-
     @Convert(converter = UngdomsytelseUttakAvslagsårsakKodeverdiConverter.class)
     @Column(name = "avslag_aarsak")
     private UngdomsytelseUttakAvslagsårsak avslagsårsak;
@@ -44,26 +32,17 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
 
     public UngdomsytelseUttakPeriode(UngdomsytelseUttakPeriode ungdomsytelseUttakPeriode) {
         this.periode = ungdomsytelseUttakPeriode.getPeriode().toRange();
-        this.utbetalingsgrad = ungdomsytelseUttakPeriode.getUtbetalingsgrad();
         this.avslagsårsak = ungdomsytelseUttakPeriode.getAvslagsårsak();
     }
 
-    public UngdomsytelseUttakPeriode(BigDecimal utbetalingsgrad,
-                                     DatoIntervallEntitet periode) {
-        this.utbetalingsgrad = utbetalingsgrad;
-        this.periode = periode.toRange();
+
+    public UngdomsytelseUttakPeriode(DatoIntervallEntitet periode) {
+        this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
     }
 
-    public UngdomsytelseUttakPeriode(LocalDate fom, LocalDate tom, BigDecimal utbetalingsgrad, UngdomsytelseUttakAvslagsårsak avslagsårsak) {
+
+    public UngdomsytelseUttakPeriode(LocalDate fom, LocalDate tom, UngdomsytelseUttakAvslagsårsak avslagsårsak) {
         this.periode = Range.closed(fom, tom);
-        this.utbetalingsgrad = utbetalingsgrad;
-        this.avslagsårsak = avslagsårsak;
-    }
-
-    public UngdomsytelseUttakPeriode(UngdomsytelseUttakAvslagsårsak avslagsårsak,
-                                     DatoIntervallEntitet periode) {
-        this.utbetalingsgrad = BigDecimal.ZERO;
-        this.periode = periode.toRange();
         this.avslagsårsak = avslagsårsak;
     }
 
@@ -72,9 +51,6 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
         return DatoIntervallEntitet.fra(periode);
     }
 
-    public BigDecimal getUtbetalingsgrad() {
-        return utbetalingsgrad;
-    }
 
     public UngdomsytelseUttakAvslagsårsak getAvslagsårsak() {
         return avslagsårsak;

@@ -7,10 +7,14 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -59,6 +63,8 @@ class HåndterMottattDokumentTaskTest {
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     @Inject
     private EntityManager entityManager;
+    @Inject
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     private Fagsak fagsak;
     private Behandling behandling;
@@ -87,7 +93,7 @@ class HåndterMottattDokumentTaskTest {
 
         when(dokumentValidatorProvider.finnValidator(Brevkode.UNGDOMSYTELSE_SOKNAD)).thenReturn(dokumentValidator);
 
-        when(dokumentmottaker.getBehandlingÅrsakType(Brevkode.UNGDOMSYTELSE_SOKNAD)).thenReturn(RE_ENDRING_FRA_BRUKER);
+        when(dokumentmottaker.getTriggere(ArgumentMatchers.anyList())).thenReturn(List.of(new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), RE_ENDRING_FRA_BRUKER)));
 
         innhentDokumentTjeneste = new InnhentDokumentTjeneste(
             new UnitTestLookupInstanceImpl<>(dokumentmottaker),
@@ -95,7 +101,8 @@ class HåndterMottattDokumentTaskTest {
             behandlingRepositoryProvider,
             null,
             null,
-            fagsakProsessTaskRepository
+            fagsakProsessTaskRepository,
+            prosessTriggereRepository
         );
     }
 

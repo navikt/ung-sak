@@ -20,7 +20,7 @@ public class UtledPeriodeTilVurderingFraUngdomsprogram {
         this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
-    public LocalDateTimeline<Boolean> finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(Long behandlingId) {
+    public LocalDateTimeline<Boolean> finnTidslinje(Long behandlingId) {
         var tidslinjeFraOpphørshendelser = prosessTriggereRepository.hentGrunnlag(behandlingId)
             .stream()
             .map(ProsessTriggere::getTriggere)

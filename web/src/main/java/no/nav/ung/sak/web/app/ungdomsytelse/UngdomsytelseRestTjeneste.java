@@ -90,7 +90,7 @@ public class UngdomsytelseRestTjeneste {
             return Collections.emptyList();
         } else {
             return uttakPerioder.getPerioder().stream()
-                .map(p->new UngdomsytelseUttakPeriodeDto(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getUtbetalingsgrad(), p.getAvslagsårsak()))
+                .map(p->new UngdomsytelseUttakPeriodeDto(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getAvslagsårsak()))
                 .toList();
         }
     }

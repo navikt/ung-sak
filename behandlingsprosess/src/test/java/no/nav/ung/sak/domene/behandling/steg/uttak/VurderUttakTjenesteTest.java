@@ -20,12 +20,9 @@ class VurderUttakTjenesteTest {
 
     private final Optional<LocalDate> INGEN_DØDSDATO = Optional.empty();
 
-    private final LocalDateTimeline<BigDecimal> satsTidslinje = LocalDateTimeline.empty();
-    private final LocalDateTimeline<Set<RapportertInntekt>> rapporterteInntekterTidslinje = LocalDateTimeline.empty();
-
     @Test
     void skal_returnere_tomt_resultat_dersom_ingen_vilkår_oppfylt() {
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(LocalDateTimeline.empty(), LocalDateTimeline.empty(), INGEN_DØDSDATO, satsTidslinje, rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(LocalDateTimeline.empty(), LocalDateTimeline.empty(), INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isEmpty();
     }
@@ -40,7 +37,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, new LocalDateTimeline<>(fom, tom, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -48,7 +45,6 @@ class VurderUttakTjenesteTest {
         var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
     }
 
 
@@ -61,7 +57,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO, new LocalDateTimeline<>(fom, tom, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -69,7 +65,6 @@ class VurderUttakTjenesteTest {
         var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
 
     @Test
@@ -82,8 +77,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(mandag_to_uker_før, søndag, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, søndag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO,
-            new LocalDateTimeline<>(mandag_to_uker_før, søndag, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, søndag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -91,7 +85,6 @@ class VurderUttakTjenesteTest {
         var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(mandag_to_uker_før);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(søndag);
-        assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
     }
 
 
@@ -105,8 +98,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(mandag_to_uker_før, fredag, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, fredag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO,
-            new LocalDateTimeline<>(mandag_to_uker_før, fredag, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(mandag_to_uker_før, fredag, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -114,7 +106,6 @@ class VurderUttakTjenesteTest {
         var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(mandag_to_uker_før);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(fredag);
-        assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
     }
 
 
@@ -128,9 +119,7 @@ class VurderUttakTjenesteTest {
         ));
 
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE),
-            ungdomsprogramtidslinje, INGEN_DØDSDATO,
-            new LocalDateTimeline<>(fom, tom, BigDecimal.valueOf(100)),
-            rapporterteInntekterTidslinje);
+            ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -138,7 +127,6 @@ class VurderUttakTjenesteTest {
         var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
     }
 
     @Test
@@ -152,8 +140,7 @@ class VurderUttakTjenesteTest {
 
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE),
             ungdomsprogramtidslinje,
-            INGEN_DØDSDATO,
-            new LocalDateTimeline<>(fom, tom, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+            INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -161,12 +148,10 @@ class VurderUttakTjenesteTest {
         var nokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(nokDagerPeriode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(nokDagerPeriode.getPeriode().getTomDato()).isEqualTo(tom.minusDays(1));
-        assertThat(nokDagerPeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
         var ikkeNokDagerPeriode = ungdomsytelseUttakPerioder.get().getPerioder().getLast();
         assertThat(ikkeNokDagerPeriode.getPeriode().getFomDato()).isEqualTo(tom);
         assertThat(ikkeNokDagerPeriode.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(ikkeNokDagerPeriode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
 
     @Test
@@ -179,8 +164,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom, tom, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO,
-            new LocalDateTimeline<>(fom, tom, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -189,7 +173,6 @@ class VurderUttakTjenesteTest {
 
         assertThat(nokDagerPeriode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(nokDagerPeriode.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(nokDagerPeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
     }
 
 
@@ -209,7 +192,7 @@ class VurderUttakTjenesteTest {
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom1, tom1, true),
             new LocalDateSegment<>(fom2, tom2, true)
-        )), ungdomsprogramtidslinje, INGEN_DØDSDATO, new LocalDateTimeline<>(fom1, tom2, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        )), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -218,13 +201,11 @@ class VurderUttakTjenesteTest {
 
         assertThat(nokDagerPeriode1.getPeriode().getFomDato()).isEqualTo(fom1);
         assertThat(nokDagerPeriode1.getPeriode().getTomDato()).isEqualTo(tom1);
-        assertThat(nokDagerPeriode1.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
         var nokDagerPeriode2 = ungdomsytelseUttakPerioder.get().getPerioder().getLast();
 
         assertThat(nokDagerPeriode2.getPeriode().getFomDato()).isEqualTo(fom2);
         assertThat(nokDagerPeriode2.getPeriode().getTomDato()).isEqualTo(tom2);
-        assertThat(nokDagerPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
     }
 
     @Test
@@ -243,7 +224,7 @@ class VurderUttakTjenesteTest {
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom1, tom1, true),
             new LocalDateSegment<>(fom2, tom2, true)
-        )), ungdomsprogramtidslinje, INGEN_DØDSDATO, new LocalDateTimeline<>(fom1, tom2, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        )), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -253,19 +234,16 @@ class VurderUttakTjenesteTest {
 
         assertThat(nokDagerPeriode1.getPeriode().getFomDato()).isEqualTo(fom1);
         assertThat(nokDagerPeriode1.getPeriode().getTomDato()).isEqualTo(tom1);
-        assertThat(nokDagerPeriode1.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
         var nokDagerPeriode2 = iterator.next();
 
         assertThat(nokDagerPeriode2.getPeriode().getFomDato()).isEqualTo(fom2);
         assertThat(nokDagerPeriode2.getPeriode().getTomDato()).isEqualTo(tom2.minusDays(1));
-        assertThat(nokDagerPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
         var ikkeNokDager = iterator.next();
 
         assertThat(ikkeNokDager.getPeriode().getFomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getPeriode().getTomDato()).isEqualTo(tom2);
-        assertThat(ikkeNokDager.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
 
 
@@ -291,7 +269,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom2, tom2, true),
             new LocalDateSegment<>(fom3, tom3, true)
 
-        )), ungdomsprogramtidslinje, INGEN_DØDSDATO, new LocalDateTimeline<>(fom1, tom3, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        )), ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -301,26 +279,22 @@ class VurderUttakTjenesteTest {
 
         assertThat(nokDagerPeriode1.getPeriode().getFomDato()).isEqualTo(fom1);
         assertThat(nokDagerPeriode1.getPeriode().getTomDato()).isEqualTo(tom1);
-        assertThat(nokDagerPeriode1.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
         var nokDagerPeriode2 = iterator.next();
 
         assertThat(nokDagerPeriode2.getPeriode().getFomDato()).isEqualTo(fom2);
         assertThat(nokDagerPeriode2.getPeriode().getTomDato()).isEqualTo(tom2.minusDays(1));
-        assertThat(nokDagerPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
         var ikkeNokDager = iterator.next();
 
         assertThat(ikkeNokDager.getPeriode().getFomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getPeriode().getTomDato()).isEqualTo(tom2);
-        assertThat(ikkeNokDager.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
 
 
         var ikkeNokDager2 = iterator.next();
 
         assertThat(ikkeNokDager2.getPeriode().getFomDato()).isEqualTo(fom3);
         assertThat(ikkeNokDager2.getPeriode().getTomDato()).isEqualTo(tom3);
-        assertThat(ikkeNokDager2.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
 
     @Test
@@ -347,8 +321,7 @@ class VurderUttakTjenesteTest {
             new LocalDateSegment<>(fom3, tom3, true)
         ));
 
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(søknadsperioder, ungdomsprogramtidslinje, INGEN_DØDSDATO,
-            new LocalDateTimeline<>(fom1, tom3, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(søknadsperioder, ungdomsprogramtidslinje, INGEN_DØDSDATO);
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
         assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(2);
@@ -357,13 +330,11 @@ class VurderUttakTjenesteTest {
         var førstePeriode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(førstePeriode.getPeriode().getFomDato()).isEqualTo(fom1);
         assertThat(førstePeriode.getPeriode().getTomDato()).isEqualTo(tom1);
-        assertThat(førstePeriode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
 
         var andrePeriode = ungdomsytelseUttakPerioder.get().getPerioder().get(1);
         assertThat(andrePeriode.getPeriode().getFomDato()).isEqualTo(fom3);
         assertThat(andrePeriode.getPeriode().getTomDato()).isEqualTo(tom3);
-        assertThat(andrePeriode.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
 
 
@@ -377,7 +348,7 @@ class VurderUttakTjenesteTest {
         ));
 
         var dødsdato = fom.plusWeeks(10);
-        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, Optional.of(dødsdato), new LocalDateTimeline<>(fom, tom, BigDecimal.valueOf(100)), rapporterteInntekterTidslinje);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(new LocalDateTimeline<>(fom, tom, Boolean.TRUE), ungdomsprogramtidslinje, Optional.of(dødsdato));
 
         assertThat(ungdomsytelseUttakPerioder).isPresent();
 
@@ -385,12 +356,10 @@ class VurderUttakTjenesteTest {
         var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(dødsdato);
-        assertThat(periode.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
 
         var periode2 = ungdomsytelseUttakPerioder.get().getPerioder().get(1);
         assertThat(periode2.getPeriode().getFomDato()).isEqualTo(dødsdato.plusDays(1));
         assertThat(periode2.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(periode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(0))).isEqualTo(0);
         assertThat(periode2.getAvslagsårsak()).isEqualTo(UngdomsytelseUttakAvslagsårsak.SØKERS_DØDSFALL);
 
     }

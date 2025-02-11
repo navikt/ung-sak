@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import org.jboss.weld.exceptions.UnsupportedOperationException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -416,8 +417,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     public Behandling buildOgLagreMedUng(
         BehandlingRepositoryProvider repositoryProvider,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository
-    ) {
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+        TilkjentYtelseRepository tilkjentYtelseRepository) {
         if (ungTestscenario == null) throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
 
         // Default Person
@@ -444,11 +445,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
 
         //Ung ting
-        buildUng(ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        buildUng(ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
         return behandling;
     }
 
-    private void buildUng(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    private void buildUng(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+                          UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+    TilkjentYtelseRepository tilkjentYtelseRepository) {
 
         if (ungTestscenario.satser() != null) {
             ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(
@@ -466,6 +469,9 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             ungdomsprogramPeriodeRepository.lagre(behandling.getId(), ungTestscenario.programPerioder());
         }
 
+        if (ungTestscenario.tilkjentYtelsePerioder() != null) {
+            tilkjentYtelseRepository.lagre(behandling.getId(), ungTestscenario.tilkjentYtelsePerioder());
+        }
 
 
     }

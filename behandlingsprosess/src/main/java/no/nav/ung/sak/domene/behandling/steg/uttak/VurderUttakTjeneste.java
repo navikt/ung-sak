@@ -3,9 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.uttak;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.*;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -16,9 +14,7 @@ class VurderUttakTjeneste {
 
     static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
                                                             LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
-                                                            Optional<LocalDate> søkersDødsdato,
-                                                            LocalDateTimeline<BigDecimal> satsTidslinje,
-                                                            LocalDateTimeline<Set<RapportertInntekt>> rapporterteInntekterTidslinje) {
+                                                            Optional<LocalDate> søkersDødsdato) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
@@ -26,12 +22,13 @@ class VurderUttakTjeneste {
         var levendeBrukerTidslinje = søkersDødsdato.map(d -> new LocalDateTimeline<>(TIDENES_BEGYNNELSE, d, true)).orElse(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, TIDENES_ENDE, true));
 
         var delresultater = List.of(
-                new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
-                new ReduserVedInntektVurderer(rapporterteInntekterTidslinje, satsTidslinje).vurder(godkjentePerioder),
-                new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder)
-            );
+            new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
+            new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder),
+            new InnvilgHelePeriodenVurderer().vurder(godkjentePerioder) // innvilger hele perioden og prioriterer så avslag i mapping dersom det finnes
+        );
 
-        final var uttakPerioder = UttaksperiodeMapper.mapTilUttaksperioder(delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList());
+        final var resultattidslinjer = delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList();
+        final var uttakPerioder = UttaksperiodeMapper.mapTilUttaksperioder(resultattidslinjer);
 
         var ungdomsytelseUttakPerioder = new UngdomsytelseUttakPerioder(uttakPerioder);
         ungdomsytelseUttakPerioder.setRegelInput(lagRegelInput(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato));

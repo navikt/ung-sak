@@ -17,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.typer.JournalpostId;
 
@@ -104,8 +105,11 @@ public class DokumentMottakerInntektrapportering implements Dokumentmottaker {
     }
 
     @Override
-    public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
-        return BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT;
+    public List<Trigger> getTriggere(Collection<MottattDokument> mottattDokument) {
+        return mottattDokument.stream().map(it ->          søknadParser.parseSøknad(it))
+            .map(it -> ((Ungdomsytelse) it.getYtelse()).getInntekter().getMinMaksPeriode())
+            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT))
+            .toList();
     }
 
 }

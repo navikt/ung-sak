@@ -4331,13 +4331,9 @@
             "format" : "date",
             "nullable" : true,
             "type" : "string"
-          },
-          "utbetalingsgrad" : {
-            "nullable" : true,
-            "type" : "number"
           }
         },
-        "required" : [ "fom", "tom", "utbetalingsgrad" ],
+        "required" : [ "fom", "tom" ],
         "type" : "object"
       },
       "UtlandsoppholdDto" : {
