@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 
 @ApplicationScoped
-@BehandlingStegRef(BehandlingStegType.UNGDOMSYTELSE_BEREGNING)
+@BehandlingStegRef(BehandlingStegType.BEREGN_YTELSE)
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef
 public class BeregnYtelseSteg implements BehandlingSteg {
