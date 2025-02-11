@@ -49,16 +49,19 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         // Henter repository data
-        final var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Forventer å ha grunnlag"));
+        final var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId());
+        if (ungdomsytelseGrunnlag.isEmpty()) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
         final var rapportertInntektTidslinje = rapportertInntektMapper.map(kontekst.getBehandlingId());
         final var ytelseTidslinje = ytelseperiodeUtleder.utledYtelsestidslinje(kontekst.getBehandlingId());
 
         // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje
         validerPerioderForRapporterteInntekter(rapportertInntektTidslinje, ytelseTidslinje);
 
-        final var satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
+        final var satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
         final var totalsatsTidslinje = mapSatserTilTotalbeløpForPerioder(satsTidslinje, ytelseTidslinje);
-        final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag);
+        final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
 
         // Utfør reduksjon og map til tilkjent ytelse
         final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(godkjentUttakTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
