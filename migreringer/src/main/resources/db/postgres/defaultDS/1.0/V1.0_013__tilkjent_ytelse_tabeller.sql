@@ -1,6 +1,6 @@
 create table tilkjent_ytelse
 (
-    id                serial primary key,
+    id                bigint not null primary key,
     behandling_id     bigint not null references behandling(id),
     aktiv             boolean not null,
     opprettet_tid     timestamp default CURRENT_TIMESTAMP not null,
@@ -29,7 +29,7 @@ comment on column tilkjent_ytelse.endret_tid is 'Tidspunkt for når ytelsen sist
 
 create table tilkjent_ytelse_periode
 (
-    id                serial primary key,
+    id                bigint not null primary key,
     tilkjent_ytelse_id bigint not null references tilkjent_ytelse(id),
     periode           daterange not null,
     uredusert_belop   numeric not null,
