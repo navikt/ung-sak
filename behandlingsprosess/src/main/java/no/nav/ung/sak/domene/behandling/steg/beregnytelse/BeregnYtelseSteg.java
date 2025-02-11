@@ -7,15 +7,14 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
-import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.behandling.steg.uttak.RapportertInntektMapper;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.RapportertInntekt;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.stønadsperioder.Stønadperiodeutleder;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -44,38 +43,41 @@ public class BeregnYtelseSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        // Henter repository data
         final var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Forventer å ha grunnlag"));
-
-
         final var rapportertInntektTidslinje = rapportertInntektMapper.map(kontekst.getBehandlingId());
-
         final var stønadTidslinje = stønadperiodeutleder.utledStønadstidslinje(kontekst.getBehandlingId());
 
-        if (rapportertInntektTidslinje.stream().anyMatch(s -> harMatchendeStønadsperiode(s, stønadTidslinje))) {
-            throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av stønadstidslinjen");
-        }
+        // Validerer at periodene for rapporterte inntekter er konsistent med stønadstidslinje
+        validerPerioderForRapporterteInntekter(rapportertInntektTidslinje, stønadTidslinje);
 
         final var satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
-
         final var totalsatsTidslinje = mapSatserTilTotalbeløpForPerioder(satsTidslinje, stønadTidslinje);
+        final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag);
 
-        final var godkjentUttakTidslinje = ungdomsytelseGrunnlag.getUttakPerioder()
-            .getPerioder()
-            .stream()
-            .filter(it -> it.getAvslagsårsak() != null)
-            .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
-            .reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
-
+        // Utfør reduksjon og map til tilkjent ytelse
         final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(godkjentUttakTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
-
-
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje);
-
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static boolean harMatchendeStønadsperiode(LocalDateSegment<Set<RapportertInntekt>> s, LocalDateTimeline<Boolean> stønadTidslinje) {
+    private static LocalDateTimeline<Boolean> finnGodkjentUttakstidslinje(UngdomsytelseGrunnlag ungdomsytelseGrunnlag) {
+        return ungdomsytelseGrunnlag.getUttakPerioder()
+                .getPerioder()
+                .stream()
+                .filter(it -> it.getAvslagsårsak() != null)
+                .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
+                .reduce(LocalDateTimeline::crossJoin)
+                .orElse(LocalDateTimeline.empty());
+    }
+
+    private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje, LocalDateTimeline<Boolean> stønadTidslinje) {
+        if (rapportertInntektTidslinje.stream().anyMatch(s -> harIkkeMatchendeStønadsperiode(s, stønadTidslinje))) {
+            throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av stønadstidslinjen");
+        }
+    }
+
+    private static boolean harIkkeMatchendeStønadsperiode(LocalDateSegment<Set<RapportertInntekt>> s, LocalDateTimeline<Boolean> stønadTidslinje) {
         return stønadTidslinje.getLocalDateIntervals().stream().noneMatch(intervall -> intervall.equals(s.getLocalDateInterval()));
     }
 
