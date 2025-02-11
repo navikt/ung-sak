@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
@@ -31,6 +32,10 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     private RapportertInntektMapper rapportertInntektMapper;
     private Stønadperiodeutleder stønadperiodeutleder;
 
+    public BeregnYtelseSteg() {
+    }
+
+    @Inject
     public BeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                             TilkjentYtelseRepository tilkjentYtelseRepository,
                             RapportertInntektMapper rapportertInntektMapper,
