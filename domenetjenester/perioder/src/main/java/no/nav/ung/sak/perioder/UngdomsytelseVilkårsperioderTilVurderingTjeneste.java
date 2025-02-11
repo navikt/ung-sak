@@ -16,7 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.ung.sak.stønadsperioder.Stønadperiodeutleder;
+import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import no.nav.ung.sak.vilkår.InngangsvilkårUtleder;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
 
@@ -30,7 +30,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     private UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
     private UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private Stønadperiodeutleder stønadperiodeutleder;
+    private YtelseperiodeUtleder ytelseperiodeUtleder;
 
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
@@ -43,12 +43,12 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
         UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram,
         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
-        Stønadperiodeutleder stønadperiodeutleder) {
+        YtelseperiodeUtleder ytelseperiodeUtleder) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.ungdomsytelseSøknadsperiodeTjeneste = ungdomsytelseSøknadsperiodeTjeneste;
         this.utledPeriodeTilVurderingFraUngdomsprogram = utledPeriodeTilVurderingFraUngdomsprogram;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
-        this.stønadperiodeutleder = stønadperiodeutleder;
+        this.ytelseperiodeUtleder = ytelseperiodeUtleder;
     }
 
 
@@ -100,7 +100,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         var tidslinjeTilVurdering = tidslinjeForRelevanteEndringerIUngdomsprogram.crossJoin(relevantePerioderTidslinje).crossJoin(tidslinjeFraTrigger);
 
 
-        final var stønadssegmenterTilVurdering = stønadperiodeutleder.utledStønadstidslinje(behandlingId)
+        final var stønadssegmenterTilVurdering = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId)
             .stream().filter(s -> !tidslinjeTilVurdering.intersection(s.getLocalDateInterval()).isEmpty())
             .toList();
 

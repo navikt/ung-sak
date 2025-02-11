@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.behandling.steg.uttak.RapportertInntektMapper;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.RapportertInntekt;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.stønadsperioder.Stønadperiodeutleder;
+import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 
 import java.util.List;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private RapportertInntektMapper rapportertInntektMapper;
-    private Stønadperiodeutleder stønadperiodeutleder;
+    private YtelseperiodeUtleder ytelseperiodeUtleder;
 
     public BeregnYtelseSteg() {
     }
@@ -39,11 +39,11 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     public BeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                             TilkjentYtelseRepository tilkjentYtelseRepository,
                             RapportertInntektMapper rapportertInntektMapper,
-                            Stønadperiodeutleder stønadperiodeutleder) {
+                            YtelseperiodeUtleder ytelseperiodeUtleder) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.stønadperiodeutleder = stønadperiodeutleder;
+        this.ytelseperiodeUtleder = ytelseperiodeUtleder;
     }
 
     @Override
@@ -51,13 +51,13 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         // Henter repository data
         final var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Forventer å ha grunnlag"));
         final var rapportertInntektTidslinje = rapportertInntektMapper.map(kontekst.getBehandlingId());
-        final var stønadTidslinje = stønadperiodeutleder.utledStønadstidslinje(kontekst.getBehandlingId());
+        final var ytelseTidslinje = ytelseperiodeUtleder.utledYtelsestidslinje(kontekst.getBehandlingId());
 
-        // Validerer at periodene for rapporterte inntekter er konsistent med stønadstidslinje
-        validerPerioderForRapporterteInntekter(rapportertInntektTidslinje, stønadTidslinje);
+        // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje
+        validerPerioderForRapporterteInntekter(rapportertInntektTidslinje, ytelseTidslinje);
 
         final var satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
-        final var totalsatsTidslinje = mapSatserTilTotalbeløpForPerioder(satsTidslinje, stønadTidslinje);
+        final var totalsatsTidslinje = mapSatserTilTotalbeløpForPerioder(satsTidslinje, ytelseTidslinje);
         final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag);
 
         // Utfør reduksjon og map til tilkjent ytelse
@@ -70,7 +70,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         return ungdomsytelseGrunnlag.getUttakPerioder()
                 .getPerioder()
                 .stream()
-                .filter(it -> it.getAvslagsårsak() != null)
+                .filter(it -> it.getAvslagsårsak() == null)
                 .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
                 .reduce(LocalDateTimeline::crossJoin)
                 .orElse(LocalDateTimeline.empty());
@@ -105,7 +105,9 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     }
 
     private BeregnetSats reduserSegmenterIDelTidslinje(BeregnetSats beregnetSats, LocalDateSegment<UngdomsytelseSatser> s2) {
-        return beregnetSats.multipliser(Virkedager.beregnAntallVirkedager(s2.getFom(), s2.getTom()));
+        final var antallVirkedager = Virkedager.beregnAntallVirkedager(s2.getFom(), s2.getTom());
+        final var bergnetForSegment = new BeregnetSats(s2.getValue().dagsats(), s2.getValue().dagsatsBarnetillegg()).multipliser(antallVirkedager);
+        return beregnetSats.adder(bergnetForSegment);
     }
 
 

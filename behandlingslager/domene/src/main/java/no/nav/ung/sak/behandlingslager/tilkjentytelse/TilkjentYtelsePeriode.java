@@ -55,7 +55,7 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
     }
 
     public DatoIntervallEntitet getPeriode() {
-        return DatoIntervallEntitet.fra(periode.lower(), periode.upper());
+        return DatoIntervallEntitet.fra(periode);
     }
 
     public BigDecimal getUredusertBeløp() {

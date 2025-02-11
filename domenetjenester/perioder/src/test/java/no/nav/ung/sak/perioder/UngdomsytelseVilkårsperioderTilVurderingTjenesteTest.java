@@ -5,7 +5,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.stønadsperioder.Stønadperiodeutleder;
+import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
     private ProsessTriggerPeriodeUtleder fraProsesstriggere;
 
     @Mock
-    private Stønadperiodeutleder stønadperiodeutleder;
+    private YtelseperiodeUtleder ytelseperiodeUtleder;
 
     @InjectMocks
     private UngdomsytelseVilkårsperioderTilVurderingTjeneste tjeneste;
@@ -46,7 +46,7 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
         when(fraSøknadsperiode.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(fraUngdomsprogram.finnTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(fraProsesstriggere.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
-        when(stønadperiodeutleder.utledStønadstidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
+        when(ytelseperiodeUtleder.utledYtelsestidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
 
         final var resultat = tjeneste.utled(1L, VilkårType.UNGDOMSPROGRAMVILKÅRET);
 
@@ -72,7 +72,7 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
         when(fraSøknadsperiode.utledTidslinje(anyLong())).thenReturn(søknadsperiodeTidslinje);
         when(fraUngdomsprogram.finnTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(fraProsesstriggere.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
-        when(stønadperiodeutleder.utledStønadstidslinje(anyLong())).thenReturn(stønadstidslinje);
+        when(ytelseperiodeUtleder.utledYtelsestidslinje(anyLong())).thenReturn(stønadstidslinje);
 
         final var resultat = tjeneste.utled(1L, VilkårType.UNGDOMSPROGRAMVILKÅRET);
 
