@@ -94,26 +94,41 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
         private Builder() {}
 
         public Builder medPeriode(DatoIntervallEntitet periode) {
+            if (periode == null) {
+                throw new IllegalArgumentException("periode kan ikke være null");
+            }
             this.periode = periode;
             return this;
         }
 
         public Builder medUredusertBeløp(BigDecimal uredusertBeløp) {
+            if (uredusertBeløp == null) {
+                throw new IllegalArgumentException("uredusertBeløp kan ikke være null");
+            }
             this.uredusertBeløp = uredusertBeløp;
             return this;
         }
 
         public Builder medReduksjon(BigDecimal reduksjon) {
+            if (reduksjon == null) {
+                throw new IllegalArgumentException("reduksjon kan ikke være null");
+            }
             this.reduksjon = reduksjon;
             return this;
         }
 
         public Builder medRedusertBeløp(BigDecimal redusertBeløp) {
+            if (redusertBeløp == null) {
+                throw new IllegalArgumentException("redusertBeløp kan ikke være null");
+            }
             this.redusertBeløp = redusertBeløp;
             return this;
         }
 
         public Builder medDagsats(BigDecimal dagsats) {
+            if (dagsats == null) {
+                throw new IllegalArgumentException("dagsats kan ikke være null");
+            }
             this.dagsats = dagsats;
             return this;
         }

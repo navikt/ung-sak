@@ -27,6 +27,7 @@ public class TilkjentYtelseRepository {
         final var eksisterende = hentTilkjentYtelse(behandlingId);
         if (eksisterende.isPresent()) {
             eksisterende.get().setIkkeAktiv();
+            entityManager.persist(eksisterende.get());
         }
         final var ny = TilkjentYtelse.ny(behandlingId)
             .medPerioder(perioder)

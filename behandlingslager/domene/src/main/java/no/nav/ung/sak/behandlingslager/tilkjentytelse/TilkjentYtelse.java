@@ -45,6 +45,9 @@ public class TilkjentYtelse extends BaseEntitet {
     }
 
     public static Builder ny(Long behandlingId) {
+        if (behandlingId == null) {
+            throw new IllegalArgumentException("behandlingId kan ikke være null");
+        }
         return new Builder(behandlingId);
     }
 
@@ -57,6 +60,9 @@ public class TilkjentYtelse extends BaseEntitet {
         }
 
         public Builder medPerioder(List<TilkjentYtelsePeriode> perioder) {
+            if (perioder == null) {
+                throw new IllegalArgumentException("perioder kan ikke være null");
+            }
             this.perioder.addAll(perioder);
             return this;
         }

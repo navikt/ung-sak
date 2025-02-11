@@ -22,10 +22,10 @@ class VurderUttakTjeneste {
         var levendeBrukerTidslinje = søkersDødsdato.map(d -> new LocalDateTimeline<>(TIDENES_BEGYNNELSE, d, true)).orElse(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, TIDENES_ENDE, true));
 
         var delresultater = List.of(
-                new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
-                new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder),
+            new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
+            new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder),
             new InnvilgHelePeriodenVurderer().vurder(godkjentePerioder) // innvilger hele perioden og prioriterer så avslag i mapping dersom det finnes
-            );
+        );
 
         final var resultattidslinjer = delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList();
         final var uttakPerioder = UttaksperiodeMapper.mapTilUttaksperioder(resultattidslinjer);
