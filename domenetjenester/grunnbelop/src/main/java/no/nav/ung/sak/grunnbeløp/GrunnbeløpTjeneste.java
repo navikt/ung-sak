@@ -1,31 +1,27 @@
 package no.nav.ung.sak.grunnbeløp;
 
-import java.math.BigDecimal;
-
 import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.grunnbeløp.GrunnbeløpRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 
 @Dependent
 public class GrunnbeløpTjeneste {
+    /**
+     * Tidslinje for grunnbeløpsatser
+     */
+    public static final LocalDateTimeline<BigDecimal> GRUNNBELØP_TIDSLINJE = new LocalDateTimeline<>(
+        List.of(
+            new LocalDateSegment<>(LocalDate.of(2024, 5, 1), LocalDate.of(2099, 12, 31), BigDecimal.valueOf(124028)),
+            new LocalDateSegment<>(LocalDate.of(2023, 5, 1), LocalDate.of(2024, 4, 30), BigDecimal.valueOf(118620))
+        ));
 
-    private final GrunnbeløpRepository grunnbeløpRepository;
 
-    @Inject
-    public GrunnbeløpTjeneste(GrunnbeløpRepository grunnbeløpRepository) {
-        this.grunnbeløpRepository = grunnbeløpRepository;
+    public LocalDateTimeline<BigDecimal> hentGrunnbeløpTidslinje() {
+        return GRUNNBELØP_TIDSLINJE;
     }
-
-    public LocalDateTimeline<BigDecimal> hentGrunnbeløpTidslinje(LocalDateTimeline<Boolean> tidslinje) {
-        var grunnbeløpSatser = grunnbeløpRepository.hentGrunnbeløpForPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(tidslinje.getMinLocalDate(), tidslinje.getMaxLocalDate()));
-        return grunnbeløpSatser.stream()
-            .map(s -> new LocalDateTimeline<>(s.getPeriode().getFomDato(), s.getPeriode().getTomDato(), BigDecimal.valueOf(s.getVerdi())))
-            .reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
-    }
-
-
 }

@@ -31,19 +31,19 @@ import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetill
 @Dependent
 public class UngdomsytelseBeregnDagsats {
 
-    private final LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste;
+    private final GrunnbeløpTidslinjeTjeneste grunnbeløpTidslinjeTjeneste;
     private final LagBarnetilleggTidslinje lagBarnetilleggTidslinje;
 
     @Inject
-    public UngdomsytelseBeregnDagsats(LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste,
+    public UngdomsytelseBeregnDagsats(GrunnbeløpTidslinjeTjeneste grunnbeløpTidslinjeTjeneste,
                                       LagBarnetilleggTidslinje lagBarnetilleggTidslinje) {
-        this.lagGrunnbeløpTidslinjeTjeneste = lagGrunnbeløpTidslinjeTjeneste;
+        this.grunnbeløpTidslinjeTjeneste = grunnbeløpTidslinjeTjeneste;
         this.lagBarnetilleggTidslinje = lagBarnetilleggTidslinje;
     }
 
 
     public UngdomsytelseSatsResultat beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
-        var grunnbeløpTidslinje = lagGrunnbeløpTidslinjeTjeneste.lagGrunnbeløpTidslinjeForPeriode(perioder);
+        var grunnbeløpTidslinje = grunnbeløpTidslinjeTjeneste.hentGrunnbeløpTidslinje();
         var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
         var barnetilleggResultat = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef, perioder);
 
