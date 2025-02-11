@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.k9.søknad.ytelse.ung.v1.UngSøknadstype;
 import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +56,8 @@ public class InnhentDokumentTjeneste {
     private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private final ProsessTaskTjeneste prosessTaskTjeneste;
     private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private final ProsessTriggereRepository prosessTriggereRepository;
+
 
 
     @Inject
@@ -64,7 +66,8 @@ public class InnhentDokumentTjeneste {
                                    BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                    ProsessTaskTjeneste prosessTaskTjeneste,
-                                   FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+                                   FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                   ProsessTriggereRepository prosessTriggereRepository) {
         this.mottakere = mottakere;
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -73,20 +76,21 @@ public class InnhentDokumentTjeneste {
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
         var brevkodeMap = mottattDokument
             .stream()
             .collect(Collectors.groupingBy(MottattDokument::getType));
-        var behandlingÅrsak = brevkodeMap.keySet()
-            .stream()
-            .sorted(Brevkode.COMP_REKKEFØLGE)
-            .map(it -> getBehandlingÅrsakType(it, fagsak))
-            .findFirst()
-            .orElseThrow();
+        var triggere = getTriggere(mottattDokument, fagsak);
 
-        var resultat = finnEllerOpprettBehandling(fagsak, behandlingÅrsak);
+        var resultat = finnEllerOpprettBehandling(fagsak, triggere);
+
+
+        if (!triggere.isEmpty()) {
+            prosessTriggereRepository.leggTil(resultat.behandling.getId(), triggere.stream().map(it -> new no.nav.ung.sak.trigger.Trigger(it.behandlingÅrsak(), it.periode())).collect(Collectors.toSet()));
+        }
 
         ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
         if (resultat.nyopprettet) {
@@ -111,7 +115,7 @@ public class InnhentDokumentTjeneste {
             || behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE).map(Aksjonspunkt::erÅpentAksjonspunkt).orElse(false));
     }
 
-    private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
+    private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, List<Trigger> triggere) {
         var fagsakId = fagsak.getId();
         Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteBehandling(fagsak.getId());
 
@@ -136,7 +140,7 @@ public class InnhentDokumentTjeneste {
                     return BehandlingMedOpprettelseResultat.nyBehandling(nyFørstegangsbehandling);
                 } else {
                     // oppretter ny behandling fra forrige (førstegangsbehandling eller revurdering)
-                    var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, behandlingÅrsakType);
+                    var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, triggere.getFirst().behandlingÅrsak());
                     return BehandlingMedOpprettelseResultat.nyBehandling(nyBehandling);
                 }
             } else {
@@ -145,6 +149,8 @@ public class InnhentDokumentTjeneste {
                 return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
             }
         }
+
+
     }
 
     public void lagreDokumenter(Map<Brevkode, List<MottattDokument>> mottattDokument, Behandling behandling) {
@@ -157,9 +163,12 @@ public class InnhentDokumentTjeneste {
             });
     }
 
-    private BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode, Fagsak fagsak) {
-        var dokumentmottaker = getDokumentmottaker(brevkode, fagsak);
-        return dokumentmottaker.getBehandlingÅrsakType(brevkode);
+    private List<Trigger> getTriggere(Collection<MottattDokument> mottatteDokumenter, Fagsak fagsak) {
+        final var gruppertPåBrevkode = mottatteDokumenter.stream()
+            .collect(Collectors.groupingBy(MottattDokument::getType));
+        return gruppertPåBrevkode.entrySet().stream()
+            .flatMap((entry) -> getDokumentmottaker(entry.getKey(), fagsak).getTriggere(entry.getValue()).stream())
+            .toList();
     }
 
     private ProsessTaskData asynkStartBehandling(Behandling behandling) {
