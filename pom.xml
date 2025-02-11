@@ -45,7 +45,7 @@
         <jandex.version>3.2.5</jandex.version>
         <flyway.version>11.3.1</flyway.version>
         <pdfgen-core.version>1.1.41</pdfgen-core.version>
-        <confluent.platform.version>7.8.0</confluent.platform.version>
+        <confluent.platform.version>7.8.1</confluent.platform.version>
         <mockito.version>5.15.2</mockito.version>
     </properties>
 
