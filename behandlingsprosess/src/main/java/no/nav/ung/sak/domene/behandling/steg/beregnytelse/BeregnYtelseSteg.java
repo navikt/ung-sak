@@ -19,7 +19,6 @@ import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 
 @ApplicationScoped
@@ -72,12 +71,12 @@ public class BeregnYtelseSteg implements BehandlingSteg {
 
     private static LocalDateTimeline<Boolean> finnGodkjentUttakstidslinje(UngdomsytelseGrunnlag ungdomsytelseGrunnlag) {
         return ungdomsytelseGrunnlag.getUttakPerioder()
-                .getPerioder()
-                .stream()
-                .filter(it -> it.getAvslagsårsak() == null)
-                .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
-                .reduce(LocalDateTimeline::crossJoin)
-                .orElse(LocalDateTimeline.empty());
+            .getPerioder()
+            .stream()
+            .filter(it -> it.getAvslagsårsak() == null)
+            .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
+            .reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
     }
 
     private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje, LocalDateTimeline<Boolean> stønadTidslinje) {
@@ -92,12 +91,14 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     }
 
 
-    public <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<V> rapportertInntektTidslinje) {
-        final var mappetTidslinje = rapportertInntektTidslinje.map(mapTotaltSatsbeløpForSegment(satsTidslinje));
+    public <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(
+        LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
+        LocalDateTimeline<V> ytelseTidslinje) {
+        final var mappetTidslinje = ytelseTidslinje.map(mapTotaltSatsbeløpForSegment(satsTidslinje));
         return mappetTidslinje;
     }
 
-    private <V >Function<LocalDateSegment<V>, List<LocalDateSegment<BeregnetSats>>> mapTotaltSatsbeløpForSegment(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {
+    private <V> Function<LocalDateSegment<V>, List<LocalDateSegment<BeregnetSats>>> mapTotaltSatsbeløpForSegment(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {
         return (inntektSegment) -> {
             var delTidslinje = satsTidslinje.intersection(inntektSegment.getLocalDateInterval());
             final BeregnetSats totatSatsbeløpForPeriode = reduser(delTidslinje);
@@ -114,8 +115,6 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         final var bergnetForSegment = new BeregnetSats(s2.getValue().dagsats(), s2.getValue().dagsatsBarnetillegg()).multipliser(antallVirkedager);
         return beregnetSats.adder(bergnetForSegment);
     }
-
-
 
 
 }
