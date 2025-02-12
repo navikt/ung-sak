@@ -4,6 +4,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.Period;
@@ -28,9 +30,11 @@ public class YtelseperiodeUtleder {
      */
     public LocalDateTimeline<Boolean> utledYtelsestidslinje(Long behandlingId) {
         final var ungdomsprogramperioder = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
-        final var fagsakTomDato = behandlingRepository.hentBehandling(behandlingId).getFagsak().getPeriode().getTomDato();
-        return ungdomsprogramperioder.compress()
-            .splitAtRegular(ungdomsprogramperioder.getMinLocalDate().withDayOfMonth(1), fagsakTomDato, Period.ofMonths(1));
+        final var fagsak = behandlingRepository.hentBehandling(behandlingId).getFagsak();
+        final var fagsakPeriode = fagsak.getPeriode();
+        return ungdomsprogramperioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
+            .compress()
+            .splitAtRegular(ungdomsprogramperioder.getMinLocalDate().withDayOfMonth(1), fagsakPeriode.getTomDato(), Period.ofMonths(1));
     }
 
 }
