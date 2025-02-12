@@ -3,6 +3,7 @@ package no.nav.ung.sak.perioder;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -13,6 +14,9 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
@@ -31,6 +35,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     private UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private YtelseperiodeUtleder ytelseperiodeUtleder;
+    private VilkårResultatRepository vilkårResultatRepository;
 
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
@@ -43,12 +48,13 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
         UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram,
         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
-        YtelseperiodeUtleder ytelseperiodeUtleder) {
+        YtelseperiodeUtleder ytelseperiodeUtleder, VilkårResultatRepository vilkårResultatRepository) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.ungdomsytelseSøknadsperiodeTjeneste = ungdomsytelseSøknadsperiodeTjeneste;
         this.utledPeriodeTilVurderingFraUngdomsprogram = utledPeriodeTilVurderingFraUngdomsprogram;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.ytelseperiodeUtleder = ytelseperiodeUtleder;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
 
@@ -59,7 +65,18 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
-        return utledPeriode(behandlingId);
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
+        if (vilkårene.isPresent()) {
+            final var perioder = utledPerioderFraRelevanteEndringer(behandlingId);
+            return vilkårene.filter(it -> it.getVilkårType().equals(vilkårType))
+                .map(Vilkår::getPerioder)
+                .stream()
+                .flatMap(Collection::stream)
+                .map(VilkårPeriode::getPeriode)
+                .filter(p -> perioder.stream().anyMatch(p::overlapper))
+                .collect(Collectors.toCollection(TreeSet::new));
+        }
+        return ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId);
     }
 
     @Override
@@ -83,6 +100,8 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         return Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET);
     }
 
+
+
     /**
      * Finner perioder som vurderes.
      * <p>
@@ -93,7 +112,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
      * @param behandlingId BehandlingId
      * @return Perioder som vurderes
      */
-    private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+    private NavigableSet<DatoIntervallEntitet> utledPerioderFraRelevanteEndringer(Long behandlingId) {
         var tidslinjeForRelevanteEndringerIUngdomsprogram = utledPeriodeTilVurderingFraUngdomsprogram.finnTidslinje(behandlingId);
         var relevantePerioderTidslinje = ungdomsytelseSøknadsperiodeTjeneste.utledTidslinje(behandlingId);
         final var tidslinjeFraTrigger = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
@@ -104,7 +123,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
             .stream().filter(s -> !tidslinjeTilVurdering.intersection(s.getLocalDateInterval()).isEmpty())
             .toList();
 
-        return TidslinjeUtil.tilDatoIntervallEntiteter(new LocalDateTimeline<>(stønadssegmenterTilVurdering));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(new LocalDateTimeline<>(stønadssegmenterTilVurdering).compress());
     }
 
 }
