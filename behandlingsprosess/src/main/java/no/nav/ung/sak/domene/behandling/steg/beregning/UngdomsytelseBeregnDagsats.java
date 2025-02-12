@@ -1,11 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -18,32 +13,34 @@ import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.Barnetillegg;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
+import no.nav.ung.sak.typer.Periode;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 @Dependent
 public class UngdomsytelseBeregnDagsats {
 
-    private final LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste;
     private final LagBarnetilleggTidslinje lagBarnetilleggTidslinje;
 
     @Inject
-    public UngdomsytelseBeregnDagsats(LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste,
-                                      LagBarnetilleggTidslinje lagBarnetilleggTidslinje) {
-        this.lagGrunnbeløpTidslinjeTjeneste = lagGrunnbeløpTidslinjeTjeneste;
+    public UngdomsytelseBeregnDagsats(LagBarnetilleggTidslinje lagBarnetilleggTidslinje) {
         this.lagBarnetilleggTidslinje = lagBarnetilleggTidslinje;
     }
 
 
     public UngdomsytelseSatsResultat beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
-        var grunnbeløpTidslinje = lagGrunnbeløpTidslinjeTjeneste.lagGrunnbeløpTidslinjeForPeriode(perioder);
+        var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
         var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
         var barnetilleggResultat = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef, perioder);
 
@@ -102,17 +99,22 @@ public class UngdomsytelseBeregnDagsats {
 
     private record RegelSporing(List<PeriodeMedVerdi<BigDecimal>> grunnbeløpPerioder,
                                 List<PeriodeMedVerdi<Sats>> satsperioder,
-                                List<PeriodeMedVerdi<Barnetillegg>> barnetilleggPerioder) {}
+                                List<PeriodeMedVerdi<Barnetillegg>> barnetilleggPerioder) {
+    }
 
     private static <T> List<PeriodeMedVerdi<T>> mapTilPerioderMedVerdi(LocalDateTimeline<T> tidslinje) {
         return tidslinje.toSegments().stream().map(it -> new PeriodeMedVerdi<>(new Periode(it.getFom(), it.getTom()), it.getValue())).toList();
     }
 
-    private record PeriodeMedVerdi<T>(Periode periode, T verdi){};
+    private record PeriodeMedVerdi<T>(Periode periode, T verdi) {
+    }
+
+    ;
 
 
-
-    private record RegelInput(List<Periode> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats, LocalDate beregningsdato, List<FødselOgDødInfo> barnFødselOgDød) {}
+    private record RegelInput(List<Periode> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats,
+                              LocalDate beregningsdato, List<FødselOgDødInfo> barnFødselOgDød) {
+    }
 
     interface JsonMappingFeil extends DeklarerteFeil {
 

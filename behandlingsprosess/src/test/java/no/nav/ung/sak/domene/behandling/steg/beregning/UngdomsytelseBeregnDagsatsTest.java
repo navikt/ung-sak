@@ -1,40 +1,34 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BarnetilleggVurdering;
+import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.grunnbeløp.GrunnbeløpTjeneste;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BarnetilleggVurdering;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
 class UngdomsytelseBeregnDagsatsTest {
 
     private UngdomsytelseBeregnDagsats tjeneste;
-    @Inject
-    private GrunnbeløpTjeneste grunnbeløpTjeneste;
     private LagBarnetilleggTidslinje lagBarnetilleggTidslinje = mock(LagBarnetilleggTidslinje.class);
 
 
     @BeforeEach
     void setUp() {
-        tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(grunnbeløpTjeneste), lagBarnetilleggTidslinje);
+        tjeneste = new UngdomsytelseBeregnDagsats(lagBarnetilleggTidslinje);
         when(lagBarnetilleggTidslinje.lagTidslinje(any(), any())).thenReturn(new BarnetilleggVurdering(LocalDateTimeline.empty(), List.of()));
     }
 
