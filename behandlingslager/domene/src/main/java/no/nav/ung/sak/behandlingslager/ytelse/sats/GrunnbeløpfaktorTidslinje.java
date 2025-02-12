@@ -12,14 +12,14 @@ public class GrunnbeløpfaktorTidslinje {
     private static LocalDateTimeline<BigDecimal> LAV_GRUNNBELØPFAKTOR_TIDSLINJE = new LocalDateTimeline<>(
         List.of(
             new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2099, 12, 31), BigDecimal.valueOf(4).divide(BigDecimal.valueOf(3), 5, RoundingMode.HALF_UP)),
-            new LocalDateSegment<>(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31), BigDecimal.valueOf(4).divide(BigDecimal.valueOf(3), 5, RoundingMode.HALF_UP))
+            new LocalDateSegment<>(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31), BigDecimal.valueOf(4).divide(BigDecimal.valueOf(3), 5, RoundingMode.HALF_UP)) // TODO: Kan fjernes før lansering
         )
     );
 
     private static LocalDateTimeline<BigDecimal> HØY_GRUNNBELØPFAKTOR_TIDSLINJE = new LocalDateTimeline<>(
         List.of(
             new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2099, 12, 31), BigDecimal.valueOf(2)),
-            new LocalDateSegment<>(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31), BigDecimal.valueOf(2))
+            new LocalDateSegment<>(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31), BigDecimal.valueOf(2)) // TODO: Kan fjernes før lansering
         )
     );
 
