@@ -19,6 +19,7 @@ import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 
 @ApplicationScoped
@@ -80,8 +81,9 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     }
 
     private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje, LocalDateTimeline<Boolean> stønadTidslinje) {
-        if (rapportertInntektTidslinje.stream().anyMatch(s -> harIkkeMatchendeStønadsperiode(s, stønadTidslinje))) {
-            throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av stønadstidslinjen");
+        final var rapporterteInntekterSomIkkeMatcherYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeMatchendeStønadsperiode(s, stønadTidslinje)).toList();
+        if (!rapporterteInntekterSomIkkeMatcherYtelsesperiode.isEmpty()) {
+            throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av stønadstidslinjen: " + rapporterteInntekterSomIkkeMatcherYtelsesperiode.stream().map(LocalDateSegment::getLocalDateInterval).toList());
         }
     }
 
