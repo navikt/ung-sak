@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,9 +27,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -64,7 +62,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var dagsats = BigDecimal.TEN;
         var grunnbeløp = BigDecimal.valueOf(50);
         var grunnbeløpFaktor = BigDecimal.valueOf(2);
-        lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY, 0, 0);
+        lagreBeregning(periode1, dagsats, grunnbeløp, hentSatstypeOgGrunnbeløp(Sats.HØY), 0, 0);
 
         var ungdomsytelseGrunnlag = repository.hentGrunnlag(behandling.getId());
         assertThat(ungdomsytelseGrunnlag.isPresent()).isTrue();
@@ -86,7 +84,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var grunnbeløpFaktor = BigDecimal.valueOf(2);
         var antallBarn = 2;
         var barnetilleggDagsats = 100;
-        lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY, antallBarn, barnetilleggDagsats);
+        lagreBeregning(periode1, dagsats, grunnbeløp, hentSatstypeOgGrunnbeløp(Sats.HØY), antallBarn, barnetilleggDagsats);
 
         var uttakperioder1 = new UngdomsytelseUttakPerioder(List.of(new UngdomsytelseUttakPeriode(
                 LocalDate.now(), LocalDate.now(), UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER
@@ -110,19 +108,25 @@ class UngdomsytelseGrunnlagRepositoryTest {
         assertThat(uttakperioder.get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()));
     }
 
-    private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, int barnetilleggDagsats) {
+    private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor, int antallBarn, int barnetilleggDagsats) {
         var tidslinje = new LocalDateTimeline<>(List.of(
-            lagSegment(periode1, dagsats, grunnbeløp, sats, antallBarn, barnetilleggDagsats)
+            lagSegment(periode1, dagsats, grunnbeløp, satsOgGrunnbeløpfaktor, antallBarn, barnetilleggDagsats)
         ));
         repository.lagre(behandling.getId(), new UngdomsytelseSatsResultat(tidslinje, "regelInput", "regelSporing"));
     }
 
-    private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats, int antallBarn, int barnetilleggDagsats) {
+    private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor, int antallBarn, int barnetilleggDagsats) {
         return new LocalDateSegment(
             datoInterval,
             new UngdomsytelseSatser(
                 dagsats,
                 grunnbeløp,
-                sats.getGrunnbeløpFaktor(), sats.getSatsType(), antallBarn, barnetilleggDagsats));
+                satsOgGrunnbeløpfaktor.grunnbeløpFaktor(), satsOgGrunnbeløpfaktor.satstype(), antallBarn, barnetilleggDagsats));
+    }
+
+    private static SatsOgGrunnbeløpfaktor hentSatstypeOgGrunnbeløp(Sats sats) {
+        return GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), sats)
+        ))).stream().findFirst().orElseThrow().getValue();
     }
 }

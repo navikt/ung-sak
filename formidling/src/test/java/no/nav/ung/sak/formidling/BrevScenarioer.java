@@ -1,12 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -18,7 +11,9 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
@@ -26,6 +21,13 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestscenario;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.List;
+
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 public class BrevScenarioer {
 
@@ -156,21 +158,30 @@ public class BrevScenarioer {
     }
 
     public static UngdomsytelseSatser.Builder lavSatsBuilder() {
+        SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
         return UngdomsytelseSatser.builder()
             .medGrunnbeløp(G_BELØP_24)
-            .medGrunnbeløpFaktor(Sats.LAV.getGrunnbeløpFaktor())
-            .medSatstype(Sats.LAV.getSatsType())
+            .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
+            .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(0)
             .medBarnetilleggDagsats(0);
     }
 
     public static UngdomsytelseSatser.Builder høySatsBuilder() {
+        SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.HØY);
+
         return UngdomsytelseSatser.builder()
             .medGrunnbeløp(G_BELØP_24)
-            .medGrunnbeløpFaktor(Sats.HØY.getGrunnbeløpFaktor())
-            .medSatstype(Sats.HØY.getSatsType())
+            .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
+            .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(0)
             .medBarnetilleggDagsats(0)
             ;
+    }
+
+    private static SatsOgGrunnbeløpfaktor hentSatstypeOgGrunnbeløp(Sats sats) {
+        return GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), sats)
+        ))).stream().findFirst().orElseThrow().getValue();
     }
 }
