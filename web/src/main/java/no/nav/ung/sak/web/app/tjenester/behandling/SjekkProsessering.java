@@ -84,8 +84,8 @@ public class SjekkProsessering {
     }
 
     private boolean harRolleSaksbehandler() {
-        String ident = SubjectHandler.getSubjectHandler().getUid();
-        List<String> brukersGrupper = JwtUtil.getGroups(ident);
+        String jwt = SubjectHandler.getSubjectHandler().getInternSsoToken();
+        List<String> brukersGrupper = JwtUtil.getGroups(jwt);
         return brukersGrupper.contains(gruppeIdSaksbehandler);
     }
 
