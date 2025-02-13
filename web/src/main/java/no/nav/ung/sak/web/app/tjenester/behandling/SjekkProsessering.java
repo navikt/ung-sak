@@ -98,14 +98,15 @@ public class SjekkProsessering {
      * Betinget sjekk om innhent registeropplysninger (conditionally) og kjør prosess. Alt gjøres asynkront i form av prosess tasks.
      * Intern sjekk på om hvorvidt registeropplysninger må reinnhentes.
      *
-     * @param sjekkSaksbehandler
      * @return optional Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
-    public Optional<String> sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling, boolean sjekkSaksbehandler) {
-        if (!skalInnhenteRegisteropplysningerPåNytt(behandling) || (sjekkSaksbehandler && !harRolleSaksbehandler())) {
+    public Optional<String> sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
+        if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
             return Optional.empty();
         }
-
+        if (!harRolleSaksbehandler()){
+            return Optional.empty();
+        }
         if (pågårEllerFeiletTasks(behandling)) {
             return Optional.empty();
         }
