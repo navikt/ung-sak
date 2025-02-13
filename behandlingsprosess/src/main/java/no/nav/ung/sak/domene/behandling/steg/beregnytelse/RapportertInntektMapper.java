@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.uttak;
+package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -7,10 +7,11 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.RapportertInntekt;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,25 +22,31 @@ import java.util.Set;
 @Dependent
 public class RapportertInntektMapper {
 
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RapportertInntektMapper.class);
+
+    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     @Inject
     public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
-    public LocalDateTimeline<Set<RapportertInntekt>> map(Long behandlingId) {
+    public LocalDateTimeline<RapporterteInntekter> map(Long behandlingId) {
         // Henter iay-grunnlag (kall til abakus)
         final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         // Finner rapporterte inntekter pr journalpost sortert på mottattdato med siste mottatt journalpost først
         final var sorterteInntekttidslinjerPåMottattdato = finnSorterteInntektstidslinjer(iayGrunnlag);
 
-        var resultatTidslinje = new LocalDateTimeline<Set<RapportertInntekt>>(List.of());
+        var resultatTidslinje = new LocalDateTimeline<RapporterteInntekter>(List.of());
         for (InntektForMottattidspunkt journalpostMedInntekttidslinje : sorterteInntekttidslinjerPåMottattdato) {
             // Dersom vi ikke allerede har lagt til en rapportert inntekt for perioden legger vi den til i resultattidslinjen
             if (!resultatTidslinje.intersects(journalpostMedInntekttidslinje.tidslinje())) {
                 // Trenger ikkje å håndtere overlapp sidan vi aldri går inn her med overlapp
                 resultatTidslinje = resultatTidslinje.crossJoin(journalpostMedInntekttidslinje.tidslinje());
+                LOGGER.info("Fant rapportert inntekt for periode: " + journalpostMedInntekttidslinje);
+
+            } else {
+                LOGGER.info("Fant inntekt som ble forkastet pga overlapp med senere rapportert inntekt for samme periode: " + journalpostMedInntekttidslinje);
             }
         }
 
@@ -58,7 +65,7 @@ public class RapportertInntektMapper {
         final var res = new ArrayList<LocalDateSegment<Set<RapportertInntekt>>>();
         res.addAll(finnArbeidOgFrilansSegmenter(o));
         res.addAll(finnNæringssegmenter(o));
-        return new InntektForMottattidspunkt(o.getInnsendingstidspunkt(), new LocalDateTimeline<>(res, StandardCombinators::union));
+        return new InntektForMottattidspunkt(o.getInnsendingstidspunkt(), new LocalDateTimeline<>(res, StandardCombinators::union).mapValue(RapporterteInntekter::new));
     }
 
     private static List<LocalDateSegment<Set<RapportertInntekt>>> finnNæringssegmenter(OppgittOpptjening o) {
@@ -82,8 +89,16 @@ public class RapportertInntektMapper {
     }
 
     private record InntektForMottattidspunkt(LocalDateTime mottattTidspunkt,
-                                             LocalDateTimeline<Set<RapportertInntekt>> tidslinje
+                                             LocalDateTimeline<RapporterteInntekter> tidslinje
     ) implements Comparable<InntektForMottattidspunkt> {
+
+        @Override
+        public String toString() {
+            return "InntektForMottattidspunkt{" +
+                "mottattTidspunkt=" + mottattTidspunkt +
+                ", tidslinje=" + tidslinje +
+                '}';
+        }
 
         @Override
         public int compareTo(@NotNull InntektForMottattidspunkt o) {

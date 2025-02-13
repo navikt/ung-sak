@@ -14,17 +14,22 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.Barnetillegg;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.Periode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Dependent
 public class UngdomsytelseBeregnDagsats {
@@ -52,7 +57,11 @@ public class UngdomsytelseBeregnDagsats {
 
         return new UngdomsytelseSatsResultat(
             satsTidslinje,
-            lagRegelSporing(grunnbeløpTidslinje, satsOgGrunnbeløpfaktorTidslinje, barnetilleggResultat.barnetilleggTidslinje()),
+            LagRegelSporing.lagRegelSporingFraTidslinjer(Map.of(
+                "grunnbeløptidslinje", grunnbeløpTidslinje,
+                "satsOgGrunnbeløpfaktorTidslinje", satsOgGrunnbeløpfaktorTidslinje,
+                "barnetilleggTidslinje", barnetilleggResultat.barnetilleggTidslinje()
+            )),
             lagRegelInput(perioder, fødselsdato, harTriggerBeregnHøySats, beregningsdato, barnetilleggResultat.relevanteBarnPersoninformasjon())
         );
     }
@@ -61,10 +70,10 @@ public class UngdomsytelseBeregnDagsats {
         return UngdomsytelseSatser.builder().medGrunnbeløpFaktor(sats.grunnbeløpFaktor()).medSatstype(sats.satstype());
     }
 
-    private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, BigDecimal, UngdomsytelseSatser.Builder> leggTilGrunnbeløp() {
+    private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, Grunnbeløp, UngdomsytelseSatser.Builder> leggTilGrunnbeløp() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue().kopi();
-            return new LocalDateSegment<>(di, builder.medGrunnbeløp(rhs.getValue()));
+            return new LocalDateSegment<>(di, builder.medGrunnbeløp(rhs.getValue().verdi()));
         };
     }
 
@@ -78,12 +87,6 @@ public class UngdomsytelseBeregnDagsats {
         };
     }
 
-
-    private static String lagRegelSporing(LocalDateTimeline<BigDecimal> grunnbeløpTidslinje, LocalDateTimeline<SatsOgGrunnbeløpfaktor> satsOgGrunnbeløpFaktorTidslinje, LocalDateTimeline<Barnetillegg> barnetilleggTidslinje) {
-        var regelSporing = new RegelSporing(mapTilPerioderMedVerdi(grunnbeløpTidslinje), mapTilPerioderMedVerdi(satsOgGrunnbeløpFaktorTidslinje), mapTilPerioderMedVerdi(barnetilleggTidslinje));
-        return JsonObjectMapper.toJson(regelSporing, JsonMappingFeil.FACTORY::jsonMappingFeil);
-    }
-
     private static String lagRegelInput(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats, LocalDate beregningsdato, List<FødselOgDødInfo> barnPersoninformasjon) {
         var regelInput = new RegelInput(
             TidslinjeUtil.tilPerioder(perioder),
@@ -94,21 +97,6 @@ public class UngdomsytelseBeregnDagsats {
         );
         return JsonObjectMapper.toJson(regelInput, JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
-
-
-    private record RegelSporing(List<PeriodeMedVerdi<BigDecimal>> grunnbeløpPerioder,
-                                List<PeriodeMedVerdi<SatsOgGrunnbeløpfaktor>> satsOgGrunnbeløpfaktorPerioder,
-                                List<PeriodeMedVerdi<Barnetillegg>> barnetilleggPerioder) {
-    }
-
-    private static <T> List<PeriodeMedVerdi<T>> mapTilPerioderMedVerdi(LocalDateTimeline<T> tidslinje) {
-        return tidslinje.toSegments().stream().map(it -> new PeriodeMedVerdi<>(new Periode(it.getFom(), it.getTom()), it.getValue())).toList();
-    }
-
-    private record PeriodeMedVerdi<T>(Periode periode, T verdi) {
-    }
-
-    ;
 
 
     private record RegelInput(List<Periode> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats,

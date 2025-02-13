@@ -4,8 +4,10 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.behandling.steg.beregnytelse.RapportertInntektMapper;
+import no.nav.ung.sak.domene.behandling.steg.beregnytelse.RapporterteInntekter;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.RapportertInntekt;
+import no.nav.ung.sak.domene.behandling.steg.beregnytelse.RapportertInntekt;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -46,7 +48,7 @@ class RapportertInntektMapperTest {
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
-            Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)));
+            new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt))));
         assertThat(tidslinje).isEqualTo(forventet);
 
     }
@@ -65,10 +67,10 @@ class RapportertInntektMapperTest {
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
-            Set.of(
+            new RapporterteInntekter(Set.of(
                 new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, arbeidsinntekt),
                 new RapportertInntekt(InntektType.SELVSTENDIG_NÆRINGSDRIVENDE, næringsinntekt)
-                ));
+                )));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 
@@ -95,8 +97,8 @@ class RapportertInntektMapperTest {
         // Assert
         final var forventet = new LocalDateTimeline<>(
             List.of(
-                new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt))),
-                new LocalDateSegment<>(periode2.getFomDato(), periode2.getTomDato(), Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)))
+                new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)))),
+                new LocalDateSegment<>(periode2.getFomDato(), periode2.getTomDato(), new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2))))
                 ));
         assertThat(tidslinje).isEqualTo(forventet);
     }
