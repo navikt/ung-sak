@@ -7,7 +7,6 @@ import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
@@ -21,13 +20,17 @@ import no.nav.ung.sak.behandling.prosessering.task.OppfriskTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
+import no.nav.ung.sak.tilgangskontroll.tilganger.AnsattTilgangerTjeneste;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi.ProsessTaskFeilmelder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Dependent
 public class SjekkProsessering {
@@ -37,10 +40,10 @@ public class SjekkProsessering {
 
     private ProsesseringAsynkTjeneste asynkTjeneste;
 
+    private AnsattTilgangerTjeneste ansattTilgangerTjeneste;
     private BehandlingRepository behandlingRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private ProsessTaskTjeneste prosessTaskRepository;
-    private String gruppeIdSaksbehandler;
 
     SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste) {
         this.asynkTjeneste = asynkTjeneste;
@@ -49,12 +52,12 @@ public class SjekkProsessering {
     @Inject
     public SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
                              BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                             @KonfigVerdi(value = "bruker.gruppe.id.saksbehandler") String gruppeIdSaksbehandler,
+                             AnsattTilgangerTjeneste ansattTilgangerTjeneste,
                              BehandlingRepository behandlingRepository,
                              ProsessTaskTjeneste prosessTaskRepository) {
         this.asynkTjeneste = asynkTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.gruppeIdSaksbehandler = gruppeIdSaksbehandler;
+        this.ansattTilgangerTjeneste = ansattTilgangerTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
@@ -63,7 +66,9 @@ public class SjekkProsessering {
         return behandlingRepository.hentBehandling(behandlingUuid);
     }
 
-    /** Sjekker om det pågår åpne prosess tasks (for angitt gruppe). Returnerer eventuelt task gruppe for eventuell åpen prosess task gruppe. */
+    /**
+     * Sjekker om det pågår åpne prosess tasks (for angitt gruppe). Returnerer eventuelt task gruppe for eventuell åpen prosess task gruppe.
+     */
     public Optional<AsyncPollingStatus> sjekkProsessTaskPågårForBehandling(Behandling behandling, String gruppe) {
 
         Long behandlingId = behandling.getId();
@@ -72,7 +77,9 @@ public class SjekkProsessering {
         return new VurderProsessTaskStatusForPollingApi(FEIL, behandlingId).sjekkStatusNesteProsessTask(gruppe, nesteTask);
     }
 
-    /** Hvorvidt betingelser for å hente inn registeropplysninger på nytt er oppfylt. */
+    /**
+     * Hvorvidt betingelser for å hente inn registeropplysninger på nytt er oppfylt.
+     */
     private boolean skalInnhenteRegisteropplysningerPåNytt(Behandling behandling) {
         return erGyldigBehandlingStatus(behandling)
             && !behandling.isBehandlingPåVent()
@@ -84,23 +91,22 @@ public class SjekkProsessering {
     }
 
     private boolean harRolleSaksbehandler() {
-        String jwt = SubjectHandler.getSubjectHandler().getInternSsoToken();
-        List<String> brukersGrupper = JwtUtil.getGroups(jwt);
-        return brukersGrupper.contains(gruppeIdSaksbehandler);
+        return ansattTilgangerTjeneste.tilgangerForInnloggetBruker().kanSaksbehandle();
     }
 
     /**
      * Betinget sjekk om innhent registeropplysninger (conditionally) og kjør prosess. Alt gjøres asynkront i form av prosess tasks.
      * Intern sjekk på om hvorvidt registeropplysninger må reinnhentes.
-     * @param sjekkSaksbehandler
      *
      * @return optional Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
-    public Optional<String> sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling, boolean sjekkSaksbehandler) {
-        if (!skalInnhenteRegisteropplysningerPåNytt(behandling) || (sjekkSaksbehandler && !harRolleSaksbehandler())) {
+    public Optional<String> sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
+        if (!skalInnhenteRegisteropplysningerPåNytt(behandling)) {
             return Optional.empty();
         }
-
+        if (!harRolleSaksbehandler()){
+            return Optional.empty();
+        }
         if (pågårEllerFeiletTasks(behandling)) {
             return Optional.empty();
         }
