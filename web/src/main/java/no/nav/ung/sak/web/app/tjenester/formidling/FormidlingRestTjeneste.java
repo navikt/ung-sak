@@ -90,10 +90,13 @@ public class FormidlingRestTjeneste {
     }
 
 
+    /**
+     * MediaType.APPLICATION_JSON is added to Produces because currently the generated client always adds accept: application/json to requests.
+     */
     @POST
     @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING, MediaType.TEXT_HTML})
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     @Operation(description = "Forhåndsvise vedtaksbrev for en behandling", tags = "formidling",
         responses = @ApiResponse(
             responseCode = "200",
@@ -101,6 +104,7 @@ public class FormidlingRestTjeneste {
             content = {
                 @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary")),
+                @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = MediaType.TEXT_HTML, schema = @Schema(type = "string"))
             }
         )

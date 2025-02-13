@@ -27,7 +27,7 @@ import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 public class StatiskeKodeverdierDeSerialiseringTest {
 
     private final ObjectMapperResolver omr = new ObjectMapperResolver();
-    private final ObjectMapper defaultObjektMapper = omr.getDefaultObjektMapper();
+    private final ObjectMapper defaultObjektMapper = omr.getDefaultObjectMapper();
     private final ObjectMapper overstyrSomSstringMapper = omr.getOverstyrKodeverdiAlltidSomStringMapper();
     private final ObjectMapper openapiMapper = omr.getOpenapiObjektMapper();
 
