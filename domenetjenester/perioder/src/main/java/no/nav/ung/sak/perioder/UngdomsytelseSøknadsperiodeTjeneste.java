@@ -1,6 +1,7 @@
 package no.nav.ung.sak.perioder;
 
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.TidslinjeUtil.tilTidslinje;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -45,6 +46,10 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
      */
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         return finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getRelevanteStartdatoer);
+    }
+
+    public LocalDateTimeline<Boolean> utledTidslinje(Long behandlingId) {
+        return tilTidslinje(finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getRelevanteStartdatoer));
     }
 
     /**

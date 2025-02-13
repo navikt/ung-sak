@@ -38,14 +38,15 @@
         <felles.version>4.4.9</felles.version>
         <swagger.version>2.2.28</swagger.version>
         <junit.version>5.11.4</junit.version>
-        <k9format.version>11.1.0</k9format.version>
+        <k9format.version>11.2.1</k9format.version>
         <jackson.version>2.18.2</jackson.version>
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.1.10</kotlin-stdlib.version>
-        <jandex.version>3.2.5</jandex.version>
+        <jandex.version>3.2.6</jandex.version>
         <flyway.version>11.3.1</flyway.version>
         <pdfgen-core.version>1.1.41</pdfgen-core.version>
-        <confluent.platform.version>7.8.0</confluent.platform.version>
+        <confluent.platform.version>7.8.1</confluent.platform.version>
+        <mockito.version>5.15.2</mockito.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -447,7 +448,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.15.2</version>
+                <version>${mockito.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -686,6 +687,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.2</version>
+                    <configuration>
+                        <argLine>
+                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                        </argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -47,8 +46,8 @@ class VurderUttakStegTest {
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
 
         VurderUttakSteg steg = new VurderUttakSteg(vilkårTjeneste, ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeTjeneste, personopplysningRepository,
-            new RapportertInntektMapper(inntektArbeidYtelseTjeneste));
+            ungdomsprogramPeriodeTjeneste, personopplysningRepository
+        );
         LocalDate fom = LocalDate.parse("2024-01-01");
         LocalDate tom = LocalDate.parse("2024-01-31");
 

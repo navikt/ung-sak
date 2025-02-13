@@ -42,7 +42,7 @@ class ProsessTriggerPeriodeUtlederTest {
 
     @Test
     void skal_ikke_finne_perioder_for_ingen_triggere() {
-        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinjeFraProsesstriggere(behandlingId);
+        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         assertThat(resultat.isEmpty()).isTrue();
     }
 
@@ -51,7 +51,7 @@ class ProsessTriggerPeriodeUtlederTest {
         // Arrange
         prosessTriggereRepository.leggTil(behandlingId, Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()))));
         // Act
-        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinjeFraProsesstriggere(behandlingId);
+        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
         assertThat(resultat.isEmpty()).isTrue();
     }
@@ -63,7 +63,7 @@ class ProsessTriggerPeriodeUtlederTest {
         final var tom = LocalDate.now().plusDays(10);
         prosessTriggereRepository.leggTil(behandlingId, Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))));
         // Act
-        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinjeFraProsesstriggere(behandlingId);
+        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
         assertThat(resultat).isEqualTo(new LocalDateTimeline<>(fom, tom, true));
     }
@@ -78,7 +78,7 @@ class ProsessTriggerPeriodeUtlederTest {
             new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))
         ));
         // Act
-        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinjeFraProsesstriggere(behandlingId);
+        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
         assertThat(resultat).isEqualTo(new LocalDateTimeline<>(fom, tom, true));
     }
@@ -95,7 +95,7 @@ class ProsessTriggerPeriodeUtlederTest {
             new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fraOgMedTilOgMed(fom2, tom2))
         ));
         // Act
-        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinjeFraProsesstriggere(behandlingId);
+        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
         final var forventetResultat = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true), new LocalDateSegment<>(fom2, tom2, true)));
         assertThat(resultat).isEqualTo(forventetResultat);

@@ -33,7 +33,7 @@ public class ProsessTriggerPeriodeUtleder {
      * @param behandligId BehandlingId
      * @return Tidslinje for perioder til vurdering
      */
-    LocalDateTimeline<Boolean> utledTidslinjeFraProsesstriggere(Long behandligId) {
+    LocalDateTimeline<Boolean> utledTidslinje(Long behandligId) {
         return prosessTriggereRepository.hentGrunnlag(behandligId)
             .stream()
             .map(gr -> gr.getTriggere())

@@ -2,17 +2,14 @@ package no.nav.ung.sak.domene.behandling.steg.uttak.regler;
 
 import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 
-import java.math.BigDecimal;
-
-public record UttakResultat(BigDecimal utbetalingsgrad, UngdomsytelseUttakAvslagsårsak avslagsårsak) {
+public record UttakResultat(boolean erInnvilget, UngdomsytelseUttakAvslagsårsak avslagsårsak) {
 
     public static UttakResultat forAvslag(UngdomsytelseUttakAvslagsårsak avslagsårsak) {
-        return new UttakResultat(BigDecimal.ZERO, avslagsårsak);
+        return new UttakResultat(false, avslagsårsak);
     }
 
-    public static UttakResultat forInnvilgelse(BigDecimal grad) {
-        return new UttakResultat(grad, null);
+    public static UttakResultat forInnvilgelse() {
+        return new UttakResultat(true, null);
     }
-
 
 }

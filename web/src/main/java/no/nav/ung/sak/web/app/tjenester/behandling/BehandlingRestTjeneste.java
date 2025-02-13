@@ -146,7 +146,7 @@ public class BehandlingRestTjeneste {
             ? behandlingsprosessTjeneste.hentBehandling(behandlingId)
             : behandlingsprosessTjeneste.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
-        Optional<String> gruppeOpt = sjekkProsessering.sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, true);
+        Optional<String> gruppeOpt = sjekkProsessering.sjekkOgForberedAsynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling);
 
         // sender alltid til poll status slik at vi får sjekket på utestående prosess tasks også.
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), gruppeOpt);

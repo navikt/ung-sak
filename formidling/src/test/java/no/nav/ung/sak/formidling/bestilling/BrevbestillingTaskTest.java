@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.UUID;
 
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +58,7 @@ class BrevbestillingTaskTest {
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     private String fnr;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @BeforeEach
     void setUp() {
@@ -64,7 +66,8 @@ class BrevbestillingTaskTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(ungdomsytelseGrunnlagRepository);
+        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
+        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository);
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         var pdlKlient = PdlKlientFake.medTilfeldigFnr();
         fnr = pdlKlient.fnr();
@@ -90,7 +93,7 @@ class BrevbestillingTaskTest {
     @Test
     void skalLagreBestillingLagePdfJournalføreOgLageDistribusjonstask() {
 
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository);
+        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
         var behandling = scenarioBuilder.getBehandling();
 
         BrevbestillingTask brevBestillingTask = new BrevbestillingTask(behandlingRepository, brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
