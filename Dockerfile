@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/sif-baseimages/java:21-202502070902Z
+FROM europe-north1-docker.pkg.dev/nais-management-233d/k9saksbehandling/navikt/sif-baseimages/java-21:2025.02.13.0951Z
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/ung-sak
 
