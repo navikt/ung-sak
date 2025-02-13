@@ -11,9 +11,9 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 
-public class LagGrunnbeløpFaktorTidslinje {
+public class LagSatsTidslinje {
 
-    static LocalDateTimeline<Sats> lagGrunnbeløpFaktorTidslinje(LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
+    static LocalDateTimeline<Sats> lagSatsTidslinje(LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
         var førsteMuligeDato = fødselsdato.plusYears(LAV.getFomAlder()).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
         LocalDate tjuefemårsdagen = fødselsdato.plusYears(HØY.getFomAlder());
         var datoForEndringAvSats = tjuefemårsdagen;

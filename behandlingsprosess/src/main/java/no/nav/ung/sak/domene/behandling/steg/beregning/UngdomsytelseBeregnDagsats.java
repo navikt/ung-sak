@@ -13,9 +13,7 @@ import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.Barnetillegg;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
@@ -41,11 +39,12 @@ public class UngdomsytelseBeregnDagsats {
 
     public UngdomsytelseSatsResultat beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
         var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
-        var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
+        var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
+        LocalDateTimeline<SatsOgGrunnbeløpfaktor> satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
         var barnetilleggResultat = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef, perioder);
 
         var satsTidslinje = perioder
-            .intersection(grunnbeløpFaktorTidslinje, StandardCombinators::rightOnly)
+            .intersection(satsOgGrunnbeløpfaktorTidslinje, StandardCombinators::rightOnly)
             .mapValue(UngdomsytelseBeregnDagsats::leggTilSatsTypeOgGrunnbeløpFaktor)
             .intersection(grunnbeløpTidslinje, leggTilGrunnbeløp())
             .combine(barnetilleggResultat.barnetilleggTidslinje(), leggTilBarnetillegg(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
@@ -53,13 +52,13 @@ public class UngdomsytelseBeregnDagsats {
 
         return new UngdomsytelseSatsResultat(
             satsTidslinje,
-            lagRegelSporing(grunnbeløpTidslinje, grunnbeløpFaktorTidslinje, barnetilleggResultat.barnetilleggTidslinje()),
+            lagRegelSporing(grunnbeløpTidslinje, satsOgGrunnbeløpfaktorTidslinje, barnetilleggResultat.barnetilleggTidslinje()),
             lagRegelInput(perioder, fødselsdato, harTriggerBeregnHøySats, beregningsdato, barnetilleggResultat.relevanteBarnPersoninformasjon())
         );
     }
 
-    private static UngdomsytelseSatser.Builder leggTilSatsTypeOgGrunnbeløpFaktor(Sats sats) {
-        return UngdomsytelseSatser.builder().medGrunnbeløpFaktor(sats.getGrunnbeløpFaktor()).medSatstype(sats.getSatsType());
+    private static UngdomsytelseSatser.Builder leggTilSatsTypeOgGrunnbeløpFaktor(SatsOgGrunnbeløpfaktor sats) {
+        return UngdomsytelseSatser.builder().medGrunnbeløpFaktor(sats.grunnbeløpFaktor()).medSatstype(sats.satstype());
     }
 
     private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, BigDecimal, UngdomsytelseSatser.Builder> leggTilGrunnbeløp() {
@@ -80,8 +79,8 @@ public class UngdomsytelseBeregnDagsats {
     }
 
 
-    private static String lagRegelSporing(LocalDateTimeline<BigDecimal> grunnbeløpTidslinje, LocalDateTimeline<Sats> grunnbeløpFaktorTidslinje, LocalDateTimeline<Barnetillegg> barnetilleggTidslinje) {
-        var regelSporing = new RegelSporing(mapTilPerioderMedVerdi(grunnbeløpTidslinje), mapTilPerioderMedVerdi(grunnbeløpFaktorTidslinje), mapTilPerioderMedVerdi(barnetilleggTidslinje));
+    private static String lagRegelSporing(LocalDateTimeline<BigDecimal> grunnbeløpTidslinje, LocalDateTimeline<SatsOgGrunnbeløpfaktor> satsOgGrunnbeløpFaktorTidslinje, LocalDateTimeline<Barnetillegg> barnetilleggTidslinje) {
+        var regelSporing = new RegelSporing(mapTilPerioderMedVerdi(grunnbeløpTidslinje), mapTilPerioderMedVerdi(satsOgGrunnbeløpFaktorTidslinje), mapTilPerioderMedVerdi(barnetilleggTidslinje));
         return JsonObjectMapper.toJson(regelSporing, JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
@@ -98,7 +97,7 @@ public class UngdomsytelseBeregnDagsats {
 
 
     private record RegelSporing(List<PeriodeMedVerdi<BigDecimal>> grunnbeløpPerioder,
-                                List<PeriodeMedVerdi<Sats>> satsperioder,
+                                List<PeriodeMedVerdi<SatsOgGrunnbeløpfaktor>> satsOgGrunnbeløpfaktorPerioder,
                                 List<PeriodeMedVerdi<Barnetillegg>> barnetilleggPerioder) {
     }
 
