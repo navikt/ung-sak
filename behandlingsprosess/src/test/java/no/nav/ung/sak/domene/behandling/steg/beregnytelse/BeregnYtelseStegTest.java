@@ -93,31 +93,31 @@ class BeregnYtelseStegTest {
         final var forventetInput = "{\n" +
             "  \"satsTidslinje\" : [ {\n" +
             "    \"periode\" : {\n" +
-            "      \"fomDato\" : \"2025-02-15\",\n" +
-            "      \"tomDato\" : \"2026-02-14\"\n" +
+            "      \"fomDato\" : \"2025-02-16\",\n" +
+            "      \"tomDato\" : \"2026-02-15\"\n" +
             "    },\n" +
-            "    \"verdi\" : \"UngdomsytelseSatser{dagsats=1000, grunnbeløp=10, grunnbeløpFaktor=1, satsType=LAV}\"\n" +
+            "    \"verdi\" : \"{\\n  \\\"dagsats\\\" : 1000,\\n  \\\"grunnbeløp\\\" : 10,\\n  \\\"grunnbeløpFaktor\\\" : 1,\\n  \\\"satsType\\\" : \\\"LAV\\\",\\n  \\\"antallBarn\\\" : 0,\\n  \\\"dagsatsBarnetillegg\\\" : 0\\n}\"\n" +
             "  } ],\n" +
             "  \"ytelseTidslinje\" : [ {\n" +
             "    \"periode\" : {\n" +
             "      \"fomDato\" : \"2026-02-01\",\n" +
-            "      \"tomDato\" : \"2026-02-14\"\n" +
+            "      \"tomDato\" : \"2026-02-15\"\n" +
             "    },\n" +
             "    \"verdi\" : \"INGEN_VERDI\"\n" +
             "  } ],\n" +
             "  \"godkjentUttakTidslinje\" : [ {\n" +
             "    \"periode\" : {\n" +
-            "      \"fomDato\" : \"2025-02-15\",\n" +
-            "      \"tomDato\" : \"2026-02-14\"\n" +
+            "      \"fomDato\" : \"2025-02-16\",\n" +
+            "      \"tomDato\" : \"2026-02-15\"\n" +
             "    },\n" +
             "    \"verdi\" : \"INGEN_VERDI\"\n" +
             "  } ],\n" +
             "  \"totalsatsTidslinje\" : [ {\n" +
             "    \"periode\" : {\n" +
             "      \"fomDato\" : \"2026-02-01\",\n" +
-            "      \"tomDato\" : \"2026-02-14\"\n" +
+            "      \"tomDato\" : \"2026-02-15\"\n" +
             "    },\n" +
-            "    \"verdi\" : \"BeregnetSats{grunnsats=10000, barnetilleggSats=0}\"\n" +
+            "    \"verdi\" : \"{\\n  \\\"grunnsats\\\" : 10000,\\n  \\\"barnetilleggSats\\\" : 0\\n}\"\n" +
             "  } ]\n" +
             "}";
         assertEquals(forventetInput, tilkjentYtelse.get().getInput());

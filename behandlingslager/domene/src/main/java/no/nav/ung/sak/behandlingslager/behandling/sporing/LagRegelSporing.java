@@ -16,9 +16,9 @@ import java.util.Map;
 
 public class LagRegelSporing {
 
-    public static String lagRegelSporingFraTidslinjer(Map<String, LocalDateTimeline<? extends Sporingsverdi>> tidslinjer) {
+    public static String lagRegelSporingFraTidslinjer(Map<String, LocalDateTimeline<?>> tidslinjer) {
         final var resultatMap = new HashMap<String, List<PeriodeMedVerdi>>();
-        for (Map.Entry<String, LocalDateTimeline<? extends Sporingsverdi>> entry : tidslinjer.entrySet()) {
+        for (Map.Entry<String, LocalDateTimeline<?>> entry : tidslinjer.entrySet()) {
             final var segmenter = entry.getValue().toSegments();
             for (var segment : segmenter) {
                 final var verdi = segment.getValue() instanceof IngenVerdi ?

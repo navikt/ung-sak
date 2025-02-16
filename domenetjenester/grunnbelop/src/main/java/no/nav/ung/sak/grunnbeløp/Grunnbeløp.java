@@ -1,20 +1,13 @@
 package no.nav.ung.sak.grunnbeløp;
 
-import no.nav.ung.sak.behandlingslager.behandling.sporing.Sporingsverdi;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public final class Grunnbeløp extends Sporingsverdi {
-    private final BigDecimal verdi;
+public class Grunnbeløp {
+    private BigDecimal verdi;
 
     public Grunnbeløp(BigDecimal verdi) {
         this.verdi = verdi;
-    }
-
-    @Override
-    public String tilRegelVerdi() {
-        return verdi.toString();
     }
 
     public BigDecimal verdi() {

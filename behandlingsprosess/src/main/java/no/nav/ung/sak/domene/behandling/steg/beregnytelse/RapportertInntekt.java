@@ -1,14 +1,13 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
-import no.nav.ung.sak.behandlingslager.behandling.sporing.Sporingsverdi;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public final class RapportertInntekt extends Sporingsverdi {
-    private final InntektType inntektType;
-    private final BigDecimal beløp;
+public class RapportertInntekt {
+    private InntektType inntektType;
+    private BigDecimal beløp;
 
     public RapportertInntekt(
         InntektType inntektType,
@@ -23,11 +22,6 @@ public final class RapportertInntekt extends Sporingsverdi {
             "inntektType=" + inntektType +
             ", beløp=" + beløp +
             '}';
-    }
-
-    @Override
-    public String tilRegelVerdi() {
-        return toString();
     }
 
     public InntektType inntektType() {

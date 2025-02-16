@@ -1,17 +1,12 @@
 package no.nav.ung.sak.behandlingslager.behandling.sporing;
 
-public class IngenVerdi extends Sporingsverdi {
+public class IngenVerdi {
 
     private IngenVerdi() {
     }
 
     public static <T> IngenVerdi ingenVerdi(T ignorertVerdi) {
         return new IngenVerdi();
-    }
-
-    @Override
-    public String tilRegelVerdi() {
-        return "INGEN_VERDI";
     }
 
     @Override

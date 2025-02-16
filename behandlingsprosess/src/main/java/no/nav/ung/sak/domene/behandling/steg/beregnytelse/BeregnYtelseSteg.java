@@ -9,7 +9,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
-import no.nav.ung.sak.behandlingslager.behandling.sporing.Sporingsverdi;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
@@ -18,10 +17,8 @@ import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -79,7 +76,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     }
 
     private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<Boolean> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje) {
-        final Map<String, LocalDateTimeline<? extends Sporingsverdi>> sporingsMap = Map.of(
+        final var sporingsMap = Map.of(
             "satsTidslinje", satsTidslinje,
             "ytelseTidslinje", ytelseTidslinje.mapValue(IngenVerdi::ingenVerdi),
             "godkjentUttakTidslinje", godkjentUttakTidslinje.mapValue(IngenVerdi::ingenVerdi),

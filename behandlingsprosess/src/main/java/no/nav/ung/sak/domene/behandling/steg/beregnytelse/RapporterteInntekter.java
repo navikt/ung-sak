@@ -1,14 +1,11 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
-import no.nav.ung.sak.behandlingslager.behandling.sporing.Sporingsverdi;
-
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class RapporterteInntekter extends Sporingsverdi {
+public class RapporterteInntekter {
 
-    private Set<RapportertInntekt> rapporterteInntekter = new HashSet<>();
+    private Set<RapportertInntekt> rapporterteInntekter;
 
 
     public RapporterteInntekter(Set<RapportertInntekt> rapporterteInntekter) {
@@ -37,8 +34,4 @@ public class RapporterteInntekter extends Sporingsverdi {
             '}';
     }
 
-    @Override
-    public String tilRegelVerdi() {
-        return "rapporterteInntekter: [" + String.join(",", rapporterteInntekter.stream().map(RapportertInntekt::tilRegelVerdi).toList()) + "]";
-    }
 }

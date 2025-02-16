@@ -1,34 +1,14 @@
 package no.nav.ung.sak.behandlingslager.ytelse.sats;
 
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
-import no.nav.ung.sak.behandlingslager.behandling.sporing.Sporingsverdi;
 
-
-public final class UngdomsytelseSatser extends Sporingsverdi {
-    private final BigDecimal dagsats;
-    private final BigDecimal grunnbeløp;
-    private final BigDecimal grunnbeløpFaktor;
-    private final UngdomsytelseSatsType satsType;
-    private final Integer antallBarn;
-    private final int dagsatsBarnetillegg;
-
-    public UngdomsytelseSatser(BigDecimal dagsats,
-                               BigDecimal grunnbeløp,
-                               BigDecimal grunnbeløpFaktor,
-                               UngdomsytelseSatsType satsType,
-                               Integer antallBarn,
-                               int dagsatsBarnetillegg) {
-        this.dagsats = dagsats;
-        this.grunnbeløp = grunnbeløp;
-        this.grunnbeløpFaktor = grunnbeløpFaktor;
-        this.satsType = satsType;
-        this.antallBarn = antallBarn;
-        this.dagsatsBarnetillegg = dagsatsBarnetillegg;
-    }
+public record UngdomsytelseSatser(BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor,
+                                  UngdomsytelseSatsType satsType, Integer antallBarn, int dagsatsBarnetillegg) {
 
     public static Builder builder() {
         return new Builder();
@@ -97,11 +77,6 @@ public final class UngdomsytelseSatser extends Sporingsverdi {
     }
 
     @Override
-    public String tilRegelVerdi() {
-        return toString();
-    }
-
-    @Override
     public String toString() {
         return "UngdomsytelseSatser{" +
             "dagsats=" + dagsats +
@@ -109,48 +84,6 @@ public final class UngdomsytelseSatser extends Sporingsverdi {
             ", grunnbeløpFaktor=" + grunnbeløpFaktor +
             ", satsType=" + satsType +
             '}';
-    }
-
-    public BigDecimal dagsats() {
-        return dagsats;
-    }
-
-    public BigDecimal grunnbeløp() {
-        return grunnbeløp;
-    }
-
-    public BigDecimal grunnbeløpFaktor() {
-        return grunnbeløpFaktor;
-    }
-
-    public UngdomsytelseSatsType satsType() {
-        return satsType;
-    }
-
-    public Integer antallBarn() {
-        return antallBarn;
-    }
-
-    public int dagsatsBarnetillegg() {
-        return dagsatsBarnetillegg;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (UngdomsytelseSatser) obj;
-        return Objects.equals(this.dagsats, that.dagsats) &&
-            Objects.equals(this.grunnbeløp, that.grunnbeløp) &&
-            Objects.equals(this.grunnbeløpFaktor, that.grunnbeløpFaktor) &&
-            Objects.equals(this.satsType, that.satsType) &&
-            Objects.equals(this.antallBarn, that.antallBarn) &&
-            this.dagsatsBarnetillegg == that.dagsatsBarnetillegg;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(dagsats, grunnbeløp, grunnbeløpFaktor, satsType, antallBarn, dagsatsBarnetillegg);
     }
 
 }
