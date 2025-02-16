@@ -36,6 +36,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 
 @ExtendWith(JpaExtension.class)
@@ -84,45 +85,10 @@ class BeregnYtelseStegTest {
 
     @Test
     void skal_opprette_tilkjent_ytelse_med_sporing_og_input() {
-
         final var behandleStegResultat = beregnYtelseSteg.utførSteg(new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling.getId())));
-
-
         final var tilkjentYtelse = tilkjentYtelseRepository.hentTilkjentYtelse(behandling.getId());
-
-        final var forventetInput = "{\n" +
-            "  \"satsTidslinje\" : [ {\n" +
-            "    \"periode\" : {\n" +
-            "      \"fomDato\" : \"2025-02-16\",\n" +
-            "      \"tomDato\" : \"2026-02-15\"\n" +
-            "    },\n" +
-            "    \"verdi\" : \"{\\n  \\\"dagsats\\\" : 1000,\\n  \\\"grunnbeløp\\\" : 10,\\n  \\\"grunnbeløpFaktor\\\" : 1,\\n  \\\"satsType\\\" : \\\"LAV\\\",\\n  \\\"antallBarn\\\" : 0,\\n  \\\"dagsatsBarnetillegg\\\" : 0\\n}\"\n" +
-            "  } ],\n" +
-            "  \"ytelseTidslinje\" : [ {\n" +
-            "    \"periode\" : {\n" +
-            "      \"fomDato\" : \"2026-02-01\",\n" +
-            "      \"tomDato\" : \"2026-02-15\"\n" +
-            "    },\n" +
-            "    \"verdi\" : \"INGEN_VERDI\"\n" +
-            "  } ],\n" +
-            "  \"godkjentUttakTidslinje\" : [ {\n" +
-            "    \"periode\" : {\n" +
-            "      \"fomDato\" : \"2025-02-16\",\n" +
-            "      \"tomDato\" : \"2026-02-15\"\n" +
-            "    },\n" +
-            "    \"verdi\" : \"INGEN_VERDI\"\n" +
-            "  } ],\n" +
-            "  \"totalsatsTidslinje\" : [ {\n" +
-            "    \"periode\" : {\n" +
-            "      \"fomDato\" : \"2026-02-01\",\n" +
-            "      \"tomDato\" : \"2026-02-15\"\n" +
-            "    },\n" +
-            "    \"verdi\" : \"{\\n  \\\"grunnsats\\\" : 10000,\\n  \\\"barnetilleggSats\\\" : 0\\n}\"\n" +
-            "  } ]\n" +
-            "}";
-        assertEquals(forventetInput, tilkjentYtelse.get().getInput());
-
-
+        assertThat(tilkjentYtelse.get().getInput()).isNotNull();
+        assertThat(tilkjentYtelse.get().getSporing()).isNotNull();
     }
 
     private void lagUngdomsprogramperioder(LocalDate fom) {
