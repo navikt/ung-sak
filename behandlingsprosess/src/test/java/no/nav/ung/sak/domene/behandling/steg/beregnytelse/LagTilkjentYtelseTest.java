@@ -34,11 +34,15 @@ class LagTilkjentYtelseTest {
         ));
 
         // Call the method under test
-        LocalDateTimeline<TilkjentYtelseVerdi> resultat = LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
 
         // Verify the result
         assertNotNull(resultat);
         assertTrue(resultat.isEmpty());
+    }
+
+    private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje) {
+        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
     @Test
@@ -66,7 +70,7 @@ class LagTilkjentYtelseTest {
         LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje = TOM_TIDSLINJE;
 
         // Act
-        LocalDateTimeline<TilkjentYtelseVerdi> resultat = LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
 
         // Assert
         // Forventer ingen reduksjon
@@ -107,7 +111,7 @@ class LagTilkjentYtelseTest {
         ));
 
         // Act
-        LocalDateTimeline<TilkjentYtelseVerdi> resultat = LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
 
         // Assert
         assertNotNull(resultat);

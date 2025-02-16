@@ -14,9 +14,11 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +70,15 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         final var totalsatsTidslinje = mapSatserTilTotalbeløpForPerioder(satsTidslinje, ytelseTidslinje);
         final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
 
+        // Utfør reduksjon og map til tilkjent ytelse
+        final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(godkjentUttakTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        final var regelInput = lagRegelInput(satsTidslinje, ytelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
+        tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<Boolean> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje) {
         final Map<String, LocalDateTimeline<? extends Sporingsverdi>> sporingsMap = Map.of(
             "satsTidslinje", satsTidslinje,
             "ytelseTidslinje", ytelseTidslinje.mapValue(IngenVerdi::ingenVerdi),
@@ -75,13 +86,18 @@ public class BeregnYtelseSteg implements BehandlingSteg {
             "totalsatsTidslinje", totalsatsTidslinje,
             "rapportertInntektTidslinje", rapportertInntektTidslinje
         );
-        // TODO: Lagre sporingsverdier
-        final var sporing = LagRegelSporing.lagRegelSporingFraTidslinjer(sporingsMap);
-        LOGGER.info("Sporing for tilkjent ytelse:" + sporing);
-        // Utfør reduksjon og map til tilkjent ytelse
-        final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(godkjentUttakTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
-        tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje);
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+        final var regelInput = LagRegelSporing.lagRegelSporingFraTidslinjer(sporingsMap);
+        return regelInput;
+    }
+
+    private static String lagSporing(LocalDateTimeline<TilkjentYtelsePeriodeResultat> tilkjentYtelseTidslinje) {
+        final var list = tilkjentYtelseTidslinje.toSegments()
+            .stream()
+            .map(it -> it.getValue().sporing())
+            .toList();
+        final var sporingMap = Map.of("tilkjentYtelsePerioder", list);
+        final var sporing = JsonObjectMapper.toJson(sporingMap, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
+        return sporing;
     }
 
     private static LocalDateTimeline<Boolean> finnGodkjentUttakstidslinje(UngdomsytelseGrunnlag ungdomsytelseGrunnlag) {

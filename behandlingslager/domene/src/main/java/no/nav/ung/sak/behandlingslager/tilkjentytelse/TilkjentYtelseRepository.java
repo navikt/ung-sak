@@ -23,7 +23,7 @@ public class TilkjentYtelseRepository {
     }
 
 
-    public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder) {
+    public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
         final var eksisterende = hentTilkjentYtelse(behandlingId);
         if (eksisterende.isPresent()) {
             eksisterende.get().setIkkeAktiv();
@@ -31,6 +31,8 @@ public class TilkjentYtelseRepository {
         }
         final var ny = TilkjentYtelse.ny(behandlingId)
             .medPerioder(perioder)
+            .medInput(input)
+            .medSporing(sporing)
             .build();
         entityManager.persist(ny);
         entityManager.flush();
@@ -65,7 +67,7 @@ public class TilkjentYtelseRepository {
         return new LocalDateTimeline<>(segments);
     }
 
-    public void lagre(Long behandlingId, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje) {
+    public void lagre(Long behandlingId, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje, String input, String sporing) {
         final var tilkjentYtelsePerioder = tilkjentYtelseTidslinje.toSegments().stream()
             .map(it -> TilkjentYtelsePeriode.ny()
                 .medUtbetalingsgrad(it.getValue().utbetalingsgrad())
@@ -76,6 +78,6 @@ public class TilkjentYtelseRepository {
                 .medUredusertBeløp(it.getValue().uredusertBeløp())
                 .build()).toList();
 
-        lagre(behandlingId, tilkjentYtelsePerioder);
+        lagre(behandlingId, tilkjentYtelsePerioder, input, sporing);
     }
 }

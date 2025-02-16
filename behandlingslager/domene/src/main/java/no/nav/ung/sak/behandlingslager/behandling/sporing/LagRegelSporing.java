@@ -21,7 +21,9 @@ public class LagRegelSporing {
         for (Map.Entry<String, LocalDateTimeline<? extends Sporingsverdi>> entry : tidslinjer.entrySet()) {
             final var segmenter = entry.getValue().toSegments();
             for (var segment : segmenter) {
-                final var verdi = segment.getValue().tilRegelVerdi();
+                final var verdi = segment.getValue() instanceof IngenVerdi ?
+                    "INGEN_VERDI" :
+                        JsonObjectMapper.toJson(segment.getValue(), JsonMappingFeil.FACTORY::jsonMappingFeil);
                 final var periodeMedVerdi = new PeriodeMedVerdi(DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()), verdi);
                 resultatMap.put(entry.getKey(), List.of(periodeMedVerdi));
             }
@@ -29,7 +31,7 @@ public class LagRegelSporing {
         return JsonObjectMapper.toJson(resultatMap, JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
-    interface JsonMappingFeil extends DeklarerteFeil {
+    public interface JsonMappingFeil extends DeklarerteFeil {
 
         JsonMappingFeil FACTORY = FeilFactory.create(JsonMappingFeil.class);
 

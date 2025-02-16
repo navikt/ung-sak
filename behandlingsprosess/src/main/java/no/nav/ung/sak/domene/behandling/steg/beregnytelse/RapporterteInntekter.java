@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.Sporingsverdi;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class RapporterteInntekter extends Sporingsverdi {
@@ -16,6 +17,17 @@ public class RapporterteInntekter extends Sporingsverdi {
 
     public Set<RapportertInntekt> getRapporterteInntekter() {
         return rapporterteInntekter;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof RapporterteInntekter that)) return false;
+        return Objects.equals(rapporterteInntekter, that.rapporterteInntekter);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(rapporterteInntekter);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
+import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.Sporingsverdi;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -38,7 +40,7 @@ public final class BeregnetSats extends Sporingsverdi {
 
     @Override
     public String tilRegelVerdi() {
-        return toString();
+        return JsonObjectMapper.toJson(this, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
 

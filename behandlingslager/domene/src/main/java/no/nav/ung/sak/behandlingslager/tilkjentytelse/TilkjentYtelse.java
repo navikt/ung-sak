@@ -21,11 +21,16 @@ public class TilkjentYtelse extends BaseEntitet {
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
-
     @Immutable
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<TilkjentYtelsePeriode> perioder = new ArrayList<>();
+
+    @Column(name = "regel_input", nullable = false, updatable = false)
+    private String input;
+
+    @Column(name = "regel_sporing", nullable = false, updatable = false)
+    private String sporing;
 
 
     public Long getBehandlingId() {
@@ -44,6 +49,14 @@ public class TilkjentYtelse extends BaseEntitet {
         return perioder;
     }
 
+    public String getInput() {
+        return input;
+    }
+
+    public String getSporing() {
+        return sporing;
+    }
+
     public static Builder ny(Long behandlingId) {
         if (behandlingId == null) {
             throw new IllegalArgumentException("behandlingId kan ikke være null");
@@ -54,6 +67,9 @@ public class TilkjentYtelse extends BaseEntitet {
     public static class Builder {
         private Long behandlingId;
         private List<TilkjentYtelsePeriode> perioder = new ArrayList<>();
+        private String input;
+        private String sporing;
+
 
         public Builder(Long behandlingId) {
             this.behandlingId = behandlingId;
@@ -67,10 +83,29 @@ public class TilkjentYtelse extends BaseEntitet {
             return this;
         }
 
+        public Builder medInput(String input) {
+            if (input == null) {
+                throw new IllegalArgumentException("input kan ikke være null");
+            }
+            this.input = input;
+            return this;
+        }
+
+        public Builder medSporing(String sporing) {
+            if (sporing == null) {
+                throw new IllegalArgumentException("sporing kan ikke være null");
+            }
+            this.sporing = sporing;
+            return this;
+        }
+
+
         public TilkjentYtelse build() {
             TilkjentYtelse tilkjentYtelse = new TilkjentYtelse();
             tilkjentYtelse.behandlingId = this.behandlingId;
             tilkjentYtelse.perioder = this.perioder;
+            tilkjentYtelse.input = this.input;
+            tilkjentYtelse.sporing = this.sporing;
             return tilkjentYtelse;
         }
 

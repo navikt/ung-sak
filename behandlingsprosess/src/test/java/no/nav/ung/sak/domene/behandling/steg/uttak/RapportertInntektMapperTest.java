@@ -124,7 +124,8 @@ class RapportertInntektMapperTest {
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
-            Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)));
+            new RapporterteInntekter(
+                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2))));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 
