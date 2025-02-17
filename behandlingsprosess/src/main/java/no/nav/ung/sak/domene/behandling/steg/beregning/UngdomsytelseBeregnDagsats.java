@@ -1,20 +1,15 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.LogLevel;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.Barnetillegg;
@@ -26,7 +21,6 @@ import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.Periode;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +89,7 @@ public class UngdomsytelseBeregnDagsats {
             beregningsdato,
             barnPersoninformasjon
         );
-        return JsonObjectMapper.toJson(regelInput, JsonMappingFeil.FACTORY::jsonMappingFeil);
+        return JsonObjectMapper.toJson(regelInput, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
 
@@ -103,12 +97,6 @@ public class UngdomsytelseBeregnDagsats {
                               LocalDate beregningsdato, List<FødselOgDødInfo> barnFødselOgDød) {
     }
 
-    interface JsonMappingFeil extends DeklarerteFeil {
 
-        JsonMappingFeil FACTORY = FeilFactory.create(JsonMappingFeil.class);
-
-        @TekniskFeil(feilkode = "UNG-34523", feilmelding = "JSON-mapping feil: %s", logLevel = LogLevel.WARN)
-        Feil jsonMappingFeil(JsonProcessingException e);
-    }
 
 }
