@@ -34,6 +34,7 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestscenario;
@@ -96,8 +97,11 @@ class BrevGenerererTjenesteInnvilgelseTest {
                 ungdomsprogramPeriodeTjeneste,
                 tilkjentYtelseUtleder,
                 personopplysningRepository),
-            new DetaljertResultatUtlederImpl(tilkjentYtelseUtleder,
-                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository)));
+            new DetaljertResultatUtlederImpl(
+                tilkjentYtelseUtleder,
+                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
+                repositoryProvider.getVilkårResultatRepository(),
+                new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())));
     }
 
     @Test()
