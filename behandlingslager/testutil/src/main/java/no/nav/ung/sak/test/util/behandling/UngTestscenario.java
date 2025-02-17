@@ -2,14 +2,15 @@ package no.nav.ung.sak.test.util.behandling;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
+import no.nav.ung.sak.trigger.Trigger;
 
 /**
  * Hjelpeobjekt for å populere databasen med diverse ung data. Brukes av TestScenarioBuilder
@@ -21,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
  * @param ungdomsprogramvilkår - timeline med ungdomsprogramvilkår oppfylt og ikke oppfylt
  * @param fødselsdato
  * @param søknadStartDato      - startdatoer fra søknad
+ * @param behandlingTriggere
  */
 public record UngTestscenario(
     String navn,
@@ -31,7 +33,8 @@ public record UngTestscenario(
     LocalDateTimeline<Utfall> aldersvilkår,
     LocalDateTimeline<Utfall> ungdomsprogramvilkår,
     LocalDate fødselsdato,
-    List<LocalDate> søknadStartDato) {
+    List<LocalDate> søknadStartDato,
+    Set<Trigger> behandlingTriggere) {
 }
 
 

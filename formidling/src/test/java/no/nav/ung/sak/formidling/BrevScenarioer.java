@@ -5,19 +5,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
@@ -26,27 +23,23 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
+import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestscenario;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import no.nav.ung.sak.trigger.Trigger;
 
 public class BrevScenarioer {
 
     public static final String DEFAULT_NAVN = "Ung Testesen";
     private static final BigDecimal G_BELØP_24 = BigDecimal.valueOf(124028);
 
-    public static TestScenarioBuilder lagAvsluttetStandardBehandling(BehandlingRepositoryProvider repositoryProvider1, UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository1, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository1, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository) {
+    public static TestScenarioBuilder lagAvsluttetStandardBehandling(UngTestRepositories repositories) {
         UngTestscenario ungTestscenario = innvilget19år(LocalDate.of(2024, 12, 1));
 
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider1, ungdomsytelseGrunnlagRepository1, ungdomsprogramPeriodeRepository1, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository);
+        var behandling = scenarioBuilder.buildOgLagreMedUng(
+            repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         return scenarioBuilder;
@@ -71,7 +64,8 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(19).plusDays(42),
-            List.of(p.getFomDato()));
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(LocalDateTimeline<UngdomsytelseSatser> satser) {
@@ -106,7 +100,9 @@ public class BrevScenarioer {
             tilkjentYtelsePerioder(satser),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fom.minusYears(27).plusDays(42), List.of(p.getFomDato()));
+            fom.minusYears(27).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
     }
 
     /**
@@ -127,12 +123,14 @@ public class BrevScenarioer {
             tilkjentYtelsePerioder(satser),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdato, List.of(p.getFomDato()));
+            fødselsdato,
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
     }
 
     /**
      * 25 år ungdom med full ungdomsprogramperiode som blir 26 ila perioden. Får både lav og høy sats
-     * ingen inntektsgradering og ingen barn, høy sats
+     * ingen inntektsgradering og ingen barn
      */
     public static UngTestscenario innvilget26År(LocalDate fom, LocalDate fødselsdato) {
         LocalDate tom26årmnd = fødselsdato.plusYears(26).with(TemporalAdjusters.lastDayOfMonth());
@@ -153,7 +151,9 @@ public class BrevScenarioer {
             tilkjentYtelsePerioder(satser),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdato, List.of(p.getFomDato()));
+            fødselsdato,
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
     }
 
     private static UngdomsytelseUttakPerioder uttaksPerioder(LocalDateInterval p) {

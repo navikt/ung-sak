@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.time.LocalDate;
 
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -26,7 +25,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
@@ -35,13 +34,11 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
-import no.nav.ung.sak.perioder.UngdomsytelseVilkårsperioderTilVurderingTjeneste;
+import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestscenario;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.vilkår.InngangsvilkårUtleder;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
@@ -100,15 +97,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
                 tilkjentYtelseUtleder,
                 personopplysningRepository),
             new DetaljertResultatUtlederImpl(tilkjentYtelseUtleder,
-                new UngdomsytelseVilkårsperioderTilVurderingTjeneste(
-                    new InngangsvilkårUtleder(),
-                    new UngdomsytelseSøknadsperiodeTjeneste(
-                        ungdomsytelseStartdatoRepository,
-                        ungdomsprogramPeriodeTjeneste,
-                        repositoryProvider.getBehandlingRepository()),
-                    new UtledPeriodeTilVurderingFraUngdomsprogram(prosessTriggereRepository),
-                    new ProsessTriggerPeriodeUtleder(prosessTriggereRepository)
-                )));
+                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository)));
     }
 
     @Test()
@@ -116,7 +105,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
     //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
     void skalHaAlleStandardtekster() {
         TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository);
+            .lagAvsluttetStandardBehandling(lagUngTestRepositories());
 
         var ungTestGrunnlag = scenarioBuilder.getUngTestGrunnlag();
         var behandling = scenarioBuilder.getBehandling();
@@ -143,6 +132,11 @@ class BrevGenerererTjenesteInnvilgelseTest {
         );
 
 
+    }
+
+    @NotNull
+    private UngTestRepositories lagUngTestRepositories() {
+        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
     }
 
 
@@ -253,7 +247,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
         var brevGenerererTjeneste = lagBrevGenererTjeneste(false);
 
         TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository);
+            .lagAvsluttetStandardBehandling(lagUngTestRepositories());
 
         var behandling = scenarioBuilder.getBehandling();
 
@@ -273,7 +267,8 @@ class BrevGenerererTjenesteInnvilgelseTest {
     private Behandling lagScenario(UngTestscenario ungTestscenario) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository);
+        var behandling = scenarioBuilder.buildOgLagreMedUng(
+            lagUngTestRepositories());
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         return behandling;
