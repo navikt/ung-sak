@@ -4,7 +4,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.RapportertInntekt;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -17,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LagTilkjentYtelseTest {
 
-    public static final LocalDateTimeline<Set<RapportertInntekt>> TOM_TIDSLINJE = LocalDateTimeline.empty();
+    public static final LocalDateTimeline<RapporterteInntekter> TOM_TIDSLINJE = LocalDateTimeline.empty();
 
     @Test
     void testLagTidslinjeMedTomGodkjentTidslinje() {
@@ -29,16 +28,21 @@ class LagTilkjentYtelseTest {
             lagSatsperiode(BigDecimal.valueOf(150), 250, LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28))
         ));
 
-        LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(LocalDate.of(2023, 1, 15), LocalDate.of(2023, 2, 15), Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(50000))))
+        LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(LocalDate.of(2023, 1, 15), LocalDate.of(2023, 2, 15),
+                new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(50000)))))
         ));
 
         // Call the method under test
-        LocalDateTimeline<TilkjentYtelseVerdi> resultat = LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
 
         // Verify the result
         assertNotNull(resultat);
         assertTrue(resultat.isEmpty());
+    }
+
+    private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje) {
+        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
     @Test
@@ -63,10 +67,10 @@ class LagTilkjentYtelseTest {
             lagSatsperiode(grunnsats2, barnetilleggSats2, fom2, tom2)
         ));
 
-        LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje = TOM_TIDSLINJE;
+        LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje = TOM_TIDSLINJE;
 
         // Act
-        LocalDateTimeline<TilkjentYtelseVerdi> resultat = LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
 
         // Assert
         // Forventer ingen reduksjon
@@ -102,12 +106,12 @@ class LagTilkjentYtelseTest {
         ));
 
         final var rapportertInntekt = BigDecimal.valueOf(150);
-        LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, rapportertInntekt)))
+        LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, rapportertInntekt))))
         ));
 
         // Act
-        LocalDateTimeline<TilkjentYtelseVerdi> resultat = LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
 
         // Assert
         assertNotNull(resultat);

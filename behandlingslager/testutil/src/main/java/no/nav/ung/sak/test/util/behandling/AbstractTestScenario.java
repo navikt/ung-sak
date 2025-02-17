@@ -470,7 +470,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         if (ungTestscenario.tilkjentYtelsePerioder() != null) {
-            tilkjentYtelseRepository.lagre(behandling.getId(), ungTestscenario.tilkjentYtelsePerioder());
+            tilkjentYtelseRepository.lagre(behandling.getId(), ungTestscenario.tilkjentYtelsePerioder(), "input", "sporing");
         }
 
 

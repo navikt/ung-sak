@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Objects;
 
 
@@ -25,24 +26,41 @@ class TikjentYtelseBeregner {
      * @param rapporertinntekt den rapporterte inntekten for perioden
      * @return en instans av `TilkjentYtelseVerdi` som representerer de beregnede verdiene
      */
-    static TilkjentYtelseVerdi beregn(LocalDateInterval periode, BeregnetSats sats, BigDecimal rapporertinntekt) {
+    static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, BigDecimal rapporertinntekt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(sats, "sats");
         Objects.requireNonNull(rapporertinntekt, "rapporertinntekt");
+        final var sporing = new HashMap<String, String>();
         // Uredusert beløp bergnes fra totalsats
         final var uredusertBeløp = sats.totalSats().setScale(10, BigDecimal.ROUND_HALF_UP);
+        sporing.put("totalSats", sats.totalSats().toString());
         // Reduserer beløp med rapportert inntekt
         final var reduksjon = rapporertinntekt.multiply(REDUKSJONS_FAKTOR);
+        sporing.put("rapportertInntekt", rapporertinntekt.toString());
+        sporing.put("reduksjonsfaktor", REDUKSJONS_FAKTOR.toString());
+        sporing.put("reduksjon", reduksjon.toString());
+
         final var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
+        sporing.put("redusertBeløp", redusertBeløp.toString());
+
         // Beregner dagsats utifra antall virkedager i perioden
         final var antallVirkedager = Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato());
+        sporing.put("antallVirkedager", String.valueOf(antallVirkedager));
         final var dagsats = antallVirkedager == 0 ?  BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, BigDecimal.ROUND_HALF_UP);
+        sporing.put("dagsats", dagsats.toString());
 
         // Beregner utbetalingsgrad
         final var utbetalingsgrad = finnUtbetalingsgrad(redusertBeløp, sats.grunnsats(), dagsats);
+        sporing.put("utbetalingsgrad", String.valueOf(utbetalingsgrad));
 
-        final var tilkjentYtelseVerdi = new TilkjentYtelseVerdi(uredusertBeløp, reduksjon, redusertBeløp, dagsats, utbetalingsgrad);
-        return tilkjentYtelseVerdi;
+        sporing.put("periode", periode.toString());
+        final var tilkjentYtelseVerdi = new TilkjentYtelseVerdi(
+            uredusertBeløp,
+            reduksjon,
+            redusertBeløp,
+            dagsats,
+            utbetalingsgrad);
+        return new TilkjentYtelsePeriodeResultat(tilkjentYtelseVerdi, sporing);
     }
 
 

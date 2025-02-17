@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public record BeregnetSats(BigDecimal grunnsats, int barnetilleggSats) {
 
@@ -27,5 +28,12 @@ public record BeregnetSats(BigDecimal grunnsats, int barnetilleggSats) {
         return grunnsats().add(BigDecimal.valueOf(barnetilleggSats()));
     }
 
+    @Override
+    public String toString() {
+        return "BeregnetSats{" +
+            "grunnsats=" + grunnsats +
+            ", barnetilleggSats=" + barnetilleggSats +
+            '}';
+    }
 
 }

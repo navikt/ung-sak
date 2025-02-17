@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ class TikjentYtelseBeregnerTest {
     void test_null_verdier() {
         // Test for null values
         assertThrows(NullPointerException.class, () -> {
-            TikjentYtelseBeregner.beregn(null, null, null);
+            beregn(null, null, null);
         });
     }
 
@@ -25,12 +26,16 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(BigDecimal.valueOf(1000), 0);
         int rapporertinntekt = 500;
 
-        final var resultat = TikjentYtelseBeregner.beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
+        final var resultat = beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(670));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(670));
         assertThat(resultat.utbetalingsgrad()).isEqualTo(67);
         assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.valueOf(330));
+    }
+
+    private static TilkjentYtelseVerdi beregn(LocalDateInterval di, BeregnetSats sats, BigDecimal rapporertinntekt) {
+        return TikjentYtelseBeregner.beregn(di, sats, rapporertinntekt).verdi();
     }
 
     @Test
@@ -40,7 +45,7 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, 0);
         int redusertBeløpLikGrunnsats = 1000;
 
-        final var resultat = TikjentYtelseBeregner.beregn(new LocalDateInterval(LocalDate.of(2025, 2, 10), LocalDate.of(2025, 2, 10).plusDays(1)), sats, BigDecimal.valueOf(redusertBeløpLikGrunnsats));
+        final var resultat = beregn(new LocalDateInterval(LocalDate.of(2025, 2, 10), LocalDate.of(2025, 2, 10).plusDays(1)), sats, BigDecimal.valueOf(redusertBeløpLikGrunnsats));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(340));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(170));
@@ -54,7 +59,7 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, 0);
         int redusertBeløpNull = 0;
 
-        final var resultat = TikjentYtelseBeregner.beregn(new LocalDateInterval(LocalDate.of(2025, 2, 10), LocalDate.of(2025, 2, 10).plusDays(1)), sats, BigDecimal.valueOf(redusertBeløpNull));
+        final var resultat = beregn(new LocalDateInterval(LocalDate.of(2025, 2, 10), LocalDate.of(2025, 2, 10).plusDays(1)), sats, BigDecimal.valueOf(redusertBeløpNull));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(grunnsatsBeløp);
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(500));
@@ -69,7 +74,7 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(BigDecimal.valueOf(1000), 0);
         int rapporertinntekt = 500;
 
-        final var resultat = TikjentYtelseBeregner.beregn(helMåned, sats, BigDecimal.valueOf(rapporertinntekt));
+        final var resultat = beregn(helMåned, sats, BigDecimal.valueOf(rapporertinntekt));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(670));
         assertThat(resultat.utbetalingsgrad()).isEqualTo(67);
@@ -85,7 +90,7 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, 0);
         int rapporertinntekt = 500;
 
-        final var resultat = TikjentYtelseBeregner.beregn(helg, sats, BigDecimal.valueOf(rapporertinntekt));
+        final var resultat = beregn(helg, sats, BigDecimal.valueOf(rapporertinntekt));
 
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(670));
@@ -101,7 +106,7 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, barnetillegg.intValue());
         int rapporertinntekt = 100;
 
-        final var resultat = TikjentYtelseBeregner.beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
+        final var resultat = beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(1134));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(567));
@@ -117,7 +122,7 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, barnetillegg.intValue());
         int rapporertinntekt = 200;
 
-        final var resultat = TikjentYtelseBeregner.beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
+        final var resultat = beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(1000));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(500));
@@ -133,7 +138,7 @@ class TikjentYtelseBeregnerTest {
         BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, barnetillegg.intValue());
         int rapporertinntekt = 500;
 
-        final var resultat = TikjentYtelseBeregner.beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
+        final var resultat = beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(870));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(435));

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.behandlingslager.behandling.beregning;
+package no.nav.ung.sak.behandlingslager.behandling.sporing;
 
 import java.io.BufferedReader;
 import java.io.IOException;

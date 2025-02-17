@@ -9,4 +9,5 @@ public record Barnetillegg(int dagsats, int antallBarn) {
             ", antallBarn=" + antallBarn +
             '}';
     }
+
 }
