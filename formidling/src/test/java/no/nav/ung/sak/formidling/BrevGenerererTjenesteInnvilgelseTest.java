@@ -37,7 +37,7 @@ import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestscenario;
+import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
@@ -238,7 +238,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
         ).containsTextsOnceInSequence(
             "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
             "Fra 1. desember 2024 til 31. mai 2025 får du utbetalt 636 kroner dagen, før skatt",
-            "Fra 1. juni 2025 til 1. desember 2025 får du utbetalt 954 kroner dagen, før skatt.",
+            "Fra 1. juni 2025 til 29. november 2025 får du utbetalt 954 kroner dagen, før skatt.",
             "Du får 1.33 ganger grunnbeløpet mens du er under 25 år og 2 ganger grunnbeløpet fra måneden etter du fyller 25 år."
         );
     }
@@ -267,7 +267,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
     }
 
-    private Behandling lagScenario(UngTestscenario ungTestscenario) {
+    private Behandling lagScenario(UngTestScenario ungTestscenario) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
         var behandling = scenarioBuilder.buildOgLagreMedUng(

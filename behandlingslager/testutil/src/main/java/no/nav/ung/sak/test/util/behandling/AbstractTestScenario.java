@@ -129,7 +129,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private boolean manueltOpprettet;
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
-    private UngTestscenario ungTestscenario;
+    private UngTestScenario ungTestscenario;
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
         this.fagsakBuilder = FagsakBuilder
@@ -405,12 +405,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     @SuppressWarnings("unchecked")
-    public S medUngTestGrunnlag(UngTestscenario ungTestscenario) {
+    public S medUngTestGrunnlag(UngTestScenario ungTestscenario) {
         this.ungTestscenario = ungTestscenario;
         return (S) this;
     }
 
-    public UngTestscenario getUngTestGrunnlag() {
+    public UngTestScenario getUngTestGrunnlag() {
         return ungTestscenario;
     }
 

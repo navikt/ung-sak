@@ -77,8 +77,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     }
 
     private static void  bestemResultatInnvilgelse(Set<?> årsak, TilkjentYtelseVerdi tilkjentYtelse, HashSet<DetaljertResultatType> resultater) {
-        if (tilkjentYtelse.utbetalingsgrad() < 100) {
-            resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
+        if (årsak.equals(Collections.singleton(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT))) {
+            if (tilkjentYtelse.utbetalingsgrad() > 0) {
+                resultater.add(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT);
+            } else {
+                resultater.add(DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT);
+            }
         } else if (årsak.equals(Collections.singleton(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))) {
             resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
         } else {

@@ -24,7 +24,7 @@ import no.nav.ung.sak.trigger.Trigger;
  * @param søknadStartDato      - startdatoer fra søknad
  * @param behandlingTriggere
  */
-public record UngTestscenario(
+public record UngTestScenario(
     String navn,
     List<UngdomsprogramPeriode> programPerioder,
     LocalDateTimeline<UngdomsytelseSatser> satser,

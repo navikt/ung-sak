@@ -1,7 +1,9 @@
 package no.nav.ung.sak.formidling;
 
 
+import java.util.Collections;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,21 +11,21 @@ import org.slf4j.LoggerFactory;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.ung.sak.formidling.innhold.EndringsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 import no.nav.ung.sak.typer.AktørId;
@@ -40,6 +42,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     //Gjør om til Instance<VedtaksbrevInnholdBygger> når flere maler kommer på plass, og hent vha en type
     private InnvilgelseInnholdBygger innvilgelseInnholdBygger;
     private DetaljertResultatUtleder detaljertResultatUtleder;
+    private EndringsInnholdBygger endringsInnholdBygger;
 
     @Inject
     public BrevGenerererTjenesteImpl(
@@ -73,15 +76,10 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
         }
 
-        LocalDateTimeline<DetaljertResultat> r = detaljertResultatUtleder.utledDetaljertResultat(behandling);
+        var bygger = bestemBygger(behandling);
 
-        if (r.stream().noneMatch(it -> it.getValue().resultatTyper().contains((DetaljertResultatType.INNVILGET_NY_PERIODE)))) {
-            LOG.warn("Behandling har ingen tilkjent ytelse. Støtter ikke vedtaksbrev for avslag foreløpig. BehandlingResultat={}", behandling.getBehandlingResultatType());
-            return null;
-        }
-
+        var resultat = bygger.bygg(behandling);
         var pdlMottaker = hentMottaker(behandling);
-        var resultat = innvilgelseInnholdBygger.bygg(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
                 FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
@@ -96,6 +94,22 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             resultat.dokumentMalType(),
             resultat.templateType()
         );
+    }
+
+    private VedtaksbrevInnholdBygger bestemBygger(Behandling behandling) {
+        var resultater = detaljertResultatUtleder.utledDetaljertResultat(behandling)
+            .toSegments().stream()
+            .flatMap(it -> it.getValue().resultatTyper().stream())
+            .collect(Collectors.toSet());
+
+        if (resultater.equals(Collections.singleton(DetaljertResultatType.INNVILGET_NY_PERIODE))) {
+            return innvilgelseInnholdBygger;
+        } else if (resultater.equals(Collections.singleton(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT))){
+            return endringsInnholdBygger;
+        } else {
+            throw new IllegalStateException("Støtter ikke vedtaksbrev for avslag foreløpig. BehandlingResultat=" + behandling.getBehandlingResultatType());
+        }
+
     }
 
 

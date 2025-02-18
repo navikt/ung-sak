@@ -31,7 +31,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestscenario;
+import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
 
 public class BrevScenarioer {
@@ -42,7 +42,7 @@ public class BrevScenarioer {
 
 
     public static TestScenarioBuilder lagAvsluttetStandardBehandling(UngTestRepositories repositories) {
-        UngTestscenario ungTestscenario = innvilget19år(LocalDate.of(2024, 12, 1));
+        UngTestScenario ungTestscenario = innvilget19år(LocalDate.of(2024, 12, 1));
 
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
@@ -56,14 +56,14 @@ public class BrevScenarioer {
     /**
      * 19 år ungdom med full ungdomsperiode, ingen inntektsgradering og ingen barn
      */
-    public static UngTestscenario innvilget19år(LocalDate fom) {
+    public static UngTestScenario innvilget19år(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusYears(1));
 
         var satser = new LocalDateTimeline<>(p, lavSatsBuilder().build());
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        return new UngTestscenario(
+        return new UngTestScenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -80,7 +80,7 @@ public class BrevScenarioer {
     /**
      * 27 år ungdom med full ungdomsperiode, ingen inntektsgradering og ingen barn, høy sats
      */
-    public static UngTestscenario innvilget27år(LocalDate fom) {
+    public static UngTestScenario innvilget27år(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
         var satser = new LocalDateTimeline<>(p,
@@ -88,7 +88,7 @@ public class BrevScenarioer {
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        return new UngTestscenario(
+        return new UngTestScenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -104,14 +104,14 @@ public class BrevScenarioer {
     /**
      * 29 år ungdom med ungdomsprogramperiode fram til 29 år, ingen inntektsgradering og ingen barn, høy sats
      */
-    public static UngTestscenario innvilget29År(LocalDate fom, LocalDate fødselsdato) {
+    public static UngTestScenario innvilget29År(LocalDate fom, LocalDate fødselsdato) {
         var p = new LocalDateInterval(fom, fødselsdato.plusYears(29).with(TemporalAdjusters.lastDayOfMonth()));
 
         var satser = new LocalDateTimeline<>(p, høySatsBuilder().build());
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        return new UngTestscenario(
+        return new UngTestScenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -128,7 +128,7 @@ public class BrevScenarioer {
      * 25 år ungdom med full ungdomsprogramperiode som blir 26 ila perioden. Får både lav og høy sats
      * ingen inntektsgradering og ingen barn
      */
-    public static UngTestscenario innvilget26År(LocalDate fom, LocalDate fødselsdato) {
+    public static UngTestScenario innvilget26År(LocalDate fom, LocalDate fødselsdato) {
         LocalDate tom26årmnd = fødselsdato.plusYears(26).with(TemporalAdjusters.lastDayOfMonth());
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
@@ -139,7 +139,7 @@ public class BrevScenarioer {
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        return new UngTestscenario(
+        return new UngTestScenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -154,20 +154,22 @@ public class BrevScenarioer {
 
 
     /**
-     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt siste måned på 10 000 kroner.
+     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt første måned på 10 000 kroner.
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
-    public static UngTestscenario endringMedInntektPå10k_19år(LocalDate fom) {
+    public static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
         UngdomsytelseSatser sats = lavSatsBuilder().build();
         var satser = new LocalDateTimeline<>(p, sats);
 
-        LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder = tilkjentytelsePerioderMedReduksjon(satser, BigDecimal.valueOf(10000));
+        var satserPrMåned = splitPrMåned(satser);
+
+        LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder = tilkjentytelsePerioderMedReduksjonFørsteMåned(satserPrMåned, BigDecimal.valueOf(10000));
 
 
-        return new UngTestscenario(
+        return new UngTestScenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
@@ -177,7 +179,11 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(p))));
+            Set.of(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(satserPrMåned.toSegments().first().getLocalDateInterval()))));
+    }
+
+    private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {
+        return satser.splitAtRegular(satser.getMinLocalDate().withDayOfMonth(1), satser.getMaxLocalDate(), Period.ofMonths(1));
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(LocalDateTimeline<UngdomsytelseSatser> satser) {
@@ -196,14 +202,14 @@ public class BrevScenarioer {
         });
     }
 
-    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentytelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satser, BigDecimal rappotertInntektSisteMåned) {
-        var satserPrMåned = satser.splitAtRegular(satser.getMinLocalDate().withDayOfMonth(1), satser.getMaxLocalDate(), Period.ofMonths(1));
-        var sisteMåned = satserPrMåned.toSegments().last();
+    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentytelsePerioderMedReduksjonFørsteMåned(LocalDateTimeline<UngdomsytelseSatser> satserPrMåned, BigDecimal rappotertInntektFørsteMåned) {
+        var førstemåned = satserPrMåned.toSegments().first();
 
-        var rapportertInntektTimeline = new LocalDateTimeline<>(sisteMåned.getLocalDateInterval(), rappotertInntektSisteMåned);
+        var rapportertInntektTimeline = new LocalDateTimeline<>(førstemåned.getLocalDateInterval(), rappotertInntektFørsteMåned);
 
         return tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektTimeline);
     }
+
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
         return satsperioder.combine(rapportertInntektTimeline,
@@ -235,19 +241,18 @@ public class BrevScenarioer {
     @Test
     void testTilkjentYtelseReduksjonScenario() {
         var scenario = endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
-        var sisteMåned = scenario.tilkjentYtelsePerioder().toSegments().last();
+        var førsteMåned = scenario.tilkjentYtelsePerioder().toSegments().first();
 
-        //siste måned (november 2025) har bare 29 dager ungdomsprogram
-        assertThat(sisteMåned.getFom()).isEqualTo(LocalDate.of(2025, 11, 1));
-        assertThat(sisteMåned.getTom()).isEqualTo(LocalDate.of(2025, 11, 29));
+        assertThat(førsteMåned.getFom()).isEqualTo(LocalDate.of(2024, 12, 1));
+        assertThat(førsteMåned.getTom()).isEqualTo(LocalDate.of(2024, 12, 31));
 
-        //20 virkningsdager i november 2025 med lav dagsats på 636,04. Rapportert inntekt er 10 000kr
-        TilkjentYtelseVerdi t = sisteMåned.getValue();
-        assertThat(t.uredusertBeløp()).isEqualByComparingTo("12720.80"); //636,04 * 20
+        //22 virkningsdager i desember 2024 med lav dagsats på 636,04. Rapportert inntekt er 10 000kr
+        TilkjentYtelseVerdi t = førsteMåned.getValue();
+        assertThat(t.uredusertBeløp()).isEqualByComparingTo("13992.88"); //636,04 * 22
         assertThat(t.reduksjon()).isEqualByComparingTo("6600"); //66% av 10 0000
-        assertThat(t.dagsats()).isEqualByComparingTo("306"); //636 - ((6600/20)  )
-        assertThat(t.redusertBeløp()).isEqualByComparingTo("6120.80"); // 12720.80 - 6600
-        assertThat(t.utbetalingsgrad()).isEqualTo(48); // 6120.80 / 12720.80 * 100
+        assertThat(t.dagsats()).isEqualByComparingTo("336"); //636 - ((6600/22)  )
+        assertThat(t.redusertBeløp()).isEqualByComparingTo("7392.88"); // 13992.88 - 6600
+        assertThat(t.utbetalingsgrad()).isEqualTo(53); // 7392.88 / 13992.88 * 100
 
     }
 
