@@ -1,5 +1,5 @@
+# syntax=docker/dockerfile:1.7.0-labs
 FROM ghcr.io/navikt/sif-baseimages/java-21:2025.02.13.1520Z
-
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/ung-sak
 
@@ -8,9 +8,12 @@ ENV JAVA_OPTS="-XX:+UseParallelGC -XX:MaxRAMPercentage=75.0 -XX:ActiveProcessorC
 # Config
 COPY web/target/classes/logback.xml /app/conf/
 
-# Avhengigheter
-COPY web/target/lib/*.jar /app/lib/
+##eksterne avhengigheter (har de i eget lag for bedre bruk av docker build cache)
+COPY --link --exclude=no.nav.ung.sak* web/target/lib/ /app/lib/
+
+#fonter, templates
 COPY formidling/target/pdfgen /app/pdfgen
 
 # Application Container (Jetty)
+COPY web/target/lib/no.nav.ung.sak*.jar /app/lib/
 COPY web/target/app.jar /app/
