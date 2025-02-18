@@ -364,6 +364,9 @@
                             <outputDirectory>${project.basedir}/target/lib/</outputDirectory>
                             <includeScope>runtime</includeScope>
                             <prependGroupId>true</prependGroupId>
+                            <!-- ekskluderer rocksdbjni som er 50 + MB, inkluder fra kafka streams, men ikke brukes av applikasjonen -->
+                            <!-- ekskluderer byte-buddy som er 8 + MB testavhengighet, men kopiert inn fordi den også har runtime scope fra test noen steder -->
+                            <excludeArtifactIds>rocksdbjni,byte-buddy</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
