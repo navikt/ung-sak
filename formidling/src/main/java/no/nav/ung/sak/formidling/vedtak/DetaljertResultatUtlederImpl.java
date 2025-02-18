@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,32 +16,33 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 
 @Dependent
 public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private VilkårResultatRepository vilkårResultatRepository;
     private UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     public DetaljertResultatUtlederImpl() {
     }
 
     @Inject
     public DetaljertResultatUtlederImpl(
-        TilkjentYtelseUtleder tilkjentYtelseUtleder,
         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
         VilkårResultatRepository vilkårResultatRepository,
-        UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste) {
+        UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
+        TilkjentYtelseRepository tilkjentYtelseRepository) {
 
-        this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.ungdomsytelseSøknadsperiodeTjeneste = ungdomsytelseSøknadsperiodeTjeneste;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
     @Override
@@ -48,16 +50,16 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
         var perioderTilVurdering = bestemPeriodeTilVurdering(behandling);
 
-        var tilkjentYtelseTidslinje = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandling.getId()).compress();
+        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         LocalDateTimeline<DetaljertResultat> combine = perioderTilVurdering.combine(tilkjentYtelseTidslinje,
             (p, lhs, rhs) -> {
-                var årsak = lhs != null ? lhs.getValue() : Collections.emptySet();
+                var årsaker = lhs != null ? lhs.getValue() : Collections.emptySet();
                 var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
                 var resultater = new HashSet<DetaljertResultatType>();
 
-                if (tilkjentYtelse != null && tilkjentYtelse.dagsats() > 0L) {
-                    bestemResultatInnvilgelse(årsak, resultater);
+                if (tilkjentYtelse != null && tilkjentYtelse.dagsats().compareTo(BigDecimal.ZERO) > 0) {
+                    bestemResultatInnvilgelse(årsaker, tilkjentYtelse, resultater);
 
                 } else {
                     //TODO må spisse avslag mer
@@ -74,8 +76,10 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     }
 
-    private static void bestemResultatInnvilgelse(Set<?> årsak, HashSet<DetaljertResultatType> resultater) {
-        if (årsak.contains(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)) {
+    private static void  bestemResultatInnvilgelse(Set<?> årsak, TilkjentYtelseVerdi tilkjentYtelse, HashSet<DetaljertResultatType> resultater) {
+        if (tilkjentYtelse.utbetalingsgrad() < 100) {
+            resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
+        } else if (årsak.equals(Collections.singleton(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))) {
             resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
         } else {
             // Innvilgelse men uten søknad/endring fra bruker - spisse dette mer
