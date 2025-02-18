@@ -363,6 +363,7 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/target/lib/</outputDirectory>
                             <includeScope>runtime</includeScope>
+                            <prependGroupId>true</prependGroupId>
                         </configuration>
                     </execution>
                 </executions>
@@ -374,7 +375,8 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <customClasspathLayout>lib/$${artifact.groupId}.$${artifact.artifactId}-$${artifact.version}$${dashClassifier?}.$${artifact.extension}</customClasspathLayout>
                             <mainClass>no.nav.ung.sak.web.server.jetty.JettyServer</mainClass>
                         </manifest>
                     </archive>
