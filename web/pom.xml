@@ -364,6 +364,8 @@
                             <outputDirectory>${project.basedir}/target/lib/</outputDirectory>
                             <includeScope>runtime</includeScope>
                             <prependGroupId>true</prependGroupId>
+                            <!-- ekskluderer rocksdbjni som er 50 + MB, inkluder fra kafka streams, men ikke brukes av applikasjonen -->
+                            <excludeArtifactIds>rocksdbjni</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
