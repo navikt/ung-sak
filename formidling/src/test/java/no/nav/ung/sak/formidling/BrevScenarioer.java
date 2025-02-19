@@ -233,10 +233,6 @@ public class BrevScenarioer {
             }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
-    public static void main(String[] args) {
-        var scenario = endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
-        System.out.println(scenario);
-    }
 
     @Test
     void testTilkjentYtelseReduksjonScenario() {
