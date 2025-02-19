@@ -3,6 +3,7 @@ package no.nav.ung.sak.formidling;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -10,6 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
@@ -17,7 +20,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.EndringsInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
@@ -39,10 +42,9 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private AktørTjeneste aktørTjeneste;
     private PdfGenKlient pdfGen;
     private PersonopplysningRepository personopplysningRepository;
-    //Gjør om til Instance<VedtaksbrevInnholdBygger> når flere maler kommer på plass, og hent vha en type
-    private InnvilgelseInnholdBygger innvilgelseInnholdBygger;
+    private Instance<VedtaksbrevInnholdBygger> innholdByggere;
+
     private DetaljertResultatUtleder detaljertResultatUtleder;
-    private EndringsInnholdBygger endringsInnholdBygger;
 
     @Inject
     public BrevGenerererTjenesteImpl(
@@ -50,14 +52,15 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         AktørTjeneste aktørTjeneste,
         PdfGenKlient pdfGen,
         PersonopplysningRepository personopplysningRepository,
-        InnvilgelseInnholdBygger innvilgelseInnholdBygger,
-        DetaljertResultatUtleder detaljertResultatUtleder) {
+        DetaljertResultatUtleder detaljertResultatUtleder,
+        @Any Instance<VedtaksbrevInnholdBygger> innholdByggere) {
+
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.pdfGen = pdfGen;
         this.personopplysningRepository = personopplysningRepository;
-        this.innvilgelseInnholdBygger = innvilgelseInnholdBygger;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
+        this.innholdByggere = innholdByggere;
     }
 
     public BrevGenerererTjenesteImpl() {
@@ -102,14 +105,18 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             .flatMap(it -> it.getValue().resultatTyper().stream())
             .collect(Collectors.toSet());
 
-        if (resultater.equals(Collections.singleton(DetaljertResultatType.INNVILGET_NY_PERIODE))) {
-            return innvilgelseInnholdBygger;
-        } else if (resultater.equals(Collections.singleton(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT))){
-            return endringsInnholdBygger;
+        if (innholderBare(resultater, DetaljertResultatType.INNVILGET_NY_PERIODE)) {
+            return innholdByggere.select(InnvilgelseInnholdBygger.class).get();
+        } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT) || innholderBare(resultater, DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT)) {
+            return innholdByggere.select(EndringInnholdBygger.class).get();
         } else {
             throw new IllegalStateException("Støtter ikke vedtaksbrev for avslag foreløpig. BehandlingResultat=" + behandling.getBehandlingResultatType());
         }
 
+    }
+
+    private static boolean innholderBare(Set<DetaljertResultatType> resultater, DetaljertResultatType detaljertResultatType) {
+        return resultater.equals(Collections.singleton(detaljertResultatType));
     }
 
 

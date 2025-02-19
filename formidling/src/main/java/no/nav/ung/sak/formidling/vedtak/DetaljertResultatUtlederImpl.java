@@ -1,6 +1,5 @@
 package no.nav.ung.sak.formidling.vedtak;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,7 +57,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
                 var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
                 var resultater = new HashSet<DetaljertResultatType>();
 
-                if (tilkjentYtelse != null && tilkjentYtelse.dagsats().compareTo(BigDecimal.ZERO) > 0) {
+                if (tilkjentYtelse != null) {
                     bestemResultatInnvilgelse(årsaker, tilkjentYtelse, resultater);
 
                 } else {

@@ -36,6 +36,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -87,20 +88,21 @@ class BrevGenerererTjenesteInnvilgelseTest {
     @NotNull
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);;
+        InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
+            ungdomsytelseGrunnlagRepository,
+            ungdomsprogramPeriodeTjeneste,
+            tilkjentYtelseUtleder,
+            personopplysningRepository);
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
             personopplysningRepository,
-            new InnvilgelseInnholdBygger(
-                ungdomsytelseGrunnlagRepository,
-                ungdomsprogramPeriodeTjeneste,
-                tilkjentYtelseUtleder,
-                personopplysningRepository),
             new DetaljertResultatUtlederImpl(
                 new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
                 repositoryProvider.getVilkårResultatRepository(),
-                new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository));
+                new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository),
+            new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger));
     }
 
     @Test()

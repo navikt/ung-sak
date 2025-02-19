@@ -29,6 +29,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederFake;
 import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
@@ -78,20 +79,20 @@ class BrevGenerererTjenesteTest {
         var behandling = scenario.getBehandling();
 
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
+            ungdomsytelseGrunnlagRepository,
+            ungdomsprogramPeriodeTjeneste,
+            tilkjentYtelseUtleder,
+            personopplysningRepository);
         brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
 
-            new InnvilgelseInnholdBygger(
-                ungdomsytelseGrunnlagRepository,
-                ungdomsprogramPeriodeTjeneste,
-                tilkjentYtelseUtleder,
-                personopplysningRepository),
             new DetaljertResultatUtlederFake(
-                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> new DetaljertResultat(Set.of(DetaljertResultatType.INNVILGET_NY_PERIODE)))
-                ));
+                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> new DetaljertResultat(Set.of(DetaljertResultatType.INNVILGET_NY_PERIODE)))),
+            new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger));
 
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
