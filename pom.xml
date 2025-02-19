@@ -43,9 +43,9 @@
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.1.10</kotlin-stdlib.version>
         <jandex.version>3.2.7</jandex.version>
-        <flyway.version>11.3.2</flyway.version>
+        <flyway.version>11.3.3</flyway.version>
         <pdfgen-core.version>1.1.42</pdfgen-core.version>
-        <confluent.platform.version>7.8.1</confluent.platform.version>
+        <confluent.platform.version>7.9.0</confluent.platform.version>
         <mockito.version>5.15.2</mockito.version>
     </properties>
 
@@ -165,7 +165,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.13.0</version>
+                <version>2.13.1</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -654,7 +654,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
