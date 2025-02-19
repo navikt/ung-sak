@@ -20,11 +20,11 @@ public class EndringInnholdBygger implements VedtaksbrevInnholdBygger  {
             new EndringRapportertInntektDto(
                 new PeriodeDto(LocalDate.now(), LocalDate.now()),
                 10000,
-                2000,
-                48,
-                500,
-                686,
-                355
+                7393,
+                66,
+                6600,
+                636,
+                336
             )
         ));
     }

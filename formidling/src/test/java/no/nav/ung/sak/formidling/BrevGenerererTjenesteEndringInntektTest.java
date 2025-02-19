@@ -3,8 +3,12 @@ package no.nav.ung.sak.formidling;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -150,8 +154,11 @@ class BrevGenerererTjenesteEndringInntektTest {
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har endret din ungdomsytelse</h1>"
         ).containsTextsOnceInSequence(
-            "Du har meldt inn inntekt på 10 000 kroner for perioden 1. desember 2024 til 31. desember 2024.",
-            "Det medfører at Nav har redusert utbetalingen din til 6600",
+            "Du har meldt inn inntekt på 10 000 kroner fra 1. desember 2024 til 31. desember 2024.",
+            "Nav har derfor redusert utbetalingen din for neste perioden til 7 393 kroner",
+            "Nav reduserer utbetalt beløp med 66 prosent av innmeldt inntekt.",
+            "Dette tilsvarer en reduksjon på 6 600 kroner.",
+            "Dagsatsen blir redusert fra 636 kroner til 336 kroner.",
             "Vedtaket er gjort etter folketrygdloven § X-Y."
         );
 
@@ -179,6 +186,30 @@ class BrevGenerererTjenesteEndringInntektTest {
             "Det medfører at du får 0 kr utbetalt i ungdomsytelse",
             "Vedtaket er gjort etter folketrygdloven § X-Y."
         );
+
+    }
+
+
+    @Test
+    void pdfStrukturTest() throws IOException {
+
+        //Lager ny fordi default PdfgenKlient lager ikke pdf
+        var brevGenerererTjeneste = lagBrevGenererTjeneste(false);
+
+        var behandling = lagScenario(
+            BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
+
+
+        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId(), brevGenerererTjeneste);
+
+        var pdf = generertBrev.dokument().pdf();
+
+        try (PDDocument pdDocument = Loader.loadPDF(pdf)) {
+            assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
+            String pdfTekst = new PDFTextStripper().getText(pdDocument);
+            assertThat(pdfTekst).isNotEmpty();
+            assertThat(pdfTekst).contains("Nav har endret din ungdomsytelse");
+        }
 
     }
 
