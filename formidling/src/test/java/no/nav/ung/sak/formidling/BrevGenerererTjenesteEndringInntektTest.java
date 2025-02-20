@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -28,8 +29,9 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
@@ -50,7 +52,7 @@ import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevGenerererTjenesteInnvilgelseTest {
+class BrevGenerererTjenesteEndringInntektTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
 
@@ -63,6 +65,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
     private ProsessTriggereRepository prosessTriggereRepository;
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private PersonopplysningRepository personopplysningRepository;
+    private AbakusInMemoryInntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste;
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
@@ -88,11 +91,8 @@ class BrevGenerererTjenesteInnvilgelseTest {
     @NotNull
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);;
-        InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
-            ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeTjeneste,
-            tilkjentYtelseUtleder,
-            personopplysningRepository);
+        EndringInnholdBygger endringInnholdBygger =
+            new EndringInnholdBygger(tilkjentYtelseRepository, abakusInMemoryInntektArbeidYtelseTjeneste);
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
@@ -102,18 +102,15 @@ class BrevGenerererTjenesteInnvilgelseTest {
                 new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
                 repositoryProvider.getVilkårResultatRepository(),
                 new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository),
-            new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger));
+            new UnitTestLookupInstanceImpl<>(endringInnholdBygger));
     }
 
     @Test()
     @DisplayName("Verifiserer faste tekster og mottaker")
     //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
     void skalHaAlleStandardtekster() {
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(lagUngTestRepositories());
-
-        var ungTestGrunnlag = scenarioBuilder.getUngTestGrunnlag();
-        var behandling = scenarioBuilder.getBehandling();
+        UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        var behandling = lagScenario(ungTestscenario);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
 
@@ -121,7 +118,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         assertThatHtml(brevtekst).containsTextsOnceInSequence(
             BrevUtils.brevDatoString(LocalDate.now()), //vedtaksdato
-            "Til: " + ungTestGrunnlag.navn(),
+            "Til: " + ungTestscenario.navn(),
             "Fødselsnummer: " + fnr,
             "Du har rett til å klage",
             "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage",
@@ -145,105 +142,57 @@ class BrevGenerererTjenesteInnvilgelseTest {
     }
 
 
-    @DisplayName("Innvilgelse med riktig fom dato, maks antall dager, lav sats, grunnbeløp, hjemmel")
-    //Denne testen sjekker også at teksten kommer i riktig rekkefølge
+    @DisplayName("Endringsbrev med periode, innrapportert inntekt, reduksjon og utbetaling")
     @Test
-    void standardInnvilgelse() {
+    void standardEndringRapportertInntekt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget19år(fom);
+        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
 
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
-            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+            "<h1>Nav har endret din ungdomsytelse</h1>"
         ).containsTextsOnceInSequence(
-            "Til: " + ungTestGrunnlag.navn(),
-            "Fødselsnummer: " + fnr,
-            "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
-            "Du får utbetalt 636 kroner dagen, før skatt.",
-            "Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får.",
-            "Siden du er under 25 år så får du 1.33 ganger grunnbeløpet.",
+            "Du har meldt inn inntekt på 10 000 kroner fra 1. desember 2024 til 31. desember 2024.",
+            "Nav har derfor redusert utbetalingen din for neste perioden til 7 393 kroner",
+            "Nav reduserer utbetalt beløp med 66 prosent av innmeldt inntekt.",
+            "Dette tilsvarer en reduksjon på 6 600 kroner.",
+            "Dagsatsen blir redusert fra 636 kroner til 336 kroner.",
             "Vedtaket er gjort etter folketrygdloven § X-Y."
         );
 
     }
 
-    @Test
-    void høySats() {
+    @DisplayName("Avslagsbrev ved ny inntekt som fører til 0 utbetaling")
+    //TODO
+    void avslagEndring() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget27år(fom);
+        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
 
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
-            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+            "<h1>Nav har endret din ungdomsytelse</h1>"
         ).containsTextsOnceInSequence(
-            "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
-            "Du får utbetalt 954 kroner dagen, før skatt.",
-            "Siden du er over 25 år så får du 2 ganger grunnbeløpet."
-        ).doesNotContainText(
-            "636",
-            "under 25 år"
+            "Til: " + ungTestGrunnlag.navn(),
+            "Fødselsnummer: " + fnr,
+            "Du har meldt inn inntekt på 10 000 kroner for perioden 1. desember 2024 til 31. desember 2024.",
+            "Det medfører at du får 0 kr utbetalt i ungdomsytelse",
+            "Vedtaket er gjort etter folketrygdloven § X-Y."
         );
 
     }
 
-    @DisplayName("blir 29 i løpet av programmet og får mindre enn maks antall dager")
-    @Test
-    void høySatsMaksAlder6MndIProgrammet() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var fødselsdato = LocalDate.of(1996, 5, 15); //Blir 29 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget29År(fom, fødselsdato);
-
-        var behandling = lagScenario(ungTestGrunnlag);
-
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
-
-        var brevtekst = generertBrev.dokument().html();
-
-        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
-            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
-            "Du har rett til ungdomsytelse fra 1. desember 2024 i 130 dager.",
-            "Du får utbetalt 954 kroner dagen, før skatt.",
-            "Siden du er over 25 år så får du 2 ganger grunnbeløpet til måneden du fyller 29 år."
-        ).doesNotContainText(
-            "636",
-            "under 25 år"
-        );;
-    }
-
-    //dekker flere dagsatser også
-    @Test
-    void lavOgHøySats() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var fødselsdato = LocalDate.of(1999, 5, 15); //Blir 26 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget26År(fom, fødselsdato);
-
-        var behandling = lagScenario(ungTestGrunnlag);
-
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
-
-        var brevtekst = generertBrev.dokument().html();
-
-        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
-            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
-            "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
-            "Fra 1. desember 2024 til 31. mai 2025 får du utbetalt 636 kroner dagen, før skatt",
-            "Fra 1. juni 2025 til 29. november 2025 får du utbetalt 954 kroner dagen, før skatt.",
-            "Du får 1.33 ganger grunnbeløpet mens du er under 25 år og 2 ganger grunnbeløpet fra måneden etter du fyller 25 år."
-        );
-    }
 
     @Test
     void pdfStrukturTest() throws IOException {
@@ -251,31 +200,41 @@ class BrevGenerererTjenesteInnvilgelseTest {
         //Lager ny fordi default PdfgenKlient lager ikke pdf
         var brevGenerererTjeneste = lagBrevGenererTjeneste(false);
 
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(lagUngTestRepositories());
+        var behandling = lagScenario(
+            BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
 
-        var behandling = scenarioBuilder.getBehandling();
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId(), brevGenerererTjeneste);
 
         var pdf = generertBrev.dokument().pdf();
 
         try (PDDocument pdDocument = Loader.loadPDF(pdf)) {
-            assertThat(pdDocument.getNumberOfPages()).isEqualTo(2);
+            assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Nav har innvilget søknaden din om ungdomsytelse");
+            assertThat(pdfTekst).contains("Nav har endret din ungdomsytelse");
         }
 
     }
 
-    private Behandling lagScenario(UngTestScenario ungTestscenario) {
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(
-            lagUngTestRepositories());
+    private Behandling lagScenario(UngTestScenario ungTestscenario) {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestscenario);
+
+        UngTestRepositories repositories = lagUngTestRepositories();
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositories);
+
+        abakusInMemoryInntektArbeidYtelseTjeneste.lagreOppgittOpptjening(
+            behandling.getId(),
+            ungTestscenario.abakusInntekt()
+        );
+
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
+
+
         return behandling;
     }
 

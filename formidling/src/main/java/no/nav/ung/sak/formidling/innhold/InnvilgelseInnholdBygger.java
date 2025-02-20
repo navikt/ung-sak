@@ -29,6 +29,7 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.ResultatFlaggDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.SatserDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.TilkjentPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.TilkjentYtelseDto;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
@@ -60,7 +61,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @WithSpan
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling) {
+    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         Long behandlingId = behandling.getId();
         var tilkjentYtelseTidslinje =
             tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId);

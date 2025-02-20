@@ -1,11 +1,14 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
+import java.math.BigDecimal;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-
-import java.math.BigDecimal;
-import java.util.Set;
+import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.RapportertInntekt;
+import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import no.nav.ung.sak.ytelse.TikjentYtelseBeregner;
+import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 
 /**
  * `LagTilkjentYtelse` er en hjelpeklasse som brukes til å generere en tidslinje for tilkjent ytelse basert på godkjente perioder,

@@ -1,13 +1,13 @@
 package no.nav.ung.sak.domene.iay.modell;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.ung.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.ung.sak.typer.Beløp;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class InntektspostBuilder {
     private Inntektspost inntektspost;

@@ -23,23 +23,15 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
-import no.nav.ung.sak.formidling.BrevScenarioer;
-import no.nav.ung.sak.formidling.PdlKlientFake;
+import no.nav.ung.sak.formidling.BrevGenerererTjenesteFake;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
-import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
+import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -53,9 +45,6 @@ class BrevbestillingTaskTest {
     private DokArkivKlientFake dokArkivKlient;
     private BrevbestillingRepository brevbestillingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     private String fnr;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
@@ -64,25 +53,9 @@ class BrevbestillingTaskTest {
     void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
-        ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
-        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository);
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
-        var pdlKlient = PdlKlientFake.medTilfeldigFnr();
-        fnr = pdlKlient.fnr();
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
-        brevGenerererTjeneste = new BrevGenerererTjeneste(
-            repositoryProvider.getBehandlingRepository(),
-            new AktørTjeneste(pdlKlient),
-            new PdfGenKlient(),
-            tilkjentYtelseUtleder,
-            repositoryProvider.getPersonopplysningRepository(),
-            new InnvilgelseInnholdBygger(
-                ungdomsytelseGrunnlagRepository,
-                ungdomsprogramPeriodeTjeneste,
-                tilkjentYtelseUtleder,
-                repositoryProvider.getPersonopplysningRepository()));
+        fnr = new FiktiveFnr().nesteFnr();
+        brevGenerererTjeneste = new BrevGenerererTjenesteFake(fnr);
 
         dokArkivKlient = new DokArkivKlientFake();
 
@@ -92,8 +65,8 @@ class BrevbestillingTaskTest {
 
     @Test
     void skalLagreBestillingLagePdfJournalføreOgLageDistribusjonstask() {
-
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, tilkjentYtelseRepository);
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
+        scenarioBuilder.lagre(repositoryProvider);
         var behandling = scenarioBuilder.getBehandling();
 
         BrevbestillingTask brevBestillingTask = new BrevbestillingTask(behandlingRepository, brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);

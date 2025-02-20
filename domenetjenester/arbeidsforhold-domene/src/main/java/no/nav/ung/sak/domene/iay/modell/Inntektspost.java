@@ -1,5 +1,8 @@
 package no.nav.ung.sak.domene.iay.modell;
 
+import java.time.LocalDate;
+import java.util.Objects;
+
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
@@ -9,9 +12,6 @@ import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Beløp;
-
-import java.time.LocalDate;
-import java.util.Objects;
 
 public class Inntektspost implements IndexKey {
 

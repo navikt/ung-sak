@@ -13,6 +13,12 @@
 	<name>ung-sak :: Domenetjenester - Arbeidsforhold</name>
 
 	<dependencies>
+
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>arbeidsforhold-domene</artifactId>
+        </dependency>
+
 		<!-- for Bean validation -->
 		<dependency>
 			<groupId>no.nav.ung.sak</groupId>
@@ -26,12 +32,6 @@
 			<!-- trengs for integrasjon mellom Weld og jakarta.el -->
 			<groupId>org.jboss.weld.module</groupId>
 			<artifactId>weld-web</artifactId>
-		</dependency>
-
-		<!-- Modul interne avhengigheter -->
-		<dependency>
-			<groupId>no.nav.ung.sak</groupId>
-			<artifactId>behandling</artifactId>
 		</dependency>
 
 		<!-- Integrasjon avhengigheter -->
