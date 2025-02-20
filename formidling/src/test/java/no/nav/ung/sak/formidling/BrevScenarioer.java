@@ -27,6 +27,8 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
+import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
@@ -73,7 +75,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))), null);
     }
 
 
@@ -98,7 +100,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(27).plusDays(42),
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))), null);
     }
 
     /**
@@ -121,7 +123,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))), null);
     }
 
     /**
@@ -149,7 +151,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))));
+            Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fra(p))), null);
     }
 
 
@@ -161,13 +163,21 @@ public class BrevScenarioer {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        UngdomsytelseSatser sats = lavSatsBuilder().build();
+        var sats = lavSatsBuilder().build();
         var satser = new LocalDateTimeline<>(p, sats);
 
         var satserPrMåned = splitPrMåned(satser);
+        var førstemåned = satserPrMåned.toSegments().first();
+        var rapportertInntektTimeline = new LocalDateTimeline<>(førstemåned.getLocalDateInterval(), BigDecimal.valueOf(10000));
+        var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektTimeline);
 
-        LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder = tilkjentytelsePerioderMedReduksjonFørsteMåned(satserPrMåned, BigDecimal.valueOf(10000));
+        var opptjening = OppgittOpptjeningBuilder.ny();
+        opptjening.leggTilOppgittArbeidsforhold(OppgittArbeidsforholdBuilder.ny()
+            .medInntekt(BigDecimal.valueOf(1000))
+            .medPeriode(DatoIntervallEntitet.fra(førstemåned.getLocalDateInterval()))
+        );
 
+        var trigger = new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(satserPrMåned.toSegments().first().getLocalDateInterval()));
 
         return new UngTestScenario(
             DEFAULT_NAVN,
@@ -179,7 +189,8 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(satserPrMåned.toSegments().first().getLocalDateInterval()))));
+            Set.of(trigger),
+            opptjening);
     }
 
     private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {
@@ -200,14 +211,6 @@ public class BrevScenarioer {
                 ))
             );
         });
-    }
-
-    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentytelsePerioderMedReduksjonFørsteMåned(LocalDateTimeline<UngdomsytelseSatser> satserPrMåned, BigDecimal rappotertInntektFørsteMåned) {
-        var førstemåned = satserPrMåned.toSegments().first();
-
-        var rapportertInntektTimeline = new LocalDateTimeline<>(førstemåned.getLocalDateInterval(), rappotertInntektFørsteMåned);
-
-        return tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektTimeline);
     }
 
 

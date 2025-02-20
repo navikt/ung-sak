@@ -138,7 +138,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     @NotNull
     private UngTestRepositories lagUngTestRepositories() {
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository, abakusInMemoryInntektArbeidYtelseTjeneste);
+        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
     }
 
 
@@ -223,9 +223,18 @@ class BrevGenerererTjenesteEndringInntektTest {
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(lagUngTestRepositories());
+        UngTestRepositories repositories = lagUngTestRepositories();
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositories);
+
+        abakusInMemoryInntektArbeidYtelseTjeneste.lagreOppgittOpptjening(
+            behandling.getId(),
+            ungTestscenario.abakusInntekt()
+        );
+
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
+
+
         return behandling;
     }
 
