@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -70,6 +71,8 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakTestUtil;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
+import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.Whitebox;
@@ -479,6 +482,24 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         if (ungTestscenario.behandlingTriggere() != null && repositories.prosessTriggereRepository() != null) {
             repositories.prosessTriggereRepository().leggTil(behandling.getId(), ungTestscenario.behandlingTriggere());
         }
+
+        if (repositories.abakus() != null) {
+            //TODO
+            OppgittOpptjeningBuilder ny = OppgittOpptjeningBuilder.ny();
+            AbakusInMemoryInntektArbeidYtelseTjeneste abakus = repositories.abakus();
+            var arb = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny();
+            ny.leggTilOppgittArbeidsforhold(
+                arb
+                    .medInntekt(BigDecimal.valueOf(1000))
+                    .medPeriode(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusYears(1)).tilOgMed(LocalDate.now()))
+
+            );
+            var n = OppgittOpptjeningBuilder.EgenNæringBuilder.ny();
+            n.medBruttoInntekt(BigDecimal.valueOf(1000));
+            ny.leggTilEgneNæringer(List.of(n));
+            abakus.lagreOppgittOpptjening(behandling.getId(), ny);
+        }
+
 
 
     }

@@ -29,6 +29,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -64,6 +65,7 @@ class BrevGenerererTjenesteEndringInntektTest {
     private ProsessTriggereRepository prosessTriggereRepository;
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private PersonopplysningRepository personopplysningRepository;
+    private AbakusInMemoryInntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste;
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
@@ -89,6 +91,8 @@ class BrevGenerererTjenesteEndringInntektTest {
     @NotNull
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);;
+        EndringInnholdBygger endringInnholdBygger =
+            new EndringInnholdBygger(tilkjentYtelseRepository, abakusInMemoryInntektArbeidYtelseTjeneste);
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
@@ -98,7 +102,7 @@ class BrevGenerererTjenesteEndringInntektTest {
                 new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
                 repositoryProvider.getVilkårResultatRepository(),
                 new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository),
-            new UnitTestLookupInstanceImpl<>(new EndringInnholdBygger()));
+            new UnitTestLookupInstanceImpl<>(endringInnholdBygger));
     }
 
     @Test()
@@ -134,7 +138,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     @NotNull
     private UngTestRepositories lagUngTestRepositories() {
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
+        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository, abakusInMemoryInntektArbeidYtelseTjeneste);
     }
 
 
@@ -219,8 +223,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(
-            lagUngTestRepositories());
+        var behandling = scenarioBuilder.buildOgLagreMedUng(lagUngTestRepositories());
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         return behandling;

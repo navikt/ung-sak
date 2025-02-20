@@ -14,6 +14,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
@@ -29,6 +30,7 @@ import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 import no.nav.ung.sak.typer.AktørId;
@@ -79,9 +81,13 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
         }
 
-        var bygger = bestemBygger(behandling);
+        LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
+        var bygger = bestemBygger(detaljertResultatTidslinje);
+        if (bygger == null) {
+            throw new IllegalStateException("Støtter ikke vedtaksbrev for resultater = " + detaljertResultatTidslinje);
+        }
 
-        var resultat = bygger.bygg(behandling);
+        var resultat = bygger.bygg(behandling, detaljertResultatTidslinje);
         var pdlMottaker = hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
@@ -99,8 +105,8 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         );
     }
 
-    private VedtaksbrevInnholdBygger bestemBygger(Behandling behandling) {
-        var resultater = detaljertResultatUtleder.utledDetaljertResultat(behandling)
+    private VedtaksbrevInnholdBygger bestemBygger(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = detaljertResultat
             .toSegments().stream()
             .flatMap(it -> it.getValue().resultatTyper().stream())
             .collect(Collectors.toSet());
@@ -110,7 +116,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT) || innholderBare(resultater, DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT)) {
             return innholdByggere.select(EndringInnholdBygger.class).get();
         } else {
-            throw new IllegalStateException("Støtter ikke vedtaksbrev for avslag foreløpig. BehandlingResultat=" + behandling.getBehandlingResultatType());
+            return null;
         }
 
     }

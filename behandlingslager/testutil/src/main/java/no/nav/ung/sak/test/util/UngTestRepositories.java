@@ -5,6 +5,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 
 /**
@@ -16,6 +17,6 @@ public record UngTestRepositories(
     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
     UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
     TilkjentYtelseRepository tilkjentYtelseRepository,
-    ProsessTriggereRepository prosessTriggereRepository
-) {
+    ProsessTriggereRepository prosessTriggereRepository,
+    AbakusInMemoryInntektArbeidYtelseTjeneste abakus) {
 }

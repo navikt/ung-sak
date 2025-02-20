@@ -29,6 +29,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
+import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -38,7 +39,6 @@ public class BrevScenarioer {
 
     public static final String DEFAULT_NAVN = "Ung Testesen";
     private static final BigDecimal G_BELØP_24 = BigDecimal.valueOf(124028);
-    private static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
 
 
     public static TestScenarioBuilder lagAvsluttetStandardBehandling(UngTestRepositories repositories) {
@@ -219,7 +219,7 @@ public class BrevScenarioer {
 
                 var uredusertBeløp = lhs.getValue().dagsats().multiply(BigDecimal.valueOf(antallVirkedager));
                 var rapportertInntekt = rhs == null ? BigDecimal.ZERO : rhs.getValue();
-                var reduksjon = rapportertInntekt.multiply(REDUKSJONS_FAKTOR);
+                var reduksjon = rapportertInntekt.multiply(EndringInnholdBygger.REDUKSJONS_FAKTOR);
                 var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
                 var dagsats = antallVirkedager == 0 ? BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, RoundingMode.HALF_UP);
                 var utbetalingsgrad = redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(uredusertBeløp, 0, RoundingMode.HALF_UP).intValue();

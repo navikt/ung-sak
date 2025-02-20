@@ -74,7 +74,7 @@ class BrevGenerererTjenesteTest {
     void skal_lage_vedtakspdf() {
 
         var scenario = BrevScenarioer.lagAvsluttetStandardBehandling(
-            new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, null));
+            new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, null, null));
         var ungTestGrunnlag = scenario.getUngTestGrunnlag();
         var behandling = scenario.getBehandling();
 
