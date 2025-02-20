@@ -2,18 +2,18 @@
  * `TikjentYtelseBeregner` er en hjelpeklasse som brukes til å beregne verdier for tilkjent ytelse basert på
  * en gitt periode, sats og rapportert inntekt.
  */
-package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
-
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.domene.typer.tid.Virkedager;
+package no.nav.ung.sak.ytelse;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Objects;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
+import no.nav.ung.sak.domene.typer.tid.Virkedager;
 
-class TikjentYtelseBeregner {
+
+public class TikjentYtelseBeregner {
 
 
     public static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
@@ -26,7 +26,7 @@ class TikjentYtelseBeregner {
      * @param rapporertinntekt den rapporterte inntekten for perioden
      * @return en instans av `TilkjentYtelseVerdi` som representerer de beregnede verdiene
      */
-    static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, BigDecimal rapporertinntekt) {
+    public static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, BigDecimal rapporertinntekt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(sats, "sats");
         Objects.requireNonNull(rapporertinntekt, "rapporertinntekt");

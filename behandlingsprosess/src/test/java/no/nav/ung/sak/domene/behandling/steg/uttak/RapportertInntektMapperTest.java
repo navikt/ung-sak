@@ -1,18 +1,9 @@
 package no.nav.ung.sak.domene.behandling.steg.uttak;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.behandling.steg.beregnytelse.RapportertInntektMapper;
-import no.nav.ung.sak.domene.behandling.steg.beregnytelse.RapporterteInntekter;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
-import no.nav.ung.sak.domene.behandling.steg.beregnytelse.RapportertInntekt;
-import no.nav.ung.sak.domene.iay.modell.*;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.JournalpostId;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,10 +11,22 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
+import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
+import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.ytelse.InntektType;
+import no.nav.ung.sak.ytelse.RapportertInntekt;
+import no.nav.ung.sak.ytelse.RapportertInntektMapper;
+import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
 class RapportertInntektMapperTest {
 
