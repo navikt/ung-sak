@@ -43,8 +43,7 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 
 /**
  * Test for brevtekster for innvilgelse. Bruker html for å validere.
@@ -63,7 +62,6 @@ class BrevGenerererTjenesteEndringInntektTest {
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private PersonopplysningRepository personopplysningRepository;
     private AbakusInMemoryInntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste;
 
@@ -80,19 +78,21 @@ class BrevGenerererTjenesteEndringInntektTest {
         ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
-        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository);
         personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
 
+        abakusInMemoryInntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         brevGenerererTjeneste = lagBrevGenererTjeneste(System.getenv("LAGRE_PDF") == null);
     }
 
-    @NotNull
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);;
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
         EndringInnholdBygger endringInnholdBygger =
-            new EndringInnholdBygger(tilkjentYtelseRepository, abakusInMemoryInntektArbeidYtelseTjeneste);
+            new EndringInnholdBygger(tilkjentYtelseRepository,
+                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste),
+                ungdomsytelseGrunnlagRepository);
+
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),

@@ -173,7 +173,7 @@ public class BrevScenarioer {
 
         var opptjening = OppgittOpptjeningBuilder.ny();
         opptjening.leggTilOppgittArbeidsforhold(OppgittArbeidsforholdBuilder.ny()
-            .medInntekt(BigDecimal.valueOf(1000))
+            .medInntekt(BigDecimal.valueOf(10000))
             .medPeriode(DatoIntervallEntitet.fra(førstemåned.getLocalDateInterval()))
         );
 
@@ -213,7 +213,7 @@ public class BrevScenarioer {
         });
     }
 
-
+    //TODO Endre til å bruke TilkjentYtelseBeregner
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
         return satsperioder.combine(rapportertInntektTimeline,
             (s, lhs, rhs) -> {

@@ -168,7 +168,7 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
 
         var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
-        iayGrunnlag.medOppgittOpptjening(oppgittOpptjening);
+        iayGrunnlag.medOppgittOpptjeningAggregat(List.of(oppgittOpptjening));
 
         lagreOgFlush(behandlingId, iayGrunnlag.build());
     }
