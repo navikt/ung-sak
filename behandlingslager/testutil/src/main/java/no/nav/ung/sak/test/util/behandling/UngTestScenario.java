@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
+import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.trigger.Trigger;
 
 /**
@@ -23,6 +24,7 @@ import no.nav.ung.sak.trigger.Trigger;
  * @param fødselsdato
  * @param søknadStartDato      - startdatoer fra søknad
  * @param behandlingTriggere
+ * @param abakusInntekt
  */
 public record UngTestScenario(
     String navn,
@@ -34,7 +36,8 @@ public record UngTestScenario(
     LocalDateTimeline<Utfall> ungdomsprogramvilkår,
     LocalDate fødselsdato,
     List<LocalDate> søknadStartDato,
-    Set<Trigger> behandlingTriggere) {
+    Set<Trigger> behandlingTriggere,
+    OppgittOpptjeningBuilder abakusInntekt) {
 }
 
 

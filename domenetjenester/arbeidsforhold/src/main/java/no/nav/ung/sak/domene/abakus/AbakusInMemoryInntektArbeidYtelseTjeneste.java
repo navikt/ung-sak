@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
-import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdInformasjon;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
