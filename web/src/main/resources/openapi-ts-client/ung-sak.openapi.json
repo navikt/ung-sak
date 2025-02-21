@@ -6657,7 +6657,7 @@
     },
     "/api/formidling/vedtaksbrev/forhaandsvis" : {
       "post" : {
-        "description" : "Forhåndsvise vedtaksbrev for en behandling",
+        "description" : "Forhåndsvise vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
         "operationId" : "forhåndsvisVedtaksbrev",
         "requestBody" : {
           "content" : {
