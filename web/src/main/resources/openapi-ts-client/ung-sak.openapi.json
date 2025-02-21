@@ -2907,6 +2907,63 @@
         "type" : "string",
         "x-enum-varnames" : [ "HASTESAK" ]
       },
+      "NotatDto" : {
+        "discriminator" : {
+          "propertyName" : "gjelderType"
+        },
+        "properties" : {
+          "endretAv" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "endretTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "gjelderType" : {
+            "$ref" : "#/components/schemas/NotatDtoGjelderType"
+          },
+          "kanRedigere" : {
+            "type" : "boolean"
+          },
+          "notatId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "notatTekst" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          },
+          "opprettetAv" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "opprettetTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "skjult" : {
+            "type" : "boolean"
+          },
+          "versjon" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "kanRedigere", "notatTekst", "skjult", "versjon" ],
+        "type" : "object"
+      },
+      "NotatDtoGjelderType" : {
+        "enum" : [ "FAGSAK" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "FAGSAK" ]
+      },
       "NyBehandlingDto" : {
         "properties" : {
           "behandlingArsakType" : {
@@ -7166,7 +7223,14 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/NotatDto"
+                  },
+                  "type" : "array"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -7188,11 +7252,15 @@
           "required" : true
         },
         "responses" : {
-          "default" : {
+          "201" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotatDto"
+                }
+              }
             },
-            "description" : "default response"
+            "description" : "Opprettet notat"
           }
         },
         "tags" : [ "notat" ]
@@ -7214,11 +7282,15 @@
           "required" : true
         },
         "responses" : {
-          "default" : {
+          "200" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotatDto"
+                }
+              }
             },
-            "description" : "default response"
+            "description" : "Endret notat"
           }
         },
         "tags" : [ "notat" ]
@@ -7240,11 +7312,15 @@
           "required" : true
         },
         "responses" : {
-          "default" : {
+          "200" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/NotatDto"
+                }
+              }
             },
-            "description" : "default response"
+            "description" : "Skjult notat"
           }
         },
         "tags" : [ "notat" ]
