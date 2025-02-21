@@ -4,12 +4,12 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,17 +73,17 @@ public class NotatRestTjeneste {
     @Operation(description = "Henter alle notater for fagsak", tags = "notat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hent(
+    public Collection<NotatDto> hent(
         @NotNull @QueryParam(SaksnummerDto.NAME) @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
         @QueryParam("notatId") @Parameter(description = "Notat uuid")  @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) UUID notatId
     ) {
         if (notatId != null) {
             NotatEntitet notat = hentNotat(saksnummer.getVerdi(), notatId);
-            return Response.ok().entity(Collections.singleton(mapDto(notat))).build();
+            return Collections.singleton(mapDto(notat));
         }
 
         List<NotatEntitet> notater = hentAlle(saksnummer.getVerdi());
-        return Response.ok().entity(notater.stream().map(this::mapDto).collect(Collectors.toList())).build();
+        return notater.stream().map(this::mapDto).collect(Collectors.toList());
 
     }
 
@@ -92,6 +92,9 @@ public class NotatRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lag nytt notat", tags = "notat")
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @ApiResponse(responseCode = "201", description = "Opprettet notat", content = {
+        @Content(mediaType = "application/json", schema = @Schema(implementation = NotatDto.class))
+    })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response opprett(
         @NotNull @Parameter(description = "Nytt notat") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OpprettNotatDto opprettNotatDto
@@ -103,7 +106,6 @@ public class NotatRestTjeneste {
         notatRepository.lagre(entitet);
         LOGGER.info("Notat opprettet");
         return Response.status(Response.Status.CREATED).entity(mapDto(entitet)).build();
-
     }
 
     @POST
@@ -111,9 +113,12 @@ public class NotatRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Endre eksistrende notat", tags = "notat")
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @ApiResponse(responseCode = "200", description = "Endret notat", content = {
+        @Content(mediaType = "application/json", schema = @Schema(implementation = NotatDto.class))
+    })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response endre(
-       @NotNull @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto
+        @NotNull @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto
     ) {
         var notat = hentNotatForEndring(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.notatId(), endreNotatDto.versjon());
 
@@ -147,6 +152,9 @@ public class NotatRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Skjul notat", tags = "notat")
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @ApiResponse(responseCode = "200", description = "Skjult notat", content = {
+        @Content(mediaType = "application/json", schema = @Schema(implementation = NotatDto.class))
+    })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response skjul(
         @NotNull @Parameter(description = "Notat som skal skjules") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SkjulNotatDto skjulNotatDto
@@ -207,16 +215,16 @@ public class NotatRestTjeneste {
 
     private NotatDto mapDto(NotatEntitet entitet) {
         return new NotatDto(
-                entitet.getUuid(),
-                entitet.getNotatTekst(),
-                entitet.isSkjult(),
-                bestemNotatGjelder(entitet),
-                entitet.kanRedigere(saksbehandlerUserid()),
-                entitet.getVersjon(),
-                entitet.getOpprettetAv(),
-                entitet.getOpprettetTidspunkt(),
-                entitet.getNotatTekstEndretAv(),
-                entitet.getNotatTekstEndretTidspunkt());
+            entitet.getUuid(),
+            entitet.getNotatTekst(),
+            entitet.isSkjult(),
+            bestemNotatGjelder(entitet),
+            entitet.kanRedigere(saksbehandlerUserid()),
+            entitet.getVersjon(),
+            entitet.getOpprettetAv(),
+            entitet.getOpprettetTidspunkt(),
+            entitet.getNotatTekstEndretAv(),
+            entitet.getNotatTekstEndretTidspunkt());
     }
 
     private static NotatGjelderType bestemNotatGjelder(NotatEntitet entitet) {
