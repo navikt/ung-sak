@@ -84,7 +84,8 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         var bygger = bestemBygger(detaljertResultatTidslinje);
         if (bygger == null) {
-            throw new IllegalStateException("Støtter ikke vedtaksbrev for resultater = " + detaljertResultatTidslinje);
+            LOG.warn("Støtter ikke vedtaksbrev for resultater = {} ", detaljertResultatString(detaljertResultatTidslinje));
+            return null;
         }
 
         var resultat = bygger.bygg(behandling, detaljertResultatTidslinje);
@@ -103,6 +104,11 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             resultat.dokumentMalType(),
             resultat.templateType()
         );
+    }
+
+    private static String detaljertResultatString(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+        return String.join(", ", detaljertResultatTidslinje.toSegments().stream()
+                .map(it -> it.getLocalDateInterval().toString() +" -> "+ it.getValue().resultatTyper()).collect(Collectors.toSet()));
     }
 
     private VedtaksbrevInnholdBygger bestemBygger(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
