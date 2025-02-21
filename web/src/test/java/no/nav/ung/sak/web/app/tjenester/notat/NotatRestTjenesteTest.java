@@ -190,8 +190,7 @@ class NotatRestTjenesteTest {
 
     private NotatDto hentNotat(Saksnummer saksnummer, UUID uuid) {
         @SuppressWarnings("unchecked")
-        var entity = (Collection<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), uuid)
-                .getEntity();
+        var entity = (Collection<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), uuid);
         return entity.stream().findFirst().orElseThrow();
     }
 
@@ -205,8 +204,7 @@ class NotatRestTjenesteTest {
 
     private List<NotatDto> hentForFagsak(Saksnummer saksnummer) {
         @SuppressWarnings("unchecked")
-        var entity = (List<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), null)
-                .getEntity();
+        var entity = (List<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), null);
         return entity;
     }
 
