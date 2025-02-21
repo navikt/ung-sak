@@ -97,7 +97,7 @@ public class FormidlingRestTjeneste {
     @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
-    @Operation(description = "Forhåndsvise vedtaksbrev for en behandling", tags = "formidling",
+    @Operation(description = "Forhåndsvise vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ", tags = "formidling",
         responses = @ApiResponse(
             responseCode = "200",
             description = "pdf",
@@ -120,7 +120,7 @@ public class FormidlingRestTjeneste {
         var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 
         return switch (mediaTypeReq) {
-            case PDF_MEDIA_STRING -> Response.ok(generertBrev.dokument().pdf()).build();
+            case PDF_MEDIA_STRING, MediaType.APPLICATION_JSON -> Response.ok(generertBrev.dokument().pdf()).build();
             case MediaType.TEXT_HTML -> Response.ok(generertBrev.dokument().html()).build();
             default -> Response.ok(generertBrev.dokument().pdf()) //Kun for å få swagger til å laste ned pdf
                 .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
