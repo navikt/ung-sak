@@ -32,7 +32,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
@@ -92,7 +92,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
 
         var endringInnholdBygger =
-            new EndringInnholdBygger(tilkjentYtelseRepository,
+            new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
                 new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste),
                 ungdomsytelseGrunnlagRepository);
 
