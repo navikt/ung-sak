@@ -4,7 +4,7 @@ package no.nav.ung.sak.formidling.template;
  * Pdfgen mal filer
  */
 public enum TemplateType {
-    INNVILGELSE("innvilgelse");
+    INNVILGELSE("innvilgelse"), ENDRING_INNTEKT("endring_inntekt");
 
     final String path;
     final String dir = "ungdomsytelse";

@@ -1,12 +1,12 @@
 package no.nav.ung.sak.domene.iay.modell;
 
+import java.util.Optional;
+
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Saksnummer;
-
-import java.util.Optional;
 
 public class YtelseBuilder {
 

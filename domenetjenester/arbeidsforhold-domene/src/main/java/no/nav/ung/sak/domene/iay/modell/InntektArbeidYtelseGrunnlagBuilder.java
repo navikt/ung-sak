@@ -7,11 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.k9.felles.util.Tuple;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Arbeidsgiver;
-import no.nav.ung.sak.typer.InternArbeidsforholdRef;
-
 public class InntektArbeidYtelseGrunnlagBuilder {
 
     private InntektArbeidYtelseGrunnlag kladd;

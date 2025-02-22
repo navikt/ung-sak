@@ -16,6 +16,7 @@ public enum DokumentMalType implements Kodeverdi {
 //    UENDRETUTFALL_DOK("UENDRE", "Uendret utfall", true),
 //    FORLENGET_DOK("FORLEN", "Forlenget saksbehandlingstid", false),
     INNVILGELSE_DOK("INNVILGELSE", "Innvilgelsesbrev", true),
+    ENDRING_DOK("ENDRING", "Endring vedtaksbrev", true),
     OPPHØR_DOK("OPPHOR", "Opphør brev", true),
     AVSLAG__DOK("AVSLAG", "Avslagsbrev", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekst vedtaksbrev", true),

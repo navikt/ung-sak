@@ -23,6 +23,7 @@
         <module>inngangsvilkar</module>
         <module>innsyn</module>
         <module>arbeidsforhold</module>
+        <module>arbeidsforhold-domene</module>
         <module>mottak</module>
         <module>okonomistotte</module>
         <module>person</module>

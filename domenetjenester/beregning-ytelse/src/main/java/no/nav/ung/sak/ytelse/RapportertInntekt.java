@@ -1,6 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
-
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
+package no.nav.ung.sak.ytelse;
 
 import java.math.BigDecimal;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.uttak.regler;
+package no.nav.ung.sak.ytelse;
 
 public enum InntektType {
 
