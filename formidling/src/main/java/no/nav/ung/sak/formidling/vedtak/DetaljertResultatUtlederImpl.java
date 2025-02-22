@@ -58,8 +58,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
                 var resultater = new HashSet<DetaljertResultatType>();
 
                 if (tilkjentYtelse != null) {
-                    bestemResultatInnvilgelse(årsaker, tilkjentYtelse, resultater);
-
+                    bestemResultatMedTilkjentYtelse(årsaker, tilkjentYtelse, resultater);
                 } else {
                     //TODO må spisse avslag mer
                     resultater.add(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
@@ -75,7 +74,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     }
 
-    private static void bestemResultatInnvilgelse(Set<?> årsak, TilkjentYtelseVerdi tilkjentYtelse, HashSet<DetaljertResultatType> resultater) {
+    private static void bestemResultatMedTilkjentYtelse(Set<?> årsak, TilkjentYtelseVerdi tilkjentYtelse, HashSet<DetaljertResultatType> resultater) {
         if (årsak.equals(Collections.singleton(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT))) {
             if (tilkjentYtelse.utbetalingsgrad() > 0) {
                 resultater.add(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT);

@@ -96,24 +96,6 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
                 satser));
     }
 
-    private static LocalDateSegment<GrunnlagOgTilkjentYtelse> sammenstillGrunnlagOgTilkjentYtelse(
-        LocalDateInterval di, LocalDateSegment<DagsatsOgUtbetalingsgrad> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
-        var dg = lhs.getValue();
-        var sp = rhs.getValue();
-        return new LocalDateSegment<>(di,
-            new GrunnlagOgTilkjentYtelse(
-                dg.dagsats(),
-                avrundTilHeltall(dg.utbetalingsgrad()),
-                sp.satsType(),
-                sp.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
-                avrundTilHeltall(sp.grunnbeløp()).longValue(),
-                avrundTilHeltall(sp.grunnbeløp().multiply(sp.grunnbeløpFaktor())).longValue(),
-                sp.antallBarn(),
-                sp.dagsatsBarnetillegg()
-            ));
-
-    }
-
     private ResultatFlaggDto lagResultatFlaggDto(
         LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTimeline,
         VurderAntallDagerResultat vurderAntallDagerResultat,
@@ -148,6 +130,24 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             høySats,
             varierendeSats,
             oppnårMaksAlder);
+    }
+
+    private static LocalDateSegment<GrunnlagOgTilkjentYtelse> sammenstillGrunnlagOgTilkjentYtelse(
+        LocalDateInterval di, LocalDateSegment<DagsatsOgUtbetalingsgrad> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
+        var dg = lhs.getValue();
+        var sp = rhs.getValue();
+        return new LocalDateSegment<>(di,
+            new GrunnlagOgTilkjentYtelse(
+                dg.dagsats(),
+                avrundTilHeltall(dg.utbetalingsgrad()),
+                sp.satsType(),
+                sp.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
+                avrundTilHeltall(sp.grunnbeløp()).longValue(),
+                avrundTilHeltall(sp.grunnbeløp().multiply(sp.grunnbeløpFaktor())).longValue(),
+                sp.antallBarn(),
+                sp.dagsatsBarnetillegg()
+            ));
+
     }
 
     private static Set<GbeløpPeriodeDto> lagGbeløpPerioderDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTimeline) {
