@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
@@ -63,14 +63,14 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         Long behandlingId = behandling.getId();
-        var tilkjentYtelseTidslinje =
-            tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId);
+        var tilkjentYtelseTidslinje = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
 
         var grunnlagOgTilkjentYtelseTidslinje = tilkjentYtelseTidslinje
-            .intersection(ungdomsytelseGrunnlag.getSatsTidslinje(), sammenstillGrunnlagOgTilkjentYtelse())
+            .intersection(ungdomsytelseGrunnlag.getSatsTidslinje(),
+                InnvilgelseInnholdBygger::sammenstillGrunnlagOgTilkjentYtelse)
             .compress();
 
         var tilkjentePerioder = lagTilkjentePerioderDto(grunnlagOgTilkjentYtelseTidslinje);
@@ -94,6 +94,24 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
                 tilkjentePerioder,
                 gBeløpPerioder,
                 satser));
+    }
+
+    private static LocalDateSegment<GrunnlagOgTilkjentYtelse> sammenstillGrunnlagOgTilkjentYtelse(
+        LocalDateInterval di, LocalDateSegment<DagsatsOgUtbetalingsgrad> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
+        var dg = lhs.getValue();
+        var sp = rhs.getValue();
+        return new LocalDateSegment<>(di,
+            new GrunnlagOgTilkjentYtelse(
+                dg.dagsats(),
+                avrundTilHeltall(dg.utbetalingsgrad()),
+                sp.satsType(),
+                sp.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
+                avrundTilHeltall(sp.grunnbeløp()).longValue(),
+                avrundTilHeltall(sp.grunnbeløp().multiply(sp.grunnbeløpFaktor())).longValue(),
+                sp.antallBarn(),
+                sp.dagsatsBarnetillegg()
+            ));
+
     }
 
     private ResultatFlaggDto lagResultatFlaggDto(
@@ -170,25 +188,6 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             .map(it ->
                 new TilkjentPeriodeDto(new PeriodeDto(it.getFom(), it.getTom()), it.getValue()))
             .toList();
-    }
-
-    private static LocalDateSegmentCombinator<DagsatsOgUtbetalingsgrad, UngdomsytelseSatser, GrunnlagOgTilkjentYtelse> sammenstillGrunnlagOgTilkjentYtelse() {
-        return (di, lhs, rhs) -> {
-            var dg = lhs.getValue();
-            var sp = rhs.getValue();
-            return new LocalDateSegment<>(di,
-                new GrunnlagOgTilkjentYtelse(
-                    dg.dagsats(),
-                    avrundTilHeltall(dg.utbetalingsgrad()),
-                    sp.satsType(),
-                    sp.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
-                    avrundTilHeltall(sp.grunnbeløp()).longValue(),
-                    avrundTilHeltall(sp.grunnbeløp().multiply(sp.grunnbeløpFaktor())).longValue(),
-                    sp.antallBarn(),
-                    sp.dagsatsBarnetillegg()
-                ));
-
-        };
     }
 
     private static BigDecimal avrundTilHeltall(BigDecimal decimal) {
