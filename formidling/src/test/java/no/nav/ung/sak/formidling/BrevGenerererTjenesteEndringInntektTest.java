@@ -90,7 +90,8 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
-        EndringInnholdBygger endringInnholdBygger =
+
+        var endringInnholdBygger =
             new EndringInnholdBygger(tilkjentYtelseRepository,
                 new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste),
                 ungdomsytelseGrunnlagRepository);
@@ -99,7 +100,9 @@ class BrevGenerererTjenesteEndringInntektTest {
                 new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
                 repositoryProvider.getVilkårResultatRepository(),
                 new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository);
+
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
+
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
@@ -111,7 +114,6 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     @Test()
     @DisplayName("Verifiserer faste tekster og mottaker")
-    //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
     void skalHaAlleStandardtekster() {
         UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
         var behandling = lagScenario(ungTestscenario);
@@ -120,23 +122,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        assertThatHtml(brevtekst).containsTextsOnceInSequence(
-            BrevUtils.brevDatoString(LocalDate.now()), //vedtaksdato
-            "Til: " + ungTestscenario.navn(),
-            "Fødselsnummer: " + fnr,
-            "Du har rett til å klage",
-            "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage",
-            "Du har rett til innsyn",
-            "Du kan se dokumentene i saken din ved å logge deg inn på nav.no",
-            "Trenger du mer informasjon?",
-            "Med vennlig hilsen",
-            "Nav Arbeid og ytelser"
-        ).containsHtmlOnceInSequence(
-            "<h2>Du har rett til å klage</h2>",
-            "<h2>Du har rett til innsyn</h2>",
-            "<h2>Trenger du mer informasjon?</h2>"
-        );
-
+        VedtaksbrevStandardTekstVerifiserer.verifiserStandardVedtaksbrevTekster(brevtekst, fnr, ungTestscenario);
 
     }
 
@@ -171,32 +157,6 @@ class BrevGenerererTjenesteEndringInntektTest {
         );
 
     }
-
-    @DisplayName("Avslagsbrev ved ny inntekt som fører til 0 utbetaling")
-    //TODO
-    void avslagEndring() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
-
-        var behandling = lagScenario(ungTestGrunnlag);
-
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
-
-        var brevtekst = generertBrev.dokument().html();
-
-        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
-            "<h1>Nav har endret din ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
-            "Til: " + ungTestGrunnlag.navn(),
-            "Fødselsnummer: " + fnr,
-            "Du har meldt inn inntekt på 10 000 kroner for perioden 1. desember 2024 til 31. desember 2024.",
-            "Det medfører at du får 0 kr utbetalt i ungdomsytelse",
-            "Vedtaket er gjort etter folketrygdloven § X-Y."
-        );
-
-    }
-
 
     @Test
     void pdfStrukturTest() throws IOException {
