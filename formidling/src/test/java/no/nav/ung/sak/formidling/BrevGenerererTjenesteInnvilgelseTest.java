@@ -87,27 +87,37 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
     @NotNull
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);;
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        ;
         InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
             ungdomsytelseGrunnlagRepository,
             ungdomsprogramPeriodeTjeneste,
             tilkjentYtelseUtleder,
             personopplysningRepository);
+
+        var ungdomsytelseSøknadsperiodeTjeneste =
+            new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
+
+        DetaljertResultatUtlederImpl detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
+            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
+            repositoryProvider.getVilkårResultatRepository(),
+            ungdomsytelseSøknadsperiodeTjeneste, tilkjentYtelseRepository);
+
+        VedtaksbrevRegler vedtaksbrevRegler = new VedtaksbrevRegler(
+            repositoryProvider.getBehandlingRepository(), new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger),
+            detaljertResultatUtleder);
+
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
             personopplysningRepository,
-            new DetaljertResultatUtlederImpl(
-                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
-                repositoryProvider.getVilkårResultatRepository(),
-                new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository),
-            new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger));
+            vedtaksbrevRegler);
     }
 
     @Test()
     @DisplayName("Verifiserer faste tekster og mottaker")
-    //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
+        //Vurder å lage gjenbrukbar assertions som sjekker alle standardtekster og mottaker
     void skalHaAlleStandardtekster() {
         TestScenarioBuilder scenarioBuilder = BrevScenarioer
             .lagAvsluttetStandardBehandling(lagUngTestRepositories());
@@ -219,7 +229,8 @@ class BrevGenerererTjenesteInnvilgelseTest {
         ).doesNotContainText(
             "636",
             "under 25 år"
-        );;
+        );
+        ;
     }
 
     //dekker flere dagsatser også

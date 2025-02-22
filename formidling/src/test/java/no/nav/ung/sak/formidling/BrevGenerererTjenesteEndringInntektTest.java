@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -32,6 +33,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
@@ -93,16 +95,18 @@ class BrevGenerererTjenesteEndringInntektTest {
                 new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste),
                 ungdomsytelseGrunnlagRepository);
 
+        var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
+                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
+                repositoryProvider.getVilkårResultatRepository(),
+                new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository);
+        Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
             personopplysningRepository,
-            new DetaljertResultatUtlederImpl(
-                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
-                repositoryProvider.getVilkårResultatRepository(),
-                new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository),
-            new UnitTestLookupInstanceImpl<>(endringInnholdBygger));
+                new VedtaksbrevRegler(
+                        repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
     }
 
     @Test()

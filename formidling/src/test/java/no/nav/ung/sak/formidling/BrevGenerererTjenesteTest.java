@@ -89,10 +89,10 @@ class BrevGenerererTjenesteTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
-
-            new DetaljertResultatUtlederFake(
-                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> new DetaljertResultat(Set.of(DetaljertResultatType.INNVILGET_NY_PERIODE)))),
-            new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger));
+            new VedtaksbrevRegler(
+                repositoryProvider.getBehandlingRepository(),
+                new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger), new DetaljertResultatUtlederFake(
+                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> new DetaljertResultat(Set.of(DetaljertResultatType.INNVILGET_NY_PERIODE))))));
 
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
