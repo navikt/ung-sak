@@ -40,6 +40,7 @@ public class ApplicationConfig extends ResourceConfig {
     }
 
     public ApplicationConfig() {
+        register(DynamicJacksonJsonProvider.class); // Denne må registrerast før anna OpenAPI oppsett for å fungere.
         final var resolvedOpenAPI = resolveOpenAPI();
         register(new no.nav.openapi.spec.utils.openapi.OpenApiResource(resolvedOpenAPI));
 
@@ -48,7 +49,6 @@ public class ApplicationConfig extends ResourceConfig {
         registerClasses(new LinkedHashSet<>(new RestImplementationClasses().getImplementationClasses()));
 
         register(ObjectMapperResolver.class);
-        register(DynamicJacksonJsonProvider.class);
 
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
         register(CacheControlFeature.class);
