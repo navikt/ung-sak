@@ -9,10 +9,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -47,7 +44,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     @Override
     public LocalDateTimeline<DetaljertResultat> utledDetaljertResultat(Behandling behandling) {
 
-        var perioderTilVurdering = bestemPeriodeTilVurdering(behandling);
+        var perioderTilVurdering = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId());
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
@@ -81,36 +78,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             } else {
                 resultater.add(DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT);
             }
-        } else if (årsak.equals(Collections.singleton(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))) {
+        } else if (årsak.equals(Collections.singleton(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE))) {
             resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
         } else {
             // Innvilgelse men uten søknad/endring fra bruker - spisse dette mer
             resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
         }
-    }
-
-    private LocalDateTimeline<Set<BehandlingÅrsakType>> bestemPeriodeTilVurdering(Behandling behandling) {
-        var triggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId());
-
-        if (behandling.getType() == BehandlingType.FØRSTEGANGSSØKNAD) {
-            var programTidslinje = new LocalDateTimeline<>(vilkårResultatRepository
-                .hentHvisEksisterer(behandling.getId())
-                .flatMap(it -> it.getVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET))
-                .orElseThrow(() -> new IllegalStateException("Mangler ungdomsprogram vilkåret"))
-                .getPerioder().stream().map(vilkårPeriode -> new LocalDateSegment<>(vilkårPeriode.getPeriode().toLocalDateInterval(), true))
-                .toList());
-
-            var søknadsperiodeTidslinje = ungdomsytelseSøknadsperiodeTjeneste.utledTidslinje(behandling.getId());
-
-            return søknadsperiodeTidslinje
-                // Henter årsakene fra trigger da trigger kan gå til uendelig, men periodene fra hentes fra søknad
-                .combine(triggerTidslinje, StandardCombinators::rightOnly, JoinStyle.LEFT_JOIN)
-                // Joiner med ungdomsprogramvilkåret slik det er gjort i VilkårsperioderTilVurderningTjeneste
-                .crossJoin(programTidslinje, StandardCombinators::leftOnly);
-
-        }
-
-        return triggerTidslinje;
     }
 
 }

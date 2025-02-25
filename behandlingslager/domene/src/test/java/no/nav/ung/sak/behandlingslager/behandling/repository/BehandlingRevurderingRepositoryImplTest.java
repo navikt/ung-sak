@@ -83,7 +83,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         revurderingsBehandling = behandlingRepository.hentBehandling(revurderingsBehandling.getId());
 
         Behandling nyRevurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)).build();
         behandlingRepository.lagreOgClear(nyRevurderingsBehandling, behandlingRepository.taSkriveLås(nyRevurderingsBehandling));
 
         nyRevurderingsBehandling = behandlingRepository.hentBehandling(nyRevurderingsBehandling.getId());
@@ -111,7 +111,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         Behandling revurderingsBehandling = opprettOgLagreRevurderingMedBehandlingÅrsak();
 
         Behandling nyRevurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)).build();
         behandlingRepository.lagreOgClear(nyRevurderingsBehandling, behandlingRepository.taSkriveLås(nyRevurderingsBehandling));
 
         nyRevurderingsBehandling = behandlingRepository.hentBehandling(nyRevurderingsBehandling.getId());

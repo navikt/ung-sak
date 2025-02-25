@@ -97,7 +97,7 @@ class BrevGenerererTjenesteEndringInntektTest {
                 ungdomsytelseGrunnlagRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
+                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
                 repositoryProvider.getVilkårResultatRepository(),
                 new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository);
 

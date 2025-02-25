@@ -38,7 +38,7 @@ class ProsessTriggerPeriodeUtlederTest {
     void setUp() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandlingId = scenario.lagre(behandlingRepositoryProvider).getId();
-        prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository);
+        prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, null);
     }
 
     @Test

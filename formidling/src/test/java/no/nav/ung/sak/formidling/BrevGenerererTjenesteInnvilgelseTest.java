@@ -99,7 +99,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
             new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
 
         DetaljertResultatUtlederImpl detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository),
+            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste),
             repositoryProvider.getVilkårResultatRepository(),
             ungdomsytelseSøknadsperiodeTjeneste, tilkjentYtelseRepository);
 

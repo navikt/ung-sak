@@ -57,6 +57,7 @@ public class UngdomsprogramPeriodeTjeneste {
             .filterValue(v -> v);
     }
 
+
     /**
      * Lager tidslinje for perioder der bruker deltar i ungdomsprogram basert på verdier fra et oppgitt periodegrunnlag
      *

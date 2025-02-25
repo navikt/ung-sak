@@ -20,7 +20,6 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 
@@ -75,7 +74,7 @@ class ForeslåVedtakTjeneste {
         if (aksjonspunktDefinisjoner.isEmpty()
             && behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
             && behandling.erRevurdering()
-            && behandling.getBehandlingÅrsakerTyper().stream().allMatch(årsak -> årsak.equals(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))) {
+            && behandling.getBehandlingÅrsakerTyper().stream().allMatch(årsak -> årsak.equals(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE))) {
             logger.info("Foreslår vedtak uten aksjonspunkter");
         }
 
