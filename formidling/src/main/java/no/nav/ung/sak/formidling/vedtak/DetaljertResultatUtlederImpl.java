@@ -11,18 +11,14 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 
 @Dependent
 public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     public DetaljertResultatUtlederImpl() {
@@ -31,13 +27,9 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     @Inject
     public DetaljertResultatUtlederImpl(
         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
-        VilkårResultatRepository vilkårResultatRepository,
-        UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
         TilkjentYtelseRepository tilkjentYtelseRepository) {
 
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
-        this.vilkårResultatRepository = vilkårResultatRepository;
-        this.ungdomsytelseSøknadsperiodeTjeneste = ungdomsytelseSøknadsperiodeTjeneste;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 

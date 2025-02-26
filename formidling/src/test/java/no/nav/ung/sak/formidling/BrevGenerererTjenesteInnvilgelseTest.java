@@ -100,8 +100,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         DetaljertResultatUtlederImpl detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste),
-            repositoryProvider.getVilkårResultatRepository(),
-            ungdomsytelseSøknadsperiodeTjeneste, tilkjentYtelseRepository);
+            tilkjentYtelseRepository);
 
         VedtaksbrevRegler vedtaksbrevRegler = new VedtaksbrevRegler(
             repositoryProvider.getBehandlingRepository(), new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger),

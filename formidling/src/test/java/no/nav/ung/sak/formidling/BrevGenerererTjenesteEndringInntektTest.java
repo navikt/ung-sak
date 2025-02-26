@@ -98,8 +98,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
                 new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-                repositoryProvider.getVilkårResultatRepository(),
-                new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()), tilkjentYtelseRepository);
+                tilkjentYtelseRepository);
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
 
