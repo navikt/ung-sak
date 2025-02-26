@@ -1,4 +1,13 @@
-package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
+package no.nav.ung.sak.ytelse;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -6,18 +15,8 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.behandling.steg.uttak.regler.InntektType;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
 
 @Dependent
 public class RapportertInntektMapper {
@@ -101,7 +100,7 @@ public class RapportertInntektMapper {
         }
 
         @Override
-        public int compareTo(@NotNull InntektForMottattidspunkt o) {
+        public int compareTo(InntektForMottattidspunkt o) {
             return this.mottattTidspunkt.compareTo(o.mottattTidspunkt);
         }
     }

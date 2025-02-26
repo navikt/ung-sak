@@ -16,6 +16,6 @@ public class UngdomsytelseStartdatoGrunnlagBehandlingÅrsakUtleder implements Be
 
     @Override
     public Set<BehandlingÅrsakType> utledBehandlingÅrsaker(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        return Set.of(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
+        return Set.of(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE);
     }
 }

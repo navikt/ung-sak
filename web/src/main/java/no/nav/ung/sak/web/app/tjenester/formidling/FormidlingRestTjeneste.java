@@ -29,17 +29,16 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.formidling.VedtaksbrevRegelResulat;
+import no.nav.ung.sak.formidling.VedtaksbrevRegler;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 
 @Path("")
 @ApplicationScoped
@@ -48,7 +47,7 @@ import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 public class FormidlingRestTjeneste {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
+    private VedtaksbrevRegler vedtaksbrevRegler;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
@@ -57,9 +56,9 @@ public class FormidlingRestTjeneste {
     @Inject
     public FormidlingRestTjeneste(
         BrevGenerererTjeneste brevGenerererTjeneste,
-        TilkjentYtelseUtleder tilkjentYtelseUtleder) {
+        VedtaksbrevRegler vedtaksbrevRegler) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
-        this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
+        this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
 
     FormidlingRestTjeneste() {
@@ -75,10 +74,9 @@ public class FormidlingRestTjeneste {
     public VedtaksbrevOperasjonerDto tilgjengeligeVedtaksbrev(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
 
-        LocalDateTimeline<DagsatsOgUtbetalingsgrad> tilkjentYtelseTidslinje =
-            tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(dto.getBehandlingId());
-        if (tilkjentYtelseTidslinje.isEmpty()) {
-            LOG.warn("Behandling har ingen tilkjent ytelse. Støtter ikke vedtaksbrev for avslag foreløpig.");
+        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(dto.getId()));
+
+        if (resultat.bygger() == null) {
             return VedtaksbrevOperasjonerDto.ingenBrev();
         }
 

@@ -1,5 +1,15 @@
 package no.nav.ung.sak.perioder;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -11,15 +21,6 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -37,7 +38,7 @@ class ProsessTriggerPeriodeUtlederTest {
     void setUp() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandlingId = scenario.lagre(behandlingRepositoryProvider).getId();
-        prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository);
+        prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, null);
     }
 
     @Test
@@ -49,7 +50,7 @@ class ProsessTriggerPeriodeUtlederTest {
     @Test
     void skal_ikke_finne_perioder_for_ikke_relevant_trigger() {
         // Arrange
-        prosessTriggereRepository.leggTil(behandlingId, Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()))));
+        prosessTriggereRepository.leggTil(behandlingId, Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRET_FORDELING, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()))));
         // Act
         final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
@@ -65,7 +66,7 @@ class ProsessTriggerPeriodeUtlederTest {
         // Act
         final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
-        assertThat(resultat).isEqualTo(new LocalDateTimeline<>(fom, tom, true));
+        assertThat(resultat).isEqualTo(new LocalDateTimeline<>(fom, tom, Set.of(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)));
     }
 
     @Test
@@ -80,7 +81,7 @@ class ProsessTriggerPeriodeUtlederTest {
         // Act
         final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
-        assertThat(resultat).isEqualTo(new LocalDateTimeline<>(fom, tom, true));
+        assertThat(resultat).isEqualTo(new LocalDateTimeline<>(fom, tom, Set.of(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)));
     }
 
     @Test
@@ -97,7 +98,7 @@ class ProsessTriggerPeriodeUtlederTest {
         // Act
         final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         // Assert
-        final var forventetResultat = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true), new LocalDateSegment<>(fom2, tom2, true)));
+        final var forventetResultat = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, Set.of(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)), new LocalDateSegment<>(fom2, tom2, Set.of(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS))));
         assertThat(resultat).isEqualTo(forventetResultat);
     }
 

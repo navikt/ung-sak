@@ -1,0 +1,22 @@
+{{#> felles/base}}
+
+
+    {{#> felles/seksjon/hoved }}
+        <h1>Nav har endret din ungdomsytelse</h1>
+        {{#with rapportertInntekt}}
+            <p>
+                Du har meldt inn inntekt på {{> felles/beløp rapportertInntekt}} {{> felles/periode-inline periode}}.
+                Nav har derfor redusert utbetalingen din for neste perioden
+                til {{> felles/beløp utbetalingBeløp}}.
+            </p>
+            <p>Nav reduserer utbetalt beløp med {{reduksjonssats}} prosent av innmeldt inntekt. Dette tilsvarer en
+                reduksjon på {{> felles/beløp reduksjonBeløp}}. Dagsatsen blir redusert fra {{> felles/beløp dagsats}}
+                til {{> felles/beløp redusertDagsats}}. </p>
+            <p></p>
+            <p>Vedtaket er gjort etter folketrygdloven § X-Y.</p>
+        {{/with}}
+    {{/felles/seksjon/hoved}}
+
+    {{> felles/footer/footer-vedtak }}
+
+{{/felles/base}}

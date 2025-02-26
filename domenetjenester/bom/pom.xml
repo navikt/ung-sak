@@ -28,6 +28,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
+            <artifactId>arbeidsforhold-domene</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>inngangsvilkar</artifactId>
         </dependency>
         <dependency>

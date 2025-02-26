@@ -1,6 +1,6 @@
 package no.nav.ung.sak.mottak.dokumentmottak;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
+import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -9,8 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,10 +20,10 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -34,7 +32,9 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -93,7 +93,7 @@ class HåndterMottattDokumentTaskTest {
 
         when(dokumentValidatorProvider.finnValidator(Brevkode.UNGDOMSYTELSE_SOKNAD)).thenReturn(dokumentValidator);
 
-        when(dokumentmottaker.getTriggere(ArgumentMatchers.anyList())).thenReturn(List.of(new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), RE_ENDRING_FRA_BRUKER)));
+        when(dokumentmottaker.getTriggere(ArgumentMatchers.anyList())).thenReturn(List.of(new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), NY_SØKT_PROGRAM_PERIODE)));
 
         innhentDokumentTjeneste = new InnhentDokumentTjeneste(
             new UnitTestLookupInstanceImpl<>(dokumentmottaker),

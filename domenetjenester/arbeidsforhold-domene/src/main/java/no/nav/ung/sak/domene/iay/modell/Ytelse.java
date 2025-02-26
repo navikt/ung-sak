@@ -1,5 +1,13 @@
 package no.nav.ung.sak.domene.iay.modell;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
@@ -8,14 +16,6 @@ import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Saksnummer;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Ytelse implements IndexKey {
 

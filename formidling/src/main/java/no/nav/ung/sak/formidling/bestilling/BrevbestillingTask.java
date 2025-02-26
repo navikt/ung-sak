@@ -78,13 +78,12 @@ public class BrevbestillingTask extends BehandlingProsessTask {
             return;
         }
 
-
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer().getVerdi();
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
                 saksnummer,
-                DokumentMalType.INNVILGELSE_DOK,
+                generertBrev.malType(),
                 new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
 
         var behandlingBestilling = new BehandlingBrevbestillingEntitet(
@@ -94,9 +93,6 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         );
 
         LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
-
-
-
 
         brevbestillingRepository.lagreForBehandling(behandlingBestilling);
 
@@ -179,6 +175,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         String fraMal = switch (dokumentMalType) {
             case HENLEGG_BEHANDLING_DOK -> "Henleggelse";
             case INNVILGELSE_DOK -> "Innvilgelse";
+            case ENDRING_DOK -> "Endring";
             case OPPHØR_DOK -> "Opphør";
             case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";

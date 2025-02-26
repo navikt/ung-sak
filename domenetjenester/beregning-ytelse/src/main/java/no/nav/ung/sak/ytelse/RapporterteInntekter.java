@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
+package no.nav.ung.sak.ytelse;
 
 import java.util.Objects;
 import java.util.Set;
