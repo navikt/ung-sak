@@ -17,3 +17,5 @@ COPY formidling/target/pdfgen /app/pdfgen
 # Application Container (Jetty)
 COPY web/target/lib/no.nav.ung.sak*.jar /app/lib/
 COPY web/target/app.jar /app/
+
+EXPOSE 8901
