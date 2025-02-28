@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling;
 
+import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
+import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
@@ -88,8 +90,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
 
-        var endringInnholdBygger =
-            new EndringHøySatsInnholdBygger();
+        var endringInnholdBygger = new EndringHøySatsInnholdBygger(ungdomsytelseGrunnlagRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
                 new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
@@ -117,6 +118,29 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         var brevtekst = generertBrev.dokument().html();
 
         VedtaksbrevStandardTekstVerifiserer.verifiserStandardVedtaksbrevTekster(brevtekst, fnr, ungTestscenario);
+
+    }
+
+    @DisplayName("Endringsbrev for overgang til høy sats")
+    @Test
+    void standardEndringHøySats() {
+        LocalDate fødselsdato = LocalDate.of(1999, 3, 25);
+        var ungTestGrunnlag = BrevScenarioer.endring25År(fødselsdato);
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_HØY_SATS);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
+            "<h1>Nav har endret din ungdomsytelse</h1>"
+        ).containsTextsOnceInSequence(
+            "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år.",
+            "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år.",
+            "Vedtaket er gjort etter folketrygdloven § X-Y."
+        );
 
     }
 

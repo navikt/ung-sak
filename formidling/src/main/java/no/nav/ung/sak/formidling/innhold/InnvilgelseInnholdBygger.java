@@ -134,18 +134,18 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private static LocalDateSegment<GrunnlagOgTilkjentYtelse> sammenstillGrunnlagOgTilkjentYtelse(
         LocalDateInterval di, LocalDateSegment<DagsatsOgUtbetalingsgrad> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
-        var dg = lhs.getValue();
-        var sp = rhs.getValue();
+        var dagsatsOgUtbetalingsgrad = lhs.getValue();
+        var satsPerioder = rhs.getValue();
         return new LocalDateSegment<>(di,
             new GrunnlagOgTilkjentYtelse(
-                dg.dagsats(),
-                avrundTilHeltall(dg.utbetalingsgrad()),
-                sp.satsType(),
-                sp.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
-                avrundTilHeltall(sp.grunnbeløp()).longValue(),
-                avrundTilHeltall(sp.grunnbeløp().multiply(sp.grunnbeløpFaktor())).longValue(),
-                sp.antallBarn(),
-                sp.dagsatsBarnetillegg()
+                dagsatsOgUtbetalingsgrad.dagsats(),
+                avrundTilHeltall(dagsatsOgUtbetalingsgrad.utbetalingsgrad()),
+                satsPerioder.satsType(),
+                satsPerioder.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
+                avrundTilHeltall(satsPerioder.grunnbeløp()).longValue(),
+                avrundTilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())).longValue(),
+                satsPerioder.antallBarn(),
+                satsPerioder.dagsatsBarnetillegg()
             ));
 
     }
