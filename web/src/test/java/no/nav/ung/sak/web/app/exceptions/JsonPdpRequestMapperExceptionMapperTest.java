@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 
 import no.nav.ung.sak.kontrakt.FeilDto;
 
-public class JsonMappingExceptionMapperTest {
+public class JsonPdpRequestMapperExceptionMapperTest {
 
     @Test
     public void skal_mappe_InvalidTypeIdException() throws Exception {
