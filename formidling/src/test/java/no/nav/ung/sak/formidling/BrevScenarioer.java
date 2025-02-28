@@ -31,7 +31,7 @@ import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -222,7 +222,7 @@ public class BrevScenarioer {
 
                 var uredusertBeløp = lhs.getValue().dagsats().multiply(BigDecimal.valueOf(antallVirkedager));
                 var rapportertInntekt = rhs == null ? BigDecimal.ZERO : rhs.getValue();
-                var reduksjon = rapportertInntekt.multiply(EndringInnholdBygger.REDUKSJONS_FAKTOR);
+                var reduksjon = rapportertInntekt.multiply(EndringRapportertInntektInnholdBygger.REDUKSJONS_FAKTOR);
                 var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
                 var dagsats = antallVirkedager == 0 ? BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, RoundingMode.HALF_UP);
                 var utbetalingsgrad = redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(uredusertBeløp, 0, RoundingMode.HALF_UP).intValue();

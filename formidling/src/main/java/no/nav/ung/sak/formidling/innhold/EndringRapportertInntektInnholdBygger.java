@@ -29,7 +29,7 @@ import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
 @Dependent
-public class EndringInnholdBygger implements VedtaksbrevInnholdBygger {
+public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private RapportertInntektMapper rapportertInntektMapper;
@@ -38,10 +38,10 @@ public class EndringInnholdBygger implements VedtaksbrevInnholdBygger {
     //TODO hente fra et annet sted?
     public static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
     private static final int REDUSJON_PROSENT = REDUKSJONS_FAKTOR.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
-    private static final Logger LOG = LoggerFactory.getLogger(EndringInnholdBygger.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EndringRapportertInntektInnholdBygger.class);
 
     @Inject
-    public EndringInnholdBygger(
+    public EndringRapportertInntektInnholdBygger(
         TilkjentYtelseRepository tilkjentYtelseRepository,
         RapportertInntektMapper rapportertInntektMapper,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
@@ -50,7 +50,7 @@ public class EndringInnholdBygger implements VedtaksbrevInnholdBygger {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
-    public EndringInnholdBygger() {
+    public EndringRapportertInntektInnholdBygger() {
     }
 
     @Override
@@ -71,12 +71,12 @@ public class EndringInnholdBygger implements VedtaksbrevInnholdBygger {
             .getSatsTidslinje();
 
         var satsOgInntektTidslinje = rapporteInntekterTidslinje.combine(satsTidslinje,
-                EndringInnholdBygger::lagSatsOgRapportertInntektTidslinje,
+                EndringRapportertInntektInnholdBygger::lagSatsOgRapportertInntektTidslinje,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
 
         var dtoTidslinje = relevantTilkjentYtelse.combine(satsOgInntektTidslinje,
-                EndringInnholdBygger::mapTilTemplateDto,
+                EndringRapportertInntektInnholdBygger::mapTilTemplateDto,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         if (dtoTidslinje.size() > 1) {
