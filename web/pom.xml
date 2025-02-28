@@ -327,6 +327,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>mottak</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.sif.abac</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

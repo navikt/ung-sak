@@ -84,6 +84,8 @@ spec:
           - "NAVident"
   accessPolicy:
     outbound:
+      rules:
+        - application : sif-abac-pdp
       external:
         - host: "k9-abakus.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
@@ -93,24 +95,26 @@ spec:
         - host: "saf.prod-fss-pub.nais.io"
         - host: "norg2.prod-fss-pub.nais.io"
         - host: "dokarkiv.prod-fss-pub.nais.io"
+        - host: "k9-fordel.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: ung-sak
         - application: k9-los-api
           namespace: k9saksbehandling
-          cluster: prod-gcp
+          cluster: prod-fss
         - application: k9-fordel
           namespace: k9saksbehandling
-          cluster: prod-gcp
+          cluster: prod-fss
         - application: k9-tilbake
           namespace: k9saksbehandling
-          cluster: prod-gcp
+          cluster: prod-fss
         - application: k9-klage
           namespace: k9saksbehandling
-          cluster: prod-gcp
+          cluster: prod-fss
         - application: k9-abakus
           namespace: k9saksbehandling
-          cluster: prod-gcp
+          cluster: prod-fss
+        - application: sif-abac-pdp
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -224,7 +228,10 @@ spec:
       value : https://pdl-pip-api.prod-fss-pub.nais.io/api/v1/person
     - name : PDL_PIP_SCOPE
       value : api://prod-fss.pdl.pdl-pip-api/.default
-
+    - name: SIF_ABAC_PDP_SCOPE
+      value: api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default
+    - name: SIF_ABAC_PDP_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung/saksinformasjon
 
     # Saf
     - name: SAF_BASE_URL

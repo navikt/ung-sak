@@ -84,6 +84,8 @@ spec:
           - "NAVident"
   accessPolicy:
     outbound:
+      rules:
+        - application: sif-abac-pdp
       external:
         - host: "k9-abakus.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
@@ -113,6 +115,7 @@ spec:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: dev-fss
+        - application: sif-abac-pdp
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -239,6 +242,10 @@ spec:
       value : https://pdl-pip-api.dev-fss-pub.nais.io/api/v1/person
     - name : PDL_PIP_SCOPE
       value : api://dev-fss.pdl.pdl-pip-api/.default
+    - name : SIF_ABAC_PDP_SCOPE
+      value : api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
+    - name : SIF_ABAC_PDP_URL
+      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung/saksinformasjon
 
     # Saf
     - name: SAF_BASE_URL
