@@ -146,9 +146,9 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har endret din ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
+        ).containsSentencesOnceInSequence(
             "Du har meldt inn inntekt på 10 000 kroner fra 1. desember 2024 til 31. desember 2024.",
-            "Nav har derfor redusert utbetalingen din for neste perioden til 7 393 kroner",
+            "Nav har derfor redusert utbetalingen din for neste perioden til 7 393 kroner.",
             "Nav reduserer utbetalt beløp med 66 prosent av innmeldt inntekt.",
             "Dette tilsvarer en reduksjon på 6 600 kroner.",
             "Dagsatsen blir redusert fra 636 kroner til 336 kroner.",

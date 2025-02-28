@@ -51,6 +51,18 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
         return this;
     }
 
+    public HtmlAssert containsSentencesOnceInSequence(CharSequence... text) {
+        CharSequence[] modifiedText = Arrays.stream(text)
+            .map(t -> {
+                if (!t.toString().endsWith(".")) {
+                    throw new IllegalArgumentException("Alle setninger må slutte med punktum. Setningen: \"" + t + "\" mangler punktum.");
+                }
+                return " " + t + " ";
+            })
+            .toArray(CharSequence[]::new);
+        containsTextsOnceInSequence(modifiedText);
+        return this;
+    }
 
     public HtmlAssert containsHtmlOnceInSequence(CharSequence... html) {
         assertThatContainsOnceInSequence(actualHtmlTrimmed, html);

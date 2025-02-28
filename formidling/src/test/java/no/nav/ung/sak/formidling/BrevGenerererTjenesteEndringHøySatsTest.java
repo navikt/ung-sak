@@ -30,7 +30,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -64,7 +63,6 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private PersonopplysningRepository personopplysningRepository;
-    private AbakusInMemoryInntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste;
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
@@ -83,7 +81,6 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
 
-        abakusInMemoryInntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         brevGenerererTjeneste = lagBrevGenererTjeneste(System.getenv("LAGRE_PDF") == null);
     }
 
@@ -136,7 +133,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har endret din ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
+        ).containsSentencesOnceInSequence(
             "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år.",
             "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år.",
             "Vedtaket er gjort etter folketrygdloven § X-Y."
@@ -181,10 +178,6 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         UngTestRepositories repositories = lagUngTestRepositories();
         var behandling = scenarioBuilder.buildOgLagreMedUng(repositories);
 
-        abakusInMemoryInntektArbeidYtelseTjeneste.lagreOppgittOpptjening(
-            behandling.getId(),
-            ungTestscenario.abakusInntekt()
-        );
 
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
