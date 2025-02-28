@@ -97,8 +97,8 @@ class BrevGenerererTjenesteEndringInntektTest {
                 ungdomsytelseGrunnlagRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-                tilkjentYtelseRepository);
+            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
+            tilkjentYtelseRepository);
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
 
@@ -107,8 +107,8 @@ class BrevGenerererTjenesteEndringInntektTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
             personopplysningRepository,
-                new VedtaksbrevRegler(
-                        repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
+            new VedtaksbrevRegler(
+                repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
     }
 
     @Test()

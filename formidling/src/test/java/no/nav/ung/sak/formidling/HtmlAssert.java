@@ -2,7 +2,9 @@ package no.nav.ung.sak.formidling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.SoftAssertions;
@@ -52,15 +54,16 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
     }
 
     public HtmlAssert containsSentencesOnceInSequence(CharSequence... text) {
-        CharSequence[] modifiedText = Arrays.stream(text)
-            .map(t -> {
-                if (!t.toString().endsWith(".")) {
-                    throw new IllegalArgumentException("Alle setninger må slutte med punktum. Setningen: \"" + t + "\" mangler punktum.");
-                }
-                return " " + t + " ";
-            })
-            .toArray(CharSequence[]::new);
-        containsTextsOnceInSequence(modifiedText);
+        List<String> list = new ArrayList<>();
+        for (var charSequence : text) {
+            String input = charSequence.toString();
+            if (!input.endsWith(".")) {
+                throw new IllegalArgumentException("Alle setninger må slutte med punktum. Setningen: \"" + charSequence + "\" mangler punktum.");
+            }
+            String medSpace = input + " ";
+            list.add(medSpace);
+        }
+        containsTextsOnceInSequence(list.toArray(new CharSequence[0]));
         return this;
     }
 
