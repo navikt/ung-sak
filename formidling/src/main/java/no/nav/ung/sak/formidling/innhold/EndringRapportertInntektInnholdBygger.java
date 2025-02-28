@@ -20,8 +20,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.template.TemplateType;
-import no.nav.ung.sak.formidling.template.dto.EndringDto;
-import no.nav.ung.sak.formidling.template.dto.endring.EndringRapportertInntektDto;
+import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
@@ -83,9 +82,9 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             LOG.warn("Flere enn 1 periode, men kun første periode vil bli hensyntatt - brevet kan bli feil...");
         }
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT, new EndringDto(
+        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT,
             dtoTidslinje.stream().findFirst().orElseThrow().getValue()
-        ));
+        );
     }
 
     private static LocalDateSegment<OpprinnligSatsOgRapportertInntekt> lagSatsOgRapportertInntektTidslinje(

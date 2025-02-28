@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.template.dto.endring;
+package no.nav.ung.sak.formidling.template.dto;
 
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 
@@ -11,5 +11,5 @@ public record EndringRapportertInntektDto(
     long dagsats,
     long redusertDagsats
 
-) {
+) implements TemplateInnholdDto  {
 }

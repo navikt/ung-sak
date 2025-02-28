@@ -1,0 +1,15 @@
+{{#> felles/base}}
+
+    {{#> felles/seksjon/hoved }}
+        <h1>Nav har endret din ungdomsytelse</h1>
+        {{#with rapportertInntekt}}
+            <p>
+                Fra {{periode.fom}} får du ny dagsats på {{> felles/beløp nyDagsats}} fordi du fyller {{aldersgrense}} år.
+            </p>
+            <p>Nav utbetaler {{satsFaktor}} av grunnbeløp fra deltager er {{aldersgrense}}. </p>
+        {{/with}}
+    {{/felles/seksjon/hoved}}
+
+    {{> felles/footer/footer-vedtak }}
+
+{{/felles/base}}

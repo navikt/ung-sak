@@ -13,6 +13,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -67,7 +68,7 @@ public class VedtaksbrevRegler {
         } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT) || innholderBare(resultater, DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT)) {
             return innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get();
         } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
-            return null; //TODO lag scenrio for endring og bruk EndringHøySatsInnholdBygger
+            return innholdByggere.select(EndringHøySatsInnholdBygger.class).get();
         } else {
             return null;
         }

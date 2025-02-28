@@ -223,8 +223,8 @@ class BrevGenerererTjenesteInnvilgelseTest {
     @Test
     void lavOgHøySats() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var fødselsdato = LocalDate.of(1999, 5, 15); //Blir 26 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget26År(fom, fødselsdato);
+        var fødselsdato = LocalDate.of(2000, 5, 15); //Blir 25 etter 6 mnd/130 dager i programmet
+        var ungTestGrunnlag = BrevScenarioer.innvilget24År(fom, fødselsdato);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
