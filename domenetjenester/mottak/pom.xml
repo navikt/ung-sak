@@ -42,7 +42,15 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9</groupId>
+            <artifactId>soknad</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9</groupId>
             <artifactId>ettersendelse</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>oppgave-ungdomsytelse</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>

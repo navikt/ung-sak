@@ -4,6 +4,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,6 +35,10 @@ import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 public class InitierPerioderSteg implements BehandlingSteg {
 
+    /**
+     * Angir maksimalt antall tillatte dager mellom startdato for ungdomsprogrammet og startdato oppgitt i søknad
+     */
+    public static final int MAKS_GODKJENT_AVSTAND_TIL_STARTDATO = 56;
     private UngdomsprogramTjeneste ungdomsprogramTjeneste;
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseStartdatoRepository startdatoRepository;
@@ -90,13 +95,13 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private UngdomsytelseStartdatoer mapStartdatoerRelevantForBehandlingen(Behandling behandling, Set<JournalpostId> journalposterMottattIDenneBehandlingen,
                                                                            UngdomsytelseStartdatoGrunnlag grunnlag) {
 
-        List<LocalDate> gyldigeStartdatoer = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId())
+        List<LocalDate> startdatoerUngdomsprogram = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId())
             .getLocalDateIntervals().stream().map(it -> it.getFomDato()).toList();
 
         var relevantePerioder = grunnlag.getOppgitteStartdatoer()
             .getStartdatoer()
             .stream()
-            .filter(it -> gyldigeStartdatoer.contains(it.getStartdato())) // Filtrer ut søknader med startdato som ikke matcher ungdomsprogramperioden.
+            .filter(it -> startdatoerUngdomsprogram.stream().anyMatch(p ->  !p.isBefore(it.getStartdato()) && p.until(it.getStartdato().plusDays(1), ChronoUnit.DAYS) <= MAKS_GODKJENT_AVSTAND_TIL_STARTDATO)) // Filtrer ut søknader med startdato som ikke matcher ungdomsprogramperioden.
             .filter(it -> journalposterMottattIDenneBehandlingen.stream().anyMatch(at -> at.equals(it.getJournalpostId())))
             .collect(Collectors.toSet());
 
