@@ -11,7 +11,6 @@ import no.nav.k9.felles.sikkerhet.abac.AbacSporingslogg;
 import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
-import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 
 @Default
 @Alternative

@@ -4,12 +4,10 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.interceptor.Interceptor;
-
-import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.felles.log.sporingslogg.Sporingsdata;
 import no.nav.k9.felles.sikkerhet.abac.DefaultAbacSporingslogg;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
+import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 
 /**
  * Egen sporingslogg implementasjon for å utvide med egne felter.

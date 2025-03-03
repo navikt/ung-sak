@@ -217,18 +217,12 @@ spec:
       value: https://ung-deltakelse-opplyser.intern.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
-    - name : SKJERMET_PERSON_URL
-      value : https://skjermede-personer-pip.intern.dev.nav.no/skjermet
-    - name : SKJERMET_PERSON_SCOPE
-      value : api://prod-gcp.nom.skjermede-personer-pip/.default
-    - name : PDL_PIP_URL
-      value : https://pdl-pip-api.prod-fss-pub.nais.io/api/v1/person
-    - name : PDL_PIP_SCOPE
-      value : api://prod-fss.pdl.pdl-pip-api/.default
     - name: SIF_ABAC_PDP_SCOPE
       value: api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default
     - name: SIF_ABAC_PDP_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung/saksinformasjon
+    - name: NAV_ANSATT_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
 
     # Saf
     - name: SAF_BASE_URL

@@ -1,13 +1,13 @@
 package no.nav.ung.sak.web.server.abac;
 
 import io.swagger.v3.oas.annotations.Operation;
+import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
+import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.kontrakt.abac.PipDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.tilgangskontroll.api.AbacBehandlingStatus;
-import no.nav.ung.sak.tilgangskontroll.api.AbacFagsakStatus;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
