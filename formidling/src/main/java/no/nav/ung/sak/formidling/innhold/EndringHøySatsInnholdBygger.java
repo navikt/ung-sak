@@ -21,7 +21,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 @Dependent
 public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(EndringHøySatsInnholdBygger.class);
 
@@ -31,12 +31,12 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
-    public EndringHøySatsInnholdBygger() {
-    }
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
 
+        // Min. dato i resultattidslinjen er da deltager blir 25 år utledet av prosessTrigger
+        // via DetaljertResultatUtleder
         LocalDate satsendringsdato = resultatTidslinje.getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())

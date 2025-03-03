@@ -38,10 +38,10 @@ import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 @Dependent
 public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
-    private PersonopplysningRepository personopplysningRepository;
+    private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private final TilkjentYtelseUtleder tilkjentYtelseUtleder;
+    private final PersonopplysningRepository personopplysningRepository;
 
     @Inject
     public InnvilgelseInnholdBygger(
@@ -56,8 +56,6 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         this.personopplysningRepository = personopplysningRepository;
     }
 
-    public InnvilgelseInnholdBygger() {
-    }
 
     @WithSpan
     @Override

@@ -18,11 +18,8 @@ import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 @Dependent
 public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
-
-    public DetaljertResultatUtlederImpl() {
-    }
+    private final ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
     public DetaljertResultatUtlederImpl(

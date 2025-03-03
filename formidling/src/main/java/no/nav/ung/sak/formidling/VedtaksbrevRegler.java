@@ -24,10 +24,10 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 @Dependent
 public class VedtaksbrevRegler {
 
-    private BehandlingRepository behandlingRepository;
-    private Instance<VedtaksbrevInnholdBygger> innholdByggere;
-    private DetaljertResultatUtleder detaljertResultatUtleder;
-    private static Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
+    private final BehandlingRepository behandlingRepository;
+    private final Instance<VedtaksbrevInnholdBygger> innholdByggere;
+    private final DetaljertResultatUtleder detaljertResultatUtleder;
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
 
     @Inject
     public VedtaksbrevRegler(
@@ -37,9 +37,6 @@ public class VedtaksbrevRegler {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
-    }
-
-    public VedtaksbrevRegler() {
     }
 
     public VedtaksbrevRegelResulat kjør(Long id) {

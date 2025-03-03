@@ -48,22 +48,25 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
         return this;
     }
 
-    public HtmlAssert containsTextsOnceInSequence(CharSequence... text) {
+    public HtmlAssert containsTextsOnceInSequence(String... text) {
         assertThatContainsOnceInSequence(actualTextTrimmed, text);
         return this;
     }
 
-    public HtmlAssert containsSentencesOnceInSequence(CharSequence... text) {
+    /**
+     * Sjekker om alle text er setninger med punktum. Legger også på space etter siste punktum for å fange f.eks.
+     * feilaktig dobbel punktum
+     */
+    public HtmlAssert containsSentencesOnceInSequence(String... text) {
         List<String> list = new ArrayList<>();
-        for (var charSequence : text) {
-            String input = charSequence.toString();
-            if (!input.endsWith(".")) {
-                throw new IllegalArgumentException("Alle setninger må slutte med punktum. Setningen: \"" + charSequence + "\" mangler punktum.");
+        for (var linje : text) {
+            if (!linje.endsWith(".")) {
+                throw new IllegalArgumentException("Alle setninger må slutte med punktum. Setningen: \"" + linje + "\" mangler punktum.");
             }
-            String medSpace = input + " ";
+            String medSpace = linje + " ";
             list.add(medSpace);
         }
-        containsTextsOnceInSequence(list.toArray(new CharSequence[0]));
+        containsTextsOnceInSequence(list.toArray(new String[0]));
         return this;
     }
 
