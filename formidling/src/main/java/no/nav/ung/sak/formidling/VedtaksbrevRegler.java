@@ -13,7 +13,8 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
@@ -23,10 +24,10 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 @Dependent
 public class VedtaksbrevRegler {
 
-    private BehandlingRepository behandlingRepository;
-    private Instance<VedtaksbrevInnholdBygger> innholdByggere;
-    private DetaljertResultatUtleder detaljertResultatUtleder;
-    private static Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
+    private final BehandlingRepository behandlingRepository;
+    private final Instance<VedtaksbrevInnholdBygger> innholdByggere;
+    private final DetaljertResultatUtleder detaljertResultatUtleder;
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
 
     @Inject
     public VedtaksbrevRegler(
@@ -36,9 +37,6 @@ public class VedtaksbrevRegler {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
-    }
-
-    public VedtaksbrevRegler() {
     }
 
     public VedtaksbrevRegelResulat kjør(Long id) {
@@ -65,7 +63,9 @@ public class VedtaksbrevRegler {
         if (innholderBare(resultater, DetaljertResultatType.INNVILGET_NY_PERIODE)) {
             return innholdByggere.select(InnvilgelseInnholdBygger.class).get();
         } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT) || innholderBare(resultater, DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT)) {
-            return innholdByggere.select(EndringInnholdBygger.class).get();
+            return innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get();
+        } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
+            return innholdByggere.select(EndringHøySatsInnholdBygger.class).get();
         } else {
             return null;
         }

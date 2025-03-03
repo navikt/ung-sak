@@ -2,7 +2,9 @@ package no.nav.ung.sak.formidling;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.SoftAssertions;
@@ -46,11 +48,27 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
         return this;
     }
 
-    public HtmlAssert containsTextsOnceInSequence(CharSequence... text) {
+    public HtmlAssert containsTextsOnceInSequence(String... text) {
         assertThatContainsOnceInSequence(actualTextTrimmed, text);
         return this;
     }
 
+    /**
+     * Sjekker om alle text er setninger med punktum. Legger også på space etter siste punktum for å fange f.eks.
+     * feilaktig dobbel punktum
+     */
+    public HtmlAssert containsSentencesOnceInSequence(String... text) {
+        List<String> list = new ArrayList<>();
+        for (var linje : text) {
+            if (!linje.endsWith(".")) {
+                throw new IllegalArgumentException("Alle setninger må slutte med punktum. Setningen: \"" + linje + "\" mangler punktum.");
+            }
+            String medSpace = linje + " ";
+            list.add(medSpace);
+        }
+        containsTextsOnceInSequence(list.toArray(new String[0]));
+        return this;
+    }
 
     public HtmlAssert containsHtmlOnceInSequence(CharSequence... html) {
         assertThatContainsOnceInSequence(actualHtmlTrimmed, html);

@@ -30,9 +30,8 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
@@ -45,7 +44,6 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 
 /**
  * Test for brevtekster for innvilgelse. Bruker html for å validere.
@@ -53,7 +51,7 @@ import no.nav.ung.sak.ytelse.RapportertInntektMapper;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevGenerererTjenesteEndringInntektTest {
+class BrevGenerererTjenesteEndringHøySatsTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
 
@@ -65,7 +63,6 @@ class BrevGenerererTjenesteEndringInntektTest {
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private PersonopplysningRepository personopplysningRepository;
-    private AbakusInMemoryInntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste;
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
@@ -84,21 +81,17 @@ class BrevGenerererTjenesteEndringInntektTest {
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
 
-        abakusInMemoryInntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         brevGenerererTjeneste = lagBrevGenererTjeneste(System.getenv("LAGRE_PDF") == null);
     }
 
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
 
-        var endringInnholdBygger =
-            new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
-                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste),
-                ungdomsytelseGrunnlagRepository);
+        var endringInnholdBygger = new EndringHøySatsInnholdBygger(ungdomsytelseGrunnlagRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-            tilkjentYtelseRepository);
+                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
+                tilkjentYtelseRepository);
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
 
@@ -107,14 +100,14 @@ class BrevGenerererTjenesteEndringInntektTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
             personopplysningRepository,
-            new VedtaksbrevRegler(
-                repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
+                new VedtaksbrevRegler(
+                        repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
     }
 
     @Test()
     @DisplayName("Verifiserer faste tekster og mottaker")
     void skalHaAlleStandardtekster() {
-        UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        UngTestScenario ungTestscenario = BrevScenarioer.endring25År(LocalDate.of(1999, 3, 25));
         var behandling = lagScenario(ungTestscenario);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
@@ -125,36 +118,32 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     }
 
-    @NotNull
-    private UngTestRepositories lagUngTestRepositories() {
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
-    }
-
-
-    @DisplayName("Endringsbrev med periode, innrapportert inntekt, reduksjon og utbetaling")
+    @DisplayName("Endringsbrev for overgang til høy sats")
     @Test
-    void standardEndringRapportertInntekt() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
+    void standardEndringHøySats() {
+        LocalDate fødselsdato = LocalDate.of(1999, 3, 25);
+        var ungTestGrunnlag = BrevScenarioer.endring25År(fødselsdato);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_HØY_SATS);
 
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har endret din ungdomsytelse</h1>"
         ).containsSentencesOnceInSequence(
-            "Du har meldt inn inntekt på 10 000 kroner fra 1. desember 2024 til 31. desember 2024.",
-            "Nav har derfor redusert utbetalingen din for neste perioden til 7 393 kroner.",
-            "Nav reduserer utbetalt beløp med 66 prosent av innmeldt inntekt.",
-            "Dette tilsvarer en reduksjon på 6 600 kroner.",
-            "Dagsatsen blir redusert fra 636 kroner til 336 kroner.",
+            "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år.",
+            "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år.",
             "Vedtaket er gjort etter folketrygdloven § X-Y."
         );
 
+    }
+
+    @NotNull
+    private UngTestRepositories lagUngTestRepositories() {
+        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
     }
 
     @Test
@@ -189,10 +178,6 @@ class BrevGenerererTjenesteEndringInntektTest {
         UngTestRepositories repositories = lagUngTestRepositories();
         var behandling = scenarioBuilder.buildOgLagreMedUng(repositories);
 
-        abakusInMemoryInntektArbeidYtelseTjeneste.lagreOppgittOpptjening(
-            behandling.getId(),
-            ungTestscenario.abakusInntekt()
-        );
 
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();

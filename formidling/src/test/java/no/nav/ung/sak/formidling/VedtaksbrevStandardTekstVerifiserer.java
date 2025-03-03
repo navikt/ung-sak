@@ -10,12 +10,12 @@ public class VedtaksbrevStandardTekstVerifiserer {
     static void verifiserStandardVedtaksbrevTekster(String brevHtml, String fnr, UngTestScenario ungTestscenario) {
         assertThatHtml(brevHtml).containsTextsOnceInSequence(
             BrevUtils.brevDatoString(LocalDate.now()), //vedtaksdato
-                "Til: " + ungTestscenario.navn(),
-                "Fødselsnummer: " + fnr,
+            "Til: " + ungTestscenario.navn(),
+            "Fødselsnummer: " + fnr,
             "Du har rett til å klage",
-            "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage",
+            "Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på nav.no/klage. ",
             "Du har rett til innsyn",
-            "Du kan se dokumentene i saken din ved å logge deg inn på nav.no",
+            "Du kan se dokumentene i saken din ved å logge deg inn på nav.no. ",
             "Trenger du mer informasjon?",
             "Med vennlig hilsen",
             "Nav Arbeid og ytelser"

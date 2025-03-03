@@ -6,7 +6,14 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 
 public interface VedtaksbrevInnholdBygger {
 
-    TemplateInnholdResultat bygg(Behandling behandlingId, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje);
+    /**
+     * Bygger komplett dto for brev template
+     *
+     * @param behandling
+     * @param detaljertResultatTidslinje - tidslinje med relevante perioder for denne behandlingen og deres resultat
+     * @return
+     */
+    TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje);
 
 }
 

@@ -18,11 +18,8 @@ import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 @Dependent
 public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
-
-    public DetaljertResultatUtlederImpl() {
-    }
+    private final ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
     public DetaljertResultatUtlederImpl(
@@ -59,23 +56,29 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             JoinStyle.LEFT_JOIN
         );
 
-        return combine;
+        return combine.compress();
 
     }
 
     private static void bestemResultatMedTilkjentYtelse(Set<?> årsak, TilkjentYtelseVerdi tilkjentYtelse, HashSet<DetaljertResultatType> resultater) {
-        if (årsak.equals(Collections.singleton(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT))) {
+        if (innholderBare(årsak, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)) {
             if (tilkjentYtelse.utbetalingsgrad() > 0) {
                 resultater.add(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT);
             } else {
                 resultater.add(DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT);
             }
-        } else if (årsak.equals(Collections.singleton(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE))) {
+        } else if (innholderBare(årsak, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
             resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
+        } else if (innholderBare(årsak, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+            resultater.add(DetaljertResultatType.ENDRING_ØKT_SATS);
         } else {
             // Innvilgelse men uten søknad/endring fra bruker - spisse dette mer
             resultater.add(DetaljertResultatType.INNVILGET_NY_PERIODE);
         }
+    }
+
+    private static boolean innholderBare(Set<?> årsaker, BehandlingÅrsakType behandlingÅrsakType) {
+        return årsaker.equals(Collections.singleton(behandlingÅrsakType));
     }
 
 }

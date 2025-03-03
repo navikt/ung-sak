@@ -20,8 +20,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.template.TemplateType;
-import no.nav.ung.sak.formidling.template.dto.EndringDto;
-import no.nav.ung.sak.formidling.template.dto.endring.EndringRapportertInntektDto;
+import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
@@ -29,28 +28,25 @@ import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
 @Dependent
-public class EndringInnholdBygger implements VedtaksbrevInnholdBygger {
+public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnholdBygger {
 
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
-    private RapportertInntektMapper rapportertInntektMapper;
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
+    private final RapportertInntektMapper rapportertInntektMapper;
+    private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
 
     //TODO hente fra et annet sted?
     public static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
     private static final int REDUSJON_PROSENT = REDUKSJONS_FAKTOR.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
-    private static final Logger LOG = LoggerFactory.getLogger(EndringInnholdBygger.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EndringRapportertInntektInnholdBygger.class);
 
     @Inject
-    public EndringInnholdBygger(
+    public EndringRapportertInntektInnholdBygger(
         TilkjentYtelseRepository tilkjentYtelseRepository,
         RapportertInntektMapper rapportertInntektMapper,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
-    }
-
-    public EndringInnholdBygger() {
     }
 
     @Override
@@ -71,27 +67,27 @@ public class EndringInnholdBygger implements VedtaksbrevInnholdBygger {
             .getSatsTidslinje();
 
         var satsOgInntektTidslinje = rapporteInntekterTidslinje.combine(satsTidslinje,
-                EndringInnholdBygger::lagSatsOgRapportertInntektTidslinje,
-                LocalDateTimeline.JoinStyle.LEFT_JOIN);
+            EndringRapportertInntektInnholdBygger::lagSatsOgRapportertInntektTidslinje,
+            LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
 
         var dtoTidslinje = relevantTilkjentYtelse.combine(satsOgInntektTidslinje,
-                EndringInnholdBygger::mapTilTemplateDto,
-                LocalDateTimeline.JoinStyle.LEFT_JOIN);
+            EndringRapportertInntektInnholdBygger::mapTilTemplateDto,
+            LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         if (dtoTidslinje.size() > 1) {
             LOG.warn("Flere enn 1 periode, men kun første periode vil bli hensyntatt - brevet kan bli feil...");
         }
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT, new EndringDto(
+        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT,
             dtoTidslinje.stream().findFirst().orElseThrow().getValue()
-        ));
+        );
     }
 
     private static LocalDateSegment<OpprinnligSatsOgRapportertInntekt> lagSatsOgRapportertInntektTidslinje(
-            LocalDateInterval p, LocalDateSegment<RapporterteInntekter> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
+        LocalDateInterval p, LocalDateSegment<RapporterteInntekter> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
         var rapportertInntektSum = lhs.getValue().getRapporterteInntekter().stream()
-                .map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
+            .map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Objects.requireNonNull(rhs, "Sats kan ikke være null for periode=%s med rapportert inntekt=%s".formatted(p.toString(), rapportertInntektSum.toPlainString()));
         var sats = rhs.getValue();
@@ -100,24 +96,24 @@ public class EndringInnholdBygger implements VedtaksbrevInnholdBygger {
     }
 
     private static LocalDateSegment<EndringRapportertInntektDto> mapTilTemplateDto(
-            LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<OpprinnligSatsOgRapportertInntekt> rhs) {
+        LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<OpprinnligSatsOgRapportertInntekt> rhs) {
         var ty = lhs.getValue();
 
         Objects.requireNonNull(rhs, "Mangler sats og rapportert inntekt for periode %s for tilkjent ytelse %s"
-                .formatted(p.toString(), ty.toString()));
+            .formatted(p.toString(), ty.toString()));
 
         var satsOgInntekt = rhs.getValue();
 
         return new LocalDateSegment<>(p,
-                new EndringRapportertInntektDto(
-                        new PeriodeDto(p.getFomDato(), p.getTomDato()),
-                        satsOgInntekt.rapportertInntekt().longValue(),
-                        ty.redusertBeløp().setScale(0, RoundingMode.HALF_UP).longValue(),
-                        REDUSJON_PROSENT,
-                        ty.reduksjon().setScale(0, RoundingMode.HALF_UP).longValue(),
-                        satsOgInntekt.opprinnligSats().setScale(0, RoundingMode.HALF_UP).longValue(),
-                        ty.dagsats().setScale(0, RoundingMode.HALF_UP).longValue()
-                )
+            new EndringRapportertInntektDto(
+                new PeriodeDto(p.getFomDato(), p.getTomDato()),
+                satsOgInntekt.rapportertInntekt().longValue(),
+                ty.redusertBeløp().setScale(0, RoundingMode.HALF_UP).longValue(),
+                REDUSJON_PROSENT,
+                ty.reduksjon().setScale(0, RoundingMode.HALF_UP).longValue(),
+                satsOgInntekt.opprinnligSats().setScale(0, RoundingMode.HALF_UP).longValue(),
+                ty.dagsats().setScale(0, RoundingMode.HALF_UP).longValue()
+            )
         );
     }
 

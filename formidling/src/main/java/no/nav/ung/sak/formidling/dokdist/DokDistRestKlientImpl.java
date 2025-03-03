@@ -12,21 +12,18 @@ import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostResponse;
 
 /**
- * https://confluence.adeo.no/pages/viewpage.action?pageId=320038938
- *
- *
- * https://dokdistfordeling.dev.intern.nav.no/swagger-ui/index.html
+ * <a href="https://confluence.adeo.no/pages/viewpage.action?pageId=320038938">dokdistfordeling docs</a>
+ * <p>
+ * <a href="https://dokdistfordeling.dev.intern.nav.no/swagger-ui/index.html">dokdistfordeling swagger</a>
  *
  */
 @Dependent
 @ScopedRestIntegration(scopeKey = "DOKDISTFORDELING_SCOPE", defaultScope = "api://prod-fss.teamdokumenthandtering.saf/.default")
 public class DokDistRestKlientImpl implements DokDistRestKlient {
 
-    private OidcRestClient restClient;
-    private URI uriDokdist;
+    private final OidcRestClient restClient;
+    private final URI uriDokdist;
 
-    DokDistRestKlientImpl() {
-    }
 
     @Inject
     public DokDistRestKlientImpl(

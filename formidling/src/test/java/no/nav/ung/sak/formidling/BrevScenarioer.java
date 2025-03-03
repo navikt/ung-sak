@@ -31,7 +31,7 @@ import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.formidling.innhold.EndringInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -127,16 +127,16 @@ public class BrevScenarioer {
     }
 
     /**
-     * 25 år ungdom med full ungdomsprogramperiode som blir 26 ila perioden. Får både lav og høy sats
-     * ingen inntektsgradering og ingen barn
+     * 24 år ungdom med full ungdomsprogramperiode som blir 25 ila perioden. Får både lav og høy sats
+     * ingen inntektsgradering og ingen barn TODO: endre denne til å gi lav sats hele perioden
      */
-    public static UngTestScenario innvilget26År(LocalDate fom, LocalDate fødselsdato) {
-        LocalDate tom26årmnd = fødselsdato.plusYears(26).with(TemporalAdjusters.lastDayOfMonth());
+    public static UngTestScenario innvilget24År(LocalDate fom, LocalDate fødselsdato) {
+        LocalDate tom25årmnd = fødselsdato.plusYears(25).with(TemporalAdjusters.lastDayOfMonth());
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
         var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(p.getFomDato(), tom26årmnd, lavSatsBuilder().build()),
-            new LocalDateSegment<>(tom26årmnd.plusDays(1), p.getTomDato(), høySatsBuilder().build())
+            new LocalDateSegment<>(p.getFomDato(), tom25årmnd, lavSatsBuilder().build()),
+            new LocalDateSegment<>(tom25årmnd.plusDays(1), p.getTomDato(), høySatsBuilder().build())
         ));
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
@@ -193,6 +193,35 @@ public class BrevScenarioer {
             opptjening);
     }
 
+    /**
+     * 24 år blir 25 år etter 3 mnd i progrmmet og får overgang til høy sats
+     */
+    public static UngTestScenario endring25År(LocalDate fødselsdato) {
+        var tjuvefemårsdag = fødselsdato.plusYears(25);
+        var fom = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
+
+        var programPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(programPeriode.getFomDato(), tjuvefemårsdag.minusDays(1), lavSatsBuilder().build()),
+            new LocalDateSegment<>(tjuvefemårsdag, programPeriode.getTomDato(), høySatsBuilder().build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(programPeriode.getFomDato(), programPeriode.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(programPeriode),
+            tilkjentYtelsePerioder(satser),
+            new LocalDateTimeline<>(programPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(programPeriode, Utfall.OPPFYLT),
+            fødselsdato,
+            List.of(programPeriode.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))), null);
+    }
+
     private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {
         return satser.splitAtRegular(satser.getMinLocalDate().withDayOfMonth(1), satser.getMaxLocalDate(), Period.ofMonths(1));
     }
@@ -222,7 +251,7 @@ public class BrevScenarioer {
 
                 var uredusertBeløp = lhs.getValue().dagsats().multiply(BigDecimal.valueOf(antallVirkedager));
                 var rapportertInntekt = rhs == null ? BigDecimal.ZERO : rhs.getValue();
-                var reduksjon = rapportertInntekt.multiply(EndringInnholdBygger.REDUKSJONS_FAKTOR);
+                var reduksjon = rapportertInntekt.multiply(EndringRapportertInntektInnholdBygger.REDUKSJONS_FAKTOR);
                 var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
                 var dagsats = antallVirkedager == 0 ? BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, RoundingMode.HALF_UP);
                 var utbetalingsgrad = redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(uredusertBeløp, 0, RoundingMode.HALF_UP).intValue();

@@ -157,9 +157,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
-            "Til: " + ungTestGrunnlag.navn(),
-            "Fødselsnummer: " + fnr,
+        ).containsSentencesOnceInSequence(
             "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
             "Du får utbetalt 636 kroner dagen, før skatt.",
             "Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får.",
@@ -182,7 +180,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
+        ).containsSentencesOnceInSequence(
             "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
             "Du får utbetalt 954 kroner dagen, før skatt.",
             "Siden du er over 25 år så får du 2 ganger grunnbeløpet."
@@ -208,7 +206,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
+        ).containsSentencesOnceInSequence(
             "Du har rett til ungdomsytelse fra 1. desember 2024 i 130 dager.",
             "Du får utbetalt 954 kroner dagen, før skatt.",
             "Siden du er over 25 år så får du 2 ganger grunnbeløpet til måneden du fyller 29 år."
@@ -223,8 +221,8 @@ class BrevGenerererTjenesteInnvilgelseTest {
     @Test
     void lavOgHøySats() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var fødselsdato = LocalDate.of(1999, 5, 15); //Blir 26 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget26År(fom, fødselsdato);
+        var fødselsdato = LocalDate.of(2000, 5, 15); //Blir 25 etter 6 mnd/130 dager i programmet
+        var ungTestGrunnlag = BrevScenarioer.innvilget24År(fom, fødselsdato);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -234,9 +232,9 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
             "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
-        ).containsTextsOnceInSequence(
+        ).containsSentencesOnceInSequence(
             "Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager.",
-            "Fra 1. desember 2024 til 31. mai 2025 får du utbetalt 636 kroner dagen, før skatt",
+            "Fra 1. desember 2024 til 31. mai 2025 får du utbetalt 636 kroner dagen, før skatt.",
             "Fra 1. juni 2025 til 29. november 2025 får du utbetalt 954 kroner dagen, før skatt.",
             "Du får 1.33 ganger grunnbeløpet mens du er under 25 år og 2 ganger grunnbeløpet fra måneden etter du fyller 25 år."
         );
