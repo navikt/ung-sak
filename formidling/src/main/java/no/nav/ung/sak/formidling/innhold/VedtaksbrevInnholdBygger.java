@@ -10,7 +10,7 @@ public interface VedtaksbrevInnholdBygger {
      * Bygger komplett dto for brev template
      *
      * @param behandling
-     * @param detaljertResultatTidslinje - tidslinje som angir perioder som har relevante for denne behandlingen og resultat deres
+     * @param detaljertResultatTidslinje - tidslinje med relevante perioder for denne behandlingen og deres resultat
      * @return
      */
     TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje);
