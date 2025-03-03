@@ -12,7 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 @Dependent
-@ScopedRestIntegration(scopeKey = "sif.abac.pdp.scope", defaultScope = "api://prod-fss.k9saksbehandling.sif-abac-pdp/.default")
+@ScopedRestIntegration(scopeKey = "sif.abac.pdp.scope", defaultScope = "api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default")
 public class SifAbacPdpRestKlient {
 
     private OidcRestClient restClient;
@@ -38,7 +38,7 @@ public class SifAbacPdpRestKlient {
         try {
             return new URI(baseUrl);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Ugyldig konfigurasjon for URL_K9TILBAKE", e);
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for sif.abac.pdp.url", e);
         }
     }
 

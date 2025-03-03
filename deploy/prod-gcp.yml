@@ -87,34 +87,31 @@ spec:
       rules:
         - application : sif-abac-pdp
       external:
+        - host: "dokarkiv.prod-fss-pub.nais.io"
         - host: "k9-abakus.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
         - host: "k9-tilbake.prod-fss-pub.nais.io"
-        - host: "k9-fordel.prod-fss-pub.nais.io"
+        - host: "norg2.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
-        - host: "norg2.prod-fss-pub.nais.io"
-        - host: "dokarkiv.prod-fss-pub.nais.io"
-        - host: "k9-fordel.prod-fss-pub.nais.io"
     inbound:
       rules:
-        - application: ung-sak
-        - application: k9-los-api
-          namespace: k9saksbehandling
-          cluster: prod-fss
-        - application: k9-fordel
-          namespace: k9saksbehandling
-          cluster: prod-fss
-        - application: k9-tilbake
+        - application: k9-abakus
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: k9-klage
           namespace: k9saksbehandling
           cluster: prod-fss
-        - application: k9-abakus
+        - application: k9-los-api
+          namespace: k9saksbehandling
+          cluster: prod-fss
+        - application: k9-tilbake
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: sif-abac-pdp
+        - application: ung-sak
+        - application: ung-sak-web
+        - application: ung-deltakelse-opplyser
   gcp:
     sqlInstances:
       - type: POSTGRES_16
