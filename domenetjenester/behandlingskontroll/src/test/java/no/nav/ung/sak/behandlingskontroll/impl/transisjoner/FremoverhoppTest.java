@@ -86,7 +86,7 @@ public class FremoverhoppTest {
 
 
         var modell = behandlingModellRepository.getModell(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
-        steg1 = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
+        steg1 = BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT;
         steg2 = modell.finnNesteSteg(steg1).getBehandlingStegType();
         steg3 = modell.finnNesteSteg(steg2).getBehandlingStegType();
     }
