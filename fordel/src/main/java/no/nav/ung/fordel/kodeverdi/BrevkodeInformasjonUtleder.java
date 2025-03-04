@@ -42,6 +42,7 @@ public final class BrevkodeInformasjonUtleder {
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(), null, "Søknad om ungdomsytelse - UNG Søknad", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
         brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, "Endringssøknad for ungdomsytelsen - UNG Endringssøknad", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(), null, "Inntektsrapportering for ungdomsytelsen", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_BEKREFTELSE_PERIODEENDRING.getOffisiellKode(), null, "Bekreftelse av periodeendring for ungdomsprogrammet", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
 
         final Map<String, BrevkodeInformasjon> titler = new HashMap<>();
         brevkodeliste.forEach(bi -> {
