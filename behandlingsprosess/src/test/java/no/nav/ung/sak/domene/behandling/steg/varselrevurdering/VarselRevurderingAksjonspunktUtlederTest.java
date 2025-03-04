@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
@@ -28,13 +29,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
     void skal_få_aksjonspunkt_og_venteårsak_for_opphør_når_vi_ikke_har_bekreftelse() {
         final var tomDato = LocalDate.now().minusDays(5);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), tomDato));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(LocalDate.now().minusDays(10), tomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of();
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertTrue(resultat.isPresent());
         assertEquals(Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, resultat.get().getVenteårsak());
@@ -44,13 +45,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
     void skal_få_aksjonspunkt_og_venteårsak_for_startdato_når_vi_ikke_har_bekreftelse() {
         final var tomDato = LocalDate.now().minusDays(5);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), tomDato));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(LocalDate.now().minusDays(10), tomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of();
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertTrue(resultat.isPresent());
         assertEquals(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, resultat.get().getVenteårsak());
@@ -63,13 +64,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var journalpostId = "1";
 
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), tomDato));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(LocalDate.now().minusDays(10), tomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)));
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(bekreftelseDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertTrue(resultat.isPresent());
         assertEquals(Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, resultat.get().getVenteårsak());
@@ -81,13 +82,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var programperiodeTomDato = LocalDate.now().minusDays(3);
 
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), programperiodeTomDato));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(LocalDate.now().minusDays(10), programperiodeTomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)));
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(programperiodeTomDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertFalse(resultat.isPresent());
     }
@@ -98,13 +99,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var fomDato = LocalDate.now().minusDays(10);
         final var journalpostId = "1";
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, LocalDate.now().minusDays(5)));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(fomDato, LocalDate.now().minusDays(5), true);
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)));
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(bekreftelseDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertTrue(resultat.isPresent());
         assertEquals(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, resultat.get().getVenteårsak());
@@ -116,7 +117,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var journalpostId2 = "2";
         final var fomDato = LocalDate.now().minusDays(10);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, LocalDate.now().minusDays(5)));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(fomDato, LocalDate.now().minusDays(5), true);
         List<MottattDokument> gyldigeDokumenter = List.of(
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
@@ -127,7 +128,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertTrue(resultat.isPresent());
         assertEquals(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, resultat.get().getVenteårsak());
@@ -139,7 +140,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var journalpostId2 = "2";
         final var fomDato = LocalDate.now().minusDays(10);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, LocalDate.now().minusDays(5)));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(fomDato, LocalDate.now().minusDays(5), true);
         List<MottattDokument> gyldigeDokumenter = List.of(
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
@@ -150,7 +151,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertFalse(resultat.isPresent());
     }
@@ -162,7 +163,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var fomDato = LocalDate.now().minusDays(10);
         final var tomDato = LocalDate.now().minusDays(5);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(fomDato, tomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of(
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
@@ -173,7 +174,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertFalse(resultat.isPresent());
     }
@@ -185,7 +186,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var fomDato = LocalDate.now().minusDays(10);
         final var tomDato = LocalDate.now().minusDays(5);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato));
+        var perioder = new LocalDateTimeline<>(fomDato, tomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of(
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
@@ -207,13 +208,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
     @Test
     void skal_ikke_få_aksjonspunkt_når_vi_har_bekreftelse_med_matchende_startdato() {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now().plusDays(3)));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(LocalDate.now().minusDays(3), LocalDate.now().plusDays(3), true);
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument("1", LocalDateTime.now().minusDays(1)));
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(LocalDate.now().minusDays(3), "1", UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertFalse(resultat.isPresent());
     }
@@ -221,13 +222,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
     @Test
     void skal_ikke_få_aksjonspunkt_uten_behandlingsårsak_for_endring() {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of();
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5)));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true);
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument("1", LocalDateTime.now().minusDays(1)));
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertFalse(resultat.isPresent());
     }
@@ -238,7 +239,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var fomDato = LocalDate.now().minusDays(10);
         final var tomDato = LocalDate.now().minusDays(5);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(fomDato, tomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of(
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1))
         );
@@ -247,7 +248,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertTrue(resultat.isPresent());
         assertEquals(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, resultat.get().getVenteårsak());
@@ -258,13 +259,13 @@ class VarselRevurderingAksjonspunktUtlederTest {
         final var fomDato = LocalDate.now().minusDays(10);
         final var tomDato = LocalDate.now().minusDays(5);
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato));
+        var ungdomsprogramTidslinje = new LocalDateTimeline<>(fomDato, tomDato, true);
         List<MottattDokument> gyldigeDokumenter = List.of();
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
-        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, perioder, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
+        Optional<AksjonspunktResultat> resultat = VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(behandlingsårsaker, ungdomsprogramTidslinje, gyldigeDokumenter, bekreftelser, ventefrist, eksisterendeAksjonspunkt);
 
         assertTrue(resultat.isPresent());
         assertEquals(Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, resultat.get().getVenteårsak());

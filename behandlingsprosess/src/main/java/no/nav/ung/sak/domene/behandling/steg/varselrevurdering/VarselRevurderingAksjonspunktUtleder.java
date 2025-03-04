@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
@@ -7,7 +8,6 @@ import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -22,7 +22,7 @@ public class VarselRevurderingAksjonspunktUtleder {
 
     public static Optional<AksjonspunktResultat> utledAksjonspunkt(
         List<BehandlingÅrsakType> behandlingsårsakerForBehandling,
-        List<DatoIntervallEntitet> perioder,
+        LocalDateTimeline<Boolean> ungdomsprogramTidslinje,
         List<MottattDokument> gyldigeDokumenter,
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser,
         Period ventePeriode,
@@ -32,14 +32,14 @@ public class VarselRevurderingAksjonspunktUtleder {
 
         if (behandlingsårsakerForBehandling.contains(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO);
-            if (sisteBekreftetEndring.isEmpty() || !harMatchendeSluttdato(perioder, sisteBekreftetEndring.get())) {
+            if (sisteBekreftetEndring.isEmpty() || !harMatchendeSluttdato(ungdomsprogramTidslinje, sisteBekreftetEndring.get())) {
                 return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, eksisterendeFrist, ventePeriode));
             }
         }
 
         if (behandlingsårsakerForBehandling.contains(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
             final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO);
-            if (sisteBekreftetEndring.isEmpty() || !harMatchendeStartdato(perioder, sisteBekreftetEndring.get())) {
+            if (sisteBekreftetEndring.isEmpty() || !harMatchendeStartdato(ungdomsprogramTidslinje, sisteBekreftetEndring.get())) {
                 return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, eksisterendeFrist, ventePeriode));
             }
 
@@ -60,12 +60,12 @@ public class VarselRevurderingAksjonspunktUtleder {
         return bekreftelser.stream().collect(Collectors.groupingBy(UngdomsprogramBekreftetPeriodeEndring::getEndringType));
     }
 
-    private static boolean harMatchendeSluttdato(List<DatoIntervallEntitet> perioder, UngdomsprogramBekreftetPeriodeEndring sisteBekreftetEndring) {
-        return perioder.stream().anyMatch(p -> p.getTomDato().equals(sisteBekreftetEndring.getDato()));
+    private static boolean harMatchendeSluttdato(LocalDateTimeline<Boolean> ungdomsprogramTidslinje, UngdomsprogramBekreftetPeriodeEndring sisteBekreftetEndring) {
+        return ungdomsprogramTidslinje.getLocalDateIntervals().stream().anyMatch(p -> p.getTomDato().equals(sisteBekreftetEndring.getDato()));
     }
 
-    private static boolean harMatchendeStartdato(List<DatoIntervallEntitet> perioder, UngdomsprogramBekreftetPeriodeEndring sisteBekreftetEndring) {
-        return perioder.stream().anyMatch(p -> p.getFomDato().equals(sisteBekreftetEndring.getDato()));
+    private static boolean harMatchendeStartdato(LocalDateTimeline<Boolean> perioder, UngdomsprogramBekreftetPeriodeEndring sisteBekreftetEndring) {
+        return perioder.getLocalDateIntervals().stream().anyMatch(p -> p.getFomDato().equals(sisteBekreftetEndring.getDato()));
     }
 
     private static Optional<UngdomsprogramBekreftetPeriodeEndring> finnSisteMottatteBekreftelseForEndringstype(Map<UngdomsprogramPeriodeEndringType, List<UngdomsprogramBekreftetPeriodeEndring>> gruppertePeriodeEndringerPåEndringstype,

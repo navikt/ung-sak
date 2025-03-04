@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.Period;
 import java.util.List;
@@ -28,18 +29,18 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
 
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private BehandlingRepository behandlingRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private final Period ventePeriode;
 
     @Inject
     public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository,
-                                     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                     UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
                                      UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
                                      @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
         this.behandlingRepository = behandlingRepository;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.ventePeriode = Period.parse(ventePeriode);
@@ -58,13 +59,13 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             throw VarselRevurderingStegFeil.FACTORY.manglerBehandlingsårsakPåRevurdering().toException();
         }
 
-        final var perioder = finnUngdomsprogramperioder(behandling);
+        final var ungdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId()).compress();
         final var bekreftelser = finnBekreftelser(behandling);
         final var gyldigeDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
 
         return VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(
                 behandling.getBehandlingÅrsakerTyper(),
-                perioder,
+                ungdomsprogramTidslinje,
                 gyldigeDokumenter,
                 bekreftelser,
                 ventePeriode,
@@ -73,13 +74,6 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             ).map(BehandleStegResultat::utførtMedAksjonspunktResultater)
             .orElse(BehandleStegResultat.utførtUtenAksjonspunkter());
 
-    }
-
-    private List<DatoIntervallEntitet> finnUngdomsprogramperioder(Behandling behandling) {
-        final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
-        return ungdomsprogramPeriodeGrunnlag.stream().flatMap(it -> it.getUngdomsprogramPerioder().getPerioder().stream())
-            .map(UngdomsprogramPeriode::getPeriode)
-            .toList();
     }
 
     private List<UngdomsprogramBekreftetPeriodeEndring> finnBekreftelser(Behandling behandling) {
