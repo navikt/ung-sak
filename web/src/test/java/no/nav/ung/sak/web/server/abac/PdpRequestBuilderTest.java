@@ -1,22 +1,12 @@
 package no.nav.ung.sak.web.server.abac;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
-import java.math.BigInteger;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
-import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
-import no.nav.ung.sak.tilgangskontroll.api.AbacBehandlingStatus;
-import no.nav.ung.sak.tilgangskontroll.api.AbacFagsakStatus;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
+import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
+import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
@@ -25,18 +15,24 @@ import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.k9.felles.exception.ManglerTilgangException;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.math.BigInteger;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class PdpRequestBuilderTest {
 
     private static final String DUMMY_ID_TOKEN = "dummyheader.dymmypayload.dummysignaturee";
     private static final String FAGSAK_ABAC_REFERANSE = "no.nav.abac.attributter.k9.fagsak";
-
-
 
     private static final Long FAGSAK_ID = 10001L;
     private static final Long FAGSAK_ID_2 = 10002L;
@@ -70,9 +66,9 @@ public class PdpRequestBuilderTest {
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
-        assertThat(request.getString(AbacAttributter.RESOURCE_K9_SAK_ANSVARLIG_SAKSBEHANDLER)).isEqualTo(ansvarligSaksbehandler);
-        assertThat(request.getString(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS)).isEqualTo(AbacBehandlingStatus.OPPRETTET.getEksternKode());
-        assertThat(request.getString(AbacAttributter.RESOURCE_K9_SAK_SAKSSTATUS)).isEqualTo(AbacFagsakStatus.UNDER_BEHANDLING.getEksternKode());
+        assertThat(request.getString(AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER)).isEqualTo(ansvarligSaksbehandler);
+        assertThat(request.getString(AbacAttributter.RESOURCE_BEHANDLINGSSTATUS)).isEqualTo(AbacBehandlingStatus.OPPRETTET.getEksternKode());
+        assertThat(request.getString(AbacAttributter.RESOURCE_SAKSSTATUS)).isEqualTo(AbacFagsakStatus.UNDER_BEHANDLING.getEksternKode());
     }
 
     @Test
@@ -135,7 +131,7 @@ public class PdpRequestBuilderTest {
         Mockito.when(pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(koder)).thenReturn(svar);
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE)).containsOnly("Overstyring", "Manuell");
+        assertThat(request.getListOfString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE)).containsOnly("Overstyring", "Manuell");
     }
 
     @Test

@@ -14,29 +14,29 @@ import java.net.URISyntaxException;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "sif.abac.pdp.scope", defaultScope = "api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default")
-public class SifAbacPdpRestKlient {
+public class NavAnsatttRestKlient {
 
     private OidcRestClient restClient;
-    private URI uriTilgangskontrollMedSaksinformasjon;
+    private URI uriNavAnsatt;
 
-    SifAbacPdpRestKlient() {
+    NavAnsatttRestKlient() {
         // for CDI proxy
     }
 
     @Inject
-    public SifAbacPdpRestKlient(OidcRestClient restClient,
-                                @KonfigVerdi(value = "sif.abac.pdp.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung") String urlSifAbacPdp) {
+    public NavAnsatttRestKlient(OidcRestClient restClient,
+                                @KonfigVerdi(value = "nav.ansatt.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt") String urlSifAbacPdp) {
         this.restClient = restClient;
-        this.uriTilgangskontrollMedSaksinformasjon = tilUri(urlSifAbacPdp, "saksinformasjon");
+        this.uriNavAnsatt = tilUri(urlSifAbacPdp);
     }
 
-    public Decision sjekkTilgangForInnloggetBruker(SaksinformasjonTilgangskontrollInputDto input) {
-        return restClient.post(uriTilgangskontrollMedSaksinformasjon, input, Decision.class);
+    public InnloggetAnsattDto tilangerForInnloggetBruker() {
+        return restClient.get(uriNavAnsatt, InnloggetAnsattDto.class);
     }
 
-    private static URI tilUri(String baseUrl, String path) {
+    private static URI tilUri(String baseUrl) {
         try {
-            return new URI(baseUrl + "/" + path);
+            return new URI(baseUrl);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Ugyldig konfigurasjon for sif.abac.pdp.url", e);
         }

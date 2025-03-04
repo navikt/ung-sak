@@ -58,22 +58,9 @@ spec:
       enabled: true
       replyURLs:
         - "https://ung.intern.dev.nav.no/ung/sak/cb"
-
-      # Tillater innlogging for alle brukere.
-      allowAllUsers: true
       claims:
-        # Kun de gruppene brukeren er medlem av vil bli lagt til i claims på tokenet.
         groups:
-          # 0000-GA-k9-beslutter
-          - id: f171716a-aaab-4e76-8869-047abaebb8f5
-          # 0000-GA-Egne_ansatte
-          - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d
-          # 0000-GA-Strengt_Fortrolig_Adresse
-          - id: 5ef775f2-61f8-4283-bf3d-8d03f428aa14
-          # 0000-GA-Fortrolig_Adresse
-          - id: ea930b6b-9397-44d9-b9e6-f4cf527a632a
-          # 0000-GA-k9-overstyrer
-          - id: 5c7003ff-b3ba-407c-9b58-7fea9bf7cb2e
+          # FIXME bytt ut med ung-grupper når opprettet
           # 0000-GA-k9-saksbehandler
           - id: 93e8903d-5c3f-4cbe-929e-0afeb22dec73
           # 0000-GA-k9-veileder
@@ -82,6 +69,7 @@ spec:
           - id: 0bc9661c-975c-4adb-86d1-a97172490662
         extra:
           - "NAVident"
+          - "azp_name"
   accessPolicy:
     outbound:
       rules:
@@ -230,18 +218,12 @@ spec:
       value: https://ung-deltakelse-opplyser.intern.dev.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
-    - name : SKJERMET_PERSON_URL
-      value : https://skjermede-personer-pip.intern.dev.nav.no/skjermet
-    - name : SKJERMET_PERSON_SCOPE
-      value : api://dev-gcp.nom.skjermede-personer-pip/.default
-    - name : PDL_PIP_URL
-      value : https://pdl-pip-api.dev-fss-pub.nais.io/api/v1/person
-    - name : PDL_PIP_SCOPE
-      value : api://dev-fss.pdl.pdl-pip-api/.default
     - name : SIF_ABAC_PDP_SCOPE
       value : api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
     - name : SIF_ABAC_PDP_URL
-      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung/saksinformasjon
+      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung
+    - name : NAV_ANSATT_URL
+      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
 
     # Saf
     - name: SAF_BASE_URL
@@ -293,29 +275,3 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"
-
-    # Gruppenavn for roller fra Active Directory
-    # 0000-GA-k9-beslutter
-    - name: BRUKER_GRUPPE_ID_BESLUTTER
-      value: f171716a-aaab-4e76-8869-047abaebb8f5
-    # 0000-GA-Egne_ansatte
-    - name: BRUKER_GRUPPE_ID_EGENANSATT
-      value: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d
-    # 0000-GA-Strengt_Fortrolig_Adresse
-    - name: BRUKER_GRUPPE_ID_KODE6
-      value: 5ef775f2-61f8-4283-bf3d-8d03f428aa14
-    # 0000-GA-Fortrolig_Adresse
-    - name: BRUKER_GRUPPE_ID_KODE7
-      value: ea930b6b-9397-44d9-b9e6-f4cf527a632a
-    # 0000-GA-k9-overstyrer
-    - name: BRUKER_GRUPPE_ID_OVERSTYRER
-      value: 5c7003ff-b3ba-407c-9b58-7fea9bf7cb2e
-    # 0000-GA-k9-saksbehandler
-    - name: BRUKER_GRUPPE_ID_SAKSBEHANDLER
-      value: 93e8903d-5c3f-4cbe-929e-0afeb22dec73
-    # 0000-GA-k9-veileder
-    - name: BRUKER_GRUPPE_ID_VEILEDER
-      value: 5bc5cae2-3ef9-4897-9828-766757299de8
-    # 0000-GA-k9-drift
-    - name: BRUKER_GRUPPE_ID_DRIFT
-      value: 0bc9661c-975c-4adb-86d1-a97172490662
