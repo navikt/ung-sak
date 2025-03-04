@@ -58,12 +58,18 @@ spec:
       enabled: true
       replyURLs:
         - "https://ung.intern.nav.no/ung/sak/cb"
-
-      # Tillater innlogging for alle brukere.
-      allowAllUsers: true
       claims:
+        groups:
+          # FIXME bytt ut med ung-grupper når opprettet
+          # 0000-GA-k9-saksbehandler
+          - id: 466d0df7-22ba-4c68-b848-73478cfd0486
+          # 0000-GA-k9-veileder
+          - id: be11a922-59a2-4afa-b5ad-b9e9bd445268
+          # 0000-GA-k9-drift
+          - id: 1509dc91-a955-4e72-b64c-2f049e37c0c6
         extra:
           - "NAVident"
+          - "azp_name"
   accessPolicy:
     outbound:
       rules:
