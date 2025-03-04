@@ -7,9 +7,11 @@
 	<sequence-generator name="SEQ_UNG_GR_STARTDATO" allocation-size="50" sequence-name="SEQ_UNG_GR_STARTDATO" />
 	<sequence-generator name="SEQ_UNG_STARTDATOER" allocation-size="50" sequence-name="SEQ_UNG_STARTDATOER" />
 	<sequence-generator name="SEQ_UNG_SOEKT_STARTDATO" allocation-size="50" sequence-name="SEQ_UNG_SOEKT_STARTDATO" />
+    <sequence-generator name="SEQ_UNG_BEKREFTET_PERIODE_ENDRING" allocation-size="50" sequence-name="SEQ_UNG_BEKREFTET_PERIODE_ENDRING" />
 
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag" />
     <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer" />
     <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseBekreftetPeriodeEndring" />
 
 </entity-mappings>

@@ -42,7 +42,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
 
     @ChangeTracked
     @BatchSize(size = 20)
-    @JoinColumn(name = "UNG_GR_ID", nullable = false)
+    @JoinColumn(name = "UNG_GR_STARTDATO_ID", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<UngdomsytelseBekreftetPeriodeEndring> bekreftetPeriodeEndringer;
 

@@ -13,13 +13,13 @@ import java.util.Objects;
 
 import static no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
 
-@Entity(name = "UngdomsytelseSøktStartdato")
+@Entity(name = "UngdomsytelseBekreftetPeriodeEndring")
 @Table(name = "UNG_BEKREFTET_PERIODE_ENDRING")
 @Immutable
 public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKT_STARTDATO")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_BEKREFTET_PERIODE_ENDRING")
     private Long id;
 
     @Convert(converter = UngdomsytelsePeirodeEndringTypeKodeverdiConverter.class)

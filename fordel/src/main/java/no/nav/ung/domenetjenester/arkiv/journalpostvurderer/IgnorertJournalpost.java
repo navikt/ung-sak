@@ -1,6 +1,7 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.StrukturertJournalpost.GODKJENTE_KODER;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
@@ -63,7 +64,6 @@ public class IgnorertJournalpost implements Journalpostvurderer {
 
     private boolean ignorer(Vurderingsgrunnlag vurderingsgrunnlag) {
         var brevkode = vurderingsgrunnlag.journalpostInfo().getBrevkode();
-        return brevkode == null ||
-            !(brevkode.equals(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode()) || brevkode.equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode()));
+        return brevkode == null || !GODKJENTE_KODER.contains(brevkode);
     }
 }
