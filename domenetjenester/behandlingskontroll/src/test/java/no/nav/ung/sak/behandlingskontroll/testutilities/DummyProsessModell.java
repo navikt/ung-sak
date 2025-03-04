@@ -28,8 +28,12 @@ public class DummyProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT)
             .medSteg(BehandlingStegType.VURDER_SØKNADSFRIST)
+            .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR)
+            .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.VURDER_TILBAKETREKK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
         return modellBuilder.build();
     }
