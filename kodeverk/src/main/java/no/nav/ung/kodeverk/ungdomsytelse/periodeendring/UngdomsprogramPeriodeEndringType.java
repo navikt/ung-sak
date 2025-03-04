@@ -5,12 +5,12 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public enum UngdomsytelsePeriodeEndringType implements Kodeverdi {
+public enum UngdomsprogramPeriodeEndringType implements Kodeverdi {
 
     ENDRET_STARTDATO("ENDRET_START", "Endret startdato"),
     ENDRET_OPPHØRSDATO("ENDRET_OPPHOER", "Endret opphørsdatp");
 
-    private static final Map<String, UngdomsytelsePeriodeEndringType> KODER = new LinkedHashMap<>();
+    private static final Map<String, UngdomsprogramPeriodeEndringType> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -23,12 +23,12 @@ public enum UngdomsytelsePeriodeEndringType implements Kodeverdi {
     private String kode;
     private String navn;
 
-    UngdomsytelsePeriodeEndringType(String kode, String navn) {
+    UngdomsprogramPeriodeEndringType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
-    public static UngdomsytelsePeriodeEndringType fraKode(String kode) {
+    public static UngdomsprogramPeriodeEndringType fraKode(String kode) {
         if (kode == null) {
             return null;
         }

@@ -1,8 +1,8 @@
 package no.nav.ung.sak.behandlingslager.behandling.startdato;
 
 import jakarta.persistence.*;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringTypeKodeverdiConverter;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringType;
+import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringTypeKodeverdiConverter;
+import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.hibernate.annotations.Immutable;
@@ -13,15 +13,15 @@ import java.util.Objects;
 @Entity(name = "UngdomsytelseBekreftetPeriodeEndring")
 @Table(name = "UNG_BEKREFTET_PERIODE_ENDRING")
 @Immutable
-public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
+public class UngdomsprogramBekreftetPeriodeEndring extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_BEKREFTET_PERIODE_ENDRING")
     private Long id;
 
-    @Convert(converter = UngdomsytelsePeriodeEndringTypeKodeverdiConverter.class)
+    @Convert(converter = UngdomsprogramPeriodeEndringTypeKodeverdiConverter.class)
     @Column(name = "endring_type", nullable = false)
-    private UngdomsytelsePeriodeEndringType endringType;
+    private UngdomsprogramPeriodeEndringType endringType;
 
     @Column(name = "dato", nullable = false)
     private LocalDate dato;
@@ -34,23 +34,13 @@ public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseBekreftetPeriodeEndring(LocalDate dato, JournalpostId journalpostId, UngdomsytelsePeriodeEndringType endringType) {
+    public UngdomsprogramBekreftetPeriodeEndring(LocalDate dato, JournalpostId journalpostId, UngdomsprogramPeriodeEndringType endringType) {
         this.dato = dato;
         this.journalpostId = journalpostId;
         this.endringType = endringType;
     }
 
-    public UngdomsytelseBekreftetPeriodeEndring(LocalDate dato) {
-        this.dato = dato;
-    }
-
-    public UngdomsytelseBekreftetPeriodeEndring(UngdomsytelseBekreftetPeriodeEndring it) {
-        this.journalpostId = it.getJournalpostId();
-        this.dato = it.getDato();
-        this.endringType = it.getEndringType();
-    }
-
-    public UngdomsytelseBekreftetPeriodeEndring() {
+    public UngdomsprogramBekreftetPeriodeEndring() {
         // hibernate
     }
 
@@ -62,7 +52,7 @@ public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
         return journalpostId;
     }
 
-    public UngdomsytelsePeriodeEndringType getEndringType() {
+    public UngdomsprogramPeriodeEndringType getEndringType() {
         return endringType;
     }
 
@@ -70,7 +60,7 @@ public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UngdomsytelseBekreftetPeriodeEndring that = (UngdomsytelseBekreftetPeriodeEndring) o;
+        UngdomsprogramBekreftetPeriodeEndring that = (UngdomsprogramBekreftetPeriodeEndring) o;
         return Objects.equals(journalpostId, that.journalpostId);
     }
 
@@ -81,7 +71,7 @@ public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "UngdomsytelseBekreftetPeriodeEndring{" +
+        return "UngdomsprogramBekreftetPeriodeEndring{" +
             "endringType=" + endringType +
             ", dato=" + dato +
             ", journalpostId=" + journalpostId +

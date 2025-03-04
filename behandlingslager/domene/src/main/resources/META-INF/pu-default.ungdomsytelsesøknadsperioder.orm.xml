@@ -12,6 +12,6 @@
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag" />
     <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer" />
     <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato" />
-    <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseBekreftetPeriodeEndring" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring" />
 
 </entity-mappings>

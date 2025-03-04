@@ -7,12 +7,12 @@ import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretFomDatoBekreftelse
 import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretTomDatoBekreftelse;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringType;
+import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseBekreftetPeriodeEndring;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
@@ -56,7 +56,7 @@ public class DokumentMottakerEndretPeriodeOppgaveBekreftelseUng implements Dokum
                 dokument.setKildesystem(oppgaveBekreftelse.getKildesystem().get().getKode());
             }
             DatoEndring bekreftelse = oppgaveBekreftelse.getBekreftelse();
-            final var bekreftetPeriodeEndring = new UngdomsytelseBekreftetPeriodeEndring(
+            final var bekreftetPeriodeEndring = new UngdomsprogramBekreftetPeriodeEndring(
                 bekreftelse.getNyDato(),
                 dokument.getJournalpostId(),
                 finnBekreftetPeriodeEndring(bekreftelse));
@@ -66,11 +66,11 @@ public class DokumentMottakerEndretPeriodeOppgaveBekreftelseUng implements Dokum
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
     }
 
-    private static UngdomsytelsePeriodeEndringType finnBekreftetPeriodeEndring(DatoEndring bekreftelse) {
+    private static UngdomsprogramPeriodeEndringType finnBekreftetPeriodeEndring(DatoEndring bekreftelse) {
         if (bekreftelse instanceof EndretTomDatoBekreftelse) {
-            return UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO;
+            return UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO;
         } else if (bekreftelse instanceof EndretFomDatoBekreftelse) {
-            return UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO;
+            return UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO;
         }
         throw new IllegalArgumentException("Kunne ikke håndtere bekreftelse av type " + bekreftelse.getType());
     }

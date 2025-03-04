@@ -44,7 +44,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "UNG_GR_STARTDATO_ID", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    private Set<UngdomsytelseBekreftetPeriodeEndring> bekreftetPeriodeEndringer;
+    private Set<UngdomsprogramBekreftetPeriodeEndring> bekreftetPeriodeEndringer;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -78,7 +78,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         return relevanteStartdatoer;
     }
 
-    public Set<UngdomsytelseBekreftetPeriodeEndring> getBekreftetPeriodeEndringer() {
+    public Set<UngdomsprogramBekreftetPeriodeEndring> getBekreftetPeriodeEndringer() {
         return bekreftetPeriodeEndringer;
     }
 
@@ -99,11 +99,11 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         this.oppgitteStartdatoer = new UngdomsytelseStartdatoer(perioder);
     }
 
-    void leggTil(UngdomsytelseBekreftetPeriodeEndring bekreftetPeriodeEndring) {
+    void leggTil(UngdomsprogramBekreftetPeriodeEndring bekreftetPeriodeEndring) {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        Set<UngdomsytelseBekreftetPeriodeEndring> perioder = this.bekreftetPeriodeEndringer != null ? new HashSet<>(this.bekreftetPeriodeEndringer) : new HashSet<>();
+        Set<UngdomsprogramBekreftetPeriodeEndring> perioder = this.bekreftetPeriodeEndringer != null ? new HashSet<>(this.bekreftetPeriodeEndringer) : new HashSet<>();
         perioder.add(bekreftetPeriodeEndring);
         this.bekreftetPeriodeEndringer = perioder;
     }

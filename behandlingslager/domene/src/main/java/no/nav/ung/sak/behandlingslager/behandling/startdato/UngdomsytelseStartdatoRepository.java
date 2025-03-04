@@ -33,7 +33,7 @@ public class UngdomsytelseStartdatoRepository {
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
-    public void lagre(Long behandlingId, UngdomsytelseBekreftetPeriodeEndring bekreftetPeriodeEndring) {
+    public void lagre(Long behandlingId, UngdomsprogramBekreftetPeriodeEndring bekreftetPeriodeEndring) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseStartdatoGrunnlag(behandlingId, it))
             .orElse(new UngdomsytelseStartdatoGrunnlag(behandlingId));

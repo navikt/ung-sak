@@ -2,11 +2,11 @@ package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringType;
+import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
 import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseBekreftetPeriodeEndring;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDateTime;
@@ -24,21 +24,21 @@ public class VarselRevurderingAksjonspunktUtleder {
         List<BehandlingÅrsakType> behandlingsårsakerForBehandling,
         List<DatoIntervallEntitet> perioder,
         List<MottattDokument> gyldigeDokumenter,
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser,
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser,
         Period ventePeriode,
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt) {
         final var gruppertePeriodeEndringerPåEndringstype = finnBekreftelserGruppertPåEndringstype(bekreftelser);
         final var eksisterendeFrist = eksisterendeAksjonspunkt.map(Aksjonspunkt::getFristTid);
 
         if (behandlingsårsakerForBehandling.contains(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
-            final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO);
+            final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO);
             if (sisteBekreftetEndring.isEmpty() || !harMatchendeSluttdato(perioder, sisteBekreftetEndring.get())) {
                 return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, eksisterendeFrist, ventePeriode));
             }
         }
 
         if (behandlingsårsakerForBehandling.contains(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
-            final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO);
+            final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO);
             if (sisteBekreftetEndring.isEmpty() || !harMatchendeStartdato(perioder, sisteBekreftetEndring.get())) {
                 return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, eksisterendeFrist, ventePeriode));
             }
@@ -56,27 +56,27 @@ public class VarselRevurderingAksjonspunktUtleder {
     }
 
 
-    private static Map<UngdomsytelsePeriodeEndringType, List<UngdomsytelseBekreftetPeriodeEndring>> finnBekreftelserGruppertPåEndringstype(List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser) {
-        return bekreftelser.stream().collect(Collectors.groupingBy(UngdomsytelseBekreftetPeriodeEndring::getEndringType));
+    private static Map<UngdomsprogramPeriodeEndringType, List<UngdomsprogramBekreftetPeriodeEndring>> finnBekreftelserGruppertPåEndringstype(List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser) {
+        return bekreftelser.stream().collect(Collectors.groupingBy(UngdomsprogramBekreftetPeriodeEndring::getEndringType));
     }
 
-    private static boolean harMatchendeSluttdato(List<DatoIntervallEntitet> perioder, UngdomsytelseBekreftetPeriodeEndring sisteBekreftetEndring) {
+    private static boolean harMatchendeSluttdato(List<DatoIntervallEntitet> perioder, UngdomsprogramBekreftetPeriodeEndring sisteBekreftetEndring) {
         return perioder.stream().anyMatch(p -> p.getTomDato().equals(sisteBekreftetEndring.getDato()));
     }
 
-    private static boolean harMatchendeStartdato(List<DatoIntervallEntitet> perioder, UngdomsytelseBekreftetPeriodeEndring sisteBekreftetEndring) {
+    private static boolean harMatchendeStartdato(List<DatoIntervallEntitet> perioder, UngdomsprogramBekreftetPeriodeEndring sisteBekreftetEndring) {
         return perioder.stream().anyMatch(p -> p.getFomDato().equals(sisteBekreftetEndring.getDato()));
     }
 
-    private static Optional<UngdomsytelseBekreftetPeriodeEndring> finnSisteMottatteBekreftelseForEndringstype(Map<UngdomsytelsePeriodeEndringType, List<UngdomsytelseBekreftetPeriodeEndring>> gruppertePeriodeEndringerPåEndringstype,
-                                                                                                              List<MottattDokument> gyldigeDokumenter,
-                                                                                                              UngdomsytelsePeriodeEndringType endringType) {
+    private static Optional<UngdomsprogramBekreftetPeriodeEndring> finnSisteMottatteBekreftelseForEndringstype(Map<UngdomsprogramPeriodeEndringType, List<UngdomsprogramBekreftetPeriodeEndring>> gruppertePeriodeEndringerPåEndringstype,
+                                                                                                               List<MottattDokument> gyldigeDokumenter,
+                                                                                                               UngdomsprogramPeriodeEndringType endringType) {
         final var bekreftetEndringer = gruppertePeriodeEndringerPåEndringstype.getOrDefault(endringType, List.of());
         return bekreftetEndringer.stream()
             .max(Comparator.comparing(e -> finnMottattTidspunkt(e, gyldigeDokumenter)));
     }
 
-    private static LocalDateTime finnMottattTidspunkt(UngdomsytelseBekreftetPeriodeEndring e, List<MottattDokument> gyldigeDokumenter) {
+    private static LocalDateTime finnMottattTidspunkt(UngdomsprogramBekreftetPeriodeEndring e, List<MottattDokument> gyldigeDokumenter) {
         return gyldigeDokumenter.stream().filter(d -> d.getJournalpostId().equals(e.getJournalpostId())).map(MottattDokument::getMottattTidspunkt).findFirst().orElseThrow();
     }
 

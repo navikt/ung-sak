@@ -2,11 +2,11 @@ package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringType;
+import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
 import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseBekreftetPeriodeEndring;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), tomDato));
         List<MottattDokument> gyldigeDokumenter = List.of();
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of();
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -46,7 +46,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), tomDato));
         List<MottattDokument> gyldigeDokumenter = List.of();
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of();
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -65,7 +65,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), tomDato));
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)));
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(bekreftelseDato, journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(bekreftelseDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -83,7 +83,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), programperiodeTomDato));
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)));
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(programperiodeTomDato, journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(programperiodeTomDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -100,7 +100,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, LocalDate.now().minusDays(5)));
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)));
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(bekreftelseDato, journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(bekreftelseDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -121,9 +121,9 @@ class VarselRevurderingAksjonspunktUtlederTest {
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
         );
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(
-            lagBekreftelse(fomDato, journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO),
-            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId2, UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(
+            lagBekreftelse(fomDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO),
+            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId2, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -144,9 +144,9 @@ class VarselRevurderingAksjonspunktUtlederTest {
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
         );
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(
-            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO),
-            lagBekreftelse(fomDato, journalpostId2, UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(
+            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO),
+            lagBekreftelse(fomDato, journalpostId2, UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -167,9 +167,9 @@ class VarselRevurderingAksjonspunktUtlederTest {
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
         );
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(
-            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO),
-            lagBekreftelse(tomDato, journalpostId2, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(
+            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO),
+            lagBekreftelse(tomDato, journalpostId2, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -190,9 +190,9 @@ class VarselRevurderingAksjonspunktUtlederTest {
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1)),
             lagMottattDokument(journalpostId2, LocalDateTime.now())
         );
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(
-            lagBekreftelse(tomDato, journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO),
-            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId2, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(
+            lagBekreftelse(tomDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO),
+            lagBekreftelse(LocalDate.now().minusDays(3), journalpostId2, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -209,7 +209,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now().plusDays(3)));
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument("1", LocalDateTime.now().minusDays(1)));
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(LocalDate.now().minusDays(3), "1", UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(lagBekreftelse(LocalDate.now().minusDays(3), "1", UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -223,7 +223,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of();
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(5)));
         List<MottattDokument> gyldigeDokumenter = List.of(lagMottattDokument("1", LocalDateTime.now().minusDays(1)));
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of();
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -242,8 +242,8 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<MottattDokument> gyldigeDokumenter = List.of(
             lagMottattDokument(journalpostId, LocalDateTime.now().minusDays(1))
         );
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of(
-            lagBekreftelse(tomDato, journalpostId, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO));
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of(
+            lagBekreftelse(tomDato, journalpostId, UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO));
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -260,7 +260,7 @@ class VarselRevurderingAksjonspunktUtlederTest {
         List<BehandlingÅrsakType> behandlingsårsaker = List.of(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         List<DatoIntervallEntitet> perioder = List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato));
         List<MottattDokument> gyldigeDokumenter = List.of();
-        List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser = List.of();
+        List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser = List.of();
         var ventefrist = Period.parse("P1D");
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt = Optional.empty();
 
@@ -271,8 +271,8 @@ class VarselRevurderingAksjonspunktUtlederTest {
     }
 
 
-    private static UngdomsytelseBekreftetPeriodeEndring lagBekreftelse(LocalDate endringDato, String journalpostId, UngdomsytelsePeriodeEndringType endringType) {
-        return new UngdomsytelseBekreftetPeriodeEndring(endringDato, new JournalpostId(journalpostId), endringType);
+    private static UngdomsprogramBekreftetPeriodeEndring lagBekreftelse(LocalDate endringDato, String journalpostId, UngdomsprogramPeriodeEndringType endringType) {
+        return new UngdomsprogramBekreftetPeriodeEndring(endringDato, new JournalpostId(journalpostId), endringType);
     }
 
     private static MottattDokument lagMottattDokument(String journalpostId, LocalDateTime mottattTidspunkt) {
