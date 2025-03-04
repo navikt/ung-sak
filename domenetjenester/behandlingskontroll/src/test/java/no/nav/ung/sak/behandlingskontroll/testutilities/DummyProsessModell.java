@@ -32,7 +32,7 @@ public class DummyProsessModell {
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
-            .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_TILBAKETREKK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
         return modellBuilder.build();
