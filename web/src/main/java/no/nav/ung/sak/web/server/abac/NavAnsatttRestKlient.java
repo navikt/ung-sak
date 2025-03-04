@@ -31,7 +31,7 @@ public class NavAnsatttRestKlient {
     }
 
     public InnloggetAnsattDto tilangerForInnloggetBruker() {
-        return restClient.post(uriNavAnsatt, null, InnloggetAnsattDto.class);
+        return restClient.get(uriNavAnsatt, InnloggetAnsattDto.class);
     }
 
     private static URI tilUri(String baseUrl) {
