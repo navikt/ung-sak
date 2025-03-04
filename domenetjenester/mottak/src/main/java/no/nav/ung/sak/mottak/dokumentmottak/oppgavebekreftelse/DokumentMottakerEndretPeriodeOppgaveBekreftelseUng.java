@@ -62,9 +62,6 @@ public class DokumentMottakerEndretPeriodeOppgaveBekreftelseUng implements Dokum
                 finnBekreftetPeriodeEndring(bekreftelse));
 
             ungdomsytelseStartdatoRepository.lagre(behandlingId, bekreftetPeriodeEndring);
-
-            // TODO: Håndtere utvidelse av fagsakperiode dersom fom-dato kan flyttes lenger bak i tid (utvide periode med ytelse/fagsakperiode)
-
         }
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
     }
