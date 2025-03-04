@@ -10,9 +10,6 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumen
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.Period;
