@@ -52,7 +52,7 @@ public class VarselRevurderingAksjonspunktUtleder {
         return AksjonspunktResultat.opprettForAksjonspunktMedFrist(
             AUTO_SATT_PÅ_VENT_REVURDERING,
             venterBekreftelseEndretStartdatoUngdomsprogram,
-            eksisterendeFrist.orElse(LocalDateTime.now().plus(Period.parse(ventefrist))));
+            eksisterendeFrist.orElse(LocalDateTime.now().plus(Period.parse(ventefrist)).minusDays(1)));
     }
 
 

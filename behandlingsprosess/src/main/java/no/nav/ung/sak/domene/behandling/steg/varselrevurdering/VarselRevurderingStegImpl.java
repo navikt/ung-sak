@@ -36,7 +36,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
                                      UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                      UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
-                                     @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P4W") String ventefrist) {
+                                     @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventefrist) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
