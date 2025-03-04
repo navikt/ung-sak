@@ -9,7 +9,7 @@ import no.nav.k9.søknad.JsonUtils;
 
 public enum Søknadsformat {
     NY,
-    ETTERSENDELSE;
+    OPPGAVEBEKREFTELSE;
 
     public static Optional<SøknadPayload> inspiserPayload(String payload, boolean dumpVedFeil) {
         boolean jsonGuess = VurderStrukturertDokumentTask.erJson(payload);
@@ -48,11 +48,12 @@ public enum Søknadsformat {
     }
 
     private static Søknadsformat getSøknadsformat(JsonNode søknad) {
-        final boolean harYtelseType = søknad.get("ytelse").hasNonNull("type");
+        final var ytelse = søknad.get("ytelse");
+        final boolean harYtelseType = ytelse != null && ytelse.hasNonNull("type");
         if (harYtelseType) {
             return Søknadsformat.NY;
         }
-        return Søknadsformat.ETTERSENDELSE;
+        return Søknadsformat.OPPGAVEBEKREFTELSE;
     }
 
     private static String dump(String payload, boolean dumpVedFeil) {

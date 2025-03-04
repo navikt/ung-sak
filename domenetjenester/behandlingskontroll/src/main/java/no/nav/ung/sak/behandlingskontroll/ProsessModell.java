@@ -44,6 +44,7 @@ public class ProsessModell {
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
+            .medSteg(BehandlingStegType.VARSEL_REVURDERING)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)

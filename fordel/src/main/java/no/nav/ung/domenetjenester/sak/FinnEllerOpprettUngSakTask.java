@@ -52,7 +52,7 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
 
     @Override
     public MottattMelding doTask(MottattMelding dataWrapper) {
-        var ytelseType = dataWrapper.getYtelseType().orElseThrow();
+        var ytelseType = dataWrapper.getYtelseType().orElse(FagsakYtelseType.UNGDOMSYTELSE);
 
         var innsendtPeriode = getPeriode(dataWrapper);
         håndterStrukturertMeldingMedPeriode(dataWrapper, ytelseType, innsendtPeriode);

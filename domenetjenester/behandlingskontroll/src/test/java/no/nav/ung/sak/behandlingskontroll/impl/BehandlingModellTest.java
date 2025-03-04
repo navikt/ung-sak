@@ -66,7 +66,7 @@ public class BehandlingModellTest {
         AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD;
         AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT;
         AksjonspunktDefinisjon a2_0 = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
-        AksjonspunktDefinisjon a2_1 = AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET;
+        AksjonspunktDefinisjon a2_1 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
 
         DummySteg steg = new DummySteg();
         DummySteg steg0 = new DummySteg();
@@ -107,7 +107,7 @@ public class BehandlingModellTest {
         // Arrange - noen utvalge, tilfeldige aksjonspunkter
         AksjonspunktDefinisjon a0_0 = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
         AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD;
-        AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET;
+        AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
         AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT;
 
         DummySteg steg = new DummySteg();

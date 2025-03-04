@@ -41,19 +41,19 @@ public class HistorikkInnslagTekstBuilderTest {
 
         HistorikkinnslagTotrinnsvurdering godkjent = new HistorikkinnslagTotrinnsvurdering();
         godkjent.setGodkjent(true);
-        godkjent.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        godkjent.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
         godkjent.setAksjonspunktSistEndret(LocalDateTime.now());
 
         HistorikkinnslagTotrinnsvurdering vurderPåNytt2 = new HistorikkinnslagTotrinnsvurdering();
         vurderPåNytt2.setGodkjent(false);
-        vurderPåNytt2.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        vurderPåNytt2.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
         vurderPåNytt2.setBegrunnelse("Ikke enig.");
         vurderPåNytt2.setAksjonspunktSistEndret(LocalDateTime.now());
         vurdering.put(SkjermlenkeType.FAKTA_FOR_OPPTJENING, Arrays.asList(godkjent, vurderPåNytt2));
 
         HistorikkinnslagTotrinnsvurdering vurderPåNytt3 = new HistorikkinnslagTotrinnsvurdering();
         vurderPåNytt3.setGodkjent(false);
-        vurderPåNytt3.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        vurderPåNytt3.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
         vurderPåNytt3.setBegrunnelse("Ikke enig.");
         vurderPåNytt3.setAksjonspunktSistEndret(LocalDateTime.now());
 
@@ -69,7 +69,7 @@ public class HistorikkInnslagTekstBuilderTest {
         List<HistorikkinnslagTotrinnsvurdering> aksjonspunkter = historikkinnslagDel.getTotrinnsvurderinger();
         assertThat(aksjonspunkter).hasSize(1);
         HistorikkinnslagTotrinnsvurdering aksjonspunkt = aksjonspunkter.get(0);
-        assertThat(aksjonspunkt.getAksjonspunktDefinisjon()).as("aksjonspunktKode").isEqualTo(AksjonspunktDefinisjon.VURDER_OPPTJENINGSVILKÅRET);
+        assertThat(aksjonspunkt.getAksjonspunktDefinisjon()).as("aksjonspunktKode").isEqualTo(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
         assertThat(aksjonspunkt.erGodkjent()).as("godkjent").isFalse();
         assertThat(aksjonspunkt.getBegrunnelse()).as("begrunnelse").isEqualTo("Ikke enig.");
     }
