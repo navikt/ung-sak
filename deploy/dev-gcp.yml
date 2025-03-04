@@ -221,7 +221,7 @@ spec:
     - name : SIF_ABAC_PDP_SCOPE
       value : api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
     - name : SIF_ABAC_PDP_URL
-      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung/saksinformasjon
+      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/ung
     - name : NAV_ANSATT_URL
       value : http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
 
