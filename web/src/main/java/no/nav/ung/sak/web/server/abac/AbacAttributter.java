@@ -12,5 +12,4 @@ public class AbacAttributter {
     public static final String RESOURCE_BEHANDLINGSSTATUS = "no.nav.abac.attributter.resource.ung.sak.behandlingsstatus";
     public static final String RESOURCE_AKSJONSPUNKT_TYPE = "no.nav.abac.attributter.resource.ung.sak.aksjonspunkt_type";
     public static final String RESOURCE_ANSVARLIG_SAKSBEHANDLER = "no.nav.abac.attributter.resource.ung.sak.ansvarlig_saksbehandler";
-    public static final String RESOURCE_FORELDREPENGER_UTTAKSPLAN = "no.nav.abac.attributter.resource.ung.uttaksplan";
 }
