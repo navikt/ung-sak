@@ -36,6 +36,6 @@ public class AppPepImpl extends no.nav.k9.felles.sikkerhet.abac.PepImpl {
      */
     @Override
     protected int getAntallResources(PdpRequest pdpRequest) {
-        return pdpRequest.getAntall(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE);
+        return pdpRequest.getAntall(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE);
     }
 }

@@ -136,7 +136,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_FNR, fnrs);
         }
         if (!aksjonspunktType.isEmpty()) {
-            pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE, aksjonspunktType);
+            pdpRequest.put(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE, aksjonspunktType);
         }
         return pdpRequest;
     }
@@ -150,11 +150,11 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
                                      PipBehandlingsData behandlingData) {
         PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aksjonspunktType);
         AbacUtil.oversettBehandlingStatus(behandlingData.getBehandligStatus())
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS, it.getEksternKode()));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_BEHANDLINGSSTATUS, it.getEksternKode()));
         AbacUtil.oversettFagstatus(behandlingData.getFagsakStatus())
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_SAKSSTATUS, it.getEksternKode()));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_SAKSSTATUS, it.getEksternKode()));
         behandlingData.getAnsvarligSaksbehandler()
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_K9_SAK_ANSVARLIG_SAKSBEHANDLER, it));
+            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER, it));
         return pdpRequest;
     }
 
