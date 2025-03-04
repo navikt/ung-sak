@@ -2,10 +2,9 @@ package no.nav.ung.kodeverk.ungdomsytelse.periodeendring;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
 @Converter(autoApply = true)
-public class UngdomsytelsePeirodeEndringTypeKodeverdiConverter implements AttributeConverter<UngdomsytelsePeriodeEndringType, String> {
+public class UngdomsytelsePeriodeEndringTypeKodeverdiConverter implements AttributeConverter<UngdomsytelsePeriodeEndringType, String> {
 
     @Override
     public String convertToDatabaseColumn(UngdomsytelsePeriodeEndringType attribute) {

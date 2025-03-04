@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
@@ -43,18 +44,18 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
     @Override
     public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
-        LocalDate opphørsdatoFraHendelse = hendelse.getHendelsePeriode().getFom();
+        LocalDate nyFomdato = hendelse.getHendelsePeriode().getFom();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
 
         var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
 
         for (AktørId aktør : aktører) {
-            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, opphørsdatoFraHendelse);
+            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, nyFomdato);
             if (relevantFagsak.isEmpty()) {
                 continue;
             }
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
-            if (erNyInformasjonIHendelsen(relevantFagsak.get(), opphørsdatoFraHendelse, hendelseId)) {
+            if (erNyInformasjonIHendelsen(relevantFagsak.get(), nyFomdato, hendelseId)) {
                 fagsaker.put(relevantFagsak.get(), BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
             }
         }
@@ -67,7 +68,7 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
      * idempotens-sjekk for å hindre at det opprettes flere revurderinger fra samme hendelse.
      * hindrer også revurdering hvis hendelsen kommer etter at behandlingen er oppdatert med ny data.
      */
-    private boolean erNyInformasjonIHendelsen(Fagsak fagsak, LocalDate opphørsdato, String hendelseId) {
+    private boolean erNyInformasjonIHendelsen(Fagsak fagsak, LocalDate nyFomDato, String hendelseId) {
         Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandlingOpt.isEmpty()) {
             logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
@@ -75,13 +76,17 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
         }
 
         Behandling behandling = behandlingOpt.get();
-        var periodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
-        if (periodeGrunnlag.isPresent()) {
-            var harIngenPerioderEtterOpphør = periodeGrunnlag.get().getUngdomsprogramPerioder().getPerioder().stream().noneMatch(p -> p.getPeriode().getTomDato().isAfter(opphørsdato));
-            if (harIngenPerioderEtterOpphør) {
-                logger.info("Datagrunnlag på behandling {} for {} hadde ingen perioder med ungdomsprogram etter opphørsdato. Trigget av hendelse {}.", behandling.getUuid(), fagsak.getSaksnummer(), hendelseId);
+        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+
+            final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
+            final var harPeriodeMedNyFomDato = ungdomsprogramPeriodeGrunnlag.stream()
+                .flatMap(it -> it.getUngdomsprogramPerioder().getPerioder().stream())
+                .anyMatch(it -> it.getPeriode().getFomDato().equals(nyFomDato));
+
+            if (!harPeriodeMedNyFomDato) {
+                logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert. Ignorer hendelse " + hendelseId);
                 return false;
-            }
+            };
         }
         return true;
     }

@@ -25,22 +25,22 @@ public class VarselRevurderingAksjonspunktUtleder {
         List<DatoIntervallEntitet> perioder,
         List<MottattDokument> gyldigeDokumenter,
         List<UngdomsytelseBekreftetPeriodeEndring> bekreftelser,
-        String ventefrist,
+        Period ventePeriode,
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt) {
         final var gruppertePeriodeEndringerPåEndringstype = finnBekreftelserGruppertPåEndringstype(bekreftelser);
         final var eksisterendeFrist = eksisterendeAksjonspunkt.map(Aksjonspunkt::getFristTid);
 
-        if (behandlingsårsakerForBehandling.stream().anyMatch(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM::equals)) {
+        if (behandlingsårsakerForBehandling.contains(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO);
             if (sisteBekreftetEndring.isEmpty() || !harMatchendeSluttdato(perioder, sisteBekreftetEndring.get())) {
-                return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, eksisterendeFrist, ventefrist));
+                return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, eksisterendeFrist, ventePeriode));
             }
         }
 
-        if (behandlingsårsakerForBehandling.stream().anyMatch(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM::equals)) {
+        if (behandlingsårsakerForBehandling.contains(RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
             final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsytelsePeriodeEndringType.ENDRET_STARTDATO);
             if (sisteBekreftetEndring.isEmpty() || !harMatchendeStartdato(perioder, sisteBekreftetEndring.get())) {
-                return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, eksisterendeFrist, ventefrist));
+                return Optional.of(aksjonspunktMedFristOgVenteÅrsak(Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, eksisterendeFrist, ventePeriode));
             }
 
         }
@@ -48,11 +48,11 @@ public class VarselRevurderingAksjonspunktUtleder {
         return Optional.empty();
     }
 
-    private static AksjonspunktResultat aksjonspunktMedFristOgVenteÅrsak(Venteårsak venterBekreftelseEndretStartdatoUngdomsprogram, Optional<LocalDateTime> eksisterendeFrist, String ventefrist) {
+    private static AksjonspunktResultat aksjonspunktMedFristOgVenteÅrsak(Venteårsak venterBekreftelseEndretStartdatoUngdomsprogram, Optional<LocalDateTime> eksisterendeFrist, Period ventePeriode) {
         return AksjonspunktResultat.opprettForAksjonspunktMedFrist(
             AUTO_SATT_PÅ_VENT_REVURDERING,
             venterBekreftelseEndretStartdatoUngdomsprogram,
-            eksisterendeFrist.orElse(LocalDateTime.now().plus(Period.parse(ventefrist)).minusDays(1)));
+            eksisterendeFrist.orElse(LocalDateTime.now().plus(ventePeriode).minusDays(1)));
     }
 
 

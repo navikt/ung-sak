@@ -8,12 +8,8 @@ import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonTypeName(Hendelse.UNGDOMSPROGRAM_OPPHOER)
+@JsonTypeName(Hendelse.UNGDOMSPROGRAM_ENDRET_STARTDATO)
 public class UngdomsprogramEndretStartdatoHendelse implements Hendelse {
-
-    private static final HendelseType HENDELSETYPE_ENDRET_STARTDATO = HendelseType.UNGDOMSPROGRAM_ENDRET_STARTDATO;
 
     @JsonProperty(value = "hendelseInfo", required = true)
     @NotNull

@@ -1,8 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.startdato;
 
 import jakarta.persistence.*;
-import no.nav.ung.kodeverk.ungdomsytelse.UngdomsytelseSatsTypeKodeverdiConverter;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeirodeEndringTypeKodeverdiConverter;
+import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringTypeKodeverdiConverter;
 import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -10,8 +9,6 @@ import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 import java.util.Objects;
-
-import static no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
 
 @Entity(name = "UngdomsytelseBekreftetPeriodeEndring")
 @Table(name = "UNG_BEKREFTET_PERIODE_ENDRING")
@@ -22,7 +19,7 @@ public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_BEKREFTET_PERIODE_ENDRING")
     private Long id;
 
-    @Convert(converter = UngdomsytelsePeirodeEndringTypeKodeverdiConverter.class)
+    @Convert(converter = UngdomsytelsePeriodeEndringTypeKodeverdiConverter.class)
     @Column(name = "endring_type", nullable = false)
     private UngdomsytelsePeriodeEndringType endringType;
 
@@ -43,13 +40,14 @@ public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
         this.endringType = endringType;
     }
 
-    public UngdomsytelseBekreftetPeriodeEndring(LocalDate startdato) {
-        this.dato = startdato;
+    public UngdomsytelseBekreftetPeriodeEndring(LocalDate dato) {
+        this.dato = dato;
     }
 
     public UngdomsytelseBekreftetPeriodeEndring(UngdomsytelseBekreftetPeriodeEndring it) {
         this.journalpostId = it.getJournalpostId();
         this.dato = it.getDato();
+        this.endringType = it.getEndringType();
     }
 
     public UngdomsytelseBekreftetPeriodeEndring() {
@@ -73,21 +71,20 @@ public class UngdomsytelseBekreftetPeriodeEndring extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UngdomsytelseBekreftetPeriodeEndring that = (UngdomsytelseBekreftetPeriodeEndring) o;
-        return Objects.equals(dato, that.dato);
+        return Objects.equals(journalpostId, that.journalpostId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dato);
+        return Objects.hash(journalpostId);
     }
 
     @Override
     public String toString() {
-        return "UngdomsytelseSøktStartdato{" +
-            "id=" + id +
-            ", startdato=" + dato +
+        return "UngdomsytelseBekreftetPeriodeEndring{" +
+            "endringType=" + endringType +
+            ", dato=" + dato +
             ", journalpostId=" + journalpostId +
-            ", versjon=" + versjon +
             '}';
     }
 }

@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
+import java.time.Period;
 import java.util.List;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
@@ -29,19 +30,19 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private final String ventefrist;
+    private final Period ventePeriode;
 
     @Inject
     public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository,
                                      UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                      UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
                                      MottatteDokumentRepository mottatteDokumentRepository,
-                                     @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventefrist) {
+                                     @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.ventefrist = ventefrist;
+        this.ventePeriode = Period.parse(ventePeriode);
     }
 
     @Override
@@ -66,7 +67,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
                 perioder,
                 gyldigeDokumenter,
                 bekreftelser,
-                ventefrist,
+                ventePeriode,
                 behandling.getAksjonspunktMedDefinisjonOptional(AUTO_SATT_PÅ_VENT_REVURDERING)
 
             ).map(BehandleStegResultat::utførtMedAksjonspunktResultater)
