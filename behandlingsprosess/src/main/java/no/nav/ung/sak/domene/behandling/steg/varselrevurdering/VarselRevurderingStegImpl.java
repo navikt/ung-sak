@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsytelsePeriodeEndringType;
 import no.nav.ung.sak.behandlingskontroll.*;
@@ -17,7 +18,10 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.temporal.TemporalAmount;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +43,19 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private final String ventefrist;
 
     @Inject
-    public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, UngdomsytelseStartdatoRepository startdatoRepository, MottatteDokumentRepository mottatteDokumentRepository) {
+    public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository,
+                                     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                     UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
+                                     MottatteDokumentRepository mottatteDokumentRepository,
+                                     @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P4W") String ventefrist) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.ventefrist = ventefrist;
     }
 
     @Override
@@ -70,7 +80,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO);
             if (sisteBekreftetEndring.isEmpty() || !harMatchendeSluttdato(perioder, sisteBekreftetEndring.get())) {
                 return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-                    AUTO_SATT_PÅ_VENT_REVURDERING, Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, eksisterendeFrist.orElse(LocalDateTime.now().plusWeeks(4))));
+                    AUTO_SATT_PÅ_VENT_REVURDERING, Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM, eksisterendeFrist.orElse(LocalDateTime.now().plus(Period.parse(ventefrist)))));
             }
         }
 
@@ -78,7 +88,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             final var sisteBekreftetEndring = finnSisteMottatteBekreftelseForEndringstype(gruppertePeriodeEndringerPåEndringstype, gyldigeDokumenter, UngdomsytelsePeriodeEndringType.ENDRET_OPPHØRSDATO);
             if (sisteBekreftetEndring.isEmpty() || !harMatchendeStartdato(perioder, sisteBekreftetEndring.get())) {
                 return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-                    AUTO_SATT_PÅ_VENT_REVURDERING, Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, eksisterendeFrist.orElse(LocalDateTime.now().plusWeeks(4))));
+                    AUTO_SATT_PÅ_VENT_REVURDERING, Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, eksisterendeFrist.orElse(LocalDateTime.now().plus(Period.parse(ventefrist)))));
             }
 
         }
