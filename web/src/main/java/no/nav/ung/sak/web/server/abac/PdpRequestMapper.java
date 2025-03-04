@@ -7,7 +7,6 @@ import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonTilgangskontrollInputDto;
 import no.nav.sif.abac.kontrakt.person.AktørId;
 import no.nav.sif.abac.kontrakt.person.PersonIdent;
-import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 
 import java.util.Arrays;
 
@@ -23,20 +22,20 @@ public class PdpRequestMapper {
     }
 
     public static OperasjonDto operasjon(PdpRequest pdpRequest) {
-        ResourceType resource = resourceTypeFraKode(pdpRequest.getString(no.nav.ung.sak.tilgangskontroll.api.AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE));
-        return new OperasjonDto(resource, actionFraKode(pdpRequest.getString(no.nav.ung.sak.tilgangskontroll.api.AbacAttributter.XACML_1_0_ACTION_ACTION_ID)));
+        ResourceType resource = resourceTypeFraKode(pdpRequest.getString(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE));
+        return new OperasjonDto(resource, actionFraKode(pdpRequest.getString(AbacAttributter.XACML_1_0_ACTION_ACTION_ID)));
     }
 
     public static SaksinformasjonDto saksinformasjon(PdpRequest pdpRequest) {
         return new SaksinformasjonDto(
-            pdpRequest.getString(no.nav.ung.sak.tilgangskontroll.api.AbacAttributter.RESOURCE_K9_SAK_ANSVARLIG_SAKSBEHANDLER),
+            pdpRequest.getString(AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER),
             Arrays.stream(AbacBehandlingStatus.values())
-                .filter(v -> v.getEksternKode().equals(pdpRequest.getString(no.nav.ung.sak.tilgangskontroll.api.AbacAttributter.RESOURCE_K9_SAK_BEHANDLINGSSTATUS)))
+                .filter(v -> v.getEksternKode().equals(pdpRequest.getString(AbacAttributter.RESOURCE_BEHANDLINGSSTATUS)))
                 .findFirst().orElse(null),
             Arrays.stream(AbacFagsakStatus.values())
-                .filter(v -> v.getEksternKode().equals(pdpRequest.getString(no.nav.ung.sak.tilgangskontroll.api.AbacAttributter.RESOURCE_K9_SAK_SAKSSTATUS)))
+                .filter(v -> v.getEksternKode().equals(pdpRequest.getString(AbacAttributter.RESOURCE_SAKSSTATUS)))
                 .findFirst().orElse(null),
-            aksjonspunktTypeFraKode(pdpRequest.getString(no.nav.ung.sak.tilgangskontroll.api.AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE)));
+            aksjonspunktTypeFraKode(pdpRequest.getString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE)));
     }
 
     private static AksjonspunktType aksjonspunktTypeFraKode(String kode) {

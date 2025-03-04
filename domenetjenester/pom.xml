@@ -36,7 +36,6 @@
         <module>bom</module>
         <module>grunnbelop</module>
         <module>behandlingskontroll</module>
-        <module>tilgangskontroll</module>
     </modules>
 
 </project>

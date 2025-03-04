@@ -11,8 +11,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.k9.sikkerhet.oidc.token.internal.JwtUtil;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
@@ -20,14 +18,14 @@ import no.nav.ung.sak.behandling.prosessering.task.OppfriskTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
-import no.nav.ung.sak.tilgangskontroll.tilganger.AnsattTilgangerTjeneste;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi.ProsessTaskFeilmelder;
+import no.nav.ung.sak.web.server.abac.NavAnsatttRestKlient;
+import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,7 +38,7 @@ public class SjekkProsessering {
 
     private ProsesseringAsynkTjeneste asynkTjeneste;
 
-    private AnsattTilgangerTjeneste ansattTilgangerTjeneste;
+    private NavAnsatttRestKlient navAnsattRestKlient;
     private BehandlingRepository behandlingRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private ProsessTaskTjeneste prosessTaskRepository;
@@ -52,12 +50,12 @@ public class SjekkProsessering {
     @Inject
     public SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
                              BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                             AnsattTilgangerTjeneste ansattTilgangerTjeneste,
+                             NavAnsatttRestKlient navAnsattRestKlient,
                              BehandlingRepository behandlingRepository,
                              ProsessTaskTjeneste prosessTaskRepository) {
         this.asynkTjeneste = asynkTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.ansattTilgangerTjeneste = ansattTilgangerTjeneste;
+        this.navAnsattRestKlient = navAnsattRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
@@ -91,7 +89,7 @@ public class SjekkProsessering {
     }
 
     private boolean harRolleSaksbehandler() {
-        return ansattTilgangerTjeneste.tilgangerForInnloggetBruker().kanSaksbehandle();
+        return navAnsattRestKlient.tilangerForInnloggetBruker().getKanSaksbehandle();
     }
 
     /**
