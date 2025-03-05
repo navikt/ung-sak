@@ -24,6 +24,7 @@ public class HistorikkinnslagTjeneste {
     private static final String SØKNAD = "Søknad";
     private static final String INNSENDING = "Innsending";
     private static final String INNTEKTSRAPPORTERING = "Inntektsrapportering";
+    private static final String OPPGAVEBEKREFTELSE = "Oppgavebekreftelse";
     private HistorikkRepository historikkRepository;
     private SafTjeneste safTjeneste;
 
@@ -106,6 +107,9 @@ public class HistorikkinnslagTjeneste {
         }
         if (brevkode.equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)) {
             return INNTEKTSRAPPORTERING;
+        }
+        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE)) {
+            return OPPGAVEBEKREFTELSE;
         }
         if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
             return SØKNAD;
