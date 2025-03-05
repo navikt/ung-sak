@@ -89,7 +89,7 @@ public class SjekkProsessering {
     }
 
     private boolean harRolleSaksbehandler() {
-        return navAnsattRestKlient.tilangerForInnloggetBruker().getKanSaksbehandle();
+        return navAnsattRestKlient.tilangerForInnloggetBruker().kanSaksbehandle();
     }
 
     /**

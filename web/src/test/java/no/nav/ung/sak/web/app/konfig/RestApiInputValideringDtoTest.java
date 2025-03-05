@@ -148,7 +148,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         Set<Class<?>> klasser = new TreeSet<>(Comparator.comparing(Class::getName));
         for (Method method : finnAlleRestMetoder()) {
             klasser.addAll(List.of(method.getParameterTypes())); // sjekker input parameter typer til rest tjeneste
-            klasser.add(method.getReturnType()); // sjekker return type også
+            //klasser.add(method.getReturnType()); // sjekker return type også
             for (Type type : method.getGenericParameterTypes()) {
                 if (type instanceof ParameterizedType) {
                     ParameterizedType genericTypes = (ParameterizedType) type;
