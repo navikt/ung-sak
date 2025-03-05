@@ -28,7 +28,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
     public static final Set<String> GODKJENTE_KODER = Set.of(
         Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
         Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
-        Brevkode.UNGDOMSYTELSE_BEKREFTELSE_PERIODEENDRING.getOffisiellKode()
+        Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getOffisiellKode()
     );
 
     private Boolean dumpPayload;
