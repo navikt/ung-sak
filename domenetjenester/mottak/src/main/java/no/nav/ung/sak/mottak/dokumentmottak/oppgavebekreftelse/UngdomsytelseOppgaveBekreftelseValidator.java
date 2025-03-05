@@ -12,16 +12,16 @@ import java.util.Objects;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE_KODE)
-public class UngdomsytelseEndretPeriodeOppgaveBekreftelseValidator implements DokumentValidator {
+public class UngdomsytelseOppgaveBekreftelseValidator implements DokumentValidator {
 
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;
 
-    UngdomsytelseEndretPeriodeOppgaveBekreftelseValidator() {
+    UngdomsytelseOppgaveBekreftelseValidator() {
         // CDI
     }
 
     @Inject
-    public UngdomsytelseEndretPeriodeOppgaveBekreftelseValidator(OppgaveBekreftelseParser oppgaveBekreftelseParser) {
+    public UngdomsytelseOppgaveBekreftelseValidator(OppgaveBekreftelseParser oppgaveBekreftelseParser) {
         this.oppgaveBekreftelseParser = oppgaveBekreftelseParser;
     }
 

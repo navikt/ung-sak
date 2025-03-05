@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekref
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 
 import java.util.Collection;
@@ -27,22 +28,25 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE_KODE)
-public class DokumentMottakerEndretPeriodeOppgaveBekreftelseUng implements Dokumentmottaker {
+public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
 
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
+    private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
-    public DokumentMottakerEndretPeriodeOppgaveBekreftelseUng() {
+    public DokumentMottakerOppgaveBekreftelseUng() {
     }
 
     @Inject
-    public DokumentMottakerEndretPeriodeOppgaveBekreftelseUng(OppgaveBekreftelseParser oppgaveBekreftelseParser,
-                                                              MottatteDokumentRepository mottatteDokumentRepository,
-                                                              UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
+    public DokumentMottakerOppgaveBekreftelseUng(OppgaveBekreftelseParser oppgaveBekreftelseParser,
+                                                 MottatteDokumentRepository mottatteDokumentRepository,
+                                                 UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
+                                                 HistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.oppgaveBekreftelseParser = oppgaveBekreftelseParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
+        this.historikkinnslagTjeneste = historikkinnslagTjeneste;
     }
 
     @Override
@@ -62,6 +66,7 @@ public class DokumentMottakerEndretPeriodeOppgaveBekreftelseUng implements Dokum
                 finnBekreftetPeriodeEndring(bekreftelse));
 
             ungdomsytelseStartdatoRepository.lagre(behandlingId, bekreftetPeriodeEndring);
+            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId());
         }
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
     }
