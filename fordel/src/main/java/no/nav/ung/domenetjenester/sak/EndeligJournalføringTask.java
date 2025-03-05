@@ -86,6 +86,7 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
                     throw e;
                 }
 
+                // TODO: Kan vi fjerne dette? Kor sannsynlig er det at dette vil skje, og er det då riktig at vi skal opprette Gosys-oppgave?
                 dataWrapper.setOppgaveFagsaksystem(GosysKonstanter.Fagsaksystem.K9);
                 dataWrapper.setOppgaveType(GosysKonstanter.OppgaveType.JOURNALFØRING);
                 dataWrapper.setBeskrivelse("Må manuelt journalføres siden det mangler data som er påkrevd for automatisk journalføring.");
@@ -97,6 +98,7 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
 
         if (dataWrapper.getEndeligJournalførteJournalPostIder().containsAll(journalpostIder)) {
             log.info("Ferdigstilt journalpost med id={} på sak={}", journalpostId, saksnummer.orElse("UNDEFINED"));
+            // TODO: Fjern dette. isJournalforingTilOppgave er alltid false
             if (dataWrapper.isJournalforingTilOppgave()) {
                 return dataWrapper.nesteSteg(OpprettOppgaveTask.TASKTYPE);
             }

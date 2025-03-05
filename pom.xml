@@ -29,7 +29,7 @@
 
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
 
-        <revision>4.0.0</revision>
+        <revision>1.0.0</revision>
         <sha1></sha1>
         <changelist>-SNAPSHOT</changelist>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,7 +38,7 @@
         <felles.version>4.4.15</felles.version>
         <swagger.version>2.2.28</swagger.version>
         <junit.version>5.12.0</junit.version>
-        <k9format.version>11.4.1</k9format.version>
+        <k9format.version>11.4.2</k9format.version>
         <jackson.version>2.18.3</jackson.version>
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.1.10</kotlin-stdlib.version>
@@ -334,6 +334,11 @@
             <dependency>
                 <groupId>no.nav.k9</groupId>
                 <artifactId>innsyn</artifactId>
+                <version>${k9format.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.k9</groupId>
+                <artifactId>oppgave-ungdomsytelse</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>

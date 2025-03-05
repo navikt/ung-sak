@@ -3,9 +3,12 @@ package no.nav.ung.domenetjenester.arkiv;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.ung.domenetjenester.arkiv.oppgavebekreftelse.VurderStrukturertOppgavebekreftelse;
+import no.nav.ung.domenetjenester.arkiv.soknad.VurderStrukturertSøknad;
 import no.nav.ung.fordel.handler.FordelProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
+import no.nav.ung.kodeverk.dokument.Brevkode;
 
 @ProsessTask(VurderStrukturertDokumentTask.TASKTYPE)
 @ApplicationScoped
@@ -26,8 +29,15 @@ public class VurderStrukturertDokumentTask extends WrappedProsessTaskHandler {
     @Override
     public MottattMelding doTask(MottattMelding dataWrapper) {
         final String payload = dataWrapper.getPayloadAsString().orElseThrow(() -> new IllegalArgumentException("Må ha payload for å vurdere strukturert dokument"));
+        if (erOppgaveBekreftelse(dataWrapper)) {
+            return new VurderStrukturertOppgavebekreftelse().håndtertOppgavebekreftelse(dataWrapper, payload);
+        }
         return new VurderStrukturertSøknad().håndtertSøknad(dataWrapper, payload);
 
+    }
+
+    private static boolean erOppgaveBekreftelse(MottattMelding dataWrapper) {
+        return dataWrapper.getBrevkode() != null && dataWrapper.getBrevkode().equals(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getOffisiellKode());
     }
 
     private void assertInneholderStrukturertDokument(MottattMelding dataWrapper) {

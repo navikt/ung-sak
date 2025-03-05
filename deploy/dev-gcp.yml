@@ -261,6 +261,9 @@ spec:
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1M"
+    - name: REVURDERING_ENDRET_PERIODE_VENTEFRIST
+      value: "PT15M"
+
 
       # Audit logging
     - name: AUDITLOGGER_ENABLED

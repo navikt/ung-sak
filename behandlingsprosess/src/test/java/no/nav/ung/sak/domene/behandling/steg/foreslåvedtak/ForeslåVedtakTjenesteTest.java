@@ -132,7 +132,7 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void setterTotrinnskontrollPaBehandlingHvisIkkeSattFraFør() {
         // Arrange
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET);
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET);
 
         // Act
         tjeneste.foreslåVedtak(behandling, kontekst);

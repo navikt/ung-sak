@@ -5,6 +5,7 @@ import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJourna
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,11 @@ import no.nav.ung.kodeverk.dokument.Brevkode;
 public class StrukturertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(StrukturertJournalpost.class);
+    public static final Set<String> GODKJENTE_KODER = Set.of(
+        Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
+        Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
+        Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getOffisiellKode()
+    );
 
     private Boolean dumpPayload;
 
@@ -45,7 +51,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
         payload.ifPresent(v -> dataWrapper.setPayload(v.getPayloadAsString()));
         var søknadsformat = payload.map(SøknadPayload::getFormat).orElse(null);
 
-        if (søknadsformat == Søknadsformat.NY) {
+        if (søknadsformat == Søknadsformat.NY || søknadsformat == Søknadsformat.OPPGAVEBEKREFTELSE) {
             loggDokumenthåndtering("strukturert dokument", dataWrapper, journalpostInfo);
             return handleStrukturertDokument(dataWrapper, journalpostInfo);
         } else {
@@ -60,8 +66,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Override
     public boolean skalVurdere(Vurderingsgrunnlag vurderingsgrunnlag) {
-        return vurderingsgrunnlag.journalpostInfo().getBrevkode().equals(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode()) ||
-            vurderingsgrunnlag.journalpostInfo().getBrevkode().equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode());
+        return GODKJENTE_KODER.contains(vurderingsgrunnlag.journalpostInfo().getBrevkode());
     }
 
     private void mapBrevkodeInformasjon(MottattMelding dataWrapper, JournalpostInfo journalpostInfo) {

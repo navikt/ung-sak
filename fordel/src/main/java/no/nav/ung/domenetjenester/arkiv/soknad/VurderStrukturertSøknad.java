@@ -1,4 +1,4 @@
-package no.nav.ung.domenetjenester.arkiv;
+package no.nav.ung.domenetjenester.arkiv.soknad;
 
 
 import no.nav.k9.søknad.JsonUtils;
@@ -8,9 +8,9 @@ import no.nav.k9.søknad.ytelse.ung.v1.UngdomsytelseSøknadValidator;
 import no.nav.ung.domenetjenester.sak.FinnEllerOpprettUngSakTask;
 import no.nav.ung.fordel.handler.MottattMelding;
 
-class VurderStrukturertSøknad {
+public class VurderStrukturertSøknad {
 
-    MottattMelding håndtertSøknad(MottattMelding dataWrapper, String payload) {
+    public MottattMelding håndtertSøknad(MottattMelding dataWrapper, String payload) {
         return håndterStrukturertJsonDokument(dataWrapper, payload);
     }
 

@@ -56,9 +56,9 @@ class StatistikkRepositoryTest {
 
     @Test
     void skal_kunne_hente_statistikk_aksjonspunkt()  {
-        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.AUTO_VENT_FRISINN_BEREGNING;
-        BehandlingStegType stegType = BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG;
-        FagsakYtelseType ytelseType = FagsakYtelseType.FRISINN;
+        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT;
+        BehandlingStegType stegType = BehandlingStegType.BEREGN_YTELSE;
+        FagsakYtelseType ytelseType = FagsakYtelseType.UNGDOMSYTELSE;
 
         var scenario = TestScenarioBuilder.builderUtenSøknad(ytelseType);
         scenario.leggTilAksjonspunkt(aksjonspunkt, stegType);
