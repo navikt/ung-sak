@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekref
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
+import java.time.Duration;
 import java.time.Period;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private final Period ventePeriode;
+    private final Duration ventePeriode;
 
     @Inject
     public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository,
@@ -40,7 +41,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.ventePeriode = Period.parse(ventePeriode);
+        this.ventePeriode = Duration.parse(ventePeriode);
     }
 
     @Override
@@ -48,12 +49,8 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
 
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
 
-        if (harUtførtVentRevurdering(behandling)) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
         if (behandling.getBehandlingÅrsaker().isEmpty()) {
-            throw VarselRevurderingStegFeil.FACTORY.manglerBehandlingsårsakPåRevurdering().toException();
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
         final var ungdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId()).compress();
@@ -79,7 +76,4 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             .flatMap(it -> it.getBekreftetPeriodeEndringer().stream()).toList();
     }
 
-    private boolean harUtførtVentRevurdering(Behandling behandling) {
-        return behandling.getAksjonspunktMedDefinisjonOptional(AUTO_SATT_PÅ_VENT_REVURDERING).map(Aksjonspunkt::erUtført).orElse(Boolean.FALSE);
-    }
 }

@@ -9,9 +9,12 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM;
@@ -25,7 +28,7 @@ public class VarselRevurderingAksjonspunktUtleder {
         LocalDateTimeline<Boolean> ungdomsprogramTidslinje,
         List<MottattDokument> gyldigeDokumenter,
         List<UngdomsprogramBekreftetPeriodeEndring> bekreftelser,
-        Period ventePeriode,
+        Duration ventePeriode,
         Optional<Aksjonspunkt> eksisterendeAksjonspunkt) {
         final var gruppertePeriodeEndringerPåEndringstype = finnBekreftelserGruppertPåEndringstype(bekreftelser);
         final var eksisterendeFrist = eksisterendeAksjonspunkt.map(Aksjonspunkt::getFristTid);
@@ -48,11 +51,11 @@ public class VarselRevurderingAksjonspunktUtleder {
         return Optional.empty();
     }
 
-    private static AksjonspunktResultat aksjonspunktMedFristOgVenteÅrsak(Venteårsak venterBekreftelseEndretStartdatoUngdomsprogram, Optional<LocalDateTime> eksisterendeFrist, Period ventePeriode) {
+    private static AksjonspunktResultat aksjonspunktMedFristOgVenteÅrsak(Venteårsak venterBekreftelseEndretStartdatoUngdomsprogram, Optional<LocalDateTime> eksisterendeFrist, Duration ventePeriode) {
         return AksjonspunktResultat.opprettForAksjonspunktMedFrist(
             AUTO_SATT_PÅ_VENT_REVURDERING,
             venterBekreftelseEndretStartdatoUngdomsprogram,
-            eksisterendeFrist.orElse(LocalDateTime.now().plus(ventePeriode)));
+            eksisterendeFrist.filter(it -> it.isAfter(LocalDateTime.now())).orElse(LocalDateTime.now().plus(ventePeriode)));
     }
 
 
