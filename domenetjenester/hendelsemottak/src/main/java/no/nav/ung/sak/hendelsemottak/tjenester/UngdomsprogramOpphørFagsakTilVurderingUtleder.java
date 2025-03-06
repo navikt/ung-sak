@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
     private static final Logger logger = LoggerFactory.getLogger(UngdomsprogramOpphørFagsakTilVurderingUtleder.class);
     private BehandlingRepository behandlingRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
 
     public UngdomsprogramOpphørFagsakTilVurderingUtleder() {
@@ -34,10 +36,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
     @Inject
     public UngdomsprogramOpphørFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
-                                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                                         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
                                                          FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
     }
 
@@ -76,10 +78,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         }
 
         Behandling behandling = behandlingOpt.get();
-        var periodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
-        if (periodeGrunnlag.isPresent()) {
-            var harIngenPerioderEtterOpphør = periodeGrunnlag.get().getUngdomsprogramPerioder().getPerioder().stream().noneMatch(p -> p.getPeriode().getTomDato().isAfter(opphørsdato));
-            if (harIngenPerioderEtterOpphør) {
+        final var ungdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+        if (!ungdomsprogramTidslinje.isEmpty()) {
+            var erSisteDatoAlleredeSattTilOpphørsdato = ungdomsprogramTidslinje.getMaxLocalDate().equals(opphørsdato);
+            if (erSisteDatoAlleredeSattTilOpphørsdato) {
                 logger.info("Datagrunnlag på behandling {} for {} hadde ingen perioder med ungdomsprogram etter opphørsdato. Trigget av hendelse {}.", behandling.getUuid(), fagsak.getSaksnummer(), hendelseId);
                 return false;
             }

@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +50,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     void setUp() {
         var fagsakRepository = new FagsakRepository(entityManager);
         this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
-            new BehandlingRepository(entityManager), ungdomsprogramPeriodeRepository, new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
+            new BehandlingRepository(entityManager), new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
     }
@@ -74,7 +75,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     }
 
     @Test
-    void skal_ikke_returnere_årsak_dersom_ingen_ungdomsprogramperioder_etter_opphørsdato() {
+    void skal_ikke_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_lik_opphørsdato() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO))));
@@ -92,6 +93,43 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
     }
 
+    @Test
+    void skal_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_etter_opphørsdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.plusDays(1)))));
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
+    }
+
+    @Test
+    void skal_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_før_opphørsdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.minusDays(1)))));
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
+    }
 
     @Test
     void skal_returnere_årsak_dersom_en_ungdomsprogramperiode_som_går_over_opphørsdato() {
