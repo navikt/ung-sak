@@ -1,30 +1,22 @@
 package no.nav.ung.fordel.handler;
 
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
+import no.nav.ung.kodeverk.behandling.BehandlingTema;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.sak.typer.JournalpostId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Clob;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.TaskType;
-import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
-import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
-import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
-import no.nav.ung.kodeverk.behandling.BehandlingTema;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.typer.JournalpostId;
 
 public class MottattMelding {
 
@@ -55,19 +47,6 @@ public class MottattMelding {
 
     public static final String DOKUMENT_TITTEL_KEY = "dokument.tittel";
     public static final String BREVKODE_KEY = "dokument.brevkode";
-
-    // Gosysoppgave
-    public static final String OPPGAVE_IGNORER_SJEKK = "oppgave.ignorer.sjekk";
-    private static final String OPPGAVE_BESKRIVELSE = "oppgave.beskrivelse";
-    private static final String OPPGAVE_FAGSAKSYSTEM = "oppgave.fagsaksystem";
-    private static final String OPPGAVE_TYPE = "oppgave.type";
-
-    // Gosysoppgave fremfor innsending.
-    private static final String JOURNALFORING_TILOPPGAVE = "journalforing.tilOppgave";
-    private static final String JOURNALFORING_OPPDATERT_BRUKER = "journalforing.oppdatertBruker";
-
-
-    // Punsj
 
     // Formidling
     private static final String DOKUMENT_MAL_TYPE = "formidling.dokumentmal.type";
@@ -339,15 +318,6 @@ public class MottattMelding {
         return null;
     }
 
-    public void setOppgaveIgnorerSjekk(boolean ignorer) {
-        prosessTaskData.setProperty(OPPGAVE_IGNORER_SJEKK, String.valueOf(ignorer));
-    }
-
-    public boolean isOppgaveIgnorerSjekk() {
-        var ignorer = prosessTaskData.getPropertyValue(OPPGAVE_IGNORER_SJEKK);
-        return ignorer != null && Boolean.parseBoolean(ignorer);
-    }
-
     public void setBehandlingTema(BehandlingTema behandlingTema) {
         Objects.requireNonNull(behandlingTema);
         prosessTaskData.setProperty(BEHANDLINGSTEMA_KEY, behandlingTema.getKode());
@@ -409,60 +379,12 @@ public class MottattMelding {
         prosessTaskData.setProperty(YTELSE_TYPE, ytelseType.getKode());
     }
 
-    public Optional<String> getBeskrivelse() {
-        return Optional.ofNullable(prosessTaskData.getPropertyValue(OPPGAVE_BESKRIVELSE));
-    }
-
-    public void setBeskrivelse(String beskrivelse) {
-        prosessTaskData.setProperty(OPPGAVE_BESKRIVELSE, beskrivelse);
-    }
-
     public void setBrevkode(String brevkode) {
         prosessTaskData.setProperty(BREVKODE_KEY, brevkode);
     }
 
     public String getBrevkode() {
         return prosessTaskData.getPropertyValue(BREVKODE_KEY);
-    }
-
-
-    public void setOppgaveFagsaksystem(GosysKonstanter.Fagsaksystem fagsystem) {
-        prosessTaskData.setProperty(OPPGAVE_FAGSAKSYSTEM, fagsystem.getKode());
-    }
-
-    public Optional<GosysKonstanter.Fagsaksystem> getOppgaveFagsaksystem() {
-        var propertyValue = prosessTaskData.getPropertyValue(OPPGAVE_FAGSAKSYSTEM);
-        return Optional.ofNullable(GosysKonstanter.Fagsaksystem.from(propertyValue));
-    }
-
-    public void setOppgaveType(GosysKonstanter.OppgaveType oppgaveType) {
-        prosessTaskData.setProperty(OPPGAVE_TYPE, oppgaveType.getKode());
-    }
-
-    public Optional<GosysKonstanter.OppgaveType> getOppgaveType() {
-        var propertyValue = prosessTaskData.getPropertyValue(OPPGAVE_TYPE);
-        return Optional.ofNullable(GosysKonstanter.OppgaveType.from(propertyValue));
-    }
-
-    public void setJournalforingTilOppgave(boolean journalforingTilOppgave) {
-        prosessTaskData.setProperty(JOURNALFORING_TILOPPGAVE, Boolean.toString(journalforingTilOppgave));
-    }
-
-    public boolean isJournalforingTilOppgave() {
-        var propertyValue = prosessTaskData.getPropertyValue(JOURNALFORING_TILOPPGAVE);
-        return Boolean.parseBoolean(propertyValue);
-    }
-
-    public void setJournalforingOppdatertBruker(boolean journalforingTilOppgave) {
-        prosessTaskData.setProperty(JOURNALFORING_OPPDATERT_BRUKER, Boolean.toString(journalforingTilOppgave));
-    }
-
-    public boolean isJournalforingOppdatertBruker() {
-        var propertyValue = prosessTaskData.getPropertyValue(JOURNALFORING_OPPDATERT_BRUKER);
-        if (propertyValue == null) {
-            return false;
-        }
-        return Boolean.parseBoolean(propertyValue);
     }
 
     public void setJournalføringHendelsetype(JournalføringHendelsetype journalføringHendelsetype) {

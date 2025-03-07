@@ -81,7 +81,6 @@ public class HentDataFraJoarkTask extends WrappedProsessTaskHandler {
         var mottattTidspunkt = journalpostInfo.getForsendelseTidspunkt();
         dataWrapper.setAktørId(aktørId.map(AktørId::getId).orElseThrow());
         dataWrapper.setForsendelseMottattTidspunkt(mottattTidspunkt);
-        oppdaterBeskrivelse(journalpostInfo, dataWrapper);
         dataWrapper.setPayload(journalpostInfo.getStrukturertPayload());
         dataWrapper.setBrevkode(journalpostInfo.getBrevkode());
 
@@ -128,15 +127,6 @@ public class HentDataFraJoarkTask extends WrappedProsessTaskHandler {
             }
         }
         return journalpostInfo;
-    }
-
-    private void oppdaterBeskrivelse(JournalpostInfo journalpostInfo, MottattMelding dataWrapper) {
-        if (journalpostInfo.getTittel() != null) {
-            dataWrapper.setBeskrivelse(journalpostInfo.getTittel());
-        } else {
-            final String utledetTittel = BrevkodeInformasjonUtleder.finnTittel(journalpostInfo.getBrevkode());
-            dataWrapper.setBeskrivelse(utledetTittel);
-        }
     }
 
     private MottattMelding registerMottattJournalpostTilBehandling(
