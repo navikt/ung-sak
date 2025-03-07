@@ -9,6 +9,9 @@ import no.nav.sif.abac.kontrakt.person.AktørId;
 import no.nav.sif.abac.kontrakt.person.PersonIdent;
 
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 public class PdpRequestMapper {
 
@@ -35,7 +38,17 @@ public class PdpRequestMapper {
             Arrays.stream(AbacFagsakStatus.values())
                 .filter(v -> v.getEksternKode().equals(pdpRequest.getString(AbacAttributter.RESOURCE_SAKSSTATUS)))
                 .findFirst().orElse(null),
-            aksjonspunktTypeFraKode(pdpRequest.getString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE)));
+            null,
+            aksjonspunktTyperFraKoder(pdpRequest.getListOfString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE)));
+    }
+
+    private static Set<AksjonspunktType> aksjonspunktTyperFraKoder(List<String> koder) {
+        Set<AksjonspunktType> resultat = EnumSet.noneOf(AksjonspunktType.class);
+        for (String kode : koder) {
+            resultat.add(aksjonspunktTypeFraKode(kode));
+        }
+        return resultat;
+
     }
 
     private static AksjonspunktType aksjonspunktTypeFraKode(String kode) {
