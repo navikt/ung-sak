@@ -1,13 +1,18 @@
 package no.nav.ung.sak.hendelsemottak.tjenester;
 
+import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import org.assertj.core.api.AbstractIntegerAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,7 +114,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap);
     }
 
     @Test
@@ -128,7 +133,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap);
     }
 
     @Test
@@ -147,7 +152,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap);
+    }
+
+    private static void validerHarÅrsak(Map<Fagsak, BehandlingÅrsakType> fagsakBehandlingÅrsakTypeMap) {
         assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
+        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next()).isEqualTo(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
     }
 
 }
