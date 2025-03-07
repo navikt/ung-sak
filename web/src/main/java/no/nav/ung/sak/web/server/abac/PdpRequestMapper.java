@@ -38,7 +38,6 @@ public class PdpRequestMapper {
             Arrays.stream(AbacFagsakStatus.values())
                 .filter(v -> v.getEksternKode().equals(pdpRequest.getString(AbacAttributter.RESOURCE_SAKSSTATUS)))
                 .findFirst().orElse(null),
-            null,
             aksjonspunktTyperFraKoder(pdpRequest.getListOfString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE)));
     }
 
