@@ -243,6 +243,8 @@ spec:
         # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
+    - name: PUBLISER_PRODUKSJONSSTYRING_HENDELSE
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
