@@ -152,7 +152,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             "Nav reduserer utbetalt beløp med 66 prosent av innmeldt inntekt.",
             "Dette tilsvarer en reduksjon på 6 600 kroner.",
             "Dagsatsen blir redusert fra 636 kroner til 336 kroner.",
-            "Vedtaket er gjort etter folketrygdloven § X-Y."
+            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx."
         );
 
     }

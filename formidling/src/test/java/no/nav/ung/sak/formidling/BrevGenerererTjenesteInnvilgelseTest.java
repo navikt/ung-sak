@@ -162,7 +162,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
             "Du får utbetalt 636 kroner dagen, før skatt.",
             "Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får.",
             "Siden du er under 25 år så får du 1.33 ganger grunnbeløpet.",
-            "Vedtaket er gjort etter folketrygdloven § X-Y."
+            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx."
         );
 
     }
