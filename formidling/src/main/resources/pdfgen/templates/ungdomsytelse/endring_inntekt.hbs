@@ -4,14 +4,19 @@
     {{#> felles/seksjon/hoved }}
         <h1>Vi har endret ungdomsytelsen din</h1>
         <p>
-            Du har meldt inn inntekt på {{> felles/beløp rapportertInntekt}} {{> felles/periode-inline periode}}.
-            Nav har derfor redusert utbetalingen din for neste perioden
-            til {{> felles/beløp utbetalingBeløp}}.
+            Du får {{> felles/beløp utbetalingBeløp}} i ungdomsytelse for perioden {{> felles/periode-inline periode}}.
+            Det er fordi du har hatt en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.
         </p>
-        <p>Nav reduserer utbetalt beløp med {{reduksjonssats}} prosent av innmeldt inntekt. Dette tilsvarer en
-            reduksjon på {{> felles/beløp reduksjonBeløp}}. Dagsatsen blir redusert fra {{> felles/beløp dagsats}}
-            til {{> felles/beløp redusertDagsats}}. </p>
-        <p></p>
+        <p>Pengene får du ubetalt før den 10. denne måneden. </p>
+        <p>
+            Når du har en inntekt, får du mindre penger i ungdomsytelse. Vi regner ut hva {{reduksjonssats}} prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden.
+        </p>
+        <p>
+            Likevel får du til sammen <i>mer</i> penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen.
+        </p>
+        <p>
+            Se <a title="utregningseksempler" href="https://nav.no/ungdomsportal/beregning">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen.
+        </p>
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.</p>
     {{/felles/seksjon/hoved}}
 

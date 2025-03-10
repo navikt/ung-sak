@@ -144,17 +144,22 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
+        assertThatHtml(brevtekst).containsHtmlSubSequenceOnce(
             "<h1>Vi har endret ungdomsytelsen din</h1>"
-        ).containsSentencesOnceInSequence(
-            "Du har meldt inn inntekt på 10 000 kroner fra 1. desember 2024 til 31. desember 2024.",
-            "Nav har derfor redusert utbetalingen din for neste perioden til 7 393 kroner.",
-            "Nav reduserer utbetalt beløp med 66 prosent av innmeldt inntekt.",
-            "Dette tilsvarer en reduksjon på 6 600 kroner.",
-            "Dagsatsen blir redusert fra 636 kroner til 336 kroner.",
-            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx."
+        ).containsTextAndSentenceSequenceOnce(
+            "Vi har endret ungdomsytelsen din ",
+            "Du får 7 393 kroner i ungdomsytelse for perioden fra 1. desember 2024 til 31. desember 2024.",
+            "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden.",
+            "Pengene får du ubetalt før den 10. denne måneden.",
+            "Når du har en inntekt, får du mindre penger i ungdomsytelse.",
+            "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden.",
+            "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen.",
+            "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen.",
+            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.",
+            "Du har rett til å klage "
+        ).containsHtmlSubSequenceOnce(
+            "Se <a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen."
         );
-
     }
 
     @Test

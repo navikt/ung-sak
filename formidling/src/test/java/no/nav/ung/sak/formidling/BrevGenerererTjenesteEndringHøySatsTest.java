@@ -131,9 +131,9 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        assertThatHtml(brevtekst).containsHtmlOnceInSequence(
+        assertThatHtml(brevtekst).containsHtmlSubSequenceOnce(
             "<h1>Vi har endret ungdomsytelsen din</h1>"
-        ).containsSentencesOnceInSequence(
+        ).containsSentenceSubSequenceOnce(
             "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år.",
             "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år.",
             "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx."
