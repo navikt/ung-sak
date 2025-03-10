@@ -44,7 +44,7 @@ public class K9TilbakeRestKlient {
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
         this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
         this.uriOppdaterAktørId = tilUri(urlK9Tilbake, "forvaltning/aktør/oppdaterAktoerId");
-        this.k9tilbakeAktivert = !Environment.current().isLocal(); //i proaksis mocker bort k9-tilbake ved kjøring lokalt og i verdikjedetester.
+        this.k9tilbakeAktivert = false; //FIXME integrer mot tilbakekrevingsløsning
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
@@ -52,7 +52,7 @@ public class K9TilbakeRestKlient {
         if (k9tilbakeAktivert) {
             return restClient.get(uri, Boolean.class);
         } else {
-            log.info("k9-tilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
+            log.info("integrasjon mot tilbakekrevingsløsningen er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
             return false;
         }
     }
@@ -62,7 +62,7 @@ public class K9TilbakeRestKlient {
         if (k9tilbakeAktivert) {
             return restClient.getReturnsOptional(uri, BehandlingStatusOgFeilutbetalinger.class);
         } else {
-            log.info("k9-tilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
+            log.info("integrasjon mot tilbakekrevingsløsningen er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
             return Optional.empty();
         }
     }
