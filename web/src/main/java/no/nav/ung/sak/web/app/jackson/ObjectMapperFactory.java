@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.ung.kodeverk.KodeverdiSomStringSerializer;
+import no.nav.ung.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 
 import java.net.URI;
@@ -53,6 +55,9 @@ public class ObjectMapperFactory {
         Collection<Class<?>> restClasses = new RestImplementationClasses().getImplementationClasses();
 
         Set<Class<?>> scanClasses = new LinkedHashSet<>(restClasses);
+
+        scanClasses.add(VurderFeilutbetalingDto.class);
+
 
         // avled code location fra klassene
         scanClasses
