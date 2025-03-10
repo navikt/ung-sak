@@ -17,8 +17,6 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
@@ -32,7 +30,6 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
 
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
     private final RapportertInntektMapper rapportertInntektMapper;
-    private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
 
     //TODO hente fra et annet sted?
     public static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
@@ -42,11 +39,9 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
     @Inject
     public EndringRapportertInntektInnholdBygger(
         TilkjentYtelseRepository tilkjentYtelseRepository,
-        RapportertInntektMapper rapportertInntektMapper,
-        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
+        RapportertInntektMapper rapportertInntektMapper) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
     @Override
@@ -60,18 +55,9 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             throw new IllegalStateException("Fant ingen tilkjent ytelse i perioden" + resultatTidslinje.getLocalDateIntervals());
         }
 
-
         var rapporteInntekterTidslinje = rapportertInntektMapper.map(behandling.getId());
-        var satsTidslinje = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
-            .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"))
-            .getSatsTidslinje();
 
-        var satsOgInntektTidslinje = rapporteInntekterTidslinje.combine(satsTidslinje,
-            EndringRapportertInntektInnholdBygger::lagSatsOgRapportertInntektTidslinje,
-            LocalDateTimeline.JoinStyle.LEFT_JOIN);
-
-
-        var dtoTidslinje = relevantTilkjentYtelse.combine(satsOgInntektTidslinje,
+        var dtoTidslinje = relevantTilkjentYtelse.combine(rapporteInntekterTidslinje,
             EndringRapportertInntektInnholdBygger::mapTilTemplateDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
@@ -84,42 +70,24 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         );
     }
 
-    private static LocalDateSegment<OpprinnligSatsOgRapportertInntekt> lagSatsOgRapportertInntektTidslinje(
-        LocalDateInterval p, LocalDateSegment<RapporterteInntekter> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
-        var rapportertInntektSum = lhs.getValue().getRapporterteInntekter().stream()
-            .map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        Objects.requireNonNull(rhs, "Sats kan ikke være null for periode=%s med rapportert inntekt=%s".formatted(p.toString(), rapportertInntektSum.toPlainString()));
-        var sats = rhs.getValue();
-
-        return new LocalDateSegment<>(p, new OpprinnligSatsOgRapportertInntekt(sats.dagsats(), rapportertInntektSum));
-    }
-
     private static LocalDateSegment<EndringRapportertInntektDto> mapTilTemplateDto(
-        LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<OpprinnligSatsOgRapportertInntekt> rhs) {
+        LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<RapporterteInntekter> rhs) {
         var ty = lhs.getValue();
 
         Objects.requireNonNull(rhs, "Mangler sats og rapportert inntekt for periode %s for tilkjent ytelse %s"
             .formatted(p.toString(), ty.toString()));
 
-        var satsOgInntekt = rhs.getValue();
+        var rapportertInntektSum = rhs.getValue().getRapporterteInntekter().stream()
+            .map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new LocalDateSegment<>(p,
             new EndringRapportertInntektDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
-                satsOgInntekt.rapportertInntekt().longValue(),
+                rapportertInntektSum.setScale(0, RoundingMode.HALF_UP).longValue(),
                 ty.redusertBeløp().setScale(0, RoundingMode.HALF_UP).longValue(),
-                REDUSJON_PROSENT,
-                ty.reduksjon().setScale(0, RoundingMode.HALF_UP).longValue(),
-                satsOgInntekt.opprinnligSats().setScale(0, RoundingMode.HALF_UP).longValue(),
-                ty.dagsats().setScale(0, RoundingMode.HALF_UP).longValue()
+                REDUSJON_PROSENT
             )
         );
     }
 
-    /**
-     * Brukt for å kombinere flere tidslinjer
-     */
-    private record OpprinnligSatsOgRapportertInntekt(BigDecimal opprinnligSats, BigDecimal rapportertInntekt) {
-    }
 }

@@ -8,7 +8,7 @@ import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 
 public class VedtaksbrevStandardTekstVerifiserer {
     static void verifiserStandardVedtaksbrevTekster(String brevHtml, String fnr, UngTestScenario ungTestscenario) {
-        assertThatHtml(brevHtml).containsTextsOnceInSequence(
+        assertThatHtml(brevHtml).containsTextSubSequenceOnce(
             BrevUtils.brevDatoString(LocalDate.now()), //vedtaksdato
             "Til: " + ungTestscenario.navn(),
             "Fødselsnummer: " + fnr,
@@ -19,7 +19,7 @@ public class VedtaksbrevStandardTekstVerifiserer {
             "Trenger du mer informasjon?",
             "Med vennlig hilsen",
             "Nav Arbeid og ytelser"
-        ).containsHtmlOnceInSequence(
+        ).containsHtmlSubSequenceOnce(
             "<h2>Du har rett til å klage</h2>",
             "<h2>Du har rett til innsyn</h2>",
             "<h2>Trenger du mer informasjon?</h2>"
