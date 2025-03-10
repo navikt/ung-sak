@@ -50,6 +50,9 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
 
 
     /**
+     * Kan brukes til å sjekke at brevet henger sammen med riktig teksten uten noe i mellom.
+     * Husk å legge på punktum på setninger selv!
+     *
      * hvis setning slutter på punktum legges det på en space for å fange opp tegn etter punkt som ikke skal være der.
      */
     public HtmlAssert containsTextAndSentenceSequenceOnce(String... text) {

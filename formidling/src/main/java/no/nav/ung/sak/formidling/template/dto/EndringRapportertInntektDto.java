@@ -6,10 +6,7 @@ public record EndringRapportertInntektDto(
     PeriodeDto periode,
     long rapportertInntekt,
     long utbetalingBeløp,
-    int reduksjonssats,
-    long reduksjonBeløp,
-    long dagsats,
-    long redusertDagsats
+    int reduksjonssats
 
 ) implements TemplateInnholdDto  {
 }

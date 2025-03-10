@@ -93,8 +93,8 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var endringInnholdBygger =
             new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
-                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste),
-                ungdomsytelseGrunnlagRepository);
+                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste)
+            );
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
