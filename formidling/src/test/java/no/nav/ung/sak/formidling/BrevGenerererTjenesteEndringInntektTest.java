@@ -145,7 +145,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
-            "<h1>Nav har endret din ungdomsytelse</h1>"
+            "<h1>Vi har endret ungdomsytelsen din</h1>"
         ).containsSentencesOnceInSequence(
             "Du har meldt inn inntekt på 10 000 kroner fra 1. desember 2024 til 31. desember 2024.",
             "Nav har derfor redusert utbetalingen din for neste perioden til 7 393 kroner.",
@@ -175,7 +175,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Nav har endret din ungdomsytelse");
+            assertThat(pdfTekst).contains("Vi har endret ungdomsytelsen din");
         }
 
     }

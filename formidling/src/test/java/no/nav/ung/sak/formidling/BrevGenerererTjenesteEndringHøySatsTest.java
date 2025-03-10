@@ -132,7 +132,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst).containsHtmlOnceInSequence(
-            "<h1>Nav har endret din ungdomsytelse</h1>"
+            "<h1>Vi har endret ungdomsytelsen din</h1>"
         ).containsSentencesOnceInSequence(
             "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år.",
             "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år.",
@@ -164,7 +164,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Nav har endret din ungdomsytelse");
+            assertThat(pdfTekst).contains("Vi har endret ungdomsytelsen din");
         }
 
     }
