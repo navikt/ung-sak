@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
 
@@ -33,6 +34,12 @@ class MapperForYtelseType {
                 throw new IllegalStateException("Kan ikke opprette mapping fra " + FagsakYtelseType.class.getName() + "." + egenKode.name() + " til " + YtelseType.class.getName()
                     + " siden det ikke finnes tilsvarende i " + YtelseType.class.getName());
             }
+        }
+
+        if (Environment.current().isDev()){
+            //FIXME fjern
+            //midlertidig mapping i dev for å kunne teste simulering
+            map.put(FagsakYtelseType.UNGDOMSYTELSE, YtelseType.FRISINN);
         }
         return map;
     }

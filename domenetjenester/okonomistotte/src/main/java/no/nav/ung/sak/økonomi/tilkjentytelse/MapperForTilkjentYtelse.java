@@ -1,20 +1,20 @@
 package no.nav.ung.sak.økonomi.tilkjentytelse;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.SatsType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class MapperForTilkjentYtelse {
 
@@ -36,8 +36,15 @@ public class MapperForTilkjentYtelse {
             logger.info("Periode {}-{} hadde ingen beløp over 0 og ble ignorert", periode.getFom(), periode.getTom());
             return null;
         }
+        Inntektskategori inntektskategori = Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER;
+        if (Environment.current().isDev()){
+            //midlertidig mapping i dev for å kunne teste simulering
+            //FIXME fjern
+            inntektskategori = Inntektskategori.FRILANSER;
+        }
+
         return new TilkjentYtelsePeriodeV1(periode.getFom(), periode.getTom(), List.of(
-            new TilkjentYtelseAndelV1(true, Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER, periode.getValue().dagsats(), SatsType.DAG, periode.getValue().utbetalingsgrad())));
+            new TilkjentYtelseAndelV1(true, inntektskategori, periode.getValue().dagsats(), SatsType.DAG, periode.getValue().utbetalingsgrad())));
     }
 
 }
