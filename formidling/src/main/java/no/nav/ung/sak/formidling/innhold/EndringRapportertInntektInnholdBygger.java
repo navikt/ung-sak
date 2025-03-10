@@ -62,7 +62,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         if (dtoTidslinje.size() > 1) {
-            LOG.warn("Flere enn 1 periode, men kun første periode vil bli hensyntatt - brevet kan bli feil...");
+            throw new IllegalStateException("Kun 1 periode støttes. Fikk %s perioder. ".formatted(dtoTidslinje.size()));
         }
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT,
