@@ -53,10 +53,10 @@ public class PdpRequestMapper {
     private static AksjonspunktType aksjonspunktTypeFraKode(String kode) {
         return switch (kode) {
             case null -> null;
-            case "AUTO" -> AksjonspunktType.AUTOPUNKT;
-            case "MANU" -> AksjonspunktType.MANUELL;
-            case "OVST" -> AksjonspunktType.OVERSTYRING;
-            case "SAOV" -> AksjonspunktType.SAKSBEHANDLEROVERSTYRING;
+            case "Autopunkt" -> AksjonspunktType.AUTOPUNKT;
+            case "Manuell" -> AksjonspunktType.MANUELL;
+            case "Overstyring" -> AksjonspunktType.OVERSTYRING;
+            case "Saksbehandleroverstyring" -> AksjonspunktType.SAKSBEHANDLEROVERSTYRING;
             default -> throw new IllegalStateException("Unexpected value: " + kode);
         };
     }
