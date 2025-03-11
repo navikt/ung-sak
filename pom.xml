@@ -36,8 +36,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>4.4.16</felles.version>
-        <swagger.version>2.2.28</swagger.version>
-        <junit.version>5.12.0</junit.version>
+        <swagger.version>2.2.29</swagger.version>
         <k9format.version>11.4.2</k9format.version>
         <jackson.version>2.18.3</jackson.version>
         <asm.version>9.7.1</asm.version>
@@ -318,7 +317,7 @@
             <dependency>
                 <groupId>no.nav.sif.abac</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.0.6</version>
+                <version>1.1.0</version>
             </dependency>
 
             <dependency>

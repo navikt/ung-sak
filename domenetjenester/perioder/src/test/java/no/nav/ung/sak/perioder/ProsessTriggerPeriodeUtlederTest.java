@@ -48,17 +48,7 @@ class ProsessTriggerPeriodeUtlederTest {
     }
 
     @Test
-    void skal_ikke_finne_perioder_for_ikke_relevant_trigger() {
-        // Arrange
-        prosessTriggereRepository.leggTil(behandlingId, Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRET_FORDELING, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()))));
-        // Act
-        final var resultat = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
-        // Assert
-        assertThat(resultat.isEmpty()).isTrue();
-    }
-
-    @Test
-    void skal_finne_en_periode_for_relevant_trigger() {
+    void skal_finne_en_periode_trigger() {
         // Arrange
         final var fom = LocalDate.now();
         final var tom = LocalDate.now().plusDays(10);
@@ -70,7 +60,7 @@ class ProsessTriggerPeriodeUtlederTest {
     }
 
     @Test
-    void skal_finne_en_periode_for_to_overlappende_relevante_triggere() {
+    void skal_finne_en_periode_for_to_overlappende_triggere() {
         // Arrange
         final var fom = LocalDate.now();
         final var tom = LocalDate.now().plusDays(10);
@@ -85,7 +75,7 @@ class ProsessTriggerPeriodeUtlederTest {
     }
 
     @Test
-    void skal_finne_tidslinje_for_to_ikke_overlappende_relevante_triggere() {
+    void skal_finne_tidslinje_for_to_ikke_overlappende_triggere() {
         // Arrange
         final var fom = LocalDate.now();
         final var tom = LocalDate.now().plusDays(10);

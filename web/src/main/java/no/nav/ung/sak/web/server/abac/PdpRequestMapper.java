@@ -1,10 +1,14 @@
 package no.nav.ung.sak.web.server.abac;
 
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.sif.abac.kontrakt.abac.*;
+import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
+import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
+import no.nav.sif.abac.kontrakt.abac.AksjonspunktType;
+import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt;
+import no.nav.sif.abac.kontrakt.abac.ResourceType;
 import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonDto;
-import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonTilgangskontrollInputDto;
+import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
 import no.nav.sif.abac.kontrakt.person.AktørId;
 import no.nav.sif.abac.kontrakt.person.PersonIdent;
 
@@ -15,8 +19,8 @@ import java.util.Set;
 
 public class PdpRequestMapper {
 
-    public static SaksinformasjonTilgangskontrollInputDto map(PdpRequest pdpRequest){
-        return new SaksinformasjonTilgangskontrollInputDto(
+    public static SaksinformasjonOgPersonerTilgangskontrollInputDto map(PdpRequest pdpRequest){
+        return new SaksinformasjonOgPersonerTilgangskontrollInputDto(
             pdpRequest.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE).stream().map(AktørId::new).toList(),
             pdpRequest.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_FNR).stream().map(PersonIdent::new).toList(),
             operasjon(pdpRequest),
@@ -53,10 +57,10 @@ public class PdpRequestMapper {
     private static AksjonspunktType aksjonspunktTypeFraKode(String kode) {
         return switch (kode) {
             case null -> null;
-            case "AUTO" -> AksjonspunktType.AUTOPUNKT;
-            case "MANU" -> AksjonspunktType.MANUELL;
-            case "OVST" -> AksjonspunktType.OVERSTYRING;
-            case "SAOV" -> AksjonspunktType.SAKSBEHANDLEROVERSTYRING;
+            case "Autopunkt" -> AksjonspunktType.AUTOPUNKT;
+            case "Manuell" -> AksjonspunktType.MANUELL;
+            case "Overstyring" -> AksjonspunktType.OVERSTYRING;
+            case "Saksbehandleroverstyring" -> AksjonspunktType.SAKSBEHANDLEROVERSTYRING;
             default -> throw new IllegalStateException("Unexpected value: " + kode);
         };
     }

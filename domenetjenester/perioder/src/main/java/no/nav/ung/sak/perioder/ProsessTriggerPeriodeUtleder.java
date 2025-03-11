@@ -1,8 +1,5 @@
 package no.nav.ung.sak.perioder;
 
-import java.util.Collection;
-import java.util.Set;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -13,18 +10,12 @@ import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
+import java.util.Collection;
+import java.util.Set;
+
 @Dependent
 public class ProsessTriggerPeriodeUtleder {
 
-    // Prosesstriggere som er relevante. RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM håndteres i UtledPeriodeTilVurderingFraUngdomsprogram
-    public static final Set<BehandlingÅrsakType> RELEVANTE_ÅRSAKER = Set.of(
-        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
-        BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
-        BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
-        BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
-        BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
-        BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE
-    );
     private final ProsessTriggereRepository prosessTriggereRepository;
     private final UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
 
@@ -41,11 +32,13 @@ public class ProsessTriggerPeriodeUtleder {
      * @return Tidslinje for perioder til vurdering
      */
     public LocalDateTimeline<Set<BehandlingÅrsakType>> utledTidslinje(Long behandligId) {
-        return prosessTriggereRepository.hentGrunnlag(behandligId)
+        final var triggere = prosessTriggereRepository.hentGrunnlag(behandligId)
             .stream()
             .map(ProsessTriggere::getTriggere)
             .flatMap(Collection::stream)
-            .filter(it -> RELEVANTE_ÅRSAKER.contains(it.getÅrsak()))
+            .toList();
+        return triggere
+            .stream()
             .map(p -> new LocalDateTimeline<>(finnPeriodeForBehandlingsårsak(behandligId, p, p.getÅrsak()), Set.of(p.getÅrsak())))
             .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::union))
             .orElse(LocalDateTimeline.empty());
