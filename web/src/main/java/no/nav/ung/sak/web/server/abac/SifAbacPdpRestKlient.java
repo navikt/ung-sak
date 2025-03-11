@@ -6,8 +6,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.Decision;
-import no.nav.sif.abac.kontrakt.abac.InnloggetAnsattDto;
-import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonTilgangskontrollInputDto;
+import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,7 +29,7 @@ public class SifAbacPdpRestKlient {
         this.uriTilgangskontrollMedSaksinformasjon = tilUri(urlSifAbacPdp, "saksinformasjon");
     }
 
-    public Decision sjekkTilgangForInnloggetBruker(SaksinformasjonTilgangskontrollInputDto input) {
+    public Decision sjekkTilgangForInnloggetBruker(SaksinformasjonOgPersonerTilgangskontrollInputDto input) {
         return restClient.post(uriTilgangskontrollMedSaksinformasjon, input, Decision.class);
     }
 
