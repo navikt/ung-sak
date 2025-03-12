@@ -168,7 +168,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
             Det betyr at du har rett på 1.33 x 124 028 = 165 370 kroner i året. \
             Dette gir en dagsats på 636 kroner. \
             For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
-            Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse \
+            Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
             Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
             """);
 
@@ -246,7 +246,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
             Det betyr at du har rett på 2 x 124 028 = 248 056 kroner i året. \
             Dette gir en dagsats på 954 kroner. \
             For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
-            Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse \
+            Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
             Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
             """);
 
@@ -291,7 +291,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
             Fra 1. juni 2025 til 29. november 2025 har du rett på 2 x 124 028 = 248 056 kroner i årsbeløp. \
             Dette gir en dagsats på 954 kroner i perioden. \
             For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
-            Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse \
+            Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
             Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
             """);
 
