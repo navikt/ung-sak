@@ -1,6 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.nio.charset.StandardCharsets;
@@ -109,7 +108,7 @@ class BrevGenerererTjenesteTest {
         assertThat(generertBrev.malType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
 
         var brevtekst = generertBrev.dokument().html();
-        assertThatHtml(brevtekst).containsText("Til: " + ungTestGrunnlag.navn());
+        assertThat(brevtekst).contains("Til: " + ungTestGrunnlag.navn());
 
     }
 

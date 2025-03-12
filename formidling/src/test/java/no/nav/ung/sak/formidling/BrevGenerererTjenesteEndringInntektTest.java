@@ -153,12 +153,13 @@ class BrevGenerererTjenesteEndringInntektTest {
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
 
         var brevtekst = generertBrev.dokument().html();
-        assertThat(BrevUtils.htmlToPlainText(brevtekst)).isEqualTo(forventet);
 
-        assertThatHtml(brevtekst).containsHtmlSubSequenceOnce(
-            "<h1>Vi har endret ungdomsytelsen din</h1>",
-            "Se <a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen."
-        );
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsytelsen din</h1>",
+                "Se <a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen."
+            );
     }
 
     @Test

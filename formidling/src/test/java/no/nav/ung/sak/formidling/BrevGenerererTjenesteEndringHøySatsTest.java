@@ -90,8 +90,8 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         var endringInnholdBygger = new EndringHøySatsInnholdBygger(ungdomsytelseGrunnlagRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-                tilkjentYtelseRepository);
+            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
+            tilkjentYtelseRepository);
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
 
@@ -100,8 +100,8 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
             personopplysningRepository,
-                new VedtaksbrevRegler(
-                        repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
+            new VedtaksbrevRegler(
+                repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
     }
 
     @Test()
@@ -137,11 +137,11 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        assertThat(BrevUtils.htmlToPlainText(brevtekst)).isEqualTo(forventet);
-
-        assertThatHtml(brevtekst).containsHtmlSubSequenceOnce(
-            "<h1>Vi har endret ungdomsytelsen din</h1>"
-        );
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsytelsen din</h1>"
+            );
 
     }
 
