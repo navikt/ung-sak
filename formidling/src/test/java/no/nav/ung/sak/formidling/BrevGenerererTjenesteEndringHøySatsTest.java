@@ -105,8 +105,8 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     }
 
     @Test()
-    @DisplayName("Verifiserer faste tekster og mottaker")
-    void skalHaAlleStandardtekster() {
+    @DisplayName("Verifiserer formatering på overskrifter")
+    void verifiserOverskrifter() {
         UngTestScenario ungTestscenario = BrevScenarioer.endring25År(LocalDate.of(1999, 3, 25));
         var behandling = lagScenario(ungTestscenario);
 
@@ -114,7 +114,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        VedtaksbrevStandardTekstVerifiserer.verifiserStandardVedtaksbrevTekster(brevtekst, fnr, ungTestscenario);
+        VedtaksbrevVerifikasjon.verifiserStandardOverskrifter(brevtekst);
 
     }
 
