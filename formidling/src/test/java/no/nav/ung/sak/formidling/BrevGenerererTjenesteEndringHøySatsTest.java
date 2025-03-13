@@ -90,8 +90,8 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         var endringInnholdBygger = new EndringHøySatsInnholdBygger(ungdomsytelseGrunnlagRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-                new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-                tilkjentYtelseRepository);
+            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
+            tilkjentYtelseRepository);
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
 
@@ -100,13 +100,13 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
             personopplysningRepository,
-                new VedtaksbrevRegler(
-                        repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
+            new VedtaksbrevRegler(
+                repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
     }
 
     @Test()
-    @DisplayName("Verifiserer faste tekster og mottaker")
-    void skalHaAlleStandardtekster() {
+    @DisplayName("Verifiserer formatering på overskrifter")
+    void verifiserOverskrifter() {
         UngTestScenario ungTestscenario = BrevScenarioer.endring25År(LocalDate.of(1999, 3, 25));
         var behandling = lagScenario(ungTestscenario);
 
@@ -114,7 +114,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        VedtaksbrevStandardTekstVerifiserer.verifiserStandardVedtaksbrevTekster(brevtekst, fnr, ungTestscenario);
+        VedtaksbrevVerifikasjon.verifiserStandardOverskrifter(brevtekst);
 
     }
 
@@ -123,6 +123,12 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     void standardEndringHøySats() {
         LocalDate fødselsdato = LocalDate.of(1999, 3, 25);
         var ungTestGrunnlag = BrevScenarioer.endring25År(fødselsdato);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret ungdomsytelsen din " +
+            "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år. " +
+            "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år. " +
+            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -131,19 +137,12 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        assertThatHtml(brevtekst).containsHtmlSubSequenceOnce(
-            "<h1>Vi har endret ungdomsytelsen din</h1>"
-        ).containsSentenceSubSequenceOnce(
-            "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år.",
-            "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år.",
-            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx."
-        );
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsytelsen din</h1>"
+            );
 
-    }
-
-    @NotNull
-    private UngTestRepositories lagUngTestRepositories() {
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
     }
 
     @Test
@@ -167,6 +166,11 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             assertThat(pdfTekst).contains("Vi har endret ungdomsytelsen din");
         }
 
+    }
+
+    @NotNull
+    private UngTestRepositories lagUngTestRepositories() {
+        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
     }
 
 
