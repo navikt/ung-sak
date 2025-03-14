@@ -65,7 +65,7 @@ public class UngdomsytelseGrunnlag {
         return new LocalDateTimeline<>(segmenter);
     }
 
-    public LocalDateTimeline<UngdomsytelseUttak> getUtbetalingsgradTidslinje() {
+    public LocalDateTimeline<UngdomsytelseUttak> getAvslagstidslinjeFraUttak() {
         var segmenter = uttakPerioder.getPerioder().stream().map(p ->
             new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), new UngdomsytelseUttak(p.getAvslagsårsak())
             )).toList();

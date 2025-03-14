@@ -63,6 +63,21 @@ public class FagsakRepository {
         return opt;
     }
 
+    public List<Fagsak> hentAlleFagsakerSomOverlapper(LocalDate fom, LocalDate tom) {
+        Objects.requireNonNull(fom, "fom");
+        Objects.requireNonNull(tom, "tom");
+        String sqlString = """
+                    select f.* from Fagsak f
+                      where f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+            """;
+
+        Query query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
+        query.setParameter("fom", fom);
+        query.setParameter("tom", tom);
+
+        return query.getResultList();
+    }
+
     // TODO: Burde kanskje ekskludere OBSOLETE her?
     public List<Fagsak> hentForBruker(AktørId aktørId) {
         TypedQuery<Fagsak> query = entityManager
