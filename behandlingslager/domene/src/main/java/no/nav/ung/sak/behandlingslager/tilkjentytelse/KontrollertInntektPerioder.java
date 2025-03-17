@@ -25,7 +25,7 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     private boolean aktiv = true;
 
     @Immutable
-    @JoinColumn(name = "kontrollert_perioder_id", nullable = false, updatable = false)
+    @JoinColumn(name = "kontrollert_inntekt_perioder_id", nullable = false, updatable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
 
