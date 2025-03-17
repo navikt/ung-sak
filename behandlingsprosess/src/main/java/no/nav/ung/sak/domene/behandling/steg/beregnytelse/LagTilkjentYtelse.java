@@ -19,7 +19,7 @@ public class LagTilkjentYtelse {
     static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje) {
         return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
                 // Dersom det ikke er rapportert inntekt settes denne til 0, ellers summeres alle inntektene
-                final var rapporertinntekt = rapportertInntekt == null ? BigDecimal.ZERO : rapportertInntekt.getValue().getRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
+                final var rapporertinntekt = rapportertInntekt == null ? BigDecimal.ZERO : rapportertInntekt.getValue().getBrukerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
                 // Mapper verdier til TilkjentYtelsePeriodeResultat
                 final var periodeResultat = TikjentYtelseBeregner.beregn(di, sats.getValue(), rapporertinntekt);
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);

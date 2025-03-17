@@ -37,7 +37,9 @@ class LagTilkjentYtelseTest {
 
         LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(LocalDate.of(2023, 1, 15), LocalDate.of(2023, 2, 15),
-                new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(50000)))))
+                new RapporterteInntekter(
+                    Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(50000))),
+                        Set.of()))
         ));
 
         // Call the method under test
@@ -114,7 +116,9 @@ class LagTilkjentYtelseTest {
 
         final var rapportertInntekt = BigDecimal.valueOf(150);
         LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, rapportertInntekt))))
+            new LocalDateSegment<>(fom, tom, new RapporterteInntekter(
+                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, rapportertInntekt)),
+                Set.of()))
         ));
 
         // Act
