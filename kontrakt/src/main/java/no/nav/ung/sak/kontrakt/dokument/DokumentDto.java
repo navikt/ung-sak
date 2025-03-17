@@ -12,7 +12,7 @@ import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.ung.sak.typer.JournalpostId;
 
 public class DokumentDto {
-    private List<Long> behandlinger = new ArrayList<>();
+    private List<Long> behandlinger;
     private String dokumentId;
     private String gjelderFor;
     private JournalpostId journalpostId;
@@ -25,7 +25,7 @@ public class DokumentDto {
     private String brevkode;
 
     public DokumentDto(String basePath) {
-        this.basePath = basePath + "&journalpostId=%s&dokumentId=%s";
+        this.basePath = String.format("%s",basePath) + "&journalpostId=%s&dokumentId=%s";
         this.behandlinger = new ArrayList<>();
     }
 
@@ -122,7 +122,8 @@ public class DokumentDto {
 
     void genererLenke() {
         if (journalpostId != null && journalpostId.getVerdi() != null && dokumentId != null) {
-            this.href = String.format("%s", basePath) + String.format("%s/%s", journalpostId.getVerdi(), dokumentId);
+            this.href = String.format(basePath, journalpostId.getVerdi(), dokumentId);
         }
+
     }
 }
