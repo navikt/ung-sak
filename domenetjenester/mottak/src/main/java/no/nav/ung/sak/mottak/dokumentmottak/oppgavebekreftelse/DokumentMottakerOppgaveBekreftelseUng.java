@@ -1,6 +1,12 @@
 package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+
+import java.util.Collection;
+import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.DatoEndring;
 import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretFomDatoBekreftelse;
@@ -12,17 +18,11 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
-
-import java.util.Collection;
-import java.util.List;
-
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 
 @ApplicationScoped
@@ -34,6 +34,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
+    private Instance<BekreftelseHåndterer> bekreftelseMottakere;
 
     public DokumentMottakerOppgaveBekreftelseUng() {
     }
@@ -42,11 +43,14 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
     public DokumentMottakerOppgaveBekreftelseUng(OppgaveBekreftelseParser oppgaveBekreftelseParser,
                                                  MottatteDokumentRepository mottatteDokumentRepository,
                                                  UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
-                                                 HistorikkinnslagTjeneste historikkinnslagTjeneste) {
+                                                 HistorikkinnslagTjeneste historikkinnslagTjeneste,
+                                                 Instance<BekreftelseHåndterer> bekreftelseMottakere
+    ) {
         this.oppgaveBekreftelseParser = oppgaveBekreftelseParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
+        this.bekreftelseMottakere = bekreftelseMottakere;
     }
 
     @Override
@@ -59,14 +63,14 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
             if (oppgaveBekreftelse.getKildesystem().isPresent()) {
                 dokument.setKildesystem(oppgaveBekreftelse.getKildesystem().get().getKode());
             }
-            DatoEndring bekreftelse = oppgaveBekreftelse.getBekreftelse();
-            final var bekreftetPeriodeEndring = new UngdomsprogramBekreftetPeriodeEndring(
-                bekreftelse.getNyDato(),
-                dokument.getJournalpostId(),
-                finnBekreftetPeriodeEndring(bekreftelse));
 
-            ungdomsytelseStartdatoRepository.lagre(behandlingId, bekreftetPeriodeEndring);
-            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId());
+            BekreftelseHåndterer bekreftelseHåndterer = bekreftelseMottakere
+                .select(new OppgaveTypeRef.OppgaveTypeRefLiteral(oppgaveBekreftelse.getBekreftelse().getType()))
+                .get();
+
+            bekreftelseHåndterer.håndter(new OppgaveBekreftelseInnhold(
+                dokument.getJournalpostId(), behandling, oppgaveBekreftelse
+            ));
         }
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
     }
