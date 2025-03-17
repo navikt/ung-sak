@@ -1,6 +1,5 @@
 package no.nav.ung.sak.ytelse.uttalelse;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 
 import java.util.List;
