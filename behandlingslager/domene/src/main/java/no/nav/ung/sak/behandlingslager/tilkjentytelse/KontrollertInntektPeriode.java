@@ -23,10 +23,10 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
-    @Column(name = "arbeidsinntekt", nullable = false)
+    @Column(name = "arbeidsinntekt")
     private BigDecimal arbeidsinntekt;
 
-    @Column(name = "ytelse", nullable = false)
+    @Column(name = "ytelse")
     private BigDecimal ytelse;
 
     protected KontrollertInntektPeriode() {
@@ -79,17 +79,11 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         }
 
         public Builder medArbeidsinntekt(BigDecimal arbeidsinntekt) {
-            if (arbeidsinntekt == null) {
-                throw new IllegalArgumentException("arbeidsinntekt kan ikke være null");
-            }
             this.arbeidsinntekt = arbeidsinntekt;
             return this;
         }
 
         public Builder medYtelse(BigDecimal ytelse) {
-            if (ytelse == null) {
-                throw new IllegalArgumentException("reduksjon kan ikke være null");
-            }
             this.ytelse = ytelse;
             return this;
         }
