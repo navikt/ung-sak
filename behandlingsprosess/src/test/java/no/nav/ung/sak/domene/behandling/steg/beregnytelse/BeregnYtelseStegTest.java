@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,8 +67,8 @@ class BeregnYtelseStegTest {
             behandlingRepository);
         beregnYtelseSteg = new BeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
-            new RapportertInntektMapper(inntektArbeidYtelseTjeneste, ytelseperiodeUtleder),
-            ytelseperiodeUtleder);
+            ytelseperiodeUtleder,
+            new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository));
 
         fagsakRepository = new FagsakRepository(entityManager);
 

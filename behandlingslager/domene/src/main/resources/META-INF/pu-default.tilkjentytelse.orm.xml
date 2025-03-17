@@ -6,8 +6,14 @@
 
     <sequence-generator name="SEQ_TILKJENT_YTELSE" allocation-size="50" sequence-name="SEQ_TILKJENT_YTELSE"/>
     <sequence-generator name="SEQ_TILKJENT_YTELSE_PERIODE" allocation-size="50" sequence-name="SEQ_TILKJENT_YTELSE_PERIODE"/>
+    <sequence-generator name="SEQ_KONTROLLERT_INNTEKT_PERIODER" allocation-size="50" sequence-name="SEQ_KONTROLLERT_INNTEKT_PERIODER"/>
+    <sequence-generator name="SEQ_KONTROLLERT_INNTEKT_PERIODE" allocation-size="50" sequence-name="SEQ_KONTROLLERT_INNTEKT_PERIODE"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelse"/>
     <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode"/>
+
+    <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPerioder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode"/>
+
 
 </entity-mappings>
