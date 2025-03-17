@@ -14,7 +14,7 @@ public class KontrollerInntektTjeneste {
 
 
 
-    public KontrollResultat utførKontroll(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
+    public static KontrollResultat utførKontroll(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
                                           LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
                                           LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje) {
 

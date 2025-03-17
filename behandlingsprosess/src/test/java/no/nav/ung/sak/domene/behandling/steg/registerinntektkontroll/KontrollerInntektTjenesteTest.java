@@ -22,13 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class KontrollerInntektTjenesteTest {
 
-    private KontrollerInntektTjeneste tjeneste;
-
-    @BeforeEach
-    void setUp() {
-        tjeneste = new KontrollerInntektTjeneste();
-    }
-
     @Test
     void utførKontroll() {
     }
@@ -43,7 +36,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = tjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST, resultat);
@@ -62,7 +55,7 @@ class KontrollerInntektTjenesteTest {
             new BrukersUttalelseForRegisterinntekt(Status.BEKREFTET, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))), new Uttalelse(false)));
 
         // Act
-        KontrollResultat resultat = tjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(KontrollResultat.OPPRETT_AKSJONSPUNKT, resultat);
@@ -82,7 +75,7 @@ class KontrollerInntektTjenesteTest {
             new BrukersUttalelseForRegisterinntekt(Status.BEKREFTET, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(registerFraUttalelse))), new Uttalelse(false)));
 
         // Act
-        KontrollResultat resultat = tjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST, resultat);
@@ -98,7 +91,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = tjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(KontrollResultat.BRUK_INNTEKT_FRA_BRUKER, resultat);
@@ -114,7 +107,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = tjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(KontrollResultat.BRUK_INNTEKT_FRA_BRUKER, resultat);
@@ -130,7 +123,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = tjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER, resultat);
@@ -148,7 +141,7 @@ class KontrollerInntektTjenesteTest {
             new BrukersUttalelseForRegisterinntekt(Status.VENTER, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(10_002))), null));
 
         // Act
-        KontrollResultat resultat = tjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
+        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
 
         // Assert
         assertEquals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST, resultat);

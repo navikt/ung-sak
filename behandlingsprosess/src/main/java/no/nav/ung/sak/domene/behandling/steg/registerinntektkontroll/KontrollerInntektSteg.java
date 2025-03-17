@@ -18,18 +18,15 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RapportertInntektMapper rapportertInntektMapper;
-    private KontrollerInntektTjeneste kontrollerInntektTjeneste;
     private RegisterinntektUttalelseTjeneste registerinntektUttalelseTjeneste;
 
 
     @Inject
     public KontrollerInntektSteg(ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                  RapportertInntektMapper rapportertInntektMapper,
-                                 KontrollerInntektTjeneste kontrollerInntektTjeneste,
                                  RegisterinntektUttalelseTjeneste registerinntektUttalelseTjeneste) {
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.kontrollerInntektTjeneste = kontrollerInntektTjeneste;
         this.registerinntektUttalelseTjeneste = registerinntektUttalelseTjeneste;
     }
 
@@ -45,7 +42,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         final var registerinntekterForIkkeGodkjentUttalelse = rapportertInntektMapper.finnRegisterinntekterForUttalelse(kontekst.getBehandlingId(), uttalelser);
 
 
-        final var kontrollResultat = kontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForIkkeGodkjentUttalelse);
+        final var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForIkkeGodkjentUttalelse);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter(
         );
