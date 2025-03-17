@@ -23,10 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class KontrollerInntektTjenesteTest {
 
     @Test
-    void utførKontroll() {
-    }
-
-    @Test
     void skal_sette_på_vent_til_rapporteringsfrist() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
