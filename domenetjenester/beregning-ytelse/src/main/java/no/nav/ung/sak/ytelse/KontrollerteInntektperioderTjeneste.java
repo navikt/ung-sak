@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -39,10 +40,16 @@ public class KontrollerteInntektperioderTjeneste {
         return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId)
             .stream()
             .flatMap(it -> it.getPerioder().stream())
-            .map(p -> new LocalDateTimeline<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), Set.of(
-                new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, p.getArbeidsinntekt()),
-                new RapportertInntekt(InntektType.YTELSE, p.getYtelse())
-            ))).reduce(LocalDateTimeline::crossJoin)
+            .map(p -> {
+                Set<RapportertInntekt> rapportertInntekter = new HashSet<>();
+                if (p.getArbeidsinntekt() != null)  {
+                    rapportertInntekter.add(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, p.getArbeidsinntekt()));
+                }
+                if (p.getYtelse() != null) {
+                    rapportertInntekter.add(new RapportertInntekt(InntektType.YTELSE, p.getYtelse()));
+                }
+                return new LocalDateTimeline<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), rapportertInntekter);
+            }).reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
     }
 
