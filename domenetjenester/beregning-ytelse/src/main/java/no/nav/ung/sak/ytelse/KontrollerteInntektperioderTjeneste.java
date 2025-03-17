@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,8 +22,7 @@ import java.util.Set;
 @Dependent
 public class KontrollerteInntektperioderTjeneste {
 
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
-
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
     public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository) {
@@ -31,21 +31,9 @@ public class KontrollerteInntektperioderTjeneste {
 
     public void opprettKontrollerteInntekterPerioder(Long behandlingId, LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
         final var relevantePerioderForKontroll = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
-        final var kontrollertePerioder = relevantePerioderForKontroll.combine(inntektTidslinje, lagTomListeForIngenInntekter(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .toSegments().stream().map(
-                s -> KontrollertInntektPeriode.ny()
-                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                    .medArbeidsinntekt(finnInntektAvType(s, InntektType.ARBEIDSTAKER_ELLER_FRILANSER))
-                    .medYtelse(finnInntektAvType(s, InntektType.YTELSE))
-                    .build()
-            ).toList();
-
-
+        final var kontrollertePerioder = mapTilKontrollerteInntektperioder(inntektTidslinje, relevantePerioderForKontroll);
         tilkjentYtelseRepository.lagre(behandlingId, kontrollertePerioder);
-
-
     }
-
 
     public LocalDateTimeline<Set<RapportertInntekt>> hentTidslinje(Long behandlingId) {
         return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId)
@@ -56,6 +44,17 @@ public class KontrollerteInntektperioderTjeneste {
                 new RapportertInntekt(InntektType.YTELSE, p.getYtelse())
             ))).reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
+    }
+
+    private static List<KontrollertInntektPeriode> mapTilKontrollerteInntektperioder(LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> relevantePerioderForKontroll) {
+        return relevantePerioderForKontroll.combine(inntektTidslinje, lagTomListeForIngenInntekter(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .toSegments().stream().map(
+                s -> KontrollertInntektPeriode.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+                    .medArbeidsinntekt(finnInntektAvType(s, InntektType.ARBEIDSTAKER_ELLER_FRILANSER))
+                    .medYtelse(finnInntektAvType(s, InntektType.YTELSE))
+                    .build()
+            ).toList();
     }
 
     private static LocalDateSegmentCombinator<Set<BehandlingÅrsakType>, Set<RapportertInntekt>, Set<RapportertInntekt>> lagTomListeForIngenInntekter() {
