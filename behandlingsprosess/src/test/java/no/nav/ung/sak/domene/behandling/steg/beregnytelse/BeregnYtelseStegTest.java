@@ -4,8 +4,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +47,7 @@ import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
 class BeregnYtelseStegTest {
+    public static final LocalDate FOM = LocalDate.now();
     @Inject
     private EntityManager entityManager;
     private BeregnYtelseSteg beregnYtelseSteg;
@@ -72,11 +76,10 @@ class BeregnYtelseStegTest {
 
         fagsakRepository = new FagsakRepository(entityManager);
 
-        final var fom = LocalDate.now();
-        lagFagsakOgBehandling(fom);
-        lagUngdomsprogramperioder(fom);
-        lagSatser(fom);
-        lagUttakPerioder(fom);
+        lagFagsakOgBehandling(FOM);
+        lagUngdomsprogramperioder(FOM);
+        lagSatser(FOM);
+        lagUttakPerioder(FOM);
 
 
         lagreIAYUtenRapportertInntekt();
@@ -92,6 +95,21 @@ class BeregnYtelseStegTest {
         final var tilkjentYtelse = tilkjentYtelseRepository.hentTilkjentYtelse(behandling.getId());
         assertThat(tilkjentYtelse.get().getInput()).isNotNull();
         assertThat(tilkjentYtelse.get().getSporing()).isNotNull();
+    }
+
+    @Test
+    void skal_få_tilkjent_ytelse_i_periode_uten_inntekt_med_gjenomført_kontroll() {
+        final var kontrollertInntektPeriode = KontrollertInntektPeriode.ny().medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1).withDayOfMonth(1), FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))).build();
+        tilkjentYtelseRepository.lagre(behandling.getId(), List.of(kontrollertInntektPeriode));
+        final var behandleStegResultat = beregnYtelseSteg.utførSteg(new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling.getId())));
+        final var tilkjentYtelse = tilkjentYtelseRepository.hentTilkjentYtelse(behandling.getId());
+        assertThat(tilkjentYtelse.get().getInput()).isNotNull();
+        assertThat(tilkjentYtelse.get().getSporing()).isNotNull();
+
+        final var perioder = tilkjentYtelse.get().getPerioder();
+        assertThat(perioder.size()).isEqualTo(2);
+        assertThat(perioder.get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, FOM.with(TemporalAdjusters.lastDayOfMonth())));
+        assertThat(perioder.get(1).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1).withDayOfMonth(1), FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth())));
     }
 
     private void lagUngdomsprogramperioder(LocalDate fom) {

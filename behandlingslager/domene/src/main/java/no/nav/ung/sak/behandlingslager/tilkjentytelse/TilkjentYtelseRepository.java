@@ -37,8 +37,6 @@ public class TilkjentYtelseRepository {
         allePerioder.addAll(eksisterendePerioderSomSkalBeholdes);
         allePerioder.addAll(perioder);
 
-        allePerioder.forEach(entityManager::persist);
-
         final var ny = KontrollertInntektPerioder.ny(behandlingId)
             .medPerioder(allePerioder)
             .build();

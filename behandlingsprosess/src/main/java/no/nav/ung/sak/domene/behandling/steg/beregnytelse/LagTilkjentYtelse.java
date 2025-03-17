@@ -31,7 +31,10 @@ public class LagTilkjentYtelse {
         final var førstePeriode = new LocalDateTimeline<>(godkjentTidslinje.getMinLocalDate(), godkjentTidslinje.getMinLocalDate().with(TemporalAdjusters.lastDayOfMonth()), true).intersection(godkjentTidslinje);
         tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(førstePeriode);
         final var sistePeriode = new LocalDateTimeline<>(godkjentTidslinje.getMaxLocalDate().withDayOfMonth(1), godkjentTidslinje.getMaxLocalDate(), true).intersection(godkjentTidslinje);
-        tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePeriode);
+        // Legger til siste periode kun om vi har gjort kontroll av perioden før
+        if (tidslinjeSomSkalHaTilkjentYtelse.getMaxLocalDate().plusDays(1).isEqual(sistePeriode.getMinLocalDate())) {
+            tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePeriode);
+        }
 
 
         return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
