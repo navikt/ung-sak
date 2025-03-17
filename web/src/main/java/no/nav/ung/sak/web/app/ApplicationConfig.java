@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import jakarta.ws.rs.ApplicationPath;
+import no.nav.openapi.spec.utils.http.DynamicObjectMapperResolverVaryFilter;
 import no.nav.openapi.spec.utils.jackson.DynamicJacksonJsonProvider;
 import no.nav.openapi.spec.utils.openapi.OpenApiSetupHelper;
 import no.nav.ung.sak.web.app.exceptions.KnownExceptionMappers;
@@ -49,6 +50,7 @@ public class ApplicationConfig extends ResourceConfig {
         registerClasses(new LinkedHashSet<>(new RestImplementationClasses().getImplementationClasses()));
 
         register(ObjectMapperResolver.class);
+        register(DynamicObjectMapperResolverVaryFilter.class);
 
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
         register(CacheControlFeature.class);
