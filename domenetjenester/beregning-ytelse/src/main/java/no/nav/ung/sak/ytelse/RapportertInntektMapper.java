@@ -102,7 +102,7 @@ public class RapportertInntektMapper {
     }
 
     private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterinntektForPeriode(Map<InntektType, List<Inntektspost>> grupperteInntekter, LocalDateInterval intervall) {
-        final var inntekterForPeriode = getInntekterForPeriode();
+        final var inntekterForPeriode = new HashSet<RapportertInntekt>();
 
         final var overlappendeArbeidsinntekter = finnOverlappendeInntekterForType(intervall, grupperteInntekter, InntektType.ARBEIDSTAKER_ELLER_FRILANSER);
 
@@ -126,10 +126,6 @@ public class RapportertInntektMapper {
         return tidslinjeForPeriode;
     }
 
-    private static HashSet<RapportertInntekt> getInntekterForPeriode() {
-        return new HashSet<RapportertInntekt>();
-    }
-
     private static void validerBrukersRapporterteInntekterTidslinje(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<Boolean> ytelseTidslinje) {
         final var perioderUtenforYtelsesperioder = brukersRapporterteInntekter.getLocalDateIntervals().stream()
             .filter(it -> ytelseTidslinje.getLocalDateIntervals().stream().noneMatch(it::equals))
@@ -143,7 +139,7 @@ public class RapportertInntektMapper {
 
     private static LocalDateTimeline<RapporterteInntekter> kombinerTidslinjer(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<Set<RapportertInntekt>> registerTidslinje) {
         return brukersRapporterteInntekter.crossJoin(registerTidslinje, (di, bruker, register) -> {
-            final var rapporterteInntekter = new RapporterteInntekter(bruker.getValue(), register.getValue());
+            final var rapporterteInntekter = new RapporterteInntekter(bruker == null ? Set.of() : bruker.getValue(), register == null ? Set.of() : register.getValue());
             return new LocalDateSegment<>(di, rapporterteInntekter);
         });
     }
@@ -160,13 +156,9 @@ public class RapportertInntektMapper {
     }
 
     private static List<Inntektspost> finnOverlappendeInntekterForType(LocalDateInterval intervall, Map<InntektType, List<Inntektspost>> grupperteInntekter, InntektType inntektType) {
-        return grupperteInntekter.get(inntektType)
+        return grupperteInntekter.getOrDefault(inntektType, List.of())
             .stream().filter(it -> intervall.overlaps(new LocalDateInterval(it.getPeriode().getFomDato(), it.getPeriode().getTomDato())))
             .toList();
-    }
-
-    private static boolean overlapperDelvis(LocalDateInterval intervall, DatoIntervallEntitet inntektsperiode) {
-        return inntektsperiode.getFomDato().isBefore(intervall.getFomDato()) && inntektsperiode.getTomDato().isAfter(intervall.getFomDato());
     }
 
     private InntektType mapTilInntektType(Inntektspost it) {
