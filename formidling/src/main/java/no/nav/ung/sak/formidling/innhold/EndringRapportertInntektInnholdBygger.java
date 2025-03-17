@@ -55,7 +55,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             throw new IllegalStateException("Fant ingen tilkjent ytelse i perioden" + resultatTidslinje.getLocalDateIntervals());
         }
 
-        var rapporteInntekterTidslinje = rapportertInntektMapper.map(behandling.getId());
+        var rapporteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandling.getId());
 
         var dtoTidslinje = relevantTilkjentYtelse.combine(rapporteInntekterTidslinje,
             EndringRapportertInntektInnholdBygger::mapTilTemplateDto,
@@ -77,7 +77,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         Objects.requireNonNull(rhs, "Mangler sats og rapportert inntekt for periode %s for tilkjent ytelse %s"
             .formatted(p.toString(), ty.toString()));
 
-        var rapportertInntektSum = rhs.getValue().getRapporterteInntekter().stream()
+        var rapportertInntektSum = rhs.getValue().getBrukerRapporterteInntekter().stream()
             .map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new LocalDateSegment<>(p,

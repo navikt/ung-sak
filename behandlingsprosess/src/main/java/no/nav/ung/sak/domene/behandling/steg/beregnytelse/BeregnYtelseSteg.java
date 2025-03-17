@@ -66,7 +66,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         if (ungdomsytelseGrunnlag.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        final var rapportertInntektTidslinje = rapportertInntektMapper.map(kontekst.getBehandlingId());
+        final var rapportertInntektTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(kontekst.getBehandlingId());
         final var ytelseTidslinje = ytelseperiodeUtleder.utledYtelsestidslinje(kontekst.getBehandlingId());
 
         // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje

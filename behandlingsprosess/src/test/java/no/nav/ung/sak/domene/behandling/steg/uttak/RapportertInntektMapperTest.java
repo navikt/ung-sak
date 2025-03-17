@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,11 +32,12 @@ import no.nav.ung.sak.ytelse.RapporterteInntekter;
 class RapportertInntektMapperTest {
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = mock(InntektArbeidYtelseTjeneste.class);
+    private YtelseperiodeUtleder ytelseperiodeUtleder = mock(YtelseperiodeUtleder.class);
     private RapportertInntektMapper rapportertInntektMapper;
 
     @BeforeEach
     void setUp() {
-        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste);
+        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, ytelseperiodeUtleder);
     }
 
     @Test
@@ -47,11 +49,12 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.map(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
-            new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt))));
+            new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)),
+                Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
 
     }
@@ -66,14 +69,14 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.map(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
             new RapporterteInntekter(Set.of(
                 new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, arbeidsinntekt),
                 new RapportertInntekt(InntektType.SELVSTENDIG_NÆRINGSDRIVENDE, næringsinntekt)
-                )));
+                ), Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 
@@ -95,13 +98,17 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening, oppgittOpptjening2));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.map(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(
             List.of(
-                new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)))),
-                new LocalDateSegment<>(periode2.getFomDato(), periode2.getTomDato(), new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2))))
+                new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new RapporterteInntekter(
+                    Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)),
+                        Set.of())),
+                new LocalDateSegment<>(periode2.getFomDato(), periode2.getTomDato(), new RapporterteInntekter(
+                    Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)),
+                    Set.of()))
                 ));
         assertThat(tidslinje).isEqualTo(forventet);
     }
@@ -123,12 +130,13 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening, oppgittOpptjening2));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.map(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
             new RapporterteInntekter(
-                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2))));
+                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)),
+                Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 

@@ -61,12 +61,13 @@ class BeregnYtelseStegTest {
         inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
+        final var ytelseperiodeUtleder = new YtelseperiodeUtleder(
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
+            behandlingRepository);
         beregnYtelseSteg = new BeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
-            new RapportertInntektMapper(inntektArbeidYtelseTjeneste),
-            new YtelseperiodeUtleder(
-                new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
-                behandlingRepository));
+            new RapportertInntektMapper(inntektArbeidYtelseTjeneste, ytelseperiodeUtleder),
+            ytelseperiodeUtleder);
 
         fagsakRepository = new FagsakRepository(entityManager);
 
