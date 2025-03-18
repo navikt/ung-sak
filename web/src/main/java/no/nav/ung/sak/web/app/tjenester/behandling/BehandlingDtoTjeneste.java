@@ -1,19 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.get;
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.post;
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.setStandardfelter;
-
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -33,24 +19,13 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ResourceLink;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingOperasjonerDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingsresultatDto;
-import no.nav.ung.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
-import no.nav.ung.sak.kontrakt.behandling.GjenopptaBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.HenleggBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.ReåpneBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
+import no.nav.ung.sak.kontrakt.behandling.*;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårResultatDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
@@ -61,6 +36,11 @@ import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.*;
 
 /**
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
@@ -131,12 +111,9 @@ public class BehandlingDtoTjeneste {
     }
 
     private void leggTilStatusResultaterLinks(Behandling behandling, BehandlingDto dto) {
-        var idQueryParams = Map.of(BehandlingIdDto.NAME, behandling.getUuid().toString()); // legacy param name
         var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
 
-        if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
-            dto.leggTil(getFraMap(KontrollRestTjeneste.KONTROLLRESULTAT_V2_PATH, "kontrollresultat", idQueryParams));
-        } else if (BehandlingType.REVURDERING.equals(behandling.getType())) {
+        if (BehandlingType.REVURDERING.equals(behandling.getType())) {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", uuidQueryParams));
         }
         dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER, "behandling-perioder-årsak", uuidQueryParams));

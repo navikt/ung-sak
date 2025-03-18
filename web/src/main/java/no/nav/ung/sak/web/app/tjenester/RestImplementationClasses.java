@@ -1,9 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
@@ -15,7 +11,6 @@ import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjo
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.OverlapendeYtelserRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
@@ -43,6 +38,10 @@ import no.nav.ung.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.ung.sak.web.app.ungdomsytelse.UngdomsytelseRestTjeneste;
 import no.nav.ung.sak.web.server.abac.PipRestTjeneste;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RestImplementationClasses {
 
@@ -73,7 +72,6 @@ public class RestImplementationClasses {
         classes.add(PipRestTjeneste.class);
         classes.add(TilbakekrevingRestTjeneste.class);
         classes.add(AktørRestTjeneste.class);
-        classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(OverlapendeYtelserRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);

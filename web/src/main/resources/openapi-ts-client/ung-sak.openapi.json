@@ -5137,56 +5137,6 @@
         "tags" : [ "beregningsresultat" ]
       }
     },
-    "/api/behandling/kontrollresultat" : {
-      "get" : {
-        "deprecated" : true,
-        "description" : "Hent kontrollresultatet for en behandling",
-        "operationId" : "hentKontrollresultat",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : { }
-            }
-          }
-        },
-        "tags" : [ "kontroll" ]
-      }
-    },
-    "/api/behandling/kontrollresultat/resultat" : {
-      "get" : {
-        "deprecated" : true,
-        "description" : "Hent kontrollresultatet for en behandling",
-        "operationId" : "hentKontrollresultatV2_1",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : { }
-            }
-          }
-        },
-        "tags" : [ "kontroll" ]
-      }
-    },
     "/api/behandling/perioder" : {
       "get" : {
         "description" : "Hent perioder til behandling og kilden til disse",

@@ -59,7 +59,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
         return switch (kontrollResultat) {
             case BRUK_INNTEKT_FRA_BRUKER -> {
-                kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioder(kontekst.getBehandlingId(), rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::getBrukerRapporterteInntekter), prosessTriggerTidslinje);
+                kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(kontekst.getBehandlingId(), rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::getBrukerRapporterteInntekter), prosessTriggerTidslinje);
                 yield BehandleStegResultat.utførtUtenAksjonspunkter();
             }
             case OPPRETT_AKSJONSPUNKT -> BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));

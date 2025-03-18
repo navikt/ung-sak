@@ -1,6 +1,8 @@
 package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKildeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;
@@ -29,8 +31,11 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Column(name = "ytelse")
     private BigDecimal ytelse;
 
-    protected KontrollertInntektPeriode() {
-    }
+    @Convert(converter = KontrollertInntektKildeKodeverdiConverter.class)
+    @Column(name = "kilde", nullable = false)
+    private KontrollertInntektKilde kilde;
+
+
 
     KontrollertInntektPeriode(KontrollertInntektPeriode eksisterende) {
         this.periode = Range.closed(eksisterende.getPeriode().getFomDato(), eksisterende.getPeriode().getTomDato());
@@ -40,10 +45,12 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
                                       BigDecimal arbeidsinntekt,
-                                      BigDecimal ytelse) {
+                                      BigDecimal ytelse,
+                                      KontrollertInntektKilde kilde) {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
         this.arbeidsinntekt = arbeidsinntekt;
         this.ytelse = ytelse;
+        this.kilde = kilde;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -58,6 +65,10 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         return ytelse;
     }
 
+    public KontrollertInntektKilde getKilde() {
+        return kilde;
+    }
+
     public static Builder ny() {
         return new Builder();
     }
@@ -67,6 +78,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         private DatoIntervallEntitet periode;
         private BigDecimal arbeidsinntekt;
         private BigDecimal ytelse;
+        private KontrollertInntektKilde kilde;
 
         private Builder() {}
 
@@ -88,9 +100,14 @@ public class KontrollertInntektPeriode extends BaseEntitet {
             return this;
         }
 
+        public Builder medKilde(KontrollertInntektKilde kilde) {
+            this.kilde = kilde;
+            return this;
+        }
+
 
         public KontrollertInntektPeriode build() {
-            return new KontrollertInntektPeriode(periode, arbeidsinntekt, ytelse);
+            return new KontrollertInntektPeriode(periode, arbeidsinntekt, ytelse, kilde);
         }
 
 
