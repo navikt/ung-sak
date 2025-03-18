@@ -90,12 +90,12 @@ public class RapportertInntektMapper {
     }
 
     private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<Boolean> ytelseTidslinje, Map<InntektType, List<Inntektspost>> grupperteInntekter) {
-        final var registerTidslinje = new LocalDateTimeline<Set<RapportertInntekt>>(Set.of());
+        var registerTidslinje = new LocalDateTimeline<Set<RapportertInntekt>>(Set.of());
 
         for (var intervall : ytelseTidslinje.getLocalDateIntervals()) {
 
             final var tidslinjeForPeriode = finnRegisterinntektForPeriode(grupperteInntekter, intervall);
-            registerTidslinje.crossJoin(tidslinjeForPeriode);
+            registerTidslinje = registerTidslinje.crossJoin(tidslinjeForPeriode);
 
         }
         return registerTidslinje;

@@ -6,13 +6,16 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -25,14 +28,21 @@ public class KontrollerteInntektperioderTjeneste {
 
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
+
     @Inject
     public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
-    public void opprettKontrollerteInntekterPerioder(Long behandlingId, LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
+    public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId, LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
         final var relevantePerioderForKontroll = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
-        final var kontrollertePerioder = mapTilKontrollerteInntektperioder(inntektTidslinje, relevantePerioderForKontroll);
+        final var kontrollertePerioder = mapTilKontrollerteInntektperioder(inntektTidslinje.mapValue(it -> new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, it)), relevantePerioderForKontroll, Optional.of(KontrollertInntektKilde.BRUKER));
+        tilkjentYtelseRepository.lagre(behandlingId, kontrollertePerioder);
+    }
+
+    public void opprettKontrollerteInntekterPerioderFraRegister(Long behandlingId, LocalDateTimeline<RapportertInntektOgKilde> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
+        final var relevantePerioderForKontroll = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        final var kontrollertePerioder = mapTilKontrollerteInntektperioder(inntektTidslinje, relevantePerioderForKontroll, Optional.empty());
         tilkjentYtelseRepository.lagre(behandlingId, kontrollertePerioder);
     }
 
@@ -53,23 +63,24 @@ public class KontrollerteInntektperioderTjeneste {
             .orElse(LocalDateTimeline.empty());
     }
 
-    private static List<KontrollertInntektPeriode> mapTilKontrollerteInntektperioder(LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> relevantePerioderForKontroll) {
-        return relevantePerioderForKontroll.combine(inntektTidslinje, lagTomListeForIngenInntekter(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+    private static List<KontrollertInntektPeriode> mapTilKontrollerteInntektperioder(LocalDateTimeline<RapportertInntektOgKilde> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> relevantePerioderForKontroll, Optional<KontrollertInntektKilde> defaultKilde) {
+        return relevantePerioderForKontroll.combine(inntektTidslinje, lagTomListeForIngenInntekter(defaultKilde), LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .toSegments().stream().map(
                 s -> KontrollertInntektPeriode.ny()
                     .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                    .medArbeidsinntekt(finnInntektAvType(s, InntektType.ARBEIDSTAKER_ELLER_FRILANSER))
-                    .medYtelse(finnInntektAvType(s, InntektType.YTELSE))
+                    .medArbeidsinntekt(finnInntektAvType(s.getValue().rapporterteInntekter(), InntektType.ARBEIDSTAKER_ELLER_FRILANSER))
+                    .medYtelse(finnInntektAvType(s.getValue().rapporterteInntekter(), InntektType.YTELSE))
+                    .medKilde(s.getValue().kilde())
                     .build()
             ).toList();
     }
 
-    private static LocalDateSegmentCombinator<Set<BehandlingÅrsakType>, Set<RapportertInntekt>, Set<RapportertInntekt>> lagTomListeForIngenInntekter() {
-        return (di, lhs, rhs) -> rhs != null ? new LocalDateSegment<>(di, Set.of()) : rhs;
+    private static LocalDateSegmentCombinator<Set<BehandlingÅrsakType>, RapportertInntektOgKilde, RapportertInntektOgKilde> lagTomListeForIngenInntekter(Optional<KontrollertInntektKilde> kilde) {
+        return (di, lhs, rhs) -> rhs == null ? new LocalDateSegment<>(di, new RapportertInntektOgKilde(kilde.orElseThrow(() -> new IllegalStateException("Forventer å få default kilde dersom tidslinjen med inntekter ikke dekker alle perioder til vurdering")), Set.of())) : rhs;
     }
 
-    private static BigDecimal finnInntektAvType(LocalDateSegment<Set<RapportertInntekt>> s, InntektType inntektType) {
-        return s.getValue().stream()
+    private static BigDecimal finnInntektAvType(Set<RapportertInntekt> s, InntektType inntektType) {
+        return s.stream()
             .filter(it -> it.inntektType().equals(inntektType))
             .map(RapportertInntekt::beløp)
             .reduce(BigDecimal::add)
