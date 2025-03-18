@@ -57,8 +57,12 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private static LocalDateTimeline<RapportertInntektOgKilde> finnTidslinjeForInntektOgKilde(LocalDateTimeline<BrukKontrollertInntektValg> valgTidslinje, LocalDateTimeline<InntekterPrKilde> inntekterForAlleKilderTidslinje) {
         return valgTidslinje.combine(inntekterForAlleKilderTidslinje, (di, valg, inntekt) -> switch (valg.getValue()) {
-            case BRUK_BRUKERS_INNTEKT ->
-                new LocalDateSegment<>(di, new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, inntekt.getValue().brukersRapporterteInntekt()));
+            case BRUK_BRUKERS_INNTEKT -> {
+                if (inntekt.getValue().brukersRapporterteInntekt().isEmpty()) {
+                    throw new IllegalArgumentException("Kan ikke bruke brukers inntekt for periode " + di + " da bruker ikke har rapportert inntekt i perioden");
+                }
+                yield new LocalDateSegment<>(di, new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, inntekt.getValue().brukersRapporterteInntekt()));
+            }
             case BRUK_REGISTER_INNTEKT ->
                 new LocalDateSegment<>(di, new RapportertInntektOgKilde(KontrollertInntektKilde.REGISTER, inntekt.getValue().registersRapporterteInntekt()));
             case MANUELT_FASTSATT ->

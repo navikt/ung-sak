@@ -54,6 +54,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -102,6 +103,23 @@ class FastsettInntektOppdatererTest {
         lagFagsakOgBehandling(FOM);
         lagUngdomsprogramperioder(FOM);
         aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+    }
+
+    @Test
+    void skal_feile_dersom_valg_brukers_inntekt_uten_rapportert_inntekt_fra_bruker() {
+        // Arrange
+        final var førsteRapporteringsmånedFom = FOM.plusMonths(1).withDayOfMonth(1);
+        final var førsteRapporteringsmånedTom = FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(førsteRapporteringsmånedFom, førsteRapporteringsmånedTom);
+        lagreIAYUtenRapportertInntekt();
+        lagreRegisterinntekt(periode, 200);
+        leggTilTriggerForKontroll(periode);
+
+        final var dto = lagDto(periode, BrukKontrollertInntektValg.BRUK_BRUKERS_INNTEKT);
+        final var param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
+
+        // Act
+        assertThrows(IllegalArgumentException.class, () -> oppdaterer.oppdater(dto, param));
     }
 
     @Test
