@@ -68,9 +68,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Foreslå vedtak manuelt", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
-    @Deprecated(forRemoval = true)
-    AVKLAR_VERGE(AksjonspunktKodeDefinisjon.AVKLAR_VERGE_KODE, AksjonspunktType.MANUELL,
-        "Avklar verge", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.INN, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_VERGE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+
     VURDERE_ANNEN_YTELSE_FØR_VEDTAK(
         AksjonspunktKodeDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere annen ytelse før vedtak",
         BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
@@ -84,11 +82,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
 
-    @Deprecated(forRemoval = true)
-    AVKLAR_FORTSATT_MEDLEMSKAP(
-        AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE, AksjonspunktType.MANUELL, "Avklar medlemskap.",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.INN,
-        VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, AVVENTER_SAKSBEHANDLER),
     KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST(
         AksjonspunktKodeDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE, AksjonspunktType.MANUELL,
         "Vurder varsel ved vedtak til ugunst",
@@ -103,16 +96,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_TILKJENNING_YTELSE, VurderingspunktType.INN,
         UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE,
         TOTRINN, AVVENTER_SAKSBEHANDLER),
-    @Deprecated(forRemoval = true)
-    AUTOMATISK_MARKERING_AV_UTENLANDSSAK(
-        AksjonspunktKodeDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE, AksjonspunktType.MANUELL,
-        "Innhent dokumentasjon fra utenlandsk trygdemyndighet",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.INN, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
-    @Deprecated(forRemoval = true)
-    VURDER_ARBEIDSFORHOLD(AksjonspunktKodeDefinisjon.VURDER_ARBEIDSFORHOLD_KODE,
-        AksjonspunktType.MANUELL, "Avklar arbeidsforhold", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_ARBEIDSFORHOLD, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_FEILUTBETALING(AksjonspunktKodeDefinisjon.VURDER_FEILUTBETALING_KODE,
         AksjonspunktType.MANUELL, "Vurder feilutbetaling", BehandlingStatus.UTREDES, BehandlingStegType.SIMULER_OPPDRAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     SJEKK_TILBAKEKREVING(AksjonspunktKodeDefinisjon.SJEKK_TILBAKEKREVING_KODE,
@@ -125,24 +109,13 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 60xx
-    OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING, "Overstyring av Søknadsfrist",
+    OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE,
+        AksjonspunktType.SAKSBEHANDLEROVERSTYRING, "Overstyring av Søknadsfrist",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT, VilkårType.SØKNADSFRIST,
         SkjermlenkeType.SOEKNADSFRIST, TOTRINN, AVVENTER_SAKSBEHANDLER),
-
-
-    @Deprecated(forRemoval = true)
-    OVERSTYRING_AV_BEREGNING(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNING_KODE,
-        AksjonspunktType.OVERSTYRING, "Overstyring av beregning", BehandlingStatus.UTREDES, BehandlingStegType.BEREGN_YTELSE, VurderingspunktType.UT,
-        UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
-
-    @Deprecated(forRemoval = true)
-    OVERSTYRING_AV_OPPTJENINGSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av opptjeningsvilkåret",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET,
-        SkjermlenkeType.PUNKT_FOR_OPPTJENING, TOTRINN, AVVENTER_SAKSBEHANDLER),
-
-    @Deprecated(forRemoval = true)
-    MANUELL_MARKERING_AV_UTLAND_SAKSTYPE(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE, AksjonspunktType.MANUELL, "Manuell markering av utenlandssak",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTLAND, ENTRINN, AVVENTER_SAKSBEHANDLER),
+    OVERSTYRING_AV_INNTEKT(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_INNTEKT_KODE,
+        AksjonspunktType.OVERSTYRING, "Overstyring av intekt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, VurderingspunktType.UT,
+        UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 70xx
 
@@ -153,18 +126,23 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Venter på komplett søknad", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W", AVVENTER_SØKER),
     AUTO_SATT_PÅ_VENT_REVURDERING(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING_KODE, AksjonspunktType.AUTOPUNKT,
         "Satt på vent etter varsel om revurdering", BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR,
-        UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W", AVVENTER_SØKER),
+        UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P2W", AVVENTER_SØKER),
 
-    @Deprecated(forRemoval = true)
-    AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER(AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER_KODE, AksjonspunktType.AUTOPUNKT, "Venter på opptjeningsopplysninger",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OPPTJENINGSVILKÅR, VurderingspunktType.UT, VilkårType.OPPTJENINGSVILKÅRET,
-        SkjermlenkeType.FAKTA_FOR_OPPTJENING, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),  //TODO?
+
     @Deprecated(forRemoval = true)
     VENT_PGA_FOR_TIDLIG_SØKNAD(AksjonspunktKodeDefinisjon.VENT_PGA_FOR_TIDLIG_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT, "Satt på vent pga for tidlig søknad",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, AVVENTER_ANNET_IKKE_SAKSBEHANDLINGSTID),
     @Deprecated(forRemoval = true)
     AUTO_VENT_ETTERLYST_INNTEKTSMELDING(AksjonspunktKodeDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding",
         BehandlingStatus.UTREDES, BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P4D", AVVENTER_ARBEIDSGIVER),
+
+
+    // Gruppe: 80xx
+    KONTROLLER_INNTEKT(
+        AksjonspunktKodeDefinisjon.KONTROLLER_INNTEKT_KODE, AksjonspunktType.MANUELL, "Kontroller inntekt",
+        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, VurderingspunktType.UT,
+        UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, AVVENTER_SAKSBEHANDLER),
+
 
     // Gruppe : 90xx
     // TODO: Fjern fra test

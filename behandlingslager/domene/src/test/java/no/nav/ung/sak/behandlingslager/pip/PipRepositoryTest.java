@@ -112,10 +112,10 @@ public class PipRepositoryTest {
 
     @Test
     public void skal_finne_aksjonspunktTyper_for_aksjonspunktKoder() {
-        Set<String> resultat1 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(Collections.singletonList(AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNING.getKode()));
+        Set<String> resultat1 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(Collections.singletonList(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT.getKode()));
         assertThat(resultat1).containsOnly("Overstyring");
 
-        Set<String> resultat2 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(List.of(AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNING.getKode(), AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD.getKode()));
+        Set<String> resultat2 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(List.of(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT.getKode(), AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode()));
         assertThat(resultat2).containsOnly("Overstyring", "Manuell");
     }
 }

@@ -54,8 +54,6 @@ public class BehandlingskontrollTjenesteImplTest {
 
     private BehandlingModell modell;
 
-    private String steg2InngangAksjonspunkt;
-
     private String steg2UtgangAksjonspunkt;
 
     @SuppressWarnings("resource")
@@ -77,7 +75,6 @@ public class BehandlingskontrollTjenesteImplTest {
         steg5 = modell.finnNesteSteg(steg4).getBehandlingStegType();
         manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, steg3);
 
-        steg2InngangAksjonspunkt = modell.finnAksjonspunktDefinisjonerInngang(steg2).iterator().next();
         steg2UtgangAksjonspunkt = modell.finnAksjonspunktDefinisjonerUtgang(steg2).iterator().next();
 
         initBehandlingskontrollTjeneste();
@@ -87,26 +84,6 @@ public class BehandlingskontrollTjenesteImplTest {
         Mockito.when(kontekst.getFagsakId()).thenReturn(behandling.getFagsakId());
     }
 
-    @Test
-    public void skal_rykke_tilbake_til_inngang_vurderingspunkt_av_steg() {
-
-        BehandlingStegType steg = steg2;
-        String inngangAksjonspunkt = steg2InngangAksjonspunkt;
-
-        kontrollTjeneste.behandlingTilbakeføringTilTidligsteAksjonspunkt(kontekst, List.of(inngangAksjonspunkt));
-
-        assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(steg);
-        assertThat(behandling.getStatus()).isEqualTo(BehandlingStatus.UTREDES);
-        assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
-        assertThat(behandling.getBehandlingStegTilstand()).isNotNull();
-        assertThat(getBehandlingStegTilstand(behandling)).hasSize(2);
-
-        sjekkBehandlingStegTilstandHistorikk(behandling, steg3,
-            BehandlingStegStatus.TILBAKEFØRT);
-        sjekkBehandlingStegTilstandHistorikk(behandling, steg2,
-            BehandlingStegStatus.INNGANG);
-
-    }
 
     @Test
     public void skal_rykke_tilbake_til_utgang_vurderingspunkt_av_steg() {
@@ -217,34 +194,6 @@ public class BehandlingskontrollTjenesteImplTest {
             kontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, forrigeSteg);
 
         });
-    }
-
-    @Test
-    public void skal_rykke_tilbake_til_inngang_vurderingspunkt_av_samme_steg() {
-
-        // Arrange
-        var steg = steg2;
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, steg, BehandlingStegStatus.UTGANG, BehandlingStegStatus.AVBRUTT);
-
-        assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(steg);
-        assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.UTGANG);
-        assertThat(behandling.getStatus()).isEqualTo(BehandlingStatus.UTREDES);
-
-        // Act
-        kontrollTjeneste.behandlingTilbakeføringTilTidligsteAksjonspunkt(kontekst, List.of(steg2InngangAksjonspunkt));
-
-        // Assert
-        assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(steg);
-        assertThat(behandling.getStatus()).isEqualTo(BehandlingStatus.UTREDES);
-        assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
-        assertThat(behandling.getBehandlingStegTilstand()).isNotNull();
-
-        assertThat(getBehandlingStegTilstand(behandling)).hasSize(2);
-
-        sjekkBehandlingStegTilstandHistorikk(behandling, steg, BehandlingStegStatus.INNGANG);
-
-        assertThat(behandling.getBehandlingStegTilstand(steg).get().getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
-
     }
 
     @Test

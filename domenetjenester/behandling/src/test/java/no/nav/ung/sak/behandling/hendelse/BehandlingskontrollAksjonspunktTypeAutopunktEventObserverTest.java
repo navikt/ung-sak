@@ -45,7 +45,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
     @BeforeEach
     public void setup() {
         autopunktDefinisjon = AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT;
-        manuellpunktDefinisjon = AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE;
+        manuellpunktDefinisjon = AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT;
 
         manuellpunkt = Mockito.mock(Aksjonspunkt.class);
         when(manuellpunkt.getAksjonspunktDefinisjon()).thenReturn(manuellpunktDefinisjon);

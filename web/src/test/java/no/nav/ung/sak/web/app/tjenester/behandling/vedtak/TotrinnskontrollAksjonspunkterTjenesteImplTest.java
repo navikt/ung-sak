@@ -160,7 +160,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
         // Arrange
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjons = new ArrayList<>();
-        aksjonspunktDefinisjons.add(AksjonspunktDefinisjon.AVKLAR_VERGE);
+        aksjonspunktDefinisjons.add(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
         boolean ttvGodkjent = false;
         boolean apAvbrutt = false;
 
@@ -287,7 +287,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_en_tom_skjermlenkecontext_for_en_behandling_med_en_totrinnsvurdering_med_et_aksjonspunktdefinisjon_som_gir_en_undefinert_skjermlenketype(){
 
         // Arrange
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK;
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         boolean ttvGodkjent = false;
 
         opprettBehandlingFor(Optional.empty());

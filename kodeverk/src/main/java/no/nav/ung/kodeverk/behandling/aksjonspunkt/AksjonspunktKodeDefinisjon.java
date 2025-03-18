@@ -1,13 +1,13 @@
 package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
+import no.nav.ung.kodeverk.vilkår.VilkårType;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-
-import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 public class AksjonspunktKodeDefinisjon {
 
@@ -16,24 +16,13 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_MANUELT_SATT_PÅ_VENT_KODE = "7001";
     public static final String AUTO_VENTER_PÅ_KOMPLETT_SØKNAD_KODE = "7003";
     public static final String AUTO_SATT_PÅ_VENT_REVURDERING_KODE = "7005";
-    public static final String AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER_KODE = "7006";
-    public static final String AUTO_VENT_KOMPLETT_OPPDATERING_KODE = "7009";
-    public static final String AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE = "7014";
-    public static final String AUTO_VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE = "7019";
-    public static final String AUTO_VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT_KODE = "7020";
-    public static final String AUTO_VENT_INNTEKTSMELDING_MED_UGYLDIG_ARBEIDSFORHOLDID_KODE = "7022";
-    public static final String AUTO_VENT_MILITÆR_OG_BG_UNDER_3G_KODE = "7023";
-    public static final String AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE = "7025";
     public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
-    public static final String AUTO_VENT_PÅ_LOVENDRING_8_41_KODE = "7041";
 
     public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
     public static final String AVKLAR_LOVLIG_OPPHOLD_KODE = "5019";
     public static final String AVKLAR_OM_ER_BOSATT_KODE = "5020";
     public static final String AVKLAR_OPPHOLDSRETT_KODE = "5023";
     public static final String AVKLAR_TILLEGGSOPPLYSNINGER_KODE = "5009";
-    public static final String AVKLAR_VERGE_KODE = "5030";
-    public static final String AVKLAR_FORTSATT_MEDLEMSKAP_KODE = "5053";
 
     public static final String FATTER_VEDTAK_KODE = "5016";
 
@@ -41,10 +30,9 @@ public class AksjonspunktKodeDefinisjon {
     public static final String FORESLÅ_VEDTAK_MANUELT_KODE = "5028";
 
     public static final String OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE = "6006";
-    public static final String OVERSTYRING_AV_BEREGNING_KODE = "6007";
-    public static final String OVERSTYRING_AV_OPPTJENINGSVILKÅRET_KODE = "6011";
-    public static final String OVERSTYRING_AV_K9_VILKÅRET_KODE = "6016";
-    public static final String MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE = "6068";
+
+    public static final String OVERSTYRING_AV_INNTEKT_KODE = "6100";
+
 
     public static final String SØKERS_OPPLYSNINGSPLIKT_MANU_KODE = "5017";
 
@@ -65,13 +53,14 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE = "5077";
 
-    public static final String VURDER_ARBEIDSFORHOLD_KODE = "5080";
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
     public static final String SJEKK_TILBAKEKREVING_KODE = "5085";
 
-    public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";
     public static final String VURDER_TILBAKETREKK_KODE = "5090";
 
+
+    // Ung
+    public static final String KONTROLLER_INNTEKT_KODE = "8000";
 
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
@@ -107,7 +96,9 @@ public class AksjonspunktKodeDefinisjon {
         }
     }
 
-    /** Andre koder, brukes til definisjon av {@link AksjonspunktDefinisjon}. */
+    /**
+     * Andre koder, brukes til definisjon av {@link AksjonspunktDefinisjon}.
+     */
     public static final SkjermlenkeType UTEN_SKJERMLENKE = null;
     public static final VilkårType UTEN_VILKÅR = null;
     public static final String UTEN_FRIST = null;

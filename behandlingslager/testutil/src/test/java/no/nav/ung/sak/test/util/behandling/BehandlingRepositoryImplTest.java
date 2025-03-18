@@ -247,7 +247,7 @@ public class BehandlingRepositoryImplTest {
 
         // Arrange
         Behandling behandling1 = opprettBehandlingForAutomatiskGjenopptagelse();
-        opprettAksjonspunkt(behandling1, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, igår);
+        opprettAksjonspunkt(behandling1, AksjonspunktDefinisjon.KONTROLLER_INNTEKT, igår);
         lagreBehandling(behandling1);
 
         // Act

@@ -1,6 +1,7 @@
 package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
 public enum VurderingspunktType {
+    @Deprecated
     INN("INN"), //$NON-NLS-1$
     UT("UT"); //$NON-NLS-1$
 
