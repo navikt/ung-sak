@@ -68,6 +68,9 @@ public enum Venteårsak implements Kodeverdi {
     VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER("VENTER_ETTERLYS_IM", "Venter på inntektsmeldinger etter etterlysning", false, AVVENTER_ARBEIDSGIVER),
     VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL("VENTER_ETTERLYS_IM_VARSEL", "Venter på inntektsmeldinger etter etterlysning med varsel om mulig avslag", false, AVVENTER_ARBEIDSGIVER),
 
+    VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE("VENTER_ETTERLYS_INNTEKT_UTTALELSE", "Venter på uttalelse fra bruker etter etterlysning", false, AVVENTER_SØKER),
+
+
     OPPD_ÅPEN_BEH("OPPD_ÅPEN_BEH", "Venter på oppdatering av åpen behandling", false, AVVENTER_ANNET), //TODO?
     VENT_DEKGRAD_REGEL("VENT_DEKGRAD_REGEL", "Venter på 80% dekningsgrad-regel", false, AVVENTER_TEKNISK_FEIL),
     VENT_ØKONOMI("VENT_ØKONOMI", "Venter på økonomiløsningen", false, AVVENTER_ANNET),
