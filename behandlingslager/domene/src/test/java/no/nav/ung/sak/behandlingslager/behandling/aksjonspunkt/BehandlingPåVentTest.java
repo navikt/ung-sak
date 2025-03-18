@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt;
 
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,13 +32,13 @@ public class BehandlingPåVentTest {
 
     @Test
     public void testErPåVentEttInnslag() {
-        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_MANUELT_SATT_PÅ_VENT);
+        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_SATT_PÅ_VENT_REVURDERING);
         assertThat(behandling.isBehandlingPåVent());
     }
 
     @Test
     public void testErIkkePåVentEttInnslag() {
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_MANUELT_SATT_PÅ_VENT);
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_SATT_PÅ_VENT_REVURDERING);
         aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "");
         assertThat(behandling.isBehandlingPåVent()).isFalse();
     }
@@ -47,7 +46,7 @@ public class BehandlingPåVentTest {
     @Test
     // TODO PKMANTIS-1137 Har satt midlertidig frist, må endres når dynamisk frist er implementert
     public void testErPåVentNårVenterPåOpptjeningsopplysninger() {
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_VENT_PÅ_OPPTJENINGSOPPLYSNINGER);
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AUTO_SATT_PÅ_VENT_REVURDERING);
         assertThat(behandling.isBehandlingPåVent()).isTrue();
         assertThat(behandling.getOpprettetDato().plusWeeks(2).toLocalDate()).isEqualTo(aksjonspunkt.getFristTid().toLocalDate());
         aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "");

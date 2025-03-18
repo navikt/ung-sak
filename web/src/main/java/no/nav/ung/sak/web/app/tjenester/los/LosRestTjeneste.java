@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.behandling.hendelse.produksjonsstyring.BehandlingProsessHendelseMapper;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.merknad.BehandlingMerknad;
@@ -27,13 +27,12 @@ import no.nav.ung.sak.kontrakt.produksjonsstyring.los.BehandlingMedFagsakDto;
 import no.nav.ung.sak.kontrakt.produksjonsstyring.los.LosOpplysningerSomManglerIKlageDto;
 import no.nav.ung.sak.web.app.tjenester.los.dto.MerknadDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
 @ApplicationScoped
@@ -94,12 +93,7 @@ public class LosRestTjeneste {
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(påklagdBehandlingUuid.getBehandlingUuid());
         if (behandling.isPresent()) {
             LosOpplysningerSomManglerIKlageDto dto = new LosOpplysningerSomManglerIKlageDto();
-            dto.setUtenlandstilsnitt(behandling.get().getAksjonspunkter()
-                .stream()
-                .filter(ap -> !ap.erAvbrutt())
-                .anyMatch(ap ->
-                    ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE)
-                 || ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE)));
+            dto.setUtenlandstilsnitt(false);
 
             Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
             return responseBuilder.build();
@@ -149,7 +143,7 @@ public class LosRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getMerknad(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var merknad = losMerknadTjeneste.hertMerknader(behandlingUuid.getBehandlingUuid());
-        var response = merknad.isEmpty()? Response.noContent() : Response.ok(map(merknad.get()));
+        var response = merknad.isEmpty() ? Response.noContent() : Response.ok(map(merknad.get()));
         return response.build();
     }
 

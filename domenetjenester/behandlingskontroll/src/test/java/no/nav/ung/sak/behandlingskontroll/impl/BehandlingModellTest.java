@@ -62,7 +62,7 @@ public class BehandlingModellTest {
     public void skal_finne_aksjonspunkter_som_ligger_etter_et_gitt_steg() {
         // Arrange - noen utvalge, tilfeldige aksjonspunkter
         AksjonspunktDefinisjon a0_0 = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD;
+        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD;
         AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT;
         AksjonspunktDefinisjon a2_0 = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
@@ -106,7 +106,7 @@ public class BehandlingModellTest {
     public void skal_finne_aksjonspunkter_ved_inngang_eller_utgang_av_steg() {
         // Arrange - noen utvalge, tilfeldige aksjonspunkter
         AksjonspunktDefinisjon a0_0 = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD;
+        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
         AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT;
 

@@ -35,7 +35,7 @@ public class HistorikkInnslagTekstBuilderTest {
         HistorikkinnslagTotrinnsvurdering vurderPåNytt = new HistorikkinnslagTotrinnsvurdering();
         vurderPåNytt.setGodkjent(false);
         vurderPåNytt.setBegrunnelse("Må vurderes igjen. Se på dokumentasjon.");
-        vurderPåNytt.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE);
+        vurderPåNytt.setAksjonspunktDefinisjon(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT);
         vurderPåNytt.setAksjonspunktSistEndret(LocalDateTime.now());
         vurdering.put(SkjermlenkeType.PUNKT_FOR_MEDLEMSKAP, Collections.singletonList(vurderPåNytt));
 

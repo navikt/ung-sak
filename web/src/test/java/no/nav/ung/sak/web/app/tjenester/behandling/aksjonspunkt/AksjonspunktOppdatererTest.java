@@ -93,7 +93,7 @@ public class AksjonspunktOppdatererTest {
     public void oppdaterer_aksjonspunkt_med_beslutters_vurdering_ved_totrinnskontroll() {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_FAKTA);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();
@@ -101,7 +101,7 @@ public class AksjonspunktOppdatererTest {
         aksGodkjDto.setGodkjent(false);
         String besluttersBegrunnelse = "Må ha bedre dokumentasjon.";
         aksGodkjDto.setBegrunnelse(besluttersBegrunnelse);
-        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
+        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         var aksjonspunktDto = new FatterVedtakAksjonspunktDto("", Collections.singletonList(aksGodkjDto));
         new FatterVedtakAksjonspunktOppdaterer(fatterVedtakAksjonspunkt).oppdater(aksjonspunktDto,
@@ -121,12 +121,12 @@ public class AksjonspunktOppdatererTest {
     @Test
     public void oppdaterer_aksjonspunkt_med_godkjent_totrinnskontroll() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_FAKTA);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();
         aksGodkjDto.setGodkjent(true);
-        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
+        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         var aksjonspunktDto = new FatterVedtakAksjonspunktDto("", Collections.singletonList(aksGodkjDto));
         new FatterVedtakAksjonspunktOppdaterer(fatterVedtakAksjonspunkt).oppdater(aksjonspunktDto,

@@ -297,7 +297,7 @@ public class ForeslåVedtakTjenesteTest {
     public void oppretterAksjonspunktVedTotrinnskontrollForRevurdering() {
         // Arrange
         behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_OPPTJENINGSVILKÅRET);
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT);
 
         // Act
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
