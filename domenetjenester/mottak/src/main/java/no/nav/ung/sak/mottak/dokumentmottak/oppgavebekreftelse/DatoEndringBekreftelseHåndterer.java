@@ -32,7 +32,6 @@ public class DatoEndringBekreftelseHåndterer implements BekreftelseHåndterer {
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelse) {
         DatoEndring bekreftelse = oppgaveBekreftelse.oppgaveBekreftelse().getBekreftelse();
 
-        //todo flytt dette til ny håndterer
         final var bekreftetPeriodeEndring = new UngdomsprogramBekreftetPeriodeEndring(
             bekreftelse.getNyDato(),
             oppgaveBekreftelse.journalpostId(),
