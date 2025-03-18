@@ -122,6 +122,9 @@ public class RapportertInntektMapper {
             .ifPresent(inntekterForPeriode::add);
 
 
+        if (inntekterForPeriode.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
         final var tidslinjeForPeriode = new LocalDateTimeline<Set<RapportertInntekt>>(intervall, inntekterForPeriode);
         return tidslinjeForPeriode;
     }
