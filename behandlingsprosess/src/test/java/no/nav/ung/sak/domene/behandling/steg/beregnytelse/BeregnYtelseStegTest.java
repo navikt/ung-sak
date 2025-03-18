@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
@@ -99,7 +100,10 @@ class BeregnYtelseStegTest {
 
     @Test
     void skal_få_tilkjent_ytelse_i_periode_uten_inntekt_med_gjenomført_kontroll() {
-        final var kontrollertInntektPeriode = KontrollertInntektPeriode.ny().medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1).withDayOfMonth(1), FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()))).build();
+        final var kontrollertInntektPeriode = KontrollertInntektPeriode.ny()
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1).withDayOfMonth(1), FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth())))
+            .medKilde(KontrollertInntektKilde.BRUKER)
+            .build();
         tilkjentYtelseRepository.lagre(behandling.getId(), List.of(kontrollertInntektPeriode));
         final var behandleStegResultat = beregnYtelseSteg.utførSteg(new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), behandlingRepository.taSkriveLås(behandling.getId())));
         final var tilkjentYtelse = tilkjentYtelseRepository.hentTilkjentYtelse(behandling.getId());
