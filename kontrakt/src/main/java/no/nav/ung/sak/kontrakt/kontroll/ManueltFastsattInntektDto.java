@@ -1,6 +1,7 @@
 package no.nav.ung.sak.kontrakt.kontroll;
 
 import com.fasterxml.jackson.annotation.*;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
@@ -37,4 +38,10 @@ public class ManueltFastsattInntektDto {
     public Integer getYtelse() {
         return ytelse;
     }
+
+    @AssertTrue
+    public boolean getErMinstEnVerdiSatt() {
+        return arbeidsinntekt != null || ytelse != null;
+    }
+
 }
