@@ -18,10 +18,8 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
-import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 
 
@@ -32,8 +30,6 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
 
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
-    private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     private Instance<BekreftelseHåndterer> bekreftelseMottakere;
 
     public DokumentMottakerOppgaveBekreftelseUng() {
@@ -42,14 +38,10 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
     @Inject
     public DokumentMottakerOppgaveBekreftelseUng(OppgaveBekreftelseParser oppgaveBekreftelseParser,
                                                  MottatteDokumentRepository mottatteDokumentRepository,
-                                                 UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
-                                                 HistorikkinnslagTjeneste historikkinnslagTjeneste,
                                                  Instance<BekreftelseHåndterer> bekreftelseMottakere
     ) {
         this.oppgaveBekreftelseParser = oppgaveBekreftelseParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
-        this.historikkinnslagTjeneste = historikkinnslagTjeneste;
         this.bekreftelseMottakere = bekreftelseMottakere;
     }
 
