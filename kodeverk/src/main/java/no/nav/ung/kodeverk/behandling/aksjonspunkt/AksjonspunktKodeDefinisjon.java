@@ -16,7 +16,10 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_MANUELT_SATT_PÅ_VENT_KODE = "7001";
     public static final String AUTO_VENTER_PÅ_KOMPLETT_SØKNAD_KODE = "7003";
     public static final String AUTO_SATT_PÅ_VENT_REVURDERING_KODE = "7005";
+    public static final String AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE = "7014";
+
     public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
+    public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKT_UTTALELSE_KODE = "7040";
 
     public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
     public static final String AVKLAR_LOVLIG_OPPHOLD_KODE = "5019";
