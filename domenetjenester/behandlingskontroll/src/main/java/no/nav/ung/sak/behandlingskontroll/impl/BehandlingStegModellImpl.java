@@ -62,6 +62,7 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
         return behandlingModell;
     }
 
+    @Deprecated(forRemoval = true)
     Set<String> getInngangAksjonpunktKoder() {
         return Collections.unmodifiableSet(inngangAksjonpunktKoder);
     }
@@ -88,6 +89,7 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
         utgangAksjonpunktKoder.add(kode);
     }
 
+    @Deprecated
     protected void leggTilAksjonspunktVurderingInngang(String kode) {
         behandlingModell.validerErIkkeAlleredeMappet(kode);
         inngangAksjonpunktKoder.add(kode);

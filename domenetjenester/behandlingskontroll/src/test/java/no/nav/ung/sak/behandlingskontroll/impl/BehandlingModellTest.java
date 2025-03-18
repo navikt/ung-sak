@@ -103,38 +103,6 @@ public class BehandlingModellTest {
     }
 
     @Test
-    public void skal_finne_aksjonspunkter_ved_inngang_eller_utgang_av_steg() {
-        // Arrange - noen utvalge, tilfeldige aksjonspunkter
-        AksjonspunktDefinisjon a0_0 = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
-        AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
-        AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT;
-
-        DummySteg steg = new DummySteg();
-        DummySteg steg0 = new DummySteg();
-        DummySteg steg1 = new DummySteg();
-
-        List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, steg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, steg0, ap(a0_0), ap(a0_1)),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, steg1, ap(a1_0), ap(a1_1)));
-
-        BehandlingModellImpl modell = setupModell(modellData);
-
-        Set<String> ads = null;
-
-        ads = modell.finnAksjonspunktDefinisjonerInngang(STEG_1);
-        assertThat(ads).isEmpty();
-
-        ads = modell.finnAksjonspunktDefinisjonerInngang(STEG_2);
-        assertThat(ads).containsOnly(a0_0.getKode());
-
-        ads = modell.finnAksjonspunktDefinisjonerUtgang(STEG_3);
-        assertThat(ads).containsOnly(a1_1.getKode());
-
-    }
-
-    @Test
     public void skal_stoppe_på_steg_2_når_får_aksjonspunkt() throws Exception {
         // Arrange
         List<TestStegKonfig> modellData = List.of(
@@ -270,19 +238,6 @@ public class BehandlingModellTest {
         assertThat(beh.getAktivtBehandlingSteg()).isEqualTo(STEG_2);
     }
 
-    @Test
-    public void finner_tidligste_steg_for_aksjonspunkter() {
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = STEG_2.getAksjonspunktDefinisjonerInngang().get(0);
-        List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(aksjonspunktDefinisjon), ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
-
-        BehandlingModellImpl modell = setupModell(modellData);
-        Set<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new HashSet<>();
-        aksjonspunktDefinisjoner.add(aksjonspunktDefinisjon);
-        BehandlingStegModell behandlingStegModell = modell.finnTidligsteStegFor(aksjonspunktDefinisjoner);
-        assertThat(behandlingStegModell.getBehandlingStegType()).isEqualTo(STEG_2);
-    }
 
     @Test
     public void skal_modifisere_aksjonspunktet_ved_å_kalle_funksjon_som_legger_til_frist() throws Exception {

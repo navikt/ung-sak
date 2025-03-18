@@ -148,6 +148,8 @@ public enum BehandlingStegType implements Kodeverdi {
         return AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(this, type);
     }
 
+    @Deprecated(forRemoval = true)
+    // Skal ikkje ha aksjonspunkter i inngang
     public List<AksjonspunktDefinisjon> getAksjonspunktDefinisjonerInngang() {
         return AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(this, VurderingspunktType.INN);
     }
