@@ -140,6 +140,108 @@ class LagTilkjentYtelseTest {
             76);
     }
 
+    @Test
+    void skal_lage_tilkjent_ytelse_for_første_periode_når_andre_periode_ikke_er_kontrollert() {
+        // Arrange
+        final var fom1 = LocalDate.of(2023, 1, 1);
+        final var tom1 = LocalDate.of(2023, 1, 31);
+        final var fom2 = LocalDate.of(2023, 2, 1);
+        final var tom2 = LocalDate.of(2023, 2, 28);
+        final var fom3 = LocalDate.of(2023, 3, 1);
+        final var tom3 = LocalDate.of(2023, 3, 15);
+
+
+        LocalDateTimeline<Boolean> godkjentTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true),
+            new LocalDateSegment<>(fom2, tom2, true),
+            new LocalDateSegment<>(fom3, tom3, true)
+
+        ));
+
+        final var grunnsats1 = BigDecimal.valueOf(100);
+        final var grunnsats2 = BigDecimal.valueOf(150);
+        final var barnetilleggSats1 = 200;
+        final var barnetilleggSats2 = 250;
+        LocalDateTimeline<BeregnetSats> totalsatsTidslinje = new LocalDateTimeline<>(List.of(
+            lagSatsperiode(grunnsats1, barnetilleggSats1, fom1, tom1),
+            lagSatsperiode(grunnsats2, barnetilleggSats2, fom2, tom2),
+            lagSatsperiode(grunnsats2, barnetilleggSats2, fom3, tom3)
+        ));
+
+        LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje = TOM_TIDSLINJE;
+
+        // Act
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+
+        // Assert
+        // Forventer ingen reduksjon og tilkjent ytelse for første periode
+        assertNotNull(resultat);
+        assertEquals(1, resultat.getLocalDateIntervals().size());
+
+        final var iterator = resultat.toSegments().iterator();
+        final var forventetDagsats1 = BigDecimal.valueOf(14);
+        final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
+        LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();
+        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, 100);
+    }
+
+
+    @Test
+    void skal_lage_tilkjent_ytelse_for_siste_periode_når_nest_siste_periode_er_kontrollert() {
+        // Arrange
+        final var fom1 = LocalDate.of(2023, 1, 1);
+        final var tom1 = LocalDate.of(2023, 1, 31);
+        final var fom2 = LocalDate.of(2023, 2, 1);
+        final var tom2 = LocalDate.of(2023, 2, 28);
+        final var fom3 = LocalDate.of(2023, 3, 1);
+        final var tom3 = LocalDate.of(2023, 3, 15);
+
+
+        LocalDateTimeline<Boolean> godkjentTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true),
+            new LocalDateSegment<>(fom2, tom2, true),
+            new LocalDateSegment<>(fom3, tom3, true)
+
+        ));
+
+        final var grunnsats1 = BigDecimal.valueOf(100);
+        final var grunnsats2 = BigDecimal.valueOf(150);
+        final var barnetilleggSats1 = 200;
+        final var barnetilleggSats2 = 250;
+        LocalDateTimeline<BeregnetSats> totalsatsTidslinje = new LocalDateTimeline<>(List.of(
+            lagSatsperiode(grunnsats1, barnetilleggSats1, fom1, tom1),
+            lagSatsperiode(grunnsats2, barnetilleggSats2, fom2, tom2),
+            lagSatsperiode(grunnsats2, barnetilleggSats2, fom3, tom3)
+        ));
+
+        LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje = new LocalDateTimeline<>(fom2, tom2, Set.of());
+
+        // Act
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje);
+
+        // Assert
+        // Forventer ingen reduksjon og tilkjent ytelse for første periode
+        assertNotNull(resultat);
+        assertEquals(3, resultat.getLocalDateIntervals().size());
+
+        final var iterator = resultat.toSegments().iterator();
+        final var forventetDagsats1 = BigDecimal.valueOf(14);
+        final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
+        LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();
+        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, 100);
+
+        LocalDateSegment<TilkjentYtelseVerdi> segment2 = iterator.next();
+        final var forventetUredusertBeløp2 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
+        final var forventetDagsats2 = BigDecimal.valueOf(20);
+        assertSegment(segment2, fom2, tom2, forventetUredusertBeløp2, forventetDagsats2, BigDecimal.ZERO, forventetUredusertBeløp2, 100);
+
+        LocalDateSegment<TilkjentYtelseVerdi> segment3 = iterator.next();
+        final var forventetUredusertBeløp3 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
+        final var forventetDagsats3 = BigDecimal.valueOf(36);
+        assertSegment(segment3, fom3, tom3, forventetUredusertBeløp3, forventetDagsats3, BigDecimal.ZERO, forventetUredusertBeløp3, 100);
+    }
+
+
 
 
     private static void assertSegment(LocalDateSegment<TilkjentYtelseVerdi> segment2,
