@@ -11,6 +11,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjo
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.OverlapendeYtelserRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollerInntektRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
@@ -78,6 +79,7 @@ public class RestImplementationClasses {
         classes.add(LosRestTjeneste.class);
 
         classes.add(UngdomsytelseRestTjeneste.class);
+        classes.add(KontrollerInntektRestTjeneste.class);
 
         classes.add(OppdragProxyRestTjeneste.class);
 

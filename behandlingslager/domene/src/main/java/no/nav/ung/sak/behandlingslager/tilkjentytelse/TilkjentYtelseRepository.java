@@ -44,7 +44,18 @@ public class TilkjentYtelseRepository {
         entityManager.flush();
     }
 
-    public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
+    public void kopierKontrollPerioder(long originalBehandlingId, long nyBehandlingId) {
+        final var eksisterende = hentKontrollertInntektPerioder(originalBehandlingId);
+        if (eksisterende.isPresent()) {
+            final var ny = KontrollertInntektPerioder.kopi(nyBehandlingId, eksisterende.get()).build();
+            entityManager.persist(ny);
+            entityManager.flush();
+        }
+
+    }
+
+
+        public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
         final var eksisterende = hentTilkjentYtelse(behandlingId);
         if (eksisterende.isPresent()) {
             eksisterende.get().setIkkeAktiv();

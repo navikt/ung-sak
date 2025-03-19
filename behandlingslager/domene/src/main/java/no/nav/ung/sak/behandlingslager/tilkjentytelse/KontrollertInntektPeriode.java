@@ -16,7 +16,6 @@ import java.time.LocalDate;
 @Table(name = "KONTROLLERT_INNTEKT_PERIODE")
 public class KontrollertInntektPeriode extends BaseEntitet {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_KONTROLLERT_INNTEKT_PERIODE")
     private Long id;
@@ -35,7 +34,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Column(name = "kilde", nullable = false)
     private KontrollertInntektKilde kilde;
 
-
+    @Column(name = "er_manuelt_vurdert", nullable = false)
+    private boolean erManueltVurdert;
 
     KontrollertInntektPeriode(KontrollertInntektPeriode eksisterende) {
         this.periode = Range.closed(eksisterende.getPeriode().getFomDato(), eksisterende.getPeriode().getTomDato());
@@ -46,11 +46,13 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
                                       BigDecimal arbeidsinntekt,
                                       BigDecimal ytelse,
-                                      KontrollertInntektKilde kilde) {
+                                      KontrollertInntektKilde kilde,
+                                      boolean erManueltVurdert) {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
         this.arbeidsinntekt = arbeidsinntekt;
         this.ytelse = ytelse;
         this.kilde = kilde;
+        this.erManueltVurdert = erManueltVurdert;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -69,6 +71,10 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         return kilde;
     }
 
+    public boolean getErManueltVurdert() {
+        return erManueltVurdert;
+    }
+
     public static Builder ny() {
         return new Builder();
     }
@@ -79,6 +85,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         private BigDecimal arbeidsinntekt;
         private BigDecimal ytelse;
         private KontrollertInntektKilde kilde;
+        private boolean erManueltVurdert;
 
         private Builder() {}
 
@@ -105,9 +112,14 @@ public class KontrollertInntektPeriode extends BaseEntitet {
             return this;
         }
 
+        public Builder medErManueltVurdert(boolean erManueltVurdert) {
+            this.erManueltVurdert = erManueltVurdert;
+            return this;
+        }
+
 
         public KontrollertInntektPeriode build() {
-            return new KontrollertInntektPeriode(periode, arbeidsinntekt, ytelse, kilde);
+            return new KontrollertInntektPeriode(periode, arbeidsinntekt, ytelse, kilde, erManueltVurdert);
         }
 
 
