@@ -74,5 +74,9 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>beregning-ytelse</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>etterlysning</artifactId>
+        </dependency>
     </dependencies>
 </project>
