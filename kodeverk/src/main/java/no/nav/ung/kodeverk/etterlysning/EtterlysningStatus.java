@@ -11,6 +11,7 @@ public enum EtterlysningStatus implements Kodeverdi {
     OPPRETTET("OPPRETTET", "Opprettet, ikke sendt ut"),
     VENTER("VENTER", "Sendt og venter på svar"),
     MOTTATT_SVAR("MOTTATT_SVAR", "Mottatt svar"),
+    SKAL_AVBRYTES("SKAL_AVBRYTES", "Skal avbrytes"),
     AVBRUTT("AVBRUTT", "Avbrutt"),
     UTLØPT("UTLOPT", "Utløpt"),
     ;

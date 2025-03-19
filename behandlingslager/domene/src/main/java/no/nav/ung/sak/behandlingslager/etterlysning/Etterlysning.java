@@ -1,7 +1,9 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.AttributeOverride;
@@ -49,6 +51,9 @@ public class Etterlysning extends BaseEntitet {
     @Column(name = "status", nullable = false)
     private EtterlysningStatus status;
 
+    @Column(name = "frist")
+    private LocalDateTime frist;
+
     private Etterlysning() {
         // Hibernate
     }
@@ -85,4 +90,49 @@ public class Etterlysning extends BaseEntitet {
     public Long getId() {
         return id;
     }
+
+    public UUID getGrunnlagsreferanse() {
+        return grunnlagsreferanse;
+    }
+
+    public UUID getEksternReferanse() {
+        return eksternReferanse;
+    }
+
+    public DatoIntervallEntitet getPeriode() {
+        return periode;
+    }
+
+    public EtterlysningType getType() {
+        return type;
+    }
+
+    public EtterlysningStatus getStatus() {
+        return status;
+    }
+
+    public void vent(LocalDateTime frist) {
+        if (status != EtterlysningStatus.OPPRETTET) {
+            throw new IllegalStateException("Kan vente på etterlysning som ikke er satt til OPPRETTET. Status er " + status);
+        }
+        this.status = EtterlysningStatus.VENTER;
+        this.frist = frist;
+    }
+
+    public void avbryt() {
+        if (status != EtterlysningStatus.SKAL_AVBRYTES) {
+            throw new IllegalStateException("Kan ikke avbryte etterlysning som ikke er satt til SKAL_AVBRYTES. Status er " + status);
+        }
+        this.status = EtterlysningStatus.AVBRUTT;
+        this.frist = null;
+    }
+
+
+    public void skalAvbrytes() {
+        if (status == EtterlysningStatus.MOTTATT_SVAR) {
+            throw new IllegalStateException("Kan ikke avbryte etterlysning som er mottatt.");
+        }
+        this.status = EtterlysningStatus.SKAL_AVBRYTES;
+    }
+
 }

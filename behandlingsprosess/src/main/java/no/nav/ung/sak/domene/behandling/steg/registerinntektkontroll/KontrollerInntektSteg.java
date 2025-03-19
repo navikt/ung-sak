@@ -1,36 +1,38 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.UUID;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.uttalelse.RegisterinntektUttalelseTjeneste;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @ApplicationScoped
 @BehandlingStegRef(value = KONTROLLER_REGISTER_INNTEKT)
@@ -73,58 +75,126 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        final var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
-        final var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
-        final var uttalelser = registerinntektUttalelseTjeneste.hentUttalelser(behandlingId);
-        final var registerinntekterForIkkeGodkjentUttalelse = rapportertInntektMapper.finnRegisterinntekterForUttalelse(behandlingId, uttalelser);
-        final var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForIkkeGodkjentUttalelse);
-
-//        return switch (kontrollResultat) {
-//            case BRUK_INNTEKT_FRA_BRUKER -> {
-//                kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
-//                    behandlingId,
-//                    rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter), prosessTriggerTidslinje);
-//                yield BehandleStegResultat.utførtUtenAksjonspunkter();
-//            }
-//            case OPPRETT_AKSJONSPUNKT ->
-//                BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
-//            case SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST -> BehandleStegResultat.utførtMedAksjonspunktResultater(
-//                AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-//                    AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST,
-//                    Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST,
-//                    utledVentefrist(prosessTriggerTidslinje)));
-//            case OPPRETT_OPPGAVE_TIL_BRUKER -> {
-//
-//                etterlysInntektskontrollUttalelse(behandlingId, rapporterteInntekterTidslinje);
-//
-//                yield BehandleStegResultat.utførtMedAksjonspunktResultater(
-//                    AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-//                        AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE,
-//                        Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
-//                        finnEksisterendeFrist(behandlingId)));
-//
-//            }
-//            case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST ->
-//                BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, LocalDateTime.now().plusDays(14)));
-//        };
-        return null;
-
+        var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
+        var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
+        var uttalelser = registerinntektUttalelseTjeneste.hentUttalelser(behandlingId);
+        var registerinntekterForIkkeGodkjentUttalelse = rapportertInntektMapper.finnRegisterinntekterForUttalelse(behandlingId, uttalelser);
+        var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForIkkeGodkjentUttalelse);
+        håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, prosessTriggerTidslinje);
+        return avgjørResultat(behandlingId, kontrollResultat, prosessTriggerTidslinje);
     }
 
-    private void etterlysInntektskontrollUttalelse(Long behandlingId, LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje) {
+    private void håndterPeriodisertKontrollresultat(BehandlingskontrollKontekst kontekst,
+                                                    LocalDateTimeline<KontrollResultat> kontrollResultat,
+                                                    LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
+                                                    LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
+        var etterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
+        List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
+        var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(kontekst.getBehandlingId());
+        for (var segment : kontrollResultat.toSegments()) {
+            switch (segment.getValue()) {
+                case BRUK_INNTEKT_FRA_BRUKER -> {
+                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, segment));
+                    kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
+                        kontekst.getBehandlingId(),
+                        rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter).intersection(segment.getLocalDateInterval()),
+                        prosessTriggerTidslinje);
+                }
+                case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST -> {
+                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, segment));
+                    etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), segment, grunnlag.getEksternReferanse()));
+                }
+                case OPPRETT_OPPGAVE_TIL_BRUKER -> {
+                    if (!harEksisterendeEtterlysningPåVent(segment, etterlysninger)) {
+                        etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), segment, grunnlag.getEksternReferanse()));
+                    }
+                }
+            }
+        }
 
+        if (!etterlysningerSomSkalOpprettes.isEmpty()) {
+            etterlysningRepository.lagre(etterlysningerSomSkalOpprettes);
+            lagTaskForOpprettingAvEtterlysning(kontekst);
+        }
+
+        if (!etterlysningerSomSkalAvbrytes.isEmpty()) {
+            etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
+            lagTaskForAvbrytelseAvEtterlysning(kontekst);
+        }
+    }
+
+    private static boolean harEksisterendeEtterlysningPåVent(LocalDateSegment<KontrollResultat> segment, List<Etterlysning> etterlysninger) {
+        return etterlysninger.stream().anyMatch(e -> e.getStatus().equals(EtterlysningStatus.VENTER) &&
+            e.getPeriode().toLocalDateInterval().overlaps(segment.getLocalDateInterval()));
+    }
+
+    private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateSegment<KontrollResultat> segment, UUID iayRef) {
         UUID bestillingsId = UUID.randomUUID();
-        Etterlysning nyEtterlysning = etterlysningRepository.lagre(
-            Etterlysning.forInntektKontrollUttalelse(behandlingId,
-                inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId).getEksternReferanse(),
-                bestillingsId,
-                DatoIntervallEntitet.fra(rapporterteInntekterTidslinje.getMinLocalDate(), rapporterteInntekterTidslinje.getMaxLocalDate())));
-
-        var prosessTaskData = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
-        prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_ID, nyEtterlysning.getId().toString());
-        prosessTaskTjeneste.lagre(prosessTaskData);
-
+        final var etterlysning = Etterlysning.forInntektKontrollUttalelse(behandlingId,
+            iayRef,
+            bestillingsId,
+            DatoIntervallEntitet.fra(segment.getFom(), segment.getTom()));
+        return etterlysning;
     }
+
+    private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateSegment<KontrollResultat> segment) {
+        var etterlysningerSomSkalAvbrytes = etterlysninger.stream()
+            .filter(etterlysning ->
+                etterlysning.getPeriode().toLocalDateInterval().overlaps(segment.getLocalDateInterval()))
+            .filter(e -> e.getStatus().equals(EtterlysningStatus.VENTER))
+            .toList();
+        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
+
+        return etterlysningerSomSkalAvbrytes;
+    }
+
+    private BehandleStegResultat avgjørResultat(Long behandlingId, LocalDateTimeline<KontrollResultat> kontrollResultat, LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
+
+        final var skalVenteTilRapportering = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST)).isEmpty();
+        if (skalVenteTilRapportering) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(
+                AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST,
+                Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST,
+                utledVentefrist(prosessTriggerTidslinje)));
+        }
+
+        final var skalVenteGrunnetNyEtterlysning = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST)).isEmpty();
+        if (skalVenteGrunnetNyEtterlysning) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, LocalDateTime.now().plusDays(14)));
+        }
+
+        final var skalVentePåEksisterendeEtterlysning = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER)).isEmpty();
+        if (skalVentePåEksisterendeEtterlysning) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(
+                AksjonspunktResultat.opprettForAksjonspunktMedFrist(
+                    AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE,
+                    Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
+                    finnEksisterendeFrist(behandlingId)));
+        }
+
+        final var skalOppretteAksjonspunkt = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_AKSJONSPUNKT)).isEmpty();
+        if (skalOppretteAksjonspunkt) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
+        }
+
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+
+    private void lagTaskForOpprettingAvEtterlysning(BehandlingskontrollKontekst kontekst) {
+        var prosessTaskData = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
+        prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT.getKode());
+        prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
+        prosessTaskTjeneste.lagre(prosessTaskData);
+    }
+
+    private void lagTaskForAvbrytelseAvEtterlysning(BehandlingskontrollKontekst kontekst) {
+        var prosessTaskData = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
+        prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
+        prosessTaskTjeneste.lagre(prosessTaskData);
+    }
+
 
     private LocalDateTime finnEksisterendeFrist(Long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
