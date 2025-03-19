@@ -10,13 +10,17 @@ public class EtterlysningRepository {
     private EntityManager entityManager;
 
 
+    public EtterlysningRepository() {
+    }
+
     @Inject
     public EtterlysningRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    public void lagre(Etterlysning etterlysning) {
+    public Etterlysning lagre(Etterlysning etterlysning) {
         entityManager.persist(etterlysning);
+        return etterlysning;
     }
 
 

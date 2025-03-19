@@ -1,5 +1,7 @@
 package no.nav.ung.sak.etterlysning;
 
+import java.util.UUID;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
@@ -8,13 +10,12 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
-import java.util.UUID;
-
+//TODO fjern?
 @Dependent
 public class InntektkontrollEtterlysningOppretter implements EtterlysningOppretter {
 
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-    private EtterlysningRepository etterlysningRepository;
+    private final InntektArbeidYtelseTjeneste iayTjeneste;
+    private final EtterlysningRepository etterlysningRepository;
 
     @Inject
     public InntektkontrollEtterlysningOppretter(InntektArbeidYtelseTjeneste iayTjeneste,
@@ -32,8 +33,9 @@ public class InntektkontrollEtterlysningOppretter implements EtterlysningOpprett
         final var etterlysning = new Etterlysning(
             behandlingId,
             grunnlagReferanse,
-            eksternReferanse, periode,
-            EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+            eksternReferanse,
+            periode,
+            EtterlysningType.UTTALELSE_KONTROLL_INNTEKT, null );
 
 
         etterlysningRepository.lagre(etterlysning);

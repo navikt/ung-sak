@@ -1,12 +1,22 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
-import jakarta.persistence.*;
+import java.util.UUID;
+
+import org.hibernate.annotations.Immutable;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import org.hibernate.annotations.Immutable;
-
-import java.util.UUID;
 
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
@@ -33,22 +43,46 @@ public class Etterlysning extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
-    @Column(name = "etterlysning_type", nullable = false)
-    private EtterlysningType etterlysningType;
+    @Column(name = "type", nullable = false)
+    private EtterlysningType type;
+
+    @Column(name = "status", nullable = false)
+    private EtterlysningStatus status;
 
     private Etterlysning() {
         // Hibernate
+    }
+
+    public static Etterlysning forInntektKontrollUttalelse(
+        Long behandlingId,
+        UUID grunnlagsreferanse,
+        UUID eksternReferanse,
+        DatoIntervallEntitet periode) {
+
+        return new Etterlysning(
+            behandlingId,
+            grunnlagsreferanse,
+            eksternReferanse,
+            periode,
+            EtterlysningType.UTTALELSE_KONTROLL_INNTEKT,
+            EtterlysningStatus.OPPRETTET);
     }
 
     public Etterlysning(Long behandlingId,
                         UUID grunnlagsreferanse,
                         UUID eksternReferanse,
                         DatoIntervallEntitet periode,
-                        EtterlysningType etterlysningType) {
+                        EtterlysningType type,
+                        EtterlysningStatus status) {
         this.behandlingId = behandlingId;
         this.grunnlagsreferanse = grunnlagsreferanse;
         this.eksternReferanse = eksternReferanse;
         this.periode = periode;
-        this.etterlysningType = etterlysningType;
+        this.type = type;
+        this.status = status;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
