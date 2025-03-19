@@ -39,10 +39,6 @@ public class Etterlysning extends BaseEntitet {
     private UUID eksternReferanse;
 
     @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
-    })
     private DatoIntervallEntitet periode;
 
     @Column(name = "type", nullable = false)
