@@ -53,12 +53,19 @@ public class KontrollertInntektPerioder extends BaseEntitet {
         return new Builder(behandlingId);
     }
 
+    public static Builder kopi(Long behandlingId, KontrollertInntektPerioder perioder) {
+        return new Builder(behandlingId, perioder);
+    }
+
     public static class Builder {
         private Long behandlingId;
         private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
-        private String input;
-        private String sporing;
 
+
+        public Builder(Long behandlingId, KontrollertInntektPerioder perioder) {
+            this.behandlingId = behandlingId;
+            this.perioder = perioder.perioder.stream().map(KontrollertInntektPeriode::new).toList();
+        }
 
         public Builder(Long behandlingId) {
             this.behandlingId = behandlingId;
