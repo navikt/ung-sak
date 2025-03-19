@@ -1,6 +1,7 @@
-package no.nav.ung.sak.ytelse.uttalelse;
+package no.nav.ung.sak.ytelse;
 
-import no.nav.ung.sak.ytelse.RapportertInntekt;
+import no.nav.ung.sak.uttalelse.Status;
+import no.nav.ung.sak.uttalelse.Uttalelse;
 
 import java.util.Set;
 

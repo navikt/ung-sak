@@ -9,10 +9,10 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.sak.uttalelse.RegisterinntektUttalelseTjeneste;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.uttalelse.RegisterinntektUttalelseTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.List;

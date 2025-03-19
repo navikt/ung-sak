@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse.uttalelse;
+package no.nav.ung.sak.uttalelse;
 
 
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

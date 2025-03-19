@@ -14,9 +14,8 @@ import no.nav.ung.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.ytelse.uttalelse.BrukersUttalelseForRegisterinntekt;
-import no.nav.ung.sak.ytelse.uttalelse.BrukersUttalelsePeriode;
-import no.nav.ung.sak.ytelse.uttalelse.Status;
+import no.nav.ung.sak.uttalelse.BrukersUttalelsePeriode;
+import no.nav.ung.sak.uttalelse.Status;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public class RapportertInntektMapper {
             .filter(it -> Set.of(Status.BEKREFTET, Status.VENTER).contains(it.status())).toList();
         final var unikeGrunnlagsIder = relevanteUttalelser
             .stream()
-            .map(no.nav.ung.sak.ytelse.uttalelse.BrukersUttalelsePeriode::iayGrunnlagUUID)
+            .map(BrukersUttalelsePeriode::iayGrunnlagUUID)
             .collect(Collectors.toSet());
 
         final var grunnlagPrUUID = unikeGrunnlagsIder.stream().collect(Collectors.toMap(it -> it, it -> inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, it)));

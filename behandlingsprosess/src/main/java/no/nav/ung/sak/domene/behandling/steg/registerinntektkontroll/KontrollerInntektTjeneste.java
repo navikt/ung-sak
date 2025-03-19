@@ -2,9 +2,9 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.uttalelse.Status;
+import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.uttalelse.BrukersUttalelseForRegisterinntekt;
-import no.nav.ung.sak.ytelse.uttalelse.Status;
 
 import java.util.Set;
 

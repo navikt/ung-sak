@@ -4,13 +4,12 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.uttalelse.Status;
+import no.nav.ung.sak.uttalelse.Uttalelse;
+import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
 import no.nav.ung.sak.ytelse.InntektType;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.uttalelse.BrukersUttalelseForRegisterinntekt;
-import no.nav.ung.sak.ytelse.uttalelse.Status;
-import no.nav.ung.sak.ytelse.uttalelse.Uttalelse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
