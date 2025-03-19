@@ -249,6 +249,11 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
+                <artifactId>etterlysning</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>produksjonsstyring</artifactId>
                 <version>${project.version}</version>
             </dependency>
