@@ -3,11 +3,11 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.FinnKontrollresultatForIkkeGodkjentUttalelse.harDiff;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
@@ -18,41 +18,40 @@ public class Avviksvurdering {
     public static final BigDecimal AKSEPTERT_DIFFERANSE = BigDecimal.valueOf(1000);
 
 
-    static Optional<KontrollResultat> gjørAvviksvurderingMotRegisterinntekt(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> tidslinjeRelevanteÅrsaker) {
+    static LocalDateTimeline<KontrollResultat> gjørAvviksvurderingMotRegisterinntekt(
+        LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
+        LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje,
+        LocalDateTimeline<Set<BehandlingÅrsakType>> tidslinjeRelevanteÅrsaker) {
+
+        //Finner tidslinje der det er avvik mellom register og rapportert inntekt
         final var inntektDiffKontrollResultat = finnKontrollresultatTidslinje(gjeldendeRapporterteInntekter, tidslinjeRelevanteÅrsaker);
 
         final var tidslinjeForOppgaveTilBruker = inntektDiffKontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER));
-        if (!tidslinjeForOppgaveTilBruker.isEmpty()) {
 
-            // Må finne ut om vi skal sette ny frist
-            final var oppgaverTilBrukerTidslinje = finnNyOppgaveKontrollresultatTidslinje(gjeldendeRapporterteInntekter, uttalelseTidslinje, tidslinjeForOppgaveTilBruker);
+        // Må finne ut om vi skal sette ny frist hvis registeret har oppdatert seg
+        final var oppgaverTilBrukerTidslinje = finnNyOppgaveKontrollresultatTidslinje(gjeldendeRapporterteInntekter, uttalelseTidslinje, tidslinjeForOppgaveTilBruker);
 
-            if (!oppgaverTilBrukerTidslinje.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST)).isEmpty()) {
-                return Optional.of(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST);
-            } else {
-                return Optional.of(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);
-            }
-
-        }
-
-        if (!inntektDiffKontrollResultat.filterValue(it -> it.equals(KontrollResultat.BRUK_INNTEKT_FRA_BRUKER)).isEmpty()) {
-            return Optional.of(KontrollResultat.BRUK_INNTEKT_FRA_BRUKER);
-        }
-        return Optional.empty();
+        //Resultat
+        return inntektDiffKontrollResultat.crossJoin(oppgaverTilBrukerTidslinje, StandardCombinators::coalesceRightHandSide);
     }
 
-    private static LocalDateTimeline<KontrollResultat> finnNyOppgaveKontrollresultatTidslinje(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje, LocalDateTimeline<KontrollResultat> tidslinjeForOppgaveTilBruker) {
+    private static LocalDateTimeline<KontrollResultat> finnNyOppgaveKontrollresultatTidslinje(
+        LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
+        LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje,
+        LocalDateTimeline<KontrollResultat> tidslinjeForOppgaveTilBruker) {
         final var oppgaverTilBrukerTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::registerRapporterteInntekter).intersection(tidslinjeForOppgaveTilBruker)
-            .combine(uttalelseTidslinje.mapValue(BrukersUttalelseForRegisterinntekt::registerInntekt), (di, register, uttalelse) -> {
-                if (uttalelse == null) {
-                    return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);
-                }
-                if (!harDiff(uttalelse.getValue(), register.getValue())) {
-                    return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);
-                } else {
-                    return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST);
-                }
-            }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+            .combine(uttalelseTidslinje.mapValue(BrukersUttalelseForRegisterinntekt::registerInntekt),
+                (di, gjeldendeRegisterinntekt, registerinntektVedUttalelse) -> {
+                    if (registerinntektVedUttalelse == null) {
+                        return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);
+                    }
+                    if (!harDiff(registerinntektVedUttalelse.getValue(), gjeldendeRegisterinntekt.getValue())) {
+                        return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);
+                    } else {
+                        return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST);
+                    }
+                },
+                LocalDateTimeline.JoinStyle.LEFT_JOIN);
         return oppgaverTilBrukerTidslinje;
     }
 

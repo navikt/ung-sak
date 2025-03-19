@@ -4,7 +4,6 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGIS
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,8 +14,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
@@ -82,34 +79,35 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         final var registerinntekterForIkkeGodkjentUttalelse = rapportertInntektMapper.finnRegisterinntekterForUttalelse(behandlingId, uttalelser);
         final var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForIkkeGodkjentUttalelse);
 
-        return switch (kontrollResultat) {
-            case BRUK_INNTEKT_FRA_BRUKER -> {
-                kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
-                    behandlingId,
-                    rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter), prosessTriggerTidslinje);
-                yield BehandleStegResultat.utførtUtenAksjonspunkter();
-            }
-            case OPPRETT_AKSJONSPUNKT ->
-                BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
-            case SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST -> BehandleStegResultat.utførtMedAksjonspunktResultater(
-                AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-                    AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST,
-                    Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST,
-                    utledVentefrist(prosessTriggerTidslinje)));
-            case OPPRETT_OPPGAVE_TIL_BRUKER -> {
-
-                etterlysInntektskontrollUttalelse(behandlingId, rapporterteInntekterTidslinje);
-
-                yield BehandleStegResultat.utførtMedAksjonspunktResultater(
-                    AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-                        AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE,
-                        Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
-                        finnEksisterendeFrist(behandlingId)));
-
-            }
-            case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST ->
-                BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, LocalDateTime.now().plusDays(14)));
-        };
+//        return switch (kontrollResultat) {
+//            case BRUK_INNTEKT_FRA_BRUKER -> {
+//                kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
+//                    behandlingId,
+//                    rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter), prosessTriggerTidslinje);
+//                yield BehandleStegResultat.utførtUtenAksjonspunkter();
+//            }
+//            case OPPRETT_AKSJONSPUNKT ->
+//                BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
+//            case SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST -> BehandleStegResultat.utførtMedAksjonspunktResultater(
+//                AksjonspunktResultat.opprettForAksjonspunktMedFrist(
+//                    AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST,
+//                    Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST,
+//                    utledVentefrist(prosessTriggerTidslinje)));
+//            case OPPRETT_OPPGAVE_TIL_BRUKER -> {
+//
+//                etterlysInntektskontrollUttalelse(behandlingId, rapporterteInntekterTidslinje);
+//
+//                yield BehandleStegResultat.utførtMedAksjonspunktResultater(
+//                    AksjonspunktResultat.opprettForAksjonspunktMedFrist(
+//                        AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE,
+//                        Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
+//                        finnEksisterendeFrist(behandlingId)));
+//
+//            }
+//            case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST ->
+//                BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, LocalDateTime.now().plusDays(14)));
+//        };
+        return null;
 
     }
 
