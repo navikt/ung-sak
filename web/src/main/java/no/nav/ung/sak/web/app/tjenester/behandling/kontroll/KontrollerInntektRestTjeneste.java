@@ -29,7 +29,7 @@ import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
-@Path(BeregningsresultatRestTjeneste.BASE_PATH)
+@Path(KontrollerInntektRestTjeneste.BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 @Transactional
