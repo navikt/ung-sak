@@ -43,7 +43,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     @Override
     public OppdateringResultat oppdater(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
         final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, param);
-        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraRegister(param.getBehandlingId(), sammenslåtteInntekterTidslinje, prosessTriggerPeriodeUtleder.utledTidslinje(param.getBehandlingId()));
+        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje, prosessTriggerPeriodeUtleder.utledTidslinje(param.getBehandlingId()));
         return OppdateringResultat.builder().medTotrinnHvis(true).build();
     }
 
