@@ -2679,6 +2679,55 @@
         "type" : "string",
         "x-enum-varnames" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ]
       },
+      "KontrollerInntektDto" : {
+        "properties" : {
+          "kontrollperioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KontrollerInntektPeriodeDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "KontrollerInntektPeriodeDto" : {
+        "properties" : {
+          "erTilVurdering" : {
+            "type" : "boolean"
+          },
+          "fastsattArbeidsinntekt" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "fastsattYtelse" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/Periode"
+          },
+          "rapporterteInntekter" : {
+            "$ref" : "#/components/schemas/RapporterteInntekterDto"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/KontrollerInntektPeriodeDtoStatus"
+          },
+          "valg" : {
+            "$ref" : "#/components/schemas/KontrollerInntektPeriodeDtoValg"
+          }
+        },
+        "type" : "object"
+      },
+      "KontrollerInntektPeriodeDtoStatus" : {
+        "enum" : [ "AVVIK", "INGEN_AVVIK" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AVVIK", "INGEN_AVVIK" ]
+      },
+      "KontrollerInntektPeriodeDtoValg" : {
+        "enum" : [ "BRUK_BRUKERS_INNTEKT", "BRUK_REGISTER_INNTEKT", "MANUELT_FASTSATT" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "BRUK_BRUKERS_INNTEKT", "BRUK_REGISTER_INNTEKT", "MANUELT_FASTSATT" ]
+      },
       "KravDokumentMedSøktePerioder" : {
         "properties" : {
           "innsendingsTidspunkt" : {
@@ -3624,6 +3673,30 @@
           }
         },
         "required" : [ "saksnummere" ],
+        "type" : "object"
+      },
+      "RapportertInntektDto" : {
+        "properties" : {
+          "arbeidsinntekt" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "ytelse" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "RapporterteInntekterDto" : {
+        "properties" : {
+          "bruker" : {
+            "$ref" : "#/components/schemas/RapportertInntektDto"
+          },
+          "register" : {
+            "$ref" : "#/components/schemas/RapportertInntektDto"
+          }
+        },
         "type" : "object"
       },
       "ReferanseDto" : {
@@ -5135,6 +5208,36 @@
         },
         "summary" : "Returnerer beregningsresultat med uttaksplan for behandling.",
         "tags" : [ "beregningsresultat" ]
+      }
+    },
+    "/api/behandling/kontrollerinntekt" : {
+      "get" : {
+        "description" : "Henter perioder for kontroll av inntekt",
+        "operationId" : "hentKontrollerInntekt",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/KontrollerInntektDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter perioder for kontroll av inntekt",
+        "tags" : [ "kontroll" ]
       }
     },
     "/api/behandling/perioder" : {
