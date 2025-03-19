@@ -1,17 +1,17 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
+import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.FinnKontrollresultatForIkkeGodkjentUttalelse.harDiff;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.Set;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
-
-import java.math.BigDecimal;
-import java.util.Optional;
-import java.util.Set;
-
-import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.FinnKontrollresultatForIkkeGodkjentUttalelse.harDiff;
 
 public class Avviksvurdering {
 
@@ -42,7 +42,7 @@ public class Avviksvurdering {
     }
 
     private static LocalDateTimeline<KontrollResultat> finnNyOppgaveKontrollresultatTidslinje(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje, LocalDateTimeline<KontrollResultat> tidslinjeForOppgaveTilBruker) {
-        final var oppgaverTilBrukerTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::getRegisterRapporterteInntekter).intersection(tidslinjeForOppgaveTilBruker)
+        final var oppgaverTilBrukerTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::registerRapporterteInntekter).intersection(tidslinjeForOppgaveTilBruker)
             .combine(uttalelseTidslinje.mapValue(BrukersUttalelseForRegisterinntekt::registerInntekt), (di, register, uttalelse) -> {
                 if (uttalelse == null) {
                     return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);
@@ -60,9 +60,9 @@ public class Avviksvurdering {
         final var inntektDiffKontrollResultat = gjeldendeRapporterteInntekter.intersection(tidslinjeRelevanteÅrsaker)
             .mapValue(it ->
             {
-                final var register = it.getRegisterRapporterteInntekter().stream()
+                final var register = it.registerRapporterteInntekter().stream()
                     .map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
-                final var bruker = it.getBrukerRapporterteInntekter().stream()
+                final var bruker = it.brukerRapporterteInntekter().stream()
                     .map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
 
                 final var differanse = register.subtract(bruker).abs();

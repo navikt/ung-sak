@@ -1,5 +1,9 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.kontroll;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -14,11 +18,12 @@ import no.nav.ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.ytelse.*;
-
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
+import no.nav.ung.sak.ytelse.InntektType;
+import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
+import no.nav.ung.sak.ytelse.RapportertInntekt;
+import no.nav.ung.sak.ytelse.RapportertInntektMapper;
+import no.nav.ung.sak.ytelse.RapportertInntektOgKilde;
+import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettInntektDto.class, adapter= FastsettInntektOppdaterer.class)
@@ -90,7 +95,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     }
 
     private static LocalDateSegment<InntekterPrKilde> mapTilInntekterPrKilde(LocalDateInterval di, LocalDateSegment<RapporterteInntekter> rapportert, LocalDateSegment<Set<RapportertInntekt>> saksbehandlet) {
-        return new LocalDateSegment<>(di, new InntekterPrKilde(rapportert.getValue().getBrukerRapporterteInntekter(), rapportert.getValue().getRegisterRapporterteInntekter(), saksbehandlet == null ? Set.of() : saksbehandlet.getValue()));
+        return new LocalDateSegment<>(di, new InntekterPrKilde(rapportert.getValue().brukerRapporterteInntekter(), rapportert.getValue().registerRapporterteInntekter(), saksbehandlet == null ? Set.of() : saksbehandlet.getValue()));
     }
 
     private static Set<RapportertInntekt> mapTilSaksbehandletRapporterteInntekter(FastsettInntektPeriodeDto p) {

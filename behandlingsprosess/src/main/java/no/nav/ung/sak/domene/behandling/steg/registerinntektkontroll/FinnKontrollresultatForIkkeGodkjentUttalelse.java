@@ -1,18 +1,18 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
+import java.math.BigDecimal;
+import java.util.Set;
+
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
-import java.math.BigDecimal;
-import java.util.Set;
-
 public class FinnKontrollresultatForIkkeGodkjentUttalelse {
 
     static KontrollResultat finnKontrollresultatForIkkeGodkjentUttalelse(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<BrukersUttalelseForRegisterinntekt> relevantIkkeGodkjentUttalelse) {
-        final var registerInntektTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::getRegisterRapporterteInntekter);
+        final var registerInntektTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::registerRapporterteInntekter);
         final var ikkeGodkjentUttalelseResultater = relevantIkkeGodkjentUttalelse.combine(registerInntektTidslinje, (di, uttalelse, register) -> {
             if (!harDiff(uttalelse.getValue().registerInntekt(), register != null ? register.getValue() : Set.of())) {
                 return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_AKSJONSPUNKT);
