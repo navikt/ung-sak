@@ -32,6 +32,14 @@ public class EtterlysningRepository {
         return etterlysninger;
     }
 
+    public List<Etterlysning> hentEtterlysninger(Long behandlingId) {
+        final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
+                "where e.behandlingId = :behandlingId", Etterlysning.class)
+            .setParameter("behandlingId", behandlingId)
+            .getResultList();
+        return etterlysninger;
+    }
+
     public List<Etterlysning> hentEtterlysninger(Long behandlingId, EtterlysningType type) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
                 "where e.behandlingId = :behandlingId and e.type = :type", Etterlysning.class)
