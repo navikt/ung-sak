@@ -2,6 +2,8 @@ create table etterlysning
 (
     id                      bigint not null primary key,
     behandling_id           bigint not null references behandling(id),
+    fom                     date,
+    tom                     date,
     grunnlag_ref            uuid not null,
     ekstern_ref             uuid not null,
     frist                   timestamp,
@@ -32,6 +34,8 @@ comment on column etterlysning.id is 'Primary Key. Unik identifikator for etterl
 comment on column etterlysning.behandling_id is 'Referanse til behandling.';
 comment on column etterlysning.grunnlag_ref is 'Referanse til registergrunnlaget';
 comment on column etterlysning.ekstern_ref is 'Ekstern referanse for etterlysning';
+comment on column etterlysning.fom is 'Fom-dato for etterlysning';
+comment on column etterlysning.tom is 'Tom-dato for etterlysning';
 comment on column etterlysning.frist is 'Frist for å bekrefte etterlysning';
 comment on column etterlysning.type is 'Type etterlysning';
 comment on column etterlysning.status is 'Status på etterlysning';
