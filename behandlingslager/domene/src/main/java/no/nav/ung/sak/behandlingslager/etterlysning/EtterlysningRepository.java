@@ -44,7 +44,7 @@ public class EtterlysningRepository {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
                 "where e.behandlingId = :behandlingId and e.type = :type", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
-            .setParameter("type", type.getKode())
+            .setParameter("type", type)
             .getResultList();
         return etterlysninger;
     }
@@ -55,7 +55,7 @@ public class EtterlysningRepository {
                 "where e.behandlingId = :behandlingId and e.type = :type and status = :status", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("type", type.getKode())
-            .setParameter("status", EtterlysningStatus.OPPRETTET.getKode())
+            .setParameter("status", EtterlysningStatus.OPPRETTET)
             .getResultList();
         return etterlysninger;
     }
@@ -64,7 +64,7 @@ public class EtterlysningRepository {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
                 "where e.behandlingId = :behandlingId and e.type = :type and status = :status", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
-            .setParameter("status", EtterlysningStatus.SKAL_AVBRYTES.getKode())
+            .setParameter("status", EtterlysningStatus.SKAL_AVBRYTES)
             .getResultList();
         return etterlysninger;
     }
