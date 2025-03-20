@@ -15,31 +15,21 @@ public class OpprettEtterlysningTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "etterlysning.opprett";
     public static final String ETTERLYSNING_TYPE = "type";
-
-    private InntektkontrollEtterlysningHåndterer inntektkontrollEtterlysningOppretter;
+    private EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste;
 
     public OpprettEtterlysningTask() {
         // CDI
     }
 
     @Inject
-    public OpprettEtterlysningTask(InntektkontrollEtterlysningHåndterer inntektkontrollEtterlysningOppretter) {
-        this.inntektkontrollEtterlysningOppretter = inntektkontrollEtterlysningOppretter;
+    public OpprettEtterlysningTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+        this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         final var behandlingId = prosessTaskData.getBehandlingId();
         final var etterlysningType = EtterlysningType.fraKode(prosessTaskData.getPropertyValue(ETTERLYSNING_TYPE));
-        switch (etterlysningType) {
-            case EtterlysningType.UTTALELSE_KONTROLL_INNTEKT:
-                inntektkontrollEtterlysningOppretter.hånterEtterlysning(Long.parseLong(behandlingId));
-                break;
-            default:
-                throw new IllegalArgumentException("Ukjent etterlysningstype: " + etterlysningType);
-        }
-
-
-
+        etterlysningProssesseringTjeneste.opprett(Long.parseLong(behandlingId), etterlysningType);
     }
 }

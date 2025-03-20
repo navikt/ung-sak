@@ -11,6 +11,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import org.hibernate.jpa.QueryHints;
 
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
@@ -100,4 +102,23 @@ public class BehandlingKandidaterRepository {
             .setHint(QueryHints.HINT_READONLY, "true");
         return query.getResultList();
     }
+
+    public List<Behandling> finnBehandlingerForUtløptEtterlysning() {
+        LocalDateTime naa = LocalDateTime.now();
+
+        String sql = " SELECT DISTINCT b.* " +
+            " FROM etterlysning e " +
+            " INNER JOIN behandling b on b.id=ap.behandling_id " +
+            " INNER JOIN fagsak f on f.id=b.fagsak_id" +
+            " WHERE e.status = :status " +
+            "   AND f.ytelse_type != 'OBSOLETE'" +
+            "   AND e.frist < :naa ";
+        var query = getEntityManager().createNativeQuery(sql, Behandling.class)
+            .setHint(QueryHints.HINT_READONLY, "true")
+            .setParameter("status", EtterlysningStatus.VENTER)
+            .setParameter("naa", naa);
+
+        return query.getResultList();
+    }
+
 }

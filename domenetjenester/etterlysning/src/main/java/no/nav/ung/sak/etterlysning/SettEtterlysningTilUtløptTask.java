@@ -1,30 +1,32 @@
 package no.nav.ung.sak.etterlysning;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 @ApplicationScoped
-@ProsessTask(value = AvbrytEtterlysningTask.TASKTYPE)
+@ProsessTask(value = SettEtterlysningTilUtløptTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class AvbrytEtterlysningTask implements ProsessTaskHandler {
+public class SettEtterlysningTilUtløptTask implements ProsessTaskHandler {
 
-    public static final String TASKTYPE = "etterlysning.avbryt";
+    public static final String TASKTYPE = "etterlysning.utlopt";
     private EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste;
 
-    public AvbrytEtterlysningTask() {
+    public SettEtterlysningTilUtløptTask() {
         // CDI
     }
 
-    public AvbrytEtterlysningTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+    @Inject
+    public SettEtterlysningTilUtløptTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
         this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        etterlysningProssesseringTjeneste.settTilAvbrutt(Long.parseLong(prosessTaskData.getBehandlingId()));
+        etterlysningProssesseringTjeneste.settTilUtløpt(Long.parseLong(prosessTaskData.getBehandlingId()));
     }
 
 }

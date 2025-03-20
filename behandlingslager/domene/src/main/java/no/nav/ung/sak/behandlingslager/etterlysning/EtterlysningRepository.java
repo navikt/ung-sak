@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
@@ -65,6 +66,17 @@ public class EtterlysningRepository {
                 "where e.behandlingId = :behandlingId and e.type = :type and status = :status", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("status", EtterlysningStatus.SKAL_AVBRYTES)
+            .getResultList();
+        return etterlysninger;
+    }
+
+
+    public List<Etterlysning> hentUtløpteEtterlysningerSomVenterPåSvar(Long behandlingId) {
+        final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
+                "where e.behandlingId = :behandlingId and e.type = :type and status = :status AND frist < :naa", Etterlysning.class)
+            .setParameter("status", EtterlysningStatus.VENTER)
+            .setParameter("behandlingId", behandlingId)
+            .setParameter("naa", LocalDateTime.now())
             .getResultList();
         return etterlysninger;
     }
