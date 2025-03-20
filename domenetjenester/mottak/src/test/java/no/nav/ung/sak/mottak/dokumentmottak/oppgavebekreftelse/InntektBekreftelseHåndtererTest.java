@@ -35,7 +35,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -51,8 +50,6 @@ class InntektBekreftelseHåndtererTest {
 
     @Inject
     private EntityManager em;
-    @Inject
-    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
@@ -66,7 +63,7 @@ class InntektBekreftelseHåndtererTest {
     }
 
     @Test
-    void skalOppdatereEtterlysningOppdatereIayGrunnlagLagreUttalelseOgSetteBehandlingAvVent() {
+    void skalOppdatereEtterlysningOppdatereIayGrunnlagOgSetteBehandlingAvVent() {
         // Arrange
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING);
@@ -103,7 +100,7 @@ class InntektBekreftelseHåndtererTest {
                         BigDecimal.valueOf(oppgittInntekt),
                         BigDecimal.ZERO)),
                     true,
-                    "uttalelse")
+                    "en uttalelse")
             ),
             LocalDateTime.now(),
             Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE
@@ -112,6 +109,7 @@ class InntektBekreftelseHåndtererTest {
         // Act
         var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
+        em.flush();
 
         // Assert
         //abakus er oppdatert
@@ -130,5 +128,12 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
+        assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
+        assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseTekst()).isEqualTo("en uttalelse");
+    }
+
+    @Test
+    void skalIkkeOppdatereGrunnlagVedUttalelse(){
+
     }
 }

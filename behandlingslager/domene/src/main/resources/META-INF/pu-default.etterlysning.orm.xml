@@ -7,5 +7,6 @@
     <sequence-generator name="SEQ_ETTERLYSNING" allocation-size="50" sequence-name="SEQ_ETTERLYSNING"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet"/>
+    <entity class="no.nav.ung.sak.behandlingslager.etterlysning.UttalelseEntitet"/>
 
 </entity-mappings>

@@ -27,12 +27,15 @@ public class EtterlysningRepository {
     }
 
     public EtterlysningEntitet lagre(EtterlysningEntitet etterlysning) {
+        if (etterlysning.getUttalelse() != null) {
+            entityManager.persist(etterlysning.getUttalelse());
+        }
         entityManager.persist(etterlysning);
         return etterlysning;
     }
 
     public List<EtterlysningEntitet> lagre(List<EtterlysningEntitet> etterlysninger) {
-        etterlysninger.forEach(entityManager::persist);
+        etterlysninger.forEach(this::lagre);
         return etterlysninger;
     }
 

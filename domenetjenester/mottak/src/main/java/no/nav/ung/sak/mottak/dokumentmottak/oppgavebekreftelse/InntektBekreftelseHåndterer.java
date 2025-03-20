@@ -49,9 +49,6 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         // lagre grunnlag
         var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
 
-        // opprett uttalelse hvis finnes
-
-
         // ta behandling av vent (lukker autopunkt også)
         var fortsettTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
         Behandling behandling = oppgaveBekreftelseInnhold.behandling();
@@ -67,7 +64,12 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         // hent tilhørende etterlysning og marker den som løst
         UUID oppgaveId = inntektBekreftelse.getOppgaveId();
         EtterlysningEntitet etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(oppgaveId);
-        etterlysning.mottattSvar();
+
+        if (inntektBekreftelse.getUttalelseFraBruker() != null) {
+            etterlysning.mottattUttalelse(inntektBekreftelse.getUttalelseFraBruker(), oppgaveBekreftelseInnhold.journalpostId());
+        } else {
+            etterlysning.mottattSvar(oppgaveBekreftelseInnhold.journalpostId());
+        }
         etterlysningRepository.lagre(etterlysning);
 
     }

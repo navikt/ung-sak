@@ -9,6 +9,7 @@ import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
@@ -42,6 +43,14 @@ public class EtterlysningEntitet extends BaseEntitet {
 
     @Column(name = "frist")
     private LocalDateTime frist;
+
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
+    private JournalpostId svarJournalpostId;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "etterlysning_id")
+    private UttalelseEntitet uttalelse;
 
     private EtterlysningEntitet() {
         // Hibernate
@@ -139,10 +148,24 @@ public class EtterlysningEntitet extends BaseEntitet {
     }
 
 
-    public void mottattSvar() {
+    public void mottattSvar(JournalpostId svarJournalpostId) {
         if (status != EtterlysningStatus.VENTER) {
             throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
         }
+        this.svarJournalpostId = svarJournalpostId;
         this.status = EtterlysningStatus.MOTTATT_SVAR;
+    }
+
+    public void mottattUttalelse(String uttalelse, JournalpostId svarJournalpostId) {
+        mottattSvar(svarJournalpostId);
+        this.uttalelse = new UttalelseEntitet(uttalelse, this.id);
+    }
+
+    public JournalpostId getSvarJournalpostId() {
+        return svarJournalpostId;
+    }
+
+    public UttalelseEntitet getUttalelse() {
+        return uttalelse;
     }
 }
