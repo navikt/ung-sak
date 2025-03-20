@@ -13,19 +13,15 @@ import java.time.LocalDateTime;
 @Dependent
 public class InntektkontrollEtterlysningHåndterer implements EtterlysningHåndterer {
 
-    private final InntektArbeidYtelseTjeneste iayTjeneste;
     private final EtterlysningRepository etterlysningRepository;
 
     @Inject
-    public InntektkontrollEtterlysningHåndterer(InntektArbeidYtelseTjeneste iayTjeneste,
-                                                EtterlysningRepository etterlysningRepository) {
-        this.iayTjeneste = iayTjeneste;
+    public InntektkontrollEtterlysningHåndterer(EtterlysningRepository etterlysningRepository) {
         this.etterlysningRepository = etterlysningRepository;
     }
 
     @Override
     public void hånterEtterlysning(long behandlingId) {
-        final var grunnlag = iayTjeneste.hentGrunnlag(behandlingId);
         final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         // Kall oppgave API
         etterlysninger.forEach(e -> e.vent(LocalDateTime.now().plusDays(14)));

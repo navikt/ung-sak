@@ -12,6 +12,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -198,7 +199,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
     private LocalDateTime finnEksisterendeFrist(Long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        return behandling.getAksjonspunktFor(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE).getFristTid();
+        return behandling.getAksjonspunktForHvisFinnes(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE.getKode()).map(Aksjonspunkt::getFristTid).orElse(LocalDateTime.now().plusDays(14));
     }
 
     private LocalDateTime utledVentefrist(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {

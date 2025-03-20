@@ -42,7 +42,7 @@ import no.nav.ung.sak.vilkår.VilkårTjeneste;
  * Kjører hver dag kl 07:15.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 7 7 * *", maxFailedRuns = 1)
+@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 7 * *", maxFailedRuns = 1)
 public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettRevurderingForInntektskontrollBatch";
@@ -108,7 +108,7 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
         log.info("Fant følgende saker til kontroll av inntekt: ", behandlinger.stream().map(Behandling::getFagsak).map(Fagsak::getSaksnummer).toList());
 
         // TODO: Legg inn dette når resten er klart (vi vil ikkje kjøre i Q før vi kan teste det skikkelig i Q)
-        // opprettProsessTask(behandlingerTilKontroll, fom, tom);
+        opprettProsessTask(behandlingerTilKontroll, fom, tom);
     }
 
     private void opprettProsessTask(List<Behandling> behandlingerTilKontroll, LocalDate fom, LocalDate tom) {
@@ -137,7 +137,7 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
             // Hvis ikke vurdert uttak
             return true;
         }
-        return ungdomsytelseGrunnlag.get().getAvslagstidslinjeFraUttak().intersection(new LocalDateInterval(fom, tom)).isEmpty();
+        return ungdomsytelseGrunnlag.get().getAvslagstidslinjeFraUttak().filterValue(it -> it.avslagsårsak() != null).intersection(new LocalDateInterval(fom, tom)).isEmpty();
     }
 
     private boolean harIkkeAvslåtteVilkår(Behandling behandling, LocalDate fom, LocalDate tom) {
