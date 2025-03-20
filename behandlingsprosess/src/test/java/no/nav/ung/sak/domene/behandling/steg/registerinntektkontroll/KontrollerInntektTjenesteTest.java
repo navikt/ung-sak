@@ -1,24 +1,24 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.uttalelse.BrukersUttalelseForRegisterinntekt;
-import no.nav.ung.sak.ytelse.uttalelse.Status;
-import no.nav.ung.sak.ytelse.uttalelse.Uttalelse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.uttalelse.Status;
+import no.nav.ung.sak.uttalelse.Uttalelse;
+import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
+import no.nav.ung.sak.ytelse.InntektType;
+import no.nav.ung.sak.ytelse.RapportertInntekt;
+import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
 class KontrollerInntektTjenesteTest {
 
@@ -32,10 +32,10 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST, resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST), resultat);
     }
 
     @Test
@@ -51,10 +51,10 @@ class KontrollerInntektTjenesteTest {
             new BrukersUttalelseForRegisterinntekt(Status.BEKREFTET, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))), new Uttalelse(false)));
 
         // Act
-        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(KontrollResultat.OPPRETT_AKSJONSPUNKT, resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_AKSJONSPUNKT), resultat);
     }
 
     @Test
@@ -71,10 +71,10 @@ class KontrollerInntektTjenesteTest {
             new BrukersUttalelseForRegisterinntekt(Status.BEKREFTET, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(registerFraUttalelse))), new Uttalelse(false)));
 
         // Act
-        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST, resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST), resultat);
     }
 
     @Test
@@ -87,10 +87,10 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(KontrollResultat.BRUK_INNTEKT_FRA_BRUKER, resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_INNTEKT_FRA_BRUKER), resultat);
     }
 
     @Test
@@ -103,10 +103,10 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(KontrollResultat.BRUK_INNTEKT_FRA_BRUKER, resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_INNTEKT_FRA_BRUKER), resultat);
     }
 
     @Test
@@ -119,10 +119,10 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<BrukersUttalelseForRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER, resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER), resultat);
     }
 
 
@@ -137,10 +137,10 @@ class KontrollerInntektTjenesteTest {
             new BrukersUttalelseForRegisterinntekt(Status.VENTER, Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(10_002))), null));
 
         // Act
-        KontrollResultat resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
 
         // Assert
-        assertEquals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST, resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST), resultat);
     }
 
 

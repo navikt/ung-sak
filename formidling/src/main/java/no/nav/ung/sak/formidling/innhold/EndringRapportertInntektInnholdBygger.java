@@ -77,7 +77,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         Objects.requireNonNull(rhs, "Mangler sats og rapportert inntekt for periode %s for tilkjent ytelse %s"
             .formatted(p.toString(), ty.toString()));
 
-        var rapportertInntektSum = rhs.getValue().getBrukerRapporterteInntekter().stream()
+        var rapportertInntektSum = rhs.getValue().brukerRapporterteInntekter().stream()
             .map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new LocalDateSegment<>(p,

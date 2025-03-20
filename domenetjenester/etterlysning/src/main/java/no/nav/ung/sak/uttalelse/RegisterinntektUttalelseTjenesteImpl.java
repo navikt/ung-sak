@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse.uttalelse;
+package no.nav.ung.sak.uttalelse;
 
 import jakarta.enterprise.context.Dependent;
 

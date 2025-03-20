@@ -76,6 +76,11 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>perioder</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>etterlysning</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
