@@ -15,6 +15,9 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
 
     @Override
     public void håndter(OppgaveBekreftelseInnhold bekreftelse) {
-
+        // hent tilhørende etterlysning og marker den som løst
+        // opprett uttalelse hvis finnes
+        // lagre grunnlag
+        // ta behandling av vent
     }
 }
