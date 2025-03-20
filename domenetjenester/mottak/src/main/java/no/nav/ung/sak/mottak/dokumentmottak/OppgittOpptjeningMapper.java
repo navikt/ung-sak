@@ -13,6 +13,13 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.søknad.felles.opptjening.AnnenAktivitet;
+import no.nav.k9.søknad.felles.opptjening.Frilanser;
+import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
+import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
+import no.nav.k9.søknad.felles.opptjening.UtenlandskArbeidsforhold;
+import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
+import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -25,15 +32,9 @@ import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuil
 import no.nav.ung.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.OrgNummer;
-import no.nav.k9.søknad.felles.opptjening.AnnenAktivitet;
-import no.nav.k9.søknad.felles.opptjening.Frilanser;
-import no.nav.k9.søknad.felles.opptjening.OpptjeningAktivitet;
-import no.nav.k9.søknad.felles.opptjening.SelvstendigNæringsdrivende;
-import no.nav.k9.søknad.felles.opptjening.UtenlandskArbeidsforhold;
-import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
-import no.nav.k9.søknad.felles.type.Periode;
 
 @Dependent
+//TODO trengs denne?
 public class OppgittOpptjeningMapper {
 
     @Inject

@@ -61,7 +61,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
                 .get();
 
             bekreftelseHåndterer.håndter(new OppgaveBekreftelseInnhold(
-                dokument.getJournalpostId(), behandling, oppgaveBekreftelse
+                dokument.getJournalpostId(), behandling, oppgaveBekreftelse, dokument.getInnsendingstidspunkt(), dokument.getType()
             ));
         }
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
@@ -73,7 +73,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
         } else if (bekreftelse instanceof EndretFomDatoBekreftelse) {
             return UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO;
         }
-        throw new IllegalArgumentException("Kunne ikke håndtere bekreftelse av type " + bekreftelse.getType());
+        throw new IllegalArgumentException("Kunne ikke håndtere bekreftelse av brevkode " + bekreftelse.getType());
     }
 
     @Override
