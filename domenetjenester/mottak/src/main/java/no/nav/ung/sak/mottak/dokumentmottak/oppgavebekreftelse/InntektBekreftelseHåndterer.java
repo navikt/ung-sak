@@ -13,8 +13,11 @@ import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.oppgave.bekreftelse.Bekreftelse;
 import no.nav.k9.oppgave.bekreftelse.ung.inntekt.InntektBekreftelse;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -38,31 +41,45 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
+    //TODO hva hvis behandling er ikke på KONTROLLER_REGISTER_INNTEKT steg?
     @Override
-    public void håndter(OppgaveBekreftelseInnhold bekreftelse) {
-        InntektBekreftelse b = bekreftelse.oppgaveBekreftelse().getBekreftelse();
+    public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelseInnhold) {
+        InntektBekreftelse inntektBekreftelse = oppgaveBekreftelseInnhold.oppgaveBekreftelse().getBekreftelse();
 
         // lagre grunnlag
-        var oppgittOpptjeningMottattRequest = mapOppgittOpptjeningRequest(bekreftelse);
-        lagreOppgittOpptjeningFraSøknad(bekreftelse, oppgittOpptjeningMottattRequest);
-
-        // hent tilhørende etterlysning og marker den som løst
-        UUID oppgaveId = b.getOppgaveId();
-        EtterlysningEntitet etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(oppgaveId);
-        etterlysning.mottattSvar();
-        etterlysningRepository.lagre(etterlysning);
+        var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
 
         // opprett uttalelse hvis finnes
 
 
-        // ta behandling av vent
+        // ta behandling av vent (lukker autopunkt også)
+        var fortsettTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+        Behandling behandling = oppgaveBekreftelseInnhold.behandling();
+        fortsettTask.setBehandling(behandling.getFagsakId(), behandling.getId());
+        fortsettTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+        fortsettTask.setProperty(FortsettBehandlingTask.GJENOPPTA_STEG, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
+
+        ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
+        gruppe.addNesteSekvensiell(abakusTask);
+        gruppe.addNesteSekvensiell(fortsettTask);
+        prosessTaskTjeneste.lagre(gruppe);
+
+        // hent tilhørende etterlysning og marker den som løst
+        UUID oppgaveId = inntektBekreftelse.getOppgaveId();
+        EtterlysningEntitet etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(oppgaveId);
+        etterlysning.mottattSvar();
+        etterlysningRepository.lagre(etterlysning);
 
     }
 
     /**
      * Lagrer oppgitt opptjening til abakus fra mottatt dokument.
+     *
+     * @return
      */
-    private void lagreOppgittOpptjeningFraSøknad(OppgaveBekreftelseInnhold bekreftelseInnhold, OppgittOpptjeningMottattRequest request) {
+    private ProsessTaskData lagOppdaterAbakusTask(OppgaveBekreftelseInnhold bekreftelseInnhold) {
+        var request = mapOppgittOpptjeningRequest(bekreftelseInnhold);
+
         try {
             var behandling = bekreftelseInnhold.behandling();
             var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
@@ -75,8 +92,9 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
             enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             enkeltTask.setCallIdFraEksisterende();
+            return enkeltTask;
 
-            prosessTaskTjeneste.lagre(enkeltTask);
+
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Opprettelse av task for lagring av oppgitt opptjening i abakus feiler.", e).toException();
         }

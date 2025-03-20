@@ -32,9 +32,10 @@ import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -50,6 +51,8 @@ class InntektBekreftelseHåndtererTest {
 
     @Inject
     private EntityManager em;
+    @Inject
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
@@ -64,13 +67,9 @@ class InntektBekreftelseHåndtererTest {
 
     @Test
     void skalOppdatereEtterlysningOppdatereIayGrunnlagLagreUttalelseOgSetteBehandlingAvVent() {
-
-
         // Arrange
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING);
-
-        scenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
         Behandling behandling = scenarioBuilder.lagre(em);
 
         var periode = DatoIntervallEntitet.fra(LocalDate.now(), LocalDate.now());
@@ -123,9 +122,10 @@ class InntektBekreftelseHåndtererTest {
         assertThat(abakusTask.getPropertyValue(AsyncAbakusLagreOpptjeningTask.BREVKODER)).isEqualTo(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getKode());
         assertThat(abakusTask.getPayloadAsString()).contains(String.valueOf(oppgittInntekt));
 
-
-        //behandling er ikke lenger på vent
-        assertThat(behandling.getAksjonspunkter()).isEmpty();
+        //behandling taes av vent
+        var fortsettSteg = prosessTaskTjeneste.finnAlle(FortsettBehandlingTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        assertThat(fortsettSteg).hasSize(1);
+        assertThat(fortsettSteg.getFirst().getPropertyValue(FortsettBehandlingTask.GJENOPPTA_STEG)).isEqualTo(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
 
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
