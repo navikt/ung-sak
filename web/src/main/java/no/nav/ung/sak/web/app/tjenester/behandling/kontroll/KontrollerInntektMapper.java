@@ -93,8 +93,8 @@ public class KontrollerInntektMapper {
             throw new IllegalStateException("Fant flere overlappende rapporterte inntekter for periode " + periode);
         }
 
-        final var brukerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.toSegments().getFirst().getValue().getBrukerRapporterteInntekter();
-        final var registerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.toSegments().getFirst().getValue().getRegisterRapporterteInntekter();
+        final var brukerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.toSegments().getFirst().getValue().brukerRapporterteInntekter();
+        final var registerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.toSegments().getFirst().getValue().registerRapporterteInntekter();
 
         final var brukersRapporterteArbeidsinntekt = finnRapporterteInntektForType(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, brukerRapporterteInntekter);
         final var brukersRapporterteYtelse = finnRapporterteInntektForType(InntektType.YTELSE, brukerRapporterteInntekter);
