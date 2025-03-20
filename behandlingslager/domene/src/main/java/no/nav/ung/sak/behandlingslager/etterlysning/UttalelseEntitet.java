@@ -16,7 +16,7 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 public class UttalelseEntitet extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_uttalelse")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UTTALELSE")
     private Long id;
 
     @Column(name = "uttalelse", updatable = false, nullable = false)

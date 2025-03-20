@@ -5,6 +5,7 @@
         version="3.0">
 
     <sequence-generator name="SEQ_ETTERLYSNING" allocation-size="50" sequence-name="SEQ_ETTERLYSNING"/>
+    <sequence-generator name="SEQ_UTTALELSE" allocation-size="50" sequence-name="SEQ_UTTALELSE"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet"/>
     <entity class="no.nav.ung.sak.behandlingslager.etterlysning.UttalelseEntitet"/>

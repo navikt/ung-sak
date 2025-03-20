@@ -128,6 +128,7 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
+        //TODO flytt denne til andre testen.
         assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
         assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseTekst()).isEqualTo("en uttalelse");
     }
