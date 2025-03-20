@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
 @Immutable
-public class Etterlysning extends BaseEntitet {
+public class EtterlysningEntitet extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ETTERLYSNING")
@@ -25,6 +25,9 @@ public class Etterlysning extends BaseEntitet {
     @Column(name = "grunnlag_ref", nullable = false)
     private UUID grunnlagsreferanse;
 
+    /**
+     * Referanse mot deltager-app oppgave styrt av ung-sak
+     */
     @Column(name = "ekstern_ref", nullable = false)
     private UUID eksternReferanse;
 
@@ -40,17 +43,17 @@ public class Etterlysning extends BaseEntitet {
     @Column(name = "frist")
     private LocalDateTime frist;
 
-    private Etterlysning() {
+    private EtterlysningEntitet() {
         // Hibernate
     }
 
-    public static Etterlysning forInntektKontrollUttalelse(
+    public static EtterlysningEntitet forInntektKontrollUttalelse(
         Long behandlingId,
         UUID grunnlagsreferanse,
         UUID eksternReferanse,
         DatoIntervallEntitet periode) {
 
-        return new Etterlysning(
+        return new EtterlysningEntitet(
             behandlingId,
             grunnlagsreferanse,
             eksternReferanse,
@@ -59,12 +62,12 @@ public class Etterlysning extends BaseEntitet {
             EtterlysningStatus.OPPRETTET);
     }
 
-    public Etterlysning(Long behandlingId,
-                        UUID grunnlagsreferanse,
-                        UUID eksternReferanse,
-                        DatoIntervallEntitet periode,
-                        EtterlysningType type,
-                        EtterlysningStatus status) {
+    public EtterlysningEntitet(Long behandlingId,
+                               UUID grunnlagsreferanse,
+                               UUID eksternReferanse,
+                               DatoIntervallEntitet periode,
+                               EtterlysningType type,
+                               EtterlysningStatus status) {
         this.behandlingId = behandlingId;
         this.grunnlagsreferanse = grunnlagsreferanse;
         this.eksternReferanse = eksternReferanse;
@@ -136,4 +139,10 @@ public class Etterlysning extends BaseEntitet {
     }
 
 
+    public void mottattSvar() {
+        if (status != EtterlysningStatus.VENTER) {
+            throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
+        }
+        this.status = EtterlysningStatus.MOTTATT_SVAR;
+    }
 }

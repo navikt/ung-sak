@@ -1,5 +1,14 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -11,10 +20,16 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
-import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -25,15 +40,6 @@ import no.nav.ung.sak.uttalelse.RegisterinntektUttalelseTjeneste;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @ApplicationScoped
 @BehandlingStegRef(value = KONTROLLER_REGISTER_INNTEKT)
@@ -92,8 +98,8 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                                     LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
                                                     LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
         var etterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
-        List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
-        List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
+        List<EtterlysningEntitet> etterlysningerSomSkalAvbrytes = new ArrayList<>();
+        List<EtterlysningEntitet> etterlysningerSomSkalOpprettes = new ArrayList<>();
         var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(kontekst.getBehandlingId());
         for (var segment : kontrollResultat.toSegments()) {
             switch (segment.getValue()) {
@@ -127,27 +133,27 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         }
     }
 
-    private static boolean harEksisterendeEtterlysningPåVent(LocalDateSegment<KontrollResultat> segment, List<Etterlysning> etterlysninger) {
+    private static boolean harEksisterendeEtterlysningPåVent(LocalDateSegment<KontrollResultat> segment, List<EtterlysningEntitet> etterlysninger) {
         return etterlysninger.stream().anyMatch(e -> e.getStatus().equals(EtterlysningStatus.VENTER) &&
             e.getPeriode().toLocalDateInterval().overlaps(segment.getLocalDateInterval()));
     }
 
-    private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateSegment<KontrollResultat> segment, UUID iayRef) {
+    private EtterlysningEntitet opprettNyEtterlysning(Long behandlingId, LocalDateSegment<KontrollResultat> segment, UUID iayRef) {
         UUID bestillingsId = UUID.randomUUID();
-        final var etterlysning = Etterlysning.forInntektKontrollUttalelse(behandlingId,
+        final var etterlysning = EtterlysningEntitet.forInntektKontrollUttalelse(behandlingId,
             iayRef,
             bestillingsId,
             DatoIntervallEntitet.fra(segment.getFom(), segment.getTom()));
         return etterlysning;
     }
 
-    private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateSegment<KontrollResultat> segment) {
+    private List<EtterlysningEntitet> avbrytDersomEksisterendeEtterlysning(List<EtterlysningEntitet> etterlysninger, LocalDateSegment<KontrollResultat> segment) {
         var etterlysningerSomSkalAvbrytes = etterlysninger.stream()
             .filter(etterlysning ->
                 etterlysning.getPeriode().toLocalDateInterval().overlaps(segment.getLocalDateInterval()))
             .filter(e -> e.getStatus().equals(EtterlysningStatus.VENTER))
             .toList();
-        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
+        etterlysningerSomSkalAvbrytes.forEach(EtterlysningEntitet::skalAvbrytes);
 
         return etterlysningerSomSkalAvbrytes;
     }
