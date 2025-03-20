@@ -1560,17 +1560,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT" ]
       },
-      "Etterlysninger" : {
-        "properties" : {
-          "etterlysninger" : {
-            "items" : {
-              "$ref" : "#/components/schemas/Etterlysning"
-            },
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
       "FagsakDto" : {
         "properties" : {
           "endret" : {
@@ -5252,22 +5241,25 @@
     "/api/behandling/etterlysninger" : {
       "get" : {
         "operationId" : "hentEtterlysninger",
-        "requestBody" : {
-          "content" : {
-            "*/*" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          },
-          "required" : true
-        },
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/Etterlysninger"
+                  "items" : {
+                    "$ref" : "#/components/schemas/Etterlysning"
+                  },
+                  "type" : "array"
                 }
               }
             },
