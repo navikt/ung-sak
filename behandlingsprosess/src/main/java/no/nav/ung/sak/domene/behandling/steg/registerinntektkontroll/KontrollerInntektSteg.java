@@ -50,7 +50,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
-
     @Inject
     public KontrollerInntektSteg(ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                  RapportertInntektMapper rapportertInntektMapper,
@@ -76,6 +75,9 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
+
+
+
         var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         var uttalelser = registerinntektUttalelseTjeneste.hentUttalelser(behandlingId);

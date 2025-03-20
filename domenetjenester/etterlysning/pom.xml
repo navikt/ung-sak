@@ -39,6 +39,7 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>arbeidsforhold</artifactId>
         </dependency>
+
     </dependencies>
 
 </project>

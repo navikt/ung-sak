@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
@@ -80,6 +82,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
      */
     private AtomicBoolean nøstetProsseringGuard = new AtomicBoolean();
     private BehandlingskontrollServiceProvider serviceProvider;
+    private ProsessTaskTjenesteImpl prosessTaskTjenesteImpl;
 
     BehandlingskontrollTjenesteImpl() {
         // for CDI proxy
@@ -89,7 +92,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
      * SE KOMMENTAR ØVERST
      */
     @Inject
-    public BehandlingskontrollTjenesteImpl(BehandlingskontrollServiceProvider serviceProvider) {
+    public BehandlingskontrollTjenesteImpl(BehandlingskontrollServiceProvider serviceProvider, ProsessTaskTjenesteImpl prosessTaskTjenesteImpl) {
 
         this.serviceProvider = serviceProvider;
         this.behandlingRepository = serviceProvider.getBehandlingRepository();
@@ -98,6 +101,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         this.behandlingStegKonfigurasjon = new BehandlingStegKonfigurasjon(EnumSet.allOf(BehandlingStegStatus.class));
         this.aksjonspunktKontrollRepository = serviceProvider.getAksjonspunktKontrollRepository();
         this.eventPubliserer = serviceProvider.getEventPubliserer();
+        this.prosessTaskTjenesteImpl = prosessTaskTjenesteImpl;
     }
 
     @Override

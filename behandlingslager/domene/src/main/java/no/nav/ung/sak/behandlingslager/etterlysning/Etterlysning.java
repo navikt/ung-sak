@@ -1,24 +1,14 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import org.hibernate.annotations.Immutable;
-
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import org.hibernate.annotations.Immutable;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
@@ -107,6 +97,14 @@ public class Etterlysning extends BaseEntitet {
         return status;
     }
 
+    public Long getBehandlingId() {
+        return behandlingId;
+    }
+
+    public LocalDateTime getFrist() {
+        return frist;
+    }
+
     public void vent(LocalDateTime frist) {
         if (status != EtterlysningStatus.OPPRETTET) {
             throw new IllegalStateException("Kan vente på etterlysning som ikke er satt til OPPRETTET. Status er " + status);
@@ -123,12 +121,19 @@ public class Etterlysning extends BaseEntitet {
         this.frist = null;
     }
 
-
     public void skalAvbrytes() {
         if (status == EtterlysningStatus.MOTTATT_SVAR) {
             throw new IllegalStateException("Kan ikke avbryte etterlysning som er mottatt.");
         }
         this.status = EtterlysningStatus.SKAL_AVBRYTES;
     }
+
+    public void utløpt() {
+        if (status != EtterlysningStatus.VENTER) {
+            throw new IllegalStateException("Kan ikke avbryte etterlysning dersom status ikke er VENTER. Status var " + status);
+        }
+        this.status = EtterlysningStatus.UTLØPT;
+    }
+
 
 }
