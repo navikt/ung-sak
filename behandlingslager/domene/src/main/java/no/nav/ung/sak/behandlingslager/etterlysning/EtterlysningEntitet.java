@@ -1,6 +1,19 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
@@ -13,7 +26,6 @@ import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
-@Immutable
 public class EtterlysningEntitet extends BaseEntitet {
 
     @Id

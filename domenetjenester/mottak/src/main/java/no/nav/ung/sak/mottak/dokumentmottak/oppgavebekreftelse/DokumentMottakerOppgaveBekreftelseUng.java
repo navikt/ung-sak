@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -36,7 +37,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
     @Inject
     public DokumentMottakerOppgaveBekreftelseUng(OppgaveBekreftelseParser oppgaveBekreftelseParser,
                                                  MottatteDokumentRepository mottatteDokumentRepository,
-                                                 Instance<BekreftelseHåndterer> bekreftelseMottakere,
+                                                 @Any Instance<BekreftelseHåndterer> bekreftelseMottakere,
                                                  HistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.oppgaveBekreftelseParser = oppgaveBekreftelseParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
