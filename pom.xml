@@ -55,6 +55,13 @@
         det brukes. -->
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>no.nav.ung</groupId>
+                <artifactId>ung-deltakelse-opplyser</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>

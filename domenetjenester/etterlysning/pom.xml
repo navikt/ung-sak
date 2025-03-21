@@ -16,6 +16,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>no.nav.ung</groupId>
+            <artifactId>ung-deltakelse-opplyser</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>kontrakt</artifactId>
         </dependency>
