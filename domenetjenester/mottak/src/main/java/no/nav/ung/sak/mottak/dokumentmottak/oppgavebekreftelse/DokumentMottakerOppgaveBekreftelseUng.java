@@ -8,18 +8,15 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.DatoEndring;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretFomDatoBekreftelse;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretTomDatoBekreftelse;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 
 
@@ -31,6 +28,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<BekreftelseHåndterer> bekreftelseMottakere;
+    private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
     public DokumentMottakerOppgaveBekreftelseUng() {
     }
@@ -38,11 +36,12 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
     @Inject
     public DokumentMottakerOppgaveBekreftelseUng(OppgaveBekreftelseParser oppgaveBekreftelseParser,
                                                  MottatteDokumentRepository mottatteDokumentRepository,
-                                                 Instance<BekreftelseHåndterer> bekreftelseMottakere
-    ) {
+                                                 Instance<BekreftelseHåndterer> bekreftelseMottakere,
+                                                 HistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.oppgaveBekreftelseParser = oppgaveBekreftelseParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.bekreftelseMottakere = bekreftelseMottakere;
+        this.historikkinnslagTjeneste = historikkinnslagTjeneste;
     }
 
     @Override
@@ -63,17 +62,10 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
             bekreftelseHåndterer.håndter(new OppgaveBekreftelseInnhold(
                 dokument.getJournalpostId(), behandling, oppgaveBekreftelse, dokument.getInnsendingstidspunkt(), dokument.getType()
             ));
+            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId());
+
         }
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
-    }
-
-    private static UngdomsprogramPeriodeEndringType finnBekreftetPeriodeEndring(DatoEndring bekreftelse) {
-        if (bekreftelse instanceof EndretTomDatoBekreftelse) {
-            return UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO;
-        } else if (bekreftelse instanceof EndretFomDatoBekreftelse) {
-            return UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO;
-        }
-        throw new IllegalArgumentException("Kunne ikke håndtere bekreftelse av brevkode " + bekreftelse.getType());
     }
 
     @Override

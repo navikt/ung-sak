@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,10 +69,12 @@ class InntektBekreftelseHåndtererTest {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING);
         Behandling behandling = scenarioBuilder.lagre(em);
-
         var periode = DatoIntervallEntitet.fra(LocalDate.now(), LocalDate.now());
+        long journalpostId = 892L;
+        int oppgittInntekt = 56321;
         var oppgaveId = UUID.randomUUID();
         var grunnlagsreferanse = UUID.randomUUID();
+
         var etterlysning = etterlysningRepository.lagre(EtterlysningEntitet.forInntektKontrollUttalelse(
             behandling.getId(),
             grunnlagsreferanse,
@@ -82,29 +85,14 @@ class InntektBekreftelseHåndtererTest {
         etterlysningRepository.lagre(etterlysning);
         em.flush();
 
-
-        long journalpostId = 892L;
-        int oppgittInntekt = 56321;
-        var bekreftelse = new OppgaveBekreftelseInnhold(
-            new JournalpostId(journalpostId),
-            behandling,
-            new OppgaveBekreftelse(
-                new SøknadId("456"),
-                Versjon.of("1"),
-                ZonedDateTime.now(),
-                new Søker(NorskIdentitetsnummer.of("12345678910")),
-                new InntektBekreftelse(
-                    oppgaveId,
-                    Set.of(new OppgittInntektForPeriode(
-                        new Periode(periode.getFomDato(), periode.getTomDato()),
-                        BigDecimal.valueOf(oppgittInntekt),
-                        BigDecimal.ZERO)),
-                    true,
-                    "en uttalelse")
-            ),
-            LocalDateTime.now(),
-            Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE
-        );
+        var bekreftelse = lagBekreftelse(journalpostId, behandling, new InntektBekreftelse(
+            oppgaveId,
+            Set.of(new OppgittInntektForPeriode(
+                new Periode(periode.getFomDato(), periode.getTomDato()),
+                BigDecimal.valueOf(oppgittInntekt),
+                BigDecimal.ZERO)),
+            true,
+            null));
 
         // Act
         var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste);
@@ -128,13 +116,77 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
-        //TODO flytt denne til andre testen.
         assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
-        assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseTekst()).isEqualTo("en uttalelse");
+        assertThat(oppdatertEtterlysning.getUttalelse()).isNull();
     }
 
     @Test
     void skalIkkeOppdatereGrunnlagVedUttalelse(){
+        // Arrange
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING);
+        Behandling behandling = scenarioBuilder.lagre(em);
+        var periode = DatoIntervallEntitet.fra(LocalDate.now(), LocalDate.now());
+        long journalpostId = 892L;
+        int oppgittInntekt = 56321;
+        var oppgaveId = UUID.randomUUID();
+        var grunnlagsreferanse = UUID.randomUUID();
 
+        var etterlysning = etterlysningRepository.lagre(EtterlysningEntitet.forInntektKontrollUttalelse(
+            behandling.getId(),
+            grunnlagsreferanse,
+            oppgaveId,
+            periode));
+
+        etterlysning.vent(LocalDateTime.now().plusDays(1));
+        etterlysningRepository.lagre(etterlysning);
+        em.flush();
+
+        var bekreftelse = lagBekreftelse(journalpostId, behandling, new InntektBekreftelse(
+            oppgaveId,
+            Set.of(new OppgittInntektForPeriode(
+                new Periode(periode.getFomDato(), periode.getTomDato()),
+                BigDecimal.valueOf(oppgittInntekt),
+                BigDecimal.ZERO)),
+            false,
+            "en uttalelse"));
+
+        // Act
+        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste);
+        inntektBekreftelseHåndterer.håndter(bekreftelse);
+        em.flush();
+
+        // Assert
+        //abakus skal ikke oppdateres
+        List<ProsessTaskData> abakusTasker = prosessTaskTjeneste.finnAlle(AsyncAbakusLagreOpptjeningTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        assertThat(abakusTasker).hasSize(0);
+
+        //behandling taes av vent
+        var fortsettSteg = prosessTaskTjeneste.finnAlle(FortsettBehandlingTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        assertThat(fortsettSteg).hasSize(1);
+        assertThat(fortsettSteg.getFirst().getPropertyValue(FortsettBehandlingTask.GJENOPPTA_STEG)).isEqualTo(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
+
+        //etterlysning er oppdatert
+        var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
+        assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
+        assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
+        assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseTekst()).isEqualTo("en uttalelse");
+    }
+
+    @NotNull
+    private static OppgaveBekreftelseInnhold lagBekreftelse(long journalpostId, Behandling behandling, InntektBekreftelse inntektBekreftelse) {
+        return new OppgaveBekreftelseInnhold(
+            new JournalpostId(journalpostId),
+            behandling,
+            new OppgaveBekreftelse(
+                new SøknadId("456"),
+                Versjon.of("1"),
+                ZonedDateTime.now(),
+                new Søker(NorskIdentitetsnummer.of("12345678910")),
+                inntektBekreftelse
+            ),
+            LocalDateTime.now(),
+            Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE
+        );
     }
 }

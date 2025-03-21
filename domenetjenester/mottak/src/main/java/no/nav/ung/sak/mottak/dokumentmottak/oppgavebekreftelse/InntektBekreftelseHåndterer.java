@@ -2,6 +2,7 @@ package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.enterprise.context.Dependent;
@@ -46,40 +47,33 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelseInnhold) {
         InntektBekreftelse inntektBekreftelse = oppgaveBekreftelseInnhold.oppgaveBekreftelse().getBekreftelse();
 
-        // lagre grunnlag
-        var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
-
-        // ta behandling av vent (lukker autopunkt også)
-        var fortsettTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
-        Behandling behandling = oppgaveBekreftelseInnhold.behandling();
-        fortsettTask.setBehandling(behandling.getFagsakId(), behandling.getId());
-        fortsettTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
-        fortsettTask.setProperty(FortsettBehandlingTask.GJENOPPTA_STEG, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
+        EtterlysningEntitet etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(inntektBekreftelse.getOppgaveId());
 
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
-        gruppe.addNesteSekvensiell(abakusTask);
-        gruppe.addNesteSekvensiell(fortsettTask);
-        prosessTaskTjeneste.lagre(gruppe);
 
-        // hent tilhørende etterlysning og marker den som løst
-        UUID oppgaveId = inntektBekreftelse.getOppgaveId();
-        EtterlysningEntitet etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(oppgaveId);
-
-        if (inntektBekreftelse.getUttalelseFraBruker() != null) {
-            etterlysning.mottattUttalelse(inntektBekreftelse.getUttalelseFraBruker(), oppgaveBekreftelseInnhold.journalpostId());
-        } else {
+        if (inntektBekreftelse.harBrukerGodtattEndringen()) {
+            var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
+            gruppe.addNesteSekvensiell(abakusTask);
             etterlysning.mottattSvar(oppgaveBekreftelseInnhold.journalpostId());
+        } else {
+            Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
+                "Uttalelse fra bruker må være satt når bruker ikke har godtatt endringen");
+            etterlysning.mottattUttalelse(inntektBekreftelse.getUttalelseFraBruker(), oppgaveBekreftelseInnhold.journalpostId());
         }
-        etterlysningRepository.lagre(etterlysning);
 
+        // ta behandling av vent (lukker autopunkt også)
+        var fortsettTask = fortsettBehandlingTask(oppgaveBekreftelseInnhold.behandling());
+        gruppe.addNesteSekvensiell(fortsettTask);
+
+        etterlysningRepository.lagre(etterlysning);
+        prosessTaskTjeneste.lagre(gruppe);
     }
 
     /**
-     * Lagrer oppgitt opptjening til abakus fra mottatt dokument.
+     * Lagrer oppgitt opptjening til abakus fra mottatt bekreftelse.
      *
-     * @return
      */
-    private ProsessTaskData lagOppdaterAbakusTask(OppgaveBekreftelseInnhold bekreftelseInnhold) {
+    private static ProsessTaskData lagOppdaterAbakusTask(OppgaveBekreftelseInnhold bekreftelseInnhold) {
         var request = mapOppgittOpptjeningRequest(bekreftelseInnhold);
 
         try {
@@ -128,6 +122,14 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         var ytelseType = YtelseType.fraKode(behandlingReferanse.getFagsakYtelseType().getKode());
         var oppgittOpptjening = new IAYTilDtoMapper(behandlingReferanse.getAktørId(), null, behandlingReferanse.getUuid()).mapTilDto(builder);
         return new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandlingReferanse.getUuid(), aktør, ytelseType, oppgittOpptjening);
+    }
+
+    private static ProsessTaskData fortsettBehandlingTask(Behandling behandling) {
+        var fortsettTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+        fortsettTask.setBehandling(behandling.getFagsakId(), behandling.getId());
+        fortsettTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+        fortsettTask.setProperty(FortsettBehandlingTask.GJENOPPTA_STEG, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
+        return fortsettTask;
     }
 
 }
