@@ -20,7 +20,7 @@ import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
 import no.nav.ung.sak.domene.abakus.mapping.IAYTilDtoMapper;
@@ -46,7 +46,7 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelseInnhold) {
         InntektBekreftelse inntektBekreftelse = oppgaveBekreftelseInnhold.oppgaveBekreftelse().getBekreftelse();
 
-        EtterlysningEntitet etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(inntektBekreftelse.getOppgaveId());
+        Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(inntektBekreftelse.getOppgaveId());
 
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 

@@ -37,7 +37,7 @@ import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningEntitet;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -75,7 +75,7 @@ class InntektBekreftelseHåndtererTest {
         var oppgaveId = UUID.randomUUID();
         var grunnlagsreferanse = UUID.randomUUID();
 
-        var etterlysning = etterlysningRepository.lagre(EtterlysningEntitet.forInntektKontrollUttalelse(
+        var etterlysning = etterlysningRepository.lagre(Etterlysning.forInntektKontrollUttalelse(
             behandling.getId(),
             grunnlagsreferanse,
             oppgaveId,
@@ -132,7 +132,7 @@ class InntektBekreftelseHåndtererTest {
         var oppgaveId = UUID.randomUUID();
         var grunnlagsreferanse = UUID.randomUUID();
 
-        var etterlysning = etterlysningRepository.lagre(EtterlysningEntitet.forInntektKontrollUttalelse(
+        var etterlysning = etterlysningRepository.lagre(Etterlysning.forInntektKontrollUttalelse(
             behandling.getId(),
             grunnlagsreferanse,
             oppgaveId,

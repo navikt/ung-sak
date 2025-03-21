@@ -26,7 +26,7 @@ public class EtterlysningRepository {
         this.entityManager = entityManager;
     }
 
-    public EtterlysningEntitet lagre(EtterlysningEntitet etterlysning) {
+    public Etterlysning lagre(Etterlysning etterlysning) {
         if (etterlysning.getUttalelse() != null) {
             entityManager.persist(etterlysning.getUttalelse());
         }
@@ -34,22 +34,22 @@ public class EtterlysningRepository {
         return etterlysning;
     }
 
-    public List<EtterlysningEntitet> lagre(List<EtterlysningEntitet> etterlysninger) {
+    public List<Etterlysning> lagre(List<Etterlysning> etterlysninger) {
         etterlysninger.forEach(this::lagre);
         return etterlysninger;
     }
 
-    public List<EtterlysningEntitet> hentEtterlysninger(Long behandlingId) {
+    public List<Etterlysning> hentEtterlysninger(Long behandlingId) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                                                             "where e.behandlingId = :behandlingId", EtterlysningEntitet.class)
+                                                             "where e.behandlingId = :behandlingId", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .getResultList();
         return etterlysninger;
     }
 
-    public List<EtterlysningEntitet> hentEtterlysninger(Long behandlingId, EtterlysningType type) {
+    public List<Etterlysning> hentEtterlysninger(Long behandlingId, EtterlysningType type) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                                                             "where e.behandlingId = :behandlingId and e.type = :type", EtterlysningEntitet.class)
+                                                             "where e.behandlingId = :behandlingId and e.type = :type", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("type", type)
             .getResultList();
@@ -57,9 +57,9 @@ public class EtterlysningRepository {
     }
 
 
-    public List<EtterlysningEntitet> hentOpprettetEtterlysninger(Long behandlingId, EtterlysningType type) {
+    public List<Etterlysning> hentOpprettetEtterlysninger(Long behandlingId, EtterlysningType type) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                                                             "where e.behandlingId = :behandlingId and e.type = :type and status = :status", EtterlysningEntitet.class)
+                                                             "where e.behandlingId = :behandlingId and e.type = :type and status = :status", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("type", type)
             .setParameter("status", EtterlysningStatus.OPPRETTET)
@@ -67,9 +67,9 @@ public class EtterlysningRepository {
         return etterlysninger;
     }
 
-    public List<EtterlysningEntitet> hentEtterlysningerSomSkalAvbrytes(Long behandlingId) {
+    public List<Etterlysning> hentEtterlysningerSomSkalAvbrytes(Long behandlingId) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                                                             "where e.behandlingId = :behandlingId and e.type = :type and status = :status", EtterlysningEntitet.class)
+                                                             "where e.behandlingId = :behandlingId and e.type = :type and status = :status", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("status", EtterlysningStatus.SKAL_AVBRYTES)
             .getResultList();
@@ -88,20 +88,20 @@ public class EtterlysningRepository {
     }
 
 
-    public EtterlysningEntitet hentEtterlysningForEksternReferanse(UUID eksternReferanse) {
+    public Etterlysning hentEtterlysningForEksternReferanse(UUID eksternReferanse) {
         return HibernateVerktøy.hentEksaktResultat(
             entityManager.createQuery(
                     "select e from Etterlysning e " +
-                    "where e.eksternReferanse = :eksternReferanse", EtterlysningEntitet.class)
+                    "where e.eksternReferanse = :eksternReferanse", Etterlysning.class)
                 .setParameter("eksternReferanse", eksternReferanse)
         );
     }
 
-    public EtterlysningEntitet hentEtterlysning(Long id) {
+    public Etterlysning hentEtterlysning(Long id) {
         return HibernateVerktøy.hentEksaktResultat(
             entityManager.createQuery(
                     "select e from Etterlysning e " +
-                    "where e.id = :id", EtterlysningEntitet.class)
+                    "where e.id = :id", Etterlysning.class)
                 .setParameter("id", id)
         );
     }

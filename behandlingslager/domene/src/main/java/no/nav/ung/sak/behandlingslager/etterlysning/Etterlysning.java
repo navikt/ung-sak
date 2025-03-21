@@ -26,7 +26,7 @@ import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
-public class EtterlysningEntitet extends BaseEntitet {
+public class Etterlysning extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ETTERLYSNING")
@@ -64,17 +64,17 @@ public class EtterlysningEntitet extends BaseEntitet {
     @JoinColumn(name = "id", referencedColumnName = "etterlysning_id")
     private UttalelseEntitet uttalelse;
 
-    private EtterlysningEntitet() {
+    private Etterlysning() {
         // Hibernate
     }
 
-    public static EtterlysningEntitet forInntektKontrollUttalelse(
+    public static Etterlysning forInntektKontrollUttalelse(
         Long behandlingId,
         UUID grunnlagsreferanse,
         UUID eksternReferanse,
         DatoIntervallEntitet periode) {
 
-        return new EtterlysningEntitet(
+        return new Etterlysning(
             behandlingId,
             grunnlagsreferanse,
             eksternReferanse,
@@ -83,12 +83,12 @@ public class EtterlysningEntitet extends BaseEntitet {
             EtterlysningStatus.OPPRETTET);
     }
 
-    public EtterlysningEntitet(Long behandlingId,
-                               UUID grunnlagsreferanse,
-                               UUID eksternReferanse,
-                               DatoIntervallEntitet periode,
-                               EtterlysningType type,
-                               EtterlysningStatus status) {
+    public Etterlysning(Long behandlingId,
+                        UUID grunnlagsreferanse,
+                        UUID eksternReferanse,
+                        DatoIntervallEntitet periode,
+                        EtterlysningType type,
+                        EtterlysningStatus status) {
         this.behandlingId = behandlingId;
         this.grunnlagsreferanse = grunnlagsreferanse;
         this.eksternReferanse = eksternReferanse;
