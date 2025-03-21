@@ -1,5 +1,14 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -11,7 +20,13 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
-import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -25,15 +40,6 @@ import no.nav.ung.sak.uttalelse.RegisterinntektUttalelseTjeneste;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @ApplicationScoped
 @BehandlingStegRef(value = KONTROLLER_REGISTER_INNTEKT)

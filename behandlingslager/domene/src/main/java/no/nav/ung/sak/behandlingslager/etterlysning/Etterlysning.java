@@ -1,18 +1,27 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import org.hibernate.annotations.Immutable;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
-@Immutable
 public class Etterlysning extends BaseEntitet {
 
     @Id
@@ -25,6 +34,9 @@ public class Etterlysning extends BaseEntitet {
     @Column(name = "grunnlag_ref", nullable = false)
     private UUID grunnlagsreferanse;
 
+    /**
+     * Referanse mot deltager-app oppgave styrt av ung-sak
+     */
     @Column(name = "ekstern_ref", nullable = false)
     private UUID eksternReferanse;
 
@@ -39,6 +51,14 @@ public class Etterlysning extends BaseEntitet {
 
     @Column(name = "frist")
     private LocalDateTime frist;
+
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
+    private JournalpostId svarJournalpostId;
+
+    @OneToOne
+    @JoinColumn(name = "id", referencedColumnName = "etterlysning_id")
+    private UttalelseEntitet uttalelse;
 
     private Etterlysning() {
         // Hibernate
@@ -136,4 +156,24 @@ public class Etterlysning extends BaseEntitet {
     }
 
 
+    public void mottattSvar(JournalpostId svarJournalpostId) {
+        if (status != EtterlysningStatus.VENTER) {
+            throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
+        }
+        this.svarJournalpostId = svarJournalpostId;
+        this.status = EtterlysningStatus.MOTTATT_SVAR;
+    }
+
+    public void mottattUttalelse(String uttalelse, JournalpostId svarJournalpostId) {
+        mottattSvar(svarJournalpostId);
+        this.uttalelse = new UttalelseEntitet(uttalelse, this.id);
+    }
+
+    public JournalpostId getSvarJournalpostId() {
+        return svarJournalpostId;
+    }
+
+    public UttalelseEntitet getUttalelse() {
+        return uttalelse;
+    }
 }

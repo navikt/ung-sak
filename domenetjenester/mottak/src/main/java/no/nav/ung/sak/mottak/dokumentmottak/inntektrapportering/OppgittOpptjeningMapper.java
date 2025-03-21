@@ -7,7 +7,7 @@ import java.util.UUID;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
-import no.nav.k9.søknad.ytelse.ung.v1.OppgittInntekt;
+import no.nav.k9.søknad.ytelse.ung.v1.inntekt.OppgittInntekt;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;

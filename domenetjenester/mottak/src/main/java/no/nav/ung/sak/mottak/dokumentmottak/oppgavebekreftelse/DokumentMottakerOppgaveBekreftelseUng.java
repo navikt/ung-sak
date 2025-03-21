@@ -1,28 +1,24 @@
 package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.DatoEndring;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretFomDatoBekreftelse;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretTomDatoBekreftelse;
-import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
-import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
-import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
-import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.Collection;
 import java.util.List;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
+import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
+import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 
 
 @ApplicationScoped
@@ -32,7 +28,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
 
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
+    private Instance<BekreftelseHåndterer> bekreftelseMottakere;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
     public DokumentMottakerOppgaveBekreftelseUng() {
@@ -41,11 +37,11 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
     @Inject
     public DokumentMottakerOppgaveBekreftelseUng(OppgaveBekreftelseParser oppgaveBekreftelseParser,
                                                  MottatteDokumentRepository mottatteDokumentRepository,
-                                                 UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
+                                                 @Any Instance<BekreftelseHåndterer> bekreftelseMottakere,
                                                  HistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.oppgaveBekreftelseParser = oppgaveBekreftelseParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
+        this.bekreftelseMottakere = bekreftelseMottakere;
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
     }
 
@@ -59,25 +55,18 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
             if (oppgaveBekreftelse.getKildesystem().isPresent()) {
                 dokument.setKildesystem(oppgaveBekreftelse.getKildesystem().get().getKode());
             }
-            DatoEndring bekreftelse = oppgaveBekreftelse.getBekreftelse();
-            final var bekreftetPeriodeEndring = new UngdomsprogramBekreftetPeriodeEndring(
-                bekreftelse.getNyDato(),
-                dokument.getJournalpostId(),
-                finnBekreftetPeriodeEndring(bekreftelse));
 
-            ungdomsytelseStartdatoRepository.lagre(behandlingId, bekreftetPeriodeEndring);
+            BekreftelseHåndterer bekreftelseHåndterer = bekreftelseMottakere
+                .select(new OppgaveTypeRef.OppgaveTypeRefLiteral(oppgaveBekreftelse.getBekreftelse().getType()))
+                .get();
+
+            bekreftelseHåndterer.håndter(new OppgaveBekreftelseInnhold(
+                dokument.getJournalpostId(), behandling, oppgaveBekreftelse, dokument.getInnsendingstidspunkt(), dokument.getType()
+            ));
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId());
+
         }
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
-    }
-
-    private static UngdomsprogramPeriodeEndringType finnBekreftetPeriodeEndring(DatoEndring bekreftelse) {
-        if (bekreftelse instanceof EndretTomDatoBekreftelse) {
-            return UngdomsprogramPeriodeEndringType.ENDRET_OPPHØRSDATO;
-        } else if (bekreftelse instanceof EndretFomDatoBekreftelse) {
-            return UngdomsprogramPeriodeEndringType.ENDRET_STARTDATO;
-        }
-        throw new IllegalArgumentException("Kunne ikke håndtere bekreftelse av type " + bekreftelse.getType());
     }
 
     @Override
