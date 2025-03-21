@@ -10,8 +10,6 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 
-import java.util.List;
-
 @ApplicationScoped
 public class EtterlysningRepository {
 

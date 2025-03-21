@@ -18,10 +18,6 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import org.hibernate.annotations.Immutable;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "Etterlysning")
