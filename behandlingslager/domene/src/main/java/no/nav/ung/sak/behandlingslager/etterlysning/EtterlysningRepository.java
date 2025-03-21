@@ -1,14 +1,15 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
-import java.util.List;
-import java.util.UUID;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @ApplicationScoped
 public class EtterlysningRepository {
