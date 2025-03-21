@@ -42,7 +42,6 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    //TODO hva hvis behandling er ikke på KONTROLLER_REGISTER_INNTEKT steg?
     @Override
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelseInnhold) {
         InntektBekreftelse inntektBekreftelse = oppgaveBekreftelseInnhold.oppgaveBekreftelse().getBekreftelse();
@@ -60,10 +59,6 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
                 "Uttalelse fra bruker må være satt når bruker ikke har godtatt endringen");
             etterlysning.mottattUttalelse(inntektBekreftelse.getUttalelseFraBruker(), oppgaveBekreftelseInnhold.journalpostId());
         }
-
-        // ta behandling av vent (lukker autopunkt også)
-        var fortsettTask = fortsettBehandlingTask(oppgaveBekreftelseInnhold.behandling());
-        gruppe.addNesteSekvensiell(fortsettTask);
 
         etterlysningRepository.lagre(etterlysning);
         prosessTaskTjeneste.lagre(gruppe);
