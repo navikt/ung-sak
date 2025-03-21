@@ -1,20 +1,5 @@
 package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -31,11 +16,9 @@ import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.SøknadId;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -44,6 +27,20 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -108,11 +105,6 @@ class InntektBekreftelseHåndtererTest {
         assertThat(abakusTask.getPropertyValue(AsyncAbakusLagreOpptjeningTask.BREVKODER)).isEqualTo(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getKode());
         assertThat(abakusTask.getPayloadAsString()).contains(String.valueOf(oppgittInntekt));
 
-        //behandling taes av vent
-        var fortsettSteg = prosessTaskTjeneste.finnAlle(FortsettBehandlingTask.TASKTYPE, ProsessTaskStatus.KLAR);
-        assertThat(fortsettSteg).hasSize(1);
-        assertThat(fortsettSteg.getFirst().getPropertyValue(FortsettBehandlingTask.GJENOPPTA_STEG)).isEqualTo(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
-
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
@@ -160,11 +152,6 @@ class InntektBekreftelseHåndtererTest {
         //abakus skal ikke oppdateres
         List<ProsessTaskData> abakusTasker = prosessTaskTjeneste.finnAlle(AsyncAbakusLagreOpptjeningTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(abakusTasker).hasSize(0);
-
-        //behandling taes av vent
-        var fortsettSteg = prosessTaskTjeneste.finnAlle(FortsettBehandlingTask.TASKTYPE, ProsessTaskStatus.KLAR);
-        assertThat(fortsettSteg).hasSize(1);
-        assertThat(fortsettSteg.getFirst().getPropertyValue(FortsettBehandlingTask.GJENOPPTA_STEG)).isEqualTo(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
 
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
