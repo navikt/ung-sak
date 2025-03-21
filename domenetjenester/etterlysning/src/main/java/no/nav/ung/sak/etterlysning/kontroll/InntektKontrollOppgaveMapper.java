@@ -10,9 +10,6 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.kontrakt.etterlysning.oppgave.kontroll.RegisterInntektATFL;
-import no.nav.ung.sak.kontrakt.etterlysning.oppgave.kontroll.RegisterInntektYtelse;
-import no.nav.ung.sak.kontrakt.etterlysning.oppgave.kontroll.RegisterInntekter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -2,30 +2,16 @@ package no.nav.ung.sak.etterlysning.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.deltakelseopplyser.domene.register.ungsak.RegisterInntektOppgaveDTO;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.Inntektspost;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.etterlysning.EtterlysningHåndterer;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
-import no.nav.ung.sak.kontrakt.etterlysning.oppgave.kontroll.RegisterInntektATFL;
-import no.nav.ung.sak.kontrakt.etterlysning.oppgave.kontroll.RegisterInntektOppgaveDto;
-import no.nav.ung.sak.kontrakt.etterlysning.oppgave.kontroll.RegisterInntektYtelse;
-import no.nav.ung.sak.kontrakt.etterlysning.oppgave.kontroll.RegisterInntekter;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 //TODO fjern?
