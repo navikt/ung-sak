@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.etterlysning.kontroll.InntektkontrollEtterlysningHåndterer;
 
 import java.util.Objects;
 
