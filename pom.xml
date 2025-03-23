@@ -57,9 +57,9 @@
         <dependencies>
 
             <dependency>
-                <groupId>no.nav.ung</groupId>
-                <artifactId>ung-deltakelse-opplyser</artifactId>
-                <version>1.0.1</version>
+                <groupId>no.nav.ung.deltakelseopplyser</groupId>
+                <artifactId>kontrakt</artifactId>
+                <version>1.0.6</version>
             </dependency>
 
             <dependency>
