@@ -5,11 +5,10 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.deltakelseopplyser.domene.register.ungsak.RegisterInntektOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "ungdomsprogramregister.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default")

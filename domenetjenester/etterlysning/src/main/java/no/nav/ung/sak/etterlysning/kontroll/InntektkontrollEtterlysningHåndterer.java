@@ -48,8 +48,12 @@ public class InntektkontrollEtterlysningHåndterer implements EtterlysningHåndt
 
         final var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> {
             final var grunnlag = grunnlagPrReferanse.get(etterlysning.getGrunnlagsreferanse());
-            return new RegisterInntektOppgaveDTO(behandling.getAktørId().getAktørId(), etterlysning.getEksternReferanse(), etterlysning.getFrist(),
-                    InntektKontrollOppgaveMapper.mapTilRegisterInntekter(grunnlag, etterlysning.getPeriode()));
+            return new RegisterInntektOppgaveDTO(behandling.getAktørId().getAktørId(),
+                etterlysning.getEksternReferanse(),
+                etterlysning.getFrist(),
+                etterlysning.getPeriode().getFomDato(),
+                etterlysning.getPeriode().getTomDato(),
+                InntektKontrollOppgaveMapper.mapTilRegisterInntekter(grunnlag, etterlysning.getPeriode()));
         }).collect(Collectors.toList());
 
         oppgaveDtoer.forEach(ungOppgaveKlient::opprettOppgave);
