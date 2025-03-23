@@ -2,8 +2,8 @@ package no.nav.ung.sak.etterlysning.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.deltakelseopplyser.domene.register.ungsak.RegisterInntektOppgaveDTO;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;

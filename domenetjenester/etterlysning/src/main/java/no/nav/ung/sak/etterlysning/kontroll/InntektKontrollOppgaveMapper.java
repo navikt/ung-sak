@@ -2,9 +2,9 @@ package no.nav.ung.sak.etterlysning.kontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.deltakelseopplyser.domene.register.ungsak.RegisterInntektArbeidOgFrilansDTO;
-import no.nav.ung.deltakelseopplyser.domene.register.ungsak.RegisterInntektDTO;
-import no.nav.ung.deltakelseopplyser.domene.register.ungsak.RegisterInntektYtelseDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektArbeidOgFrilansDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektYtelseDTO;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
