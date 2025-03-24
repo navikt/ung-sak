@@ -25,3 +25,11 @@ where not exists (select 1 from prosess_task where task_type = 'batch.retryFeile
 insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key)
 select nextval('SEQ_PROSESS_TASK'), 'batch.opprettRevurderingForInntektskontrollBatch', 1, 'KLAR', nextval('SEQ_PROSESS_TASK_GRUPPE'), 1,'05'
 where not exists (select 1 from prosess_task where task_type = 'batch.opprettRevurderingForInntektskontrollBatch'  and status IN ('KLAR', 'FEILET'));
+
+insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key)
+select nextval('SEQ_PROSESS_TASK'), 'batch.automatiskSettEtterlysningUtlopt', 1, 'KLAR', nextval('SEQ_PROSESS_TASK_GRUPPE'), 1,'05'
+where not exists (select 1 from prosess_task where task_type = 'batch.automatiskSettEtterlysningUtlopt'  and status IN ('KLAR', 'FEILET'));
+
+insert into prosess_task (id, task_type, prioritet, status, task_gruppe, task_sekvens, partition_key)
+select nextval('SEQ_PROSESS_TASK'), 'sensu.metrikk.task', 1, 'KLAR', nextval('SEQ_PROSESS_TASK_GRUPPE'), 1,'05'
+where not exists (select 1 from prosess_task where task_type = 'sensu.metrikk.task'  and status IN ('KLAR', 'FEILET'));
