@@ -52,7 +52,7 @@ class FagsakperiodeUtlederTest {
 
     @Test
     void skal_sette_periode_for_revurdering_uten_forbrukte_dager() {
-        var fom = LocalDate.now();
+        var fom = LocalDate.of(2025,3,24);
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), fom, null);
         entityManager.persist(fagsak);
         var behandling = Behandling.forFørstegangssøknad(fagsak).build();
