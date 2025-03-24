@@ -1,14 +1,5 @@
 package no.nav.ung.sak.metrikker;
 
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
@@ -16,9 +7,18 @@ import no.nav.k9.felles.integrasjon.sensu.SensuKlient;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @ProsessTask(value = DagligSensuMetrikkTask.TASKTYPE, cronExpression = "0 1 23 * * *", maxFailedRuns = 20, firstDelay = 60)
+@Deprecated // Trengs sannsynligvis ikke for ung
 public class DagligSensuMetrikkTask implements ProsessTaskHandler {
 
     private static final int CHUNK_EVENT_SIZE = 1000;
