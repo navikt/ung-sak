@@ -1,6 +1,7 @@
 package no.nav.ung.sak.etterlysning;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -19,6 +20,7 @@ public class AutomatiskSettEtterlysningerUtløptBatchTask implements ProsessTask
         // CDI
     }
 
+    @Inject
     public AutomatiskSettEtterlysningerUtløptBatchTask(AutomatiskUtløptEtterlysningTjeneste automatiskUtløptEtterlysningTjeneste) {
         this.automatiskUtløptEtterlysningTjeneste = automatiskUtløptEtterlysningTjeneste;
     }
