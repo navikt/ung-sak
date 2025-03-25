@@ -7,6 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
@@ -14,8 +15,7 @@ import no.nav.ung.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.uttalelse.BrukersUttalelsePeriode;
-import no.nav.ung.sak.uttalelse.Status;
+import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,18 +56,17 @@ public class RapportertInntektMapper {
 
     }
 
-    public LocalDateTimeline<BrukersUttalelseForRegisterinntekt> finnRegisterinntekterForUttalelse(Long behandlingId,
-                                                                                                   List<BrukersUttalelsePeriode> brukersUttalelsePerioder) {
-        final var relevanteUttalelser = brukersUttalelsePerioder.stream()
-            .filter(it -> Set.of(Status.BEKREFTET, Status.VENTER).contains(it.status())).toList();
-        final var unikeGrunnlagsIder = relevanteUttalelser
-            .stream()
-            .map(BrukersUttalelsePeriode::iayGrunnlagUUID)
-            .collect(Collectors.toSet());
+    public LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterForEtterlysninger(
+        Long behandlingId,
+        List<EtterlysningsPeriode> etterlysningsperioder) {
+
+        var svarteEllerVentendeStatuser = Set.of(EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.OPPRETTET, EtterlysningStatus.VENTER);
+        final var unikeGrunnlagsIder = etterlysningsperioder.stream().filter(it -> svarteEllerVentendeStatuser.contains(it.etterlysningInfo().etterlysningStatus()))
+            .map(EtterlysningsPeriode::iayGrunnlagUUID).collect(Collectors.toSet());
 
         final var grunnlagPrUUID = unikeGrunnlagsIder.stream().collect(Collectors.toMap(it -> it, it -> inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, it)));
 
-        return relevanteUttalelser.stream()
+        return etterlysningsperioder.stream()
             .map(it -> finnRegisterinntekterVurdertIUttalelse(it, grunnlagPrUUID))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
@@ -81,11 +80,12 @@ public class RapportertInntektMapper {
             .collect(Collectors.groupingBy(this::mapTilInntektType));
     }
 
-    private LocalDateTimeline<BrukersUttalelseForRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(BrukersUttalelsePeriode it, Map<UUID, InntektArbeidYtelseGrunnlag> grunnlagPrUUID) {
+
+    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(EtterlysningsPeriode it, Map<UUID, InntektArbeidYtelseGrunnlag> grunnlagPrUUID) {
         final var iayGrunnlag = grunnlagPrUUID.get(it.iayGrunnlagUUID());
         final var grupperteInntekter = grupperInntekter(iayGrunnlag);
-        final var registerTidslinje = finnRegisterinntektForPeriode(grupperteInntekter, it.periode().toLocalDateInterval());
-        return registerTidslinje.mapValue(registerinntekter -> new BrukersUttalelseForRegisterinntekt(it.status(), registerinntekter, it.uttalelse()));
+        final var registerTidslinje = finnRegisterinntektForPeriode(grupperteInntekter, it.periode());
+        return registerTidslinje.mapValue(registerinntekter -> new EtterlysningOgRegisterinntekt(registerinntekter, it.etterlysningInfo()));
     }
 
     private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<Boolean> ytelseTidslinje, Map<InntektType, List<Inntektspost>> grupperteInntekter) {

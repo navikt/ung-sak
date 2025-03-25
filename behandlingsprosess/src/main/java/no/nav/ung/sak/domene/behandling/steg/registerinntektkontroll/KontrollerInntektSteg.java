@@ -1,14 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -22,7 +13,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.*;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -32,10 +22,20 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.uttalelse.RegisterinntektUttalelseTjeneste;
+import no.nav.ung.sak.uttalelse.EtterlysningInfo;
+import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @ApplicationScoped
 @BehandlingStegRef(value = KONTROLLER_REGISTER_INNTEKT)
@@ -45,7 +45,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RapportertInntektMapper rapportertInntektMapper;
-    private RegisterinntektUttalelseTjeneste registerinntektUttalelseTjeneste;
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private BehandlingRepository behandlingRepository;
     private EtterlysningRepository etterlysningRepository;
@@ -55,7 +54,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Inject
     public KontrollerInntektSteg(ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                  RapportertInntektMapper rapportertInntektMapper,
-                                 RegisterinntektUttalelseTjeneste registerinntektUttalelseTjeneste,
                                  KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
                                  BehandlingRepository behandlingRepository,
                                  EtterlysningRepository etterlysningRepository,
@@ -63,7 +61,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                  ProsessTaskTjeneste prosessTaskTjeneste) {
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.registerinntektUttalelseTjeneste = registerinntektUttalelseTjeneste;
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;
@@ -79,10 +76,14 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         Long behandlingId = kontekst.getBehandlingId();
         var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
-        var uttalelser = registerinntektUttalelseTjeneste.hentUttalelser(behandlingId);
-        var registerinntekterForIkkeGodkjentUttalelse = rapportertInntektMapper.finnRegisterinntekterForUttalelse(behandlingId, uttalelser);
-        var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForIkkeGodkjentUttalelse);
-        håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, prosessTriggerTidslinje);
+        var etterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+
+        //TODO fix erEndringGodkjent
+        var etterlysningsperioder = etterlysninger.stream().map(it -> new EtterlysningsPeriode(it.getPeriode().toLocalDateInterval(), new EtterlysningInfo(it.getStatus(), it.getUttalelse() != null), it.getGrunnlagsreferanse())).toList();
+        var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);
+
+        var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
+        håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, prosessTriggerTidslinje, etterlysninger);
         return avgjørResultat(behandlingId, kontrollResultat, prosessTriggerTidslinje);
     }
 
@@ -101,8 +102,8 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private void håndterPeriodisertKontrollresultat(BehandlingskontrollKontekst kontekst,
                                                     LocalDateTimeline<KontrollResultat> kontrollResultat,
                                                     LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
-                                                    LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
-        var etterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+                                                    LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
+                                                    List<Etterlysning> etterlysninger) {
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
         var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(kontekst.getBehandlingId());

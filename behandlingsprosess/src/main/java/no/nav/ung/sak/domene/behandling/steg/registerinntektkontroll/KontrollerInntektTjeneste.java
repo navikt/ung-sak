@@ -1,23 +1,22 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.FinnKontrollresultatForIkkeGodkjentUttalelse.finnKontrollresultatForIkkeGodkjentUttalelse;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
+import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
 import java.util.List;
 import java.util.Set;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.uttalelse.Status;
-import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.FinnKontrollresultatForIkkeGodkjentUttalelse.finnKontrollresultatForIkkeGodkjentUttalelse;
 
 public class KontrollerInntektTjeneste {
 
     public static LocalDateTimeline<KontrollResultat> utførKontroll(
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-        LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje) {
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
 
 
         var resultatTidslinje = new LocalDateTimeline<KontrollResultat>(List.of());
@@ -31,13 +30,13 @@ public class KontrollerInntektTjeneste {
         resultatTidslinje = resultatTidslinje.crossJoin(harIkkePassertRapporteringsfrist.mapValue(it -> KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST));
 
 
-        final var relevantIkkeGodkjentUttalelse = uttalelseTidslinje.filterValue(it -> it.status().equals(Status.BEKREFTET) && !it.uttalelse().erEndringenGodkjent()).intersection(tidslinjeRelevanteÅrsaker);
+        final var relevantIkkeGodkjentUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erSvartOgIkkeGodkjent()).intersection(tidslinjeRelevanteÅrsaker);
         var kontrollresultatForIkkeGodkjentUttalelse = finnKontrollresultatForIkkeGodkjentUttalelse(gjeldendeRapporterteInntekter, relevantIkkeGodkjentUttalelse);
         resultatTidslinje = resultatTidslinje.crossJoin(kontrollresultatForIkkeGodkjentUttalelse, StandardCombinators::coalesceLeftHandSide);
 
         var avviksvurderingMotRegisterinntekt = Avviksvurdering.gjørAvviksvurderingMotRegisterinntekt(
             gjeldendeRapporterteInntekter,
-            uttalelseTidslinje,
+            etterlysningTidslinje,
             tidslinjeRelevanteÅrsaker);
 
         resultatTidslinje = resultatTidslinje.crossJoin(avviksvurderingMotRegisterinntekt);
