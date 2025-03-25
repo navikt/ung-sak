@@ -1,3 +1,3 @@
-alter table uttalelse add er_endring_godkjent boolean;
+alter table uttalelse add har_godtatt_endringen boolean;
 
-comment on column uttalelse.er_endring_godkjent is 'Angir om endringen er godkjent av deltager';
+comment on column uttalelse.har_godtatt_endringen is 'Angir om endringen er godkjent av deltager';

@@ -16,8 +16,8 @@ public class UttalelseEntitet extends BaseEntitet {
     @Column(name = "uttalelse", updatable = false)
     private String uttalelseTekst;
 
-    @Column(name = "er_endringen_godkjent", updatable = false, nullable = false)
-    private boolean erEndringenGodkjent;
+    @Column(name = "har_godtatt_endringen", updatable = false, nullable = false)
+    private boolean harGodtattEndringen;
 
     @Column(name = "etterlysning_id", updatable = false, nullable = false)
     private long etterlysningId;
@@ -27,9 +27,9 @@ public class UttalelseEntitet extends BaseEntitet {
         // Hibernate
     }
 
-    public UttalelseEntitet(long etterlysningId, boolean erEndringenGodkjent, String uttalelseTekst) {
+    public UttalelseEntitet(long etterlysningId, boolean harGodtattEndringen, String uttalelseTekst) {
         this.uttalelseTekst = uttalelseTekst;
-        this.erEndringenGodkjent = erEndringenGodkjent;
+        this.harGodtattEndringen = harGodtattEndringen;
         this.etterlysningId = etterlysningId;
     }
 
@@ -39,7 +39,7 @@ public class UttalelseEntitet extends BaseEntitet {
         return uttalelseTekst;
     }
 
-    public boolean erEndringenGodkjent() {
-        return erEndringenGodkjent;
+    public boolean harGodtattEndringen() {
+        return harGodtattEndringen;
     }
 }

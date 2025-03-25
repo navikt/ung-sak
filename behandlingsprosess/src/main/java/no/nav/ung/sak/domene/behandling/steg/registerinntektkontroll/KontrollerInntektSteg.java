@@ -81,7 +81,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var etterlysningsperioder = etterlysninger.stream()
             .map(it -> new EtterlysningsPeriode(
                 it.getPeriode().toLocalDateInterval(),
-                new EtterlysningInfo(it.getStatus(), it.getUttalelse() != null ? it.getUttalelse().erEndringenGodkjent() : null),
+                new EtterlysningInfo(it.getStatus(), it.getUttalelse() != null ? it.getUttalelse().harGodtattEndringen() : null),
                 it.getGrunnlagsreferanse())).toList();
 
         var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);
