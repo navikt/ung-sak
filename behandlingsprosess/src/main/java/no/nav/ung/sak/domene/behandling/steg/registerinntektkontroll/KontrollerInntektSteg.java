@@ -78,8 +78,12 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         var etterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
 
-        //TODO fix erEndringGodkjent
-        var etterlysningsperioder = etterlysninger.stream().map(it -> new EtterlysningsPeriode(it.getPeriode().toLocalDateInterval(), new EtterlysningInfo(it.getStatus(), it.getUttalelse() != null), it.getGrunnlagsreferanse())).toList();
+        var etterlysningsperioder = etterlysninger.stream()
+            .map(it -> new EtterlysningsPeriode(
+                it.getPeriode().toLocalDateInterval(),
+                new EtterlysningInfo(it.getStatus(), it.getUttalelse() != null ? it.getUttalelse().erEndringenGodkjent() : null),
+                it.getGrunnlagsreferanse())).toList();
+
         var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);
 
         var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);

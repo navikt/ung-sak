@@ -20,7 +20,7 @@ public class Avviksvurdering {
 
     static LocalDateTimeline<KontrollResultat> gjørAvviksvurderingMotRegisterinntekt(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-        LocalDateTimeline<EtterlysningOgRegisterinntekt> uttalelseTidslinje,
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
         LocalDateTimeline<Set<BehandlingÅrsakType>> tidslinjeRelevanteÅrsaker) {
 
         //Finner tidslinje der det er avvik mellom register og rapportert inntekt
@@ -29,7 +29,7 @@ public class Avviksvurdering {
         final var tidslinjeForOppgaveTilBruker = inntektDiffKontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER));
 
         // Må finne ut om vi skal sette ny frist hvis registeret har oppdatert seg
-        final var oppgaverTilBrukerTidslinje = finnNyOppgaveKontrollresultatTidslinje(gjeldendeRapporterteInntekter, uttalelseTidslinje, tidslinjeForOppgaveTilBruker);
+        final var oppgaverTilBrukerTidslinje = finnNyOppgaveKontrollresultatTidslinje(gjeldendeRapporterteInntekter, etterlysningTidslinje, tidslinjeForOppgaveTilBruker);
 
         //Resultat
         return inntektDiffKontrollResultat.crossJoin(oppgaverTilBrukerTidslinje, StandardCombinators::coalesceRightHandSide);
@@ -37,10 +37,10 @@ public class Avviksvurdering {
 
     private static LocalDateTimeline<KontrollResultat> finnNyOppgaveKontrollresultatTidslinje(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-        LocalDateTimeline<EtterlysningOgRegisterinntekt> uttalelseTidslinje,
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysingTidslinje,
         LocalDateTimeline<KontrollResultat> tidslinjeForOppgaveTilBruker) {
         final var oppgaverTilBrukerTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::registerRapporterteInntekter).intersection(tidslinjeForOppgaveTilBruker)
-            .combine(uttalelseTidslinje.mapValue(EtterlysningOgRegisterinntekt::registerInntekt),
+            .combine(etterlysingTidslinje.mapValue(EtterlysningOgRegisterinntekt::registerInntekt),
                 (di, gjeldendeRegisterinntekt, registerinntektVedUttalelse) -> {
                     if (registerinntektVedUttalelse == null) {
                         return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);
