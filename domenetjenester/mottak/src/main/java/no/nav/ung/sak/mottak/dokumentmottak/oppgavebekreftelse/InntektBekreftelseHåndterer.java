@@ -51,10 +51,11 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
         if (inntektBekreftelse.harBrukerGodtattEndringen()) {
-            Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
-                "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
             var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
             gruppe.addNesteSekvensiell(abakusTask);
+        } else {
+            Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
+                "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
         }
 
         etterlysning.mottattUttalelse(

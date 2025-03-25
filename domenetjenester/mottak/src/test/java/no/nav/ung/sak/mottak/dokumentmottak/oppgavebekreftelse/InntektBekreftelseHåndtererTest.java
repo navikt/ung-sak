@@ -109,7 +109,8 @@ class InntektBekreftelseHåndtererTest {
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
         assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
-        assertThat(oppdatertEtterlysning.getUttalelse()).isNull();
+        assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseTekst()).isNull();
+        assertThat(oppdatertEtterlysning.getUttalelse().harGodtattEndringen()).isTrue();
     }
 
     @Test
@@ -158,6 +159,7 @@ class InntektBekreftelseHåndtererTest {
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
         assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
         assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseTekst()).isEqualTo("en uttalelse");
+        assertThat(oppdatertEtterlysning.getUttalelse().harGodtattEndringen()).isFalse();
     }
 
     @NotNull
