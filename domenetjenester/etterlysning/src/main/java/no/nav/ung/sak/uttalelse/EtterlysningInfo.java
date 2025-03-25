@@ -13,7 +13,7 @@ public record EtterlysningInfo(EtterlysningStatus etterlysningStatus, Boolean er
         }
     }
 
-    public boolean erSvartOgIkkeGodkjent() {
+    public boolean erBesvartOgIkkeGodkjent() {
         return etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR && !erEndringenGodkjent();
     }
 

@@ -13,8 +13,8 @@ public class UttalelseEntitet extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UTTALELSE")
     private Long id;
 
-    @Column(name = "uttalelse", updatable = false)
-    private String uttalelseTekst;
+    @Column(name = "uttalelse_begrunnelse", updatable = false)
+    private String uttalelseBegrunnelse;
 
     @Column(name = "har_godtatt_endringen", updatable = false, nullable = false)
     private boolean harGodtattEndringen;
@@ -27,16 +27,16 @@ public class UttalelseEntitet extends BaseEntitet {
         // Hibernate
     }
 
-    public UttalelseEntitet(long etterlysningId, boolean harGodtattEndringen, String uttalelseTekst) {
-        this.uttalelseTekst = uttalelseTekst;
+    public UttalelseEntitet(long etterlysningId, boolean harGodtattEndringen, String uttalelseBegrunnelse) {
+        this.uttalelseBegrunnelse = uttalelseBegrunnelse;
         this.harGodtattEndringen = harGodtattEndringen;
         this.etterlysningId = etterlysningId;
     }
 
 
 
-    public String getUttalelseTekst() {
-        return uttalelseTekst;
+    public String getUttalelseBegrunnelse() {
+        return uttalelseBegrunnelse;
     }
 
     public boolean harGodtattEndringen() {
