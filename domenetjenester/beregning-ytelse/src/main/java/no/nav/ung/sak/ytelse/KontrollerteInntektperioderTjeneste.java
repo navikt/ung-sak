@@ -45,6 +45,10 @@ public class KontrollerteInntektperioderTjeneste {
         tilkjentYtelseRepository.lagre(behandlingId, kontrollertePerioder);
     }
 
+    public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {
+        tilkjentYtelseRepository.gjenopprettTilOriginal(originalBehandlingId, behandlingId);
+    }
+
     public LocalDateTimeline<Set<RapportertInntekt>> hentTidslinje(Long behandlingId) {
         return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId)
                 .stream()

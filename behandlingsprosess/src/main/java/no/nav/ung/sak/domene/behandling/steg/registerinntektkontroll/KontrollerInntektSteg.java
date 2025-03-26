@@ -15,18 +15,14 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
-import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -81,9 +77,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-
-
-
         var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         var uttalelser = registerinntektUttalelseTjeneste.hentUttalelser(behandlingId);
@@ -91,6 +84,18 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForIkkeGodkjentUttalelse);
         håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, prosessTriggerTidslinje);
         return avgjørResultat(behandlingId, kontrollResultat, prosessTriggerTidslinje);
+    }
+
+    @Override
+    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell,
+                                   BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
+        if (!tilSteg.equals(KONTROLLER_REGISTER_INNTEKT)) {
+            final var behandlingId = kontekst.getBehandlingId();
+            final var behandling = behandlingRepository.hentBehandling(behandlingId);
+            if (behandling.getOriginalBehandlingId().isPresent()) {
+                kontrollerteInntektperioderTjeneste.gjenopprettTilOriginal(behandling.getOriginalBehandlingId().get(), behandlingId);
+            }
+        }
     }
 
     private void håndterPeriodisertKontrollresultat(BehandlingskontrollKontekst kontekst,
