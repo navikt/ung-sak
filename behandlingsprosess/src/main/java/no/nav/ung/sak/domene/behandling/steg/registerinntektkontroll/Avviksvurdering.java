@@ -1,17 +1,17 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.FinnKontrollresultatForIkkeGodkjentUttalelse.harDiff;
-
-import java.math.BigDecimal;
-import java.util.Set;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
+import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
+
+import java.math.BigDecimal;
+import java.util.Set;
+
+import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.FinnKontrollresultatForIkkeGodkjentUttalelse.harDiff;
 
 public class Avviksvurdering {
 
@@ -20,7 +20,7 @@ public class Avviksvurdering {
 
     static LocalDateTimeline<KontrollResultat> gjørAvviksvurderingMotRegisterinntekt(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-        LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje,
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
         LocalDateTimeline<Set<BehandlingÅrsakType>> tidslinjeRelevanteÅrsaker) {
 
         //Finner tidslinje der det er avvik mellom register og rapportert inntekt
@@ -29,7 +29,7 @@ public class Avviksvurdering {
         final var tidslinjeForOppgaveTilBruker = inntektDiffKontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER));
 
         // Må finne ut om vi skal sette ny frist hvis registeret har oppdatert seg
-        final var oppgaverTilBrukerTidslinje = finnNyOppgaveKontrollresultatTidslinje(gjeldendeRapporterteInntekter, uttalelseTidslinje, tidslinjeForOppgaveTilBruker);
+        final var oppgaverTilBrukerTidslinje = finnNyOppgaveKontrollresultatTidslinje(gjeldendeRapporterteInntekter, etterlysningTidslinje, tidslinjeForOppgaveTilBruker);
 
         //Resultat
         return inntektDiffKontrollResultat.crossJoin(oppgaverTilBrukerTidslinje, StandardCombinators::coalesceRightHandSide);
@@ -37,10 +37,10 @@ public class Avviksvurdering {
 
     private static LocalDateTimeline<KontrollResultat> finnNyOppgaveKontrollresultatTidslinje(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-        LocalDateTimeline<BrukersUttalelseForRegisterinntekt> uttalelseTidslinje,
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysingTidslinje,
         LocalDateTimeline<KontrollResultat> tidslinjeForOppgaveTilBruker) {
         final var oppgaverTilBrukerTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::registerRapporterteInntekter).intersection(tidslinjeForOppgaveTilBruker)
-            .combine(uttalelseTidslinje.mapValue(BrukersUttalelseForRegisterinntekt::registerInntekt),
+            .combine(etterlysingTidslinje.mapValue(EtterlysningOgRegisterinntekt::registerInntekt),
                 (di, gjeldendeRegisterinntekt, registerinntektVedUttalelse) -> {
                     if (registerinntektVedUttalelse == null) {
                         return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER);

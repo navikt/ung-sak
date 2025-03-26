@@ -1,19 +1,19 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-import java.math.BigDecimal;
-import java.util.Set;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.ytelse.BrukersUttalelseForRegisterinntekt;
+import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
+
+import java.math.BigDecimal;
+import java.util.Set;
 
 public class FinnKontrollresultatForIkkeGodkjentUttalelse {
 
     static LocalDateTimeline<KontrollResultat> finnKontrollresultatForIkkeGodkjentUttalelse(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-        LocalDateTimeline<BrukersUttalelseForRegisterinntekt> relevantIkkeGodkjentUttalelse) {
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> relevantIkkeGodkjentUttalelse) {
 
         final var registerInntektTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::registerRapporterteInntekter);
         final var ikkeGodkjentUttalelseResultater = relevantIkkeGodkjentUttalelse.combine(registerInntektTidslinje, (di, uttalelse, register) -> {

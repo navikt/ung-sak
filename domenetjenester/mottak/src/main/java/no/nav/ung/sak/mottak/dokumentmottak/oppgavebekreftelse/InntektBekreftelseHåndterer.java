@@ -1,10 +1,5 @@
 package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.UUID;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
@@ -27,6 +22,11 @@ import no.nav.ung.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.UUID;
 
 @Dependent
 @OppgaveTypeRef(Bekreftelse.Type.UNG_AVVIK_REGISTERINNTEKT)
@@ -53,12 +53,16 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         if (inntektBekreftelse.harBrukerGodtattEndringen()) {
             var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
             gruppe.addNesteSekvensiell(abakusTask);
-            etterlysning.mottattSvar(oppgaveBekreftelseInnhold.journalpostId());
         } else {
             Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
-                "Uttalelse fra bruker må være satt når bruker ikke har godtatt endringen");
-            etterlysning.mottattUttalelse(inntektBekreftelse.getUttalelseFraBruker(), oppgaveBekreftelseInnhold.journalpostId());
+                "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
         }
+
+        etterlysning.mottattUttalelse(
+            oppgaveBekreftelseInnhold.journalpostId(),
+            inntektBekreftelse.harBrukerGodtattEndringen(),
+            inntektBekreftelse.getUttalelseFraBruker()
+        );
 
         etterlysningRepository.lagre(etterlysning);
         prosessTaskTjeneste.lagre(gruppe);
