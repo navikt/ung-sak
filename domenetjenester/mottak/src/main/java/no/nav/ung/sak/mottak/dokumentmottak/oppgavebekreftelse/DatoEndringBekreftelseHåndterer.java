@@ -9,6 +9,10 @@ import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretTomDatoBekreftelse
 import no.nav.ung.kodeverk.ungdomsytelse.periodeendring.UngdomsprogramPeriodeEndringType;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekreftetPeriodeEndring;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Dependent
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_FOM_DATO)
@@ -35,6 +39,11 @@ public class DatoEndringBekreftelseHåndterer implements BekreftelseHåndterer {
 
         var behandling = oppgaveBekreftelse.behandling();
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), bekreftetPeriodeEndring);
+    }
+
+    @Override
+    public Optional<Trigger> utledTrigger(UUID oppgaveId) {
+        return Optional.empty();
     }
 
     private static UngdomsprogramPeriodeEndringType finnBekreftetPeriodeEndring(DatoEndring bekreftelse) {

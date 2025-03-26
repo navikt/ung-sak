@@ -87,11 +87,6 @@ public class InnhentDokumentTjeneste {
 
         var resultat = finnEllerOpprettBehandling(fagsak, triggere);
 
-
-        if (!triggere.isEmpty()) {
-            prosessTriggereRepository.leggTil(resultat.behandling.getId(), triggere.stream().map(it -> new no.nav.ung.sak.trigger.Trigger(it.behandlingÅrsak(), it.periode())).collect(Collectors.toSet()));
-        }
-
         ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
         if (resultat.nyopprettet) {
             taskGruppe.addNesteSekvensiell(asynkStartBehandling(resultat.behandling));
@@ -100,11 +95,17 @@ public class InnhentDokumentTjeneste {
         } else {
             taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false);
         }
+
+        // Må legges på etter at taskgruppe er satt opp for å få diff
+        if (!triggere.isEmpty()) {
+            prosessTriggereRepository.leggTil(resultat.behandling.getId(), triggere.stream().map(it -> new no.nav.ung.sak.trigger.Trigger(it.behandlingÅrsak(), it.periode())).collect(Collectors.toSet()));
+        }
         lagreDokumenter(brevkodeMap, resultat.behandling);
 
         if (taskGruppe == null) {
             throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
         }
+
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
         prosessTaskTjeneste.lagre(taskGruppe);
     }

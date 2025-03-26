@@ -91,6 +91,10 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_RAPPORTERING_INNTEKT("RE-RAPPORTERING-INNTEKT", "Rapportering av inntekt"),
     RE_KONTROLL_REGISTER_INNTEKT("RE-KONTROLL-REGISTER-INNTEKT", "Kontroll av registerinntekt"),
 
+    // Generell oppgavebekreftelse
+    UTTALELSE_FRA_BRUKER("UTTALELSE-FRA-BRUKER", "Uttalelse fra bruker"),
+
+
 
     UDEFINERT("-", "Ikke definert"),
 
