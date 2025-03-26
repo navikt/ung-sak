@@ -7476,6 +7476,30 @@
         "tags" : [ "oppdrag" ]
       }
     },
+    "/api/oppgave/forvaltning/fjern-uttalelse" : {
+      "post" : {
+        "description" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "operationId" : "fjernUttalelser",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "tags" : [ "oppgave" ]
+      }
+    },
     "/api/pip/aktoer-for-sak" : {
       "get" : {
         "description" : "Henter aktørId'er tilknyttet en fagsak",
