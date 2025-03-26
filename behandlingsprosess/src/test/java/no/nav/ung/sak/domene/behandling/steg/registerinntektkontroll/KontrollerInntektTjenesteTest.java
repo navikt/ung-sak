@@ -142,6 +142,23 @@ class KontrollerInntektTjenesteTest {
         assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST), resultat);
     }
 
+    @Test
+    void skal_opprette_aksjonspunkt_dersom_ingen_inntekt_i_register_og_rapportert_inntekt_fra_bruker() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 11_001);
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
+
+        // Act
+        var resultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+
+        // Assert
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_AKSJONSPUNKT), resultat);
+    }
+
+
 
     private static LocalDateTimeline<Set<BehandlingÅrsakType>> lagProsesstriggerTidslinjeForInntektRapportering(LocalDate fom, LocalDate tom) {
         return new LocalDateTimeline<>(
