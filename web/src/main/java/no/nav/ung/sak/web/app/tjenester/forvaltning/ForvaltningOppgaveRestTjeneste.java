@@ -58,7 +58,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Path("fjern-uttalelse")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling", summary = ("Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling"), tags = "oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.DELETE, resource = FAGSAK)
     public Response fjernUttalelser(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         if (isProd) {
             throw new IllegalArgumentException("Kan ikke kjøre denne tjenesten i prod");
