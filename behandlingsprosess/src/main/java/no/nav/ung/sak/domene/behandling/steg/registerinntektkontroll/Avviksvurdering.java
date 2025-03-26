@@ -67,6 +67,9 @@ public class Avviksvurdering {
                 final var differanse = register.subtract(bruker).abs();
 
                 if (differanse.compareTo(AKSEPTERT_DIFFERANSE) > 0) {
+                    if (register.compareTo(BigDecimal.ZERO) == 0) {
+                        return KontrollResultat.OPPRETT_AKSJONSPUNKT;
+                    }
                     return KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER;
                 } else {
                     return KontrollResultat.BRUK_INNTEKT_FRA_BRUKER;
