@@ -51,7 +51,15 @@ public class TilkjentYtelseRepository {
             entityManager.persist(ny);
             entityManager.flush();
         }
+    }
 
+    public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {
+        final var eksisterende = hentKontrollertInntektPerioder(behandlingId);
+        if (eksisterende.isPresent()) {
+            eksisterende.get().setIkkeAktiv();
+            entityManager.persist(eksisterende.get());
+        }
+        kopierKontrollPerioder(originalBehandlingId, behandlingId);
     }
 
 
