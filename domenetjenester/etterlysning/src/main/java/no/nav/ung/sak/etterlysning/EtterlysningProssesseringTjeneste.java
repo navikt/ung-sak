@@ -14,6 +14,7 @@ public class EtterlysningProssesseringTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private InntektkontrollEtterlysningHåndterer inntektkontrollEtterlysningOppretter;
+    private UngOppgaveKlient oppgaveKlient;
 
     public EtterlysningProssesseringTjeneste() {
         // CDI
@@ -21,9 +22,10 @@ public class EtterlysningProssesseringTjeneste {
 
     @Inject
     public EtterlysningProssesseringTjeneste(EtterlysningRepository etterlysningRepository,
-                                             InntektkontrollEtterlysningHåndterer inntektkontrollEtterlysningOppretter) {
+                                             InntektkontrollEtterlysningHåndterer inntektkontrollEtterlysningOppretter, UngOppgaveKlient oppgaveKlient) {
         this.etterlysningRepository = etterlysningRepository;
         this.inntektkontrollEtterlysningOppretter = inntektkontrollEtterlysningOppretter;
+        this.oppgaveKlient = oppgaveKlient;
     }
 
     public void settTilUtløpt(Long behandlingId) {
@@ -37,6 +39,8 @@ public class EtterlysningProssesseringTjeneste {
     public void settTilAvbrutt(Long behandlingId) {
         final var etterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandlingId);
         // Kall oppgave API
+
+        etterlysninger.forEach(e -> oppgaveKlient.avbrytOppgave(e.getEksternReferanse()));
 
         etterlysninger.forEach(Etterlysning::avbryt);
         etterlysningRepository.lagre(etterlysninger);

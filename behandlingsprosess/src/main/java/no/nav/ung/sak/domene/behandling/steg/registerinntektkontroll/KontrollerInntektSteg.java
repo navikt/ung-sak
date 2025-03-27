@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -143,17 +144,23 @@ public class KontrollerInntektSteg implements BehandlingSteg {
             }
         }
 
-        if (!etterlysningerSomSkalOpprettes.isEmpty()) {
-            log.info("Oppretter etterlysninger {}", etterlysningerSomSkalOpprettes);
-            etterlysningRepository.lagre(etterlysningerSomSkalOpprettes);
-            lagTaskForOpprettingAvEtterlysning(kontekst);
-        }
-
+        final var prosessTaskGruppe = new ProsessTaskGruppe();
         if (!etterlysningerSomSkalAvbrytes.isEmpty()) {
             log.info("Avbryter etterlysninger {}", etterlysningerSomSkalAvbrytes);
             etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
-            lagTaskForAvbrytelseAvEtterlysning(kontekst);
+            prosessTaskGruppe.addNesteSekvensiell(lagTaskForAvbrytelseAvEtterlysning(kontekst));
         }
+
+        if (!etterlysningerSomSkalOpprettes.isEmpty()) {
+            log.info("Oppretter etterlysninger {}", etterlysningerSomSkalOpprettes);
+            etterlysningRepository.lagre(etterlysningerSomSkalOpprettes);
+            prosessTaskGruppe.addNesteSekvensiell(lagTaskForOpprettingAvEtterlysning(kontekst));
+        }
+
+        if (!prosessTaskGruppe.getTasks().isEmpty()) {
+            prosessTaskTjeneste.lagre(prosessTaskGruppe);
+        }
+
     }
 
     private static boolean harEksisterendeEtterlysningPåVent(LocalDateSegment<KontrollResultat> segment, List<Etterlysning> etterlysninger) {
@@ -214,17 +221,17 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     }
 
 
-    private void lagTaskForOpprettingAvEtterlysning(BehandlingskontrollKontekst kontekst) {
+    private ProsessTaskData lagTaskForOpprettingAvEtterlysning(BehandlingskontrollKontekst kontekst) {
         var prosessTaskData = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
         prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT.getKode());
         prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
-        prosessTaskTjeneste.lagre(prosessTaskData);
+        return prosessTaskData;
     }
 
-    private void lagTaskForAvbrytelseAvEtterlysning(BehandlingskontrollKontekst kontekst) {
+    private ProsessTaskData lagTaskForAvbrytelseAvEtterlysning(BehandlingskontrollKontekst kontekst) {
         var prosessTaskData = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
         prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
-        prosessTaskTjeneste.lagre(prosessTaskData);
+        return prosessTaskData;
     }
 
 

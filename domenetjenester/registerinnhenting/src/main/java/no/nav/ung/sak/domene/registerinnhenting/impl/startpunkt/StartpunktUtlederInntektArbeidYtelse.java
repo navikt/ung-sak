@@ -6,10 +6,8 @@ import java.util.List;
 import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
@@ -19,7 +17,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @ApplicationScoped
@@ -29,7 +27,7 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private ProsessTriggerPeriodeUtleder periodeUtleder;
 
     public StartpunktUtlederInntektArbeidYtelse() {
         // For CDI
@@ -37,9 +35,9 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     @Inject
     StartpunktUtlederInntektArbeidYtelse(InntektArbeidYtelseTjeneste iayTjeneste,
-                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                         ProsessTriggerPeriodeUtleder periodeUtleder) {
         this.iayTjeneste = iayTjeneste;
-        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.periodeUtleder = periodeUtleder;
     }
 
     @Override
@@ -58,20 +56,21 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
         Saksnummer saksnummer = ref.getSaksnummer();
 
-        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
 
-        for (DatoIntervallEntitet periode : perioderTilVurdering) {
+        var perioderTilVurdering = periodeUtleder.utledTidslinje(ref.getBehandlingId()).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT))
+            .getLocalDateIntervals();
+
+        for (var periode : perioderTilVurdering) {
             var opptjeningsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(30), periode.getFomDato());
 
             boolean aktørYtelseEndring = diff.endringPåAktørYtelseForAktør(saksnummer, opptjeningsperiode, ref.getAktørId());
             if (aktørYtelseEndring) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.BEREGNING, "aktør ytelse andre tema for periode " + opptjeningsperiode);
+                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "aktør ytelse andre tema for periode " + opptjeningsperiode);
             } else {
                 var relevantInntektsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusMonths(3), periode.getFomDato());
                 boolean erAktørInntektEndretForSøker = diff.erEndringPåAktørInntektForAktør(relevantInntektsperiode, ref.getAktørId());
                 if (erAktørInntektEndretForSøker) {
-                    leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.BEREGNING, "aktør inntekt for periode " + relevantInntektsperiode);
+                    leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "aktør inntekt for periode " + relevantInntektsperiode);
                 }
             }
         }

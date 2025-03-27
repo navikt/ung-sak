@@ -22,21 +22,13 @@ public class UttalelseEntitet extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
     private JournalpostId svarJournalpostId;
 
-
-    //Hibernate - skal brukes via Etterlysning, men hibernate trenger dette for å kunne hente fra databasen sammen med Etterlysning
-    @OneToOne
-    @JoinColumn(name = "etterlysning_id", referencedColumnName = "id", nullable = false)
-    private Etterlysning etterlysning;
-
-
-    private UttalelseEntitet() {
+    public UttalelseEntitet() {
         // Hibernate
     }
 
-    public UttalelseEntitet(Etterlysning etterlysningId, boolean harGodtattEndringen, String uttalelseBegrunnelse, JournalpostId svarJournalpostId) {
+    public UttalelseEntitet(boolean harGodtattEndringen, String uttalelseBegrunnelse, JournalpostId svarJournalpostId) {
         this.uttalelseBegrunnelse = uttalelseBegrunnelse;
         this.harGodtattEndringen = harGodtattEndringen;
-        this.etterlysning = etterlysningId;
         this.svarJournalpostId = svarJournalpostId;
     }
 
@@ -46,7 +38,6 @@ public class UttalelseEntitet extends BaseEntitet {
             "id=" + id +
             ", harGodtattEndringen=" + harGodtattEndringen +
             ", svarJournalpostId=" + svarJournalpostId +
-            ", etterlysningId=" + etterlysning.getId() +
             '}';
     }
 

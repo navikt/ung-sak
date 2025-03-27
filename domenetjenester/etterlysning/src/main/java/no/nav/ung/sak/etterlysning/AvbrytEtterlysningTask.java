@@ -1,6 +1,7 @@
 package no.nav.ung.sak.etterlysning;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -18,6 +19,7 @@ public class AvbrytEtterlysningTask implements ProsessTaskHandler {
         // CDI
     }
 
+    @Inject
     public AvbrytEtterlysningTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
         this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
     }

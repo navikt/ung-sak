@@ -9,12 +9,14 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "ungdomsprogramregister.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default")
 public class UngOppgaveKlient {
     private final OidcRestClient restClient;
     private final URI opprettURI;
+    private final URI avbrytURI;
 
     @Inject
     public UngOppgaveKlient(
@@ -22,6 +24,16 @@ public class UngOppgaveKlient {
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
         opprettURI = tilUri(url, "oppgave/opprett");
+        avbrytURI = tilUri(url, "oppgave/avbryt");
+
+    }
+
+    public void avbrytOppgave(UUID eksternRef) {
+        try {
+            restClient.post(avbrytURI, eksternRef);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
 
     }
 
