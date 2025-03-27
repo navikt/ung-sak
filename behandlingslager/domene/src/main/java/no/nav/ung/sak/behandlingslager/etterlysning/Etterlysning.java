@@ -42,10 +42,6 @@ public class Etterlysning extends BaseEntitet {
     @Column(name = "frist")
     private LocalDateTime frist;
 
-    @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
-    private JournalpostId svarJournalpostId;
-
     @OneToOne(mappedBy = "etterlysning")
     private UttalelseEntitet uttalelse;
 
@@ -93,7 +89,6 @@ public class Etterlysning extends BaseEntitet {
             ", type=" + type +
             ", status=" + status +
             ", frist=" + frist +
-            ", svarJournalpostId=" + svarJournalpostId +
             ", uttalelse=" + uttalelse +
             '}';
     }
@@ -165,13 +160,8 @@ public class Etterlysning extends BaseEntitet {
         if (status != EtterlysningStatus.VENTER) {
             throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
         }
-        this.svarJournalpostId = svarJournalpostId;
         this.status = EtterlysningStatus.MOTTATT_SVAR;
-        this.uttalelse = new UttalelseEntitet(this, erEndringGodkjent, uttalelse);
-    }
-
-    public JournalpostId getSvarJournalpostId() {
-        return svarJournalpostId;
+        this.uttalelse = new UttalelseEntitet(this, erEndringGodkjent, uttalelse, svarJournalpostId);
     }
 
     public UttalelseEntitet getUttalelse() {
