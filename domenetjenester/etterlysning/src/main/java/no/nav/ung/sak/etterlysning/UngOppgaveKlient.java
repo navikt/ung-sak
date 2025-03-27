@@ -34,6 +34,10 @@ public class UngOppgaveKlient {
 
     }
 
+
+
+
+
     private static URI tilUri(String baseUrl, String path) {
         try {
             return new URI(baseUrl + "/" + path);
