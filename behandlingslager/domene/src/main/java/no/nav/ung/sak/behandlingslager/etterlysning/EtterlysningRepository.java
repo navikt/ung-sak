@@ -68,7 +68,7 @@ public class EtterlysningRepository {
 
     public List<Etterlysning> hentEtterlysningerSomSkalAvbrytes(Long behandlingId) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                                                             "where e.behandlingId = :behandlingId and e.type = :type and status = :status", Etterlysning.class)
+                                                             "where e.behandlingId = :behandlingId and status = :status", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("status", EtterlysningStatus.SKAL_AVBRYTES)
             .getResultList();
@@ -78,7 +78,7 @@ public class EtterlysningRepository {
 
     public List<Etterlysning> hentUtløpteEtterlysningerSomVenterPåSvar(Long behandlingId) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                "where e.behandlingId = :behandlingId and e.type = :type and status = :status AND frist < :naa", Etterlysning.class)
+                "where e.behandlingId = :behandlingId and status = :status AND frist < :naa", Etterlysning.class)
             .setParameter("status", EtterlysningStatus.VENTER)
             .setParameter("behandlingId", behandlingId)
             .setParameter("naa", LocalDateTime.now())

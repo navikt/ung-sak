@@ -1,12 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -20,6 +13,12 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Dependent
 public class VedtaksbrevRegler {
@@ -42,13 +41,15 @@ public class VedtaksbrevRegler {
     public VedtaksbrevRegelResulat kjør(Long id) {
         var behandling = behandlingRepository.hentBehandling(id);
         if (!behandling.erAvsluttet()) {
-            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+            LOG.info("Kan ikke bestille brev før behandlingen er avsluttet");
+            return null;
         }
 
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         var bygger = bestemBygger(detaljertResultatTidslinje);
         if (bygger == null) {
             LOG.warn("Støtter ikke vedtaksbrev for resultater = {} ", DetaljertResultat.timelineTostring(detaljertResultatTidslinje));
+            return null;
         }
 
         return new VedtaksbrevRegelResulat(bygger, detaljertResultatTidslinje);

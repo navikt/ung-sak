@@ -1,9 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.kontroll;
 
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -18,15 +14,14 @@ import no.nav.ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelse.RapportertInntektOgKilde;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import no.nav.ung.sak.ytelse.*;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = FastsettInntektDto.class, adapter= FastsettInntektOppdaterer.class)
+@DtoTilServiceAdapter(dto = FastsettInntektDto.class, adapter = AksjonspunktOppdaterer.class)
 public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<FastsettInntektDto> {
 
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
@@ -110,7 +105,9 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     }
 
 
-    record InntekterPrKilde(Set<RapportertInntekt> brukersRapporterteInntekt, Set<RapportertInntekt> registersRapporterteInntekt, Set<RapportertInntekt> saksbehandlersFastsatteInntekt) {
+    record InntekterPrKilde(Set<RapportertInntekt> brukersRapporterteInntekt,
+                            Set<RapportertInntekt> registersRapporterteInntekt,
+                            Set<RapportertInntekt> saksbehandlersFastsatteInntekt) {
     }
 
 }

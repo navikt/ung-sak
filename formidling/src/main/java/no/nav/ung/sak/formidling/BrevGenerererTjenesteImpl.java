@@ -1,11 +1,6 @@
 package no.nav.ung.sak.formidling;
 
 
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,6 +18,10 @@ import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 @ApplicationScoped
 public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
@@ -64,11 +63,16 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private GenerertBrev doGenererVedtaksbrev(Long behandlingId) {
 
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
-        VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
-        if (bygger == null) {
+        if (regelResultat == null) {
+            LOG.info("Ingen resultat fra vedtaksbrevregler. Bestiller ikke brev");
             return null;
         }
+
+        VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        if (!behandling.erAvsluttet()) {
+            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+        }
 
         var resultat = bygger.bygg(behandling, regelResultat.detaljertResultatTimeline());
         var pdlMottaker = hentMottaker(behandling);

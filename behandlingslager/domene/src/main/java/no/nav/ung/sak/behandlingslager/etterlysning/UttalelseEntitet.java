@@ -2,11 +2,10 @@ package no.nav.ung.sak.behandlingslager.etterlysning;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import org.hibernate.annotations.Immutable;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "Uttalelse")
 @Table(name = "UTTALELSE")
-@Immutable
 public class UttalelseEntitet extends BaseEntitet {
 
     @Id
@@ -19,21 +18,28 @@ public class UttalelseEntitet extends BaseEntitet {
     @Column(name = "har_godtatt_endringen", updatable = false, nullable = false)
     private boolean harGodtattEndringen;
 
-    @Column(name = "etterlysning_id", updatable = false, nullable = false)
-    private long etterlysningId;
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
+    private JournalpostId svarJournalpostId;
 
-
-    private UttalelseEntitet() {
+    public UttalelseEntitet() {
         // Hibernate
     }
 
-    public UttalelseEntitet(long etterlysningId, boolean harGodtattEndringen, String uttalelseBegrunnelse) {
+    public UttalelseEntitet(boolean harGodtattEndringen, String uttalelseBegrunnelse, JournalpostId svarJournalpostId) {
         this.uttalelseBegrunnelse = uttalelseBegrunnelse;
         this.harGodtattEndringen = harGodtattEndringen;
-        this.etterlysningId = etterlysningId;
+        this.svarJournalpostId = svarJournalpostId;
     }
 
-
+    @Override
+    public String toString() {
+        return "UttalelseEntitet{" +
+            "id=" + id +
+            ", harGodtattEndringen=" + harGodtattEndringen +
+            ", svarJournalpostId=" + svarJournalpostId +
+            '}';
+    }
 
     public String getUttalelseBegrunnelse() {
         return uttalelseBegrunnelse;
@@ -41,5 +47,9 @@ public class UttalelseEntitet extends BaseEntitet {
 
     public boolean harGodtattEndringen() {
         return harGodtattEndringen;
+    }
+
+    public JournalpostId getSvarJournalpostId() {
+        return svarJournalpostId;
     }
 }

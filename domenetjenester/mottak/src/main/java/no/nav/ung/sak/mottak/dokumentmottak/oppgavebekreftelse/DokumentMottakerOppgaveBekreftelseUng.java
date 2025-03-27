@@ -1,10 +1,5 @@
 package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.util.Collection;
-import java.util.List;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -19,6 +14,12 @@ import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 
 @ApplicationScoped
@@ -71,7 +72,16 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
 
     @Override
     public List<Trigger> getTriggere(Collection<MottattDokument> mottattDokument) {
-        return List.of(); // Skal ikke generere ekstra trigger
+        final var triggers = new ArrayList<Trigger>();
+        for (MottattDokument dokument : mottattDokument) {
+            var oppgaveBekreftelse = oppgaveBekreftelseParser.parseOppgaveBekreftelse(dokument);
+            final var oppgaveId = oppgaveBekreftelse.getBekreftelse().getOppgaveId();
+            BekreftelseHåndterer bekreftelseHåndterer = bekreftelseMottakere
+                .select(new OppgaveTypeRef.OppgaveTypeRefLiteral(oppgaveBekreftelse.getBekreftelse().getType()))
+                .get();
+            bekreftelseHåndterer.utledTrigger(oppgaveId).ifPresent(triggers::add);
+        }
+        return triggers;
     }
 
 }

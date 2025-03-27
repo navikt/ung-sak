@@ -42,15 +42,11 @@ public class Etterlysning extends BaseEntitet {
     @Column(name = "frist")
     private LocalDateTime frist;
 
-    @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
-    private JournalpostId svarJournalpostId;
-
     @OneToOne
-    @JoinColumn(name = "id", referencedColumnName = "etterlysning_id")
+    @JoinColumn(name = "uttalelse_id", unique = true)
     private UttalelseEntitet uttalelse;
 
-    private Etterlysning() {
+    Etterlysning() {
         // Hibernate
     }
 
@@ -81,6 +77,21 @@ public class Etterlysning extends BaseEntitet {
         this.periode = periode;
         this.type = type;
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Etterlysning{" +
+            "id=" + id +
+            ", behandlingId=" + behandlingId +
+            ", grunnlagsreferanse=" + grunnlagsreferanse +
+            ", eksternReferanse=" + eksternReferanse +
+            ", periode=" + periode +
+            ", type=" + type +
+            ", status=" + status +
+            ", frist=" + frist +
+            ", uttalelse=" + uttalelse +
+            '}';
     }
 
     public Long getId() {
@@ -150,13 +161,8 @@ public class Etterlysning extends BaseEntitet {
         if (status != EtterlysningStatus.VENTER) {
             throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
         }
-        this.svarJournalpostId = svarJournalpostId;
         this.status = EtterlysningStatus.MOTTATT_SVAR;
-        this.uttalelse = new UttalelseEntitet(this.id, erEndringGodkjent, uttalelse);
-    }
-
-    public JournalpostId getSvarJournalpostId() {
-        return svarJournalpostId;
+        this.uttalelse = new UttalelseEntitet(erEndringGodkjent, uttalelse, svarJournalpostId);
     }
 
     public UttalelseEntitet getUttalelse() {

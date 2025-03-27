@@ -12,8 +12,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -22,10 +21,12 @@ import no.nav.ung.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
+import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Dependent
@@ -66,6 +67,13 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
 
         etterlysningRepository.lagre(etterlysning);
         prosessTaskTjeneste.lagre(gruppe);
+    }
+
+    @Override
+    public Optional<Trigger> utledTrigger(UUID oppgaveId) {
+        Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(oppgaveId);
+
+        return Optional.of(new Trigger(etterlysning.getPeriode(), BehandlingÅrsakType.UTTALELSE_FRA_BRUKER));
     }
 
     /**
@@ -121,14 +129,6 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         var ytelseType = YtelseType.fraKode(behandlingReferanse.getFagsakYtelseType().getKode());
         var oppgittOpptjening = new IAYTilDtoMapper(behandlingReferanse.getAktørId(), null, behandlingReferanse.getUuid()).mapTilDto(builder);
         return new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandlingReferanse.getUuid(), aktør, ytelseType, oppgittOpptjening);
-    }
-
-    private static ProsessTaskData fortsettBehandlingTask(Behandling behandling) {
-        var fortsettTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
-        fortsettTask.setBehandling(behandling.getFagsakId(), behandling.getId());
-        fortsettTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
-        fortsettTask.setProperty(FortsettBehandlingTask.GJENOPPTA_STEG, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT.getKode());
-        return fortsettTask;
     }
 
 }

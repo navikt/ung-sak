@@ -37,6 +37,11 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Column(name = "er_manuelt_vurdert", nullable = false)
     private boolean erManueltVurdert;
 
+
+    private KontrollertInntektPeriode() {
+        // Hibernate
+    }
+
     KontrollertInntektPeriode(KontrollertInntektPeriode eksisterende) {
         this.periode = Range.closed(eksisterende.getPeriode().getFomDato(), eksisterende.getPeriode().getTomDato());
         this.arbeidsinntekt = eksisterende.getArbeidsinntekt();
@@ -73,6 +78,17 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     public boolean getErManueltVurdert() {
         return erManueltVurdert;
+    }
+
+    @Override
+    public String toString() {
+        return "KontrollertInntektPeriode{" +
+            "periode=" + periode +
+            ", arbeidsinntekt=" + arbeidsinntekt +
+            ", ytelse=" + ytelse +
+            ", kilde=" + kilde +
+            ", erManueltVurdert=" + erManueltVurdert +
+            '}';
     }
 
     public static Builder ny() {

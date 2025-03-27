@@ -108,9 +108,9 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
-        assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
         assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseBegrunnelse()).isNull();
         assertThat(oppdatertEtterlysning.getUttalelse().harGodtattEndringen()).isTrue();
+        assertThat(oppdatertEtterlysning.getUttalelse().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
     @Test
@@ -157,9 +157,9 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
-        assertThat(oppdatertEtterlysning.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
         assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseBegrunnelse()).isEqualTo("en uttalelse");
         assertThat(oppdatertEtterlysning.getUttalelse().harGodtattEndringen()).isFalse();
+        assertThat(oppdatertEtterlysning.getUttalelse().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
     @NotNull
