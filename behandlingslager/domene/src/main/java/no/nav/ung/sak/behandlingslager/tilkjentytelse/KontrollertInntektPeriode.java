@@ -75,6 +75,17 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         return erManueltVurdert;
     }
 
+    @Override
+    public String toString() {
+        return "KontrollertInntektPeriode{" +
+            "periode=" + periode +
+            ", arbeidsinntekt=" + arbeidsinntekt +
+            ", ytelse=" + ytelse +
+            ", kilde=" + kilde +
+            ", erManueltVurdert=" + erManueltVurdert +
+            '}';
+    }
+
     public static Builder ny() {
         return new Builder();
     }

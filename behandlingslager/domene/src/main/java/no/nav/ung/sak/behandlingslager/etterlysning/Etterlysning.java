@@ -46,8 +46,7 @@ public class Etterlysning extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
     private JournalpostId svarJournalpostId;
 
-    @OneToOne
-    @JoinColumn(name = "id", referencedColumnName = "etterlysning_id")
+    @OneToOne(mappedBy = "etterlysning")
     private UttalelseEntitet uttalelse;
 
     private Etterlysning() {
@@ -81,6 +80,22 @@ public class Etterlysning extends BaseEntitet {
         this.periode = periode;
         this.type = type;
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Etterlysning{" +
+            "id=" + id +
+            ", behandlingId=" + behandlingId +
+            ", grunnlagsreferanse=" + grunnlagsreferanse +
+            ", eksternReferanse=" + eksternReferanse +
+            ", periode=" + periode +
+            ", type=" + type +
+            ", status=" + status +
+            ", frist=" + frist +
+            ", svarJournalpostId=" + svarJournalpostId +
+            ", uttalelse=" + uttalelse +
+            '}';
     }
 
     public Long getId() {
@@ -152,7 +167,7 @@ public class Etterlysning extends BaseEntitet {
         }
         this.svarJournalpostId = svarJournalpostId;
         this.status = EtterlysningStatus.MOTTATT_SVAR;
-        this.uttalelse = new UttalelseEntitet(this.id, erEndringGodkjent, uttalelse);
+        this.uttalelse = new UttalelseEntitet(this, erEndringGodkjent, uttalelse);
     }
 
     public JournalpostId getSvarJournalpostId() {

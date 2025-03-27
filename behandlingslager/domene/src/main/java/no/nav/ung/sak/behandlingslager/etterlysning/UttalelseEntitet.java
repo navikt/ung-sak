@@ -2,11 +2,9 @@ package no.nav.ung.sak.behandlingslager.etterlysning;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import org.hibernate.annotations.Immutable;
 
 @Entity(name = "Uttalelse")
 @Table(name = "UTTALELSE")
-@Immutable
 public class UttalelseEntitet extends BaseEntitet {
 
     @Id
@@ -19,21 +17,30 @@ public class UttalelseEntitet extends BaseEntitet {
     @Column(name = "har_godtatt_endringen", updatable = false, nullable = false)
     private boolean harGodtattEndringen;
 
-    @Column(name = "etterlysning_id", updatable = false, nullable = false)
-    private long etterlysningId;
+    //Hibernate - skal brukes via Etterlysning, men hibernate trenger dette for å kunne hente fra databasen sammen med Etterlysning
+    @OneToOne
+    @JoinColumn(name = "etterlysning_id", referencedColumnName = "id", nullable = false)
+    private Etterlysning etterlysning;
 
 
     private UttalelseEntitet() {
         // Hibernate
     }
 
-    public UttalelseEntitet(long etterlysningId, boolean harGodtattEndringen, String uttalelseBegrunnelse) {
+    public UttalelseEntitet(Etterlysning etterlysningId, boolean harGodtattEndringen, String uttalelseBegrunnelse) {
         this.uttalelseBegrunnelse = uttalelseBegrunnelse;
         this.harGodtattEndringen = harGodtattEndringen;
-        this.etterlysningId = etterlysningId;
+        this.etterlysning = etterlysningId;
     }
 
-
+    @Override
+    public String toString() {
+        return "UttalelseEntitet{" +
+            "id=" + id +
+            ", harGodtattEndringen=" + harGodtattEndringen +
+            ", etterlysningId=" + etterlysning.getId() +
+            '}';
+    }
 
     public String getUttalelseBegrunnelse() {
         return uttalelseBegrunnelse;

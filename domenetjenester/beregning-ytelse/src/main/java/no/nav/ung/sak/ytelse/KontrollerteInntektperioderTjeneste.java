@@ -10,6 +10,8 @@ import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ import java.util.Set;
 @Dependent
 public class KontrollerteInntektperioderTjeneste {
 
+    private static final Logger LOG = LoggerFactory.getLogger(KontrollerteInntektperioderTjeneste.class);
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
 
@@ -36,6 +39,7 @@ public class KontrollerteInntektperioderTjeneste {
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId, LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
         final var relevantePerioderForKontroll = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
         final var kontrollertePerioder = mapTilKontrollerteInntektperioder(inntektTidslinje.mapValue(it -> new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, it)), relevantePerioderForKontroll, Optional.of(KontrollertInntektKilde.BRUKER), false);
+        LOG.info("Lagrer inntekt fra bruker: {}", kontrollertePerioder);
         tilkjentYtelseRepository.lagre(behandlingId, kontrollertePerioder);
     }
 

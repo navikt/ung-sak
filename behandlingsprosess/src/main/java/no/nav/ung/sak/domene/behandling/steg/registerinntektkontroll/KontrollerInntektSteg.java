@@ -27,6 +27,8 @@ import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,6 +45,8 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 public class KontrollerInntektSteg implements BehandlingSteg {
 
+    private static final Logger log = LoggerFactory.getLogger(KontrollerInntektSteg.class);
+
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RapportertInntektMapper rapportertInntektMapper;
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
@@ -50,6 +54,8 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private EtterlysningRepository etterlysningRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+
+
 
     @Inject
     public KontrollerInntektSteg(ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
@@ -87,6 +93,8 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);
 
         var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
+
+        log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
         håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, prosessTriggerTidslinje, etterlysninger);
         return avgjørResultat(behandlingId, kontrollResultat, prosessTriggerTidslinje);
     }
@@ -111,33 +119,38 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
         var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(kontekst.getBehandlingId());
-        for (var segment : kontrollResultat.toSegments()) {
-            switch (segment.getValue()) {
+        for (var kontrollSegment : kontrollResultat.toSegments()) {
+            switch (kontrollSegment.getValue()) {
                 case BRUK_INNTEKT_FRA_BRUKER -> {
-                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, segment));
+                    log.info("Bruker inntekt fra bruker for periode {}", kontrollSegment.getLocalDateInterval());
+                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment));
                     kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
                         kontekst.getBehandlingId(),
-                        rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter).intersection(segment.getLocalDateInterval()),
+                        rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter).intersection(kontrollSegment.getLocalDateInterval()),
                         prosessTriggerTidslinje);
                 }
                 case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST -> {
-                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, segment));
-                    etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), segment, grunnlag.getEksternReferanse()));
+                    log.info("Oppretter ny etterlysning med utvidet frist for periode {}", kontrollSegment.getLocalDateInterval());
+                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment));
+                    etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.getEksternReferanse()));
                 }
                 case OPPRETT_OPPGAVE_TIL_BRUKER -> {
-                    if (!harEksisterendeEtterlysningPåVent(segment, etterlysninger)) {
-                        etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), segment, grunnlag.getEksternReferanse()));
+                    log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
+                    if (!harEksisterendeEtterlysningPåVent(kontrollSegment, etterlysninger)) {
+                        etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.getEksternReferanse()));
                     }
                 }
             }
         }
 
         if (!etterlysningerSomSkalOpprettes.isEmpty()) {
+            log.info("Oppretter etterlysninger {}", etterlysningerSomSkalOpprettes);
             etterlysningRepository.lagre(etterlysningerSomSkalOpprettes);
             lagTaskForOpprettingAvEtterlysning(kontekst);
         }
 
         if (!etterlysningerSomSkalAvbrytes.isEmpty()) {
+            log.info("Avbryter etterlysninger {}", etterlysningerSomSkalAvbrytes);
             etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
             lagTaskForAvbrytelseAvEtterlysning(kontekst);
         }
