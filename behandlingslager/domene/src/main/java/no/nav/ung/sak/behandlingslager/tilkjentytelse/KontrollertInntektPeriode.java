@@ -46,6 +46,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         this.periode = Range.closed(eksisterende.getPeriode().getFomDato(), eksisterende.getPeriode().getTomDato());
         this.arbeidsinntekt = eksisterende.getArbeidsinntekt();
         this.ytelse = eksisterende.getYtelse();
+        this.kilde = eksisterende.getKilde();
+        this.erManueltVurdert = eksisterende.getErManueltVurdert();
     }
 
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
