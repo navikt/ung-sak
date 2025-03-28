@@ -29,6 +29,7 @@ public class TilkjentYtelseRepository {
         if (eksisterende.isPresent()) {
             eksisterende.get().setIkkeAktiv();
             entityManager.persist(eksisterende.get());
+            entityManager.flush();
         }
         final var eksisterendePerioderSomSkalBeholdes = eksisterende.stream().flatMap(it -> it.getPerioder().stream())
             .filter(p -> perioder.stream().map(KontrollertInntektPeriode::getPeriode).noneMatch(p2 -> p.getPeriode().overlapper(p2)))
@@ -54,10 +55,12 @@ public class TilkjentYtelseRepository {
     }
 
     public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {
-        final var eksisterende = hentKontrollertInntektPerioder(behandlingId);
-        if (eksisterende.isPresent()) {
-            eksisterende.get().setIkkeAktiv();
-            entityManager.persist(eksisterende.get());
+        final var eksisterendeOptional = hentKontrollertInntektPerioder(behandlingId);
+        if (eksisterendeOptional.isPresent()) {
+            final var eksisterende = eksisterendeOptional.get();
+            eksisterende.setIkkeAktiv();
+            entityManager.persist(eksisterende);
+            entityManager.flush();
         }
         kopierKontrollPerioder(originalBehandlingId, behandlingId);
     }
