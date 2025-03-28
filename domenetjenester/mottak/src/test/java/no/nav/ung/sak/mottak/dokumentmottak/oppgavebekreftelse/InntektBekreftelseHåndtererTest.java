@@ -18,8 +18,11 @@ import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -50,11 +53,13 @@ class InntektBekreftelseHåndtererTest {
     private EntityManager em;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
 
     @BeforeEach
     void setup() {
         etterlysningRepository = new EtterlysningRepository(em);
+        mottatteDokumentRepository = new MottatteDokumentRepository(em);
         ProsessTaskRepositoryImpl prosessTaskRepository = new ProsessTaskRepositoryImpl(em, null, null);
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(prosessTaskRepository);
 
@@ -72,6 +77,8 @@ class InntektBekreftelseHåndtererTest {
         var oppgaveId = UUID.randomUUID();
         var grunnlagsreferanse = UUID.randomUUID();
 
+        final var mottattDokument = lagMottattDokument(behandling, journalpostId);
+
         var etterlysning = etterlysningRepository.lagre(Etterlysning.forInntektKontrollUttalelse(
             behandling.getId(),
             grunnlagsreferanse,
@@ -82,7 +89,7 @@ class InntektBekreftelseHåndtererTest {
         etterlysningRepository.lagre(etterlysning);
         em.flush();
 
-        var bekreftelse = lagBekreftelse(journalpostId, behandling, new InntektBekreftelse(
+        var bekreftelse = lagBekreftelse(mottattDokument, behandling, new InntektBekreftelse(
             oppgaveId,
             Set.of(new OppgittInntektForPeriode(
                 new Periode(periode.getFomDato(), periode.getTomDato()),
@@ -92,11 +99,15 @@ class InntektBekreftelseHåndtererTest {
             null));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste);
+        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste, mottatteDokumentRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
         // Assert
+        // Dokument er under behandling
+        final var dokumentTilBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.BEHANDLER);
+        assertThat(dokumentTilBehandling).hasSize(1);
+
         //abakus er oppdatert
         List<ProsessTaskData> abakusTasker = prosessTaskTjeneste.finnAlle(AsyncAbakusLagreOpptjeningTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(abakusTasker).hasSize(1);
@@ -114,7 +125,7 @@ class InntektBekreftelseHåndtererTest {
     }
 
     @Test
-    void skalIkkeOppdatereGrunnlagVedUttalelse(){
+    void skalIkkeOppdatereGrunnlagVedUttalelse() {
         // Arrange
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING);
@@ -135,7 +146,7 @@ class InntektBekreftelseHåndtererTest {
         etterlysningRepository.lagre(etterlysning);
         em.flush();
 
-        var bekreftelse = lagBekreftelse(journalpostId, behandling, new InntektBekreftelse(
+        var bekreftelse = lagBekreftelse(lagMottattDokument(behandling, journalpostId), behandling, new InntektBekreftelse(
             oppgaveId,
             Set.of(new OppgittInntektForPeriode(
                 new Periode(periode.getFomDato(), periode.getTomDato()),
@@ -145,11 +156,15 @@ class InntektBekreftelseHåndtererTest {
             "en uttalelse"));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste);
+        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste, mottatteDokumentRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
         // Assert
+        // Dokument er gyldig
+        final var dokumentTilBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.GYLDIG);
+        assertThat(dokumentTilBehandling).hasSize(1);
+
         //abakus skal ikke oppdateres
         List<ProsessTaskData> abakusTasker = prosessTaskTjeneste.finnAlle(AsyncAbakusLagreOpptjeningTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(abakusTasker).hasSize(0);
@@ -162,10 +177,21 @@ class InntektBekreftelseHåndtererTest {
         assertThat(oppdatertEtterlysning.getUttalelse().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
-    @NotNull
-    private static OppgaveBekreftelseInnhold lagBekreftelse(long journalpostId, Behandling behandling, InntektBekreftelse inntektBekreftelse) {
+    private MottattDokument lagMottattDokument(Behandling behandling, long journalpostId) {
+        final var builder = new MottattDokument.Builder();
+        final var mottattDokument = builder
+            .medInnsendingstidspunkt(LocalDateTime.now())
+            .medBehandlingId(behandling.getId())
+            .medFagsakId(behandling.getFagsakId())
+            .medJournalPostId(new JournalpostId(journalpostId))
+            .build();
+        mottatteDokumentRepository.lagre(mottattDokument, DokumentStatus.BEHANDLER);
+        return mottattDokument;
+    }
+
+    private static OppgaveBekreftelseInnhold lagBekreftelse(MottattDokument mottattDokument, Behandling behandling, InntektBekreftelse inntektBekreftelse) {
         return new OppgaveBekreftelseInnhold(
-            new JournalpostId(journalpostId),
+            mottattDokument,
             behandling,
             new OppgaveBekreftelse(
                 new SøknadId("456"),
@@ -174,7 +200,6 @@ class InntektBekreftelseHåndtererTest {
                 new Søker(NorskIdentitetsnummer.of("12345678910")),
                 inntektBekreftelse
             ),
-            LocalDateTime.now(),
             Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE
         );
     }
