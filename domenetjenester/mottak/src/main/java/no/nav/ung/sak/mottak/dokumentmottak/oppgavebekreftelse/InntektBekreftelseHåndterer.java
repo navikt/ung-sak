@@ -13,8 +13,10 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
@@ -26,6 +28,7 @@ import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,11 +40,16 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
 
     private final EtterlysningRepository etterlysningRepository;
     private final ProsessTaskTjeneste prosessTaskTjeneste;
+    private final MottatteDokumentRepository mottatteDokumentRepository;
+
 
     @Inject
-    public InntektBekreftelseHåndterer(EtterlysningRepository etterlysningRepository, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public InntektBekreftelseHåndterer(EtterlysningRepository etterlysningRepository,
+                                       ProsessTaskTjeneste prosessTaskTjeneste,
+                                       MottatteDokumentRepository mottatteDokumentRepository) {
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
     @Override
@@ -60,12 +68,13 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
             var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
             gruppe.addNesteSekvensiell(abakusTask);
         } else {
+            mottatteDokumentRepository.oppdaterStatus(List.of(oppgaveBekreftelseInnhold.mottattDokument()), DokumentStatus.GYLDIG);
             Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
                 "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
         }
 
         etterlysning.mottattUttalelse(
-            oppgaveBekreftelseInnhold.journalpostId(),
+            oppgaveBekreftelseInnhold.mottattDokument().getJournalpostId(),
             inntektBekreftelse.harBrukerGodtattEndringen(),
             inntektBekreftelse.getUttalelseFraBruker()
         );
@@ -83,7 +92,6 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
 
     /**
      * Lagrer oppgitt opptjening til abakus fra mottatt bekreftelse.
-     *
      */
     private static ProsessTaskData lagOppdaterAbakusTask(OppgaveBekreftelseInnhold bekreftelseInnhold) {
         var request = mapOppgittOpptjeningRequest(bekreftelseInnhold);
@@ -94,7 +102,7 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
             var payload = JsonObjectMapper.getMapper().writeValueAsString(request);
             enkeltTask.setPayload(payload);
 
-            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, bekreftelseInnhold.journalpostId().getJournalpostId().getVerdi());
+            enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, bekreftelseInnhold.mottattDokument().getJournalpostId().getVerdi());
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.BREVKODER, bekreftelseInnhold.brevkode().getKode());
 
             enkeltTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getAktørId());
@@ -126,8 +134,8 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
 
         var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
         builder.leggTilOppgittArbeidsforhold(oppgittArbeidOgFrilans);
-        builder.leggTilJournalpostId(bekreftelse.journalpostId().getJournalpostId());
-        builder.leggTilInnsendingstidspunkt(bekreftelse.innsendingstidspunkt());
+        builder.leggTilJournalpostId(bekreftelse.mottattDokument().getJournalpostId());
+        builder.leggTilInnsendingstidspunkt(bekreftelse.mottattDokument().getInnsendingstidspunkt());
         Behandling behandlingReferanse = bekreftelse.behandling();
         var aktør = new AktørIdPersonident(behandlingReferanse.getAktørId().getId());
         var saksnummer = behandlingReferanse.getFagsak().getSaksnummer();

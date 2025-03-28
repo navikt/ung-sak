@@ -61,13 +61,9 @@ public class RapportertInntektMapper {
         List<EtterlysningsPeriode> etterlysningsperioder) {
 
         var svarteEllerVentendeStatuser = Set.of(EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.OPPRETTET, EtterlysningStatus.VENTER);
-        final var unikeGrunnlagsIder = etterlysningsperioder.stream().filter(it -> svarteEllerVentendeStatuser.contains(it.etterlysningInfo().etterlysningStatus()))
-            .map(EtterlysningsPeriode::iayGrunnlagUUID).collect(Collectors.toSet());
-
-        final var grunnlagPrUUID = unikeGrunnlagsIder.stream().collect(Collectors.toMap(it -> it, it -> inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, it)));
-
         return etterlysningsperioder.stream()
-            .map(it -> finnRegisterinntekterVurdertIUttalelse(it, grunnlagPrUUID))
+            .filter(it -> svarteEllerVentendeStatuser.contains(it.etterlysningInfo().etterlysningStatus()))
+            .map(it -> finnRegisterinntekterVurdertIUttalelse(behandlingId, it))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
 
@@ -81,8 +77,8 @@ public class RapportertInntektMapper {
     }
 
 
-    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(EtterlysningsPeriode it, Map<UUID, InntektArbeidYtelseGrunnlag> grunnlagPrUUID) {
-        final var iayGrunnlag = grunnlagPrUUID.get(it.iayGrunnlagUUID());
+    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(Long behandlingId, EtterlysningsPeriode it) {
+        final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, it.iayGrunnlagUUID());
         final var grupperteInntekter = grupperInntekter(iayGrunnlag);
         final var registerTidslinje = finnRegisterinntektForPeriode(grupperteInntekter, it.periode());
         return registerTidslinje.mapValue(registerinntekter -> new EtterlysningOgRegisterinntekt(registerinntekter, it.etterlysningInfo()));
