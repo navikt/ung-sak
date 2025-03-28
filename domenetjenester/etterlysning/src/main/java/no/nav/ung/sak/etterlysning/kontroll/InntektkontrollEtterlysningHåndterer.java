@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningHåndterer;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -36,18 +37,10 @@ public class InntektkontrollEtterlysningHåndterer implements EtterlysningHåndt
 
     public void håndterOpprettelse(long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-
-
         final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
-
-
-        final var unikeGrunnlagsreferanser = etterlysninger.stream().map(Etterlysning::getGrunnlagsreferanse).collect(Collectors.toSet());
-
-        final var grunnlagPrReferanse = unikeGrunnlagsreferanser.stream().collect(Collectors.toMap(it -> it, it -> inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, it)));
-        etterlysninger.forEach(e -> e.vent(LocalDateTime.now().plusDays(14)));
-
+        etterlysninger.forEach(e -> e.vent(getFrist()));
         final var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> {
-            final var grunnlag = grunnlagPrReferanse.get(etterlysning.getGrunnlagsreferanse());
+            final var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, etterlysning.getGrunnlagsreferanse());
             return new RegisterInntektOppgaveDTO(behandling.getAktørId().getAktørId(),
                 etterlysning.getEksternReferanse(),
                 etterlysning.getFrist(),
@@ -60,6 +53,10 @@ public class InntektkontrollEtterlysningHåndterer implements EtterlysningHåndt
 
         // Kall oppgave API
         etterlysningRepository.lagre(etterlysninger);
+    }
+
+    private static LocalDateTime getFrist() {
+        return LocalDateTime.now().plusDays(14);
     }
 
 }
