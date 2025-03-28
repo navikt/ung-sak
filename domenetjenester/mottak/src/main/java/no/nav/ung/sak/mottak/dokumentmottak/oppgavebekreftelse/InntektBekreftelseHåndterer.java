@@ -13,6 +13,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -48,6 +49,10 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         InntektBekreftelse inntektBekreftelse = oppgaveBekreftelseInnhold.oppgaveBekreftelse().getBekreftelse();
 
         Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(inntektBekreftelse.getOppgaveId());
+
+        if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
+            throw new IllegalStateException("Etterlysning må hå status VENTER for å motta bekreftelse. Status var " + etterlysning.getStatus());
+        }
 
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
