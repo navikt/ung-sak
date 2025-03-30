@@ -55,6 +55,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private EtterlysningRepository etterlysningRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
 
 
 
@@ -65,7 +66,8 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                  BehandlingRepository behandlingRepository,
                                  EtterlysningRepository etterlysningRepository,
                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                 ProsessTaskTjeneste prosessTaskTjeneste) {
+                                 ProsessTaskTjeneste prosessTaskTjeneste,
+                                 ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste) {
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
@@ -73,6 +75,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         this.etterlysningRepository = etterlysningRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.manglendeKontrollperioderTjeneste = manglendeKontrollperioderTjeneste;
     }
 
     public KontrollerInntektSteg() {
@@ -81,8 +84,11 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
+        manglendeKontrollperioderTjeneste.leggTilManglendeKontrollTriggere(behandlingId);
+
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
+
+        var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
         var etterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
 
         var etterlysningsperioder = etterlysninger.stream()
