@@ -84,6 +84,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
+        // Må legge til manglende triggere før resten av steget kjøres
         manglendeKontrollperioderTjeneste.leggTilManglendeKontrollTriggere(behandlingId);
 
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
