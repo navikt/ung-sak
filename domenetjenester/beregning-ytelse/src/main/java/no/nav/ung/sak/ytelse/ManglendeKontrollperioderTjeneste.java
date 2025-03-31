@@ -65,7 +65,7 @@ public class ManglendeKontrollperioderTjeneste {
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
         final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
 
-        final var perioderMedManglendeKontroll = mapTilProsessTriggere(manglendeKontrollTidslinje, ytelsesPerioder);
+        final var perioderMedManglendeKontroll = splittPåYtelsesperioder(manglendeKontrollTidslinje, ytelsesPerioder);
 
         if (!perioderMedManglendeKontroll.isEmpty()) {
             final var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -88,7 +88,7 @@ public class ManglendeKontrollperioderTjeneste {
     }
 
 
-    private static Set<LocalDateInterval> mapTilProsessTriggere(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<Boolean> ytelsesPerioder) {
+    private static Set<LocalDateInterval> splittPåYtelsesperioder(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<Boolean> ytelsesPerioder) {
         return manglendeKontrollTidslinje.compress()
             .combine(ytelsesPerioder, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .getLocalDateIntervals();
