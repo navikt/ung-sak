@@ -75,7 +75,7 @@ public class Avviksvurdering {
                     return KontrollResultat.BRUK_INNTEKT_FRA_BRUKER;
                 }
             });
-        return inntektDiffKontrollResultat;
+        return inntektDiffKontrollResultat.crossJoin(tidslinjeRelevanteÅrsaker.mapValue(it -> KontrollResultat.BRUK_INNTEKT_FRA_BRUKER), StandardCombinators::coalesceLeftHandSide);
     }
 
 
