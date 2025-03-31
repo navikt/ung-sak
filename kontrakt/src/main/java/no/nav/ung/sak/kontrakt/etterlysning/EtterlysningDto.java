@@ -6,5 +6,6 @@ import no.nav.ung.sak.typer.Periode;
 
 import java.util.UUID;
 
-public record Etterlysning(EtterlysningStatus status, EtterlysningType type, Periode periode, UUID eksternReferanse) {
+public record EtterlysningDto(EtterlysningStatus status, EtterlysningType type, Periode periode, UUID eksternReferanse,
+                              UttalelseDto uttalelse) {
 }
