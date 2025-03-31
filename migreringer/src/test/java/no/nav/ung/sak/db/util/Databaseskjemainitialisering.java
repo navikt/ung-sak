@@ -34,8 +34,6 @@ public final class Databaseskjemainitialisering {
             var location = "/db/postgres/";
 
             ClassicConfiguration conf = new ClassicConfiguration();
-
-
             conf.setDataSource(createDs(USER));
             conf.setLocationsAsStrings(location);
             conf.setBaselineOnMigrate(true);
