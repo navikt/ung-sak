@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -58,7 +59,7 @@ public class ManglendeKontrollperioderTjeneste {
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
         final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
 
-        final var manglendeTriggere = mapTilProsessTriggere(manglendeKontrollTidslinje);
+        final var manglendeTriggere = mapTilProsessTriggere(manglendeKontrollTidslinje, ytelsesPerioder);
 
         if (!manglendeTriggere.isEmpty()) {
             LOG.info("Legger til manglende triggere for kontroll: {}", manglendeTriggere);
@@ -66,8 +67,10 @@ public class ManglendeKontrollperioderTjeneste {
         }
     }
 
-    private static Set<Trigger> mapTilProsessTriggere(LocalDateTimeline<Boolean> manglendeKontrollTidslinje) {
-        final var manglendeTriggere = manglendeKontrollTidslinje.compress().getLocalDateIntervals().stream()
+    private static Set<Trigger> mapTilProsessTriggere(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<Boolean> ytelsesPerioder) {
+        final var manglendeTriggere = manglendeKontrollTidslinje.compress()
+            .combine(ytelsesPerioder, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .getLocalDateIntervals().stream()
             .map(di -> new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(di)))
             .collect(Collectors.toSet());
         return manglendeTriggere;
