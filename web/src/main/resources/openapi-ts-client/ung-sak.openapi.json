@@ -1532,7 +1532,7 @@
         "required" : [ "notatId", "notatTekst", "saksnummer", "versjon" ],
         "type" : "object"
       },
-      "Etterlysning" : {
+      "EtterlysningDto" : {
         "properties" : {
           "eksternReferanse" : {
             "format" : "uuid",
@@ -1542,20 +1542,23 @@
             "$ref" : "#/components/schemas/Periode"
           },
           "status" : {
-            "$ref" : "#/components/schemas/EtterlysningStatus"
+            "$ref" : "#/components/schemas/EtterlysningDtoStatus"
           },
           "type" : {
-            "$ref" : "#/components/schemas/EtterlysningType"
+            "$ref" : "#/components/schemas/EtterlysningDtoType"
+          },
+          "uttalelse" : {
+            "$ref" : "#/components/schemas/UttalelseDto"
           }
         },
         "type" : "object"
       },
-      "EtterlysningStatus" : {
+      "EtterlysningDtoStatus" : {
         "enum" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLOPT" ],
         "type" : "string",
         "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ]
       },
-      "EtterlysningType" : {
+      "EtterlysningDtoType" : {
         "enum" : [ "UTTALELSE_KONTROLL_INNTEKT" ],
         "type" : "string",
         "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT" ]
@@ -4568,6 +4571,17 @@
         "type" : "string",
         "x-enum-varnames" : [ "INNVILGET", "AVSLÅTT", "UDEFINERT" ]
       },
+      "UttalelseDto" : {
+        "properties" : {
+          "harGodtattEndringen" : {
+            "type" : "boolean"
+          },
+          "uttalelseBegrunnelse" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "VarseltekstDto" : {
         "properties" : {
           "varseltekst" : {
@@ -5257,7 +5271,7 @@
               "application/json" : {
                 "schema" : {
                   "items" : {
-                    "$ref" : "#/components/schemas/Etterlysning"
+                    "$ref" : "#/components/schemas/EtterlysningDto"
                   },
                   "type" : "array"
                 }
