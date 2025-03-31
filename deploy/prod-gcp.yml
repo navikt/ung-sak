@@ -251,6 +251,8 @@ spec:
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1H"
+    - name: RAPPORTERINGSFRIST_DAG_I_MAANED
+      value: "6"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

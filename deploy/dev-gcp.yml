@@ -265,6 +265,8 @@ spec:
       value: "PT1M"
     - name: REVURDERING_ENDRET_PERIODE_VENTEFRIST
       value: "PT15M"
+    - name: RAPPORTERINGSFRIST_DAG_I_MAANED
+      value: "6"
 
 
       # Audit logging
