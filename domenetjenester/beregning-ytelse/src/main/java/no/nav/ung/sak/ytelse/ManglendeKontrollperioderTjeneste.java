@@ -1,26 +1,29 @@
-package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
+package no.nav.ung.sak.ytelse;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
-import no.nav.ung.sak.trigger.Trigger;
-import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
+import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 @Dependent
@@ -32,26 +35,29 @@ public class ManglendeKontrollperioderTjeneste {
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private YtelseperiodeUtleder ytelseperiodeUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private ProsessTriggereRepository prosessTriggereRepository;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
-    public ManglendeKontrollperioderTjeneste(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
+    public ManglendeKontrollperioderTjeneste(BehandlingRepository behandlingRepository,
+                                             KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
                                              YtelseperiodeUtleder ytelseperiodeUtleder,
                                              ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
-                                             ProsessTriggereRepository prosessTriggereRepository,
                                              @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristIMåned) {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.ytelseperiodeUtleder = ytelseperiodeUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
-        this.prosessTriggereRepository = prosessTriggereRepository;
         this.rapporteringsfristIMåned = rapporteringsfristIMåned;
+        this.behandlingRepository = behandlingRepository;
     }
 
-    /** Legger til triggere for kontroll der denne mangler
+    /**
+     * Lager prosesstaskdata for revurdering grunnet manglende kontroll av inntekt
      * Dette kan skje dersom programperioden er flyttet langt nok tilbake i tid eller at første søknad er sendt inn etter at rapporteringsfristen for andre måned er passert.
+     *
      * @param behandlingId BehandlingId
+     * @return
      */
-    public void leggTilManglendeKontrollTriggere(Long behandlingId) {
+    public Optional<ProsessTaskData> lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(Long behandlingId) {
         final var ytelsesPerioder = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
         final var påkrevdKontrollTidslinje = finnPerioderSomSkalKontrolleres(ytelsesPerioder);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
@@ -59,21 +65,33 @@ public class ManglendeKontrollperioderTjeneste {
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
         final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
 
-        final var manglendeTriggere = mapTilProsessTriggere(manglendeKontrollTidslinje, ytelsesPerioder);
+        final var perioderMedManglendeKontroll = mapTilProsessTriggere(manglendeKontrollTidslinje, ytelsesPerioder);
 
-        if (!manglendeTriggere.isEmpty()) {
-            LOG.info("Legger til manglende triggere for kontroll: {}", manglendeTriggere);
-            prosessTriggereRepository.leggTil(behandlingId, manglendeTriggere);
+        if (!perioderMedManglendeKontroll.isEmpty()) {
+            final var behandling = behandlingRepository.hentBehandling(behandlingId);
+            return Optional.of(lagProsesstask(behandling.getFagsakId(), perioderMedManglendeKontroll));
+        } else {
+            return Optional.empty();
         }
     }
 
-    private static Set<Trigger> mapTilProsessTriggere(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<Boolean> ytelsesPerioder) {
-        final var manglendeTriggere = manglendeKontrollTidslinje.compress()
+
+    private ProsessTaskData lagProsesstask(Long fagsakId, Set<LocalDateInterval> perioder) {
+        LOG.info("Oppretter revurdering for fagsak med id {} for perioder {}", fagsakId, perioder);
+        ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+        tilVurderingTask.setFagsakId(fagsakId);
+        final var perioderString = perioder.stream().map(it -> it.getFomDato() + "/" + it.getTomDato())
+            .collect(Collectors.joining("|"));
+        tilVurderingTask.setProperty(PERIODER, perioderString);
+        tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.getKode());
+        return tilVurderingTask;
+    }
+
+
+    private static Set<LocalDateInterval> mapTilProsessTriggere(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<Boolean> ytelsesPerioder) {
+        return manglendeKontrollTidslinje.compress()
             .combine(ytelsesPerioder, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .getLocalDateIntervals().stream()
-            .map(di -> new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(di)))
-            .collect(Collectors.toSet());
-        return manglendeTriggere;
+            .getLocalDateIntervals();
     }
 
     private LocalDateTimeline<Set<BehandlingÅrsakType>> finnPerioderMarkertForKontroll(Long behandlingId) {

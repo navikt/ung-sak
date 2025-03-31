@@ -26,6 +26,7 @@ import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;
 import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
+import no.nav.ung.sak.ytelse.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import org.slf4j.Logger;
@@ -55,7 +56,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private EtterlysningRepository etterlysningRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
 
 
 
@@ -66,8 +66,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                  BehandlingRepository behandlingRepository,
                                  EtterlysningRepository etterlysningRepository,
                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                 ProsessTaskTjeneste prosessTaskTjeneste,
-                                 ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste) {
+                                 ProsessTaskTjeneste prosessTaskTjeneste) {
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
@@ -75,7 +74,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         this.etterlysningRepository = etterlysningRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.manglendeKontrollperioderTjeneste = manglendeKontrollperioderTjeneste;
     }
 
     public KontrollerInntektSteg() {
@@ -84,9 +82,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        // Må legge til manglende triggere før resten av steget kjøres
-        manglendeKontrollperioderTjeneste.leggTilManglendeKontrollTriggere(behandlingId);
-
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
 
         var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
