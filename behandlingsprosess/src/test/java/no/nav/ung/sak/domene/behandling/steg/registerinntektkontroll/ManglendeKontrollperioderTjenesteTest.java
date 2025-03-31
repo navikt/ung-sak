@@ -2,8 +2,6 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -37,7 +35,6 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -59,8 +56,6 @@ class ManglendeKontrollperioderTjenesteTest {
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     @Inject
     private FagsakRepository fagsakRepository;
-    @Inject
-    private ProsessTaskRepositoryImpl prosessTaskRepository;
     private Behandling behandling;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
@@ -74,14 +69,7 @@ class ManglendeKontrollperioderTjenesteTest {
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste);
         kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository);
         ytelseperiodeUtleder = new YtelseperiodeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
-
-
-
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
-
-
-
-
     }
 
     @Test
@@ -161,7 +149,7 @@ class ManglendeKontrollperioderTjenesteTest {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
-        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelseperiodeUtleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth()-1);
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelseperiodeUtleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth() - 1);
 
 
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
@@ -194,7 +182,6 @@ class ManglendeKontrollperioderTjenesteTest {
         final var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandling.getId());
         assertThat(prosessTriggere.isEmpty()).isTrue();
     }
-
 
 
     private Long lagFagsakOgBehandling(LocalDate fom) {
