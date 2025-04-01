@@ -791,7 +791,13 @@
           "behandlingKoet" : {
             "type" : "boolean"
           },
+          "behandlingKøet" : {
+            "type" : "boolean"
+          },
           "behandlingPaaVent" : {
+            "type" : "boolean"
+          },
+          "behandlingPåVent" : {
             "type" : "boolean"
           },
           "behandlingResultatType" : {
@@ -825,6 +831,9 @@
           "erPaaVent" : {
             "type" : "boolean"
           },
+          "erPåVent" : {
+            "type" : "boolean"
+          },
           "fagsakId" : {
             "format" : "int64",
             "maximum" : 9223372036854775807,
@@ -832,6 +841,9 @@
             "type" : "integer"
           },
           "fristBehandlingPaaVent" : {
+            "type" : "string"
+          },
+          "fristBehandlingPåVent" : {
             "maxLength" : 20,
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$",
@@ -871,6 +883,9 @@
           "sprakkode" : {
             "$ref" : "#/components/schemas/Språkkode"
           },
+          "språkkode" : {
+            "$ref" : "#/components/schemas/Språkkode"
+          },
           "status" : {
             "$ref" : "#/components/schemas/BehandlingDtoStatus"
           },
@@ -891,6 +906,9 @@
             "type" : "string"
           },
           "venteArsakKode" : {
+            "type" : "string"
+          },
+          "venteÅrsakKode" : {
             "maxLength" : 20,
             "minLength" : 0,
             "pattern" : "^[\\p{Alnum}\\p{L}\\p{N}]+$",
