@@ -95,8 +95,7 @@ public class KontrollerteInntektperioderTjeneste {
                                                                                      Optional<KontrollertInntektKilde> defaultKilde,
                                                                                      boolean erManueltVurdert) {
 
-        return vurdertTidslinje
-            .intersection(inntektTidslinje).combine(inntektTidslinje, lagTomListeForIngenInntekter(defaultKilde), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+        return vurdertTidslinje.combine(inntektTidslinje, lagTomListeForIngenInntekter(defaultKilde), LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .toSegments().stream().map(
                 s -> KontrollertInntektPeriode.ny()
                     .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
