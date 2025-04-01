@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -15,6 +16,7 @@ import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelse.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -43,8 +45,18 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     @Override
     public OppdateringResultat oppdater(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
         final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, param);
-        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje, prosessTriggerPeriodeUtleder.utledTidslinje(param.getBehandlingId()));
+        validerVurdertePerioder(param, sammenslåtteInntekterTidslinje);
+        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje);
         return OppdateringResultat.builder().medTotrinnHvis(true).build();
+    }
+
+    private void validerVurdertePerioder(AksjonspunktOppdaterParameter param, LocalDateTimeline<RapportertInntektOgKilde> sammenslåtteInntekterTidslinje) {
+        final var prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(param.getBehandlingId());
+        final var tidslinjeTilVurdering = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        final var vurdertePerioderSomIkkeSkalVurderes = sammenslåtteInntekterTidslinje.disjoint(tidslinjeTilVurdering);
+        if (!vurdertePerioderSomIkkeSkalVurderes.isEmpty()) {
+            throw new IllegalStateException("Kan ikke bekrefte perioder som ikke skal vurderes i denne behandlingen: " + vurdertePerioderSomIkkeSkalVurderes);
+        }
     }
 
     private LocalDateTimeline<RapportertInntektOgKilde> finnInntektOgKildeTidslinje(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
