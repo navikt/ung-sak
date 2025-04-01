@@ -24,7 +24,7 @@ public class YtelseperiodeUtleder {
     }
 
 
-    /** Utleder oppstykkede ytelseperioder
+    /** Utleder oppstykkede ytelseperioder pr måned
      * Ytelseperioder brukes til generering av tilkjent ytelse, rapporteringsperioder for inntekt og eventuelle kontrollperioder for inntekt
      * @param behandlingId Id for behandling
      * @return Oppstykket tidslinje for ytelse
