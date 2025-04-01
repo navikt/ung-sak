@@ -1,25 +1,23 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.InntektType;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LagTilkjentYtelseTest {
 
@@ -46,10 +44,6 @@ class LagTilkjentYtelseTest {
         // Verify the result
         assertNotNull(resultat);
         assertTrue(resultat.isEmpty());
-    }
-
-    private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
-        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
     @Test
@@ -239,6 +233,10 @@ class LagTilkjentYtelseTest {
         final var forventetUredusertBeløp3 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
         final var forventetDagsats3 = BigDecimal.valueOf(36);
         assertSegment(segment3, fom3, tom3, forventetUredusertBeløp3, forventetDagsats3, BigDecimal.ZERO, forventetUredusertBeløp3, 100);
+    }
+
+    private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
+        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje.mapValue(it -> new YtelsesperiodeDefinisjon(UUID.randomUUID().toString())), godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
 

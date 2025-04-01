@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffT
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +89,7 @@ public class ManglendeKontrollperioderTjeneste {
     }
 
 
-    private static Set<LocalDateInterval> splittPåYtelsesperioder(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<Boolean> ytelsesPerioder) {
+    private static Set<LocalDateInterval> splittPåYtelsesperioder(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<YtelsesperiodeDefinisjon> ytelsesPerioder) {
         return manglendeKontrollTidslinje.compress()
             .combine(ytelsesPerioder, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .getLocalDateIntervals();
@@ -104,17 +105,6 @@ public class ManglendeKontrollperioderTjeneste {
 
     private LocalDateTimeline<Boolean> finnPerioderMedPassertRapporteringsfrist() {
         return new LocalDateTimeline<>(TIDENES_BEGYNNELSE, getTomDatoForPassertRapporteringsfrist(), true);
-    }
-
-    private static LocalDateTimeline<Boolean> finnPerioderSomSkalKontrolleres(LocalDateTimeline<Boolean> ytelsesPerioder) {
-        LocalDateTimeline<Boolean> perioderForKontroll = LocalDateTimeline.empty();
-        if (ytelsesPerioder.toSegments().size() > 2) {
-            final var segmenterForKontroll = new TreeSet<>(ytelsesPerioder.toSegments());
-            segmenterForKontroll.removeFirst();
-            segmenterForKontroll.removeLast();
-            perioderForKontroll = new LocalDateTimeline<>(segmenterForKontroll);
-        }
-        return perioderForKontroll;
     }
 
     private LocalDate getTomDatoForPassertRapporteringsfrist() {

@@ -17,6 +17,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,7 @@ public class RapportertInntektMapper {
         return registerTidslinje.mapValue(registerinntekter -> new EtterlysningOgRegisterinntekt(registerinntekter, it.etterlysningInfo()));
     }
 
-    private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<Boolean> ytelseTidslinje, Map<InntektType, List<Inntektspost>> grupperteInntekter) {
+    private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje, Map<InntektType, List<Inntektspost>> grupperteInntekter) {
         var registerTidslinje = new LocalDateTimeline<Set<RapportertInntekt>>(Set.of());
 
         for (var intervall : ytelseTidslinje.getLocalDateIntervals()) {
@@ -124,7 +125,7 @@ public class RapportertInntektMapper {
         return tidslinjeForPeriode;
     }
 
-    private static void validerBrukersRapporterteInntekterTidslinje(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<Boolean> ytelseTidslinje) {
+    private static void validerBrukersRapporterteInntekterTidslinje(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje) {
         final var perioderUtenforYtelsesperioder = brukersRapporterteInntekter.getLocalDateIntervals().stream()
             .filter(it -> ytelseTidslinje.getLocalDateIntervals().stream().noneMatch(it::equals))
             .toList();
@@ -168,7 +169,7 @@ public class RapportertInntektMapper {
         throw new IllegalArgumentException("Kunne ikke håndtere inntektsposttype: " + it.getInntektspostType());
     }
 
-    private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> ytelseTidslinje) {
+    private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje) {
         // Finner rapporterte inntekter pr journalpost sortert på mottattdato med siste mottatt journalpost først
         final var sorterteInntekttidslinjerPåMottattdato = finnSorterteInntektstidslinjer(iayGrunnlag, ytelseTidslinje);
 
@@ -187,7 +188,7 @@ public class RapportertInntektMapper {
         return brukersRapporterteInntekter;
     }
 
-    private List<InntektForMottattidspunkt> finnSorterteInntektstidslinjer(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> ytelseTidslinje) {
+    private List<InntektForMottattidspunkt> finnSorterteInntektstidslinjer(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje) {
         return iayGrunnlag.getOppgittOpptjeningAggregat()
             .stream()
             .flatMap(o -> o.getOppgitteOpptjeninger().stream())
@@ -197,7 +198,7 @@ public class RapportertInntektMapper {
             .toList();
     }
 
-    private boolean erRapportertForGyldigPeriode(OppgittOpptjening o, LocalDateTimeline<Boolean> ytelseTidslinje) {
+    private boolean erRapportertForGyldigPeriode(OppgittOpptjening o, LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje) {
         return o.getOppgittArbeidsforhold().stream().map(OppgittArbeidsforhold::getPeriode)
             .map(DatoIntervallEntitet::toLocalDateInterval)
             .allMatch(p -> ytelseTidslinje.getLocalDateIntervals().stream().anyMatch(p::equals));

@@ -28,6 +28,7 @@ import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.ytelse.*;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 
 
 @ApplicationScoped
@@ -83,7 +84,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<Boolean> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
+    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
         final var sporingsMap = Map.of(
             "satsTidslinje", satsTidslinje,
             "ytelseTidslinje", ytelseTidslinje.mapValue(IngenVerdi::ingenVerdi),
@@ -115,14 +116,14 @@ public class BeregnYtelseSteg implements BehandlingSteg {
             .orElse(LocalDateTimeline.empty());
     }
 
-    private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje, LocalDateTimeline<Boolean> stønadTidslinje) {
+    private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje, LocalDateTimeline<YtelsesperiodeDefinisjon> stønadTidslinje) {
         final var rapporterteInntekterSomIkkeMatcherYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeMatchendeStønadsperiode(s, stønadTidslinje)).toList();
         if (!rapporterteInntekterSomIkkeMatcherYtelsesperiode.isEmpty()) {
             throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av stønadstidslinjen: " + rapporterteInntekterSomIkkeMatcherYtelsesperiode.stream().map(LocalDateSegment::getLocalDateInterval).toList());
         }
     }
 
-    private static boolean harIkkeMatchendeStønadsperiode(LocalDateSegment<Set<RapportertInntekt>> s, LocalDateTimeline<Boolean> stønadTidslinje) {
+    private static boolean harIkkeMatchendeStønadsperiode(LocalDateSegment<Set<RapportertInntekt>> s, LocalDateTimeline<YtelsesperiodeDefinisjon> stønadTidslinje) {
         return stønadTidslinje.getLocalDateIntervals().stream().noneMatch(intervall -> intervall.equals(s.getLocalDateInterval()));
     }
 

@@ -15,11 +15,13 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
@@ -56,13 +58,13 @@ class YtelseperiodeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, TIDENES_ENDE, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        LocalDateTimeline<Boolean> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
+        var result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
 
-        List<LocalDateSegment<Boolean>> expectedSegments = List.of(
-            new LocalDateSegment<>(startDate, startDate.with(TemporalAdjusters.lastDayOfMonth()), true),
-            new LocalDateSegment<>(startDate.plusMonths(1).withDayOfMonth(1), fagsakTom, true)
+        List<LocalDateSegment<YtelsesperiodeDefinisjon>> expectedSegments = List.of(
+            new LocalDateSegment<>(startDate, startDate.with(TemporalAdjusters.lastDayOfMonth()), YtelsesperiodeDefinisjon.fraFomDato(startDate)),
+            new LocalDateSegment<>(startDate.plusMonths(1).withDayOfMonth(1), fagsakTom, YtelsesperiodeDefinisjon.fraFomDato(startDate.plusMonths(1)))
             );
-        LocalDateTimeline<Boolean> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
+        LocalDateTimeline<YtelsesperiodeDefinisjon> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
 
         assertEquals(expectedTimeline, result);
     }
@@ -75,10 +77,10 @@ class YtelseperiodeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        LocalDateTimeline<Boolean> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
+        var result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
 
-        List<LocalDateSegment<Boolean>> expectedSegments = List.of(new LocalDateSegment<>(startDate, endDate, true));
-        LocalDateTimeline<Boolean> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
+        List<LocalDateSegment<YtelsesperiodeDefinisjon>> expectedSegments = List.of(new LocalDateSegment<>(startDate, endDate, YtelsesperiodeDefinisjon.fraFomDato(startDate)));
+        LocalDateTimeline<YtelsesperiodeDefinisjon> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
 
         assertEquals(expectedTimeline, result);
     }
@@ -92,10 +94,10 @@ class YtelseperiodeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        LocalDateTimeline<Boolean> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
+        LocalDateTimeline<YtelsesperiodeDefinisjon> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
 
-        List<LocalDateSegment<Boolean>> expectedSegments = List.of(new LocalDateSegment<>(startDate, endDate, true));
-        LocalDateTimeline<Boolean> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
+        List<LocalDateSegment<YtelsesperiodeDefinisjon>> expectedSegments = List.of(new LocalDateSegment<>(startDate, endDate, YtelsesperiodeDefinisjon.fraFomDato(startDate)));
+        LocalDateTimeline<YtelsesperiodeDefinisjon> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
 
         assertEquals(expectedTimeline, result);
     }
@@ -108,13 +110,13 @@ class YtelseperiodeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        LocalDateTimeline<Boolean> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
+        LocalDateTimeline<YtelsesperiodeDefinisjon> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
 
-        List<LocalDateSegment<Boolean>> expectedSegments = List.of(
-            new LocalDateSegment<>(startDate, LocalDate.of(2023, 1, 31), true),
-            new LocalDateSegment<>(LocalDate.of(2023, 2, 1), endDate, true)
+        List<LocalDateSegment<YtelsesperiodeDefinisjon>> expectedSegments = List.of(
+            new LocalDateSegment<>(startDate, LocalDate.of(2023, 1, 31), new YtelsesperiodeDefinisjon("JANUARY")),
+            new LocalDateSegment<>(LocalDate.of(2023, 2, 1), endDate, new YtelsesperiodeDefinisjon("FEBRUARY"))
         );
-        LocalDateTimeline<Boolean> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
+        LocalDateTimeline<YtelsesperiodeDefinisjon> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
 
         assertEquals(expectedTimeline, result);
     }
@@ -127,13 +129,13 @@ class YtelseperiodeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        LocalDateTimeline<Boolean> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
+        LocalDateTimeline<YtelsesperiodeDefinisjon> result = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
 
-        List<LocalDateSegment<Boolean>> expectedSegments = List.of(
-            new LocalDateSegment<>(startDate, LocalDate.of(2023, 1, 31), true),
-            new LocalDateSegment<>(LocalDate.of(2023, 2, 1), endDate, true)
+        List<LocalDateSegment<YtelsesperiodeDefinisjon>> expectedSegments = List.of(
+            new LocalDateSegment<>(startDate, LocalDate.of(2023, 1, 31), new YtelsesperiodeDefinisjon("JANUARY")),
+            new LocalDateSegment<>(LocalDate.of(2023, 2, 1), endDate, new YtelsesperiodeDefinisjon("FEBRUARY"))
         );
-        LocalDateTimeline<Boolean> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
+        LocalDateTimeline<YtelsesperiodeDefinisjon> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
 
         assertEquals(expectedTimeline, result);
     }

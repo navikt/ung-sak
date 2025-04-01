@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.ytelse.*;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class LagTilkjentYtelse {
 
-    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<Boolean> ytelseTidslinje,
+    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje,
                                                                          LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                          LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
                                                                          LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {

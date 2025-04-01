@@ -2,11 +2,12 @@ package no.nav.ung.sak.ytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,10 +21,10 @@ class RelevanteKontrollperioderUtlederTest {
         final var førstePeriodeTom = LocalDate.of(2023, 1, 10);
         final var sistePeriodeFom = LocalDate.of(2023, 1, 21);
         final var sistePeriodeTom = LocalDate.of(2023, 1, 30);
-        LocalDateTimeline<Boolean> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, true),
-            new LocalDateSegment<>(LocalDate.of(2023, 1, 11), LocalDate.of(2023, 1, 20), true),
-            new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, true)
+        LocalDateTimeline<YtelsesperiodeDefinisjon> ytelsesPerioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(LocalDate.of(2023, 1, 11), LocalDate.of(2023, 1, 20), lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, lagRandomYtelsesperiodeDefinisjon())
         ));
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
@@ -46,9 +47,9 @@ class RelevanteKontrollperioderUtlederTest {
         final var førstePeriodeTom = LocalDate.of(2023, 1, 10);
         final var sistePeriodeFom = LocalDate.of(2023, 1, 11);
         final var sistePeriodeTom = LocalDate.of(2023, 1, 30);
-        LocalDateTimeline<Boolean> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, true),
-            new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, true)
+        LocalDateTimeline<YtelsesperiodeDefinisjon> ytelsesPerioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, lagRandomYtelsesperiodeDefinisjon())
         ));
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
@@ -76,11 +77,11 @@ class RelevanteKontrollperioderUtlederTest {
         final var førstePeriode2Tom = LocalDate.of(2023, 2, 10);
         final var sistePeriode2Fom = LocalDate.of(2023, 2, 11);
         final var sistePeriode2Tom = LocalDate.of(2023, 2, 28);
-        LocalDateTimeline<Boolean> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, true),
-            new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, true),
-            new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, true),
-            new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, true)
+        LocalDateTimeline<YtelsesperiodeDefinisjon> ytelsesPerioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, lagRandomYtelsesperiodeDefinisjon())
         ));
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
@@ -119,13 +120,13 @@ class RelevanteKontrollperioderUtlederTest {
         final var førstePeriode2Tom = LocalDate.of(2023, 2, 10);
         final var sistePeriode2Fom = LocalDate.of(2023, 2, 20);
         final var sistePeriode2Tom = LocalDate.of(2023, 2, 28);
-        LocalDateTimeline<Boolean> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, true),
-            new LocalDateSegment<>(LocalDate.of(2023, 1, 11), LocalDate.of(2023, 1, 19), true),
-            new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, true),
-            new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, true),
-            new LocalDateSegment<>(LocalDate.of(2023, 2, 11), LocalDate.of(2023, 2, 19), true),
-            new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, true)
+        LocalDateTimeline<YtelsesperiodeDefinisjon> ytelsesPerioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(LocalDate.of(2023, 1, 11), LocalDate.of(2023, 1, 19), lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(LocalDate.of(2023, 2, 11), LocalDate.of(2023, 2, 19), lagRandomYtelsesperiodeDefinisjon()),
+            new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, lagRandomYtelsesperiodeDefinisjon())
         ));
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
@@ -151,6 +152,10 @@ class RelevanteKontrollperioderUtlederTest {
         assertThat(siste2.getFom()).isEqualTo(sistePeriode2Fom);
         assertThat(siste2.getTom()).isEqualTo(sistePeriode2Tom);
         assertTrue(siste2.getValue().gjelderSistePeriode());
+    }
+
+    private static YtelsesperiodeDefinisjon lagRandomYtelsesperiodeDefinisjon() {
+        return new YtelsesperiodeDefinisjon(UUID.randomUUID().toString());
     }
 
 }

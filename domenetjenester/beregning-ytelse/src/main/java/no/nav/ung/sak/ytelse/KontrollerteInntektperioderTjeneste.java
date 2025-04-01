@@ -2,7 +2,6 @@ package no.nav.ung.sak.ytelse;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -49,6 +48,30 @@ public class KontrollerteInntektperioderTjeneste {
         final var allePerioder = utvidEksisterendePerioder(behandlingId, kontrollertePerioder);
 
         tilkjentYtelseRepository.lagre(behandlingId, allePerioder);
+    }
+
+    /** Det er ikke påkrevd med kontroll av inntekt for første og siste måned.
+     * Dersom programperioden har endret seg fjernes allerede kontrollerte perioder dersom første og siste måned for programmet er endret.
+     * Dette for å unngå at utbetaling reduseres i disse månedene og potensielt også reduseres basert på feilaktig inntekt.
+     * @param behandlingId BehandlingId
+     */
+    public void ryddPerioderFritattForKontroll(Long behandlingId) {
+        final var kontrollertInntektPerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId);
+        if (kontrollertInntektPerioder.isEmpty()) {
+            return;
+        }
+
+        final var ytelseTidslinje = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
+        final var relevantForKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelseTidslinje);
+        if (relevantForKontrollTidslinje.isEmpty()) {
+            tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());
+        } else {
+            final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
+            final var perioderSomBeholdes = eksisterendePerioder.stream()
+                .filter(it -> !relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
+                .toList();
+            tilkjentYtelseRepository.lagre(behandlingId, perioderSomBeholdes);
+        }
     }
 
     private ArrayList<KontrollertInntektPeriode> utvidEksisterendePerioder(Long behandlingId, List<KontrollertInntektPeriode> nyePerioder) {
@@ -119,24 +142,5 @@ public class KontrollerteInntektperioderTjeneste {
             .orElse(null);
     }
 
-    public void ryddMotYtelsetidslinje(Long behandlingId) {
-        final var kontrollertInntektPerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId);
-        if (kontrollertInntektPerioder.isEmpty()) {
-            return;
-        }
 
-        final var ytelseTidslinje = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
-        final var relevantForKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelseTidslinje);
-        if (relevantForKontrollTidslinje.isEmpty()) {
-            tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());
-        } else {
-            final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
-            final var perioderSomBeholdes = eksisterendePerioder.stream()
-                .filter(it -> !relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
-                .toList();
-            tilkjentYtelseRepository.lagre(behandlingId, perioderSomBeholdes);
-        }
-
-
-    }
 }

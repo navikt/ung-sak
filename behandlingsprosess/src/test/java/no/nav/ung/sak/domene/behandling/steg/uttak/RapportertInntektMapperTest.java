@@ -12,6 +12,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +40,8 @@ class RapportertInntektMapperTest {
     @BeforeEach
     void setUp() {
         when(ytelseperiodeUtleder.utledYtelsestidslinje(anyLong())).thenReturn(new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()), true),
-            new LocalDateSegment<>(LocalDate.now().plusMonths(1).withDayOfMonth(1), LocalDate.now().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()), true))));
+            new LocalDateSegment<>(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()), new YtelsesperiodeDefinisjon("1")),
+            new LocalDateSegment<>(LocalDate.now().plusMonths(1).withDayOfMonth(1), LocalDate.now().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()), new YtelsesperiodeDefinisjon("2")))));
         rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, ytelseperiodeUtleder);
     }
 

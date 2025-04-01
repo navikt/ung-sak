@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -57,10 +58,10 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
             )
         );
 
-        LocalDateTimeline<Boolean> stønadstidslinje = new LocalDateTimeline<>(
+        LocalDateTimeline<YtelsesperiodeDefinisjon> stønadstidslinje = new LocalDateTimeline<>(
             List.of(
-                new LocalDateSegment<>(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31), true),
-                new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), true)
+                new LocalDateSegment<>(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31), new YtelsesperiodeDefinisjon("1")),
+                new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), new YtelsesperiodeDefinisjon("2"))
             )
         );
 
@@ -89,9 +90,9 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
                 )
         );
 
-        LocalDateTimeline<Boolean> stønadstidslinje = new LocalDateTimeline<>(
+        LocalDateTimeline<YtelsesperiodeDefinisjon> stønadstidslinje = new LocalDateTimeline<>(
                 List.of(
-                        new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), true)
+                        new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), new YtelsesperiodeDefinisjon("1"))
                 )
         );
 
