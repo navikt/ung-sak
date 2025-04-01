@@ -97,7 +97,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
 
         log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
-        håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, prosessTriggerTidslinje, etterlysninger);
+        håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, etterlysninger);
         return avgjørResultat(behandlingId, kontrollResultat, prosessTriggerTidslinje);
     }
 
@@ -116,7 +116,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private void håndterPeriodisertKontrollresultat(BehandlingskontrollKontekst kontekst,
                                                     LocalDateTimeline<KontrollResultat> kontrollResultat,
                                                     LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
-                                                    LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
                                                     List<Etterlysning> etterlysninger) {
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
@@ -128,8 +127,9 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                     etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment));
                     kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
                         kontekst.getBehandlingId(),
-                        rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter).intersection(kontrollSegment.getLocalDateInterval()),
-                        prosessTriggerTidslinje);
+                        kontrollSegment.getLocalDateInterval(),
+                        rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter).intersection(kontrollSegment.getLocalDateInterval())
+                    );
                 }
                 case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST -> {
                     log.info("Oppretter ny etterlysning med utvidet frist for periode {}", kontrollSegment.getLocalDateInterval());
