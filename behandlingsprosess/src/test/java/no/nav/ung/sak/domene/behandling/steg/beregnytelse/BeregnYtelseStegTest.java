@@ -73,7 +73,7 @@ class BeregnYtelseStegTest {
         beregnYtelseSteg = new BeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
             ytelseperiodeUtleder,
-            new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository));
+            new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, ytelseperiodeUtleder));
 
         fagsakRepository = new FagsakRepository(entityManager);
 

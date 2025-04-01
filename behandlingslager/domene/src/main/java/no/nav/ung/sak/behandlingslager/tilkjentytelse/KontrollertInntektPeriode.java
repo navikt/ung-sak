@@ -42,7 +42,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         // Hibernate
     }
 
-    KontrollertInntektPeriode(KontrollertInntektPeriode eksisterende) {
+    public KontrollertInntektPeriode(KontrollertInntektPeriode eksisterende) {
         this.periode = Range.closed(eksisterende.getPeriode().getFomDato(), eksisterende.getPeriode().getTomDato());
         this.arbeidsinntekt = eksisterende.getArbeidsinntekt();
         this.ytelse = eksisterende.getYtelse();

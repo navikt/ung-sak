@@ -49,7 +49,7 @@ class LagTilkjentYtelseTest {
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
-        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
+        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje, godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
     @Test

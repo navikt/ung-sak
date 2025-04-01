@@ -67,8 +67,8 @@ class ManglendeKontrollperioderTjenesteTest {
         final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
         final var ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, behandlingRepository);
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste);
-        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository);
         ytelseperiodeUtleder = new YtelseperiodeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
+        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, ytelseperiodeUtleder);
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
     }
 

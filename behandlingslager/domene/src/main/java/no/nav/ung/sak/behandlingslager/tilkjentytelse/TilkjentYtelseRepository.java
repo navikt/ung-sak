@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
+import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
+import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.util.ArrayList;
@@ -15,6 +18,8 @@ import java.util.stream.Collectors;
 
 @Dependent
 public class TilkjentYtelseRepository {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TilkjentYtelseRepository.class);
 
     private final EntityManager entityManager;
 
@@ -26,22 +31,37 @@ public class TilkjentYtelseRepository {
 
     public void lagre(long behandlingId, List<KontrollertInntektPeriode> perioder) {
         final var eksisterende = hentKontrollertInntektPerioder(behandlingId);
-        if (eksisterende.isPresent()) {
-            eksisterende.get().setIkkeAktiv();
-            entityManager.persist(eksisterende.get());
-            entityManager.flush();
+        final var eksisterendePerioder = eksisterende.stream()
+            .flatMap(it -> it.getPerioder().stream())
+            .toList();
+        final var differ = differ();
+        if (!differ.areDifferent(eksisterendePerioder, perioder)) {
+            log.info("Fant ingen diff mellom eksisterende og nye perioder, lagrer ikke.");
         }
-        final var eksisterendePerioderSomSkalBeholdes = eksisterende.stream().flatMap(it -> it.getPerioder().stream())
-            .filter(p -> perioder.stream().map(KontrollertInntektPeriode::getPeriode).noneMatch(p2 -> p.getPeriode().overlapper(p2)))
-            .map(KontrollertInntektPeriode::new).toList();
-        final var allePerioder = new ArrayList<KontrollertInntektPeriode>();
-        allePerioder.addAll(eksisterendePerioderSomSkalBeholdes);
-        allePerioder.addAll(perioder);
+
+        eksisterende.ifPresent(this::deaktiver);
+
+        if (perioder.isEmpty()) {
+            return;
+        }
 
         final var ny = KontrollertInntektPerioder.ny(behandlingId)
-            .medPerioder(allePerioder)
+            .medPerioder(perioder)
             .build();
         entityManager.persist(ny);
+        entityManager.flush();
+    }
+
+    private DiffEntity differ() {
+        TraverseGraph traverser = TraverseEntityGraphFactory.build();
+        return new DiffEntity(traverser);
+    }
+
+
+
+    private void deaktiver(KontrollertInntektPerioder eksisterende) {
+        eksisterende.setIkkeAktiv();
+        entityManager.persist(eksisterende);
         entityManager.flush();
     }
 
@@ -58,9 +78,7 @@ public class TilkjentYtelseRepository {
         final var eksisterendeOptional = hentKontrollertInntektPerioder(behandlingId);
         if (eksisterendeOptional.isPresent()) {
             final var eksisterende = eksisterendeOptional.get();
-            eksisterende.setIkkeAktiv();
-            entityManager.persist(eksisterende);
-            entityManager.flush();
+            deaktiver(eksisterende);
         }
         kopierKontrollPerioder(originalBehandlingId, behandlingId);
     }

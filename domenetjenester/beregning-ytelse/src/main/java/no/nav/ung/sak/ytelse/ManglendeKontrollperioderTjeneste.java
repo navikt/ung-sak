@@ -59,7 +59,7 @@ public class ManglendeKontrollperioderTjeneste {
      */
     public Optional<ProsessTaskData> lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(Long behandlingId) {
         final var ytelsesPerioder = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
-        final var påkrevdKontrollTidslinje = finnPerioderSomSkalKontrolleres(ytelsesPerioder);
+        final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelsesPerioder);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
         final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);

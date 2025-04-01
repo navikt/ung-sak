@@ -1,17 +1,14 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import java.math.BigDecimal;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.ytelse.BeregnetSats;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.TikjentYtelseBeregner;
+import no.nav.ung.sak.ytelse.*;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * `LagTilkjentYtelse` er en hjelpeklasse som brukes til å generere en tidslinje for tilkjent ytelse basert på godkjente perioder,
@@ -21,20 +18,24 @@ import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
  */
 public class LagTilkjentYtelse {
 
-    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
+    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<Boolean> ytelseTidslinje,
+                                                                         LocalDateTimeline<Boolean> godkjentTidslinje,
+                                                                         LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
+                                                                         LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
+        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelseTidslinje);
+
+
+        final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);
+
         // Begrenser tilkjent ytelse til periode med kontrollert inntekt eller første/siste periode
         var tidslinjeSomSkalHaTilkjentYtelse = rapportertInntektTidslinje.intersection(godkjentTidslinje).mapValue(it -> true);
-        final var førstePeriode = new LocalDateTimeline<>(godkjentTidslinje.getMinLocalDate(), godkjentTidslinje.getMinLocalDate().with(TemporalAdjusters.lastDayOfMonth()), true).intersection(godkjentTidslinje);
-        tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(førstePeriode);
-        final var sistePeriode = new LocalDateTimeline<>(godkjentTidslinje.getMaxLocalDate().withDayOfMonth(1), godkjentTidslinje.getMaxLocalDate(), true).intersection(godkjentTidslinje);
-        // Legger til siste periode kun om vi har gjort kontroll av perioden før
-        if (tidslinjeSomSkalHaTilkjentYtelse.getMaxLocalDate().plusDays(1).isEqual(sistePeriode.getMinLocalDate())) {
-            tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePeriode);
-        }
+        tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(førstePerioder);
+        final var sistePerioderSomSkalUtbetales = finnSistePerioderSomSkalLeggesTil(ikkePåkrevdKontrollTidslinje, tidslinjeSomSkalHaTilkjentYtelse);
+        tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePerioderSomSkalUtbetales);
 
 
         return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
@@ -45,6 +46,24 @@ public class LagTilkjentYtelse {
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);
             }, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .intersection(tidslinjeSomSkalHaTilkjentYtelse);
+    }
+
+    /** Perioder som ikke slutter ved månedsslutt legges kun til dersom foregående periode er ferdig kontrollert/behandlet
+     * @param ikkePåkrevdKontrollTidslinje Tidslinje der vi ikke trenger å kontrollere inntekt
+     * @param tidslinjeSomSkalHaTilkjentYtelse Tidslinje der vi har utført kontroll eller skal utbetale fordi det er første periode
+     * @return Tidslinje der vi skal utbetale for siste periode
+     */
+    private static LocalDateTimeline<Boolean> finnSistePerioderSomSkalLeggesTil(LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> ikkePåkrevdKontrollTidslinje,
+                                                                                LocalDateTimeline<Boolean> tidslinjeSomSkalHaTilkjentYtelse) {
+        final var segmenter = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderSistePeriode)
+            .stream()
+            .filter(it -> !tidslinjeSomSkalHaTilkjentYtelse.intersection(dagenFør(it)).isEmpty())
+            .toList();
+        return new LocalDateTimeline<>(segmenter).mapValue(it -> true);
+    }
+
+    private static LocalDateInterval dagenFør(LocalDateSegment<RelevanteKontrollperioderUtleder.FritattForKontroll> it) {
+        return new LocalDateInterval(it.getFom().minusDays(1), it.getFom().minusDays(1));
     }
 
 }
