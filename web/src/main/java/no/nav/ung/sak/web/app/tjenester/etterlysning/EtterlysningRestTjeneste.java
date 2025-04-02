@@ -16,11 +16,13 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.etterlysning.Etterlysning;
+import no.nav.ung.sak.kontrakt.etterlysning.EtterlysningDto;
+import no.nav.ung.sak.kontrakt.etterlysning.UttalelseDto;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.List;
+import java.util.Optional;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
@@ -50,11 +52,17 @@ public class EtterlysningRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<Etterlysning> hentEtterlysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public List<EtterlysningDto> hentEtterlysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         final var mappetEtterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId())
             .stream()
-            .map(it -> new Etterlysning(it.getStatus(), it.getType(), new Periode(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()), it.getEksternReferanse()))
+            .map(it -> new EtterlysningDto(
+                it.getStatus(),
+                it.getType(),
+                new Periode(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()),
+                it.getEksternReferanse(),
+                Optional.ofNullable(it.getUttalelse())
+                    .map(u -> new UttalelseDto(u.getUttalelseBegrunnelse(), u.harGodtattEndringen())).orElse(null)))
             .toList();
         return mappetEtterlysninger;
     }
