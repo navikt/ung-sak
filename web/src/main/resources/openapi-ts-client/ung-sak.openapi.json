@@ -3529,6 +3529,37 @@
         "required" : [ "aktørIder" ],
         "type" : "object"
       },
+      "PipDtoV2" : {
+        "properties" : {
+          "aktørIder" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "ansvarligSaksbehandler" : {
+            "type" : "string"
+          },
+          "behandlingStatus" : {
+            "$ref" : "#/components/schemas/PipDtoV2BehandlingStatus"
+          },
+          "fagsakStatus" : {
+            "$ref" : "#/components/schemas/PipDtoV2FagsakStatus"
+          }
+        },
+        "type" : "object"
+      },
+      "PipDtoV2BehandlingStatus" : {
+        "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
+      },
+      "PipDtoV2FagsakStatus" : {
+        "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
+      },
       "ProsessTaskDataDto" : {
         "properties" : {
           "gruppe" : {
@@ -7567,6 +7598,36 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/PipDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-behandling-v2" : {
+      "get" : {
+        "description" : "Henter aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
+        "operationId" : "hentPipDataTilknyttetBehandlingV2",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/PipDtoV2"
+                  } ],
+                  "nullable" : true
                 }
               }
             },
