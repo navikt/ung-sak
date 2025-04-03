@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -8,8 +9,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.ytelse.*;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
-import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * `LagTilkjentYtelse` er en hjelpeklasse som brukes til å generere en tidslinje for tilkjent ytelse basert på godkjente perioder,
@@ -19,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class LagTilkjentYtelse {
 
-    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YtelsesperiodeDefinisjon> ytelseTidslinje,
+    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
                                                                          LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                          LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
                                                                          LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
@@ -27,7 +26,7 @@ public class LagTilkjentYtelse {
             return LocalDateTimeline.empty();
         }
 
-        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelseTidslinje);
+        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje);
 
 
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);

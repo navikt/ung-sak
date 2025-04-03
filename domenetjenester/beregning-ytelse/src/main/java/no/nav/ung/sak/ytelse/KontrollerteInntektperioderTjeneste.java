@@ -9,7 +9,7 @@ import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +26,13 @@ public class KontrollerteInntektperioderTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(KontrollerteInntektperioderTjeneste.class);
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
-    private final YtelseperiodeUtleder ytelseperiodeUtleder;
+    private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
 
     @Inject
-    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, YtelseperiodeUtleder ytelseperiodeUtleder) {
+    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder ytelsesperiodeutleder) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
-        this.ytelseperiodeUtleder = ytelseperiodeUtleder;
+        this.ytelsesperiodeutleder = ytelsesperiodeutleder;
     }
 
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId,
@@ -61,7 +61,7 @@ public class KontrollerteInntektperioderTjeneste {
             return;
         }
 
-        final var ytelseTidslinje = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
+        final var ytelseTidslinje = ytelsesperiodeutleder.periodiserMånedsvis(behandlingId);
         final var relevantForKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelseTidslinje);
         if (relevantForKontrollTidslinje.isEmpty()) {
             tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());

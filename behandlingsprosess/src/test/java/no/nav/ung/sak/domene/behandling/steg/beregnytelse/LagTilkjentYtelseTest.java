@@ -7,14 +7,13 @@ import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.InntektType;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
-import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -236,7 +235,7 @@ class LagTilkjentYtelseTest {
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
-        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje.mapValue(it -> new YtelsesperiodeDefinisjon(UUID.randomUUID().toString())), godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
+        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje.map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonth())))), godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
 

@@ -3,19 +3,18 @@ package no.nav.ung.sak.perioder;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
-import no.nav.ung.sak.ytelseperioder.YtelsesperiodeDefinisjon;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
     private ProsessTriggerPeriodeUtleder fraProsesstriggere;
 
     @Mock
-    private YtelseperiodeUtleder ytelseperiodeUtleder;
+    private MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
     @InjectMocks
     private UngdomsytelseVilkårsperioderTilVurderingTjeneste tjeneste;
@@ -58,10 +57,10 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
             )
         );
 
-        LocalDateTimeline<YtelsesperiodeDefinisjon> stønadstidslinje = new LocalDateTimeline<>(
+        LocalDateTimeline<YearMonth> stønadstidslinje = new LocalDateTimeline<>(
             List.of(
-                new LocalDateSegment<>(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31), new YtelsesperiodeDefinisjon("1")),
-                new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), new YtelsesperiodeDefinisjon("2"))
+                new LocalDateSegment<>(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31), YearMonth.of(2023, 1)),
+                new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), YearMonth.of(2023, 2))
             )
         );
 
@@ -69,7 +68,7 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
         when(fraSøknadsperiode.utledTidslinje(anyLong())).thenReturn(søknadsperiodeTidslinje);
         when(fraUngdomsprogram.finnTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(fraProsesstriggere.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
-        when(ytelseperiodeUtleder.utledYtelsestidslinje(anyLong())).thenReturn(stønadstidslinje);
+        when(ytelsesperiodeutleder.periodiserMånedsvis(anyLong())).thenReturn(stønadstidslinje);
 
         final var resultat = tjeneste.utled(1L, VilkårType.UNGDOMSPROGRAMVILKÅRET);
 
@@ -90,9 +89,9 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
                 )
         );
 
-        LocalDateTimeline<YtelsesperiodeDefinisjon> stønadstidslinje = new LocalDateTimeline<>(
+        LocalDateTimeline<YearMonth> stønadstidslinje = new LocalDateTimeline<>(
                 List.of(
-                        new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), new YtelsesperiodeDefinisjon("1"))
+                        new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), YearMonth.of(2023, 2))
                 )
         );
 
@@ -103,7 +102,7 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
         when(fraSøknadsperiode.utledTidslinje(anyLong())).thenReturn(søknadsperiodeTidslinje);
         when(fraUngdomsprogram.finnTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(fraProsesstriggere.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
-        when(ytelseperiodeUtleder.utledYtelsestidslinje(anyLong())).thenReturn(stønadstidslinje);
+        when(ytelsesperiodeutleder.periodiserMånedsvis(anyLong())).thenReturn(stønadstidslinje);
 
         final var resultat = tjeneste.utled(1L, VilkårType.UNGDOMSPROGRAMVILKÅRET);
 

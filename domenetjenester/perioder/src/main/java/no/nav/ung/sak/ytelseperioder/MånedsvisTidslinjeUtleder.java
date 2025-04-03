@@ -8,17 +8,17 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.Period;
+import java.time.YearMonth;
 import java.util.List;
-import java.util.Objects;
 
 @Dependent
-public class YtelseperiodeUtleder {
+public class MånedsvisTidslinjeUtleder {
 
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final BehandlingRepository behandlingRepository;
 
     @Inject
-    public YtelseperiodeUtleder(UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
+    public MånedsvisTidslinjeUtleder(UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.behandlingRepository = behandlingRepository;
     }
@@ -29,14 +29,15 @@ public class YtelseperiodeUtleder {
      * @param behandlingId Id for behandling
      * @return Oppstykket tidslinje for ytelse
      */
-    public LocalDateTimeline<YtelsesperiodeDefinisjon> utledYtelsestidslinje(Long behandlingId) {
+    // Det er litt rart med en tidslinje av periodedata, men det gjøres for å gjøre det veldig tydelig at dette er en tidslinje som ikke skal kunne slås sammen på tvers av måneder
+    public LocalDateTimeline<YearMonth> periodiserMånedsvis(Long behandlingId) {
         final var ungdomsprogramperioder = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
         final var fagsak = behandlingRepository.hentBehandling(behandlingId).getFagsak();
         final var fagsakPeriode = fagsak.getPeriode();
         return ungdomsprogramperioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
             .compress()
             .splitAtRegular(ungdomsprogramperioder.getMinLocalDate().withDayOfMonth(1), fagsakPeriode.getTomDato(), Period.ofMonths(1))
-            .map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), new YtelsesperiodeDefinisjon(it.getFom().getMonth().name()))));
+            .map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonthValue()))));
     }
 
 
