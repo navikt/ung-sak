@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.time.LocalDate;
 
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -94,7 +94,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var endringInnholdBygger =
             new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
-                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste, new YtelseperiodeUtleder(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), repositoryProvider.getBehandlingRepository()))
+                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste, new MånedsvisTidslinjeUtleder(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), repositoryProvider.getBehandlingRepository()))
             );
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(

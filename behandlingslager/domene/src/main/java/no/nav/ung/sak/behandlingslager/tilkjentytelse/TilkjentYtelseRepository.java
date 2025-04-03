@@ -37,6 +37,7 @@ public class TilkjentYtelseRepository {
         final var differ = differ();
         if (!differ.areDifferent(eksisterendePerioder, perioder)) {
             log.info("Fant ingen diff mellom eksisterende og nye perioder, lagrer ikke.");
+            return;
         }
 
         eksisterende.ifPresent(this::deaktiver);

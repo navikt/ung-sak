@@ -11,15 +11,15 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
@@ -33,18 +33,18 @@ public class ManglendeKontrollperioderTjeneste {
 
     private final int rapporteringsfristIMåned;
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
-    private YtelseperiodeUtleder ytelseperiodeUtleder;
+    private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private BehandlingRepository behandlingRepository;
 
     @Inject
     public ManglendeKontrollperioderTjeneste(BehandlingRepository behandlingRepository,
                                              KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
-                                             YtelseperiodeUtleder ytelseperiodeUtleder,
+                                             MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                              ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                              @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristIMåned) {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
-        this.ytelseperiodeUtleder = ytelseperiodeUtleder;
+        this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapporteringsfristIMåned = rapporteringsfristIMåned;
         this.behandlingRepository = behandlingRepository;
@@ -58,14 +58,14 @@ public class ManglendeKontrollperioderTjeneste {
      * @return
      */
     public Optional<ProsessTaskData> lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(Long behandlingId) {
-        final var ytelsesPerioder = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
-        final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelsesPerioder);
+        final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
         final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
         final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
 
-        final var perioderMedManglendeKontroll = splittPåYtelsesperioder(manglendeKontrollTidslinje, ytelsesPerioder);
+        final var perioderMedManglendeKontroll = splittPåMåneder(manglendeKontrollTidslinje, månedsvisYtelsestidslinje);
 
         if (!perioderMedManglendeKontroll.isEmpty()) {
             final var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -88,9 +88,9 @@ public class ManglendeKontrollperioderTjeneste {
     }
 
 
-    private static Set<LocalDateInterval> splittPåYtelsesperioder(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<Boolean> ytelsesPerioder) {
+    private static Set<LocalDateInterval> splittPåMåneder(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<YearMonth> månedsvisYtelsestidslinje) {
         return manglendeKontrollTidslinje.compress()
-            .combine(ytelsesPerioder, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .combine(månedsvisYtelsestidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .getLocalDateIntervals();
     }
 
@@ -104,17 +104,6 @@ public class ManglendeKontrollperioderTjeneste {
 
     private LocalDateTimeline<Boolean> finnPerioderMedPassertRapporteringsfrist() {
         return new LocalDateTimeline<>(TIDENES_BEGYNNELSE, getTomDatoForPassertRapporteringsfrist(), true);
-    }
-
-    private static LocalDateTimeline<Boolean> finnPerioderSomSkalKontrolleres(LocalDateTimeline<Boolean> ytelsesPerioder) {
-        LocalDateTimeline<Boolean> perioderForKontroll = LocalDateTimeline.empty();
-        if (ytelsesPerioder.toSegments().size() > 2) {
-            final var segmenterForKontroll = new TreeSet<>(ytelsesPerioder.toSegments());
-            segmenterForKontroll.removeFirst();
-            segmenterForKontroll.removeLast();
-            perioderForKontroll = new LocalDateTimeline<>(segmenterForKontroll);
-        }
-        return perioderForKontroll;
     }
 
     private LocalDate getTomDatoForPassertRapporteringsfrist() {

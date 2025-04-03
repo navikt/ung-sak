@@ -26,7 +26,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.ManglendeKontrollperioderTjeneste;
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +59,7 @@ class ManglendeKontrollperioderTjenesteTest {
     private Behandling behandling;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
-    private YtelseperiodeUtleder ytelseperiodeUtleder;
+    private MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
 
     @BeforeEach
@@ -67,8 +67,8 @@ class ManglendeKontrollperioderTjenesteTest {
         final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
         final var ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, behandlingRepository);
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste);
-        ytelseperiodeUtleder = new YtelseperiodeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
-        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, ytelseperiodeUtleder);
+        ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
+        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, ytelsesperiodeutleder);
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
     }
 
@@ -76,7 +76,7 @@ class ManglendeKontrollperioderTjenesteTest {
     void skal_ikke_legge_til_trigger_dersom_kun_en_måned() {
 
         var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste,
-                ytelseperiodeUtleder,
+            ytelsesperiodeutleder,
                 prosessTriggerPeriodeUtleder, 6);
 
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
@@ -93,7 +93,7 @@ class ManglendeKontrollperioderTjenesteTest {
     @Test
     void skal_ikke_legge_til_trigger_dersom_programdeltakelse_over_to_måneder() {
 
-        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelseperiodeUtleder, prosessTriggerPeriodeUtleder, 6);
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, 6);
 
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(3).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
@@ -109,7 +109,7 @@ class ManglendeKontrollperioderTjenesteTest {
     @Test
     void skal_legge_til_trigger_for_måned_nr_to_dersom_programdeltakelse_over_tre_måneder_og_passert_rapporteringsfrist() {
 
-        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelseperiodeUtleder, prosessTriggerPeriodeUtleder, 6);
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, 6);
 
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(4).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
@@ -131,7 +131,7 @@ class ManglendeKontrollperioderTjenesteTest {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
-        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelseperiodeUtleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth());
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth());
 
 
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
@@ -149,7 +149,7 @@ class ManglendeKontrollperioderTjenesteTest {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
-        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelseperiodeUtleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth() - 1);
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth() - 1);
 
 
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
@@ -167,7 +167,7 @@ class ManglendeKontrollperioderTjenesteTest {
     @Test
     void skal_ikke_legge_til_trigger_dersom_allerede_kontrollert() {
 
-        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelseperiodeUtleder, prosessTriggerPeriodeUtleder, 6);
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository, kontrollerteInntektperioderTjeneste, ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, 6);
 
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(4).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
