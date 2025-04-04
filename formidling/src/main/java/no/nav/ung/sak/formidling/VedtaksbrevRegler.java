@@ -61,7 +61,7 @@ public class VedtaksbrevRegler {
             .flatMap(it -> it.getValue().resultatTyper().stream())
             .collect(Collectors.toSet());
 
-        if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_MED_UTBETALING)) {
+        if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)) {
             return innholdByggere.select(InnvilgelseInnholdBygger.class).get();
         } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT) || innholderBare(resultater, DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT)) {
             return innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get();

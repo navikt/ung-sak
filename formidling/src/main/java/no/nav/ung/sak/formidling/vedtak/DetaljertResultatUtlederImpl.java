@@ -139,14 +139,14 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
-            return DetaljertResultatType.INNVILGELSE_MED_UTBETALING;
+            return DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE;
         }
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return DetaljertResultatType.ENDRING_ØKT_SATS;
         }
 
         // Innvilgelse men uten søknad/endring fra bruker - spisse dette mer
-        return DetaljertResultatType.INNVILGELSE_VILKÅR;
+        return DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE;
     }
 
     @NotNull
@@ -159,7 +159,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (innholderBare(vilkårResultat.utfall(), Utfall.OPPFYLT)) {
-            return DetaljertResultatType.INNVILGELSE_VILKÅR;
+            return DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE;
         }
 
         throw new IllegalStateException("Ingen resultat utledet for vilkårsresultater " + vilkårResultat);
