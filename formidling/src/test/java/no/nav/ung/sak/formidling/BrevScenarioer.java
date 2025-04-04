@@ -1,18 +1,6 @@
 package no.nav.ung.sak.formidling;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -36,6 +24,17 @@ import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.TemporalAdjusters;
+import java.util.List;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BrevScenarioer {
 
@@ -70,7 +69,7 @@ public class BrevScenarioer {
             programPerioder,
             satser,
             uttaksPerioder(p),
-            tilkjentYtelsePerioder(satser),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(19).plusDays(42),
@@ -95,7 +94,7 @@ public class BrevScenarioer {
             programPerioder,
             satser,
             uttaksPerioder(p),
-            tilkjentYtelsePerioder(satser),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(27).plusDays(42),
@@ -118,7 +117,7 @@ public class BrevScenarioer {
             programPerioder,
             satser,
             uttaksPerioder(p),
-            tilkjentYtelsePerioder(satser),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
@@ -127,26 +126,29 @@ public class BrevScenarioer {
     }
 
     /**
-     * 24 år ungdom med full ungdomsprogramperiode som blir 25 ila perioden. Får både lav og høy sats
-     * ingen inntektsgradering og ingen barn TODO: endre denne til å gi lav sats hele perioden
+     *  24 år, søker måneden ungdom blir 25 år. Får både lav og høy sats
+     * ingen inntektsgradering og ingen barn
      */
-    public static UngTestScenario innvilget24År(LocalDate fom, LocalDate fødselsdato) {
-        LocalDate tom25årmnd = fødselsdato.plusYears(25).with(TemporalAdjusters.lastDayOfMonth());
-        var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+    public static UngTestScenario innvilget24ÅrSøkerPå25årsdagen(LocalDate fødselsdato) {
+        LocalDate tjuvefemårsdag = fødselsdato.plusYears(25);
+        LocalDate tom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate fom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth());
+        var p = new LocalDateInterval(fom25årmnd, fom25årmnd.plusWeeks(52).minusDays(1));
 
         var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(p.getFomDato(), tom25årmnd, lavSatsBuilder().build()),
-            new LocalDateSegment<>(tom25årmnd.plusDays(1), p.getTomDato(), høySatsBuilder().build())
+            new LocalDateSegment<>(fom25årmnd, tjuvefemårsdag, lavSatsBuilder().build()),
+            new LocalDateSegment<>(tjuvefemårsdag.plusDays(1), p.getTomDato(), høySatsBuilder().build())
         ));
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
+        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom25årmnd, tom25årmnd);
         return new UngTestScenario(
             DEFAULT_NAVN,
             programPerioder,
             satser,
             uttaksPerioder(p),
-            tilkjentYtelsePerioder(satser),
+            tilkjentYtelsePerioder(satser, tilkjentPeriode),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
@@ -214,7 +216,7 @@ public class BrevScenarioer {
             programPerioder,
             satser,
             uttaksPerioder(programPeriode),
-            tilkjentYtelsePerioder(satser),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
             new LocalDateTimeline<>(programPeriode, Utfall.OPPFYLT),
             new LocalDateTimeline<>(programPeriode, Utfall.OPPFYLT),
             fødselsdato,
@@ -226,8 +228,8 @@ public class BrevScenarioer {
         return satser.splitAtRegular(satser.getMinLocalDate().withDayOfMonth(1), satser.getMaxLocalDate(), Period.ofMonths(1));
     }
 
-    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(LocalDateTimeline<UngdomsytelseSatser> satser) {
-        return satser.map(s ->
+    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(LocalDateTimeline<UngdomsytelseSatser> satser, LocalDateInterval tilkjentPeriode) {
+        return satser.intersection(tilkjentPeriode).map(s ->
         {
             BigDecimal multiply = s.getValue().dagsats().multiply(BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(s.getFom(), s.getTom())));
             return List.of(

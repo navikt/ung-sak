@@ -68,6 +68,8 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             return null;
         }
 
+        LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
+
         VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (!behandling.erAvsluttet()) {

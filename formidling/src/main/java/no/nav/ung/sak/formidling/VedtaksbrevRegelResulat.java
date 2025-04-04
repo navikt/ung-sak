@@ -8,4 +8,10 @@ public record VedtaksbrevRegelResulat(
     VedtaksbrevInnholdBygger bygger,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline
 ) {
+    public String safePrint() {
+        return "VedtaksbrevRegelResulat{" +
+            "bygger=" + (bygger != null ? bygger.getClass().getSimpleName() : "null") +
+            ", detaljertResultatTimeline=" + DetaljertResultat.timelineTostring(detaljertResultatTimeline) +
+            '}';
+    }
 }
