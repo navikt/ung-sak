@@ -90,7 +90,7 @@ class BrevGenerererTjenesteTest {
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(),
                 new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger), new DetaljertResultatUtlederFake(
-                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatType.INNVILGELSE_MED_UTBETALING, Collections.emptySet(), Collections.emptySet(), Collections.emptySet())))));
+                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, Collections.emptySet(), Collections.emptySet(), Collections.emptySet())))));
 
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
