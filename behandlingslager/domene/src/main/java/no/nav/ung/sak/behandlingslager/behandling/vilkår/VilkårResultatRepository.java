@@ -1,15 +1,5 @@
 package no.nav.ung.sak.behandlingslager.behandling.vilkår;
 
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -24,6 +14,11 @@ import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Date;
+import java.util.*;
 
 @Dependent
 public class VilkårResultatRepository {
@@ -137,7 +132,7 @@ public class VilkårResultatRepository {
      * Optimalisert spørring for å hente vilkårsresultater uten regelsporing.
      */
     public List<VilkårPeriodeResultatDto> hentVilkårResultater(Long behandlingId) {
-        String sql = "select vv.vilkar_type, vp.fom, vp.tom, nullif('-', vp.utfall) as utfall, nullif('-', vp.overstyrt_utfall) as overstyrt_utfall, vp.avslag_kode" +
+        String sql = "select vv.vilkar_type, vp.fom, vp.tom, nullif(vp.utfall, '-') as utfall, nullif(vp.overstyrt_utfall, '-') as overstyrt_utfall, vp.avslag_kode" +
             " from rs_vilkars_resultat rv " +
             " inner join vr_vilkar vv on vv.vilkar_resultat_id=rv.vilkarene_id " +
             " inner join vr_vilkar_periode vp on vp.vilkar_id=vv.id " +
