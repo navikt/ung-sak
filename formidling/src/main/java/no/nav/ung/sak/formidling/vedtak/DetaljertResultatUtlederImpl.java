@@ -8,7 +8,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
@@ -17,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -114,24 +114,46 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var avslåtteVilkår = vilkårResultat.avslåtteVilkår();
         var behandlingsårsaker = vilkårResultat.behandlingÅrsaker();
 
-        if (tilkjentYtelse == null) {
-            DetaljertResultatType resultatType = bestemResultatUtenUtbetaling(vilkårResultat);
-            return DetaljertResultat.of(resultatType, behandlingsårsaker, avslåtteVilkår, vilkårSomIkkeErVurdert);
-        }
+        DetaljertResultatType resultatType = bestemResultat(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker);
 
-        if (!avslåtteVilkår.isEmpty() || !vilkårSomIkkeErVurdert.isEmpty()) {
-            throw new IllegalStateException("Har tilkjent ytelse samtidig med avslått og/eller ikke vurderte vilkår for periode %s og avslåtte vilkår %s og ikke vurderte vilkår %s og tilkjent ytelse %s".formatted(p, avslåtteVilkår, vilkårSomIkkeErVurdert, tilkjentYtelse));
-        }
-
-        DetaljertResultatType resultatType = bestemResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
-
-        return DetaljertResultat.of(resultatType, behandlingsårsaker, Collections.emptySet(), Collections.emptySet());
+        return DetaljertResultat.of(resultatType, behandlingsårsaker, avslåtteVilkår, vilkårSomIkkeErVurdert);
 
     }
 
     @NotNull
-    private static DetaljertResultatType bestemResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)) {
+    private static DetaljertResultatType bestemResultat(
+        LocalDateInterval p,
+        SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat,
+        TilkjentYtelseVerdi tilkjentYtelse,
+        Set<BehandlingÅrsakType> behandlingsårsaker) {
+
+        if (!vilkårResultat.ikkeVurderteVilkår().isEmpty())  {
+            return DetaljertResultatType.IKKE_VURDERT;
+        }
+
+        if (!vilkårResultat.avslåtteVilkår().isEmpty()) {
+            return DetaljertResultatType.AVSLAG_INNGANGSVILKÅR;
+        }
+
+        if (tilkjentYtelse != null) {
+            DetaljertResultatType tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
+            if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
+        }
+
+        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+            return DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE;
+        }
+        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+            return DetaljertResultatType.ENDRING_ØKT_SATS;
+        }
+
+        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkår %s og tilkjent ytelse %s og behandlingårsaker %s"
+                .formatted(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker));
+    }
+
+    @Nullable
+    private static DetaljertResultatType bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
+        if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
             if (tilkjentYtelse.utbetalingsgrad() > 0) {
                 return DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT;
             }
@@ -139,30 +161,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
-            return DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE;
+            if (tilkjentYtelse.utbetalingsgrad() > 0) {
+                return DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE;
+            }
+            return DetaljertResultatType.AVSLAG_UTBETALING_NY_PERIODE;
         }
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
-            return DetaljertResultatType.ENDRING_ØKT_SATS;
-        }
-
-        // Innvilgelse men uten søknad/endring fra bruker - spisse dette mer
-        return DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE;
-    }
-
-    @NotNull
-    private static DetaljertResultatType bestemResultatUtenUtbetaling(SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat) {
-        if (!vilkårResultat.ikkeVurderteVilkår().isEmpty())  {
-            return DetaljertResultatType.IKKE_VURDERT;
-        }
-        if (!vilkårResultat.avslåtteVilkår().isEmpty()) {
-            return DetaljertResultatType.AVSLAG_INNGANGSVILKÅR;
-        }
-
-        if (innholderBare(vilkårResultat.utfall(), Utfall.OPPFYLT)) {
-            return DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE;
-        }
-
-        throw new IllegalStateException("Ingen resultat utledet for vilkårsresultater " + vilkårResultat);
+        return null;
     }
 
     @SafeVarargs
