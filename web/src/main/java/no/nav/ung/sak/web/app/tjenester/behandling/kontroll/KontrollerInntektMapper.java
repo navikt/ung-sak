@@ -63,7 +63,6 @@ public class KontrollerInntektMapper {
                     true,
                     rapporterteInntekter,
                     null,
-                    null,
                     null
                 );
                 return kontrollerInntektPeriodeDto;
@@ -80,8 +79,7 @@ public class KontrollerInntektMapper {
             it.getErManueltVurdert() ? PeriodeStatus.AVVIK : PeriodeStatus.INGEN_AVVIK,
             !perioderTilKontroll.intersection(it.getPeriode().toLocalDateInterval()).isEmpty(),
             rapporterteInntekter,
-            it.getArbeidsinntekt() == null ? null : it.getArbeidsinntekt().intValue(),
-            it.getYtelse() == null ? null : it.getYtelse().intValue(),
+            it.getInntekt() == null ? null : it.getInntekt().intValue(),
             mapTilValg(it)
         );
     }
