@@ -100,6 +100,7 @@ class BeregnYtelseStegTest {
     void skal_få_tilkjent_ytelse_i_periode_uten_inntekt_med_gjenomført_kontroll() {
         final var kontrollertInntektPeriode = KontrollertInntektPeriode.ny()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusMonths(1).withDayOfMonth(1), FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth())))
+            .medInntekt(BigDecimal.ZERO)
             .medKilde(KontrollertInntektKilde.BRUKER)
             .build();
         tilkjentYtelseRepository.lagre(behandling.getId(), List.of(kontrollertInntektPeriode));
