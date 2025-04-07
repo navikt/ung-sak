@@ -2,11 +2,11 @@ package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.ytelse.*;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 
@@ -21,7 +21,7 @@ public class LagTilkjentYtelse {
     static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
                                                                          LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                          LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
-                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
+                                                                         LocalDateTimeline<Set<RapportertInntekt>> rapportertInntektTidslinje) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
@@ -40,7 +40,7 @@ public class LagTilkjentYtelse {
 
         return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
                 // Dersom det ikke er rapportert inntekt settes denne til 0, ellers summeres alle inntektene
-                final var rapporertinntekt = rapportertInntekt == null ? BigDecimal.ZERO : rapportertInntekt.getValue();
+                final var rapporertinntekt = rapportertInntekt == null ? BigDecimal.ZERO : rapportertInntekt.getValue().stream().map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
                 // Mapper verdier til TilkjentYtelsePeriodeResultat
                 final var periodeResultat = TikjentYtelseBeregner.beregn(di, sats.getValue(), rapporertinntekt);
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);

@@ -7,7 +7,8 @@ public record KontrollerInntektPeriodeDto(
     PeriodeStatus status,
     boolean erTilVurdering,
     RapporterteInntekterDto rapporterteInntekter,
-    Integer fastsattInntekt,
+    Integer fastsattArbeidsinntekt,
+    Integer fastsattYtelse,
     BrukKontrollertInntektValg valg
 ) {
 }
