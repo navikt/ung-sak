@@ -2741,11 +2741,7 @@
           "erTilVurdering" : {
             "type" : "boolean"
           },
-          "fastsattArbeidsinntekt" : {
-            "format" : "int32",
-            "type" : "integer"
-          },
-          "fastsattYtelse" : {
+          "fastsattInntekt" : {
             "format" : "int32",
             "type" : "integer"
           },
