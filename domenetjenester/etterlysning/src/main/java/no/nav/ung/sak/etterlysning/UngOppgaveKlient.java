@@ -5,8 +5,8 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.veileder.EndrePeriodeDatoDTO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,7 +43,7 @@ public class UngOppgaveKlient {
 
     }
 
-    public void opprettOppgave(RegisterInntektOppgaveDTO oppgaver) {
+    public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgaver) {
         try {
             restClient.post(opprettKontrollerRegisterInntektURI, oppgaver);
         } catch (Exception e) {
@@ -60,17 +60,17 @@ public class UngOppgaveKlient {
         }
     }
 
-    public void opprettEndretStartdatoOppgave(EndrePeriodeDatoDTO endrePeriodeDatoDTO) {
+    public void opprettEndretStartdatoOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
         try {
-            restClient.post(opprettEndretStartdatoURI, endrePeriodeDatoDTO);
+            restClient.post(opprettEndretStartdatoURI, endretPeriodeOppgaveDTO);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
     }
 
-    public void opprettEndretSluttdatoOppgave(EndrePeriodeDatoDTO endrePeriodeDatoDTO) {
+    public void opprettEndretSluttdatoOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
         try {
-            restClient.post(opprettEndretSluttdatoURI, endrePeriodeDatoDTO);
+            restClient.post(opprettEndretSluttdatoURI, endretPeriodeOppgaveDTO);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }

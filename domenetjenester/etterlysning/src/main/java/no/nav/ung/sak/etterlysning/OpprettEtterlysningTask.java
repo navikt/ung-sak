@@ -8,6 +8,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
+import java.util.Set;
+
 @ApplicationScoped
 @ProsessTask(value = OpprettEtterlysningTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
@@ -24,6 +26,11 @@ public class OpprettEtterlysningTask implements ProsessTaskHandler {
     @Inject
     public OpprettEtterlysningTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
         this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
+    }
+
+    @Override
+    public Set<String> requiredProperties() {
+        return Set.of(ETTERLYSNING_TYPE);
     }
 
     @Override

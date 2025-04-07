@@ -38,9 +38,13 @@ public class InntektkontrollEtterlysningHåndterer implements EtterlysningHåndt
         this.personinfoAdapter = personinfoAdapter;
     }
 
-    public void håndterOpprettelse(long behandlingId) {
+    public void håndterOpprettelse(long behandlingId, EtterlysningType etterlysningType) {
+        if (etterlysningType != EtterlysningType.UTTALELSE_KONTROLL_INNTEKT) {
+            throw new IllegalArgumentException("Ikke støttet etterlysningstype: " + etterlysningType);
+        }
+
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, etterlysningType);
         AktørId aktørId = behandling.getAktørId();
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
 
@@ -55,14 +59,8 @@ public class InntektkontrollEtterlysningHåndterer implements EtterlysningHåndt
                 InntektKontrollOppgaveMapper.mapTilRegisterInntekter(grunnlag, etterlysning.getPeriode()));
         }).collect(Collectors.toList());
 
-        oppgaveDtoer.forEach(ungOppgaveKlient::opprettOppgave);
+        oppgaveDtoer.forEach(ungOppgaveKlient::opprettKontrollerRegisterInntektOppgave);
 
-        // Kall oppgave API
         etterlysningRepository.lagre(etterlysninger);
     }
-
-    private static LocalDateTime getFrist() {
-        return LocalDateTime.now().plusDays(14);
-    }
-
 }
