@@ -121,7 +121,7 @@ class RelevanteKontrollperioderUtlederTest {
         final var sistePeriode2Tom = LocalDate.of(2023, 6, 2);
         LocalDateTimeline<YearMonth> ytelsesPerioder = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, YearMonth.of(2023, 1)),
-            new LocalDateSegment<>(førstePeriode1Tom.plusDays(1), sistePeriode1Fom.plusDays(1), YearMonth.of(2023, 2)),
+            new LocalDateSegment<>(førstePeriode1Tom.plusDays(1), sistePeriode1Fom.minusDays(1), YearMonth.of(2023, 2)),
             new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, YearMonth.of(2023, 3)),
             new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, YearMonth.of(2023, 4)),
             new LocalDateSegment<>(førstePeriode2Tom.plusDays(1), sistePeriode2Fom.minusDays(1), YearMonth.of(2023, 5)),
