@@ -65,6 +65,55 @@ public class Etterlysning extends BaseEntitet {
             EtterlysningStatus.OPPRETTET);
     }
 
+    public static Etterlysning forEndretStartdatoUttalelse(
+        Long behandlingId,
+        UUID grunnlagsreferanse,
+        UUID eksternReferanse,
+        DatoIntervallEntitet periode
+    ) {
+        return forEndretPeriodeUttalelse(
+            behandlingId,
+            grunnlagsreferanse,
+            eksternReferanse,
+            periode,
+            EtterlysningType.UTTALELSE_ENDRET_STARTDATO
+        );
+    }
+
+    public static Etterlysning forEndretSluttdatoUttalelse(
+        Long behandlingId,
+        UUID grunnlagsreferanse,
+        UUID eksternReferanse,
+        DatoIntervallEntitet periode
+    ) {
+
+        return forEndretPeriodeUttalelse(
+            behandlingId,
+            grunnlagsreferanse,
+            eksternReferanse,
+            periode,
+            EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO
+        );
+    }
+
+    private static Etterlysning forEndretPeriodeUttalelse(
+        Long behandlingId,
+        UUID grunnlagsreferanse,
+        UUID eksternReferanse,
+        DatoIntervallEntitet periode,
+        EtterlysningType type
+    ) {
+
+        return new Etterlysning(
+            behandlingId,
+            grunnlagsreferanse,
+            eksternReferanse,
+            periode,
+            type,
+            EtterlysningStatus.OPPRETTET
+        );
+    }
+
     public Etterlysning(Long behandlingId,
                         UUID grunnlagsreferanse,
                         UUID eksternReferanse,
