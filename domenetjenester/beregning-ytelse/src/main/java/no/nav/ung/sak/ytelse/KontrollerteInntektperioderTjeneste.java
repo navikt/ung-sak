@@ -15,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Tjeneste for oppretting og uthenting av kontrollerte perioder for rapportert inntekt
@@ -40,7 +43,7 @@ public class KontrollerteInntektperioderTjeneste {
                                                               LocalDateInterval vurdertPeriode,
                                                               LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje) {
         final var kontrollertePerioder = mapTilKontrollerteInntektperioder(new LocalDateTimeline<>(vurdertPeriode, true),
-            inntektTidslinje.mapValue(it -> new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, it)),
+            inntektTidslinje.mapValue(it -> new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, summerRapporterteInntekter(it))),
             Optional.of(KontrollertInntektKilde.BRUKER),
             false);
         LOG.info("Lagrer inntekt fra bruker: {}", kontrollertePerioder);
@@ -51,9 +54,11 @@ public class KontrollerteInntektperioderTjeneste {
         tilkjentYtelseRepository.lagre(behandlingId, allePerioder);
     }
 
-    /** Det er ikke påkrevd med kontroll av inntekt for første og siste måned.
+    /**
+     * Det er ikke påkrevd med kontroll av inntekt for første og siste måned.
      * Dersom programperioden har endret seg fjernes allerede kontrollerte perioder dersom første og siste måned for programmet er endret.
      * Dette for å unngå at utbetaling reduseres i disse månedene og potensielt også reduseres basert på feilaktig inntekt.
+     *
      * @param behandlingId BehandlingId
      */
     public void ryddPerioderFritattForKontroll(Long behandlingId) {
@@ -88,7 +93,7 @@ public class KontrollerteInntektperioderTjeneste {
         return allePerioder;
     }
 
-    public void opprettKontrollerteInntekterPerioderFraEtterManuellVurdering(Long behandlingId, LocalDateTimeline<RapportertInntektOgKilde> inntektTidslinje) {
+    public void opprettKontrollerteInntekterPerioderEtterManuellVurdering(Long behandlingId, LocalDateTimeline<RapportertInntektOgKilde> inntektTidslinje) {
         final var kontrollertePerioder = mapTilKontrollerteInntektperioder(inntektTidslinje.mapValue(it -> true), inntektTidslinje, Optional.empty(), true);
         tilkjentYtelseRepository.lagre(behandlingId, utvidEksisterendePerioder(behandlingId, kontrollertePerioder));
     }
@@ -113,28 +118,25 @@ public class KontrollerteInntektperioderTjeneste {
                                                                                      Optional<KontrollertInntektKilde> defaultKilde,
                                                                                      boolean erManueltVurdert) {
 
-        return vurdertTidslinje.combine(inntektTidslinje, lagTomListeForIngenInntekter(defaultKilde), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+        return vurdertTidslinje.combine(inntektTidslinje, settVerdiForIngenInntekter(defaultKilde), LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .toSegments().stream().map(
                 s -> KontrollertInntektPeriode.ny()
                     .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                    .medInntekt(s.getValue().rapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO))
+                    .medInntekt(s.getValue().samletInntekt())
                     .medKilde(s.getValue().kilde())
                     .medErManueltVurdert(erManueltVurdert)
                     .build()
             ).toList();
     }
 
-    private static LocalDateSegmentCombinator<Boolean, RapportertInntektOgKilde, RapportertInntektOgKilde> lagTomListeForIngenInntekter(Optional<KontrollertInntektKilde> kilde) {
-        return (di, lhs, rhs) -> rhs == null ? new LocalDateSegment<>(di, new RapportertInntektOgKilde(kilde.orElseThrow(() -> new IllegalStateException("Forventer å få default kilde dersom tidslinjen med inntekter ikke dekker alle perioder til vurdering")), Set.of())) : rhs;
+    private static BigDecimal summerRapporterteInntekter(Set<RapportertInntekt> rapportertInntekts) {
+        return rapportertInntekts.stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
-    private static BigDecimal finnInntektAvType(Set<RapportertInntekt> s, InntektType inntektType) {
-        return s.stream()
-            .filter(it -> it.inntektType().equals(inntektType))
-            .map(RapportertInntekt::beløp)
-            .reduce(BigDecimal::add)
-            .orElse(null);
+    private static LocalDateSegmentCombinator<Boolean, RapportertInntektOgKilde, RapportertInntektOgKilde> settVerdiForIngenInntekter(Optional<KontrollertInntektKilde> kilde) {
+        return (di, lhs, rhs) ->
+            rhs == null ?
+            new LocalDateSegment<>(di, new RapportertInntektOgKilde(kilde.orElseThrow(() -> new IllegalStateException("Forventer å få default kilde dersom tidslinjen med inntekter ikke dekker alle perioder til vurdering")), BigDecimal.ZERO)) :
+                rhs;
     }
-
-
 }
