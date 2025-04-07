@@ -1,9 +1,8 @@
 package no.nav.ung.sak.ytelse;
 
-import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 
-import java.util.Set;
+import java.math.BigDecimal;
 
-public record RapportertInntektOgKilde(KontrollertInntektKilde kilde, Set<RapportertInntekt> rapporterteInntekter) {
+public record RapportertInntektOgKilde(KontrollertInntektKilde kilde, BigDecimal samletInntekt) {
 }

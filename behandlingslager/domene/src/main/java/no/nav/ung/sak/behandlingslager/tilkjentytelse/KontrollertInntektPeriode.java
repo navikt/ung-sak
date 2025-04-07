@@ -24,11 +24,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
-    @Column(name = "arbeidsinntekt")
-    private BigDecimal arbeidsinntekt;
-
-    @Column(name = "ytelse")
-    private BigDecimal ytelse;
+    @Column(name = "inntekt")
+    private BigDecimal inntekt;
 
     @Convert(converter = KontrollertInntektKildeKodeverdiConverter.class)
     @Column(name = "kilde", nullable = false)
@@ -44,20 +41,17 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     public KontrollertInntektPeriode(KontrollertInntektPeriode eksisterende) {
         this.periode = Range.closed(eksisterende.getPeriode().getFomDato(), eksisterende.getPeriode().getTomDato());
-        this.arbeidsinntekt = eksisterende.getArbeidsinntekt();
-        this.ytelse = eksisterende.getYtelse();
+        this.inntekt = eksisterende.getInntekt();
         this.kilde = eksisterende.getKilde();
         this.erManueltVurdert = eksisterende.getErManueltVurdert();
     }
 
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
-                                      BigDecimal arbeidsinntekt,
-                                      BigDecimal ytelse,
+                                      BigDecimal inntekt,
                                       KontrollertInntektKilde kilde,
                                       boolean erManueltVurdert) {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
-        this.arbeidsinntekt = arbeidsinntekt;
-        this.ytelse = ytelse;
+        this.inntekt = inntekt;
         this.kilde = kilde;
         this.erManueltVurdert = erManueltVurdert;
     }
@@ -66,12 +60,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         return DatoIntervallEntitet.fra(periode);
     }
 
-    public BigDecimal getArbeidsinntekt() {
-        return arbeidsinntekt;
-    }
-
-    public BigDecimal getYtelse() {
-        return ytelse;
+    public BigDecimal getInntekt() {
+        return inntekt;
     }
 
     public KontrollertInntektKilde getKilde() {
@@ -86,8 +76,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     public String toString() {
         return "KontrollertInntektPeriode{" +
             "periode=" + periode +
-            ", arbeidsinntekt=" + arbeidsinntekt +
-            ", ytelse=" + ytelse +
+            ", inntekt=" + inntekt +
             ", kilde=" + kilde +
             ", erManueltVurdert=" + erManueltVurdert +
             '}';
@@ -100,12 +89,12 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     public static class Builder {
 
         private DatoIntervallEntitet periode;
-        private BigDecimal arbeidsinntekt;
-        private BigDecimal ytelse;
+        private BigDecimal inntekt;
         private KontrollertInntektKilde kilde;
         private boolean erManueltVurdert;
 
-        private Builder() {}
+        private Builder() {
+        }
 
         public Builder medPeriode(DatoIntervallEntitet periode) {
             if (periode == null) {
@@ -115,13 +104,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
             return this;
         }
 
-        public Builder medArbeidsinntekt(BigDecimal arbeidsinntekt) {
-            this.arbeidsinntekt = arbeidsinntekt;
-            return this;
-        }
-
-        public Builder medYtelse(BigDecimal ytelse) {
-            this.ytelse = ytelse;
+        public Builder medInntekt(BigDecimal arbeidsinntekt) {
+            this.inntekt = arbeidsinntekt;
             return this;
         }
 
@@ -137,7 +121,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
 
         public KontrollertInntektPeriode build() {
-            return new KontrollertInntektPeriode(periode, arbeidsinntekt, ytelse, kilde, erManueltVurdert);
+            return new KontrollertInntektPeriode(periode, inntekt, kilde, erManueltVurdert);
         }
 
 

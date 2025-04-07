@@ -30,7 +30,6 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
-import no.nav.ung.sak.kontrakt.kontroll.ManueltFastsattInntektDto;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -145,7 +144,7 @@ class FastsettInntektOppdatererTest {
         assertThat(kontrollertePerioder.get().getPerioder().size()).isEqualTo(1);
         final var kontrollertperiode = kontrollertePerioder.get().getPerioder().get(0);
         assertThat(kontrollertperiode.getKilde()).isEqualTo(KontrollertInntektKilde.BRUKER);
-        assertThat(kontrollertperiode.getArbeidsinntekt().compareTo(BigDecimal.valueOf(brukersRapporterteInntekt))).isEqualTo(0);
+        assertThat(kontrollertperiode.getInntekt().compareTo(BigDecimal.valueOf(brukersRapporterteInntekt))).isEqualTo(0);
     }
 
 
@@ -174,7 +173,7 @@ class FastsettInntektOppdatererTest {
         assertThat(kontrollertePerioder.get().getPerioder().size()).isEqualTo(1);
         final var kontrollertperiode = kontrollertePerioder.get().getPerioder().get(0);
         assertThat(kontrollertperiode.getKilde()).isEqualTo(KontrollertInntektKilde.REGISTER);
-        assertThat(kontrollertperiode.getArbeidsinntekt().compareTo(BigDecimal.valueOf(registerinntekt))).isEqualTo(0);
+        assertThat(kontrollertperiode.getInntekt().compareTo(BigDecimal.valueOf(registerinntekt))).isEqualTo(0);
     }
 
     @Test
@@ -190,7 +189,7 @@ class FastsettInntektOppdatererTest {
         leggTilTriggerForKontroll(periode);
 
         final var manueltFastsattArbeidsinntekt = 300;
-        final var dto = lagDto(periode, new ManueltFastsattInntektDto(manueltFastsattArbeidsinntekt, null));
+        final var dto = lagDto(periode, manueltFastsattArbeidsinntekt);
         final var param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
 
         // Act
@@ -202,7 +201,7 @@ class FastsettInntektOppdatererTest {
         assertThat(kontrollertePerioder.get().getPerioder().size()).isEqualTo(1);
         final var kontrollertperiode = kontrollertePerioder.get().getPerioder().get(0);
         assertThat(kontrollertperiode.getKilde()).isEqualTo(KontrollertInntektKilde.SAKSBEHANDLER);
-        assertThat(kontrollertperiode.getArbeidsinntekt().compareTo(BigDecimal.valueOf(manueltFastsattArbeidsinntekt))).isEqualTo(0);
+        assertThat(kontrollertperiode.getInntekt().compareTo(BigDecimal.valueOf(manueltFastsattArbeidsinntekt))).isEqualTo(0);
     }
 
     private static FastsettInntektDto lagDto(DatoIntervallEntitet periode, BrukKontrollertInntektValg brukBrukersInntekt) {
@@ -211,7 +210,7 @@ class FastsettInntektOppdatererTest {
                 new Periode(periode.getFomDato(), periode.getTomDato()), null, brukBrukersInntekt)));
     }
 
-    private static FastsettInntektDto lagDto(DatoIntervallEntitet periode, ManueltFastsattInntektDto fastsattInntektDto) {
+    private static FastsettInntektDto lagDto(DatoIntervallEntitet periode, Integer fastsattInntektDto) {
         return new FastsettInntektDto("begrunnelse", List.of(
             new FastsettInntektPeriodeDto(
                 new Periode(periode.getFomDato(), periode.getTomDato()), fastsattInntektDto, BrukKontrollertInntektValg.MANUELT_FASTSATT)));

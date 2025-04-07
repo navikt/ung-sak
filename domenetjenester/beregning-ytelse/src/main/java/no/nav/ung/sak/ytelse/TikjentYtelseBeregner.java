@@ -5,6 +5,7 @@
 package no.nav.ung.sak.ytelse;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -32,7 +33,7 @@ public class TikjentYtelseBeregner {
         Objects.requireNonNull(rapporertinntekt, "rapporertinntekt");
         final var sporing = new HashMap<String, String>();
         // Uredusert beløp bergnes fra totalsats
-        final var uredusertBeløp = sats.totalSats().setScale(10, BigDecimal.ROUND_HALF_UP);
+        final var uredusertBeløp = sats.totalSats().setScale(10, RoundingMode.HALF_UP);
         sporing.put("totalSats", sats.totalSats().toString());
         // Reduserer beløp med rapportert inntekt
         final var reduksjon = rapporertinntekt.multiply(REDUKSJONS_FAKTOR);
@@ -46,7 +47,7 @@ public class TikjentYtelseBeregner {
         // Beregner dagsats utifra antall virkedager i perioden
         final var antallVirkedager = Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato());
         sporing.put("antallVirkedager", String.valueOf(antallVirkedager));
-        final var dagsats = antallVirkedager == 0 ?  BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, BigDecimal.ROUND_HALF_UP);
+        final var dagsats = antallVirkedager == 0 ?  BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, RoundingMode.HALF_UP);
         sporing.put("dagsats", dagsats.toString());
 
         // Beregner utbetalingsgrad
