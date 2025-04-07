@@ -9,7 +9,6 @@ import java.util.List;
 
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
 import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,8 +41,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -67,13 +65,13 @@ class BeregnYtelseStegTest {
         inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
-        final var ytelseperiodeUtleder = new YtelseperiodeUtleder(
+        final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             behandlingRepository);
         beregnYtelseSteg = new BeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
-            ytelseperiodeUtleder,
-            new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, ytelseperiodeUtleder));
+            månedsvisTidslinjeUtleder,
+            new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, månedsvisTidslinjeUtleder));
 
         fagsakRepository = new FagsakRepository(entityManager);
 

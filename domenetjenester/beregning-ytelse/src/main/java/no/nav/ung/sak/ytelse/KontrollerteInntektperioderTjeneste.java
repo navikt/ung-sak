@@ -10,7 +10,7 @@ import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +27,13 @@ public class KontrollerteInntektperioderTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(KontrollerteInntektperioderTjeneste.class);
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
-    private final YtelseperiodeUtleder ytelseperiodeUtleder;
+    private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
 
     @Inject
-    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, YtelseperiodeUtleder ytelseperiodeUtleder) {
+    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder ytelsesperiodeutleder) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
-        this.ytelseperiodeUtleder = ytelseperiodeUtleder;
+        this.ytelsesperiodeutleder = ytelsesperiodeutleder;
     }
 
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId,
@@ -49,6 +49,30 @@ public class KontrollerteInntektperioderTjeneste {
         final var allePerioder = utvidEksisterendePerioder(behandlingId, kontrollertePerioder);
 
         tilkjentYtelseRepository.lagre(behandlingId, allePerioder);
+    }
+
+    /** Det er ikke påkrevd med kontroll av inntekt for første og siste måned.
+     * Dersom programperioden har endret seg fjernes allerede kontrollerte perioder dersom første og siste måned for programmet er endret.
+     * Dette for å unngå at utbetaling reduseres i disse månedene og potensielt også reduseres basert på feilaktig inntekt.
+     * @param behandlingId BehandlingId
+     */
+    public void ryddPerioderFritattForKontroll(Long behandlingId) {
+        final var kontrollertInntektPerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId);
+        if (kontrollertInntektPerioder.isEmpty()) {
+            return;
+        }
+
+        final var ytelseTidslinje = ytelsesperiodeutleder.periodiserMånedsvis(behandlingId);
+        final var relevantForKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelseTidslinje);
+        if (relevantForKontrollTidslinje.isEmpty()) {
+            tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());
+        } else {
+            final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
+            final var perioderSomBeholdes = eksisterendePerioder.stream()
+                .filter(it -> !relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
+                .toList();
+            tilkjentYtelseRepository.lagre(behandlingId, perioderSomBeholdes);
+        }
     }
 
     private ArrayList<KontrollertInntektPeriode> utvidEksisterendePerioder(Long behandlingId, List<KontrollertInntektPeriode> nyePerioder) {
@@ -119,24 +143,5 @@ public class KontrollerteInntektperioderTjeneste {
             .orElse(null);
     }
 
-    public void ryddMotYtelsetidslinje(Long behandlingId) {
-        final var kontrollertInntektPerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId);
-        if (kontrollertInntektPerioder.isEmpty()) {
-            return;
-        }
 
-        final var ytelseTidslinje = ytelseperiodeUtleder.utledYtelsestidslinje(behandlingId);
-        final var relevantForKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelseTidslinje);
-        if (relevantForKontrollTidslinje.isEmpty()) {
-            tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());
-        } else {
-            final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
-            final var perioderSomBeholdes = eksisterendePerioder.stream()
-                .filter(it -> !relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
-                .toList();
-            tilkjentYtelseRepository.lagre(behandlingId, perioderSomBeholdes);
-        }
-
-
-    }
 }
