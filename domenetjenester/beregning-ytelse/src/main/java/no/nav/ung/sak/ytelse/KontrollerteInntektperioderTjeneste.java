@@ -97,20 +97,14 @@ public class KontrollerteInntektperioderTjeneste {
         tilkjentYtelseRepository.gjenopprettTilOriginal(originalBehandlingId, behandlingId);
     }
 
-    public LocalDateTimeline<Set<RapportertInntekt>> hentTidslinje(Long behandlingId) {
+    public LocalDateTimeline<BigDecimal> hentTidslinje(Long behandlingId) {
         return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId)
             .stream()
             .flatMap(it -> it.getPerioder().stream())
-            .map(p -> {
-                Set<RapportertInntekt> rapportertInntekter = new HashSet<>();
-                if (p.getArbeidsinntekt() != null) {
-                    rapportertInntekter.add(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, p.getArbeidsinntekt()));
-                }
-                if (p.getYtelse() != null) {
-                    rapportertInntekter.add(new RapportertInntekt(InntektType.YTELSE, p.getYtelse()));
-                }
-                return new LocalDateTimeline<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), rapportertInntekter);
-            }).reduce(LocalDateTimeline::crossJoin)
+            .map(p -> new LocalDateTimeline<>(
+                p.getPeriode().getFomDato(),
+                p.getPeriode().getTomDato(),
+                p.getInntekt())).reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
     }
 
@@ -123,8 +117,7 @@ public class KontrollerteInntektperioderTjeneste {
             .toSegments().stream().map(
                 s -> KontrollertInntektPeriode.ny()
                     .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                    .medArbeidsinntekt(finnInntektAvType(s.getValue().rapporterteInntekter(), InntektType.ARBEIDSTAKER_ELLER_FRILANSER))
-                    .medYtelse(finnInntektAvType(s.getValue().rapporterteInntekter(), InntektType.YTELSE))
+                    .medInntekt(s.getValue().rapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO))
                     .medKilde(s.getValue().kilde())
                     .medErManueltVurdert(erManueltVurdert)
                     .build()
