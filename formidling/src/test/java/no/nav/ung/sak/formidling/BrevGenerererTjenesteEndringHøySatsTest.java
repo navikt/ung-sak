@@ -150,7 +150,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         var brevGenerererTjeneste = lagBrevGenererTjeneste(false);
 
         var behandling = lagScenario(
-            BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
+            BrevScenarioer.endring25År(LocalDate.of(2024, 12, 1)));
 
 
         GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId(), brevGenerererTjeneste);

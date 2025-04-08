@@ -1,22 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.time.LocalDate;
-
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -47,7 +30,7 @@ import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelseperioder.YtelseperiodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -155,14 +138,14 @@ class BrevGenerererTjenesteEndringInntektTest {
         var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsytelsen din " +
-            "Du får 7 393 kroner i ungdomsytelse for perioden fra 1. desember 2024 til 31. desember 2024. " +
-            "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
-            "Pengene får du utbetalt før den 10. denne måneden. " +
-            "Når du har en inntekt, får du mindre penger i ungdomsytelse. " +
-            "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden. " +
-            "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen. " +
-            "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen. " +
-            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+                "Du får 8 029 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Pengene får du utbetalt før den 10. denne måneden. " +
+                "Når du har en inntekt, får du mindre penger i ungdomsytelse. " +
+                "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden. " +
+                "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen. " +
+                "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen. " +
+                "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
 
         var behandling = lagScenario(ungTestGrunnlag);
 
