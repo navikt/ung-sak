@@ -2,15 +2,12 @@ package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -21,8 +18,8 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -79,16 +76,24 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
         if (behandling.getBehandlingÅrsaker().isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
+        List<BehandlingÅrsakType> behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper();
 
-        LocalDateTimeline<Boolean> endretUngdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(BehandlingReferanse.fra(behandling));
-        opprettTaskForEtterlysning(kontekst, endretUngdomsprogramTidslinje);
+        boolean skalOppretteEtterlysning = behandlingÅrsakerTyper.stream()
+            .anyMatch(årsak ->
+                BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM == årsak ||
+                    BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == årsak
+            );
+
+        if (skalOppretteEtterlysning) {
+            opprettTaskForEtterlysning(kontekst);
+        }
 
         final var bekreftelser = finnBekreftelser(behandling);
         final var gyldigeDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
         final var ungdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId()).compress();
 
         return VarselRevurderingAksjonspunktUtleder.utledAksjonspunkt(
-                behandling.getBehandlingÅrsakerTyper(),
+                behandlingÅrsakerTyper,
                 ungdomsprogramTidslinje,
                 gyldigeDokumenter,
                 bekreftelser,
@@ -106,7 +111,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             .flatMap(it -> it.getBekreftetPeriodeEndringer().stream()).toList();
     }
 
-    private void opprettTaskForEtterlysning(BehandlingskontrollKontekst kontekst, LocalDateTimeline<Boolean> endretUngdomsprogramTidslinje) {
+    private void opprettTaskForEtterlysning(BehandlingskontrollKontekst kontekst) {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow();
 
         List<Trigger> triggere = prosessTriggereRepository.hentGrunnlag(kontekst.getBehandlingId())
@@ -115,40 +120,46 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             .flatMap(Collection::stream)
             .toList();
 
-        LocalDateTimeline<Set<Etterlysning>> etterlysningerLocalDateTimeline = triggere
-            .stream()
-            .map(trigger -> {
-                    Etterlysning etterlysning = mapTilEtterlysning(kontekst, trigger, ungdomsprogramPeriodeGrunnlag);
-                    if (etterlysning == null) {
-                        return null;
-                    }
-                    return new LocalDateTimeline(
-                        trigger.getPeriode().getFomDato(),
-                        trigger.getPeriode().getTomDato(),
-                        Set.of(etterlysning));
-                }
-            )
-            .filter(Objects::nonNull)
-            .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::union))
-            .orElse(LocalDateTimeline.empty());
+        List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
+        List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
+        final var prosessTaskGruppe = new ProsessTaskGruppe();
 
-        etterlysningerLocalDateTimeline.stream()
+        triggere.stream()
             .filter(Objects::nonNull)
-            .forEach(etterlysningSegment -> {
-                Etterlysning etterlysning = etterlysningSegment.getValue().iterator().next();
+            .map(trigger -> mapTilEtterlysning(kontekst, trigger, ungdomsprogramPeriodeGrunnlag))
+            .filter(Objects::nonNull)
+            .forEach(etterlysning -> {
                 List<Etterlysning> eksiterendeEtterLysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), etterlysning.getType());
-                if (eksiterendeEtterLysninger.isEmpty()) {
-                    etterlysningRepository.lagre(etterlysning);
 
-                    var prosessTaskData = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
-                    prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, etterlysning.getType().getKode());
-                    prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
-                    prosessTaskTjeneste.lagre(prosessTaskData);
+                if (eksiterendeEtterLysninger.isEmpty()) {
+                    etterlysningerSomSkalOpprettes.add(etterlysning);
                 } else {
                     // TODO: Håndter eksisterende etterlysning av samme type som ikke er besvart.
                     logger.info("Etterlysning {} finnes allerede for behandling {}", etterlysning.getType(), kontekst.getBehandlingId());
+
+                    eksiterendeEtterLysninger
+                        .stream()
+                        .filter(eksiterendeEtterLysning -> eksiterendeEtterLysning.getType() == etterlysning.getType())
+                        .forEach(eksiterendeEtterLysning -> {
+                            eksiterendeEtterLysning.skalAvbrytes();
+                            etterlysningerSomSkalAvbrytes.add(eksiterendeEtterLysning);
+                        });
                 }
             });
+
+        if (!etterlysningerSomSkalAvbrytes.isEmpty()) {
+            logger.info("Avbryter etterlysninger {}", etterlysningerSomSkalAvbrytes);
+            etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
+            prosessTaskGruppe.addNesteSekvensiell(lagTaskForAvbrytelseAvEtterlysning(kontekst));
+        }
+        if (!etterlysningerSomSkalOpprettes.isEmpty()) {
+            logger.info("Oppretter etterlysninger {}", etterlysningerSomSkalOpprettes);
+            etterlysningRepository.lagre(etterlysningerSomSkalOpprettes);
+            prosessTaskGruppe.addNesteSekvensiell(lagTaskForOpprettingAvEtterlysning(kontekst));
+        }
+        if (!prosessTaskGruppe.getTasks().isEmpty()) {
+            prosessTaskTjeneste.lagre(prosessTaskGruppe);
+        }
     }
 
     @Nullable
@@ -177,14 +188,16 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
         };
     }
 
-    private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateSegment<KontrollResultat> segment) {
-        var etterlysningerSomSkalAvbrytes = etterlysninger.stream()
-            .filter(etterlysning ->
-                etterlysning.getPeriode().toLocalDateInterval().overlaps(segment.getLocalDateInterval()))
-            .filter(e -> e.getStatus().equals(EtterlysningStatus.VENTER))
-            .toList();
-        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
+    private ProsessTaskData lagTaskForAvbrytelseAvEtterlysning(BehandlingskontrollKontekst kontekst) {
+        var prosessTaskData = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
+        prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
+        return prosessTaskData;
+    }
 
-        return etterlysningerSomSkalAvbrytes;
+    private ProsessTaskData lagTaskForOpprettingAvEtterlysning(BehandlingskontrollKontekst kontekst) {
+        var prosessTaskData = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
+        prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT.getKode());
+        prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
+        return prosessTaskData;
     }
 }
