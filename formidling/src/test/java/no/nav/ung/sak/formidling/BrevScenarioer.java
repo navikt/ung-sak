@@ -32,6 +32,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -166,7 +167,7 @@ public class BrevScenarioer {
         return endringMedInntektPå10k_19år(fom,
             new LocalDateInterval(fom.withDayOfMonth(1).plusMonths(1),
                 fom.withDayOfMonth(1).plusMonths(1)
-                    .with(TemporalAdjusters.lastDayOfMonth())));
+                    .with(TemporalAdjusters.lastDayOfMonth())), 10000);
     }
 
     /**
@@ -178,11 +179,21 @@ public class BrevScenarioer {
             fom.withDayOfMonth(1).plusMonths(1),
             fom.withDayOfMonth(1).plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()));
 
-        return endringMedInntektPå10k_19år(fom, rapportertInntektPeriode);
+        return endringMedInntektPå10k_19år(fom, rapportertInntektPeriode, 10000);
+    }
+
+    /**
+     * 19 år ungdom med full ungdomsperiode uten inntekt og rapporterer ingen inntekt
+     */
+    public static UngTestScenario endring0inntekt_19år(LocalDate fom) {
+        return endringMedInntektPå10k_19år(fom,
+            new LocalDateInterval(fom.withDayOfMonth(1).plusMonths(1),
+                fom.withDayOfMonth(1).plusMonths(1)
+                    .with(TemporalAdjusters.lastDayOfMonth())), null);
     }
 
     @NotNull
-    private static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom, LocalDateInterval rapportertInntektPeriode) {
+    private static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom, LocalDateInterval rapportertInntektPeriode, Integer rapportertInntektPrMåned) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
@@ -190,7 +201,7 @@ public class BrevScenarioer {
         var satser = new LocalDateTimeline<>(p, sats);
 
         var satserPrMåned = splitPrMåned(satser);
-        var rapportertInntektTimeline = splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, BigDecimal.valueOf(10000)));
+        var rapportertInntektTimeline = splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, rapportertInntektPrMåned != null ? BigDecimal.valueOf(rapportertInntektPrMåned) : BigDecimal.ZERO));
         var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
 
         var opptjening = OppgittOpptjeningBuilder.ny();
@@ -201,11 +212,11 @@ public class BrevScenarioer {
                 .medPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             ));
 
-        var triggere = Set.of(
-            new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode)),
-            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode))
-        );
-
+        var triggere = HashSet.<Trigger>newHashSet(2);
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode)));
+        if (rapportertInntektPrMåned != null) {
+            triggere.add(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode)));
+        }
 
         return new UngTestScenario(
             DEFAULT_NAVN,

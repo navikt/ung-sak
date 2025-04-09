@@ -16,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -114,58 +113,76 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var avslåtteVilkår = vilkårResultat.avslåtteVilkår();
         var behandlingsårsaker = vilkårResultat.behandlingÅrsaker();
 
-        DetaljertResultatType resultatType = bestemResultat(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker);
+        var resultatType = bestemResultat(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker);
 
         return DetaljertResultat.of(resultatType, behandlingsårsaker, avslåtteVilkår, vilkårSomIkkeErVurdert);
 
     }
 
     @NotNull
-    private static DetaljertResultatType bestemResultat(
+    private static DetaljertResultatInfo bestemResultat(
         LocalDateInterval p,
         SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat,
         TilkjentYtelseVerdi tilkjentYtelse,
         Set<BehandlingÅrsakType> behandlingsårsaker) {
 
         if (!vilkårResultat.ikkeVurderteVilkår().isEmpty())  {
-            return DetaljertResultatType.IKKE_VURDERT;
+            return DetaljertResultatInfo.of(DetaljertResultatType.IKKE_VURDERT);
         }
 
         if (!vilkårResultat.avslåtteVilkår().isEmpty()) {
-            return DetaljertResultatType.AVSLAG_INNGANGSVILKÅR;
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
         }
 
         if (tilkjentYtelse != null) {
-            DetaljertResultatType tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
+            var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
             if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
         }
 
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
-            return DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE;
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE);
         }
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
-            return DetaljertResultatType.ENDRING_ØKT_SATS;
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS);
+        }
+
+        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør av ungdomsprogram");
         }
 
         throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkår %s og tilkjent ytelse %s og behandlingårsaker %s"
                 .formatted(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker));
     }
 
-    @Nullable
-    private static DetaljertResultatType bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
+    private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
         if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
-            if (tilkjentYtelse.utbetalingsgrad() > 0) {
-                return DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT;
+            // Behandling for å kontrollere inntekt
+            if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)) {
+                if (tilkjentYtelse.utbetalingsgrad() > 0) {
+                    return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT);
+                }
+                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT);
             }
-            return DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT;
+
+            // Har ikke rapportert inntekt
+            if (tilkjentYtelse.utbetalingsgrad() > 0) {
+                return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_UTEN_INNTEKT);
+            }
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT, "Ingen tilkjent ytelse og mangler rapportert inntekt");
         }
 
+        // Behandling ved endring av programperiode
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
             if (tilkjentYtelse.utbetalingsgrad() > 0) {
-                return DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE;
+                return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE);
             }
-            return DetaljertResultatType.AVSLAG_UTBETALING_NY_PERIODE;
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Ny programperiode uten tilkjent ytelse og uten rapportert inntekt");
         }
+
+        if (tilkjentYtelse.utbetalingsgrad() == 0) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Ingen utbetalingsgrad. TilkjentYtelse: %s, Behandlingsårsaker: %s".formatted(tilkjentYtelse, behandlingsårsaker));
+        }
+
         return null;
     }
 

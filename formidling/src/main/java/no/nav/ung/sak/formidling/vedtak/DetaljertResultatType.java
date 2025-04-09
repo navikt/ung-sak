@@ -8,12 +8,17 @@ public enum DetaljertResultatType {
     IKKE_VURDERT("Ikke vurdert"),
     INNVILGELSE_VILKÅR_NY_PERIODE("Innvilgelse av vilkår for ny periode uten utbetaling"),
     INNVILGELSE_UTBETALING_NY_PERIODE("Innvilgelse av ny periode med utbetaling"),
-    AVSLAG_UTBETALING_NY_PERIODE("Avslag pga annen gradering") //
+    INNVILGELSE_UTBETALING_UTEN_INNTEKT("Innvilgelse med utbetaling uten rapportert inntekt"),
+    AVSLAG_ANNET("Avslag pga annen årsak - se beskrivelse"),
     ;
 
-    private final String beskrivelse;
+    private final String navn;
 
-    DetaljertResultatType(String beskrivelse) {
-        this.beskrivelse = beskrivelse;
+    DetaljertResultatType(String navn) {
+        this.navn = navn;
+    }
+
+    public String getNavn() {
+        return navn;
     }
 }

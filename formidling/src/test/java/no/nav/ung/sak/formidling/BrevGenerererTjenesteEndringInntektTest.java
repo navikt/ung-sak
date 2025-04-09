@@ -196,6 +196,16 @@ class BrevGenerererTjenesteEndringInntektTest {
             );
     }
 
+    @DisplayName("Ingen brev ved ingen rapportert inntekt og ingen inntekt")
+    @Test
+    void full_ungdomsprogram_med_ingen_rapportert_inntekt_gir_ingen_brev() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = BrevScenarioer.endring0inntekt_19år(fom);
+        var behandling = lagScenario(ungTestGrunnlag);
+        assertThat(genererVedtaksbrevBrev(behandling.getId())).isNull();
+
+    }
+
 
     @Test
     void pdfStrukturTest() throws IOException {

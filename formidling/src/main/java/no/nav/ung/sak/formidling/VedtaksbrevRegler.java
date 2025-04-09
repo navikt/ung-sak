@@ -11,6 +11,7 @@ import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 import org.slf4j.Logger;
@@ -58,20 +59,19 @@ public class VedtaksbrevRegler {
     private VedtaksbrevInnholdBygger bestemBygger(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = detaljertResultat
             .toSegments().stream()
-            .flatMap(it -> it.getValue().resultatTyper().stream())
+            .flatMap(it -> it.getValue().resultatInfo().stream().map(DetaljertResultatInfo::detaljertResultatType))
             .collect(Collectors.toSet());
 
         if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
             || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
             return innholdByggere.select(InnvilgelseInnholdBygger.class).get();
-        } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT) || innholderBare(resultater, DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT)) {
+        } else if (resultater.contains(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT)) {
             return innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get();
         } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
             return innholdByggere.select(EndringHøySatsInnholdBygger.class).get();
         } else {
             return null;
         }
-
     }
 
 

@@ -16,6 +16,7 @@ import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederFake;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -90,7 +91,7 @@ class BrevGenerererTjenesteTest {
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(),
                 new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger), new DetaljertResultatUtlederFake(
-                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, Collections.emptySet(), Collections.emptySet(), Collections.emptySet())))));
+                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet())))));
 
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
