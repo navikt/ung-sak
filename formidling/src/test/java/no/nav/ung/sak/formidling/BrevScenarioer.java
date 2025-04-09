@@ -24,6 +24,7 @@ import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -126,7 +127,7 @@ public class BrevScenarioer {
     }
 
     /**
-     *  24 år, søker måneden ungdom blir 25 år. Får både lav og høy sats
+     * 24 år, søker måneden ungdom blir 25 år. Får både lav og høy sats
      * ingen inntektsgradering og ingen barn
      */
     public static UngTestScenario innvilget24ÅrSøkerPå25årsdagen(LocalDate fødselsdato) {
@@ -162,6 +163,26 @@ public class BrevScenarioer {
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom) {
+        return endringMedInntektPå10k_19år(fom,
+            new LocalDateInterval(fom.withDayOfMonth(1).plusMonths(1),
+                fom.withDayOfMonth(1).plusMonths(1)
+                    .with(TemporalAdjusters.lastDayOfMonth())));
+    }
+
+    /**
+     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre og tredje måned på 10 000 kroner.
+     * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
+     */
+    public static UngTestScenario endringMedInntektPå10k_flere_mnd_19år(LocalDate fom) {
+        LocalDateInterval rapportertInntektPeriode = new LocalDateInterval(
+            fom.withDayOfMonth(1).plusMonths(1),
+            fom.withDayOfMonth(1).plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()));
+
+        return endringMedInntektPå10k_19år(fom, rapportertInntektPeriode);
+    }
+
+    @NotNull
+    private static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom, LocalDateInterval rapportertInntektPeriode) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
@@ -169,20 +190,20 @@ public class BrevScenarioer {
         var satser = new LocalDateTimeline<>(p, sats);
 
         var satserPrMåned = splitPrMåned(satser);
-        var satserAndreMåned = satserPrMåned.toSegments().stream().skip(1).findFirst().get();
-        var andreMåned = satserAndreMåned.getLocalDateInterval();
-        var rapportertInntektTimeline = new LocalDateTimeline<>(andreMåned, BigDecimal.valueOf(10000));
-        var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, andreMåned, rapportertInntektTimeline);
+        var rapportertInntektTimeline = splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, BigDecimal.valueOf(10000)));
+        var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
 
         var opptjening = OppgittOpptjeningBuilder.ny();
-        opptjening.leggTilOppgittArbeidsforhold(OppgittArbeidsforholdBuilder.ny()
-            .medInntekt(BigDecimal.valueOf(10000))
-            .medPeriode(DatoIntervallEntitet.fra(andreMåned))
-        );
+
+        rapportertInntektTimeline.forEach(it ->
+            opptjening.leggTilOppgittArbeidsforhold(OppgittArbeidsforholdBuilder.ny()
+                .medInntekt(it.getValue())
+                .medPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            ));
 
         var triggere = Set.of(
-            new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(andreMåned)),
-            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(andreMåned))
+            new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode)),
+            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode))
         );
 
 

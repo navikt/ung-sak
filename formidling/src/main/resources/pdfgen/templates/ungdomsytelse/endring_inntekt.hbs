@@ -4,10 +4,22 @@
     {{#> felles/seksjon/hoved }}
         <h1>Vi har endret ungdomsytelsen din</h1>
         <p>
-            Du får {{> felles/beløp utbetalingBeløp}} i ungdomsytelse for perioden {{> felles/periode-inline periode}}.
-            Det er fordi du har hatt en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.
+            Du får {{> felles/beløp totalUtbetalingBeløp}} i ungdomsytelse for perioden {{> felles/periode-inline totalPeriode}}.
+            Det er fordi du har hatt en inntekt på {{> felles/beløp totalRapportertInntekt}} i denne perioden.
         </p>
+
         <p>Pengene får du utbetalt før den 10. denne måneden. </p>
+
+        {{#if harRapportertFlerePerioder}}
+            Vi har registrert følgende inntekter på deg:
+            <ul>
+                {{#each perioder}}
+                    <li>{{> felles/periode periode}} har du hatt en inntekt på {{> felles/beløp rapportertInntekt}}.</li>
+                {{/each}}
+            </ul>
+        {{/if}}
+
+
         <p>
             Når du har en inntekt, får du mindre penger i ungdomsytelse. Vi regner ut hva {{reduksjonssats}} prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden.
         </p>
