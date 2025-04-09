@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.perioder;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -22,6 +23,10 @@ public class UngdomsprogramPeriodeRepository {
 
     public Optional<UngdomsprogramPeriodeGrunnlag> hentGrunnlag(Long behandlingId) {
         return hentEksisterendeGrunnlag(behandlingId);
+    }
+
+    public Optional<UngdomsprogramPeriodeGrunnlag> hentGrunnlagFraGrunnlagsReferanse(UUID grunnlagsReferanse) {
+        return hentEksisterendeGrunnlag(grunnlagsReferanse);
     }
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder) {
@@ -62,6 +67,18 @@ public class UngdomsprogramPeriodeRepository {
                 "AND gr.aktiv = true", UngdomsprogramPeriodeGrunnlag.class);
 
         query.setParameter("behandlingId", id);
+
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    private Optional<UngdomsprogramPeriodeGrunnlag> hentEksisterendeGrunnlag(UUID grunnlagsReferanse) {
+        var query = entityManager.createQuery(
+            "SELECT gr " +
+                "FROM UngdomsprogramPeriodeGrunnlag gr " +
+                "WHERE gr.grunnlagsreferanse = :grunnlagsReferanse " +
+                "AND gr.aktiv = true", UngdomsprogramPeriodeGrunnlag.class);
+
+        query.setParameter("grunnlagsReferanse", grunnlagsReferanse);
 
         return HibernateVerktøy.hentUniktResultat(query);
     }

@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsprogramBekref
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -25,11 +26,13 @@ import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import org.apache.commons.lang3.stream.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
@@ -111,8 +114,6 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     }
 
     private void opprettTaskForEtterlysning(BehandlingskontrollKontekst kontekst) {
-        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow();
-
         List<Trigger> relevanteTriggerForEtterlysning = prosessTriggereRepository.hentGrunnlag(kontekst.getBehandlingId())
             .stream()
             .map(ProsessTriggere::getTriggere)
@@ -123,12 +124,41 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             )
             .toList();
 
+
+        List<EtterLysningUngdomsPeriodeGrunnlag> etterLysningerUngdomsPeriodeGrunnlag = Streams.of(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)
+            .flatMap(type -> etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), type).stream())
+            .map(e -> {
+                Optional<Set<DatoIntervallEntitet>> periodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(e.getGrunnlagsreferanse())
+                    .map(it -> it.getUngdomsprogramPerioder().getPerioder().stream()
+                        .map(UngdomsprogramPeriode::getPeriode)
+                        .collect(Collectors.toSet()));
+
+                return EtterLysningUngdomsPeriodeGrunnlag.of(e, periodeGrunnlag.orElse(Set.of()));
+            })
+            .toList();
+
+        etterLysningerUngdomsPeriodeGrunnlag.forEach(etterLysningUngdomsPeriodeGrunnlag ->
+            {
+                if (etterLysningUngdomsPeriodeGrunnlag.perioder.isEmpty()) {
+                    // TODO: Hvorfor har en eksisterende etterlysning ingen perioder?
+                } else {
+                    //TOOD: Avbryt etterlysning dersom det er en overlap med eksisterende etterlysning
+                }
+            }
+        );
+
+        Optional<Trigger> sisteEndretStartdatoTrigger = relevanteTriggerForEtterlysning.stream()
+            .filter(t -> t.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+            .max(Comparator.comparing(Trigger::getOpprettetTidspunkt));
+
+
+        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow();
+
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
         final var prosessTaskGruppe = new ProsessTaskGruppe();
 
         relevanteTriggerForEtterlysning.stream()
-            .filter(Objects::nonNull)
             .map(trigger -> mapTilEtterlysning(kontekst, trigger, ungdomsprogramPeriodeGrunnlag))
             .forEach(etterlysning -> {
                 List<Etterlysning> eksiterendeEtterLysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), etterlysning.getType());
@@ -200,5 +230,11 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
         prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT.getKode());
         prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
         return prosessTaskData;
+    }
+
+    record EtterLysningUngdomsPeriodeGrunnlag(Etterlysning etterlysning, Set<DatoIntervallEntitet> perioder) {
+        public static EtterLysningUngdomsPeriodeGrunnlag of(Etterlysning etterlysning, Set<DatoIntervallEntitet> perioder) {
+            return new EtterLysningUngdomsPeriodeGrunnlag(etterlysning, perioder);
+        }
     }
 }
