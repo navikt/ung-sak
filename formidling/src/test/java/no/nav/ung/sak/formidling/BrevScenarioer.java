@@ -164,7 +164,7 @@ public class BrevScenarioer {
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom) {
-        return endringMedInntektPå10k_19år(fom,
+        return endringMedInntekt_19år(fom,
             new LocalDateInterval(fom.withDayOfMonth(1).plusMonths(1),
                 fom.withDayOfMonth(1).plusMonths(1)
                     .with(TemporalAdjusters.lastDayOfMonth())), 10000);
@@ -179,21 +179,21 @@ public class BrevScenarioer {
             fom.withDayOfMonth(1).plusMonths(1),
             fom.withDayOfMonth(1).plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()));
 
-        return endringMedInntektPå10k_19år(fom, rapportertInntektPeriode, 10000);
+        return endringMedInntekt_19år(fom, rapportertInntektPeriode, 10000);
     }
 
     /**
      * 19 år ungdom med full ungdomsperiode uten inntekt og rapporterer ingen inntekt
      */
-    public static UngTestScenario endring0inntekt_19år(LocalDate fom) {
-        return endringMedInntektPå10k_19år(fom,
+    public static UngTestScenario endring0KrInntekt_19år(LocalDate fom) {
+        return endringMedInntekt_19år(fom,
             new LocalDateInterval(fom.withDayOfMonth(1).plusMonths(1),
                 fom.withDayOfMonth(1).plusMonths(1)
                     .with(TemporalAdjusters.lastDayOfMonth())), null);
     }
 
     @NotNull
-    private static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom, LocalDateInterval rapportertInntektPeriode, Integer rapportertInntektPrMåned) {
+    private static UngTestScenario endringMedInntekt_19år(LocalDate fom, LocalDateInterval rapportertInntektPeriode, Integer rapportertInntektPrMåned) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
