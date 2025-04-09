@@ -25,7 +25,6 @@ import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,27 +113,29 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     private void opprettTaskForEtterlysning(BehandlingskontrollKontekst kontekst) {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow();
 
-        List<Trigger> triggere = prosessTriggereRepository.hentGrunnlag(kontekst.getBehandlingId())
+        List<Trigger> relevanteTriggerForEtterlysning = prosessTriggereRepository.hentGrunnlag(kontekst.getBehandlingId())
             .stream()
             .map(ProsessTriggere::getTriggere)
             .flatMap(Collection::stream)
+            .filter(trigger ->
+                trigger.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM ||
+                    trigger.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+            )
             .toList();
 
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
         final var prosessTaskGruppe = new ProsessTaskGruppe();
 
-        triggere.stream()
+        relevanteTriggerForEtterlysning.stream()
             .filter(Objects::nonNull)
             .map(trigger -> mapTilEtterlysning(kontekst, trigger, ungdomsprogramPeriodeGrunnlag))
-            .filter(Objects::nonNull)
             .forEach(etterlysning -> {
                 List<Etterlysning> eksiterendeEtterLysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), etterlysning.getType());
 
                 if (eksiterendeEtterLysninger.isEmpty()) {
                     etterlysningerSomSkalOpprettes.add(etterlysning);
                 } else {
-                    // TODO: Håndter eksisterende etterlysning av samme type som ikke er besvart.
                     logger.info("Etterlysning {} finnes allerede for behandling {}", etterlysning.getType(), kontekst.getBehandlingId());
 
                     eksiterendeEtterLysninger
@@ -162,7 +163,6 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
         }
     }
 
-    @Nullable
     private static Etterlysning mapTilEtterlysning(BehandlingskontrollKontekst kontekst, Trigger trigger, UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag) {
         BehandlingÅrsakType behandlingÅrsakType = trigger.getÅrsak();
         DatoIntervallEntitet periode = trigger.getPeriode();
@@ -184,7 +184,8 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
                 eksternReferanse,
                 periode
             );
-            case null, default -> null;
+            case null, default ->
+                throw new IllegalStateException("Ugyldig behandling årsak type: " + trigger.getÅrsak());
         };
     }
 
