@@ -71,7 +71,7 @@ public class Etterlysning extends BaseEntitet {
         UUID eksternReferanse,
         DatoIntervallEntitet periode
     ) {
-        return forEndretPeriodeUttalelse(
+        return opprettForType(
             behandlingId,
             grunnlagsreferanse,
             eksternReferanse,
@@ -87,7 +87,7 @@ public class Etterlysning extends BaseEntitet {
         DatoIntervallEntitet periode
     ) {
 
-        return forEndretPeriodeUttalelse(
+        return opprettForType(
             behandlingId,
             grunnlagsreferanse,
             eksternReferanse,
@@ -96,14 +96,13 @@ public class Etterlysning extends BaseEntitet {
         );
     }
 
-    private static Etterlysning forEndretPeriodeUttalelse(
+    public static Etterlysning opprettForType(
         Long behandlingId,
         UUID grunnlagsreferanse,
         UUID eksternReferanse,
         DatoIntervallEntitet periode,
         EtterlysningType type
     ) {
-
         return new Etterlysning(
             behandlingId,
             grunnlagsreferanse,
