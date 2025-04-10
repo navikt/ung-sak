@@ -15,9 +15,11 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -59,7 +61,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     }
 
     private static LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> kombinerVilkårOgBehandlingsårsaker(LocalDateInterval p, LocalDateSegment<Set<BehandlingÅrsakType>> lhs, LocalDateSegment<List<DetaljertVilkårResultat>> rhs) {
-        Set<BehandlingÅrsakType> årsaker = lhs != null ? lhs.getValue() : Collections.emptySet();
+        Set<BehandlingÅrsakType> årsaker = lhs.getValue();
         List<DetaljertVilkårResultat> samletResultat = rhs != null ? rhs.getValue() : null;
 
         if (samletResultat == null) {
@@ -71,7 +73,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     }
 
     private static LocalDateSegment<DetaljertResultat> kombinerMedTilkjentYtelse(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {
-        SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat = lhs != null ? lhs.getValue() : null;
+        SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat = lhs.getValue();
         var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
 
         if (vilkårResultat == null) {
@@ -119,7 +121,6 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     }
 
-    @NotNull
     private static DetaljertResultatInfo bestemResultat(
         LocalDateInterval p,
         SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat,
