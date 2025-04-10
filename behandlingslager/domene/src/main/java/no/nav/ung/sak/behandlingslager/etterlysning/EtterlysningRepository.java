@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,7 +51,7 @@ public class EtterlysningRepository {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
                                                              "where e.behandlingId = :behandlingId and e.type in :type", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
-            .setParameter("type", type)
+            .setParameter("type", Arrays.stream(type).toList())
             .getResultList();
         return etterlysninger;
     }
