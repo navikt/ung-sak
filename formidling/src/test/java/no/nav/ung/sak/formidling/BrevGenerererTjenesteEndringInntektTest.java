@@ -1,22 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.time.LocalDate;
-
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -47,6 +30,22 @@ import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.io.IOException;
+import java.time.LocalDate;
+
+import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for brevtekster for innvilgelse. Bruker html for å validere.
@@ -99,7 +98,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-            tilkjentYtelseRepository);
+            tilkjentYtelseRepository, repositoryProvider.getVilkårResultatRepository());
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
 
@@ -139,14 +138,14 @@ class BrevGenerererTjenesteEndringInntektTest {
         var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsytelsen din " +
-            "Du får 7 393 kroner i ungdomsytelse for perioden fra 1. desember 2024 til 31. desember 2024. " +
-            "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
-            "Pengene får du ubetalt før den 10. denne måneden. " +
-            "Når du har en inntekt, får du mindre penger i ungdomsytelse. " +
-            "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden. " +
-            "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen. " +
-            "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen. " +
-            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+                "Du får 8 029 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Pengene får du utbetalt før den 10. denne måneden. " +
+                "Når du har en inntekt, får du mindre penger i ungdomsytelse. " +
+                "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden. " +
+                "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen. " +
+                "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen. " +
+                "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -162,6 +161,51 @@ class BrevGenerererTjenesteEndringInntektTest {
                 "Se <a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen."
             );
     }
+
+    @DisplayName("Endringsbrev med flere perioder")
+    @Test
+    void melder_inntekt_for_flere_mnd() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret ungdomsytelsen din " +
+                "Du får 14 150 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
+                "Det er fordi du har hatt en inntekt på 20 000 kroner i denne perioden. " +
+                "Pengene får du utbetalt før den 10. denne måneden. " +
+                "Vi har registrert følgende inntekter på deg: " +
+                "Fra 1. januar 2025 til 31. januar 2025 har du hatt en inntekt på 10 000 kroner. " +
+                "Fra 1. februar 2025 til 28. februar 2025 har du hatt en inntekt på 10 000 kroner. " +
+                "Når du har en inntekt, får du mindre penger i ungdomsytelse. " +
+                "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden. " +
+                "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen. " +
+                "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen. " +
+                "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsytelsen din</h1>",
+                "Se <a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen."
+            );
+    }
+
+    @DisplayName("Ingen brev ved ingen rapportert inntekt og ingen inntekt")
+    @Test
+    void full_ungdomsprogram_med_ingen_rapportert_inntekt_gir_ingen_brev() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = BrevScenarioer.endring0KrInntekt_19år(fom);
+        var behandling = lagScenario(ungTestGrunnlag);
+        assertThat(genererVedtaksbrevBrev(behandling.getId())).isNull();
+
+    }
+
 
     @Test
     void pdfStrukturTest() throws IOException {

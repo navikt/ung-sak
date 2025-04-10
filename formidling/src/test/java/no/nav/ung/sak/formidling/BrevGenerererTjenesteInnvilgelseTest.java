@@ -1,21 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.time.LocalDate;
-
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -43,6 +27,21 @@ import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.io.IOException;
+import java.time.LocalDate;
+
+import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for brevtekster for innvilgelse. Bruker html for å validere.
@@ -100,7 +99,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         DetaljertResultatUtlederImpl detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste),
-            tilkjentYtelseRepository);
+            tilkjentYtelseRepository, repositoryProvider.getVilkårResultatRepository());
 
         VedtaksbrevRegler vedtaksbrevRegler = new VedtaksbrevRegler(
             repositoryProvider.getBehandlingRepository(), new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger),
@@ -265,15 +264,14 @@ class BrevGenerererTjenesteInnvilgelseTest {
     //dekker flere dagsatser også
     @Test
     void lavOgHøySats() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
         var fødselsdato = LocalDate.of(2000, 5, 15); //Blir 25 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget24År(fom, fødselsdato);
+        var ungTestGrunnlag = BrevScenarioer.innvilget24ÅrSøkerPå25årsdagen(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Nav har innvilget søknaden din om ungdomsytelse \
-                Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager. \
-                Fra 1. desember 2024 til 31. mai 2025 får du utbetalt 636 kroner dagen, før skatt. \
-                Fra 1. juni 2025 til 29. november 2025 får du utbetalt 954 kroner dagen, før skatt. \
+                Du har rett til ungdomsytelse fra 1. mai 2025 i 260 dager. \
+                Fra 1. mai 2025 til 15. mai 2025 får du utbetalt 636 kroner dagen, før skatt. \
+                Fra 16. mai 2025 til 31. mai 2025 får du utbetalt 954 kroner dagen, før skatt. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
                 Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
@@ -285,9 +283,9 @@ class BrevGenerererTjenesteInnvilgelseTest {
                 Du får 1.33 ganger grunnbeløpet mens du er under 25 år og 2 ganger grunnbeløpet fra måneden etter du fyller 25 år. \
                 Nav regner med 260 virkedager per år utenom helger og ferie. \
                 For å regne ut hva du får per dag, deles årsbeløpet på antall dager. \
-                Fra 1. desember 2024 til 31. mai 2025 har du rett på 1.33 x 124 028 = 165 370 kroner i årsbeløp. \
+                Fra 1. mai 2025 til 15. mai 2025 har du rett på 1.33 x 124 028 = 165 370 kroner i årsbeløp. \
                 Dette gir en dagsats på 636 kroner i perioden. \
-                Fra 1. juni 2025 til 29. november 2025 har du rett på 2 x 124 028 = 248 056 kroner i årsbeløp. \
+                Fra 16. mai 2025 til 31. mai 2025 har du rett på 2 x 124 028 = 248 056 kroner i årsbeløp. \
                 Dette gir en dagsats på 954 kroner i perioden. \
                 For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
                 Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \

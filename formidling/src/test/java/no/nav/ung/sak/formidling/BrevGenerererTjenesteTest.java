@@ -1,14 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -25,6 +16,7 @@ import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederFake;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -32,6 +24,14 @@ import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**
  * Tester at pdf blir generert riktig.
@@ -91,7 +91,7 @@ class BrevGenerererTjenesteTest {
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(),
                 new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger), new DetaljertResultatUtlederFake(
-                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> new DetaljertResultat(Set.of(DetaljertResultatType.INNVILGET_NY_PERIODE))))));
+                ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet())))));
 
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());

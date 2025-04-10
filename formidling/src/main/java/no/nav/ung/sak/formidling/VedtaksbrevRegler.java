@@ -11,12 +11,13 @@ import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,28 +59,24 @@ public class VedtaksbrevRegler {
     private VedtaksbrevInnholdBygger bestemBygger(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = detaljertResultat
             .toSegments().stream()
-            .flatMap(it -> it.getValue().resultatTyper().stream())
+            .flatMap(it -> it.getValue().resultatInfo().stream().map(DetaljertResultatInfo::detaljertResultatType))
             .collect(Collectors.toSet());
 
-        if (innholderBare(resultater, DetaljertResultatType.INNVILGET_NY_PERIODE)) {
+        if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
+            || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
             return innholdByggere.select(InnvilgelseInnholdBygger.class).get();
-        } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT) || innholderBare(resultater, DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT)) {
+        } else if (resultater.contains(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT)) {
             return innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get();
         } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
             return innholdByggere.select(EndringHøySatsInnholdBygger.class).get();
         } else {
             return null;
         }
-
-    }
-
-    private static String detaljertResultatString(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        return String.join(", ", detaljertResultatTidslinje.toSegments().stream()
-            .map(it -> it.getLocalDateInterval().toString() +" -> "+ it.getValue().resultatTyper()).collect(Collectors.toSet()));
     }
 
 
-    private static boolean innholderBare(Set<DetaljertResultatType> resultater, DetaljertResultatType detaljertResultatType) {
-        return resultater.equals(Collections.singleton(detaljertResultatType));
+    @SafeVarargs
+    private static <V> boolean innholderBare(Set<V> set, V... value) {
+        return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
     }
 }

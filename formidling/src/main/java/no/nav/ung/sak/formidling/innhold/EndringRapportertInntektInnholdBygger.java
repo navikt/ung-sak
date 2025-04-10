@@ -1,12 +1,5 @@
 package no.nav.ung.sak.formidling.innhold;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -19,11 +12,20 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
+import no.nav.ung.sak.formidling.template.dto.endring.inntekt.EndringRapportertInntektPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Dependent
 public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -57,20 +59,40 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
 
         var rapporteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandling.getId());
 
-        var dtoTidslinje = relevantTilkjentYtelse.combine(rapporteInntekterTidslinje,
-            EndringRapportertInntektInnholdBygger::mapTilTemplateDto,
+        var periodeDtoTidslinje = relevantTilkjentYtelse.combine(rapporteInntekterTidslinje,
+            EndringRapportertInntektInnholdBygger::mapTilPeriodeDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        if (dtoTidslinje.size() > 1) {
-            throw new IllegalStateException("Kun 1 periode støttes. Fikk %s perioder. ".formatted(dtoTidslinje.size()));
-        }
+        EndringRapportertInntektDto dto = aggregerOgLagDto(periodeDtoTidslinje);
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT,
-            dtoTidslinje.stream().findFirst().orElseThrow().getValue()
-        );
+        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT, dto);
     }
 
-    private static LocalDateSegment<EndringRapportertInntektDto> mapTilTemplateDto(
+    private EndringRapportertInntektDto aggregerOgLagDto(
+        LocalDateTimeline<EndringRapportertInntektPeriodeDto> periodeDtoTidslinje) {
+        long sumRapportertInntekt = periodeDtoTidslinje.toSegments().stream()
+            .map(it -> it.getValue().rapportertInntekt())
+            .reduce(0L, Long::sum);
+
+        long sumUtbetaling = periodeDtoTidslinje.toSegments().stream()
+            .map(it -> it.getValue().utbetalingBeløp())
+            .reduce(0L, Long::sum);
+
+        return new EndringRapportertInntektDto(
+            new PeriodeDto(periodeDtoTidslinje.getMinLocalDate(), periodeDtoTidslinje.getMaxLocalDate()),
+            sumRapportertInntekt,
+            sumUtbetaling,
+            REDUSJON_PROSENT,
+            periodeDtoTidslinje.size() > 1,
+            periodeDtoTidslinje.toSegments().stream()
+                .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
+                .map(LocalDateSegment::getValue)
+                .collect(Collectors.toList())
+        );
+
+    }
+
+    private static LocalDateSegment<EndringRapportertInntektPeriodeDto> mapTilPeriodeDto(
         LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<RapporterteInntekter> rhs) {
         var ty = lhs.getValue();
 
@@ -81,7 +103,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             .map(RapportertInntekt::beløp).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new LocalDateSegment<>(p,
-            new EndringRapportertInntektDto(
+            new EndringRapportertInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
                 rapportertInntektSum.setScale(0, RoundingMode.HALF_UP).longValue(),
                 ty.redusertBeløp().setScale(0, RoundingMode.HALF_UP).longValue(),
