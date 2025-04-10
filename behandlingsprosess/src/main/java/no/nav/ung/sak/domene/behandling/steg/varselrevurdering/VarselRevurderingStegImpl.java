@@ -7,6 +7,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -124,16 +125,19 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             )
             .toList();
 
-
-        List<EtterLysningUngdomsPeriodeGrunnlag> etterLysningerUngdomsPeriodeGrunnlag = Streams.of(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)
+        List<Etterlysning> relevanteEtterlysninger = Streams.of(EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)
             .flatMap(type -> etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), type).stream())
+            .filter(e -> e.getStatus() == EtterlysningStatus.VENTER || e.getStatus() == EtterlysningStatus.OPPRETTET || e.getStatus() == EtterlysningStatus.MOTTATT_SVAR)
+            .toList();
+
+        List<EtterLysningUngdomsPeriodeGrunnlag> etterLysningerUngdomsPeriodeGrunnlag = relevanteEtterlysninger.stream()
             .map(e -> {
                 Optional<Set<DatoIntervallEntitet>> periodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(e.getGrunnlagsreferanse())
                     .map(it -> it.getUngdomsprogramPerioder().getPerioder().stream()
                         .map(UngdomsprogramPeriode::getPeriode)
                         .collect(Collectors.toSet()));
 
-                return EtterLysningUngdomsPeriodeGrunnlag.of(e, periodeGrunnlag.orElse(Set.of()));
+                return EtterLysningUngdomsPeriodeGrunnlag.of(e, periodeGrunnlag.orElseThrow(() -> new IllegalStateException("Fant ikke grunnlag for etterlysning " + e.getGrunnlagsreferanse())));
             })
             .toList();
 
