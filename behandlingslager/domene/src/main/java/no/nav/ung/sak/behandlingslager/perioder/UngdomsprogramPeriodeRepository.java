@@ -75,8 +75,7 @@ public class UngdomsprogramPeriodeRepository {
         var query = entityManager.createQuery(
             "SELECT gr " +
                 "FROM UngdomsprogramPeriodeGrunnlag gr " +
-                "WHERE gr.grunnlagsreferanse = :grunnlagsReferanse " +
-                "AND gr.aktiv = true", UngdomsprogramPeriodeGrunnlag.class);
+                "WHERE gr.grunnlagsreferanse = :grunnlagsReferanse", UngdomsprogramPeriodeGrunnlag.class);
 
         query.setParameter("grunnlagsReferanse", grunnlagsReferanse);
 
