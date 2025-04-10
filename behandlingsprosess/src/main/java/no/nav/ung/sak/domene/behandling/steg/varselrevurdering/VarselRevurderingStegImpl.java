@@ -125,10 +125,21 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             )
             .toList();
 
-        List<Etterlysning> relevanteEtterlysninger = Streams.of(EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)
+        List<Etterlysning> relevanteEtterlysninger = Streams.of(EtterlysningType.UTTALELSE_ENDRET_STARTDATO)
             .flatMap(type -> etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), type).stream())
-            .filter(e -> e.getStatus() == EtterlysningStatus.VENTER || e.getStatus() == EtterlysningStatus.OPPRETTET || e.getStatus() == EtterlysningStatus.MOTTATT_SVAR)
             .toList();
+
+        List<Etterlysning> endretStartdatoEtterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+
+        List<Etterlysning> ubesvarteEndretStartdatoEtterlysninger = endretStartdatoEtterlysninger.stream()
+            .filter(e -> e.getStatus() == EtterlysningStatus.VENTER || e.getStatus() == EtterlysningStatus.OPPRETTET)
+            .toList();
+
+        Optional<Etterlysning> sistMottatteSvarEndretStartdatoEtterlysning = endretStartdatoEtterlysninger
+            .stream()
+            .filter(e -> e.getStatus() == EtterlysningStatus.MOTTATT_SVAR)
+            .max(Comparator.comparing(Etterlysning::getOpprettetTidspunkt));
+
 
         List<EtterLysningUngdomsPeriodeGrunnlag> etterLysningerUngdomsPeriodeGrunnlag = relevanteEtterlysninger.stream()
             .map(e -> {
@@ -141,13 +152,13 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             })
             .toList();
 
+        Optional<Trigger> sisteEndretStartdatoTrigger = relevanteTriggerForEtterlysning.stream()
+            .filter(t -> t.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+            .max(Comparator.comparing(Trigger::getOpprettetTidspunkt));
+
         etterLysningerUngdomsPeriodeGrunnlag.forEach(etterLysningUngdomsPeriodeGrunnlag ->
             {
-                if (etterLysningUngdomsPeriodeGrunnlag.perioder.isEmpty()) {
-                    // TODO: Hvorfor har en eksisterende etterlysning ingen perioder?
-                } else {
-                    //TOOD: Avbryt etterlysning dersom det er en overlap med eksisterende etterlysning
-                }
+                etterLysningUngdomsPeriodeGrunnlag.
             }
         );
 
