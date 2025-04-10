@@ -115,7 +115,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var avslåtteVilkår = vilkårResultat.avslåtteVilkår();
         var behandlingsårsaker = vilkårResultat.behandlingÅrsaker();
 
-        var resultatType = bestemResultat(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker);
+        var resultatType = bestemResultat(p, vilkårResultat, tilkjentYtelse);
 
         return DetaljertResultat.of(resultatType, behandlingsårsaker, avslåtteVilkår, vilkårSomIkkeErVurdert);
 
@@ -123,17 +123,18 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     private static DetaljertResultatInfo bestemResultat(
         LocalDateInterval p,
-        SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat,
-        TilkjentYtelseVerdi tilkjentYtelse,
-        Set<BehandlingÅrsakType> behandlingsårsaker) {
+        SamletVilkårResultatOgBehandlingÅrsaker vilkårsresultatOgBehandlingsårsaker,
+        TilkjentYtelseVerdi tilkjentYtelse) {
 
-        if (!vilkårResultat.ikkeVurderteVilkår().isEmpty())  {
+        if (!vilkårsresultatOgBehandlingsårsaker.ikkeVurderteVilkår().isEmpty())  {
             return DetaljertResultatInfo.of(DetaljertResultatType.IKKE_VURDERT);
         }
 
-        if (!vilkårResultat.avslåtteVilkår().isEmpty()) {
+        if (!vilkårsresultatOgBehandlingsårsaker.avslåtteVilkår().isEmpty()) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
         }
+
+        var behandlingsårsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker();
 
         if (tilkjentYtelse != null) {
             var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
@@ -159,8 +160,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga dødsfall av barn");
         }
 
-        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkår %s og tilkjent ytelse %s og behandlingårsaker %s"
-                .formatted(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker));
+        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør pga dødsfall av søker");
+        }
+
+        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
+                .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
     }
 
     private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
