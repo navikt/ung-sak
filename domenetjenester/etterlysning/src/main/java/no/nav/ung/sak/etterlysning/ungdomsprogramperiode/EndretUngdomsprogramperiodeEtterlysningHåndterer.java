@@ -2,6 +2,7 @@ package no.nav.ung.sak.etterlysning.ungdomsprogramperiode;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretPeriodeOppgaveDTO;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -12,6 +13,9 @@ import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Dependent
 public class EndretUngdomsprogramperiodeEtterlysningHåndterer implements EtterlysningHåndterer {
 
@@ -19,15 +23,18 @@ public class EndretUngdomsprogramperiodeEtterlysningHåndterer implements Etterl
     private final BehandlingRepository behandlingRepository;
     private UngOppgaveKlient ungOppgaveKlient;
     private PersoninfoAdapter personinfoAdapter;
+    private final Duration ventePeriode;
 
     @Inject
     public EndretUngdomsprogramperiodeEtterlysningHåndterer(EtterlysningRepository etterlysningRepository,
                                                             BehandlingRepository behandlingRepository,
-                                                            UngOppgaveKlient ungOppgaveKlient, PersoninfoAdapter personinfoAdapter) {
+                                                            UngOppgaveKlient ungOppgaveKlient, PersoninfoAdapter personinfoAdapter,
+                                                            @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.ungOppgaveKlient = ungOppgaveKlient;
         this.personinfoAdapter = personinfoAdapter;
+        this.ventePeriode = Duration.parse(ventePeriode);
     }
 
     public void håndterOpprettelse(long behandlingId, EtterlysningType etterlysningType) {
@@ -53,4 +60,10 @@ public class EndretUngdomsprogramperiodeEtterlysningHåndterer implements Etterl
 
         etterlysningRepository.lagre(etterlysninger);
     }
+
+    @Override
+    public LocalDateTime getFrist() {
+        return LocalDateTime.now().plus(ventePeriode);
+    }
+
 }
