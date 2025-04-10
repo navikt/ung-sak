@@ -151,6 +151,14 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør av ungdomsprogram");
         }
 
+        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga ny fødsel");
+        }
+
+        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga dødsfall av barn");
+        }
+
         throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkår %s og tilkjent ytelse %s og behandlingårsaker %s"
                 .formatted(p, vilkårResultat, tilkjentYtelse, behandlingsårsaker));
     }
