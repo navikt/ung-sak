@@ -148,7 +148,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS);
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+        if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør av ungdomsprogram");
         }
 
@@ -163,6 +163,11 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør pga dødsfall av søker");
         }
+
+        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Uendret innvilget periode i kant med en endret periode");
+        }
+
 
         throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
                 .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));

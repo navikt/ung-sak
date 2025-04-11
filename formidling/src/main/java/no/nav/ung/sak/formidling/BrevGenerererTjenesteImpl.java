@@ -63,12 +63,12 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private GenerertBrev doGenererVedtaksbrev(Long behandlingId) {
 
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
+        LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
+
         if (!regelResultat.vedtaksbrevOperasjoner().harBrev()) {
             LOG.warn(regelResultat.vedtaksbrevOperasjoner().forklaring());
             return null;
         }
-
-        LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (!behandling.erAvsluttet()) {
