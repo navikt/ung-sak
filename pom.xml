@@ -38,7 +38,7 @@
         <felles.version>4.4.16</felles.version>
         <swagger.version>2.2.29</swagger.version>
         <junit.version>5.12.1</junit.version>
-        <k9format.version>11.4.3</k9format.version>
+        <k9format.version>11.5.0</k9format.version>
         <jackson.version>2.18.3</jackson.version>
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.1.20</kotlin-stdlib.version>
@@ -47,7 +47,7 @@
         <pdfgen-core.version>1.1.43</pdfgen-core.version>
         <confluent.platform.version>7.9.0</confluent.platform.version>
         <mockito.version>5.16.1</mockito.version>
-        <ung-deltakelse-opplyser.version>1.1.0</ung-deltakelse-opplyser.version>
+        <ung-deltakelse-opplyser.version>1.2.0</ung-deltakelse-opplyser.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det

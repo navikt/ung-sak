@@ -1,6 +1,7 @@
 package no.nav.ung.sak.ungdomsprogram;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
@@ -48,10 +49,19 @@ public class UngdomsprogramPeriodeTjeneste {
      * @param behandlingReferanse Behandlingreferanse
      * @return Tidslinje for endrede perioder
      */
-    public LocalDateTimeline<Boolean> finnEndretPeriodeTidslinje(BehandlingReferanse behandlingReferanse) {
+    public LocalDateTimeline<Boolean> finnEndretPeriodeTidslinjeFraOriginal(BehandlingReferanse behandlingReferanse) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
         var originaltGrunnlag = behandlingReferanse.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag);
+        var initiellPeriodeTidslinje = lagPeriodeTidslinje(originaltGrunnlag);
+        return initiellPeriodeTidslinje.crossJoin(periodeTidslinje, UngdomsprogramPeriodeTjeneste::erEndret)
+            .filterValue(v -> v);
+    }
+
+    public LocalDateTimeline<Boolean> finnEndretPeriodeTidslinje(UUID fraReferanse, UUID tilReferanse) {
+        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(tilReferanse);
+        var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
+        var originaltGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(fraReferanse);
         var initiellPeriodeTidslinje = lagPeriodeTidslinje(originaltGrunnlag);
         return initiellPeriodeTidslinje.crossJoin(periodeTidslinje, UngdomsprogramPeriodeTjeneste::erEndret)
             .filterValue(v -> v);
@@ -64,18 +74,18 @@ public class UngdomsprogramPeriodeTjeneste {
      * @param ungdomsprogramPeriodeGrunnlag Ungdomsprogram-grunnlag med perioder der bruker er i ungdomsprogram
      * @return Tidslinje for perioder der bruker er i ungdomsprogram
      */
-    private LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag) {
+    public LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag) {
         return ungdomsprogramPeriodeGrunnlag.stream()
             .flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
             .map(UngdomsprogramPeriode::getPeriode)
             .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
             .reduce(LocalDateTimeline::crossJoin)
-            .map(t -> komprimer(t))
+            .map(this::komprimer)
             .orElse(LocalDateTimeline.empty());
     }
 
-    private static LocalDateSegment<Boolean> erEndret(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
-        return new LocalDateSegment<>(di, lhs == null || rhs == null || lhs.getValue().equals(rhs.getValue()));
+    public static LocalDateSegment<Boolean> erEndret(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
+        return new LocalDateSegment<>(di, lhs == null || rhs == null || !lhs.getValue().equals(rhs.getValue()));
     }
 
 

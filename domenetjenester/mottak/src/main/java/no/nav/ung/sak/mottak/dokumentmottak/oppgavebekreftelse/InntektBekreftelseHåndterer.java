@@ -56,7 +56,7 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelseInnhold) {
         InntektBekreftelse inntektBekreftelse = oppgaveBekreftelseInnhold.oppgaveBekreftelse().getBekreftelse();
 
-        Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(inntektBekreftelse.getOppgaveId());
+        Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(inntektBekreftelse.getOppgaveReferanse());
 
         if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
             throw new IllegalStateException("Etterlysning må hå status VENTER for å motta bekreftelse. Status var " + etterlysning.getStatus());

@@ -33,15 +33,6 @@ public class UngdomsytelseStartdatoRepository {
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
-    public void lagre(Long behandlingId, UngdomsprogramBekreftetPeriodeEndring bekreftetPeriodeEndring) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseStartdatoGrunnlag(behandlingId, it))
-            .orElse(new UngdomsytelseStartdatoGrunnlag(behandlingId));
-        nyttGrunnlag.leggTil(bekreftetPeriodeEndring);
-
-        persister(eksisterendeGrunnlag, nyttGrunnlag);
-    }
-
     public void lagreRelevanteSøknader(Long behandlingId, UngdomsytelseStartdatoer søknader) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseStartdatoGrunnlag(behandlingId, it))

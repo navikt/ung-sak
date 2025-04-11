@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.perioder;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.annotations.Immutable;
 
@@ -32,6 +33,9 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     @JoinColumn(name = "ung_ungdomsprogramperioder_id", nullable = false, updatable = false, unique = true)
     private UngdomsprogramPerioder ungdomsprogramPerioder;
 
+    @Column(name = "grunnlagsreferanse", updatable = false, unique = true)
+    private UUID grunnlagsreferanse;
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -42,14 +46,20 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     UngdomsprogramPeriodeGrunnlag(Long behandlingId, UngdomsprogramPeriodeGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.ungdomsprogramPerioder = grunnlag.ungdomsprogramPerioder;
+        this.grunnlagsreferanse = UUID.randomUUID();
     }
 
     public UngdomsprogramPeriodeGrunnlag(Long behandlingId) {
         this.behandlingId = behandlingId;
+        this.grunnlagsreferanse = UUID.randomUUID();
     }
 
     public Long getId() {
         return id;
+    }
+
+    public UUID getGrunnlagsreferanse() {
+        return grunnlagsreferanse;
     }
 
     void leggTil(Collection<UngdomsprogramPeriode> ungdomsprogramPeriode) {

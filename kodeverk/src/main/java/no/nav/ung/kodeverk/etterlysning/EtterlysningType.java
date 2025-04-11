@@ -9,6 +9,8 @@ import java.util.Map;
 public enum EtterlysningType implements Kodeverdi {
 
     UTTALELSE_KONTROLL_INNTEKT("UTTALELSE_KONTROLL_INNTEKT", "Uttalelse kontroll av inntekt"),
+    UTTALELSE_ENDRET_PROGRAMPERIODE("UTTALELSE_ENDRET_PROGRAMPERIODE", "Uttalelse endret programperiode"),
+
     ;
 
     @JsonValue

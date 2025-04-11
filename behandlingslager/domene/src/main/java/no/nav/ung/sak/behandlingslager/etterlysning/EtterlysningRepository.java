@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,8 +29,10 @@ public class EtterlysningRepository {
     public Etterlysning lagre(Etterlysning etterlysning) {
         if (etterlysning.getUttalelse() != null) {
             entityManager.persist(etterlysning.getUttalelse());
+            entityManager.flush();
         }
         entityManager.persist(etterlysning);
+        entityManager.flush();
         return etterlysning;
     }
 
@@ -46,11 +49,11 @@ public class EtterlysningRepository {
         return etterlysninger;
     }
 
-    public List<Etterlysning> hentEtterlysninger(Long behandlingId, EtterlysningType type) {
+    public List<Etterlysning> hentEtterlysninger(Long behandlingId, EtterlysningType ...type) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                                                             "where e.behandlingId = :behandlingId and e.type = :type", Etterlysning.class)
+                                                             "where e.behandlingId = :behandlingId and e.type in :type", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
-            .setParameter("type", type)
+            .setParameter("type", Arrays.stream(type).toList())
             .getResultList();
         return etterlysninger;
     }

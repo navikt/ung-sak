@@ -1,16 +1,12 @@
 package no.nav.ung.sak.behandlingslager.behandling.startdato;
 
+import jakarta.persistence.*;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import org.hibernate.annotations.Immutable;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-
-import jakarta.persistence.*;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Immutable;
-
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "UngdomsytelseStartdatoGrunnlag")
 @Table(name = "UNG_GR_STARTDATO")
@@ -39,12 +35,6 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     @JoinColumn(name = "oppgitte_startdatoer_id", nullable = false, updatable = false, unique = true)
     private UngdomsytelseStartdatoer oppgitteStartdatoer;
 
-
-    @ChangeTracked
-    @BatchSize(size = 20)
-    @JoinColumn(name = "UNG_GR_STARTDATO_ID", nullable = false)
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    private Set<UngdomsprogramBekreftetPeriodeEndring> bekreftetPeriodeEndringer;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -78,9 +68,6 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         return relevanteStartdatoer;
     }
 
-    public Set<UngdomsprogramBekreftetPeriodeEndring> getBekreftetPeriodeEndringer() {
-        return bekreftetPeriodeEndringer;
-    }
 
     public boolean isAktiv() {
         return aktiv;
@@ -97,15 +84,6 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         var perioder = this.oppgitteStartdatoer != null ? new HashSet<>(this.oppgitteStartdatoer.getStartdatoer()) : new HashSet<>(startdatoer);
         perioder.addAll(startdatoer);
         this.oppgitteStartdatoer = new UngdomsytelseStartdatoer(perioder);
-    }
-
-    void leggTil(UngdomsprogramBekreftetPeriodeEndring bekreftetPeriodeEndring) {
-        if (id != null) {
-            throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
-        }
-        Set<UngdomsprogramBekreftetPeriodeEndring> perioder = this.bekreftetPeriodeEndringer != null ? new HashSet<>(this.bekreftetPeriodeEndringer) : new HashSet<>();
-        perioder.add(bekreftetPeriodeEndring);
-        this.bekreftetPeriodeEndringer = perioder;
     }
 
     void setRelevanteStartdatoer(UngdomsytelseStartdatoer relevanteSøknader) {

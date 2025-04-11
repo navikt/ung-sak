@@ -65,6 +65,23 @@ public class Etterlysning extends BaseEntitet {
             EtterlysningStatus.OPPRETTET);
     }
 
+    public static Etterlysning opprettForType(
+        Long behandlingId,
+        UUID grunnlagsreferanse,
+        UUID eksternReferanse,
+        DatoIntervallEntitet periode,
+        EtterlysningType type
+    ) {
+        return new Etterlysning(
+            behandlingId,
+            grunnlagsreferanse,
+            eksternReferanse,
+            periode,
+            type,
+            EtterlysningStatus.OPPRETTET
+        );
+    }
+
     public Etterlysning(Long behandlingId,
                         UUID grunnlagsreferanse,
                         UUID eksternReferanse,
