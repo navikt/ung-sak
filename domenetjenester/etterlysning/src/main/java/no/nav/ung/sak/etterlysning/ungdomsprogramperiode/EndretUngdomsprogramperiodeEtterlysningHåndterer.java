@@ -4,6 +4,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretPeriodeOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretProgamperiodeOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.ProgramperiodeDTO;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -44,19 +46,15 @@ public class EndretUngdomsprogramperiodeEtterlysningHåndterer implements Etterl
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
 
         etterlysninger.forEach(e -> e.vent(getFrist()));
-        final var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> new EndretPeriodeOppgaveDTO(
+        final var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> new EndretProgamperiodeOppgaveDTO(
                 deltakerIdent.getIdent(),
                 etterlysning.getEksternReferanse(),
                 etterlysning.getFrist(),
-                etterlysning.getPeriode().getFomDato()
+                new ProgramperiodeDTO(etterlysning.getPeriode().getFomDato(), etterlysning.getPeriode().getTomDato())
             )
         ).toList();
 
-        switch (etterlysningType) {
-            case UTTALELSE_ENDRET_STARTDATO -> oppgaveDtoer.forEach(ungOppgaveKlient::opprettEndretStartdatoOppgave);
-            case UTTALELSE_ENDRET_SLUTTDATO -> oppgaveDtoer.forEach(ungOppgaveKlient::opprettEndretSluttdatoOppgave);
-            default -> throw new IllegalArgumentException("Ikke støttet etterlysningstype: " + etterlysningType);
-        }
+       oppgaveDtoer.forEach(ungOppgaveKlient::opprettEndretSluttdatoOppgave);
 
         etterlysningRepository.lagre(etterlysninger);
     }

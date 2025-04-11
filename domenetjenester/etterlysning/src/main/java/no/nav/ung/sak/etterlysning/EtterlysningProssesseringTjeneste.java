@@ -56,9 +56,7 @@ public class EtterlysningProssesseringTjeneste {
         switch (Objects.requireNonNull(etterlysningType)) {
             case UTTALELSE_KONTROLL_INNTEKT ->
                 inntektkontrollEtterlysningOppretter.håndterOpprettelse(behandlingId, etterlysningType);
-            case UTTALELSE_ENDRET_STARTDATO ->
-                endretUngdomsprogramperiodeEtterlysningHåndterer.håndterOpprettelse(behandlingId, etterlysningType);
-            case UTTALELSE_ENDRET_SLUTTDATO ->
+            case UTTALELSE_ENDRET_PROGRAMPERIODE ->
                 endretUngdomsprogramperiodeEtterlysningHåndterer.håndterOpprettelse(behandlingId, etterlysningType);
             default -> throw new IllegalArgumentException("Uhåndtert etterlysningstype: " + etterlysningType);
         }

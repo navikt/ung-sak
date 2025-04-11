@@ -69,7 +69,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
         final var triggers = new ArrayList<Trigger>();
         for (MottattDokument dokument : mottattDokument) {
             var oppgaveBekreftelse = oppgaveBekreftelseParser.parseOppgaveBekreftelse(dokument);
-            final var oppgaveId = oppgaveBekreftelse.getBekreftelse().getOppgaveId();
+            final var oppgaveId = oppgaveBekreftelse.getBekreftelse().getOppgaveReferanse();
             BekreftelseHåndterer bekreftelseHåndterer = bekreftelseMottakere
                 .select(new OppgaveTypeRef.OppgaveTypeRefLiteral(oppgaveBekreftelse.getBekreftelse().getType()))
                 .get();

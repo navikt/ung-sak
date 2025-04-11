@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.oppgave.bekreftelse.Bekreftelse;
 import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.DatoEndring;
+import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretProgramperiodeBekreftelse;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
@@ -18,25 +19,24 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Dependent
-@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_FOM_DATO)
-@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_TOM_DATO)
-public class DatoEndringBekreftelseHåndterer implements BekreftelseHåndterer {
+@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PROGRAMPERIODE)
+public class ProgramperiodeEndringBekreftelseHåndterer implements BekreftelseHåndterer {
 
     private final MottatteDokumentRepository mottatteDokumentRepository;
     private final EtterlysningRepository etterlysningRepository;
 
     @Inject
-    public DatoEndringBekreftelseHåndterer(MottatteDokumentRepository mottatteDokumentRepository, EtterlysningRepository etterlysningRepository) {
+    public ProgramperiodeEndringBekreftelseHåndterer(MottatteDokumentRepository mottatteDokumentRepository, EtterlysningRepository etterlysningRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.etterlysningRepository = etterlysningRepository;
     }
 
     @Override
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelse) {
-        DatoEndring bekreftelse = oppgaveBekreftelse.oppgaveBekreftelse().getBekreftelse();
+        EndretProgramperiodeBekreftelse bekreftelse = oppgaveBekreftelse.oppgaveBekreftelse().getBekreftelse();
 
 
-        Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(bekreftelse.getOppgaveId());
+        Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(bekreftelse.getOppgaveReferanse());
 
         if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
             throw new IllegalStateException("Etterlysning må hå status VENTER for å motta bekreftelse. Status var " + etterlysning.getStatus());

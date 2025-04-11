@@ -62,7 +62,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             etterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(kontekst);
         }
 
-        final var endretProgramperiodeEtterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+        final var endretProgramperiodeEtterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         final var nyopprettetEtterlysning = endretProgramperiodeEtterlysninger.stream().filter(it -> it.getStatus().equals(EtterlysningStatus.OPPRETTET)).findFirst();
         if (nyopprettetEtterlysning.isPresent()) {
             final var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(
