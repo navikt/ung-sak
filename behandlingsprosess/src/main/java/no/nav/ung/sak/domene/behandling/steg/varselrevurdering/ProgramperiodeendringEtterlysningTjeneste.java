@@ -7,7 +7,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -46,11 +45,11 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         this.etterlysningRepository = etterlysningRepository;
     }
 
-    void opprettEtterlysningerForProgramperiodeEndring(BehandlingskontrollKontekst kontekst) {
-        final var gjeldendePeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(kontekst.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
+    void opprettEtterlysningerForProgramperiodeEndring(Long behandlingId, Long fagsakId) {
+        final var gjeldendePeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
 
         // Finner etterlysninger som skal opprettes og avbrytes for endring av programperiode
-        final var resultatEndretProgramperiode = finnEndretProgramperiodeResultat(kontekst, gjeldendePeriodeGrunnlag);
+        final var resultatEndretProgramperiode = finnEndretProgramperiodeResultat(gjeldendePeriodeGrunnlag, behandlingId);
 
         final var prosessTaskGruppe = new ProsessTaskGruppe();
 
@@ -58,12 +57,12 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         if (resultatEndretProgramperiode.etterlysningSomSkalAvbrytes() != null) {
             logger.info("Avbryter etterlysning {}", resultatEndretProgramperiode.etterlysningSomSkalAvbrytes());
             etterlysningRepository.lagre(resultatEndretProgramperiode.etterlysningSomSkalAvbrytes());
-            prosessTaskGruppe.addNesteSekvensiell(lagTaskForAvbrytelseAvEtterlysning(kontekst));
+            prosessTaskGruppe.addNesteSekvensiell(lagTaskForAvbrytelseAvEtterlysning(behandlingId, fagsakId));
         }
         if (resultatEndretProgramperiode.etterlysningSomSkalOpprettes() != null) {
             logger.info("Oppretter etterlysning {}", resultatEndretProgramperiode.etterlysningSomSkalOpprettes());
             etterlysningRepository.lagre(resultatEndretProgramperiode.etterlysningSomSkalOpprettes());
-            prosessTaskGruppe.addNesteSekvensiell(lagTaskForOpprettingAvEtterlysning(kontekst, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE));
+            prosessTaskGruppe.addNesteSekvensiell(lagTaskForOpprettingAvEtterlysning(behandlingId, fagsakId));
         }
         if (!prosessTaskGruppe.getTasks().isEmpty()) {
             prosessTaskTjeneste.lagre(prosessTaskGruppe);
@@ -71,7 +70,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
 
-    private Resultat finnEndretProgramperiodeResultat(BehandlingskontrollKontekst kontekst, UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag) {
+    private Resultat finnEndretProgramperiodeResultat(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId) {
         final var programperioder = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder();
         if (programperioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke flere programperioder");
@@ -80,36 +79,33 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
         }
         return håndterTriggereForProgramperiodeendring(
-            kontekst,
-            gjeldendePeriodeGrunnlag
+            gjeldendePeriodeGrunnlag, behandlingId
         );
     }
 
-    private Resultat håndterTriggereForProgramperiodeendring(BehandlingskontrollKontekst kontekst,
-                                                             UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag) {
-        List<Etterlysning> alleEtterlysningerForAktuellType = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+    private Resultat håndterTriggereForProgramperiodeendring(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId) {
+        List<Etterlysning> alleEtterlysningerForAktuellType = etterlysningRepository.hentEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         final var ventendeEtterlysning = finnVentendeEtterlysning(alleEtterlysningerForAktuellType);
         final var sisteMottatteEtterlysning = finnEtterlysningMedSistMottattSvar(alleEtterlysningerForAktuellType);
         if (ventendeEtterlysning.isPresent()) {
             return erstattDersomEndret(
-                kontekst.getBehandlingId(),
+                behandlingId,
                 gjeldendePeriodeGrunnlag,
                 ventendeEtterlysning.get()
             );
         } else if (sisteMottatteEtterlysning.isPresent()) {
             if (!erSisteMottatteGyldig(gjeldendePeriodeGrunnlag, sisteMottatteEtterlysning.get())) {
-                return lagResultatForNyEtterlysningUtenAvbrutt(kontekst, gjeldendePeriodeGrunnlag);
+                return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId);
             }
         } else {
-            return lagResultatForNyEtterlysningUtenAvbrutt(kontekst, gjeldendePeriodeGrunnlag);
+            return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId);
         }
         return Resultat.tom();
     }
 
-    private static Resultat lagResultatForNyEtterlysningUtenAvbrutt(BehandlingskontrollKontekst kontekst,
-                                                                    UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag) {
+    private static Resultat lagResultatForNyEtterlysningUtenAvbrutt(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId) {
         final var nyEtterlysning = Etterlysning.opprettForType(
-            kontekst.getBehandlingId(),
+            behandlingId,
             gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),
             UUID.randomUUID(),
             gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode(),
@@ -148,7 +144,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
                 gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode(),
                 EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE
             );
-            ventendeEtterlysning.avbryt();
+            ventendeEtterlysning.skalAvbrytes();
             return new Resultat(
                 ventendeEtterlysning,
                 skalOpprettes
@@ -164,16 +160,16 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
 
-    private ProsessTaskData lagTaskForAvbrytelseAvEtterlysning(BehandlingskontrollKontekst kontekst) {
+    private ProsessTaskData lagTaskForAvbrytelseAvEtterlysning(Long behandlingId, Long fagsakId) {
         var prosessTaskData = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
-        prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
+        prosessTaskData.setBehandling(fagsakId, behandlingId);
         return prosessTaskData;
     }
 
-    private ProsessTaskData lagTaskForOpprettingAvEtterlysning(BehandlingskontrollKontekst kontekst, EtterlysningType type) {
+    private ProsessTaskData lagTaskForOpprettingAvEtterlysning(Long behandlingId, Long fagsakId) {
         var prosessTaskData = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
-        prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, type.getKode());
-        prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
+        prosessTaskData.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE.getKode());
+        prosessTaskData.setBehandling(fagsakId, behandlingId);
         return prosessTaskData;
     }
 
