@@ -9,4 +9,9 @@ public record DetaljertResultatInfo(DetaljertResultatType detaljertResultatType,
     public static DetaljertResultatInfo of(DetaljertResultatType detaljertResultatType, String beskrivelse) {
         return new DetaljertResultatInfo(detaljertResultatType, beskrivelse);
     }
+
+    public String utledForklaring() {
+        var typeTekst = detaljertResultatType.name() + " - " + detaljertResultatType.getNavn();
+        return forklaring != null ? typeTekst + ". Forklaring: " + forklaring : typeTekst;
+    }
 }

@@ -69,16 +69,8 @@ public class FormidlingRestTjeneste {
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
 
         VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(dto.getId()));
-
-        if (resultat == null) {
-            return VedtaksbrevOperasjonerDto.ingenBrev();
-        }
-
-        return new VedtaksbrevOperasjonerDto(true,
-            new VedtaksbrevOperasjonerDto.AutomatiskBrevOperasjoner(false, false),
-            false,
-            false,
-            false);
+        LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
+        return resultat.vedtaksbrevOperasjoner();
     }
 
 
@@ -108,6 +100,9 @@ public class FormidlingRestTjeneste {
     ) {
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
+        if (generertBrev == null) {
+            return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
+        }
 
         var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 
