@@ -63,19 +63,19 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private GenerertBrev doGenererVedtaksbrev(Long behandlingId) {
 
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
-        if (regelResultat == null) {
-            LOG.info("Ingen resultat fra vedtaksbrevregler. Bestiller ikke brev");
+        if (!regelResultat.vedtaksbrevOperasjoner().harBrev()) {
+            LOG.warn(regelResultat.vedtaksbrevOperasjoner().forklaring());
             return null;
         }
 
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
-        VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (!behandling.erAvsluttet()) {
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
         }
 
+        VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
         var resultat = bygger.bygg(behandling, regelResultat.detaljertResultatTimeline());
         var pdlMottaker = hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),

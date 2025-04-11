@@ -6,7 +6,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -14,6 +13,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,36 +42,49 @@ public class VedtaksbrevRegler {
     public VedtaksbrevRegelResulat kjør(Long id) {
         var behandling = behandlingRepository.hentBehandling(id);
         if (!behandling.erAvsluttet()) {
-            LOG.info("Kan ikke bestille brev før behandlingen er avsluttet");
-            return null;
+            return new VedtaksbrevRegelResulat(VedtaksbrevOperasjonerDto.ingenBrev("Ingen vedtaksbrev før behandling er avsluttet"), null, null);
         }
 
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
-        var bygger = bestemBygger(detaljertResultatTidslinje);
-        if (bygger == null) {
-            LOG.warn("Støtter ikke vedtaksbrev for resultater = {} ", DetaljertResultat.timelineTostring(detaljertResultatTidslinje));
-            return null;
-        }
-
-        return new VedtaksbrevRegelResulat(bygger, detaljertResultatTidslinje);
+        return lagResultatMedBygger(detaljertResultatTidslinje);
     }
 
-    private VedtaksbrevInnholdBygger bestemBygger(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = detaljertResultat
+    private VedtaksbrevRegelResulat lagResultatMedBygger(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultaterInfo = detaljertResultat
             .toSegments().stream()
-            .flatMap(it -> it.getValue().resultatInfo().stream().map(DetaljertResultatInfo::detaljertResultatType))
+            .flatMap(it -> it.getValue().resultatInfo().stream())
             .collect(Collectors.toSet());
+
+        var resultater = resultaterInfo.stream().map(DetaljertResultatInfo::detaljertResultatType).collect(Collectors.toSet());
 
         if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
             || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
-            return innholdByggere.select(InnvilgelseInnholdBygger.class).get();
-        } else if (resultater.contains(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT)) {
-            return innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get();
-        } else if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
-            return innholdByggere.select(EndringHøySatsInnholdBygger.class).get();
-        } else {
-            return null;
+            return new VedtaksbrevRegelResulat(
+                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved ny innvilgelse"),
+                innholdByggere.select(InnvilgelseInnholdBygger.class).get(),
+                detaljertResultat
+            );
         }
+
+        if (resultater.contains(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT)) {
+            return new VedtaksbrevRegelResulat(
+                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved endring av rapportert inntekt"),
+                innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
+                detaljertResultat);
+        }
+
+        if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
+            return new VedtaksbrevRegelResulat(
+                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved endring av rapportert inntekt"),
+                innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
+                detaljertResultat);
+        }
+
+        String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
+        return new VedtaksbrevRegelResulat(
+            VedtaksbrevOperasjonerDto.ingenBrev(forklaring),
+            null,
+            detaljertResultat);
     }
 
 
