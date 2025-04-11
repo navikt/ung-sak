@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
@@ -53,7 +54,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
 
 
     @Override
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
         FødselHendelse fødselsHendelse = (FødselHendelse) hendelse;
         String hendelseId = fødselsHendelse.getHendelseInfo().getHendelseId();
 
@@ -62,14 +63,14 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
         Person barnInfo = hentPersonInformasjon(barnIdent.getIdent());
         LocalDate aktuellDato = finnAktuellDato(barnInfo);
 
-        var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
+        var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : forelderAktørIder) {
             Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
                     if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId)) {
-                        fagsakÅrsakMap.put(f, BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
+                        fagsakÅrsakMap.put(f, new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato())));
                     }
                 }
             );

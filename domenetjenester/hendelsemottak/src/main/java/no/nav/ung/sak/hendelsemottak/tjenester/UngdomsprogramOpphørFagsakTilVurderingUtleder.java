@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,12 +45,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     }
 
     @Override
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
         LocalDate opphørsdatoFraHendelse = hendelse.getHendelsePeriode().getFom();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
 
-        var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
+        var fagsaker = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : aktører) {
             var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, opphørsdatoFraHendelse);
@@ -58,13 +59,39 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             }
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), opphørsdatoFraHendelse, hendelseId)) {
-                fagsaker.put(relevantFagsak.get(), BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+                fagsaker.put(relevantFagsak.get(), new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse)));
             }
         }
 
 
         return fagsaker;
     }
+
+    private DatoIntervallEntitet utledPeriode(Fagsak fagsak, LocalDate nyTomdato) {
+        var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+
+        final var tidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+
+        if (tidslinje.isEmpty()) {
+            logger.info("Fant ikke ungdomsprogramperiodegrunnlag for behandling med id " + behandling.getId());
+            return fagsak.getPeriode();
+        }
+
+
+        final var perioder = tidslinje.toSegments();
+
+        if (perioder.size() > 1) {
+            throw new IllegalStateException("Støtter ikke endring av periode for mer enn en periode");
+        } else if (perioder.isEmpty()) {
+            logger.info("Fant ikke ungdomsprogramperiodegrunnlag for behandling med id " + behandling.getId());
+            return fagsak.getPeriode();
+        }
+
+        final var gammelTomDato = tidslinje.getMaxLocalDate().isAfter(fagsak.getPeriode().getTomDato()) ? fagsak.getPeriode().getTomDato() : tidslinje.getMaxLocalDate();
+        return gammelTomDato.isBefore(nyTomdato) ? DatoIntervallEntitet.fraOgMedTilOgMed(gammelTomDato, nyTomdato) : DatoIntervallEntitet.fraOgMedTilOgMed(nyTomdato, gammelTomDato);
+    }
+
+
 
     /**
      * idempotens-sjekk for å hindre at det opprettes flere revurderinger fra samme hendelse.

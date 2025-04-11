@@ -6,18 +6,17 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @ApplicationScoped
 @HendelseTypeRef("UNGDOMSPROGRAM_ENDRET_STARTDATO")
@@ -42,12 +41,12 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
     }
 
     @Override
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
         LocalDate nyFomdato = hendelse.getHendelsePeriode().getFom();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
 
-        var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
+        var fagsaker = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : aktører) {
             var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, nyFomdato);
@@ -56,12 +55,38 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
             }
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), nyFomdato, hendelseId)) {
-                fagsaker.put(relevantFagsak.get(), BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+                fagsaker.put(relevantFagsak.get(), new ÅrsakOgPeriode(
+                    BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+                    utledPeriode(relevantFagsak.get(), nyFomdato)));
             }
         }
 
 
         return fagsaker;
+    }
+
+    private DatoIntervallEntitet utledPeriode(Fagsak fagsak, LocalDate nyFomdato) {
+        var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+
+        final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
+
+        if (ungdomsprogramPeriodeGrunnlag.isEmpty()) {
+            logger.info("Fant ikke ungdomsprogramperiodegrunnlag for behandling med id " + behandling.getId());
+            return fagsak.getPeriode();
+        }
+
+
+        final var perioder = ungdomsprogramPeriodeGrunnlag.get().getUngdomsprogramPerioder().getPerioder();
+
+        if (perioder.size() > 1) {
+            throw new IllegalStateException("Støtter ikke endring av periode for mer enn en periode");
+        } else if (perioder.isEmpty()) {
+            logger.info("Fant ikke ungdomsprogramperiodegrunnlag for behandling med id " + behandling.getId());
+            return fagsak.getPeriode();
+        }
+
+        final var gammelFomDato = perioder.iterator().next().getPeriode().getFomDato();
+        return gammelFomDato.isBefore(nyFomdato) ? DatoIntervallEntitet.fraOgMedTilOgMed(gammelFomDato, nyFomdato) : DatoIntervallEntitet.fraOgMedTilOgMed(nyFomdato, gammelFomDato);
     }
 
     /**
@@ -86,7 +111,8 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
             if (!harPeriodeMedNyFomDato) {
                 logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert. Ignorer hendelse " + hendelseId);
                 return false;
-            };
+            }
+            ;
         }
         return true;
     }
