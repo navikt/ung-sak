@@ -22,9 +22,13 @@ public record DetaljertResultat(
     }
 
 
-    public static String timelineTostring(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+    public static String timelineToString(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         return String.join(", ", detaljertResultatTidslinje.toSegments().stream()
-            .map(it -> it.getLocalDateInterval().toString() + " -> " + it.getValue().resultatInfo()).collect(Collectors.toSet()));
+            .map(it ->
+                it.getLocalDateInterval().toString() + " -> " +
+                    "resultatInfo: " + it.getValue().resultatInfo() +", "
+                    + "behandlingÅrsaker: " + it.getValue().behandlingsårsaker() + " ")
+            .collect(Collectors.toSet()));
     }
 
 }

@@ -13,8 +13,8 @@ public record VedtaksbrevRegelResulat(
     public String safePrint() {
         return "VedtaksbrevRegelResulat{" +
             "vedtaksbrevOperasjoner=" + vedtaksbrevOperasjoner +
-            "bygger=" + (bygger != null ? bygger.getClass().getSimpleName() : "null") +
-            ", detaljertResultatTimeline=" + DetaljertResultat.timelineTostring(detaljertResultatTimeline) +
+            " bygger=" + (bygger != null ? bygger.getClass().getSimpleName() : "null") +
+            ", detaljertResultatTimeline=" + DetaljertResultat.timelineToString(detaljertResultatTimeline) +
             '}';
     }
 }
