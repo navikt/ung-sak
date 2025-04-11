@@ -20,6 +20,7 @@ import java.util.List;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
 
 @BehandlingStegRef(value = VARSEL_REVURDERING)
 @BehandlingTypeRef
@@ -67,7 +68,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
         if (nyopprettetEtterlysning.isPresent()) {
             final var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(
                 AUTO_SATT_PÅ_VENT_REVURDERING,
-                utledVenteårsak(nyopprettetEtterlysning.get().getType()),
+                VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE,
                 LocalDateTime.now().plus(ventePeriode));
             return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultat);
         }
@@ -81,7 +82,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
                 .max(Comparator.comparing(Etterlysning::getFrist)).orElseThrow(() -> new IllegalStateException("Forventer å finne en etterlysning på vent"));
             final var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(
                 AUTO_SATT_PÅ_VENT_REVURDERING,
-                utledVenteårsak(lengsteFristEtterlysning.getType()),
+                VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE,
                 lengsteFristEtterlysning.getFrist());
             return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultat);
         }
@@ -89,8 +90,5 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static Venteårsak utledVenteårsak(EtterlysningType type) {
-        return type.equals(EtterlysningType.UTTALELSE_ENDRET_STARTDATO) ? Venteårsak.VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM : Venteårsak.VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM;
-    }
 
 }

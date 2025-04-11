@@ -114,10 +114,7 @@ public enum Venteårsak implements Kodeverdi {
     MANGLER_SØKNADOPPLYSNING_NÆRING("AVV_SOKN_NAERING", "Avventer søknad for næring ved direkte overgang fra infotrygd. Må spesialhåndteres.", false, AVVENTER_SAKSBEHANDLER),
     MANGLER_SØKNADOPPLYSNING_FRILANS("AVV_SOKN_FRILANS", "Avventer søknad for frilans ved direkte overgang fra infotrygd. Må spesialhåndteres.", false, AVVENTER_SAKSBEHANDLER),
 
-
-    VENTER_BEKREFTELSE_ENDRET_OPPHØR_UNGDOMSPROGRAM("VENTER_BEKREFT_ENDRET_OPPHOER_UNGDOMSPROGRAM", "Venter på at søker skal bekrefte endring i ungdomsprogramperiode", false, AVVENTER_SØKER),
-    VENTER_BEKREFTELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM("VENTER_BEKREFT_ENDRET_STARTDATO_UNGDOMSPROGRAM", "Venter på at søker skal bekrefte endring i ungdomsprogramperiode", false, AVVENTER_SØKER),
-
+    VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE("VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "Venter på at søker skal bekrefte endring i ungdomsprogramperiode", false, AVVENTER_SØKER),
 
     /*
      * Disse kodene kan ikke fjernes før vi eventuelt har ryddet vekk bruk av
