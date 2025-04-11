@@ -4651,6 +4651,9 @@
           "enableHindre" : {
             "type" : "boolean"
           },
+          "forklaring" : {
+            "type" : "string"
+          },
           "fritekstbrev" : {
             "type" : "boolean"
           },
