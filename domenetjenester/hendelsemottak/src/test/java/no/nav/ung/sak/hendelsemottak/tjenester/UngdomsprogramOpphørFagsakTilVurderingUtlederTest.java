@@ -9,10 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import org.assertj.core.api.AbstractIntegerAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,7 +100,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     void skal_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_etter_opphørsdato() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.plusDays(1)))));
+        final var gammelOpphørsdato = OPPHØRSDATO.plusDays(1);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelOpphørsdato))));
 
         behandling.avsluttBehandling();
         entityManager.flush();
@@ -114,14 +113,15 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap);
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO, gammelOpphørsdato));
     }
 
     @Test
     void skal_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_før_opphørsdato() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.minusDays(1)))));
+        final var gammelOpphørsdato = OPPHØRSDATO.minusDays(1);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelOpphørsdato))));
 
         behandling.avsluttBehandling();
         entityManager.flush();
@@ -133,14 +133,15 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap);
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(gammelOpphørsdato, OPPHØRSDATO));
     }
 
     @Test
     void skal_returnere_årsak_dersom_en_ungdomsprogramperiode_som_går_over_opphørsdato() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.plusDays(1)))));
+        final var gammelOpphørsdato = OPPHØRSDATO.plusDays(1);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelOpphørsdato))));
 
         behandling.avsluttBehandling();
         entityManager.flush();
@@ -152,12 +153,14 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap);
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO, gammelOpphørsdato));
     }
 
-    private static void validerHarÅrsak(Map<Fagsak, BehandlingÅrsakType> fagsakBehandlingÅrsakTypeMap) {
+    private static void validerHarÅrsak(Map<Fagsak, ÅrsakOgPeriode> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {
         assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
-        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next()).isEqualTo(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().behandlingÅrsak()).isEqualTo(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().periode()).isEqualTo(forventetPeriode);
+
     }
 
 }
