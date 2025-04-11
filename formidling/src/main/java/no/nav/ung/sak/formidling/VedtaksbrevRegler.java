@@ -6,6 +6,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -75,8 +76,8 @@ public class VedtaksbrevRegler {
 
         if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
             return new VedtaksbrevRegelResulat(
-                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved endring av rapportert inntekt"),
-                innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
+                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved endring til høy sats"),
+                innholdByggere.select(EndringHøySatsInnholdBygger.class).get(),
                 detaljertResultat);
         }
 
