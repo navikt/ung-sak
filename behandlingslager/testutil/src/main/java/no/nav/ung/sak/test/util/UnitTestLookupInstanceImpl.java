@@ -1,12 +1,12 @@
 package no.nav.ung.sak.test.util;
 
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.util.TypeLiteral;
+
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
-
-import jakarta.enterprise.inject.Instance;
-import jakarta.enterprise.util.TypeLiteral;
 
 public class UnitTestLookupInstanceImpl<T> implements Instance<T> {
 
@@ -31,6 +31,9 @@ public class UnitTestLookupInstanceImpl<T> implements Instance<T> {
     @SuppressWarnings("unchecked")
     @Override
     public <U extends T> Instance<U> select(Class<U> aClass, Annotation... annotations) {
+        if (!aClass.isAssignableFrom(verdi.getClass())) {
+            throw new IllegalArgumentException("Kan ikke caste " + verdi.getClass() + " til " + aClass);
+        }
         return (Instance<U>) this;
     }
 
