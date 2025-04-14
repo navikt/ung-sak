@@ -67,7 +67,7 @@ public class VedtaksbrevRegler {
             );
         }
 
-        if (resultater.contains(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT)) {
+        if (resultater.contains(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
             return new VedtaksbrevRegelResulat(
                 VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved endring av rapportert inntekt"),
                 innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
