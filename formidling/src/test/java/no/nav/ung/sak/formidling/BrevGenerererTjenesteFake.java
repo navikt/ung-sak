@@ -25,4 +25,9 @@ public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste{
     public GenerertBrev genererVedtaksbrev(Long behandlingId) {
         return resultat;
     }
+
+    @Override
+    public GenerertBrev genererVedtaksbrevKunHtml(Long behandlingId) {
+        return resultat;
+    }
 }

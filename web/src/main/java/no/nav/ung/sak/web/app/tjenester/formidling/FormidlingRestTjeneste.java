@@ -98,13 +98,15 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
     ) {
+        var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
+        GenerertBrev generertBrev = mediaTypeReq.equals(MediaType.TEXT_HTML) ?
+            brevGenerererTjeneste.genererVedtaksbrevKunHtml(dto.behandlingId()) :
+            brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
+
         if (generertBrev == null) {
             return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
         }
-
-        var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 
         return switch (mediaTypeReq) {
             case PDF_MEDIA_STRING, MediaType.APPLICATION_JSON -> Response.ok(generertBrev.dokument().pdf()).build();
