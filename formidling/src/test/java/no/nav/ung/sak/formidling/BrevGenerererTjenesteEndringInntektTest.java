@@ -7,12 +7,6 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
@@ -27,7 +21,6 @@ import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
@@ -59,45 +52,36 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     @Inject
     private EntityManager entityManager;
-    private BehandlingRepositoryProvider repositoryProvider;
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
-    private ProsessTriggereRepository prosessTriggereRepository;
-    private PersonopplysningRepository personopplysningRepository;
     private AbakusInMemoryInntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste;
+    private UngTestRepositories ungTestRepositories;
+
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
     private TestInfo testInfo;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
 
     @BeforeEach
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
-        ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
-        personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
-        prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
-        ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
-
+        ungTestRepositories = lagUngTestRepositories();
         abakusInMemoryInntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         brevGenerererTjeneste = lagBrevGenererTjeneste(System.getenv("LAGRE_PDF") == null);
     }
 
     private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        var repositoryProvider = ungTestRepositories.repositoryProvider();
+        var tilkjentYtelseRepository = ungTestRepositories.tilkjentYtelseRepository();
+
+        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
         var endringInnholdBygger =
             new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
-                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste, new MånedsvisTidslinjeUtleder(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), repositoryProvider.getBehandlingRepository()))
+                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste, new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()))
             );
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
+            new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
             tilkjentYtelseRepository, repositoryProvider.getVilkårResultatRepository());
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
@@ -106,7 +90,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(ignorePdf),
-            personopplysningRepository,
+            repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
     }
@@ -127,7 +111,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     @NotNull
     private UngTestRepositories lagUngTestRepositories() {
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
+        return UngTestRepositories.lagAlleUngTestRepositories(entityManager);
     }
 
 
