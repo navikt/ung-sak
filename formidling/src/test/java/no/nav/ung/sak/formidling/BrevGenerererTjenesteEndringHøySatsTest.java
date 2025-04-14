@@ -60,10 +60,10 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = UngTestRepositories.lagAlleUngTestRepositories(entityManager);
-        brevGenerererTjeneste = lagBrevGenererTjeneste(System.getenv("LAGRE_PDF") == null);
+        brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
-    private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
+    private BrevGenerererTjeneste lagBrevGenererTjeneste() {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
@@ -81,7 +81,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         return new BrevGenerererTjenesteImpl(
             behandlingRepository,
             new AktørTjeneste(pdlKlient),
-            new PdfGenKlient(ignorePdf),
+            new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                 behandlingRepository, innholdByggere, detaljertResultatUtleder));
@@ -93,7 +93,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         UngTestScenario ungTestscenario = BrevScenarioer.endring25År(LocalDate.of(1999, 3, 25));
         var behandling = lagScenario(ungTestscenario);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevKunHtml((behandling.getId()));
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -115,7 +115,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         var behandling = lagScenario(ungTestGrunnlag);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_HØY_SATS);
 
         var brevtekst = generertBrev.dokument().html();
@@ -130,15 +130,11 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
     @Test
     void pdfStrukturTest() throws IOException {
-
-        //Lager ny fordi default PdfgenKlient lager ikke pdf
-        var brevGenerererTjeneste = lagBrevGenererTjeneste(false);
-
         var behandling = lagScenario(
             BrevScenarioer.endring25År(LocalDate.of(2024, 12, 1)));
 
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId(), brevGenerererTjeneste);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -166,18 +162,11 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         return behandling;
     }
 
-    private GenerertBrev genererVedtaksbrevBrev(Long behandlingId) {
-        return genererVedtaksbrevBrev(behandlingId, brevGenerererTjeneste);
+
+    private GenerertBrev genererVedtaksbrev(Long behandlingId) {
+        return BrevUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
     }
 
-
-    private GenerertBrev genererVedtaksbrevBrev(Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste1) {
-        GenerertBrev generertBrev = brevGenerererTjeneste1.genererVedtaksbrev(behandlingId);
-        if (System.getenv("LAGRE_PDF") != null) {
-            BrevUtils.lagrePdf(generertBrev, testInfo);
-        }
-        return generertBrev;
-    }
 
 
 }

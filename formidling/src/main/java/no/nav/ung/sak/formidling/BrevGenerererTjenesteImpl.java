@@ -56,11 +56,17 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     @WithSpan
     @Override
     public GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId));
+        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId, false));
+    }
+
+    @WithSpan
+    @Override
+    public GenerertBrev genererVedtaksbrevKunHtml(Long behandlingId) {
+        return doGenererVedtaksbrev(behandlingId, true);
     }
 
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
-    private GenerertBrev doGenererVedtaksbrev(Long behandlingId) {
+    private GenerertBrev doGenererVedtaksbrev(Long behandlingId, boolean kunHtml) {
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
@@ -81,7 +87,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             )
         );
 
-        PdfGenDokument dokument = pdfGen.lagDokument(input);
+        PdfGenDokument dokument = pdfGen.lagDokument(input, kunHtml);
         return new GenerertBrev(
             dokument,
             pdlMottaker,

@@ -66,10 +66,10 @@ class BrevGenerererTjenesteEndringInntektTest {
         this.testInfo = testInfo;
         ungTestRepositories = lagUngTestRepositories();
         abakusInMemoryInntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        brevGenerererTjeneste = lagBrevGenererTjeneste(System.getenv("LAGRE_PDF") == null);
+        brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
-    private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
+    private BrevGenerererTjeneste lagBrevGenererTjeneste() {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
         var tilkjentYtelseRepository = ungTestRepositories.tilkjentYtelseRepository();
 
@@ -89,7 +89,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
-            new PdfGenKlient(ignorePdf),
+            new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
@@ -101,7 +101,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
         var behandling = lagScenario(ungTestscenario);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevKunHtml(behandling.getId());
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -133,7 +133,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var behandling = lagScenario(ungTestGrunnlag);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
 
         var brevtekst = generertBrev.dokument().html();
@@ -167,7 +167,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var behandling = lagScenario(ungTestGrunnlag);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
 
         var brevtekst = generertBrev.dokument().html();
@@ -186,22 +186,18 @@ class BrevGenerererTjenesteEndringInntektTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = BrevScenarioer.endring0KrInntekt_19år(fom);
         var behandling = lagScenario(ungTestGrunnlag);
-        assertThat(genererVedtaksbrevBrev(behandling.getId())).isNull();
+        assertThat(brevGenerererTjeneste.genererVedtaksbrev(behandling.getId())).isNull();
 
     }
 
 
     @Test
     void pdfStrukturTest() throws IOException {
-
-        //Lager ny fordi default PdfgenKlient lager ikke pdf
-        var brevGenerererTjeneste = lagBrevGenererTjeneste(false);
-
         var behandling = lagScenario(
             BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
 
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId(), brevGenerererTjeneste);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -235,19 +231,10 @@ class BrevGenerererTjenesteEndringInntektTest {
         return behandling;
     }
 
-    private GenerertBrev genererVedtaksbrevBrev(Long behandlingId) {
-        return genererVedtaksbrevBrev(behandlingId, brevGenerererTjeneste);
+
+    private GenerertBrev genererVedtaksbrev(Long behandlingId) {
+        return BrevUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
     }
-
-
-    private GenerertBrev genererVedtaksbrevBrev(Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste1) {
-        GenerertBrev generertBrev = brevGenerererTjeneste1.genererVedtaksbrev(behandlingId);
-        if (System.getenv("LAGRE_PDF") != null) {
-            BrevUtils.lagrePdf(generertBrev, testInfo);
-        }
-        return generertBrev;
-    }
-
 
 }
 
