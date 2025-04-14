@@ -108,7 +108,7 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
                 .flatMap(it -> it.getUngdomsprogramPerioder().getPerioder().stream())
                 .anyMatch(it -> it.getPeriode().getFomDato().equals(nyFomDato));
 
-            if (!harPeriodeMedNyFomDato) {
+            if (harPeriodeMedNyFomDato) {
                 logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert. Ignorer hendelse " + hendelseId);
                 return false;
             }
