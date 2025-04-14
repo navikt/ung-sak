@@ -41,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevGenerererTjenesteInnvilgelseTest {
+class BrevGenerererTjenesteNyInnvilgelseTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
 
