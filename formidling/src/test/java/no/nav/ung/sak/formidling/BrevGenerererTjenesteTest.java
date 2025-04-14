@@ -4,12 +4,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
@@ -22,7 +16,6 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederFake;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,50 +33,33 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ExtendWith(JpaExtension.class)
 class BrevGenerererTjenesteTest {
 
-    private BrevGenerererTjeneste brevGenerererTjeneste;
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
+    private UngTestRepositories ungTestRepositories;
 
     @Inject
     private EntityManager entityManager;
-    private BehandlingRepositoryProvider repositoryProvider;
-
-
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
-    @Inject
-    private PersonopplysningRepository personopplysningRepository;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @BeforeEach
     void setup() {
-
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
-        ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
-        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
-        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository);
-
+        ungTestRepositories = UngTestRepositories.lagAlleUngTestRepositories(entityManager);
     }
 
 
     @Test
     void skal_lage_vedtakspdf() {
 
-        var scenario = BrevScenarioer.lagAvsluttetStandardBehandling(
-            new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, null));
+        var scenario = BrevScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
         var ungTestGrunnlag = scenario.getUngTestGrunnlag();
         var behandling = scenario.getBehandling();
 
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        var repositoryProvider = ungTestRepositories.repositoryProvider();
+
         InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
-            ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeTjeneste,
-            tilkjentYtelseUtleder,
-            personopplysningRepository);
-        brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
+            ungTestRepositories.ungdomsytelseGrunnlagRepository(),
+            new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository()),
+            new UngdomsytelseTilkjentYtelseUtleder(ungTestRepositories.tilkjentYtelseRepository()),
+            repositoryProvider.getPersonopplysningRepository());
+        BrevGenerererTjeneste brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
