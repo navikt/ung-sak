@@ -5,6 +5,8 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
@@ -43,10 +45,10 @@ public class VedtaksbrevRegler {
     public VedtaksbrevRegelResulat kjør(Long id) {
         var behandling = behandlingRepository.hentBehandling(id);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
-        return lagResultatMedBygger(detaljertResultatTidslinje);
+        return lagResultatMedBygger(behandling, detaljertResultatTidslinje);
     }
 
-    private VedtaksbrevRegelResulat lagResultatMedBygger(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private VedtaksbrevRegelResulat lagResultatMedBygger(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultaterInfo = detaljertResultat
             .toSegments().stream()
             .flatMap(it -> it.getValue().resultatInfo().stream())
@@ -54,25 +56,30 @@ public class VedtaksbrevRegler {
 
         var resultater = resultaterInfo.stream().map(DetaljertResultatInfo::detaljertResultatType).collect(Collectors.toSet());
 
+        var redigerRegelResultat = harUtførteAksjonspunkterMedToTrinn(behandling);
+
         if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
             || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
+            String forklaring = "Automatisk brev ved ny innvilgelse. " + redigerRegelResultat.forklaring();
             return new VedtaksbrevRegelResulat(
-                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved ny innvilgelse"),
+                VedtaksbrevOperasjonerDto.automatiskBrev(forklaring, redigerRegelResultat.kanRedigere()),
                 innholdByggere.select(InnvilgelseInnholdBygger.class).get(),
                 detaljertResultat
             );
         }
 
         if (resultater.contains(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
+            String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();
             return new VedtaksbrevRegelResulat(
-                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved endring av rapportert inntekt"),
+                VedtaksbrevOperasjonerDto.automatiskBrev(forklaring, redigerRegelResultat.kanRedigere()),
                 innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
                 detaljertResultat);
         }
 
         if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
+            String forklaring = "Automatisk brev ved endring til høy sats. " + redigerRegelResultat.forklaring();
             return new VedtaksbrevRegelResulat(
-                VedtaksbrevOperasjonerDto.automatiskBrev("Automatisk brev ved endring til høy sats"),
+                VedtaksbrevOperasjonerDto.automatiskBrev(forklaring, redigerRegelResultat.kanRedigere()),
                 innholdByggere.select(EndringHøySatsInnholdBygger.class).get(),
                 detaljertResultat);
         }
@@ -84,9 +91,24 @@ public class VedtaksbrevRegler {
             detaljertResultat);
     }
 
+    private static RedigerRegelResultat harUtførteAksjonspunkterMedToTrinn(Behandling behandling) {
+        var lukkedeApMedToTrinn = behandling.getAksjonspunkterMedTotrinnskontroll().stream()
+            .filter(Aksjonspunkt::erUtført).toList();
+        boolean kanRedigere = !lukkedeApMedToTrinn.isEmpty();
+        if (kanRedigere) {
+            return new RedigerRegelResultat(true, "Kan redigeres pga aksjonspunkt(er) %s".formatted(
+                lukkedeApMedToTrinn.stream().map(it -> it.getAksjonspunktDefinisjon().getKode())
+                    .collect(Collectors.toSet())
+            ));
+        }
+        return new RedigerRegelResultat(false, "");
+    }
+
 
     @SafeVarargs
     private static <V> boolean innholderBare(Set<V> set, V... value) {
         return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
     }
+
+    private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {}
 }

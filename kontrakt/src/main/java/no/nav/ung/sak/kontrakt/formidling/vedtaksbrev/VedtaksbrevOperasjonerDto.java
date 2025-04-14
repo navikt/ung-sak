@@ -32,8 +32,8 @@ public record VedtaksbrevOperasjonerDto(
         return new VedtaksbrevOperasjonerDto(false, null, false, false, false, forklaring);
     }
 
-    public static VedtaksbrevOperasjonerDto automatiskBrev(String forklaring) {
-        return new VedtaksbrevOperasjonerDto(true, new AutomatiskBrevOperasjoner(true, false), false, true, false, forklaring);
+    public static VedtaksbrevOperasjonerDto automatiskBrev(String forklaring, boolean enableRedigerOgHindring) {
+        return new VedtaksbrevOperasjonerDto(true, new AutomatiskBrevOperasjoner(enableRedigerOgHindring, false), false, enableRedigerOgHindring, false, forklaring);
     }
 
     /**

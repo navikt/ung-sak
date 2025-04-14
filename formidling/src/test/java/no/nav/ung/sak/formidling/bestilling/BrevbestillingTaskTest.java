@@ -13,7 +13,6 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.BrevGenerererTjenesteFake;
@@ -46,7 +45,6 @@ class BrevbestillingTaskTest {
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     private String fnr;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @BeforeEach
     void setUp() {
