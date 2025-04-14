@@ -18,9 +18,11 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.etterlysning.UttalelseEntitet;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
+import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;
@@ -53,6 +55,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private BehandlingRepository behandlingRepository;
     private EtterlysningRepository etterlysningRepository;
+    private EtterlysningTjeneste etterlysningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
@@ -64,6 +67,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                  KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
                                  BehandlingRepository behandlingRepository,
                                  EtterlysningRepository etterlysningRepository,
+                                 EtterlysningTjeneste etterlysningTjeneste,
                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                  ProsessTaskTjeneste prosessTaskTjeneste) {
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
@@ -71,6 +75,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;
+        this.etterlysningTjeneste = etterlysningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
@@ -84,12 +89,12 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         kontrollerteInntektperioderTjeneste.ryddPerioderFritattForKontroll(behandlingId);
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
-        var etterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(kontekst.getBehandlingId(), kontekst.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
 
         var etterlysningsperioder = etterlysninger.stream()
             .map(it -> new EtterlysningsPeriode(
                 it.getPeriode().toLocalDateInterval(),
-                new EtterlysningInfo(it.getStatus(), it.getUttalelse() != null ? it.getUttalelse().harGodtattEndringen() : null),
+                new EtterlysningInfo(it.getStatus(), it.getUttalelse().map(UttalelseEntitet::harGodtattEndringen).orElse(null)),
                 it.getGrunnlagsreferanse())).toList();
 
         var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);

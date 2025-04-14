@@ -8,6 +8,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity(name = "Etterlysning")
@@ -182,7 +183,7 @@ public class Etterlysning extends BaseEntitet {
         this.uttalelse = new UttalelseEntitet(erEndringGodkjent, uttalelse, svarJournalpostId);
     }
 
-    public UttalelseEntitet getUttalelse() {
-        return uttalelse;
+    public Optional<UttalelseEntitet> getUttalelse() {
+        return Optional.ofNullable(uttalelse);
     }
 }
