@@ -61,7 +61,6 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
 
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
     private GenerertBrev doGenererVedtaksbrev(Long behandlingId) {
-
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
@@ -71,9 +70,6 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         }
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (!behandling.erAvsluttet()) {
-            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
-        }
 
         VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
         var resultat = bygger.bygg(behandling, regelResultat.detaljertResultatTimeline());

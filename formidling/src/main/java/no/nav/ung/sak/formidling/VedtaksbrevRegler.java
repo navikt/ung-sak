@@ -42,10 +42,6 @@ public class VedtaksbrevRegler {
 
     public VedtaksbrevRegelResulat kjør(Long id) {
         var behandling = behandlingRepository.hentBehandling(id);
-        if (!behandling.erAvsluttet()) {
-            return new VedtaksbrevRegelResulat(VedtaksbrevOperasjonerDto.ingenBrev("Ingen vedtaksbrev før behandling er avsluttet"), null, null);
-        }
-
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return lagResultatMedBygger(detaljertResultatTidslinje);
     }
