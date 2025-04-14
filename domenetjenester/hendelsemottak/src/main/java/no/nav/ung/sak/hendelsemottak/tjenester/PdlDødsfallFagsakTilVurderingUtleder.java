@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
@@ -51,10 +52,10 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
 
 
     @Override
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
-        var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
+        var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : aktører) {
 
@@ -67,14 +68,14 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
         return fagsakÅrsakMap;
     }
 
-    private HashMap<Fagsak, BehandlingÅrsakType> finnPåvirketFagsak(AktørId aktør, LocalDate aktuellDato, String hendelseId) {
-        var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
+    private HashMap<Fagsak, ÅrsakOgPeriode> finnPåvirketFagsak(AktørId aktør, LocalDate aktuellDato, String hendelseId) {
+        var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         // Sjekker om det gjelder dødshendelse for søker
         var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
         if (fagsakForAktør.isPresent()) {
             if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
-                fagsakÅrsakMap.put(fagsakForAktør.get(), BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
+                fagsakÅrsakMap.put(fagsakForAktør.get(), new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsakForAktør.get().getPeriode().getTomDato())));
             }
         }
 
@@ -83,7 +84,7 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
             .stream()
             .filter(f -> deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId))
             .filter(f -> erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId))
-            .forEach(f -> fagsakÅrsakMap.put(f, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN));
+            .forEach(f -> fagsakÅrsakMap.put(f, new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, f.getPeriode().getTomDato()))));
 
         return fagsakÅrsakMap;
     }

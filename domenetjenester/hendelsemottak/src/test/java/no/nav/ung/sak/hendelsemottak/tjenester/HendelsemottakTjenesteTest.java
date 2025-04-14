@@ -12,6 +12,8 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse;
 import no.nav.ung.sak.typer.AktørId;
@@ -73,8 +75,8 @@ class HendelsemottakTjenesteTest {
 
     @Test
     void skal_opprette_revurdering_task_for_hendelse_som_er_relevant() {
-        when(fagsakerTilVurderingUtleder.finnFagsakerTilVurdering(any())).thenReturn(Map.of(fagsak, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM));
         var opphørsdato = LocalDate.now().plusDays(10);
+        when(fagsakerTilVurderingUtleder.finnFagsakerTilVurdering(any())).thenReturn(Map.of(fagsak, new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(opphørsdato, fagsak.getPeriode().getTomDato()))));
         var opphørHendelse = new UngdomsprogramOpphørHendelse(new HendelseInfo.Builder().medHendelseId("hendelse1").medOpprettet(LocalDateTime.now()).leggTilAktør(AKTØR_ID).build(),
             opphørsdato);
 
