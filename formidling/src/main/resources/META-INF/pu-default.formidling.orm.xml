@@ -6,5 +6,6 @@
 
 	<entity class="no.nav.ung.sak.formidling.bestilling.BrevbestillingEntitet" />
 	<entity class="no.nav.ung.sak.formidling.bestilling.BehandlingBrevbestillingEntitet" />
+	<entity class="no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgEntitet" />
 
 </entity-mappings>
