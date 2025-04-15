@@ -4688,6 +4688,9 @@
           "enableHindre" : {
             "type" : "boolean"
           },
+          "enableRediger" : {
+            "type" : "boolean"
+          },
           "forklaring" : {
             "type" : "string"
           },
@@ -4699,6 +4702,19 @@
           },
           "hindret" : {
             "type" : "boolean"
+          },
+          "kanHindre" : {
+            "type" : "boolean"
+          },
+          "kanRedigere" : {
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "tidligereKladdId" : {
+            "format" : "uuid",
+            "type" : "string"
           }
         },
         "type" : "object"
