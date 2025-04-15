@@ -78,14 +78,16 @@ class VedtaksbrevValgRepositoryTest {
 
         //klient 1 endrer før lagring
         VedtaksbrevValgEntitet kopi1 = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId());
-        kopi1.redigerTekst("Vil feile");
+        kopi1.setRedigertBrevHtml("Vil feile");
+        kopi1.setRedigert(true);
         entityManager.detach(kopi1);
         assertThat(kopi1.getId()).isEqualTo(original.getId());
         assertThat(kopi1.getVersjon()).isEqualTo(0);
 
         //klient 2 endrer og rekker å lagre
         VedtaksbrevValgEntitet kopi2 = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId());
-        kopi2.redigerTekst("Vil gå bra");
+        kopi2.setRedigertBrevHtml("Vil gå bra");
+        kopi2.setRedigert(true);
         kopi2 = vedtaksbrevValgRepository.lagre(kopi2);
         entityManager.flush();
         entityManager.detach(kopi2);
@@ -101,4 +103,5 @@ class VedtaksbrevValgRepositoryTest {
 
 
     }
+
 }

@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 
 /**
+ * Response objekt - skal ikke sendes inn
+ *
  * @param harBrev                   true hvis det finnes brev for behandling
  * @param automatiskBrevOperasjoner satt hvis det skal brukes automatisk brev.
  * @param fritekstbrev              true hvis det skal skrives fritekstbrev. Både fritekstbrev og automatiskbrev kan ikke være true/satt samtidig
@@ -15,10 +17,10 @@ import java.util.UUID;
  *                                  hvis en behandling først hadde automatisk brev som ble redigert av saksbehandler, som så får fritekstbrev etter at behandling endret seg så vil
  *                                  automatiskBrevOperasjoner bli null, fritekstbrev bli true, men redigertHtml vil fortsatt innholde den gamle teksten.
  *                                  </p>
- * @param kanHindre                 true hvis det er mulig å hindre brevet
+ * @param kanOverstyreHindre        true hvis det er mulig å hindre brevet
  * @param enableRediger             true hvis valget for redigering er relevant og skal vises
  * @param redigert                  true hvis det det brevet har blitt redigert - blir nullstilt ved tilbakehopp
- * @param kanRedigere               true hvis det er mulig å redigere brevet
+ * @param kanOverstyreRediger       true hvis det er mulig å redigere et automatisk brev.
  * @param forklaring                en forklaring av resultatet
  * @param tidligereKladdId          Id på tidligere versjon av redigert brev ved tilbakehopp
  */
@@ -30,10 +32,10 @@ public record VedtaksbrevOperasjonerDto(
     boolean fritekstbrev,
     boolean enableHindre,
     boolean hindret,
-    boolean kanHindre,
+    boolean kanOverstyreHindre,
     boolean enableRediger,
     boolean redigert,
-    boolean kanRedigere,
+    boolean kanOverstyreRediger,
     String forklaring,
     UUID tidligereKladdId) {
 
