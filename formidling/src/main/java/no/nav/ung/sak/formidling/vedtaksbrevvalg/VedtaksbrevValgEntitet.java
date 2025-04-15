@@ -41,6 +41,15 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
 
     }
 
+    public static VedtaksbrevValgEntitet ny(Long behandlingId) {
+        return new VedtaksbrevValgEntitet(
+            behandlingId,
+            false,
+            false,
+            null
+        );
+    }
+
     public Long getId() {
         return id;
     }
@@ -65,8 +74,15 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
         return versjon;
     }
 
-    public void redigerTekst(String htmlTekst) {
-        redigert = true;
-        redigertBrevHtml = htmlTekst;
+    public void setRedigert(boolean redigert) {
+        this.redigert = redigert;
+    }
+
+    public void setHindret(boolean hindret) {
+        this.hindret = hindret;
+    }
+
+    public void setRedigertBrevHtml(String redigertBrevHtml) {
+        this.redigertBrevHtml = redigertBrevHtml;
     }
 }
