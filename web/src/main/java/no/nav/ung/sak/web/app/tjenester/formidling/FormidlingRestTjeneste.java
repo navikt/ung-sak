@@ -25,6 +25,7 @@ import no.nav.ung.sak.formidling.VedtaksbrevRegler;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevRedigerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,25 @@ public class FormidlingRestTjeneste {
         VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(dto.getId()));
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
         return resultat.vedtaksbrevOperasjoner();
+    }
+
+    @GET
+    @Path("/formidling/vedtaksbrev/rediger")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter vedtaksbrev for redigering", tags = "formidling")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public VedtaksbrevRedigerDto vedtaksbrevHtml(
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto
+    ) {
+
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevKunHtml(dto.getBehandlingId());
+
+        if (generertBrev == null) {
+            return null;
+        }
+
+        return null;
     }
 
 
