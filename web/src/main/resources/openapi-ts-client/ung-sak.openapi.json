@@ -4719,6 +4719,22 @@
         },
         "type" : "object"
       },
+      "VedtaksbrevRedigerDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "html" : {
+            "type" : "string"
+          },
+          "kladdId" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "VenteårsakSomObjekt" : {
         "properties" : {
           "kanVelges" : {
@@ -6920,6 +6936,35 @@
               }
             },
             "description" : "pdf"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/vedtaksbrev/rediger" : {
+      "get" : {
+        "description" : "Henter vedtaksbrev for redigering",
+        "operationId" : "vedtaksbrevHtml",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VedtaksbrevRedigerDto"
+                }
+              }
+            },
+            "description" : "default response"
           }
         },
         "tags" : [ "formidling" ]
