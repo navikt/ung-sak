@@ -64,4 +64,9 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
     public long getVersjon() {
         return versjon;
     }
+
+    public void redigerTekst(String htmlTekst) {
+        redigert = true;
+        redigertBrevHtml = htmlTekst;
+    }
 }
