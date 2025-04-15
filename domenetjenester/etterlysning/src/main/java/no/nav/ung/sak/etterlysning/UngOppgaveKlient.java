@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretProgamperiodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 
@@ -20,8 +19,6 @@ public class UngOppgaveKlient {
     private final URI opprettKontrollerRegisterInntektURI;
     private final URI avbrytURI;
     private final URI utløptURI;
-    private final URI opprettEndretStartdatoURI;
-    private final URI opprettEndretSluttdatoURI;
     private final URI opprettEndretProgramperiodeURI;
 
 
@@ -31,8 +28,6 @@ public class UngOppgaveKlient {
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
         opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
-        opprettEndretStartdatoURI = tilUri(url, "oppgave/opprett/endre/startdato");
-        opprettEndretSluttdatoURI = tilUri(url, "oppgave/opprett/endre/sluttdato");
         opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endre/programperiode");
         avbrytURI = tilUri(url, "oppgave/avbryt");
         utløptURI = tilUri(url, "oppgave/utløpt");
@@ -59,22 +54,6 @@ public class UngOppgaveKlient {
     public void oppgaveUtløpt(UUID eksternRef) {
         try {
             restClient.post(utløptURI, eksternRef);
-        } catch (Exception e) {
-            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
-        }
-    }
-
-    public void opprettEndretStartdatoOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
-        try {
-            restClient.post(opprettEndretStartdatoURI, endretPeriodeOppgaveDTO);
-        } catch (Exception e) {
-            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
-        }
-    }
-
-    public void opprettEndretSluttdatoOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
-        try {
-            restClient.post(opprettEndretSluttdatoURI, endretPeriodeOppgaveDTO);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }

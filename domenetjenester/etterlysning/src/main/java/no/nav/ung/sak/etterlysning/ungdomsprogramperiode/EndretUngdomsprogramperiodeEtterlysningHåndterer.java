@@ -3,7 +3,6 @@ package no.nav.ung.sak.etterlysning.ungdomsprogramperiode;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretProgamperiodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.ProgramperiodeDTO;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
@@ -50,7 +49,8 @@ public class EndretUngdomsprogramperiodeEtterlysningHåndterer implements Etterl
                 deltakerIdent.getIdent(),
                 etterlysning.getEksternReferanse(),
                 etterlysning.getFrist(),
-                new ProgramperiodeDTO(etterlysning.getPeriode().getFomDato(), etterlysning.getPeriode().getTomDato())
+                new ProgramperiodeDTO(etterlysning.getPeriode().getFomDato(), etterlysning.getPeriode().getTomDato()),
+                null // TODO: Legg til forrige programperiode
             )
         ).toList();
 
