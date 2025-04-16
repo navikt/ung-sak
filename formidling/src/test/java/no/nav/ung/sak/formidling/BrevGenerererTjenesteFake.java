@@ -5,7 +5,7 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.typer.AktørId;
 
-public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste{
+public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste {
 
     private final GenerertBrev resultat;
 
@@ -20,14 +20,17 @@ public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste{
     }
 
 
-
     @Override
-    public GenerertBrev genererVedtaksbrev(Long behandlingId) {
+    public GenerertBrev genererVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return resultat;
+    }
+
+    public GenerertBrev genererVedtaksbrevKunHtml(Long behandlingId) {
         return resultat;
     }
 
     @Override
-    public GenerertBrev genererVedtaksbrevKunHtml(Long behandlingId) {
+    public GenerertBrev genererBrevOverstyrRegler(Long behandlingId, boolean kunHtml) {
         return resultat;
     }
 }

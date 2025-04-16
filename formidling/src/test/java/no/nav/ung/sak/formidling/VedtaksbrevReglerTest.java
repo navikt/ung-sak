@@ -62,7 +62,7 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(regelResulat.bygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
@@ -80,7 +80,7 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(regelResulat.bygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
@@ -101,7 +101,7 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(regelResulat.bygger()).isNull();
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isNull();
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
@@ -122,7 +122,7 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(regelResulat.bygger()).isInstanceOf(ManuellVedtaksbrevInnholdBygger.class);
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isInstanceOf(ManuellVedtaksbrevInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();

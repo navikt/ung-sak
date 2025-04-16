@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
@@ -91,10 +92,11 @@ class FormidlingTjenesteTest {
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             vedtaksbrevRegler,
-            ungTestRepositories.vedtaksbrevValgRepository());
+            ungTestRepositories.vedtaksbrevValgRepository(),
+            new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
     }
 
-//    @Test
+    @Test
     void test() {
         UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
@@ -151,8 +153,6 @@ class FormidlingTjenesteTest {
 
         //Forhåndsviser maneull brev - skal nå gå bra
         assertThat(forhåndsvis(behandling, false)).contains(redigertHtml);
-
-
 
     }
 

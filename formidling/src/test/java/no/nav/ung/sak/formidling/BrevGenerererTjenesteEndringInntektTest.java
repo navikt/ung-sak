@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
@@ -89,7 +90,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder),
-            ungTestRepositories.vedtaksbrevValgRepository());
+            ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
     }
 
     @Test()
@@ -98,7 +99,8 @@ class BrevGenerererTjenesteEndringInntektTest {
         UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
         var behandling = lagScenario(ungTestscenario);
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevKunHtml(behandling.getId());
+        Long behandlingId = behandling.getId();
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -178,7 +180,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = BrevScenarioer.endring0KrInntekt_19år(fom);
         var behandling = lagScenario(ungTestGrunnlag);
-        assertThat(brevGenerererTjeneste.genererVedtaksbrev(behandling.getId())).isNull();
+        assertThat(brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), true)).isNull();
 
     }
 
@@ -189,7 +191,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
 
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 

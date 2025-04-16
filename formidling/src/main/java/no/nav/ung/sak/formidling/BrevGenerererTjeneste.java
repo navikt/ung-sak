@@ -4,7 +4,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 
 public interface BrevGenerererTjeneste {
     @WithSpan
-    GenerertBrev genererVedtaksbrev(Long behandlingId);
+    GenerertBrev genererVedtaksbrev(Long behandlingId, boolean kunHtml);
 
-    GenerertBrev genererVedtaksbrevKunHtml(Long behandlingId);
+    GenerertBrev genererBrevOverstyrRegler(Long behandlingId, boolean kunHtml);
 }
