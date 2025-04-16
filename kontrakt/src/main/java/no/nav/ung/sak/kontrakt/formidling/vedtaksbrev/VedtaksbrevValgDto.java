@@ -15,7 +15,7 @@ import jakarta.validation.Valid;
  *                                  hvis en behandling først hadde automatisk brev som ble redigert av saksbehandler, som så får fritekstbrev etter at behandling endret seg så vil
  *                                  automatiskBrevOperasjoner bli null, fritekstbrev bli true, men redigertHtml vil fortsatt innholde den gamle teksten.
  *                                  </p>
- * @param kanOverstyreHindre        true hvis det er mulig å hindre brevet
+ * @param kanOverstyreHindre        true hvis det er mulig å overstyre hindring brevet
  * @param enableRediger             true hvis valget for redigering er relevant og skal vises
  * @param redigert                  true hvis det det brevet har blitt redigert - blir nullstilt ved tilbakehopp
  * @param kanOverstyreRediger       true hvis det er mulig å redigere et automatisk brev.
