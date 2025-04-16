@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.template;
+package no.nav.ung.kodeverk.formidling;
 
 /**
  * Pdfgen mal filer

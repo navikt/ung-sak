@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.template;
 
+import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 
 /**

@@ -5,5 +5,7 @@
         version="3.0">
 
     <entity class="no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet" />
+    <entity class="no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet" />
+    <entity class="no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet" />
 
 </entity-mappings>
