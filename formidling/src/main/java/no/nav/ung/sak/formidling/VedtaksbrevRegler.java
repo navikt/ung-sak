@@ -52,7 +52,7 @@ public class VedtaksbrevRegler {
 
         var resultater = resultaterInfo.stream().map(DetaljertResultatInfo::detaljertResultatType).collect(Collectors.toSet());
 
-        var redigerRegelResultat = harUtførteManuelleAksjonspunkter(behandling);
+        var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
 
         if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
             || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
@@ -99,9 +99,8 @@ public class VedtaksbrevRegler {
         return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, forklaring);
     }
 
-    private static RedigerRegelResultat harUtførteManuelleAksjonspunkter(Behandling behandling) {
-        var lukkedeApMedToTrinn = behandling.getAksjonspunkter().stream()
-            .filter(it -> !it.erAutopunkt())
+    private static RedigerRegelResultat harUtførteManuelleAksjonspunkterMedToTrinn(Behandling behandling) {
+        var lukkedeApMedToTrinn = behandling.getAksjonspunkterMedTotrinnskontroll().stream()
             .filter(Aksjonspunkt::erUtført).toList();
         boolean kanRedigere = !lukkedeApMedToTrinn.isEmpty();
         if (kanRedigere) {
