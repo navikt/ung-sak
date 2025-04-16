@@ -78,18 +78,24 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             }
             if (vedtaksbrevValgEntitet.isRedigert()) {
                 LOG.info("Vedtaksbrev er manuelt redigert - genererer manuell brev");
-                return genererManuellVedtaksbrev(behandlingId, kunHtml);
+                return doGenererManuellVedtaksbrev(behandlingId, kunHtml);
             }
             LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
         }
 
-        return genererAutomatiskVedtaksbrev(behandlingId, kunHtml);
+        return doGenererAutomatiskVedtaksbrev(behandlingId, kunHtml);
     }
 
     /**
      * Lager brev basert på regler
      */
+    @WithSpan
     public GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(behandlingId, kunHtml));
+    }
+
+    @WithSpan
+    private GenerertBrev doGenererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
@@ -120,7 +126,13 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         );
     }
 
+    @WithSpan
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, kunHtml));
+    }
+
+    @WithSpan
+    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var resultat = manuellVedtaksbrevInnholdBygger.bygg(behandling, null);
         var pdlMottaker = hentMottaker(behandling);
