@@ -6,6 +6,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 
 /**
@@ -17,18 +18,22 @@ public record UngTestRepositories(
     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
     UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
     TilkjentYtelseRepository tilkjentYtelseRepository,
-    ProsessTriggereRepository prosessTriggereRepository
+    ProsessTriggereRepository prosessTriggereRepository,
+    InntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste
 ) {
 
     public static UngTestRepositories lagAlleUngTestRepositories(EntityManager entityManager) {
+        return lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, null);
+    }
+
+    public static UngTestRepositories lagAlleUngTestRepositoriesOgAbakusTjeneste(EntityManager entityManager, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         var ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
         var ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         var tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
         var prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         var ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
-
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
+        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste);
 
     }
 }
