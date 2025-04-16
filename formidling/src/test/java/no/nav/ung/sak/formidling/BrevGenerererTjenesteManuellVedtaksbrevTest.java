@@ -90,7 +90,8 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                 behandlingRepository, innholdByggere, detaljertResultatUtleder),
-            ungTestRepositories.vedtaksbrevValgRepository());
+            ungTestRepositories.vedtaksbrevValgRepository(),
+            new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
     }
 
     @Test()
@@ -106,7 +107,8 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
             "<h1>Manuell skrevet overskrift</h1>"
         ));
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevKunHtml((behandling.getId()));
+        Long behandlingId = (behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -163,7 +165,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
             "<h1>Manuell skrevet overskrift</h1>"
         ));
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), true);
 
         var pdf = generertBrev.dokument().pdf();
 

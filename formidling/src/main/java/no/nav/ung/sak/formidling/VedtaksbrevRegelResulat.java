@@ -6,13 +6,13 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 
 public record VedtaksbrevRegelResulat(
     VedtaksbrevEgenskaper vedtaksbrevEgenskaper,
-    VedtaksbrevInnholdBygger bygger,
+    VedtaksbrevInnholdBygger automatiskVedtaksbrevBygger,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
     String forklaring) {
     public String safePrint() {
         return "VedtaksbrevRegelResulat{" +
             "vedtaksbrevEgenskaper=" + vedtaksbrevEgenskaper +
-            ", bygger=" + (bygger != null ? bygger.getClass().getSimpleName() : "null") +
+            ", bygger=" + (automatiskVedtaksbrevBygger != null ? automatiskVedtaksbrevBygger.getClass().getSimpleName() : "null") +
             ", detaljertResultatTimeline=" + DetaljertResultat.timelineToString(detaljertResultatTimeline) +
             ", forklaring='" + forklaring + '\'' +
             '}';

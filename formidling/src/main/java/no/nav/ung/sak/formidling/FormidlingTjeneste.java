@@ -45,7 +45,7 @@ public class FormidlingTjeneste {
 
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
-        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(behandlingId));
+        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
@@ -115,9 +115,11 @@ public class FormidlingTjeneste {
     }
 
     public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, boolean kunHtml) {
-        return kunHtml ?
-            brevGenerererTjeneste.genererVedtaksbrevKunHtml(dto.behandlingId()) :
-            brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
+        if (dto.redigertVersjon()) {
+            return brevGenerererTjeneste.genererBrevOverstyrRegler(dto.behandlingId(), kunHtml);
+        }
+
+        return brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId(), kunHtml);
     }
 
 }

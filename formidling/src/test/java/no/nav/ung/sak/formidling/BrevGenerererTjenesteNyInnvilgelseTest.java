@@ -8,6 +8,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
@@ -91,7 +92,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             vedtaksbrevRegler,
-            ungTestRepositories.vedtaksbrevValgRepository());
+            ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
     }
 
     @Test()
@@ -101,7 +102,8 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
         var behandling = scenarioBuilder.getBehandling();
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevKunHtml((behandling.getId()));
+        Long behandlingId = (behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -289,7 +291,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
         var behandling = scenarioBuilder.getBehandling();
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 

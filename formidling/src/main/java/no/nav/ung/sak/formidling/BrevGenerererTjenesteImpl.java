@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
@@ -35,6 +36,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private PdfGenKlient pdfGen;
     private PersonopplysningRepository personopplysningRepository;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
+    private ManuellVedtaksbrevInnholdBygger manuellVedtaksbrevInnholdBygger;
 
     private VedtaksbrevRegler vedtaksbrevRegler;
 
@@ -45,7 +47,8 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         PdfGenKlient pdfGen,
         PersonopplysningRepository personopplysningRepository,
         VedtaksbrevRegler vedtaksbrevRegler,
-        VedtaksbrevValgRepository vedtaksbrevValgRepository) {
+        VedtaksbrevValgRepository vedtaksbrevValgRepository,
+        ManuellVedtaksbrevInnholdBygger manuellVedtaksbrevInnholdBygger) {
 
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
@@ -53,6 +56,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         this.personopplysningRepository = personopplysningRepository;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
+        this.manuellVedtaksbrevInnholdBygger = manuellVedtaksbrevInnholdBygger;
     }
 
     public BrevGenerererTjenesteImpl() {
@@ -60,22 +64,32 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
 
     @WithSpan
     @Override
-    public GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId, false));
-    }
-
-    @WithSpan
-    @Override
-    public GenerertBrev genererVedtaksbrevKunHtml(Long behandlingId) {
-        return doGenererVedtaksbrev(behandlingId, true);
+    public GenerertBrev genererVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId, kunHtml));
     }
 
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
     private GenerertBrev doGenererVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        return genererAutomatiskVedtaksbrev(behandlingId, kunHtml);
+        VedtaksbrevValgEntitet vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
+        if (vedtaksbrevValgEntitet != null) {
+            if (vedtaksbrevValgEntitet.isHindret()) {
+                LOG.info("Vedtaksbrev er manuelt stoppet - lager ikke brev");
+                return null;
+            }
+            if (vedtaksbrevValgEntitet.isRedigert()) {
+                LOG.info("Vedtaksbrev er manuelt redigert - genererer manuell brev");
+                return genererBrevOverstyrRegler(behandlingId, kunHtml);
+            }
+            LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
+        }
+
+        return genererBrevBasertPåRegler(behandlingId, kunHtml);
     }
 
-    private GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
+    /**
+     * Lager brev basert på regler
+     */
+    private GenerertBrev genererBrevBasertPåRegler(Long behandlingId, boolean kunHtml) {
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
@@ -86,7 +100,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
+        VedtaksbrevInnholdBygger bygger = regelResultat.automatiskVedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, regelResultat.detaljertResultatTimeline());
         var pdlMottaker = hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
@@ -106,16 +120,13 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         );
     }
 
-    @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
-    private GenerertBrev doGenererVedtaksbrev2(Long behandlingId, boolean kunHtml) {
-        LOG.info("Generer manuell brev");
+    public GenerertBrev genererBrevOverstyrRegler(Long behandlingId, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        VedtaksbrevInnholdBygger bygger = new ManuellVedtaksbrevInnholdBygger(null);
-        var resultat = bygger.bygg(behandling, null);
+        var resultat = manuellVedtaksbrevInnholdBygger.bygg(behandling, null);
         var pdlMottaker = hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
+                FellesDto.manuell(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
                 resultat.templateInnholdDto()
             )
         );
