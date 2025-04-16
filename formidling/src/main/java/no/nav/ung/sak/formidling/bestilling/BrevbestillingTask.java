@@ -75,7 +75,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         validerBrevbestillingForespørsel(behandling);
 
-        var generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), false);
+        var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
         if (generertBrev == null) {
             LOG.info("Ingen brev generert.");
             return;

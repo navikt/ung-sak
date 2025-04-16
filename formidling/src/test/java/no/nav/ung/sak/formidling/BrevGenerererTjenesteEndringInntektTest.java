@@ -100,7 +100,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         var behandling = lagScenario(ungTestscenario);
 
         Long behandlingId = behandling.getId();
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId, true);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -180,7 +180,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = BrevScenarioer.endring0KrInntekt_19år(fom);
         var behandling = lagScenario(ungTestGrunnlag);
-        assertThat(brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), true)).isNull();
+        assertThat(brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), true)).isNull();
 
     }
 
@@ -191,7 +191,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
 
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), false);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 

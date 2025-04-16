@@ -85,4 +85,10 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
     public void setRedigertBrevHtml(String redigertBrevHtml) {
         this.redigertBrevHtml = redigertBrevHtml;
     }
+
+    public void tilbakestill() {
+        //Fjerner ikke redigert tekst i tilfelle saksbehandler ønsker å bruke den
+        setRedigert(false);
+        setHindret(false);
+    }
 }

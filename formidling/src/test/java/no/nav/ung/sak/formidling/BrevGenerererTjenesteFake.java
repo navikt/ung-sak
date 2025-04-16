@@ -21,16 +21,17 @@ public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste {
 
 
     @Override
-    public GenerertBrev genererVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        return resultat;
-    }
-
-    public GenerertBrev genererVedtaksbrevKunHtml(Long behandlingId) {
+    public GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml) {
         return resultat;
     }
 
     @Override
-    public GenerertBrev genererBrevOverstyrRegler(Long behandlingId, boolean kunHtml) {
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return resultat;
+    }
+
+    @Override
+    public GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
         return resultat;
     }
 }

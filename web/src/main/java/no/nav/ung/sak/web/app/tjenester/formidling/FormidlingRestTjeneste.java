@@ -67,11 +67,14 @@ public class FormidlingRestTjeneste {
     @Path("/formidling/vedtaksbrev")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling")
+    @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling",
+        responses = @ApiResponse(responseCode = "200", description = "lagret ok")
+)
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response lagreVedtaksbrevValg(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequestDto dto) {
-        return formidlingTjeneste.lagreVedtaksbrev(dto);
+        formidlingTjeneste.lagreVedtaksbrev(dto);
+        return Response.ok().build();
     }
 
     /**
