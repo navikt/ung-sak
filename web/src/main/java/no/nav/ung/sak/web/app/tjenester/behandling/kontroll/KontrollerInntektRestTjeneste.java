@@ -12,19 +12,28 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.Inntekt;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.kontroll.KontrollerInntektDto;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
+
+import java.util.List;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
@@ -43,6 +52,8 @@ public class KontrollerInntektRestTjeneste {
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RapportertInntektMapper rapportertInntektMapper;
+    private EtterlysningTjeneste etterlysningTjeneste;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
 
     public KontrollerInntektRestTjeneste() {
@@ -51,11 +62,16 @@ public class KontrollerInntektRestTjeneste {
 
     @Inject
     public KontrollerInntektRestTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                         TilkjentYtelseRepository tilkjentYtelseRepository, ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder, RapportertInntektMapper rapportertInntektMapper) {
+                                         TilkjentYtelseRepository tilkjentYtelseRepository,
+                                         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
+                                         RapportertInntektMapper rapportertInntektMapper,
+                                         EtterlysningTjeneste etterlysningTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
+        this.etterlysningTjeneste = etterlysningTjeneste;
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
     @GET
@@ -73,7 +89,19 @@ public class KontrollerInntektRestTjeneste {
             .filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
         final var rapporterteInntekter = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandling.getId());
-        return KontrollerInntektMapper.map(kontrollertInntektPerioder, rapporterteInntekter, perioderTilKontroll);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysningTidslinje(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId());
+        final var registerinntekter = iayGrunnlag.getRegisterVersjon()
+            .stream()
+            .flatMap(it -> it.getAktørInntekt().stream()
+                .filter(ai -> ai.getAktørId().equals(behandling.getAktørId())))
+            .flatMap(it -> it.getInntekt().stream())
+            .toList();
+
+        return KontrollerInntektMapper.map(kontrollertInntektPerioder,
+            rapporterteInntekter,
+            registerinntekter,
+            gjeldendeEtterlysninger,  perioderTilKontroll);
     }
 
 
