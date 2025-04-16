@@ -1,12 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -21,7 +14,14 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.formidling.FormidlingTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 class ForeslåVedtakTjeneste {
@@ -33,6 +33,7 @@ class ForeslåVedtakTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
+    private FormidlingTjeneste formidlingTjeneste;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -43,12 +44,14 @@ class ForeslåVedtakTjeneste {
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
+                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
+                          FormidlingTjeneste formidlingTjeneste) {
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
+        this.formidlingTjeneste = formidlingTjeneste;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -101,6 +104,9 @@ class ForeslåVedtakTjeneste {
     }
 
     private boolean skalOppretteForeslåVedtakManuelt(Behandling behandling) {
+        if (formidlingTjeneste.måSkriveBrev(behandling.getId())) {
+            return true;
+        }
         return finnForeslåVedtakManueltUtleder(behandling).skalOppretteForeslåVedtakManuelt(behandling);
     }
 

@@ -1,24 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -43,12 +24,31 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
+import no.nav.ung.sak.formidling.FormidlingTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -82,6 +82,9 @@ public class ForeslåVedtakTjenesteTest {
     @Mock
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekreving;
 
+    @Mock
+    private FormidlingTjeneste formidlingTjeneste;
+
     @Spy
     private HistorikkRepository historikkRepository;
 
@@ -110,7 +113,7 @@ public class ForeslåVedtakTjenesteTest {
         SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere);
+        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere, formidlingTjeneste);
     }
 
     @Test
