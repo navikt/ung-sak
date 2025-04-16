@@ -1,14 +1,10 @@
-package no.nav.ung.sak.domene.arbeidsforhold;
+package no.nav.ung.sak.domene.iay.modell;
+
+import no.nav.abakus.iaygrunnlag.request.Dataset;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import no.nav.abakus.iaygrunnlag.request.Dataset;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 
 public interface InntektArbeidYtelseTjeneste {
     /**

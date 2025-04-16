@@ -1,32 +1,15 @@
 package no.nav.ung.sak.domene.abakus;
 
-import java.lang.StackWalker.StackFrame;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYDiffsjekker;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningAggregat;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.domene.iay.modell.VersjonType;
+import no.nav.ung.sak.domene.iay.modell.*;
+
+import java.lang.StackWalker.StackFrame;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager)

@@ -1,5 +1,8 @@
 package no.nav.ung.sak.formidling;
 
+import jakarta.persistence.EntityManager;
+import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.test.util.UngTestRepositories;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,6 +37,10 @@ public class BrevUtils {
         }
 
         return brevGenerererTjeneste.genererVedtaksbrevKunHtml(behandlingId);
+    }
+
+    public static UngTestRepositories lagAlleUngTestRepositories(EntityManager entityManager) {
+        return UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, new AbakusInMemoryInntektArbeidYtelseTjeneste());
     }
 
     public static void lagrePdf(GenerertBrev generertBrev, TestInfo testInfo) {

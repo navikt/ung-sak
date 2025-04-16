@@ -1,9 +1,5 @@
 package no.nav.ung.sak.domene.vedtak.ekstern;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -14,12 +10,16 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.Ytelse;
 import no.nav.ung.sak.domene.iay.modell.YtelseFilter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Saksnummer;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @ApplicationScoped
 public class OverlappendeYtelserTjeneste {

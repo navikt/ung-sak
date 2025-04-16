@@ -1,7 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
-import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -9,11 +7,13 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
+
+import java.util.Optional;
 
 @ApplicationScoped
 public class OpprettToTrinnsgrunnlag {

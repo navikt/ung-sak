@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -52,7 +51,6 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     @Inject
     private EntityManager entityManager;
-    private AbakusInMemoryInntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste;
     private UngTestRepositories ungTestRepositories;
 
 
@@ -64,8 +62,7 @@ class BrevGenerererTjenesteEndringInntektTest {
     @BeforeEach
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
-        ungTestRepositories = lagUngTestRepositories();
-        abakusInMemoryInntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
         brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
@@ -77,7 +74,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var endringInnholdBygger =
             new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
-                new RapportertInntektMapper(abakusInMemoryInntektArbeidYtelseTjeneste, new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()))
+                new RapportertInntektMapper(ungTestRepositories.abakusInMemoryInntektArbeidYtelseTjeneste(), new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()))
             );
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
@@ -111,7 +108,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
     @NotNull
     private UngTestRepositories lagUngTestRepositories() {
-        return UngTestRepositories.lagAlleUngTestRepositories(entityManager);
+        return BrevUtils.lagAlleUngTestRepositories(entityManager);
     }
 
 
@@ -216,13 +213,8 @@ class BrevGenerererTjenesteEndringInntektTest {
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);
 
-        UngTestRepositories repositories = lagUngTestRepositories();
+        UngTestRepositories repositories = ungTestRepositories;
         var behandling = scenarioBuilder.buildOgLagreMedUng(repositories);
-
-        abakusInMemoryInntektArbeidYtelseTjeneste.lagreOppgittOpptjening(
-            behandling.getId(),
-            ungTestscenario.abakusInntekt()
-        );
 
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();

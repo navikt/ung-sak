@@ -1,7 +1,5 @@
 package no.nav.ung.sak.domene.arbeidsforhold.testutilities.behandling;
 
-import java.util.Objects;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -9,7 +7,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+
+import java.util.Objects;
 
 @Dependent
 public class IAYRepositoryProvider {
