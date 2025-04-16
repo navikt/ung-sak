@@ -2,11 +2,9 @@ package no.nav.ung.sak.formidling;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgRepository;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
@@ -37,11 +35,11 @@ public class FormidlingTjeneste {
     }
 
 
-    public VedtaksbrevValgDto vedtaksbrevOperasjoner(BehandlingIdDto dto) {
+    public VedtaksbrevValgDto vedtaksbrevValg(Long behandlingId) {
 
-        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.getBehandlingId());
+        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
-        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(dto.getId()));
+        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(behandlingId));
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
@@ -104,24 +102,10 @@ public class FormidlingTjeneste {
 
     }
 
-    public Response forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, String mediaTypeReq) {
-
-        GenerertBrev generertBrev = mediaTypeReq.equals(MediaType.TEXT_HTML) ?
+    public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, boolean kunHtml) {
+        return kunHtml ?
             brevGenerererTjeneste.genererVedtaksbrevKunHtml(dto.behandlingId()) :
             brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
-
-        if (generertBrev == null) {
-            return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
-        }
-
-        return switch (mediaTypeReq) {
-            case PDF_MEDIA_STRING, MediaType.APPLICATION_JSON -> Response.ok(generertBrev.dokument().pdf()).build();
-            case MediaType.TEXT_HTML -> Response.ok(generertBrev.dokument().html()).build();
-            default -> Response.ok(generertBrev.dokument().pdf()) //Kun for å få swagger til å laste ned pdf
-                .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
-                .build();
-
-        };
     }
 
 }

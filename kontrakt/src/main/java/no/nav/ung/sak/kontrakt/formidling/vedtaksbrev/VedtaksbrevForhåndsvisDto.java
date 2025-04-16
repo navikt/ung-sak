@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -34,15 +32,7 @@ public record VedtaksbrevForhåndsvisDto(
      */
     @JsonProperty("redigertVersjon")
     @Valid
-    Boolean redigertVersjon,
-
-    /**
-     * TODO
-     */
-    @JsonProperty("dokumentdata")
-    @Valid
-    JsonNode dokumentdata
-
+    Boolean redigertVersjon
 
 ) {
 }
