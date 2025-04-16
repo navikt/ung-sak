@@ -4703,10 +4703,10 @@
           "hindret" : {
             "type" : "boolean"
           },
-          "kanHindre" : {
+          "kanOverstyreHindre" : {
             "type" : "boolean"
           },
-          "kanRedigere" : {
+          "kanOverstyreRediger" : {
             "type" : "boolean"
           },
           "redigert" : {
@@ -4719,20 +4719,26 @@
         },
         "type" : "object"
       },
-      "VedtaksbrevRedigerDto" : {
+      "VedtaksbrevOperasjonerRequestDto" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
             "type" : "integer"
           },
-          "html" : {
-            "type" : "string"
+          "hindret" : {
+            "type" : "boolean"
           },
-          "kladdId" : {
-            "format" : "uuid",
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "redigertHtml" : {
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           }
         },
+        "required" : [ "behandlingId" ],
         "type" : "object"
       },
       "VenteårsakSomObjekt" : {
@@ -6870,7 +6876,7 @@
     "/api/formidling/vedtaksbrev" : {
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
-        "operationId" : "tilgjengeligeVedtaksbrev",
+        "operationId" : "vedtaksbrevOperasjoner",
         "parameters" : [ {
           "in" : "query",
           "name" : "behandlingId",
@@ -6887,6 +6893,27 @@
                   "$ref" : "#/components/schemas/VedtaksbrevOperasjonerDto"
                 }
               }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      },
+      "post" : {
+        "description" : "Lagring av brevvalg eks redigert eller hindretbrev  ",
+        "operationId" : "lagreVedtaksbrev",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/VedtaksbrevOperasjonerRequestDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
             },
             "description" : "default response"
           }
@@ -6936,35 +6963,6 @@
               }
             },
             "description" : "pdf"
-          }
-        },
-        "tags" : [ "formidling" ]
-      }
-    },
-    "/api/formidling/vedtaksbrev/rediger" : {
-      "get" : {
-        "description" : "Henter vedtaksbrev for redigering",
-        "operationId" : "vedtaksbrevHtml",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/VedtaksbrevRedigerDto"
-                }
-              }
-            },
-            "description" : "default response"
           }
         },
         "tags" : [ "formidling" ]
