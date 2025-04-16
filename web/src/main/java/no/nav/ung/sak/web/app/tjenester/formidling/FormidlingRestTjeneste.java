@@ -58,9 +58,9 @@ public class FormidlingRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Operasjoner som er mulig for vedtaksbrev", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public VedtaksbrevValgDto vedtaksbrevOperasjoner(
+    public VedtaksbrevValgDto vedtaksbrevValg(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
-        return formidlingTjeneste.vedtaksbrevOperasjoner(dto);
+        return formidlingTjeneste.vedtaksbrevValg(dto.getBehandlingId());
     }
 
     @POST
@@ -69,7 +69,7 @@ public class FormidlingRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public Response lagreVedtaksbrev(
+    public Response lagreVedtaksbrevValg(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequestDto dto) {
         return formidlingTjeneste.lagreVedtaksbrev(dto);
     }
@@ -99,7 +99,20 @@ public class FormidlingRestTjeneste {
         @Context HttpServletRequest request
     ) {
         String mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
-        return formidlingTjeneste.forhåndsvisVedtaksbrev(dto, mediaTypeReq);
+        var generertBrev = formidlingTjeneste.forhåndsvisVedtaksbrev(dto, MediaType.TEXT_HTML.equals(mediaTypeReq));
+
+        if (generertBrev == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        return switch (mediaTypeReq) {
+            case PDF_MEDIA_STRING, MediaType.APPLICATION_JSON -> Response.ok(generertBrev.dokument().pdf()).build();
+            case MediaType.TEXT_HTML -> Response.ok(generertBrev.dokument().html()).build();
+            default -> Response.ok(generertBrev.dokument().pdf()) //Kun for å få swagger til å laste ned pdf
+                .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
+                .build();
+
+        };
     }
 
 
