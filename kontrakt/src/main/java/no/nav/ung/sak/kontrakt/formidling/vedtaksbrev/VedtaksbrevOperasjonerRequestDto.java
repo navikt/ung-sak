@@ -6,7 +6,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import no.nav.ung.abac.AbacAttributt;
+import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
@@ -32,6 +34,7 @@ public record VedtaksbrevOperasjonerRequestDto(
     Boolean redigert,
 
     @JsonProperty("redigertHtml")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     String redigertHtml
     ) {
 
