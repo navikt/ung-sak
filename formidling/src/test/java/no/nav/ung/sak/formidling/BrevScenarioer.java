@@ -49,8 +49,7 @@ public class BrevScenarioer {
 
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(
-            repositories);
+        var behandling = scenarioBuilder.buildOgLagreMedUng(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         return scenarioBuilder;

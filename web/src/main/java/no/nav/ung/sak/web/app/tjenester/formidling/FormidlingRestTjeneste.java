@@ -22,9 +22,12 @@ import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.VedtaksbrevRegelResulat;
 import no.nav.ung.sak.formidling.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,17 +45,19 @@ public class FormidlingRestTjeneste {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private VedtaksbrevRegler vedtaksbrevRegler;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
-    private static final MediaType PDF_MEDIA_TYPE = MediaType.valueOf(PDF_MEDIA_STRING);
 
     @Inject
     public FormidlingRestTjeneste(
         BrevGenerererTjeneste brevGenerererTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler) {
+        VedtaksbrevRegler vedtaksbrevRegler,
+        VedtaksbrevValgRepository vedtaksbrevValgRepository) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
+        this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
     }
 
     FormidlingRestTjeneste() {
@@ -65,14 +70,80 @@ public class FormidlingRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Operasjoner som er mulig for vedtaksbrev", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public VedtaksbrevOperasjonerDto tilgjengeligeVedtaksbrev(
+    public VedtaksbrevValgDto vedtaksbrevOperasjoner(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
+
+        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.getBehandlingId());
 
         VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(dto.getId()));
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
-        return resultat.vedtaksbrevOperasjoner();
+
+        var egenskaper = resultat.vedtaksbrevEgenskaper();
+
+        return new VedtaksbrevValgDto(
+            egenskaper.harBrev(),
+            null,
+            false,
+            egenskaper.kanHindre(),
+            valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
+            egenskaper.kanOverstyreHindre(),
+            egenskaper.kanRedigere(),
+            valg.map(VedtaksbrevValgEntitet::isRedigert).orElse(false),
+            egenskaper.kanOverstyreRediger(),
+            resultat.forklaring(),
+            valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null)
+        );
     }
 
+    @POST
+    @Path("/formidling/vedtaksbrev")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public Response lagreVedtaksbrev(
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequestDto dto) {
+
+        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
+            .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
+
+        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(dto.behandlingId());
+        var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
+
+        if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Brevet kan ikke redigeres. ")
+                .build();
+        }
+
+        if (Boolean.TRUE.equals(dto.redigert()) && (dto.redigertHtml() == null || dto.redigertHtml().isBlank())) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Redigert tekst kan ikke være tom samtidig som redigert er true")
+                .build();
+        }
+
+        if ((dto.redigert() == null || !dto.redigert()) && dto.redigertHtml() != null) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Kan ikke ha redigert tekst samtidig som redigert er false")
+                .build();
+        }
+
+        if (!vedtaksbrevEgenskaper.kanHindre() && dto.hindret() != null) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Brevet kan ikke hindres. ")
+                .build();
+        }
+
+
+        vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
+        vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
+        vedtaksbrevValgEntitet.setRedigertBrevHtml(dto.redigertHtml());
+
+        vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
+
+        return Response.ok().build();
+
+    }
 
     /**
      * MediaType.APPLICATION_JSON is added to Produces because currently the generated client always adds accept: application/json to requests.
@@ -98,13 +169,15 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
     ) {
+        var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
+        GenerertBrev generertBrev = mediaTypeReq.equals(MediaType.TEXT_HTML) ?
+            brevGenerererTjeneste.genererVedtaksbrevKunHtml(dto.behandlingId()) :
+            brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId());
+
         if (generertBrev == null) {
             return Response.status(Response.Status.NOT_FOUND.getStatusCode()).build();
         }
-
-        var mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
 
         return switch (mediaTypeReq) {
             case PDF_MEDIA_STRING, MediaType.APPLICATION_JSON -> Response.ok(generertBrev.dokument().pdf()).build();
