@@ -95,7 +95,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         var behandling = lagScenario(ungTestscenario);
 
         Long behandlingId = (behandling.getId());
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId, true);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -136,7 +136,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             BrevScenarioer.endring25År(LocalDate.of(2024, 12, 1)));
 
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), false);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 

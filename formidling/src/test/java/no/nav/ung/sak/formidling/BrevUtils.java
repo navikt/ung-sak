@@ -31,12 +31,12 @@ public class BrevUtils {
 
     public static GenerertBrev genererBrevOgLagreHvisEnabled(TestInfo testInfo, Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste ) {
         if (System.getenv("LAGRE_PDF") != null) {
-            var generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId, false);
+            var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
             BrevUtils.lagrePdf(generertBrev, testInfo);
             return generertBrev;
         }
 
-        return brevGenerererTjeneste.genererVedtaksbrev(behandlingId, true);
+        return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
     }
 
     public static UngTestRepositories lagAlleUngTestRepositories(EntityManager entityManager) {

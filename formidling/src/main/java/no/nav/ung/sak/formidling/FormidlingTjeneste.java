@@ -2,7 +2,7 @@ package no.nav.ung.sak.formidling;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -21,7 +21,6 @@ public class FormidlingTjeneste {
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingTjeneste.class);
-    private static final String PDF_MEDIA_STRING = "application/pdf";
 
     @Inject
     public FormidlingTjeneste(
@@ -65,12 +64,10 @@ public class FormidlingTjeneste {
         );
     }
 
-    public Response lagreVedtaksbrev(VedtaksbrevValgRequestDto dto) {
+    public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequestDto dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Kan endre vedtaksbrev på avsluttet behandling")
-                .build();
+            throw new BadRequestException("Kan endre vedtaksbrev på avsluttet behandling");
         }
 
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
@@ -80,27 +77,19 @@ public class FormidlingTjeneste {
         var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
 
         if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Brevet kan ikke redigeres. ")
-                .build();
+            throw new BadRequestException("Brevet kan ikke redigeres.");
         }
 
         if (Boolean.TRUE.equals(dto.redigert()) && (dto.redigertHtml() == null || dto.redigertHtml().isBlank())) {
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Redigert tekst kan ikke være tom samtidig som redigert er true")
-                .build();
+            throw new BadRequestException("Redigert tekst kan ikke være tom samtidig som redigert er true");
         }
 
         if ((dto.redigert() == null || !dto.redigert()) && dto.redigertHtml() != null) {
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Kan ikke ha redigert tekst samtidig som redigert er false")
-                .build();
+            throw new BadRequestException("Kan ikke ha redigert tekst samtidig som redigert er false");
         }
 
         if (!vedtaksbrevEgenskaper.kanHindre() && dto.hindret() != null) {
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Brevet kan ikke hindres. ")
-                .build();
+            throw new BadRequestException("Brevet kan ikke hindres. ");
         }
 
 
@@ -108,19 +97,30 @@ public class FormidlingTjeneste {
         vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
         vedtaksbrevValgEntitet.setRedigertBrevHtml(dto.redigertHtml()); //TODO sanitize html!
 
-        vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
-
-        return Response.ok().build();
+        return vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }
 
     public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, boolean kunHtml) {
+        if (dto.redigertVersjon() == null) {
+            return brevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
+        }
         if (dto.redigertVersjon()) {
-            return brevGenerererTjeneste.genererBrevOverstyrRegler(dto.behandlingId(), kunHtml);
+            return brevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
         }
 
-        return brevGenerererTjeneste.genererVedtaksbrev(dto.behandlingId(), kunHtml);
+        return brevGenerererTjeneste.genererAutomatiskVedtaksbrev(dto.behandlingId(), kunHtml);
     }
 
+    public void ryddVedTilbakeHopp(Long behandlingId) {
+        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
+        if (vedtaksbrevValgEntitet == null) {
+            return;
+        }
+
+        vedtaksbrevValgEntitet.tilbakestill();
+        vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
+
+    }
 }
 

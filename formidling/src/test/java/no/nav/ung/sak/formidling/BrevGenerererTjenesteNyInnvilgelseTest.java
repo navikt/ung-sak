@@ -103,7 +103,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         var behandling = scenarioBuilder.getBehandling();
 
         Long behandlingId = (behandling.getId());
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandlingId, true);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -291,7 +291,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
         var behandling = scenarioBuilder.getBehandling();
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId(), false);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 
