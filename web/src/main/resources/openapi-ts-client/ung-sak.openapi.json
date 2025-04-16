@@ -4711,10 +4711,6 @@
           },
           "redigert" : {
             "type" : "boolean"
-          },
-          "tidligereKladdId" : {
-            "format" : "uuid",
-            "type" : "string"
           }
         },
         "type" : "object"
@@ -6902,14 +6898,16 @@
       "post" : {
         "description" : "Lagring av brevvalg eks redigert eller hindretbrev  ",
         "operationId" : "lagreVedtaksbrev",
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "behandlingId",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/VedtaksbrevOperasjonerRequestDto"
-          }
-        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VedtaksbrevOperasjonerRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
         "responses" : {
           "default" : {
             "content" : {
