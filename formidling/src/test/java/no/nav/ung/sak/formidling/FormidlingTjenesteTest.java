@@ -60,8 +60,8 @@ class FormidlingTjenesteTest {
         lagBrevgenererOgVedtaksbrevRegler();
         vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
         formidlingTjeneste = new FormidlingTjeneste(
-            brevGenerererTjeneste, vedtaksbrevRegler, vedtaksbrevValgRepository
-        );
+            brevGenerererTjeneste, vedtaksbrevRegler, vedtaksbrevValgRepository,
+            ungTestRepositories.repositoryProvider().getBehandlingRepository());
 
     }
 

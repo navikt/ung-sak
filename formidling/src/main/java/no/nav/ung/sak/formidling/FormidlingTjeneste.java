@@ -3,6 +3,7 @@ package no.nav.ung.sak.formidling;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgRepository;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 @Dependent
 public class FormidlingTjeneste {
 
+    private BehandlingRepository behandlingRepository;
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private VedtaksbrevRegler vedtaksbrevRegler;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
@@ -25,10 +27,12 @@ public class FormidlingTjeneste {
     public FormidlingTjeneste(
         BrevGenerererTjeneste brevGenerererTjeneste,
         VedtaksbrevRegler vedtaksbrevRegler,
-        VedtaksbrevValgRepository vedtaksbrevValgRepository) {
+        VedtaksbrevValgRepository vedtaksbrevValgRepository,
+        BehandlingRepository behandlingRepository) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     FormidlingTjeneste() {
@@ -36,6 +40,8 @@ public class FormidlingTjeneste {
 
 
     public VedtaksbrevValgDto vedtaksbrevValg(Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var erAvsluttet = behandling.erAvsluttet();
 
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
@@ -50,16 +56,22 @@ public class FormidlingTjeneste {
             false,
             egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
-            egenskaper.kanOverstyreHindre(),
+            !erAvsluttet && egenskaper.kanOverstyreHindre(),
             egenskaper.kanRedigere(),
             valg.map(VedtaksbrevValgEntitet::isRedigert).orElse(false),
-            egenskaper.kanOverstyreRediger(),
+            !erAvsluttet && egenskaper.kanOverstyreRediger(),
             resultat.forklaring(),
             valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null)
         );
     }
 
     public Response lagreVedtaksbrev(VedtaksbrevValgRequestDto dto) {
+        var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
+        if (behandling.erAvsluttet()) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Kan endre vedtaksbrev på avsluttet behandling")
+                .build();
+        }
 
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
             .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
