@@ -20,8 +20,9 @@ import jakarta.validation.Valid;
  * @param redigert                  true hvis det det brevet har blitt redigert - blir nullstilt ved tilbakehopp
  * @param kanOverstyreRediger       true hvis det er mulig å redigere et automatisk brev.
  * @param forklaring                en forklaring av resultatet
+ * @param redigertBrevHtml
  */
-public record VedtaksbrevOperasjonerDto(
+public record VedtaksbrevValgDto(
     boolean harBrev,
     @Valid @Deprecated
     AutomatiskBrevOperasjoner automatiskBrevOperasjoner,
@@ -33,36 +34,8 @@ public record VedtaksbrevOperasjonerDto(
     boolean enableRediger,
     boolean redigert,
     boolean kanOverstyreRediger,
-    String forklaring
-) {
-
-    public static VedtaksbrevOperasjonerDto ingenBrev(String forklaring) {
-        return new VedtaksbrevOperasjonerDto(false,
-            null,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            forklaring
-        );
-    }
-
-    public static VedtaksbrevOperasjonerDto automatiskBrev(String forklaring, boolean enableRedigerOgHindring) {
-        return new VedtaksbrevOperasjonerDto(true,
-            new AutomatiskBrevOperasjoner(enableRedigerOgHindring, false),
-            false,
-            enableRedigerOgHindring,
-            false,
-            enableRedigerOgHindring,
-            enableRedigerOgHindring,
-            false,
-            enableRedigerOgHindring,
-            forklaring
-        );
-    }
+    String forklaring,
+    String redigertBrevHtml) {
 
     /**
      * @param enableRediger true hvis brevet kan redigeres

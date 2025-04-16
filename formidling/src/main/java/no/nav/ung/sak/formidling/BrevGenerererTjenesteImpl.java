@@ -70,8 +70,8 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
-        if (!regelResultat.vedtaksbrevOperasjoner().harBrev()) {
-            LOG.warn(regelResultat.vedtaksbrevOperasjoner().forklaring());
+        if (!regelResultat.vedtaksbrevEgenskaper().harBrev()) {
+            LOG.warn(regelResultat.forklaring());
             return null;
         }
 
