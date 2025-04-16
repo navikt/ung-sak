@@ -52,6 +52,13 @@ På denne måten kan man teste om backend endringer fører til feil i frontend f
 
 Se også [openapi-ts-client/README](web/src/main/resources/openapi-ts-client/README.md) for mer teknisk info.
 
+## Tilkobling til database
+For å koble til databasen i dev-gcp kan man kjøre denne hjelpe-scriptet:
+
+```shell script
+./scripts/nais-postgres.sh --context dev-gcp --namespace k9saksbehandling --app ung-deltakelse-opplyser
+```
+
 ## Kode generert av GitHub Copilot
 
 Dette repoet bruker GitHub Copilot til å generere kode.
