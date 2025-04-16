@@ -90,6 +90,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
      * Lager brev basert på regler
      */
     @WithSpan
+    @Override
     public GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
         return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(behandlingId, kunHtml));
     }
@@ -127,6 +128,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     }
 
     @WithSpan
+    @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
         return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, kunHtml));
     }
