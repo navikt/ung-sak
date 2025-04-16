@@ -55,7 +55,7 @@ public class VedtaksbrevRegler {
 
         var resultater = resultaterInfo.stream().map(DetaljertResultatInfo::detaljertResultatType).collect(Collectors.toSet());
 
-        var redigerRegelResultat = harUtførteAksjonspunkterMedToTrinn(behandling);
+        var redigerRegelResultat = harUtførteManuelleAksjonspunkter(behandling);
 
         if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
             || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
@@ -88,12 +88,23 @@ public class VedtaksbrevRegler {
             );
         }
 
+        if (redigerRegelResultat.kanRedigere()) {
+            // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
+            String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring();
+            return VedtaksbrevRegelResulat.tomRedigerbarBrev(
+                null,
+                detaljertResultat,
+                forklaring
+            );
+        }
+
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
         return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, forklaring);
     }
 
-    private static RedigerRegelResultat harUtførteAksjonspunkterMedToTrinn(Behandling behandling) {
-        var lukkedeApMedToTrinn = behandling.getAksjonspunkterMedTotrinnskontroll().stream()
+    private static RedigerRegelResultat harUtførteManuelleAksjonspunkter(Behandling behandling) {
+        var lukkedeApMedToTrinn = behandling.getAksjonspunkter().stream()
+            .filter(it -> !it.erAutopunkt())
             .filter(Aksjonspunkt::erUtført).toList();
         boolean kanRedigere = !lukkedeApMedToTrinn.isEmpty();
         if (kanRedigere) {

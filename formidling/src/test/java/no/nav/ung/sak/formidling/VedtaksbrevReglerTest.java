@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -21,6 +22,7 @@ import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,15 +52,8 @@ class VedtaksbrevReglerTest {
 
 
     @Test
-    void skal_ikke_kunne_redigere_brev_uten_aksjonspunkt() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
-            .medUngTestGrunnlag(ungTestGrunnlag);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+    void skal_ikke_redigere_brev_uten_aksjonspunkt() {
+        var behandling = lagBehandling(BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
 
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
@@ -74,22 +69,9 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_kunne_redigere_brev_ved_aksjonspunkt() {
+    void skal_kunne_redigere_automatisk_brev_ved_aksjonspunkt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
-            .medUngTestGrunnlag(ungTestGrunnlag);
-
-        scenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
-        new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
-        var behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        var behandling = lagBehandling(BrevScenarioer.endringMedInntektPå10k_19år(fom), BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
@@ -102,6 +84,25 @@ class VedtaksbrevReglerTest {
         assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isTrue();
 
         assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
+
+    }
+
+    @Test
+    void skal_redigere_brev_ved_aksjonspunkt_uten_automatisk_brev() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), BehandlingStegType.SIMULER_OPPDRAG, AksjonspunktDefinisjon.VURDER_TILBAKETREKK);
+
+        VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
+
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
+
+        assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
+
+        assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.VURDER_TILBAKETREKK.getKode());
 
     }
 
@@ -125,6 +126,33 @@ class VedtaksbrevReglerTest {
             detaljertResultatUtleder
         );
 
+    }
+
+    private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
+        return this.lagBehandling(ungTestGrunnlag, null, null);
+    }
+
+    private Behandling lagBehandling(UngTestScenario ungTestGrunnlag, BehandlingStegType behandlingStegType, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestGrunnlag);
+
+        if (aksjonspunktDefinisjon != null) {
+            scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, behandlingStegType);
+        }
+
+        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+
+        if (aksjonspunktDefinisjon != null) {
+            Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
+            new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
+            BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
+            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        }
+
+
+        return behandling;
     }
 
 }

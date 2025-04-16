@@ -35,6 +35,24 @@ public record VedtaksbrevRegelResulat(
         );
     }
 
+    public static VedtaksbrevRegelResulat tomRedigerbarBrev(
+        VedtaksbrevInnholdBygger bygger,
+        LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+        String forklaring
+    ) {
+        return new VedtaksbrevRegelResulat(
+            new VedtaksbrevEgenskaper(
+                true,
+                true,
+                true,
+                true,
+                false),
+            bygger,
+            detaljertResultatTimeline,
+            forklaring
+        );
+    }
+
     public static VedtaksbrevRegelResulat ingenBrev(
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
         String forklaring
@@ -57,6 +75,7 @@ public record VedtaksbrevRegelResulat(
         boolean kanOverstyreHindre,
         boolean kanRedigere,
         boolean kanOverstyreRediger
-    ) {}
+    ) {
+    }
 }
 
