@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.FritekstVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -61,6 +62,7 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
+        assertThat(regelResulat.bygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
@@ -78,6 +80,7 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
+        assertThat(regelResulat.bygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
@@ -98,6 +101,7 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
+        assertThat(regelResulat.bygger()).isNull();
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
@@ -109,15 +113,16 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_redigere_brev_ved_aksjonspunkt_uten_automatisk_brev() {
+    void skal_gi_fritekstvedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), BehandlingStegType.SIMULER_OPPDRAG, AksjonspunktDefinisjon.VURDER_TILBAKETREKK);
 
-        var vedtaksbrevRegler = lagVedtaksbrevRegler(null);
+        var vedtaksbrevRegler = lagVedtaksbrevRegler(FritekstVedtaksbrevInnholdBygger.class);
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
+        assertThat(regelResulat.bygger()).isInstanceOf(FritekstVedtaksbrevInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
