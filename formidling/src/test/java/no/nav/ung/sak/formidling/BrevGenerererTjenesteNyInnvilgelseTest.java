@@ -57,7 +57,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
     @BeforeEach
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
-        ungTestRepositories = UngTestRepositories.lagAlleUngTestRepositories(entityManager);
+        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
         brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
