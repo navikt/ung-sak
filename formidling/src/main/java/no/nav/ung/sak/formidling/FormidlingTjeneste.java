@@ -64,6 +64,11 @@ public class FormidlingTjeneste {
         );
     }
 
+    public boolean måSkriveBrev(Long behandlingId) {
+        var regelResulat = vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevEgenskaper();
+        return regelResulat.harBrev() && regelResulat.kanRedigere() && !regelResulat.kanOverstyreRediger();
+    }
+
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequestDto dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
