@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -120,7 +119,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
 
         var behandling = lagScenario(
-            BrevScenarioer.endring0KrInntekt_19år(fom), BehandlingStegType.SIMULER_OPPDRAG, AksjonspunktDefinisjon.VURDER_TILBAKETREKK);
+            BrevScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE);
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
@@ -181,18 +180,17 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
 
         return lagScenario(
             BrevScenarioer.endring0KrInntekt_19år(fom),
-            BehandlingStegType.SIMULER_OPPDRAG,
-            AksjonspunktDefinisjon.VURDER_TILBAKETREKK
+            AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE
         );
     }
 
-    private Behandling lagScenario(UngTestScenario ungTestscenario, BehandlingStegType behandlingStegType, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+    private Behandling lagScenario(UngTestScenario ungTestscenario, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);
 
         if (aksjonspunktDefinisjon != null) {
-            scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, behandlingStegType);
+            scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, null);
         }
 
 
