@@ -4643,7 +4643,7 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
-      "VedtaksbrevOperasjonerDto" : {
+      "VedtaksbrevValgDto" : {
         "properties" : {
           "automatiskBrevOperasjoner" : {
             "$ref" : "#/components/schemas/AutomatiskBrevOperasjoner"
@@ -4674,11 +4674,14 @@
           },
           "redigert" : {
             "type" : "boolean"
+          },
+          "redigertBrevHtml" : {
+            "type" : "string"
           }
         },
         "type" : "object"
       },
-      "VedtaksbrevOperasjonerRequestDto" : {
+      "VedtaksbrevValgRequestDto" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
@@ -6849,7 +6852,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VedtaksbrevOperasjonerDto"
+                  "$ref" : "#/components/schemas/VedtaksbrevValgDto"
                 }
               }
             },
@@ -6865,7 +6868,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/VedtaksbrevOperasjonerRequestDto"
+                "$ref" : "#/components/schemas/VedtaksbrevValgRequestDto"
               }
             }
           },
