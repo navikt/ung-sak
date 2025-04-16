@@ -50,14 +50,15 @@ public class FormidlingRestTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
-    private static final MediaType PDF_MEDIA_TYPE = MediaType.valueOf(PDF_MEDIA_STRING);
 
     @Inject
     public FormidlingRestTjeneste(
         BrevGenerererTjeneste brevGenerererTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler) {
+        VedtaksbrevRegler vedtaksbrevRegler,
+        VedtaksbrevValgRepository vedtaksbrevValgRepository) {
         this.brevGenerererTjeneste = brevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
+        this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
     }
 
     FormidlingRestTjeneste() {
@@ -85,7 +86,7 @@ public class FormidlingRestTjeneste {
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response lagreVedtaksbrev(
-        @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevOperasjonerRequestDto dto) {
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevOperasjonerRequestDto dto) {
 
         VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(dto.behandlingId());
 
@@ -94,7 +95,7 @@ public class FormidlingRestTjeneste {
 
         if (!resultat.vedtaksbrevOperasjoner().enableRediger() && dto.redigert() != null) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                "Brevet kan ikke redigeres. ")
+                    "Brevet kan ikke redigeres. ")
                 .build();
         }
 

@@ -67,9 +67,14 @@ class VedtaksbrevReglerTest {
         assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().enableRediger()).isFalse();
         assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().redigert()).isFalse();
         assertThat(vedtaksbrevOperasjonerDto.enableHindre()).isFalse();
+        assertThat(vedtaksbrevOperasjonerDto.enableRediger()).isFalse();
         assertThat(vedtaksbrevOperasjonerDto.fritekstbrev()).isFalse();
         assertThat(vedtaksbrevOperasjonerDto.harBrev()).isTrue();
         assertThat(vedtaksbrevOperasjonerDto.hindret()).isFalse();
+        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreHindre()).isFalse();
+        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreRediger()).isFalse();
+        assertThat(vedtaksbrevOperasjonerDto.redigert()).isFalse();
+
 
     }
 
@@ -98,10 +103,14 @@ class VedtaksbrevReglerTest {
         assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().enableRediger()).isTrue();
         assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().redigert()).isFalse();
         assertThat(vedtaksbrevOperasjonerDto.enableHindre()).isTrue();
+        assertThat(vedtaksbrevOperasjonerDto.enableRediger()).isTrue();
         assertThat(vedtaksbrevOperasjonerDto.fritekstbrev()).isFalse();
+        assertThat(vedtaksbrevOperasjonerDto.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
         assertThat(vedtaksbrevOperasjonerDto.harBrev()).isTrue();
         assertThat(vedtaksbrevOperasjonerDto.hindret()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
+        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreHindre()).isTrue();
+        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreRediger()).isTrue();
+        assertThat(vedtaksbrevOperasjonerDto.redigert()).isFalse();
 
     }
 

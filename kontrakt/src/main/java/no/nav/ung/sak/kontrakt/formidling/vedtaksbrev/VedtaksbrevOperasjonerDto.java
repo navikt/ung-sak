@@ -3,8 +3,6 @@ package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 import jakarta.validation.Valid;
 
-import java.util.UUID;
-
 /**
  * Response objekt - skal ikke sendes inn
  *
@@ -22,7 +20,6 @@ import java.util.UUID;
  * @param redigert                  true hvis det det brevet har blitt redigert - blir nullstilt ved tilbakehopp
  * @param kanOverstyreRediger       true hvis det er mulig å redigere et automatisk brev.
  * @param forklaring                en forklaring av resultatet
- * @param tidligereKladdId          Id på tidligere versjon av redigert brev ved tilbakehopp
  */
 public record VedtaksbrevOperasjonerDto(
     boolean harBrev,
@@ -36,8 +33,8 @@ public record VedtaksbrevOperasjonerDto(
     boolean enableRediger,
     boolean redigert,
     boolean kanOverstyreRediger,
-    String forklaring,
-    UUID tidligereKladdId) {
+    String forklaring
+) {
 
     public static VedtaksbrevOperasjonerDto ingenBrev(String forklaring) {
         return new VedtaksbrevOperasjonerDto(false,
@@ -49,8 +46,8 @@ public record VedtaksbrevOperasjonerDto(
             false,
             false,
             false,
-            forklaring,
-            null);
+            forklaring
+        );
     }
 
     public static VedtaksbrevOperasjonerDto automatiskBrev(String forklaring, boolean enableRedigerOgHindring) {
@@ -63,8 +60,8 @@ public record VedtaksbrevOperasjonerDto(
             enableRedigerOgHindring,
             false,
             enableRedigerOgHindring,
-            forklaring,
-            null);
+            forklaring
+        );
     }
 
     /**
