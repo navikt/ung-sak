@@ -26,7 +26,6 @@ import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -104,11 +103,6 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         VedtaksbrevVerifikasjon.verifiserStandardOverskrifter(brevtekst);
 
-    }
-
-    @NotNull
-    private UngTestRepositories lagUngTestRepositories() {
-        return BrevUtils.lagAlleUngTestRepositories(entityManager);
     }
 
 

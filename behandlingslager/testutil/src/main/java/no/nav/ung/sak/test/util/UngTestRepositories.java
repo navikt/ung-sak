@@ -22,10 +22,6 @@ public record UngTestRepositories(
     InntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste
 ) {
 
-    public static UngTestRepositories lagAlleUngTestRepositories(EntityManager entityManager) {
-        return lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, null);
-    }
-
     public static UngTestRepositories lagAlleUngTestRepositoriesOgAbakusTjeneste(EntityManager entityManager, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         var ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);

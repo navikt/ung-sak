@@ -49,7 +49,7 @@ class VedtaksbrevReglerTest {
 
     @BeforeEach
     void setup() {
-        ungTestRepositories = UngTestRepositories.lagAlleUngTestRepositories(entityManager);
+        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
     }
 
 

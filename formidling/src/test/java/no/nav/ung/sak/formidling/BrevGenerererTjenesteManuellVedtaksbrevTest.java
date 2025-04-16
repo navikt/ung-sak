@@ -65,7 +65,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
         vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
-        ungTestRepositories = UngTestRepositories.lagAlleUngTestRepositories(entityManager);
+        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
         brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
@@ -180,7 +180,9 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
 
         return lagScenario(
-            BrevScenarioer.endring0KrInntekt_19år(fom), BehandlingStegType.SIMULER_OPPDRAG, AksjonspunktDefinisjon.VURDER_TILBAKETREKK
+            BrevScenarioer.endring0KrInntekt_19år(fom),
+            BehandlingStegType.SIMULER_OPPDRAG,
+            AksjonspunktDefinisjon.VURDER_TILBAKETREKK
         );
     }
 
