@@ -6906,11 +6906,8 @@
           "required" : true
         },
         "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : { }
-            },
-            "description" : "default response"
+          "200" : {
+            "description" : "lagret ok"
           }
         },
         "tags" : [ "formidling" ]
