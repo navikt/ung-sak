@@ -2,13 +2,14 @@ package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -16,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
@@ -26,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -50,6 +51,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
 
     private TestScenarioBuilder scenario;
     private Behandling behandling;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
 
     @BeforeEach
@@ -57,11 +59,13 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(entityManager);
         final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         programperiodeendringEtterlysningTjeneste = new ProgramperiodeendringEtterlysningTjeneste(
             ungdomsprogramPeriodeTjeneste,
             ungdomsprogramPeriodeRepository,
             prosessTaskTjeneste,
-            etterlysningRepository
+            etterlysningRepository,
+            new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository)
         );
     }
 
@@ -274,7 +278,12 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var eksisterendeEtterlysning = Etterlysning.opprettForType(behandling.getId(), ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse(), UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, tom), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         eksisterendeEtterlysning.vent(LocalDateTime.now());
-        eksisterendeEtterlysning.mottattUttalelse(new JournalpostId(12L), true, null);
+        final var svarJournalpostId = new JournalpostId(12L);
+        mottatteDokumentRepository.lagre(new MottattDokument.Builder().medJournalPostId(svarJournalpostId)
+                .medInnsendingstidspunkt(LocalDateTime.now())
+                .medFagsakId(behandling.getFagsakId())
+            .build(), DokumentStatus.GYLDIG);
+        eksisterendeEtterlysning.mottattUttalelse(svarJournalpostId, true, null);
         etterlysningRepository.lagre(eksisterendeEtterlysning);
     }
 

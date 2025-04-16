@@ -3,7 +3,6 @@ package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.oppgave.bekreftelse.Bekreftelse;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.DatoEndring;
 import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretProgramperiodeBekreftelse;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;

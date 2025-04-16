@@ -30,7 +30,6 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,9 +118,9 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
-        assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseBegrunnelse()).isNull();
-        assertThat(oppdatertEtterlysning.getUttalelse().harGodtattEndringen()).isTrue();
-        assertThat(oppdatertEtterlysning.getUttalelse().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
+        assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isNull();
+        assertThat(oppdatertEtterlysning.getUttalelse().get().harGodtattEndringen()).isTrue();
+        assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
     @Test
@@ -172,9 +171,9 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
-        assertThat(oppdatertEtterlysning.getUttalelse().getUttalelseBegrunnelse()).isEqualTo("en uttalelse");
-        assertThat(oppdatertEtterlysning.getUttalelse().harGodtattEndringen()).isFalse();
-        assertThat(oppdatertEtterlysning.getUttalelse().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
+        assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isEqualTo("en uttalelse");
+        assertThat(oppdatertEtterlysning.getUttalelse().get().harGodtattEndringen()).isFalse();
+        assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
     private MottattDokument lagMottattDokument(Behandling behandling, long journalpostId) {

@@ -7,49 +7,51 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
+import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Dependent
 public class ProgramperiodeendringEtterlysningTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(ProgramperiodeendringEtterlysningTjeneste.class);
-
+    public static final Set<EtterlysningStatus> VENTER_STATUSER = Set.of(EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
 
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private EtterlysningRepository etterlysningRepository;
+    private EtterlysningTjeneste etterlysningTjeneste;
 
     @Inject
     public ProgramperiodeendringEtterlysningTjeneste(UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
                                                      UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                                      ProsessTaskTjeneste prosessTaskTjeneste,
-                                                     EtterlysningRepository etterlysningRepository) {
+                                                     EtterlysningRepository etterlysningRepository,
+                                                     EtterlysningTjeneste EtterlysningTjeneste) {
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.etterlysningRepository = etterlysningRepository;
+        this.etterlysningTjeneste = EtterlysningTjeneste;
     }
 
     void opprettEtterlysningerForProgramperiodeEndring(Long behandlingId, Long fagsakId) {
         final var gjeldendePeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
 
         // Finner etterlysninger som skal opprettes og avbrytes for endring av programperiode
-        final var resultatEndretProgramperiode = finnEndretProgramperiodeResultat(gjeldendePeriodeGrunnlag, behandlingId);
+        final var resultatEndretProgramperiode = finnEndretProgramperiodeResultat(gjeldendePeriodeGrunnlag, behandlingId, fagsakId);
 
         final var prosessTaskGruppe = new ProsessTaskGruppe();
 
@@ -70,7 +72,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
 
-    private Resultat finnEndretProgramperiodeResultat(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId) {
+    private Resultat finnEndretProgramperiodeResultat(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, Long fagsakId) {
         final var programperioder = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder();
         if (programperioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke flere programperioder");
@@ -79,28 +81,36 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
         }
         return håndterTriggereForProgramperiodeendring(
-            gjeldendePeriodeGrunnlag, behandlingId
-        );
+            gjeldendePeriodeGrunnlag, behandlingId,
+            fagsakId);
     }
 
-    private Resultat håndterTriggereForProgramperiodeendring(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId) {
-        List<Etterlysning> alleEtterlysningerForAktuellType = etterlysningRepository.hentEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
-        final var ventendeEtterlysning = finnVentendeEtterlysning(alleEtterlysningerForAktuellType);
-        final var sisteMottatteEtterlysning = finnEtterlysningMedSistMottattSvar(alleEtterlysningerForAktuellType);
-        if (ventendeEtterlysning.isPresent()) {
-            return erstattDersomEndret(
-                behandlingId,
-                gjeldendePeriodeGrunnlag,
-                ventendeEtterlysning.get()
-            );
-        } else if (sisteMottatteEtterlysning.isPresent()) {
-            if (!erSisteMottatteGyldig(gjeldendePeriodeGrunnlag, sisteMottatteEtterlysning.get())) {
-                return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId);
+    private Resultat håndterTriggereForProgramperiodeendring(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, Long fagsakId) {
+        final var gjeldendeEtterlysning = finnGjeldendeEtterlysning(behandlingId, fagsakId);
+        if (gjeldendeEtterlysning.isPresent()) {
+            if (VENTER_STATUSER.contains(gjeldendeEtterlysning.get().getStatus())) {
+                return erstattDersomEndret(
+                    behandlingId,
+                    gjeldendePeriodeGrunnlag,
+                    gjeldendeEtterlysning.get()
+                );
+            } else if (gjeldendeEtterlysning.get().getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
+                if (!erSisteMottatteGyldig(gjeldendePeriodeGrunnlag, gjeldendeEtterlysning.get())) {
+                    return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId);
+                }
             }
         } else {
             return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId);
         }
         return Resultat.tom();
+    }
+
+    private Optional<Etterlysning> finnGjeldendeEtterlysning(Long behandlingId, Long fagsakId) {
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingId, fagsakId, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        if (gjeldendeEtterlysninger.size() > 1) {
+            throw new IllegalStateException("Forventet å finne maksimalt en etterlysning for endret programperiode, fant " + gjeldendeEtterlysninger.size());
+        }
+        return gjeldendeEtterlysninger.isEmpty() ? Optional.empty() : Optional.of(gjeldendeEtterlysninger.get(0));
     }
 
     private static Resultat lagResultatForNyEtterlysningUtenAvbrutt(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId) {
@@ -112,24 +122,6 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE
         );
         return new Resultat(null, nyEtterlysning);
-    }
-
-
-    private static Optional<Etterlysning> finnEtterlysningMedSistMottattSvar(List<Etterlysning> aktuelleEtterlysningerForEndring) {
-        return aktuelleEtterlysningerForEndring.stream()
-            .filter(it -> it.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR))
-            .max(Comparator.comparing(BaseEntitet::getOpprettetTidspunkt));
-    }
-
-    private static Optional<Etterlysning> finnVentendeEtterlysning(List<Etterlysning> aktuelleEtterlysningerForEndring) {
-        final var ventendeEtterlysninger = aktuelleEtterlysningerForEndring.stream()
-            .filter(it -> it.getStatus().equals(EtterlysningStatus.OPPRETTET) || it.getStatus().equals(EtterlysningStatus.VENTER)).toList();
-
-
-        if (ventendeEtterlysninger.size() > 1) {
-            throw new IllegalStateException("Forventet å finne maksimalt en etterlysning fant " + ventendeEtterlysninger.size());
-        }
-        return ventendeEtterlysninger.isEmpty() ? Optional.empty() : Optional.of(ventendeEtterlysninger.getFirst());
     }
 
     private Resultat erstattDersomEndret(Long behandlingId,
