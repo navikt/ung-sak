@@ -1904,9 +1904,6 @@
         "required" : [ "journalpostId" ],
         "type" : "object"
       },
-      "JsonNode" : {
-        "type" : "object"
-      },
       "KodeverdiSomObjektAktivitetStatus" : {
         "properties" : {
           "kode" : {
@@ -4670,9 +4667,6 @@
             "minimum" : 0,
             "type" : "integer"
           },
-          "dokumentdata" : {
-            "$ref" : "#/components/schemas/JsonNode"
-          },
           "redigertVersjon" : {
             "type" : "boolean"
           }
@@ -6875,7 +6869,7 @@
     "/api/formidling/vedtaksbrev" : {
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
-        "operationId" : "vedtaksbrevOperasjoner",
+        "operationId" : "vedtaksbrevValg",
         "parameters" : [ {
           "in" : "query",
           "name" : "behandlingId",
@@ -6900,7 +6894,7 @@
       },
       "post" : {
         "description" : "Lagring av brevvalg eks redigert eller hindretbrev  ",
-        "operationId" : "lagreVedtaksbrev",
+        "operationId" : "lagreVedtaksbrevValg",
         "requestBody" : {
           "content" : {
             "application/json" : {
