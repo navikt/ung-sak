@@ -137,7 +137,7 @@ public class FormidlingRestTjeneste {
 
         vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
         vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
-        vedtaksbrevValgEntitet.setRedigertBrevHtml(dto.redigertHtml());
+        vedtaksbrevValgEntitet.setRedigertBrevHtml(dto.redigertHtml()); //TODO sanitize html!
 
         vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
