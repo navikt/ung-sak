@@ -4,9 +4,11 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -49,6 +51,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
 
     private TestScenarioBuilder scenario;
     private Behandling behandling;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
 
     @BeforeEach
@@ -56,12 +59,13 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(entityManager);
         final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         programperiodeendringEtterlysningTjeneste = new ProgramperiodeendringEtterlysningTjeneste(
             ungdomsprogramPeriodeTjeneste,
             ungdomsprogramPeriodeRepository,
             prosessTaskTjeneste,
             etterlysningRepository,
-            new EtterlysningTjeneste(new MottatteDokumentRepository(entityManager), etterlysningRepository)
+            new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository)
         );
     }
 
@@ -274,7 +278,12 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var eksisterendeEtterlysning = Etterlysning.opprettForType(behandling.getId(), ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse(), UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, tom), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         eksisterendeEtterlysning.vent(LocalDateTime.now());
-        eksisterendeEtterlysning.mottattUttalelse(new JournalpostId(12L), true, null);
+        final var svarJournalpostId = new JournalpostId(12L);
+        mottatteDokumentRepository.lagre(new MottattDokument.Builder().medJournalPostId(svarJournalpostId)
+                .medInnsendingstidspunkt(LocalDateTime.now())
+                .medFagsakId(behandling.getFagsakId())
+            .build(), DokumentStatus.GYLDIG);
+        eksisterendeEtterlysning.mottattUttalelse(svarJournalpostId, true, null);
         etterlysningRepository.lagre(eksisterendeEtterlysning);
     }
 
