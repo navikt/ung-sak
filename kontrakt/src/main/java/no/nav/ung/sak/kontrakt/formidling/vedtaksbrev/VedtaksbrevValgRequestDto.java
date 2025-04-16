@@ -18,7 +18,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  * @param redigert - overstyre eller skrive fritekst vedtaksbrev
  * @param redigertHtml - html med tekst som skal overstyre
  */
-public record VedtaksbrevOperasjonerRequestDto(
+public record VedtaksbrevValgRequestDto(
     @JsonProperty(value = BehandlingIdDto.NAME, required = true)
     @NotNull
     @Valid

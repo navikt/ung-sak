@@ -26,14 +26,13 @@ import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerRequestDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
@@ -71,12 +70,29 @@ public class FormidlingRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Operasjoner som er mulig for vedtaksbrev", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public VedtaksbrevOperasjonerDto vedtaksbrevOperasjoner(
+    public VedtaksbrevValgDto vedtaksbrevOperasjoner(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
+
+        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.getBehandlingId());
 
         VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(Long.valueOf(dto.getId()));
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
-        return resultat.vedtaksbrevOperasjoner();
+
+        var egenskaper = resultat.vedtaksbrevEgenskaper();
+
+        return new VedtaksbrevValgDto(
+            egenskaper.harBrev(),
+            null,
+            false,
+            egenskaper.kanHindre(),
+            valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
+            egenskaper.kanOverstyreHindre(),
+            egenskaper.kanRedigere(),
+            valg.map(VedtaksbrevValgEntitet::isRedigert).orElse(false),
+            egenskaper.kanOverstyreRediger(),
+            resultat.forklaring(),
+            valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null)
+        );
     }
 
     @POST
@@ -86,14 +102,15 @@ public class FormidlingRestTjeneste {
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response lagreVedtaksbrev(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevOperasjonerRequestDto dto) {
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequestDto dto) {
 
-        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(dto.behandlingId());
-
-        var vedtaksbrevValgEntitet = Optional.ofNullable(vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()))
+        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
             .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
 
-        if (!resultat.vedtaksbrevOperasjoner().enableRediger() && dto.redigert() != null) {
+        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(dto.behandlingId());
+        var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
+
+        if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
                     "Brevet kan ikke redigeres. ")
                 .build();
@@ -101,17 +118,17 @@ public class FormidlingRestTjeneste {
 
         if (Boolean.TRUE.equals(dto.redigert()) && (dto.redigertHtml() == null || dto.redigertHtml().isBlank())) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Redigert tekst kan ikke være tom")
+                    "Redigert tekst kan ikke være tom samtidig som redigert er true")
                 .build();
         }
 
         if ((dto.redigert() == null || !dto.redigert()) && dto.redigertHtml() != null) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Kan ikke ha redigert tekst samtidig som redigert er true")
+                    "Kan ikke ha redigert tekst samtidig som redigert er false")
                 .build();
         }
 
-        if (!resultat.vedtaksbrevOperasjoner().enableHindre() && dto.hindret() != null) {
+        if (!vedtaksbrevEgenskaper.kanHindre() && dto.hindret() != null) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode(),
                     "Brevet kan ikke hindres. ")
                 .build();

@@ -62,18 +62,13 @@ class VedtaksbrevReglerTest {
 
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
-        var vedtaksbrevOperasjonerDto = regelResulat.vedtaksbrevOperasjoner();
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().enableRediger()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().redigert()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.enableHindre()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.enableRediger()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.fritekstbrev()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.harBrev()).isTrue();
-        assertThat(vedtaksbrevOperasjonerDto.hindret()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreHindre()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreRediger()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.redigert()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
 
 
     }
@@ -98,19 +93,15 @@ class VedtaksbrevReglerTest {
 
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
-        var vedtaksbrevOperasjonerDto = regelResulat.vedtaksbrevOperasjoner();
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().enableRediger()).isTrue();
-        assertThat(vedtaksbrevOperasjonerDto.automatiskBrevOperasjoner().redigert()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.enableHindre()).isTrue();
-        assertThat(vedtaksbrevOperasjonerDto.enableRediger()).isTrue();
-        assertThat(vedtaksbrevOperasjonerDto.fritekstbrev()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
-        assertThat(vedtaksbrevOperasjonerDto.harBrev()).isTrue();
-        assertThat(vedtaksbrevOperasjonerDto.hindret()).isFalse();
-        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreHindre()).isTrue();
-        assertThat(vedtaksbrevOperasjonerDto.kanOverstyreRediger()).isTrue();
-        assertThat(vedtaksbrevOperasjonerDto.redigert()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isTrue();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isTrue();
+
+        assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
 
     }
 

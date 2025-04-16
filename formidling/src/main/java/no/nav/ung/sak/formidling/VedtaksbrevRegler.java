@@ -16,7 +16,6 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevOperasjonerDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,34 +60,36 @@ public class VedtaksbrevRegler {
         if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
             || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
             String forklaring = "Automatisk brev ved ny innvilgelse. " + redigerRegelResultat.forklaring();
-            return new VedtaksbrevRegelResulat(
-                VedtaksbrevOperasjonerDto.automatiskBrev(forklaring, redigerRegelResultat.kanRedigere()),
+            return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(InnvilgelseInnholdBygger.class).get(),
-                detaljertResultat
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
             );
         }
 
         if (resultater.contains(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
             String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();
-            return new VedtaksbrevRegelResulat(
-                VedtaksbrevOperasjonerDto.automatiskBrev(forklaring, redigerRegelResultat.kanRedigere()),
+            return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
-                detaljertResultat);
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
+            );
         }
 
         if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
             String forklaring = "Automatisk brev ved endring til høy sats. " + redigerRegelResultat.forklaring();
-            return new VedtaksbrevRegelResulat(
-                VedtaksbrevOperasjonerDto.automatiskBrev(forklaring, redigerRegelResultat.kanRedigere()),
+            return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(EndringHøySatsInnholdBygger.class).get(),
-                detaljertResultat);
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
+            );
         }
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return new VedtaksbrevRegelResulat(
-            VedtaksbrevOperasjonerDto.ingenBrev(forklaring),
-            null,
-            detaljertResultat);
+        return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, forklaring);
     }
 
     private static RedigerRegelResultat harUtførteAksjonspunkterMedToTrinn(Behandling behandling) {
