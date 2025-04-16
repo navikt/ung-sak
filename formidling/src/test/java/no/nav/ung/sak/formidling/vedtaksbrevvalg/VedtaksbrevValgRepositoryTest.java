@@ -5,6 +5,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;

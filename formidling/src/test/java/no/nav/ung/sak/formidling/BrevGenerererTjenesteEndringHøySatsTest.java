@@ -84,7 +84,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
-                behandlingRepository, innholdByggere, detaljertResultatUtleder));
+                behandlingRepository, innholdByggere, detaljertResultatUtleder), ungTestRepositories.vedtaksbrevValgRepository());
     }
 
     @Test()

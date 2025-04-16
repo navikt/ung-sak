@@ -11,6 +11,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
@@ -18,8 +20,6 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgEntitet;
-import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -89,7 +89,8 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
-                behandlingRepository, innholdByggere, detaljertResultatUtleder));
+                behandlingRepository, innholdByggere, detaljertResultatUtleder),
+            ungTestRepositories.vedtaksbrevValgRepository());
     }
 
     @Test()

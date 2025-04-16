@@ -12,13 +12,13 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgRepository;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -31,6 +31,7 @@ import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
@@ -89,7 +90,8 @@ class FormidlingTjenesteTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
-            vedtaksbrevRegler);
+            vedtaksbrevRegler,
+            ungTestRepositories.vedtaksbrevValgRepository());
     }
 
 //    @Test

@@ -90,7 +90,8 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
-            vedtaksbrevRegler);
+            vedtaksbrevRegler,
+            ungTestRepositories.vedtaksbrevValgRepository());
     }
 
     @Test()

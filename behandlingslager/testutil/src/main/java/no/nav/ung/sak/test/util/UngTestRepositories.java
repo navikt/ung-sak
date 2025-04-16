@@ -3,6 +3,7 @@ package no.nav.ung.sak.test.util;
 import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
@@ -19,8 +20,8 @@ public record UngTestRepositories(
     UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
     TilkjentYtelseRepository tilkjentYtelseRepository,
     ProsessTriggereRepository prosessTriggereRepository,
-    InntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste
-) {
+    InntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste,
+    VedtaksbrevValgRepository vedtaksbrevValgRepository) {
 
     public static UngTestRepositories lagAlleUngTestRepositoriesOgAbakusTjeneste(EntityManager entityManager, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
@@ -29,7 +30,8 @@ public record UngTestRepositories(
         var tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
         var prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         var ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste);
+        var vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
+        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste, vedtaksbrevValgRepository);
 
     }
 }
