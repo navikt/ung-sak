@@ -4,26 +4,37 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
+import no.nav.ung.sak.domene.iay.modell.Inntekt;
+import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.kontrakt.kontroll.*;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.ytelse.InntektType;
 import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class KontrollerInntektMapper {
 
 
     public static KontrollerInntektDto map(List<KontrollertInntektPeriode> kontrollertInntektPerioder,
                                            LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
+                                           List<Inntekt> registerinntekter,
+                                           LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
                                            LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
 
-        final var vurdertePerioder = finnVurdertePerioder(kontrollertInntektPerioder, rapporterteInntekterTidslinje, perioderTilKontroll);
-        final var ikkeVurdert = finnIkkeVurdertePerioder(kontrollertInntektPerioder, rapporterteInntekterTidslinje, perioderTilKontroll);
+        final var vurdertePerioder = finnVurdertePerioder(
+            kontrollertInntektPerioder,
+            rapporterteInntekterTidslinje,
+            registerinntekter,
+            gjeldendeEtterlysninger,
+            perioderTilKontroll);
+        final var ikkeVurdert = finnIkkeVurdertePerioder(
+            kontrollertInntektPerioder,
+            rapporterteInntekterTidslinje,
+            registerinntekter,
+            gjeldendeEtterlysninger,
+            perioderTilKontroll);
 
         final var perioder = new ArrayList<KontrollerInntektPeriodeDto>();
         perioder.addAll(vurdertePerioder);
@@ -32,17 +43,29 @@ public class KontrollerInntektMapper {
         return new KontrollerInntektDto(perioder);
     }
 
-    private static List<KontrollerInntektPeriodeDto> finnVurdertePerioder(List<KontrollertInntektPeriode> kontrollertInntektPerioder, LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
-        final var vurdertePerioder = kontrollertInntektPerioder.stream()
-            .map(it -> mapTilPeriodeDto(rapporterteInntekterTidslinje, perioderTilKontroll, it))
+    private static List<KontrollerInntektPeriodeDto> finnVurdertePerioder(List<KontrollertInntektPeriode> kontrollertInntektPerioder, LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje, List<Inntekt> registerinntekter, LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger, LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
+        return kontrollertInntektPerioder.stream()
+            .map(it -> mapTilPeriodeDto(
+                rapporterteInntekterTidslinje,
+                registerinntekter,
+                gjeldendeEtterlysninger,
+                perioderTilKontroll, it))
             .toList();
-        return vurdertePerioder;
     }
 
-    private static List<KontrollerInntektPeriodeDto> finnIkkeVurdertePerioder(List<KontrollertInntektPeriode> kontrollertInntektPerioder, LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
+    private static List<KontrollerInntektPeriodeDto> finnIkkeVurdertePerioder(
+        List<KontrollertInntektPeriode> kontrollertInntektPerioder,
+        LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
+        List<Inntekt> registerinntekter,
+        LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
+        LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
         final var vurdertePerioderTidslinje = finnTidslinjeForVurdertePerioder(kontrollertInntektPerioder);
-        final var ikkeVurdert = mapIkkeVurdertePerioder(rapporterteInntekterTidslinje, perioderTilKontroll, vurdertePerioderTidslinje);
-        return ikkeVurdert;
+        return mapIkkeVurdertePerioder(
+            rapporterteInntekterTidslinje,
+            registerinntekter,
+            gjeldendeEtterlysninger,
+            perioderTilKontroll,
+            vurdertePerioderTidslinje);
     }
 
     private static LocalDateTimeline<Boolean> finnTidslinjeForVurdertePerioder(List<KontrollertInntektPeriode> kontrollertInntektPerioder) {
@@ -52,39 +75,63 @@ public class KontrollerInntektMapper {
             .orElse(LocalDateTimeline.empty());
     }
 
-    private static List<KontrollerInntektPeriodeDto> mapIkkeVurdertePerioder(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje, LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll, LocalDateTimeline<Boolean> vurdertePerioderTidslinje) {
+    private static List<KontrollerInntektPeriodeDto> mapIkkeVurdertePerioder(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
+                                                                             List<Inntekt> registerinntekter,
+                                                                             LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
+                                                                             LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll,
+                                                                             LocalDateTimeline<Boolean> vurdertePerioderTidslinje) {
         final var ikkeVurdertTidslinje = perioderTilKontroll.disjoint(vurdertePerioderTidslinje);
         return ikkeVurdertTidslinje.toSegments().stream()
             .map(it -> {
-                final var rapporterteInntekter = mapRapporterteInntekter(rapporterteInntekterTidslinje, it.getLocalDateInterval());
-                final var kontrollerInntektPeriodeDto = new KontrollerInntektPeriodeDto(
+                final var rapporterteInntekter = mapRapporterteInntekter(rapporterteInntekterTidslinje, registerinntekter, it.getLocalDateInterval());
+                final var uttalelse = finnUttalelse(gjeldendeEtterlysninger, it.getLocalDateInterval());
+                return new KontrollerInntektPeriodeDto(
                     new Periode(it.getFom(), it.getTom()),
                     PeriodeStatus.AVVIK,
                     true,
                     rapporterteInntekter,
                     null,
-                    null
+                    null,
+                    uttalelse.orElse(null)
                 );
-                return kontrollerInntektPeriodeDto;
             })
             .toList();
     }
 
     private static KontrollerInntektPeriodeDto mapTilPeriodeDto(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
+                                                                List<Inntekt> registerinntekter,
+                                                                LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
                                                                 LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll, KontrollertInntektPeriode it) {
         final var overlappendeRapporterteInntekter = rapporterteInntekterTidslinje.intersection(it.getPeriode().toLocalDateInterval());
-        final var rapporterteInntekter = mapRapporterteInntekter(overlappendeRapporterteInntekter, it.getPeriode().toLocalDateInterval());
+        final var rapporterteInntekter = mapRapporterteInntekter(overlappendeRapporterteInntekter, registerinntekter, it.getPeriode().toLocalDateInterval());
+        final var uttalelseFraBruker = finnUttalelse(gjeldendeEtterlysninger, it.getPeriode().toLocalDateInterval());
+
         return new KontrollerInntektPeriodeDto(
             new Periode(it.getPeriode().getFomDato(), it.getPeriode().getTomDato()),
             it.getErManueltVurdert() ? PeriodeStatus.AVVIK : PeriodeStatus.INGEN_AVVIK,
             !perioderTilKontroll.intersection(it.getPeriode().toLocalDateInterval()).isEmpty(),
             rapporterteInntekter,
             it.getInntekt() == null ? null : it.getInntekt().intValue(),
-            mapTilValg(it)
+            mapTilValg(it),
+            uttalelseFraBruker.orElse(null)
         );
     }
 
-    private static RapporterteInntekterDto mapRapporterteInntekter(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje, LocalDateInterval periode) {
+    private static Optional<String> finnUttalelse(LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger, LocalDateInterval periode) {
+        final var overlappendeEtterlysning = gjeldendeEtterlysninger.intersection(periode);
+        if (overlappendeEtterlysning.isEmpty()) {
+            return Optional.empty();
+        }
+        if (overlappendeEtterlysning.toSegments().size() > 1) {
+            throw new IllegalStateException("Forventet å finne maks en overlappende etterlysninger for periode " + periode + ", men fant " + overlappendeEtterlysning.toSegments().size());
+        }
+        final var uttalelseData = overlappendeEtterlysning.toSegments().first().getValue().uttalelseData();
+        return uttalelseData != null ? Optional.of(uttalelseData.uttalelse()) : Optional.empty();
+    }
+
+    private static RapporterteInntekterDto mapRapporterteInntekter(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
+                                                                   List<Inntekt> registerinntekter,
+                                                                   LocalDateInterval periode) {
         final var overlappendeRapporterteInntekter = rapporterteInntekterTidslinje.intersection(periode);
 
         if (overlappendeRapporterteInntekter.toSegments().size() > 1) {
@@ -98,11 +145,29 @@ public class KontrollerInntektMapper {
         final var brukersRapporterteYtelse = finnRapporterteInntektForType(InntektType.YTELSE, brukerRapporterteInntekter);
         final var registersArbeidsinntekt = finnRapporterteInntektForType(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, registerRapporterteInntekter);
         final var registersYtelse = finnRapporterteInntektForType(InntektType.YTELSE, registerRapporterteInntekter);
+        final var inntektsposterFraRegister = finnInntektsposterForPeriode(registerinntekter, periode);
 
         return new RapporterteInntekterDto(
             new RapportertInntektDto(brukersRapporterteArbeidsinntekt, brukersRapporterteYtelse),
-            new RapportertInntektDto(registersArbeidsinntekt, registersYtelse)
+            new RegisterinntektDto(
+                new RapportertInntektDto(registersArbeidsinntekt, registersYtelse),
+                inntektsposterFraRegister
+            )
         );
+    }
+
+    private static List<InntektspostFraRegisterDto> finnInntektsposterForPeriode(List<Inntekt> registerinntekter, LocalDateInterval periode) {
+        List<InntektspostFraRegisterDto> inntektsposterFraRegister = new ArrayList<>();
+        for (Inntekt inntekt : registerinntekter) {
+            inntekt.getAlleInntektsposter().stream()
+                .filter(ip -> ip.getPeriode().toLocalDateInterval().overlaps(periode))
+                .map(ip -> new InntektspostFraRegisterDto(
+                    inntekt.getArbeidsgiver() != null ? inntekt.getArbeidsgiver().getIdentifikator() : null,
+                    ip.getInntektYtelseType() != null ? ip.getInntektYtelseType().getYtelseType() : null,
+                    ip.getBeløp().getVerdi().intValue()))
+                .forEach(inntektsposterFraRegister::add);
+        }
+        return inntektsposterFraRegister;
     }
 
     private static BrukKontrollertInntektValg mapTilValg(KontrollertInntektPeriode it) {

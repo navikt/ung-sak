@@ -1867,6 +1867,26 @@
         },
         "type" : "object"
       },
+      "InntektspostFraRegisterDto" : {
+        "properties" : {
+          "arbeidsgiverIdentifikator" : {
+            "type" : "string"
+          },
+          "inntekt" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "ytelseType" : {
+            "$ref" : "#/components/schemas/InntektspostFraRegisterDtoYtelseType"
+          }
+        },
+        "type" : "object"
+      },
+      "InntektspostFraRegisterDtoYtelseType" : {
+        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
+      },
       "InntrekkBeslutning" : {
         "properties" : {
           "brukInntrekk" : {
@@ -2753,6 +2773,9 @@
           },
           "status" : {
             "$ref" : "#/components/schemas/KontrollerInntektPeriodeDtoStatus"
+          },
+          "uttalelseFraBruker" : {
+            "type" : "string"
           },
           "valg" : {
             "$ref" : "#/components/schemas/KontrollerInntektPeriodeDtoValg"
@@ -3767,7 +3790,7 @@
             "$ref" : "#/components/schemas/RapportertInntektDto"
           },
           "register" : {
-            "$ref" : "#/components/schemas/RapportertInntektDto"
+            "$ref" : "#/components/schemas/RegisterinntektDto"
           }
         },
         "type" : "object"
@@ -3780,6 +3803,20 @@
           }
         },
         "required" : [ "referanse" ],
+        "type" : "object"
+      },
+      "RegisterinntektDto" : {
+        "properties" : {
+          "inntekter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/InntektspostFraRegisterDto"
+            },
+            "type" : "array"
+          },
+          "oppsummertRegister" : {
+            "$ref" : "#/components/schemas/RapportertInntektDto"
+          }
+        },
         "type" : "object"
       },
       "ResourceLink" : {
