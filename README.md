@@ -56,7 +56,7 @@ Se også [openapi-ts-client/README](web/src/main/resources/openapi-ts-client/REA
 For å koble til databasen i dev-gcp kan man kjøre denne hjelpe-scriptet:
 
 ```shell script
-./scripts/nais-postgres.sh --context dev-gcp --namespace k9saksbehandling --app ung-deltakelse-opplyser
+./scripts/nais-postgres.sh --context dev-gcp --namespace k9saksbehandling --app ung-sak
 ```
 
 ## Kode generert av GitHub Copilot
