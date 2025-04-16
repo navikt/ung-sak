@@ -88,7 +88,8 @@ class BrevGenerererTjenesteEndringInntektTest {
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
-                repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder));
+                repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder),
+            ungTestRepositories.vedtaksbrevValgRepository());
     }
 
     @Test()

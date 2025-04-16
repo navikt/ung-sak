@@ -5,10 +5,10 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.template.dto.ManuellVedtaksbrevDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtaksbrevvalg.VedtaksbrevValgRepository;
 
 @Dependent
 public class ManuellVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger {

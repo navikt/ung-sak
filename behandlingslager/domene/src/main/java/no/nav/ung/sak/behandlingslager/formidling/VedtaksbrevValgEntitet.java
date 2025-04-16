@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtaksbrevvalg;
+package no.nav.ung.sak.behandlingslager.formidling;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
