@@ -1,8 +1,8 @@
 package no.nav.ung.sak.formidling;
 
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
-import no.nav.ung.sak.formidling.template.TemplateType;
 
 public record GenerertBrev(
 

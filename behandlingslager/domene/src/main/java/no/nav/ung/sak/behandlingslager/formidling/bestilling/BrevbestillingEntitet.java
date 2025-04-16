@@ -1,27 +1,14 @@
-package no.nav.ung.sak.formidling.bestilling;
+package no.nav.ung.sak.behandlingslager.formidling.bestilling;
 
-import java.util.UUID;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.*;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.formidling.template.TemplateType;
+import java.util.UUID;
 
 @Entity(name = "BrevbestillingEntitet")
 @Table(name = "brevbestilling")

@@ -1,11 +1,11 @@
-package no.nav.ung.sak.formidling.bestilling;
-
-import java.util.List;
+package no.nav.ung.sak.behandlingslager.formidling.bestilling;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+
+import java.util.List;
 
 @Dependent
 public class BrevbestillingRepository {
