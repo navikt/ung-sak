@@ -21,6 +21,7 @@ public class VedtaksbrevValgRepository {
 
     public VedtaksbrevValgEntitet lagre(VedtaksbrevValgEntitet vedtaksbrevValgEntitet) {
         entityManager.persist(vedtaksbrevValgEntitet);
+        entityManager.flush();
         return vedtaksbrevValgEntitet;
     }
 

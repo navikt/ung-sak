@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.FritekstVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -113,16 +113,16 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_gi_fritekstvedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
+    void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), BehandlingStegType.SIMULER_OPPDRAG, AksjonspunktDefinisjon.VURDER_TILBAKETREKK);
 
-        var vedtaksbrevRegler = lagVedtaksbrevRegler(FritekstVedtaksbrevInnholdBygger.class);
+        var vedtaksbrevRegler = lagVedtaksbrevRegler(ManuellVedtaksbrevInnholdBygger.class);
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(regelResulat.bygger()).isInstanceOf(FritekstVedtaksbrevInnholdBygger.class);
+        assertThat(regelResulat.bygger()).isInstanceOf(ManuellVedtaksbrevInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();
@@ -176,6 +176,8 @@ class VedtaksbrevReglerTest {
             behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         }
 
+
+        behandling.avsluttBehandling();
 
         return behandling;
     }

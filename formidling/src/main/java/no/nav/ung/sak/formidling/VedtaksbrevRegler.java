@@ -89,7 +89,7 @@ public class VedtaksbrevRegler {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
             String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.tomRedigerbarBrev(
-                innholdByggere.select(FritekstVedtaksbrevInnholdBygger.class).get(),
+                innholdByggere.select(ManuellVedtaksbrevInnholdBygger.class).get(),
                 detaljertResultat,
                 forklaring
             );
