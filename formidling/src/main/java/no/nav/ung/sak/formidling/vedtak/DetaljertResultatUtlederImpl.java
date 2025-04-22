@@ -51,25 +51,14 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårPeriodeResultatMap);
 
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
-            .combine(samletVilkårTidslinje, DetaljertResultatUtlederImpl::kombinerVilkårOgBehandlingsårsaker, JoinStyle.LEFT_JOIN);
+            .intersection(samletVilkårTidslinje,
+                (p, lhs, rhs) -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(rhs.getValue(), lhs.getValue())));
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::kombinerMedTilkjentYtelse, JoinStyle.LEFT_JOIN);
 
         return detaljertResultatTidslinje.compress();
 
-    }
-
-    private static LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> kombinerVilkårOgBehandlingsårsaker(LocalDateInterval p, LocalDateSegment<Set<BehandlingÅrsakType>> lhs, LocalDateSegment<List<DetaljertVilkårResultat>> rhs) {
-        Set<BehandlingÅrsakType> årsaker = lhs.getValue();
-        List<DetaljertVilkårResultat> samletResultat = rhs != null ? rhs.getValue() : null;
-
-        if (samletResultat == null) {
-            throw new IllegalStateException("Ingen vilkårsresultat for periode %s og årsaker %s ".formatted(p, årsaker));
-        }
-
-        var resultat = new SamletVilkårResultatOgBehandlingÅrsaker(samletResultat, årsaker);
-        return new LocalDateSegment<>(p, resultat);
     }
 
     private static LocalDateSegment<DetaljertResultat> kombinerMedTilkjentYtelse(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {
