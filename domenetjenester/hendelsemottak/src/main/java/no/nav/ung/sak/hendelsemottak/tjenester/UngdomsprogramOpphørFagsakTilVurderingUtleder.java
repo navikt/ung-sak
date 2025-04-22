@@ -88,7 +88,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         }
 
         final var gammelTomDato = tidslinje.getMaxLocalDate().isAfter(fagsak.getPeriode().getTomDato()) ? fagsak.getPeriode().getTomDato() : tidslinje.getMaxLocalDate();
-        return gammelTomDato.isBefore(nyTomdato) ? DatoIntervallEntitet.fraOgMedTilOgMed(gammelTomDato, nyTomdato) : DatoIntervallEntitet.fraOgMedTilOgMed(nyTomdato, gammelTomDato);
+        return gammelTomDato.isBefore(nyTomdato) ? DatoIntervallEntitet.fraOgMedTilOgMed(gammelTomDato.plusDays(1), nyTomdato) : DatoIntervallEntitet.fraOgMedTilOgMed(nyTomdato.plusDays(1), gammelTomDato);
     }
 
 

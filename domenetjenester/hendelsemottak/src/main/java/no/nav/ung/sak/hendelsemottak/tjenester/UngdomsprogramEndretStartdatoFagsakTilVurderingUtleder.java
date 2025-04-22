@@ -86,7 +86,7 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
         }
 
         final var gammelFomDato = perioder.iterator().next().getPeriode().getFomDato();
-        return gammelFomDato.isBefore(nyFomdato) ? DatoIntervallEntitet.fraOgMedTilOgMed(gammelFomDato, nyFomdato) : DatoIntervallEntitet.fraOgMedTilOgMed(nyFomdato, gammelFomDato);
+        return gammelFomDato.isBefore(nyFomdato) ? DatoIntervallEntitet.fraOgMedTilOgMed(gammelFomDato, nyFomdato.minusDays(1)) : DatoIntervallEntitet.fraOgMedTilOgMed(nyFomdato, gammelFomDato.minusDays(1));
     }
 
     /**
