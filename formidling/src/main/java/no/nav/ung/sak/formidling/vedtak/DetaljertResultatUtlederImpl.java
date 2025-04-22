@@ -43,16 +43,17 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     @Override
     public LocalDateTimeline<DetaljertResultat> utledDetaljertResultat(Behandling behandling) {
 
-        var perioderTilVurdering = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId());
+        var triggerPerioder = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId());
 
-        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         var vilkårPeriodeResultatMap = hentVilkårTidslinjer(behandling.getId());
         var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårPeriodeResultatMap);
 
-        var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
+        var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
             .intersection(samletVilkårTidslinje,
                 (p, lhs, rhs) -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(rhs.getValue(), lhs.getValue())));
+
+        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::kombinerMedTilkjentYtelse, JoinStyle.LEFT_JOIN);
@@ -115,7 +116,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         SamletVilkårResultatOgBehandlingÅrsaker vilkårsresultatOgBehandlingsårsaker,
         TilkjentYtelseVerdi tilkjentYtelse) {
 
-        if (!vilkårsresultatOgBehandlingsårsaker.ikkeVurderteVilkår().isEmpty())  {
+        if (!vilkårsresultatOgBehandlingsårsaker.ikkeVurderteVilkår().isEmpty()) {
             return DetaljertResultatInfo.of(DetaljertResultatType.IKKE_VURDERT);
         }
 
@@ -135,6 +136,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS);
+        }
+
+        if (Set.of(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+                BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
+            .containsAll(behandlingsårsaker)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga endret startdato");
         }
 
         if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
@@ -159,7 +166,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
 
         throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
-                .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
+            .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
     }
 
     private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
@@ -198,6 +205,5 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     private static <V> boolean innholderBare(Set<V> set, V... value) {
         return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
     }
-
 
 }
