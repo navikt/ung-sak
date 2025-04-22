@@ -120,15 +120,26 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.IKKE_VURDERT);
         }
 
-        if (!vilkårsresultatOgBehandlingsårsaker.avslåtteVilkår().isEmpty()) {
+        var avslåtteVilkår = vilkårsresultatOgBehandlingsårsaker.avslåtteVilkår();
+        var behandlingsårsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker();
+
+
+        if (!avslåtteVilkår.isEmpty()) {
+            if (innholderBareOgOptionallyUttalelse(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+                && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
+                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRET_STARTDATO);
+            }
+
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
         }
-
-        var behandlingsårsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker();
 
         if (tilkjentYtelse != null) {
             var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
             if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
+        }
+
+        if (innholderBareOgOptionallyUttalelse(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ENDRING_STARTDATO);
         }
 
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
@@ -136,12 +147,6 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
         if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS);
-        }
-
-        if (Set.of(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
-                BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
-            .containsAll(behandlingsårsaker)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga endret startdato");
         }
 
         if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
@@ -202,4 +207,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
     }
 
+    private static boolean innholderBareOgOptionallyUttalelse(Set<BehandlingÅrsakType> set, BehandlingÅrsakType behandlingÅrsakType) {
+        return set.contains(behandlingÅrsakType) && (set.size() == 1 || set.size() == 2 && set.contains(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER));
+    }
+
+    private static boolean harAvslåttVilkår(Set<DetaljertVilkårResultat> avslåtteVilkår, VilkårType vilkårType) {
+        return avslåtteVilkår.stream().anyMatch
+            (it -> it.vilkårType().equals(vilkårType));
+    }
 }
