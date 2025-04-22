@@ -62,6 +62,9 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     public BrevGenerererTjenesteImpl() {
     }
 
+    /**
+     * Lager brev for behandling basert på valg gjort av saksbehandler
+     */
     @WithSpan
     @Override
     public GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml) {
@@ -127,6 +130,9 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         );
     }
 
+    /**
+     * Lager manuell brev lagret i databasen uten å kjøre brevregler
+     */
     @WithSpan
     @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {

@@ -72,7 +72,7 @@ public class FormidlingTjeneste {
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequestDto dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
-            throw new BadRequestException("Kan endre vedtaksbrev på avsluttet behandling");
+            throw new BadRequestException("Kan ikke endre vedtaksbrev på avsluttet behandling");
         }
 
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
