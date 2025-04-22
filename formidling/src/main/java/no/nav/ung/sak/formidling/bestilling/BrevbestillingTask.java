@@ -36,7 +36,7 @@ import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.Distri
  */
 @ApplicationScoped
 @ProsessTask(value = BrevbestillingTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class BrevbestillingTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.brevbestilling";
