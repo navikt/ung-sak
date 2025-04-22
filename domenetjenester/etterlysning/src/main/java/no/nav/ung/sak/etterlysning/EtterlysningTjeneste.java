@@ -32,6 +32,18 @@ public class EtterlysningTjeneste {
         this.etterlysningRepository = etterlysningRepository;
     }
 
+
+    public LocalDateTimeline<EtterlysningData> hentGjeldendeEtterlysningTidslinje(
+            Long behandlingId,
+            Long fagsakId,
+            EtterlysningType type) {
+        final var gjeldendeEtterlysninger = hentGjeldendeEtterlysninger(behandlingId, fagsakId, type);
+        return gjeldendeEtterlysninger.stream()
+                .map(hen -> new LocalDateTimeline<>(hen.getPeriode().toLocalDateInterval(), new EtterlysningData(hen.getStatus(), hen.getFrist(), hen.getGrunnlagsreferanse(), hen.getUttalelse().map(ut -> new UttalelseData(ut.harGodtattEndringen(), ut.getUttalelseBegrunnelse())).orElse(null))))
+                .reduce(LocalDateTimeline::crossJoin)
+                .orElse(LocalDateTimeline.empty());
+    }
+
     /**
      * Henter gjeldende etterlysninger for en behandling og fagsak.
      * Gjeldende etterlysning er den som ble opprettet sist for en periode dersom den ikke er koblet til en uttalelse (statuser VENTER eller UTLØPT)
@@ -43,9 +55,9 @@ public class EtterlysningTjeneste {
      * @return Liste med gjeldende etterlysninger
      */
     public List<Etterlysning> hentGjeldendeEtterlysninger(
-        Long behandlingId,
-        Long fagsakId,
-        EtterlysningType type) {
+            Long behandlingId,
+            Long fagsakId,
+            EtterlysningType type) {
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingId, type);
         final var journalpostIder = etterlysninger.stream().flatMap(it -> it.getUttalelse().stream().map(UttalelseEntitet::getSvarJournalpostId)).collect(Collectors.toSet());
         final var mottattDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder);
@@ -57,8 +69,8 @@ public class EtterlysningTjeneste {
 
         // Sorter etterlysningene etter periode
         final var sorterteEtterlysninger = etterlysninger.stream()
-            .sorted(Comparator.comparing(Etterlysning::getPeriode))
-            .toList();
+                .sorted(Comparator.comparing(Etterlysning::getPeriode))
+                .toList();
 
         // Starter for-løkke med tom tidsline og tom liste med etterlysninger
         List<Etterlysning> etterlysningerForSammePeriode = new ArrayList<>();
@@ -72,7 +84,7 @@ public class EtterlysningTjeneste {
             } else {
                 // Finner gjeldende fra forrige gruppe
                 finnGjeldendeForPeriode(etterlysningerForSammePeriode, mottattDokumenter)
-                    .ifPresent(gjeldendeEtterlysningerListe::add);
+                        .ifPresent(gjeldendeEtterlysningerListe::add);
 
                 // Starter ny gruppe med etterlysninger
                 tidslinjeForSamledeEtterlysninger = new LocalDateTimeline<>(etterlysning.getPeriode().toLocalDateInterval(), true);
@@ -83,7 +95,7 @@ public class EtterlysningTjeneste {
 
         // Finner gjeldende etterlysning for siste gruppe
         finnGjeldendeForPeriode(etterlysningerForSammePeriode, mottattDokumenter)
-            .ifPresent(gjeldendeEtterlysningerListe::add);
+                .ifPresent(gjeldendeEtterlysningerListe::add);
 
 
         return gjeldendeEtterlysningerListe;
@@ -96,23 +108,23 @@ public class EtterlysningTjeneste {
         }
 
         if (etterlysningerForSammePeriode.stream().filter(it -> it.getStatus().equals(EtterlysningStatus.VENTER)).count() > 1) {
-           throw new IllegalStateException("Fant flere etterlysninger på vent for samme periode");
+            throw new IllegalStateException("Fant flere etterlysninger på vent for samme periode");
         }
 
         // Dersom etterlysningen ikke overlapper med eksisterende etterlysninger i tidslinjen har vi en ny gruppe
         final var sisteOpprettetEtterlysningForPeriode = etterlysningerForSammePeriode.stream()
-            .max(Comparator.comparing(BaseEntitet::getOpprettetTidspunkt))
-            .orElseThrow(() -> new IllegalStateException("Kunne ikke finne siste opprettede etterlysning"));
+                .max(Comparator.comparing(BaseEntitet::getOpprettetTidspunkt))
+                .orElseThrow(() -> new IllegalStateException("Kunne ikke finne siste opprettede etterlysning"));
 
         if (sisteOpprettetEtterlysningForPeriode.getUttalelse().isEmpty()) {
             return Optional.of(sisteOpprettetEtterlysningForPeriode);
         } else {
             // Bruker innsendt tidspunkt fra mottatt dokument siden dette er mer robust (støtter f.eks. kopi fra original behandling til revurdering)
             return etterlysningerForSammePeriode.stream()
-                .filter(it -> it.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR))
-                .max(Comparator.comparing(
-                it -> finnInnsendingstidspunkt(it, mottattDokumenter)
-            ));
+                    .filter(it -> it.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR))
+                    .max(Comparator.comparing(
+                            it -> finnInnsendingstidspunkt(it, mottattDokumenter)
+                    ));
         }
     }
 
