@@ -2,15 +2,19 @@ package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -30,16 +34,18 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     private BehandlingRepository behandlingRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProgramperiodeendringEtterlysningTjeneste etterlysningTjeneste;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final Duration ventePeriode;
 
     @Inject
     public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository,
                                      EtterlysningRepository etterlysningRepository,
-                                     ProgramperiodeendringEtterlysningTjeneste etterlysningTjeneste,
+                                     ProgramperiodeendringEtterlysningTjeneste etterlysningTjeneste, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
                                      @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ventePeriode = Duration.parse(ventePeriode);
     }
 
@@ -60,6 +66,11 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
 
         if (skalOppretteEtterlysning) {
             etterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(kontekst.getBehandlingId(), kontekst.getFagsakId());
+        } else {
+            final var endretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinjeFraOriginal(BehandlingReferanse.fra(behandling));
+            if (endretTidslinje.isEmpty()) {
+                throw new IllegalStateException("Fant endring i programperiode uten trigger. Legg til trigger manuelt for perioder: " + endretTidslinje.getLocalDateIntervals());
+            }
         }
 
         final var endretProgramperiodeEtterlysninger = etterlysningRepository.hentEtterlysninger(kontekst.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
