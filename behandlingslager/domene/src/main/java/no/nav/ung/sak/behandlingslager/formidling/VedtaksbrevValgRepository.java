@@ -27,7 +27,7 @@ public class VedtaksbrevValgRepository {
 
     public Optional<VedtaksbrevValgEntitet> finnVedtakbrevValg(Long behandlingId) {
         TypedQuery<VedtaksbrevValgEntitet> query = entityManager.createQuery(
-                "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.behandlingId = :behandlingId and aktiv = true", VedtaksbrevValgEntitet.class)
+                "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.behandlingId = :behandlingId", VedtaksbrevValgEntitet.class)
             .setParameter("behandlingId", behandlingId);
         return HibernateVerktøy.hentUniktResultat(query);
     }
