@@ -35,12 +35,12 @@ public record VedtaksbrevValgRequestDto(
 ) {
 
     @AssertTrue(message = "Redigert tekst kan ikke være tom samtidig som redigert er true")
-    public boolean måHaTekstHvisRedigertErTrue() {
+    public boolean isEmptyRedigertTekstAndRedigertTrue() {
         return !Boolean.TRUE.equals(redigert) || (redigertHtml != null && !redigertHtml.isBlank());
     }
 
     @AssertTrue(message = "Kan ikke ha redigert tekst samtidig som redigert er false")
-    public boolean kanIkkeHaTekstHvisRedigertErFalse() {
+    public boolean isRedigertTextAndRedigertFalse() {
         return redigert != null && (redigert || redigertHtml == null);
     }
 
