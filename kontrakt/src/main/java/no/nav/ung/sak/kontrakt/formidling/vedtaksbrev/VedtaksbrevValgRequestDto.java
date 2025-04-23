@@ -3,19 +3,15 @@ package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
- *
  * @param behandlingId
- * @param hindret - hindre sending av brev
- * @param redigert - overstyre eller skrive fritekst vedtaksbrev
+ * @param hindret      - hindre sending av brev
+ * @param redigert     - overstyre eller skrive fritekst vedtaksbrev
  * @param redigertHtml - html med tekst som skal overstyre
  */
 public record VedtaksbrevValgRequestDto(
@@ -36,7 +32,17 @@ public record VedtaksbrevValgRequestDto(
     @JsonProperty("redigertHtml")
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     String redigertHtml
-    ) {
+) {
+
+    @AssertTrue(message = "Redigert tekst kan ikke være tom samtidig som redigert er true")
+    public boolean måHaTekstHvisRedigertErTrue() {
+        return !Boolean.TRUE.equals(redigert) || (redigertHtml != null && !redigertHtml.isBlank());
+    }
+
+    @AssertTrue(message = "Kan ikke ha redigert tekst samtidig som redigert er false")
+    public boolean kanIkkeHaTekstHvisRedigertErFalse() {
+        return redigert != null && (redigert || redigertHtml == null);
+    }
 
 }
 

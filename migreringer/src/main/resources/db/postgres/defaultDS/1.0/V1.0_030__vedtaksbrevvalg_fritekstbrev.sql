@@ -5,7 +5,6 @@ create table if not exists vedtaksbrev_valg
     redigert           boolean                               not null,
     redigert_brev_html text,
     hindret            boolean                               not null,
-    aktiv              boolean     default true,
     versjon            bigint      default 0                 not null,
     opprettet_av       varchar(20) default 'VL'              not null,
     opprettet_tid      timestamp   default CURRENT_TIMESTAMP not null,
@@ -14,14 +13,12 @@ create table if not exists vedtaksbrev_valg
     constraint fk_behandling foreign key (behandling_id) references behandling (id)
 );
 
-create unique index if not exists idx_vedtaksbrev_valg_behandling_aktiv
-    on vedtaksbrev_valg (behandling_id)
-    where aktiv = true;
+create unique index if not exists uidx_vedtaksbrev_valg_behandling_aktiv
+    on vedtaksbrev_valg (behandling_id);
 
 create sequence if not exists seq_vedtaksbrev_valg increment by 50 minvalue 1000000;
 comment on column vedtaksbrev_valg.redigert is 'Indikerer om sakbehandler har redigert eller skrevet et fritekstbrev';
 comment on column vedtaksbrev_valg.redigert_brev_html is 'Html tekst som skal brukes istedenfor det automatiske brevet ';
 comment on column vedtaksbrev_valg.hindret is 'Indikerer om brevet er manuelt hindret';
-comment on column vedtaksbrev_valg.aktiv is 'Soft delete';
 
 comment on column vedtaksbrev_valg.versjon is 'Versjonsnummer av teksten for optimistisk låsing';

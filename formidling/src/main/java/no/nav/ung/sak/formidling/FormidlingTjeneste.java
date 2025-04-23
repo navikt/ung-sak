@@ -34,9 +34,6 @@ public class FormidlingTjeneste {
         this.behandlingRepository = behandlingRepository;
     }
 
-    FormidlingTjeneste() {
-    }
-
 
     public VedtaksbrevValgDto vedtaksbrevValg(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -85,18 +82,9 @@ public class FormidlingTjeneste {
             throw new BadRequestException("Brevet kan ikke redigeres.");
         }
 
-        if (Boolean.TRUE.equals(dto.redigert()) && (dto.redigertHtml() == null || dto.redigertHtml().isBlank())) {
-            throw new BadRequestException("Redigert tekst kan ikke være tom samtidig som redigert er true");
-        }
-
-        if ((dto.redigert() == null || !dto.redigert()) && dto.redigertHtml() != null) {
-            throw new BadRequestException("Kan ikke ha redigert tekst samtidig som redigert er false");
-        }
-
         if (!vedtaksbrevEgenskaper.kanHindre() && dto.hindret() != null) {
             throw new BadRequestException("Brevet kan ikke hindres. ");
         }
-
 
         vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
         vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
