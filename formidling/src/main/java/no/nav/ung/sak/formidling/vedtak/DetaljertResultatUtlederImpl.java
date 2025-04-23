@@ -213,6 +213,6 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     private static boolean harAvslåttVilkår(Set<DetaljertVilkårResultat> avslåtteVilkår, VilkårType vilkårType) {
         return avslåtteVilkår.stream().anyMatch
-            (it -> it.vilkårType().equals(vilkårType));
+            (it -> it.vilkårType() == vilkårType);
     }
 }
