@@ -167,12 +167,11 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør pga dødsfall av søker");
         }
 
-        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)) {
+        if (relevanteÅrsaker.isEmpty()) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Uendret innvilget periode i kant med en endret periode");
         }
 
-
-        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og relevanteÅrsaker %s og tilkjent ytelse %s"
+        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
             .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
     }
 
