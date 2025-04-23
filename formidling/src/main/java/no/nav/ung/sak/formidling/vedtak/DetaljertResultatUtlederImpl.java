@@ -45,7 +45,6 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
         var triggerPerioder = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId());
 
-
         var vilkårPeriodeResultatMap = hentVilkårTidslinjer(behandling.getId());
         var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårPeriodeResultatMap);
 
@@ -57,13 +56,13 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
-            .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::kombinerMedTilkjentYtelse, JoinStyle.LEFT_JOIN);
+            .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::bestemResultatForPeriode, JoinStyle.LEFT_JOIN);
 
         return detaljertResultatTidslinje.compress();
 
     }
 
-    private static LocalDateSegment<DetaljertResultat> kombinerMedTilkjentYtelse(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {
+    private static LocalDateSegment<DetaljertResultat> bestemResultatForPeriode(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {
         SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat = lhs.getValue();
         var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
 
