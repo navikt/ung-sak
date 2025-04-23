@@ -1847,9 +1847,6 @@
         "required" : [ "journalpostId" ],
         "type" : "object"
       },
-      "JsonNode" : {
-        "type" : "object"
-      },
       "KodeverdiSomObjektAktivitetStatus" : {
         "properties" : {
           "kode" : {
@@ -4404,9 +4401,6 @@
             "minimum" : 0,
             "type" : "integer"
           },
-          "dokumentdata" : {
-            "$ref" : "#/components/schemas/JsonNode"
-          },
           "redigertVersjon" : {
             "type" : "boolean"
           }
@@ -4414,12 +4408,15 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
-      "VedtaksbrevOperasjonerDto" : {
+      "VedtaksbrevValgDto" : {
         "properties" : {
           "automatiskBrevOperasjoner" : {
             "$ref" : "#/components/schemas/AutomatiskBrevOperasjoner"
           },
           "enableHindre" : {
+            "type" : "boolean"
+          },
+          "enableRediger" : {
             "type" : "boolean"
           },
           "forklaring" : {
@@ -4433,8 +4430,48 @@
           },
           "hindret" : {
             "type" : "boolean"
+          },
+          "kanOverstyreHindre" : {
+            "type" : "boolean"
+          },
+          "kanOverstyreRediger" : {
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "redigertBrevHtml" : {
+            "type" : "string"
           }
         },
+        "type" : "object"
+      },
+      "VedtaksbrevValgRequestDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "emptyRedigertTekstAndRedigertTrue" : {
+            "type" : "boolean"
+          },
+          "hindret" : {
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "redigertHtml" : {
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          },
+          "redigertTextAndRedigertFalse" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "behandlingId" ],
         "type" : "object"
       },
       "VenteårsakSomObjekt" : {
@@ -6572,7 +6609,7 @@
     "/api/formidling/vedtaksbrev" : {
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
-        "operationId" : "tilgjengeligeVedtaksbrev",
+        "operationId" : "vedtaksbrevValg",
         "parameters" : [ {
           "in" : "query",
           "name" : "behandlingId",
@@ -6586,11 +6623,31 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VedtaksbrevOperasjonerDto"
+                  "$ref" : "#/components/schemas/VedtaksbrevValgDto"
                 }
               }
             },
             "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      },
+      "post" : {
+        "description" : "Lagring av brevvalg eks redigert eller hindretbrev  ",
+        "operationId" : "lagreVedtaksbrevValg",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/VedtaksbrevValgRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "lagret ok"
           }
         },
         "tags" : [ "formidling" ]

@@ -171,19 +171,15 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
         if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
-            // Behandling for å kontrollere inntekt
-            if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT)) {
-                if (tilkjentYtelse.utbetalingsgrad() > 0) {
-                    return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_RAPPORTERT_INNTEKT);
-                }
-                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT);
+            if (tilkjentYtelse.utbetalingsgrad() <= 0) {
+                return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
             }
 
-            // Har ikke rapportert inntekt
-            if (tilkjentYtelse.utbetalingsgrad() > 0) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_UTEN_INNTEKT);
+            if (tilkjentYtelse.utbetalingsgrad() >= 100) {
+                return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
             }
-            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_RAPPORTERT_INNTEKT, "Ingen tilkjent ytelse og mangler rapportert inntekt");
+
+            return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON);
         }
 
         // Behandling ved endring av programperiode
@@ -194,7 +190,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Ny programperiode uten tilkjent ytelse og uten rapportert inntekt");
         }
 
-        if (tilkjentYtelse.utbetalingsgrad() == 0) {
+        if (tilkjentYtelse.utbetalingsgrad() <= 0) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Ingen utbetalingsgrad. TilkjentYtelse: %s, Behandlingsårsaker: %s".formatted(tilkjentYtelse, behandlingsårsaker));
         }
 

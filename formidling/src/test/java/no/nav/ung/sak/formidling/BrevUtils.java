@@ -1,5 +1,15 @@
 package no.nav.ung.sak.formidling;
 
+import jakarta.persistence.EntityManager;
+import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.test.util.UngTestRepositories;
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.NodeVisitor;
+import org.junit.jupiter.api.TestInfo;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,19 +21,26 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Node;
-import org.jsoup.select.NodeVisitor;
-import org.junit.jupiter.api.TestInfo;
-
 public class BrevUtils {
 
     static DateTimeFormatter norwegianFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("no-NO"));
 
     public static String brevDatoString(LocalDate date) {
         return date.format(norwegianFormatter);
+    }
+
+    public static GenerertBrev genererBrevOgLagreHvisEnabled(TestInfo testInfo, Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste ) {
+        if (System.getenv("LAGRE_PDF") != null) {
+            var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
+            BrevUtils.lagrePdf(generertBrev, testInfo);
+            return generertBrev;
+        }
+
+        return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+    }
+
+    public static UngTestRepositories lagAlleUngTestRepositories(EntityManager entityManager) {
+        return UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, new AbakusInMemoryInntektArbeidYtelseTjeneste());
     }
 
     public static void lagrePdf(GenerertBrev generertBrev, TestInfo testInfo) {

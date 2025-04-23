@@ -1,15 +1,5 @@
 package no.nav.ung.sak.formidling.bestilling;
 
-import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
-import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -21,6 +11,10 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.GenerertBrev;
@@ -28,6 +22,15 @@ import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
+import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
 
 /**
  * <a href="https://confluence.adeo.no/pages/viewpage.action?pageId=377701645">dokarkiv doc</a>
@@ -72,7 +75,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         validerBrevbestillingForespørsel(behandling);
 
-        var generertBrev = brevGenerererTjeneste.genererVedtaksbrev(behandling.getId());
+        var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
         if (generertBrev == null) {
             LOG.info("Ingen brev generert.");
             return;
@@ -116,6 +119,10 @@ public class BrevbestillingTask extends BehandlingProsessTask {
     }
 
     private void validerBrevbestillingForespørsel(Behandling behandling) {
+        if (!behandling.erAvsluttet()) {
+            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+        }
+
         var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
         var tidligereVedtaksbrev= tidligereBestillinger.stream().filter(BehandlingBrevbestillingEntitet::isVedtaksbrev).toList();
         if (!tidligereVedtaksbrev.isEmpty()) {
