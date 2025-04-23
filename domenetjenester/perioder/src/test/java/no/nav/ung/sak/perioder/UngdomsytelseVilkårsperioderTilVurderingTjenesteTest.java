@@ -37,9 +37,6 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
     @Mock
     private ProsessTriggerPeriodeUtleder fraProsesstriggere;
 
-    @Mock
-    private MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
-
     @InjectMocks
     private UngdomsytelseVilkårsperioderTilVurderingTjeneste tjeneste;
 
@@ -57,18 +54,10 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
             )
         );
 
-        LocalDateTimeline<YearMonth> stønadstidslinje = new LocalDateTimeline<>(
-            List.of(
-                new LocalDateSegment<>(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31), YearMonth.of(2023, 1)),
-                new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), YearMonth.of(2023, 2))
-            )
-        );
-
         mockVilkårPeriode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 28));
         when(fraSøknadsperiode.utledTidslinje(anyLong())).thenReturn(søknadsperiodeTidslinje);
         when(fraUngdomsprogram.finnTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(fraProsesstriggere.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
-        when(ytelsesperiodeutleder.periodiserMånedsvis(anyLong())).thenReturn(stønadstidslinje);
 
         final var resultat = tjeneste.utled(1L, VilkårType.UNGDOMSPROGRAMVILKÅRET);
 
@@ -78,43 +67,6 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
         var firstPeriod = iterator.next();
 
         assertThat(firstPeriod).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 28)));
-    }
-
-
-    @Test
-    void skal_returnere_hele_ytelsesperioden_dersom_vilkår_er_oppstykket() {
-        LocalDateTimeline<Boolean> søknadsperiodeTidslinje = new LocalDateTimeline<>(
-                List.of(
-                        new LocalDateSegment<>(LocalDate.of(2023, 2, 14), LocalDate.of(2023, 2, 28), true)
-                )
-        );
-
-        LocalDateTimeline<YearMonth> stønadstidslinje = new LocalDateTimeline<>(
-                List.of(
-                        new LocalDateSegment<>(LocalDate.of(2023, 2, 1), LocalDate.of(2023, 2, 28), YearMonth.of(2023, 2))
-                )
-        );
-
-        mockVilkårPerioder(List.of(
-                DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2023, 2, 10), LocalDate.of(2023, 2, 10)),
-                DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2023, 2, 14), LocalDate.of(2023, 2, 28))
-                ));
-        when(fraSøknadsperiode.utledTidslinje(anyLong())).thenReturn(søknadsperiodeTidslinje);
-        when(fraUngdomsprogram.finnTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
-        when(fraProsesstriggere.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
-        when(ytelsesperiodeutleder.periodiserMånedsvis(anyLong())).thenReturn(stønadstidslinje);
-
-        final var resultat = tjeneste.utled(1L, VilkårType.UNGDOMSPROGRAMVILKÅRET);
-
-        assertThat(resultat.size()).isEqualTo(2);
-
-        var iterator = resultat.iterator();
-        var firstPeriod = iterator.next();
-        var secondPeriod = iterator.next();
-
-        assertThat(firstPeriod).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2023, 2, 10), LocalDate.of(2023, 2, 10)));
-        assertThat(secondPeriod).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2023, 2, 14), LocalDate.of(2023, 2, 28)));
-
     }
 
     private void mockVilkårPeriode(LocalDate fom, LocalDate tom) {
