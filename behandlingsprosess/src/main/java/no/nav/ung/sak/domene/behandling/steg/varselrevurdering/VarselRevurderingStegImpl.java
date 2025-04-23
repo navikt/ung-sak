@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
 
@@ -20,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
@@ -35,6 +37,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     private EtterlysningRepository etterlysningRepository;
     private ProgramperiodeendringEtterlysningTjeneste etterlysningTjeneste;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private final Duration ventePeriode;
 
     @Inject
@@ -68,7 +71,8 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             etterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(kontekst.getBehandlingId(), kontekst.getFagsakId());
         } else {
             final var endretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinjeFraOriginal(BehandlingReferanse.fra(behandling));
-            if (!endretTidslinje.isEmpty()) {
+            final var nySøktPerioderTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId()).filterValue(it -> it.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE));
+            if (!endretTidslinje.disjoint(nySøktPerioderTidslinje).isEmpty()) {
                 throw new IllegalStateException("Fant endring i programperiode uten trigger. Legg til trigger manuelt for perioder: " + endretTidslinje.getLocalDateIntervals());
             }
         }
