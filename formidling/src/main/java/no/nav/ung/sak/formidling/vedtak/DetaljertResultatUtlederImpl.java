@@ -51,7 +51,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
         var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
             .intersection(samletVilkårTidslinje,
-                (p, lhs, rhs) -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(rhs.getValue(), lhs.getValue())));
+                (p, behandlingÅrsaker, vilkårResultater)
+                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue())));
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
@@ -121,11 +122,13 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         var avslåtteVilkår = vilkårsresultatOgBehandlingsårsaker.avslåtteVilkår();
-        var behandlingsårsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker();
+        var relevanteÅrsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker().stream()
+            .filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
+            .collect(Collectors.toSet());
 
 
         if (!avslåtteVilkår.isEmpty()) {
-            if (innholderBareOgOptionallyUttalelse(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+            if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
                 return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRET_STARTDATO);
             }
@@ -134,43 +137,43 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (tilkjentYtelse != null) {
-            var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
+            var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, relevanteÅrsaker);
             if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
         }
 
-        if (innholderBareOgOptionallyUttalelse(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ENDRING_STARTDATO);
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE);
         }
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS);
         }
 
-        if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør av ungdomsprogram");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga ny fødsel");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga dødsfall av barn");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør pga dødsfall av søker");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Uendret innvilget periode i kant med en endret periode");
         }
 
 
-        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
+        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og relevanteÅrsaker %s og tilkjent ytelse %s"
             .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
     }
 
