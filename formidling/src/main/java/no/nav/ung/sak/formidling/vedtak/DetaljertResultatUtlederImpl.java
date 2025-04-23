@@ -45,24 +45,24 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
         var triggerPerioder = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId());
 
-
         var vilkårPeriodeResultatMap = hentVilkårTidslinjer(behandling.getId());
         var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårPeriodeResultatMap);
 
         var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
             .intersection(samletVilkårTidslinje,
-                (p, lhs, rhs) -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(rhs.getValue(), lhs.getValue())));
+                (p, behandlingÅrsaker, vilkårResultater)
+                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue())));
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
-            .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::kombinerMedTilkjentYtelse, JoinStyle.LEFT_JOIN);
+            .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::bestemResultatForPeriode, JoinStyle.LEFT_JOIN);
 
         return detaljertResultatTidslinje.compress();
 
     }
 
-    private static LocalDateSegment<DetaljertResultat> kombinerMedTilkjentYtelse(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {
+    private static LocalDateSegment<DetaljertResultat> bestemResultatForPeriode(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {
         SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat = lhs.getValue();
         var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
 
@@ -120,50 +120,56 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.IKKE_VURDERT);
         }
 
-        if (!vilkårsresultatOgBehandlingsårsaker.avslåtteVilkår().isEmpty()) {
+        var avslåtteVilkår = vilkårsresultatOgBehandlingsårsaker.avslåtteVilkår();
+        var relevanteÅrsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker().stream()
+            .filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
+            .collect(Collectors.toSet());
+
+
+        if (!avslåtteVilkår.isEmpty()) {
+            if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+                && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
+                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRING_STARTDATO);
+            }
+
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
         }
 
-        var behandlingsårsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker();
-
         if (tilkjentYtelse != null) {
-            var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, behandlingsårsaker);
+            var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, relevanteÅrsaker);
             if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ENDRING_STARTDATO);
+        }
+
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE);
         }
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS);
         }
 
-        if (Set.of(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
-                BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
-            .containsAll(behandlingsårsaker)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga endret startdato");
-        }
-
-        if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør av ungdomsprogram");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga ny fødsel");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga dødsfall av barn");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
+        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør pga dødsfall av søker");
         }
 
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)) {
+        if (relevanteÅrsaker.isEmpty()) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Uendret innvilget periode i kant med en endret periode");
         }
-
 
         throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
             .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
@@ -202,4 +208,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
     }
 
+    private static boolean harAvslåttVilkår(Set<DetaljertVilkårResultat> avslåtteVilkår, VilkårType vilkårType) {
+        return avslåtteVilkår.stream().anyMatch
+            (it -> it.vilkårType() == vilkårType);
+    }
 }
