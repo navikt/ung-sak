@@ -44,11 +44,13 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository,
                                      EtterlysningRepository etterlysningRepository,
                                      ProgramperiodeendringEtterlysningTjeneste etterlysningTjeneste, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
+                                     ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                      @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.ventePeriode = Duration.parse(ventePeriode);
     }
 
