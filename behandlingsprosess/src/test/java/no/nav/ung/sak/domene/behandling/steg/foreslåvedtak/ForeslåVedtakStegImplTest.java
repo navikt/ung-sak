@@ -1,18 +1,18 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
-import org.junit.jupiter.api.Test;
-
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.formidling.FormidlingTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import org.junit.jupiter.api.Test;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class ForeslåVedtakStegImplTest {
 
@@ -24,7 +24,8 @@ public class ForeslåVedtakStegImplTest {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
         var behandlingRepository = scenario.mockBehandlingRepository();
-        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(behandlingRepository, foreslåVedtakTjeneste, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(b -> null));
+        ForeslåVedtakStegImpl steg = new ForeslåVedtakStegImpl(
+            behandlingRepository, foreslåVedtakTjeneste, new UnitTestLookupInstanceImpl<YtelsespesifikkForeslåVedtak>(b -> null), mock(FormidlingTjeneste.class));
 
         // Act
         Fagsak fagsak = behandling.getFagsak();

@@ -1,11 +1,11 @@
 package no.nav.ung.sak.formidling;
 
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
-import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.typer.AktørId;
 
-public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste{
+public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste {
 
     private final GenerertBrev resultat;
 
@@ -20,9 +20,18 @@ public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste{
     }
 
 
+    @Override
+    public GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml) {
+        return resultat;
+    }
 
     @Override
-    public GenerertBrev genererVedtaksbrev(Long behandlingId) {
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return resultat;
+    }
+
+    @Override
+    public GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
         return resultat;
     }
 }

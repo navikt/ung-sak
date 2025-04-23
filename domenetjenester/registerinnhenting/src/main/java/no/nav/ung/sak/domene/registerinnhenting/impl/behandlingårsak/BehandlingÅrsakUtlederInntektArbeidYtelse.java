@@ -1,13 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl.behandlingårsak;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -15,10 +7,17 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.domene.arbeidsforhold.AktørYtelseEndring;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.ung.sak.typer.Saksnummer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @ApplicationScoped
 @GrunnlagRef(InntektArbeidYtelseGrunnlag.class)

@@ -4,18 +4,13 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.formidling.template.TemplateType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
@@ -23,9 +18,7 @@ import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -49,56 +42,44 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevGenerererTjenesteInnvilgelseTest {
+class BrevGenerererTjenesteNyInnvilgelseTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
 
     @Inject
     private EntityManager entityManager;
-    private BehandlingRepositoryProvider repositoryProvider;
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
-    private ProsessTriggereRepository prosessTriggereRepository;
-    private TilkjentYtelseUtleder tilkjentYtelseUtleder;
-    private PersonopplysningRepository personopplysningRepository;
+    private UngTestRepositories ungTestRepositories;
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
     private TestInfo testInfo;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
 
     @BeforeEach
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        ungdomsytelseGrunnlagRepository = new UngdomsytelseGrunnlagRepository(entityManager);
-        ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
-        tilkjentYtelseUtleder = new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository);
-        personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
-        prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
-        ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
-
-        brevGenerererTjeneste = lagBrevGenererTjeneste(System.getenv("LAGRE_PDF") == null);
+        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
+        brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
     @NotNull
-    private BrevGenerererTjeneste lagBrevGenererTjeneste(boolean ignorePdf) {
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
-        ;
+    private BrevGenerererTjeneste lagBrevGenererTjeneste() {
+        var repositoryProvider = ungTestRepositories.repositoryProvider();
+        var tilkjentYtelseRepository = ungTestRepositories.tilkjentYtelseRepository();
+
+        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
+
         InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
-            ungdomsytelseGrunnlagRepository,
+            ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
-            tilkjentYtelseUtleder,
-            personopplysningRepository);
+            new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository),
+            repositoryProvider.getPersonopplysningRepository());
 
         var ungdomsytelseSøknadsperiodeTjeneste =
-            new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
+            new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
 
         DetaljertResultatUtlederImpl detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste),
+            new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), ungdomsytelseSøknadsperiodeTjeneste),
             tilkjentYtelseRepository, repositoryProvider.getVilkårResultatRepository());
 
         VedtaksbrevRegler vedtaksbrevRegler = new VedtaksbrevRegler(
@@ -108,30 +89,27 @@ class BrevGenerererTjenesteInnvilgelseTest {
         return new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
-            new PdfGenKlient(ignorePdf),
-            personopplysningRepository,
-            vedtaksbrevRegler);
+            new PdfGenKlient(),
+            repositoryProvider.getPersonopplysningRepository(),
+            vedtaksbrevRegler,
+            ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
     }
 
     @Test()
     @DisplayName("Verifiserer formatering på overskrifter")
     void verifiserOverskrifter() {
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(lagUngTestRepositories());
+        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
 
         var behandling = scenarioBuilder.getBehandling();
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        Long behandlingId = (behandling.getId());
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
         VedtaksbrevVerifikasjon.verifiserStandardOverskrifter(brevtekst);
 
 
-    }
-
-    @NotNull
-    private UngTestRepositories lagUngTestRepositories() {
-        return new UngTestRepositories(repositoryProvider, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository);
     }
 
 
@@ -143,7 +121,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         var behandling = lagScenario(ungTestGrunnlag);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
 
         var brevtekst = generertBrev.dokument().html();
@@ -186,7 +164,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         var behandling = lagScenario(ungTestGrunnlag);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -250,7 +228,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         var behandling = lagScenario(ungTestGrunnlag);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -295,7 +273,7 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
         var behandling = lagScenario(ungTestGrunnlag);
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId());
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -308,16 +286,12 @@ class BrevGenerererTjenesteInnvilgelseTest {
 
     @Test
     void pdfStrukturTest() throws IOException {
-
-        //Lager ny fordi default PdfgenKlient lager ikke pdf
-        var brevGenerererTjeneste = lagBrevGenererTjeneste(false);
-
         TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(lagUngTestRepositories());
+            .lagAvsluttetStandardBehandling(ungTestRepositories);
 
         var behandling = scenarioBuilder.getBehandling();
 
-        GenerertBrev generertBrev = genererVedtaksbrevBrev(behandling.getId(), brevGenerererTjeneste);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -334,23 +308,15 @@ class BrevGenerererTjenesteInnvilgelseTest {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
         var behandling = scenarioBuilder.buildOgLagreMedUng(
-            lagUngTestRepositories());
+            ungTestRepositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         return behandling;
     }
 
-    private GenerertBrev genererVedtaksbrevBrev(Long behandlingId) {
-        return genererVedtaksbrevBrev(behandlingId, brevGenerererTjeneste);
-    }
 
-
-    private GenerertBrev genererVedtaksbrevBrev(Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste1) {
-        GenerertBrev generertBrev = brevGenerererTjeneste1.genererVedtaksbrev(behandlingId);
-        if (System.getenv("LAGRE_PDF") != null) {
-            BrevUtils.lagrePdf(generertBrev, testInfo);
-        }
-        return generertBrev;
+    private GenerertBrev genererVedtaksbrev(Long behandlingId) {
+        return BrevUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
     }
 
 

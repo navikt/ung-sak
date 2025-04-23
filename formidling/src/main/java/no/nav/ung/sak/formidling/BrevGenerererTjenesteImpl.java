@@ -9,7 +9,10 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -32,50 +35,82 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private AktørTjeneste aktørTjeneste;
     private PdfGenKlient pdfGen;
     private PersonopplysningRepository personopplysningRepository;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
+    private ManuellVedtaksbrevInnholdBygger manuellVedtaksbrevInnholdBygger;
 
     private VedtaksbrevRegler vedtaksbrevRegler;
 
     @Inject
     public BrevGenerererTjenesteImpl(
-            BehandlingRepository behandlingRepository,
-            AktørTjeneste aktørTjeneste,
-            PdfGenKlient pdfGen,
-            PersonopplysningRepository personopplysningRepository,
-            VedtaksbrevRegler vedtaksbrevRegler) {
+        BehandlingRepository behandlingRepository,
+        AktørTjeneste aktørTjeneste,
+        PdfGenKlient pdfGen,
+        PersonopplysningRepository personopplysningRepository,
+        VedtaksbrevRegler vedtaksbrevRegler,
+        VedtaksbrevValgRepository vedtaksbrevValgRepository,
+        ManuellVedtaksbrevInnholdBygger manuellVedtaksbrevInnholdBygger) {
 
         this.behandlingRepository = behandlingRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.pdfGen = pdfGen;
         this.personopplysningRepository = personopplysningRepository;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
+        this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
+        this.manuellVedtaksbrevInnholdBygger = manuellVedtaksbrevInnholdBygger;
     }
 
     public BrevGenerererTjenesteImpl() {
     }
 
+    /**
+     * Lager brev for behandling basert på valg gjort av saksbehandler
+     */
     @WithSpan
     @Override
-    public GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId));
+    public GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId, kunHtml));
     }
 
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
-    private GenerertBrev doGenererVedtaksbrev(Long behandlingId) {
+    private GenerertBrev doGenererVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        VedtaksbrevValgEntitet vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
+        if (vedtaksbrevValgEntitet != null) {
+            if (vedtaksbrevValgEntitet.isHindret()) {
+                LOG.info("Vedtaksbrev er manuelt stoppet - lager ikke brev");
+                return null;
+            }
+            if (vedtaksbrevValgEntitet.isRedigert()) {
+                LOG.info("Vedtaksbrev er manuelt redigert - genererer manuell brev");
+                return doGenererManuellVedtaksbrev(behandlingId, kunHtml);
+            }
+            LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
+        }
 
+        return doGenererAutomatiskVedtaksbrev(behandlingId, kunHtml);
+    }
+
+    /**
+     * Lager brev basert på regler
+     */
+    @WithSpan
+    @Override
+    public GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(behandlingId, kunHtml));
+    }
+
+    @WithSpan
+    private GenerertBrev doGenererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
-        if (!regelResultat.vedtaksbrevOperasjoner().harBrev()) {
-            LOG.warn(regelResultat.vedtaksbrevOperasjoner().forklaring());
+        if (!regelResultat.vedtaksbrevEgenskaper().harBrev()) {
+            LOG.warn(regelResultat.forklaring());
             return null;
         }
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (!behandling.erAvsluttet()) {
-            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
-        }
 
-        VedtaksbrevInnholdBygger bygger = regelResultat.bygger();
+        VedtaksbrevInnholdBygger bygger = regelResultat.automatiskVedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, regelResultat.detaljertResultatTimeline());
         var pdlMottaker = hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
@@ -85,7 +120,38 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
             )
         );
 
-        PdfGenDokument dokument = pdfGen.lagDokument(input);
+        PdfGenDokument dokument = pdfGen.lagDokument(input, kunHtml);
+        return new GenerertBrev(
+            dokument,
+            pdlMottaker,
+            pdlMottaker,
+            resultat.dokumentMalType(),
+            resultat.templateType()
+        );
+    }
+
+    /**
+     * Lager manuell brev lagret i databasen uten å kjøre brevregler
+     */
+    @WithSpan
+    @Override
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, kunHtml));
+    }
+
+    @WithSpan
+    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var resultat = manuellVedtaksbrevInnholdBygger.bygg(behandling, null);
+        var pdlMottaker = hentMottaker(behandling);
+        var input = new TemplateInput(resultat.templateType(),
+            new TemplateDto(
+                FellesDto.manuell(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
+                resultat.templateInnholdDto()
+            )
+        );
+
+        PdfGenDokument dokument = pdfGen.lagDokument(input, kunHtml);
         return new GenerertBrev(
             dokument,
             pdlMottaker,

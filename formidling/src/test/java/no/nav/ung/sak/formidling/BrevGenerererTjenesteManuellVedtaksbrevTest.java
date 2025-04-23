@@ -6,12 +6,16 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -38,13 +42,11 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for brevtekster for innvilgelse. Bruker html for å validere.
- * For manuell verifikasjon av pdf kan env variabel LAGRE_PDF brukes.
- */
+// TODO test som først får automatisk brev som redigeres.
+
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevGenerererTjenesteEndringHøySatsTest {
+class BrevGenerererTjenesteManuellVedtaksbrevTest {
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
 
@@ -55,11 +57,13 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     String fnr = pdlKlient.fnr();
     private TestInfo testInfo;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
 
     @BeforeEach
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
+        vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
         ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
         brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
@@ -69,15 +73,15 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-        var endringInnholdBygger = new EndringHøySatsInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository());
-
         BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, behandlingRepository)),
             ungTestRepositories.tilkjentYtelseRepository(), repositoryProvider.getVilkårResultatRepository());
 
-        Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
+        Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(new ManuellVedtaksbrevInnholdBygger(
+            vedtaksbrevValgRepository
+        ));
 
         return new BrevGenerererTjenesteImpl(
             behandlingRepository,
@@ -85,14 +89,23 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
-                behandlingRepository, innholdByggere, detaljertResultatUtleder), ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
+                behandlingRepository, innholdByggere, detaljertResultatUtleder),
+            ungTestRepositories.vedtaksbrevValgRepository(),
+            new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
     }
 
     @Test()
     @DisplayName("Verifiserer formatering på overskrifter")
     void verifiserOverskrifter() {
-        UngTestScenario ungTestscenario = BrevScenarioer.endring25År(LocalDate.of(1999, 3, 25));
-        var behandling = lagScenario(ungTestscenario);
+
+        var behandling = lagScenarioMedAksjonspunktSomGirKunManuellBrev();
+
+        vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
+            behandling.getId(),
+            true,
+            false,
+            "<h1>Manuell skrevet overskrift</h1>"
+        ));
 
         Long behandlingId = (behandling.getId());
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
@@ -103,38 +116,54 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
     }
 
-    @DisplayName("Endringsbrev for overgang til høy sats")
+    @DisplayName("Standard manuell brev")
     @Test
-    void standardEndringHøySats() {
-        LocalDate fødselsdato = LocalDate.of(1999, 3, 25);
-        var ungTestGrunnlag = BrevScenarioer.endring25År(fødselsdato);
+    void standardManuellBrev() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+
+        var behandling = lagScenario(
+            BrevScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE);
+
+        vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
+            behandling.getId(),
+            true,
+            false,
+            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>" +
+                "<p>Du skal få penger, men du har tjent for mye og vi vil derfor kreve tilbake et beløp.</p>" +
+                "<p>Du får mer informasjon om dette i nærmeste fremtid.</p>"
+        ));
+
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-            "Vi har endret ungdomsytelsen din " +
-            "Fra 25. mars 2024 får du ny dagsats på 954 kroner fordi du fyller 25 år. " +
-            "Nav utbetaler 2 ganger grunnbeløp fra deltager er 25 år. " +
-            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+            "Nav har innvilget søknaden din om ungdomsytelse " +
+                "Du skal få penger, men du har tjent for mye og vi vil derfor kreve tilbake et beløp. " +
+                "Du får mer informasjon om dette i nærmeste fremtid. "
+        );
 
 
-        var behandling = lagScenario(ungTestGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_HØY_SATS);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.MANUELL_VEDTAKSBREV);
 
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsytelsen din</h1>"
+                "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
             );
 
     }
 
     @Test
     void pdfStrukturTest() throws IOException {
-        var behandling = lagScenario(
-            BrevScenarioer.endring25År(LocalDate.of(2024, 12, 1)));
+        var behandling = lagScenarioMedAksjonspunktSomGirKunManuellBrev();
 
+        vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
+            behandling.getId(),
+            true,
+            false,
+            "<h1>Manuell skrevet overskrift</h1>"
+        ));
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
 
@@ -144,22 +173,42 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Vi har endret ungdomsytelsen din");
+            assertThat(pdfTekst).contains("Manuell skrevet overskrift");
         }
 
     }
 
-    private Behandling lagScenario(UngTestScenario ungTestscenario) {
+    private Behandling lagScenarioMedAksjonspunktSomGirKunManuellBrev() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+
+        return lagScenario(
+            BrevScenarioer.endring0KrInntekt_19år(fom),
+            AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE
+        );
+    }
+
+    private Behandling lagScenario(UngTestScenario ungTestscenario, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);
 
+        if (aksjonspunktDefinisjon != null) {
+            scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, null);
+        }
+
+
         var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
-
-
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
 
+
+        if (aksjonspunktDefinisjon != null) {
+            Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
+            new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
+            BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
+            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        }
+
+        behandling.avsluttBehandling();
 
         return behandling;
     }
@@ -168,7 +217,6 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     private GenerertBrev genererVedtaksbrev(Long behandlingId) {
         return BrevUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
     }
-
 
 
 }
