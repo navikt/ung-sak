@@ -4720,6 +4720,9 @@
             "minimum" : 0,
             "type" : "integer"
           },
+          "emptyRedigertTekstAndRedigertTrue" : {
+            "type" : "boolean"
+          },
           "hindret" : {
             "type" : "boolean"
           },
@@ -4729,6 +4732,9 @@
           "redigertHtml" : {
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
+          },
+          "redigertTextAndRedigertFalse" : {
+            "type" : "boolean"
           }
         },
         "required" : [ "behandlingId" ],
