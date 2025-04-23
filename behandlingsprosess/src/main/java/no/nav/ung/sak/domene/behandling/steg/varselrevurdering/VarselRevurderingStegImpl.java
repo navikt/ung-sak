@@ -68,7 +68,7 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
             etterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(kontekst.getBehandlingId(), kontekst.getFagsakId());
         } else {
             final var endretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinjeFraOriginal(BehandlingReferanse.fra(behandling));
-            if (endretTidslinje.isEmpty()) {
+            if (!endretTidslinje.isEmpty()) {
                 throw new IllegalStateException("Fant endring i programperiode uten trigger. Legg til trigger manuelt for perioder: " + endretTidslinje.getLocalDateIntervals());
             }
         }
