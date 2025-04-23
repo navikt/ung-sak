@@ -113,7 +113,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO, gammelOpphørsdato));
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
     }
 
     @Test
@@ -133,7 +133,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(gammelOpphørsdato, OPPHØRSDATO));
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(gammelOpphørsdato.plusDays(1), OPPHØRSDATO));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
 
-        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO, gammelOpphørsdato));
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
     }
 
     private static void validerHarÅrsak(Map<Fagsak, ÅrsakOgPeriode> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {
