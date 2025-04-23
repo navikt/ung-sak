@@ -7,7 +7,7 @@ public enum DetaljertResultatType {
     KONTROLLER_INNTEKT_FULL_UTBETALING("Full utbetaling etter kontroll av inntekt"),
     KONTROLLER_INNTEKT_INGEN_UTBETALING("Ingen utbetaling etter kontroll av inntekt"),
     INNVILGELSE_ENDRING_STARTDATO("Innvilgelse av ny periode etter endring av startdato"),
-    AVSLAG_ENDRET_STARTDATO("Avslag av tidligere periode etter endret startdato"),
+    AVSLAG_ENDRING_STARTDATO("Avslag av tidligere periode etter endret startdato"),
     IKKE_VURDERT("Ikke vurdert"),
     INNVILGELSE_VILKÅR_NY_PERIODE("Innvilgelse av vilkår for ny periode uten utbetaling"),
     INNVILGELSE_UTBETALING_NY_PERIODE("Innvilgelse av ny periode med utbetaling"),

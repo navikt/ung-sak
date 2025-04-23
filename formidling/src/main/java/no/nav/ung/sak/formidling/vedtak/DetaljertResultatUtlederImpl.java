@@ -129,7 +129,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         if (!avslåtteVilkår.isEmpty()) {
             if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRET_STARTDATO);
+                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRING_STARTDATO);
             }
 
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
