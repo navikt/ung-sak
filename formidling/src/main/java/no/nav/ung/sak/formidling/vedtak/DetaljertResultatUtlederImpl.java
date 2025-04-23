@@ -209,10 +209,6 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
     }
 
-    private static boolean innholderBareOgOptionallyUttalelse(Set<BehandlingÅrsakType> set, BehandlingÅrsakType behandlingÅrsakType) {
-        return set.contains(behandlingÅrsakType) && (set.size() == 1 || set.size() == 2 && set.contains(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER));
-    }
-
     private static boolean harAvslåttVilkår(Set<DetaljertVilkårResultat> avslåtteVilkår, VilkårType vilkårType) {
         return avslåtteVilkår.stream().anyMatch
             (it -> it.vilkårType() == vilkårType);
