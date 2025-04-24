@@ -1,22 +1,13 @@
 package no.nav.ung.sak.perioder;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -25,9 +16,14 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.vilkår.InngangsvilkårUtleder;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef
@@ -37,10 +33,11 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     private InngangsvilkårUtleder inngangsvilkårUtleder;
 
     private UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private VilkårResultatRepository vilkårResultatRepository;
+    private BehandlingRepository behandlingRepository;
 
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
@@ -51,15 +48,17 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
         @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder,
         UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
         UtledPeriodeTilVurderingFraUngdomsprogram utledPeriodeTilVurderingFraUngdomsprogram,
         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
-        MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, VilkårResultatRepository vilkårResultatRepository) {
+        VilkårResultatRepository vilkårResultatRepository, BehandlingRepository behandlingRepository) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.ungdomsytelseSøknadsperiodeTjeneste = ungdomsytelseSøknadsperiodeTjeneste;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.utledPeriodeTilVurderingFraUngdomsprogram = utledPeriodeTilVurderingFraUngdomsprogram;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
-        this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
 
@@ -81,16 +80,19 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
                 .filter(p -> perioder.stream().anyMatch(p::overlapper))
                 .collect(Collectors.toCollection(TreeSet::new));
         }
-        return ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId));
     }
 
     @Override
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         final var vilkårPeriodeSet = new HashMap<VilkårType, NavigableSet<DatoIntervallEntitet>>();
         UtledeteVilkår utledeteVilkår = inngangsvilkårUtleder.utledVilkår(null);
-        var søktePerioder = ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId);
+        final var behandling = behandlingRepository.hentBehandling(behandlingId);
+        final var fagsakperiode = behandling.getFagsak().getPeriode();
+        var programperioder = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinjeFraOriginal(BehandlingReferanse.fra(behandling))
+            .intersection(fagsakperiode.toLocalDateInterval()).compress();
         utledeteVilkår.getAlleAvklarte()
-                .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, søktePerioder));
+                .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, TidslinjeUtil.tilDatoIntervallEntiteter(programperioder)));
 
         return vilkårPeriodeSet;
     }
@@ -123,12 +125,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         final var tidslinjeFraTrigger = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).mapValue(it -> true);
         var tidslinjeTilVurdering = tidslinjeForRelevanteEndringerIUngdomsprogram.crossJoin(relevantePerioderTidslinje).crossJoin(tidslinjeFraTrigger);
 
-
-        final var månedssegmenterTilVurdering = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId)
-            .stream().filter(s -> !tidslinjeTilVurdering.intersection(s.getLocalDateInterval()).isEmpty())
-            .toList();
-
-        return TidslinjeUtil.tilDatoIntervallEntiteter(new LocalDateTimeline<>(månedssegmenterTilVurdering).compress());
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering.compress());
     }
 
 }
