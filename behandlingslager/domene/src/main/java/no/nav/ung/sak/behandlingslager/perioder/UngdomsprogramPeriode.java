@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
@@ -55,5 +56,14 @@ public class UngdomsprogramPeriode extends BaseEntitet {
         return periode;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof UngdomsprogramPeriode that)) return false;
+        return Objects.equals(periode, that.periode);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(periode);
+    }
 }

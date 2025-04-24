@@ -1,6 +1,10 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
@@ -42,5 +46,21 @@ public class UngdomsprogramPerioder extends BaseEntitet {
 
     public Set<UngdomsprogramPeriode> getPerioder() {
         return perioder;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof UngdomsprogramPerioder that)) return false;
+        return Objects.equals(sortert(perioder), sortert(that.perioder));
+    }
+
+    private LinkedHashSet<UngdomsprogramPeriode> sortert(Set<UngdomsprogramPeriode> perioder1) {
+        return perioder1.stream().sorted(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(sortert(perioder));
     }
 }

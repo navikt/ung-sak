@@ -1,9 +1,6 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
@@ -79,5 +76,16 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
 
     public void setAktiv(boolean aktiv) {
         this.aktiv = aktiv;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof UngdomsprogramPeriodeGrunnlag that)) return false;
+        return Objects.equals(behandlingId, that.behandlingId) && Objects.equals(ungdomsprogramPerioder, that.ungdomsprogramPerioder);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(behandlingId, ungdomsprogramPerioder);
     }
 }
