@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
@@ -18,7 +19,7 @@ import org.slf4j.LoggerFactory;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTask {
 
-    public static final String TASKTYPE = "innhentsaksopplysninger.unggdomsprogramperioder";
+    public static final String TASKTYPE = "innhentsaksopplysninger.ungdomsprogramperioder";
     private static final Logger LOGGER = LoggerFactory.getLogger(InnhentUngdomsprogramperioderTask.class);
     private UngdomsprogramTjeneste ungdomsprogramTjeneste;
 
@@ -28,8 +29,9 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
 
     @Inject
     public InnhentUngdomsprogramperioderTask(BehandlingRepositoryProvider repositoryProvider,
+                                             BehandlingLåsRepository behandlingLåsRepository,
                                              UngdomsprogramTjeneste ungdomsprogramTjeneste) {
-        super(repositoryProvider.getBehandlingRepository(), null /* håndterer låsing selv på senere tidspunkt */);
+        super(repositoryProvider.getBehandlingRepository(), behandlingLåsRepository);
         this.ungdomsprogramTjeneste = ungdomsprogramTjeneste;
     }
 
