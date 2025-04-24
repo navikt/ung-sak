@@ -20,9 +20,9 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.UNGDOMSYTELSE);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
@@ -45,10 +45,10 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.REVURDERING, FagsakYtelseType.UNGDOMSYTELSE);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.VARSEL_REVURDERING)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)

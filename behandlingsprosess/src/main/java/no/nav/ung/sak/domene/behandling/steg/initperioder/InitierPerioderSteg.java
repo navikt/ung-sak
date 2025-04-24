@@ -10,14 +10,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,7 +27,6 @@ import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 public class InitierPerioderSteg implements BehandlingSteg {
 
-    private UngdomsprogramTjeneste ungdomsprogramTjeneste;
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseStartdatoRepository startdatoRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -39,12 +34,10 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private FagsakRepository fagsakRepository;
 
     @Inject
-    public InitierPerioderSteg(UngdomsprogramTjeneste ungdomsprogramTjeneste,
-                               BehandlingRepository behandlingRepository,
+    public InitierPerioderSteg(BehandlingRepository behandlingRepository,
                                UngdomsytelseStartdatoRepository startdatoRepository,
                                MottatteDokumentRepository mottatteDokumentRepository,
                                UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, FagsakRepository fagsakRepository) {
-        this.ungdomsprogramTjeneste = ungdomsprogramTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.startdatoRepository = startdatoRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -57,7 +50,6 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        ungdomsprogramTjeneste.innhentOpplysninger(kontekst);
         initierRelevanteSøknader(kontekst);
         var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(kontekst.getBehandlingId());
         if (!periodeTidslinje.isEmpty()) {

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Column;
@@ -30,6 +31,7 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
+    @ChangeTracked
     @JoinColumn(name = "ung_ungdomsprogramperioder_id", nullable = false, updatable = false, unique = true)
     private UngdomsprogramPerioder ungdomsprogramPerioder;
 

@@ -241,18 +241,6 @@ public interface BehandlingskontrollTjeneste {
                                               Venteårsak venteårsak, String venteårsakVariant);
 
     /**
-     * Sjekker i behandlingsmodellen om aksjonspunktet skal løses i eller etter det angitte startpunktet.
-     *
-     * @param ytelseType
-     * @param behandlingType
-     * @param startpunkt startpunkt som angir steget som aksjonspunktet skal sjekkes mot
-     * @param aksjonspunktDefinisjon aksjonspunktet som skal sjekkes
-     * @return true dersom aksjonspunktet skal løses i eller etter det angitte steget.
-     */
-    boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType, StartpunktType startpunkt,
-                                                 AksjonspunktDefinisjon aksjonspunktDefinisjon);
-
-    /**
      * Ny metode som forbereder en behandling for prosessering - setter autopunkt til utført og evt tilbakeføring ved gjenopptak.
      * Behandlingen skal være klar til prosessering uten åpne autopunkt når kallet er ferdig.
      */

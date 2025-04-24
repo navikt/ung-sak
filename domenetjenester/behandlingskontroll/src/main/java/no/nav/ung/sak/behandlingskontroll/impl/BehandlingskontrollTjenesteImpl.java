@@ -565,23 +565,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         eventPubliserer.fireEvent(event);
     }
 
-    @Override
-    public boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType,
-                                                        StartpunktType startpunkt, AksjonspunktDefinisjon apDef) {
 
-        BehandlingModell modell = getModell(behandlingType, ytelseType);
-        BehandlingStegType behandlingSteg = finnBehandlingSteg(startpunkt, ytelseType, behandlingType);
-        BehandlingStegType apLøsesteg = Optional.ofNullable(modell
-                .finnTidligsteStegForAksjonspunktDefinisjon(singletonList(apDef.getKode())))
-            .map(BehandlingStegModell::getBehandlingStegType)
-            .orElse(null);
-        if (apLøsesteg == null) {
-            // AksjonspunktDefinisjon finnes ikke på stegene til denne behandlingstypen. Ap kan derfor ikke løses.
-            return false;
-        }
-
-        return behandlingSteg.equals(apLøsesteg) || modell.erStegAFørStegB(behandlingSteg, apLøsesteg);
-    }
 
     // TODO: (PK-49128) Midlertidig løsning for å filtrere aksjonspunkter til høyre for steg i hendelsemodul
     @Override

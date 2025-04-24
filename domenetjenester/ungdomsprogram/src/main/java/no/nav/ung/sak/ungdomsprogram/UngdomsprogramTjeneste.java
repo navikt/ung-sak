@@ -7,7 +7,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -28,8 +28,7 @@ public class UngdomsprogramTjeneste {
     public UngdomsprogramTjeneste() {
     }
 
-    public void innhentOpplysninger(BehandlingskontrollKontekst kontekst) {
-        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+    public void innhentOpplysninger(Behandling behandling) {
         var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(behandling.getFagsak().getAktørId().getAktørId());
 
         if (registerOpplysninger.opplysninger().isEmpty()) {

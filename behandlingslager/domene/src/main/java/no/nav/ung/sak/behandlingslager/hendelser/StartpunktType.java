@@ -18,17 +18,10 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum StartpunktType implements Kodeverdi {
 
-    INIT_PERIODER("INIT_PERIODER", "Initier perioder", 1),
-    KONTROLLER_ARBEIDSFORHOLD("KONTROLLER_ARBEIDSFORHOLD", "Startpunkt kontroller arbeidsforhold", 2),
-    KONTROLLER_FAKTA("KONTROLLER_FAKTA", "Kontroller fakta", 3),
-    INNGANGSVILKÅR_OPPLYSNINGSPLIKT("INNGANGSVILKÅR_OPPL", "Inngangsvilkår opplysningsplikt", 4),
-    INNGANGSVILKÅR_OMSORGENFOR("INNGANGSVILKÅR_OMSORGENFOR", "Inngangsvilkår omsorgen for", 10),
-    INNGANGSVILKÅR_MEDISINSK("INNGANGSVILKÅR_MEDISINSK", "Inngangsvilkår sykdom", 12),
-    INNGANGSVILKÅR_MEDLEMSKAP("INNGANGSVILKÅR_MEDL", "Inngangsvilkår medlemskapsvilkår", 15),
-    OPPTJENING("OPPTJENING", "Opptjening", 20),
+    INNHENT_REGISTEROPPLYSNINGER("INNHENT_REGISTEROPPLYSNINGER", "Innhent registeropplysninger", 1),
+    INIT_PERIODER("INIT_PERIODER", "Initier perioder", 2),
     BEREGNING("BEREGNING", "Beregning", 25),
     UTTAKSVILKÅR("UTTAKSVILKÅR", "Uttaksvilkår", 30),
-    UTTAKSVILKÅR_VURDERING("UTTAKSVILKÅR_VURDERING", "Uttaksvilkår", 35),
 
     UDEFINERT("-", "Ikke definert", 99),
     ;
