@@ -92,6 +92,7 @@ public class KontrollerInntektMapper {
                     rapporterteInntekter,
                     null,
                     null,
+                    null,
                     uttalelse.orElse(null)
                 );
             })
@@ -112,6 +113,7 @@ public class KontrollerInntektMapper {
             !perioderTilKontroll.intersection(it.getPeriode().toLocalDateInterval()).isEmpty(),
             rapporterteInntekter,
             it.getInntekt() == null ? null : it.getInntekt().intValue(),
+            it.getBegrunnelse(),
             mapTilValg(it),
             uttalelseFraBruker.orElse(null)
         );
