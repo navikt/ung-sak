@@ -99,18 +99,10 @@ public class PersonopplysningGrunnlagDiff {
         return !Objects.equals(hentSivilstand(grunnlag1, søkerAktørId), hentSivilstand(grunnlag2, søkerAktørId));
     }
 
-    public boolean erRegionEndretForBruker() {
-        return !Objects.equals(hentRegion(grunnlag1, søkerAktørId), hentRegion(grunnlag2, søkerAktørId));
-    }
-
     public boolean erForeldreDødsdatoEndret() {
         Set<AktørId> foreldre = new HashSet<>();
         foreldre.add(søkerAktørId);
         return !Objects.equals(hentDødsdatoer(grunnlag1, foreldre), hentDødsdatoer(grunnlag2, foreldre));
-    }
-
-    public boolean erDødsdatoEndret(AktørId aktørId) {
-        return !Objects.equals(hentDødsdatoer(grunnlag1, Set.of(aktørId)), hentDødsdatoer(grunnlag2, Set.of(aktørId)));
     }
 
     public boolean erBarnDødsdatoEndret() {

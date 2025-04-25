@@ -15,6 +15,8 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInforma
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -37,7 +39,7 @@ public class EndringsresultatSjekker {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     private ProsessTriggereRepository prosessTriggereRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
     private BehandlingRepository behandlingRepository;
 
@@ -54,21 +56,23 @@ public class EndringsresultatSjekker {
                                    @Any Instance<SøknadDokumentTjeneste> søknadsDokumentTjenester,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ProsessTriggereRepository prosessTriggereRepository,
-                                   BehandlingRepositoryProvider provider) {
+                                   UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                   BehandlingRepository behandlingRepository) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.startpunktUtledere = startpunktUtledere;
         this.søknadsDokumentTjenester = søknadsDokumentTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
-        this.vilkårResultatRepository = provider.getVilkårResultatRepository();
-        this.behandlingRepository = provider.getBehandlingRepository();
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public EndringsresultatSnapshot opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(Long behandlingId) {
         EndringsresultatSnapshot snapshot = EndringsresultatSnapshot.opprett();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        snapshot.leggTil(ungdomsprogramPeriodeRepository.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(prosessTriggereRepository.finnAktivGrunnlagId(behandlingId)); // annen part etc
 
@@ -119,10 +123,14 @@ public class EndringsresultatSjekker {
                 .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> personopplysningTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
         });
 
-
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, ProsessTriggere.class, behandling.getFagsakYtelseType())
             .flatMap(u -> idDiff.hentDelresultat(ProsessTriggere.class))
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> prosessTriggereRepository.diffResultat(idEndring, kunSporedeEndringer)));
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
+            .flatMap(u -> idDiff.hentDelresultat(UngdomsprogramPeriodeGrunnlag.class))
+            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> ungdomsprogramPeriodeRepository.diffResultat(idEndring, kunSporedeEndringer)));
+
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
             if (inkludererBeregning(behandling)) {

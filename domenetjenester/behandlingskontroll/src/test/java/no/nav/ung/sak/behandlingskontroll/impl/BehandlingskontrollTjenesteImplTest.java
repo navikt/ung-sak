@@ -213,19 +213,6 @@ public class BehandlingskontrollTjenesteImplTest {
         });
     }
 
-    @Test
-    public void skal_returnere_true_når_aksjonspunktet_skal_løses_i_angitt_steg() {
-        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), StartpunktType.KONTROLLER_FAKTA,
-            steg3.getAksjonspunktDefinisjonerUtgang().get(0)))
-                .isTrue();
-    }
-
-    @Test
-    public void skal_returnere_false_når_aksjonspunktet_skal_løses_før_angitt_steg() {
-        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), StartpunktType.BEREGNING,
-            steg2.getAksjonspunktDefinisjonerUtgang().get(0)))
-                .isFalse();
-    }
 
     private void sjekkBehandlingStegTilstandHistorikk(Behandling behandling, BehandlingStegType stegType,
                                                       BehandlingStegStatus... stegStatuser) {
