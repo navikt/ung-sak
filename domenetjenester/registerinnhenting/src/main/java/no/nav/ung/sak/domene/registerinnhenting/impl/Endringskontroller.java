@@ -100,6 +100,7 @@ public class Endringskontroller {
         // Inkluderer tilbakeføring samme steg UTGANG->INNGANG
         boolean tilbakeføres = skalTilbakeføres(behandling, fraSteg, tilSteg);
 
+        // TODO: Vurder om dette kan fjernes sidan vi ikkje har KOARB
         // Gjør aksjonspunktutledning utenom steg kun hvis man har passert KOFAK og evt hopper tilbake. Dette pga KOARB.UT->INN
         if (harUtførtKontrollerFakta(behandling)) {
             BehandlingStegType funnetSteg = tilbakeføres ? tilSteg : fraSteg;

@@ -7,6 +7,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;

@@ -45,6 +45,12 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     public static final String PERIODER = "perioder";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
+    public static final Set<BehandlingÅrsakType> REGISTERINNHENTING_ÅRSAKER = Set.of(
+        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+        BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
+        BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+        BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
@@ -105,7 +111,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             var behandling = behandlingRepository.hentBehandling(behandlingId);
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
-            var skalTvingeRegisterinnhenting = Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).contains(behandlingÅrsakType);
+            var skalTvingeRegisterinnhenting = REGISTERINNHENTING_ÅRSAKER.contains(behandlingÅrsakType);
 
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false, skalTvingeRegisterinnhenting);
 

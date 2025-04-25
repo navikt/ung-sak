@@ -1,29 +1,18 @@
 package no.nav.ung.sak.behandling.prosessering;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.k9.felles.log.mdc.MDCOperations;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.ung.sak.behandling.prosessering.task.HoppTilbakeTilStegTask;
@@ -31,6 +20,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
@@ -38,11 +28,15 @@ import no.nav.ung.sak.domene.registerinnhenting.EndringsresultatSjekker;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.ung.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
-import no.nav.ung.sak.domene.registerinnhenting.task.DiffOgReposisjonerTask;
-import no.nav.ung.sak.domene.registerinnhenting.task.InnhentIAYIAbakusTask;
-import no.nav.ung.sak.domene.registerinnhenting.task.InnhentPersonopplysningerTask;
-import no.nav.ung.sak.domene.registerinnhenting.task.SettRegisterdataInnhentetTidspunktTask;
+import no.nav.ung.sak.domene.registerinnhenting.task.*;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Grensesnitt for å kjøre behandlingsprosess, herunder gjenopptak, registeroppdatering, koordinering av sakskompleks mv.
@@ -342,6 +336,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())
             .ifPresent(u -> tasks.add(InnhentPersonopplysningerTask.TASKTYPE));
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
+            .ifPresent(u -> tasks.add(InnhentUngdomsprogramperioderTask.TASKTYPE));
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
             if (skalInnhenteAbakus(behandling)) {

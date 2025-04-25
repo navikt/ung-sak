@@ -57,7 +57,7 @@ public class StartpunktTjenesteImplTest {
         var behRef = BehandlingReferanse.fra(behandling, LocalDate.now());
 
         // Act/Assert
-        assertThat(tjeneste.utledStartpunktForDiffBehandlingsgrunnlag(behRef, endringsresultat)).isEqualTo(StartpunktType.KONTROLLER_FAKTA);
+        assertThat(tjeneste.utledStartpunktForDiffBehandlingsgrunnlag(behRef, endringsresultat)).isEqualTo(StartpunktType.INIT_PERIODER);
     }
 
     private EndringsresultatDiff opprettEndringsresultat(Long grunnlagId1, Long grunnlagId2) {

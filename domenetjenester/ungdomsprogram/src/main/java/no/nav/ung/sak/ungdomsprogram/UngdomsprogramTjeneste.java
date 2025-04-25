@@ -1,35 +1,34 @@
 package no.nav.ung.sak.ungdomsprogram;
 
 
-import java.util.Collection;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 
+import java.util.Collection;
+
+/**
+ * Tjeneste for innhenting av ungdomsprogramopplysninger fra register.
+ */
 @Dependent
 public class UngdomsprogramTjeneste {
     private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
-    private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public UngdomsprogramTjeneste(UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient, BehandlingRepository behandlingRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public UngdomsprogramTjeneste(UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
-        this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     public UngdomsprogramTjeneste() {
     }
 
-    public void innhentOpplysninger(BehandlingskontrollKontekst kontekst) {
-        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+    public void innhentOpplysninger(Behandling behandling) {
         var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(behandling.getFagsak().getAktørId().getAktørId());
 
         if (registerOpplysninger.opplysninger().isEmpty()) {
@@ -38,7 +37,6 @@ public class UngdomsprogramTjeneste {
 
 
         var timeline = lagTimeline(registerOpplysninger);
-
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline));
     }
 

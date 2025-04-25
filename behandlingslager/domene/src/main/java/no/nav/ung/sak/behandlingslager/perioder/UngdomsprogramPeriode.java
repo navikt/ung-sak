@@ -1,7 +1,9 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
+import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.AttributeOverride;
@@ -31,6 +33,7 @@ public class UngdomsprogramPeriode extends BaseEntitet {
             @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
             @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
+    @ChangeTracked
     private DatoIntervallEntitet periode;
 
     public UngdomsprogramPeriode() {
@@ -53,5 +56,14 @@ public class UngdomsprogramPeriode extends BaseEntitet {
         return periode;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof UngdomsprogramPeriode that)) return false;
+        return Objects.equals(periode, that.periode);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(periode);
+    }
 }
