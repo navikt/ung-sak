@@ -5,11 +5,14 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -33,26 +36,34 @@ public class BehandlingÅrsakUtlederUngdomsprogramperiode implements Behandling�
 
     @Override
     public Set<BehandlingÅrsakType> utledBehandlingÅrsaker(BehandlingReferanse ref, Object nyeste, Object eldste) {
-        var eldsteGrunnlag = new HashSet<>(ungdomsprogramPeriodeRepository.hentGrunnlagBasertPåId((Long) eldste)
+        var eldstePerioder = ungdomsprogramPeriodeRepository.hentGrunnlagBasertPåId((Long) eldste)
+            .stream()
             .map(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramPerioder)
             .map(UngdomsprogramPerioder::getPerioder)
-            .orElseGet(Set::of));
-        var nyesteGrunnlag = new HashSet<>(ungdomsprogramPeriodeRepository.hentGrunnlagBasertPåId((Long) nyeste)
+            .flatMap(Collection::stream)
+            .map(UngdomsprogramPeriode::getPeriode)
+            .sorted()
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        var nyestePerioder = ungdomsprogramPeriodeRepository.hentGrunnlagBasertPåId((Long) nyeste)
+            .stream()
             .map(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramPerioder)
             .map(UngdomsprogramPerioder::getPerioder)
-            .orElseGet(Set::of));
+            .flatMap(Collection::stream)
+            .map(UngdomsprogramPeriode::getPeriode)
+            .sorted()
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         final var årsaker = new HashSet<BehandlingÅrsakType>();
 
-        var gamleFomDatoer = eldsteGrunnlag.stream().map(it -> it.getPeriode().getFomDato()).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-        var nyeFomDatoer = nyesteGrunnlag.stream().map(it -> it.getPeriode().getFomDato()).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-        if (nyeFomDatoer.equals(gamleFomDatoer)) {
+        var gamleFomDatoer = eldstePerioder.stream().map(DatoIntervallEntitet::getFomDato).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        var nyeFomDatoer = nyestePerioder.stream().map(DatoIntervallEntitet::getFomDato).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        if (!nyeFomDatoer.equals(gamleFomDatoer)) {
             årsaker.add(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
         }
 
-        var gamleTomDatoer = eldsteGrunnlag.stream().map(it -> it.getPeriode().getTomDato()).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-        var nyeTomDatoer = nyesteGrunnlag.stream().map(it -> it.getPeriode().getTomDato()).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
-        if (nyeTomDatoer.equals(gamleTomDatoer)) {
+        var gamleTomDatoer = eldstePerioder.stream().map(DatoIntervallEntitet::getTomDato).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        var nyeTomDatoer = nyestePerioder.stream().map(DatoIntervallEntitet::getTomDato).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        if (!nyeTomDatoer.equals(gamleTomDatoer)) {
             årsaker.add(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         }
         return årsaker;
