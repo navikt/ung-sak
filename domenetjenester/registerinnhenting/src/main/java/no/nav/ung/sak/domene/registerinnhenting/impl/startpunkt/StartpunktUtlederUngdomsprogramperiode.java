@@ -45,9 +45,9 @@ class StartpunktUtlederUngdomsprogramperiode implements EndringStartpunktUtleder
             return StartpunktType.UDEFINERT;
         }
 
-        log.info("Fant endringer i ungdomsprogramperioder. Flytter til innhenting av registeropplysninger.");
+        log.info("Fant endringer i ungdomsprogramperioder. Flytter til init perioder.");
 
-        return StartpunktType.INNHENT_REGISTEROPPLYSNINGER;
+        return StartpunktType.INIT_PERIODER;
     }
 
     private Set<DatoIntervallEntitet> hentPerioder(Long nyeste) {
