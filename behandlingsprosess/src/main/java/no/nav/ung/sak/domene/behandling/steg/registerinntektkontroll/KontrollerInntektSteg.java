@@ -124,7 +124,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                                     List<Etterlysning> etterlysninger) {
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
-        var grunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(kontekst.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag"));
+        var grunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(kontekst.getBehandlingId());
         for (var kontrollSegment : kontrollResultat.toSegments()) {
             switch (kontrollSegment.getValue()) {
                 case BRUK_INNTEKT_FRA_BRUKER -> {
@@ -139,12 +139,12 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                 case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST -> {
                     log.info("Oppretter ny etterlysning med utvidet frist for periode {}", kontrollSegment.getLocalDateInterval());
                     etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment));
-                    etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.getEksternReferanse()));
+                    etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                 }
                 case OPPRETT_OPPGAVE_TIL_BRUKER -> {
                     log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
                     if (!harEksisterendeEtterlysningPåVent(kontrollSegment, etterlysninger)) {
-                        etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.getEksternReferanse()));
+                        etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                     }
                 }
             }
