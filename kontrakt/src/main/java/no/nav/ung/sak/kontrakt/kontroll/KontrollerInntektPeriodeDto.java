@@ -8,6 +8,7 @@ public record KontrollerInntektPeriodeDto(
     boolean erTilVurdering,
     RapporterteInntekterDto rapporterteInntekter,
     Integer fastsattInntekt,
+    String begrunnelse,
     BrukKontrollertInntektValg valg,
     String uttalelseFraBruker
 ) {

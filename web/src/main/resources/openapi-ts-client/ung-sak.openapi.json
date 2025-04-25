@@ -2613,6 +2613,9 @@
       },
       "KontrollerInntektPeriodeDto" : {
         "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
           "erTilVurdering" : {
             "type" : "boolean"
           },

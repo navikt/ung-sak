@@ -34,6 +34,12 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Column(name = "er_manuelt_vurdert", nullable = false)
     private boolean erManueltVurdert;
 
+    /**
+     * Begrunnelse for valg og fastsatt inntekt ved manuell vurdering.
+     */
+    @Column(name = "manuelt_vurdert_begrunnelse", nullable = true)
+    private String begrunnelse;
+
 
     private KontrollertInntektPeriode() {
         // Hibernate
@@ -49,11 +55,13 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
                                       BigDecimal inntekt,
                                       KontrollertInntektKilde kilde,
-                                      boolean erManueltVurdert) {
+                                      boolean erManueltVurdert,
+                                      String begrunnelse) {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
         this.inntekt = inntekt;
         this.kilde = kilde;
         this.erManueltVurdert = erManueltVurdert;
+        this.begrunnelse = begrunnelse;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -70,6 +78,10 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     public boolean getErManueltVurdert() {
         return erManueltVurdert;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 
     @Override
@@ -92,6 +104,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         private BigDecimal inntekt;
         private KontrollertInntektKilde kilde;
         private boolean erManueltVurdert;
+        private String begrunnelse;
 
         private Builder() {
         }
@@ -119,9 +132,14 @@ public class KontrollertInntektPeriode extends BaseEntitet {
             return this;
         }
 
+        public Builder medBegrunnelse(String begrunnelse) {
+            this.begrunnelse = begrunnelse;
+            return this;
+        }
+
 
         public KontrollertInntektPeriode build() {
-            return new KontrollertInntektPeriode(periode, inntekt, kilde, erManueltVurdert);
+            return new KontrollertInntektPeriode(periode, inntekt, kilde, erManueltVurdert, begrunnelse);
         }
 
 
