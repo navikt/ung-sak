@@ -124,7 +124,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                                     List<Etterlysning> etterlysninger) {
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
-        var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(kontekst.getBehandlingId());
+        var grunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(kontekst.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag"));
         for (var kontrollSegment : kontrollResultat.toSegments()) {
             switch (kontrollSegment.getValue()) {
                 case BRUK_INNTEKT_FRA_BRUKER -> {

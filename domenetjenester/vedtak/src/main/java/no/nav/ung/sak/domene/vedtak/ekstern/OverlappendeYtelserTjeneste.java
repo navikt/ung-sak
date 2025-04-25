@@ -46,8 +46,10 @@ public class OverlappendeYtelserTjeneste {
             return Map.of();
         }
 
-        var aktørYtelse = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId())
-            .getAktørYtelseFraRegister(ref.getAktørId());
+        var aktørYtelse = inntektArbeidYtelseTjeneste.finnGrunnlag(ref.getBehandlingId())
+            .stream()
+            .flatMap(it -> it.getAktørYtelseFraRegister(ref.getAktørId()).stream())
+            .findFirst();
         if (aktørYtelse.isEmpty()) {
             return Map.of();
         }

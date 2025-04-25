@@ -11,9 +11,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.typer.Saksnummer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -53,27 +51,13 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
         var forrigeGrunnlag = grunnlagId2 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2) : null;
         var diff = new IAYGrunnlagDiff(oppdatertGrunnlag, forrigeGrunnlag);
 
+        var perioderTilVurdering = periodeUtleder.utledTidslinje(ref.getBehandlingId()).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
-        Saksnummer saksnummer = ref.getSaksnummer();
-
-
-        var perioderTilVurdering = periodeUtleder.utledTidslinje(ref.getBehandlingId()).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT))
-            .getLocalDateIntervals();
-
-        for (var periode : perioderTilVurdering) {
-            var opptjeningsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusDays(30), periode.getFomDato());
-
-            boolean aktørYtelseEndring = diff.endringPåAktørYtelseForAktør(saksnummer, opptjeningsperiode, ref.getAktørId());
-            if (aktørYtelseEndring) {
-                leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "aktør ytelse andre tema for periode " + opptjeningsperiode);
-            } else {
-                var relevantInntektsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusMonths(3), periode.getFomDato());
-                boolean erAktørInntektEndretForSøker = diff.erEndringPåAktørInntektForAktør(relevantInntektsperiode, ref.getAktørId());
-                if (erAktørInntektEndretForSøker) {
-                    leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.INIT_PERIODER, "aktør inntekt for periode " + relevantInntektsperiode);
-                }
-            }
+        boolean erAktørInntektEndretForSøker = diff.erEndringPåAktørInntektForAktør(perioderTilVurdering, ref.getAktørId());
+        if (erAktørInntektEndretForSøker) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_INNTEKT, "aktør inntekt for periode " + perioderTilVurdering);
         }
+
 
         return startpunkter;
     }

@@ -349,9 +349,12 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhenteAbakus(Behandling behandling) {
-        var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
-        Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
-        return registerdata != null && !(registerdata.isEmpty());
+        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
+            var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
+            Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
+            return registerdata != null && !(registerdata.isEmpty());
+        }
+        return false;
     }
 
     private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

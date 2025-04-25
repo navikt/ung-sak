@@ -28,6 +28,8 @@ import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 
+import java.util.Collections;
+
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
@@ -83,8 +85,13 @@ public class KontrollerInntektRestTjeneste {
 
         final var rapporterteInntekter = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandling.getId());
         final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysningTidslinje(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
-        final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId());
-        final var registerinntekter = iayGrunnlag.getRegisterVersjon()
+        final var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandling.getId());
+
+        if (iayGrunnlag.isEmpty()) {
+            return new KontrollerInntektDto(Collections.emptyList());
+        }
+
+        final var registerinntekter = iayGrunnlag.get().getRegisterVersjon()
             .stream()
             .flatMap(it -> it.getAktørInntekt().stream()
                 .filter(ai -> ai.getAktørId().equals(behandling.getAktørId())))

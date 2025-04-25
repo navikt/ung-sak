@@ -49,12 +49,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         return getAktivtInntektArbeidGrunnlag(behandlingId);
     }
 
-
-    @Override
-    public InntektArbeidYtelseGrunnlag hentGrunnlag(Long behandlingId) {
-        return getAktivtInntektArbeidGrunnlag(behandlingId).orElseThrow();
-    }
-
     @Override
     public InntektArbeidYtelseGrunnlag hentGrunnlagForGrunnlagId(Long behandlingId, UUID inntektArbeidYtelseGrunnlagId) {
         return grunnlag.stream().filter(g -> Objects.equals(g.getEksternReferanse(), inntektArbeidYtelseGrunnlagId))
@@ -173,11 +167,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     @Override
     public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
         return finnGrunnlag(behandlingId).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
-    }
-
-    @Override
-    public InntektArbeidYtelseGrunnlag hentGrunnlag(UUID behandlingUUid) {
-        throw new UnsupportedOperationException("NOT IMPLEMENTED (mangler kobling til behandlingUUid): #" + getCallerMethod());
     }
 
     private Optional<InntektArbeidYtelseGrunnlag> getAktivtInntektArbeidGrunnlag(@SuppressWarnings("unused") UUID behandlingId) {
