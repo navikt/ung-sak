@@ -3,6 +3,7 @@ package no.nav.ung.sak.kontrakt.kontroll;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -54,4 +55,10 @@ public class FastsettInntektPeriodeDto {
     public BrukKontrollertInntektValg getValg() {
         return valg;
     }
+
+    @AssertTrue(message = "Må ha satt inntekt for valg MANUELT_FASTSATT")
+    public boolean isHarInntektForManueltFastsatt() {
+        return !valg.equals(BrukKontrollertInntektValg.MANUELT_FASTSATT) || fastsattInnntekt != null;
+    }
+
 }
