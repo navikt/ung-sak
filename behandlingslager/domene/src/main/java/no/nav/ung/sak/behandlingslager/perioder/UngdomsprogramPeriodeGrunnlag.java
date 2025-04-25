@@ -81,11 +81,11 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof UngdomsprogramPeriodeGrunnlag that)) return false;
-        return Objects.equals(behandlingId, that.behandlingId) && Objects.equals(ungdomsprogramPerioder, that.ungdomsprogramPerioder);
+        return Objects.equals(ungdomsprogramPerioder, that.ungdomsprogramPerioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingId, ungdomsprogramPerioder);
+        return Objects.hash(ungdomsprogramPerioder);
     }
 }

@@ -48,19 +48,14 @@ public class UngdomsprogramPerioder extends BaseEntitet {
         return perioder;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof UngdomsprogramPerioder that)) return false;
-        return Objects.equals(sortert(perioder), sortert(that.perioder));
-    }
-
-    private LinkedHashSet<UngdomsprogramPeriode> sortert(Set<UngdomsprogramPeriode> perioder1) {
-        return perioder1.stream().sorted(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).collect(Collectors.toCollection(LinkedHashSet::new));
+        return Objects.equals(perioder, that.perioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(sortert(perioder));
+        return Objects.hashCode(perioder);
     }
 }
