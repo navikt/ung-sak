@@ -11,6 +11,9 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 
 import java.util.Collection;
 
+/**
+ * Tjeneste for innhenting av ungdomsprogramopplysninger fra register.
+ */
 @Dependent
 public class UngdomsprogramTjeneste {
     private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
