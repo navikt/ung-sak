@@ -206,13 +206,13 @@ class FastsettInntektOppdatererTest {
     private static FastsettInntektDto lagDto(DatoIntervallEntitet periode, BrukKontrollertInntektValg brukBrukersInntekt) {
         return new FastsettInntektDto("begrunnelse", List.of(
             new FastsettInntektPeriodeDto(
-                new Periode(periode.getFomDato(), periode.getTomDato()), null, brukBrukersInntekt)));
+                new Periode(periode.getFomDato(), periode.getTomDato()), null, brukBrukersInntekt, "en begrunnelse")));
     }
 
     private static FastsettInntektDto lagDto(DatoIntervallEntitet periode, Integer fastsattInntektDto) {
         return new FastsettInntektDto("begrunnelse", List.of(
             new FastsettInntektPeriodeDto(
-                new Periode(periode.getFomDato(), periode.getTomDato()), fastsattInntektDto, BrukKontrollertInntektValg.MANUELT_FASTSATT)));
+                new Periode(periode.getFomDato(), periode.getTomDato()), fastsattInntektDto, BrukKontrollertInntektValg.MANUELT_FASTSATT, "en begrunnelse")));
     }
 
 

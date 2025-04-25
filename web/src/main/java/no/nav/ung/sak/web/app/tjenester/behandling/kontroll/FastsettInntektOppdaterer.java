@@ -47,7 +47,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         return OppdateringResultat.builder().medTotrinnHvis(true).build();
     }
 
-    private void validerVurdertePerioder(AksjonspunktOppdaterParameter param, LocalDateTimeline<RapportertInntektOgKilde> sammenslåtteInntekterTidslinje) {
+    private void validerVurdertePerioder(AksjonspunktOppdaterParameter param, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
         final var prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(param.getBehandlingId());
         final var tidslinjeTilVurdering = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
         final var vurdertePerioderSomIkkeSkalVurderes = sammenslåtteInntekterTidslinje.disjoint(tidslinjeTilVurdering);
@@ -56,7 +56,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         }
     }
 
-    private LocalDateTimeline<RapportertInntektOgKilde> finnInntektOgKildeTidslinje(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
+    private LocalDateTimeline<ManueltKontrollertInntekt> finnInntektOgKildeTidslinje(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
         final var brukerOgRegisterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(param.getBehandlingId());
         final var saksbehandlerFastsatteInntekterTidslinje = finnSaksbehandlersFastsatteInntekterTidslinje(dto);
         final var inntekterForAlleKilderTidslinje = kombinerInntekterFraAlleKilder(brukerOgRegisterTidslinje, saksbehandlerFastsatteInntekterTidslinje);
@@ -64,19 +64,19 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         return finnTidslinjeForInntektOgKilde(valgTidslinje, inntekterForAlleKilderTidslinje);
     }
 
-    private static LocalDateTimeline<RapportertInntektOgKilde> finnTidslinjeForInntektOgKilde(LocalDateTimeline<BrukKontrollertInntektValg> valgTidslinje,
+    private static LocalDateTimeline<ManueltKontrollertInntekt> finnTidslinjeForInntektOgKilde(LocalDateTimeline<ValgOgBegrunnelse> valgTidslinje,
                                                                                               LocalDateTimeline<InntekterPrKilde> inntekterForAlleKilderTidslinje) {
-        return valgTidslinje.combine(inntekterForAlleKilderTidslinje, (di, valg, inntekt) -> switch (valg.getValue()) {
+        return valgTidslinje.combine(inntekterForAlleKilderTidslinje, (di, valgOgBegrunnelse, inntekt) -> switch (valgOgBegrunnelse.getValue().valg()) {
             case BRUK_BRUKERS_INNTEKT -> {
                 if (inntekt.getValue().brukersRapporterteInntekt().isEmpty()) {
                     throw new IllegalArgumentException("Kan ikke bruke brukers inntekt for periode " + di + " da bruker ikke har rapportert inntekt i perioden");
                 }
-                yield new LocalDateSegment<>(di, new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, summerRapporterteInntekter(inntekt.getValue().brukersRapporterteInntekt())));
+                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.BRUKER, summerRapporterteInntekter(inntekt.getValue().brukersRapporterteInntekt()), valgOgBegrunnelse.getValue().begrunnelse()));
             }
             case BRUK_REGISTER_INNTEKT ->
-                new LocalDateSegment<>(di, new RapportertInntektOgKilde(KontrollertInntektKilde.REGISTER, summerRapporterteInntekter(inntekt.getValue().registersRapporterteInntekt())));
+                new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.REGISTER, summerRapporterteInntekter(inntekt.getValue().registersRapporterteInntekt()), valgOgBegrunnelse.getValue().begrunnelse()));
             case MANUELT_FASTSATT ->
-                new LocalDateSegment<>(di, new RapportertInntektOgKilde(KontrollertInntektKilde.SAKSBEHANDLER, inntekt.getValue().saksbehandlersFastsatteInntekt()));
+                new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.SAKSBEHANDLER, inntekt.getValue().saksbehandlersFastsatteInntekt(), valgOgBegrunnelse.getValue().begrunnelse()));
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
@@ -84,9 +84,9 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         return rapportertInntekts.stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
-    private static LocalDateTimeline<BrukKontrollertInntektValg> tidslinjeForValg(FastsettInntektDto dto) {
+    private static LocalDateTimeline<ValgOgBegrunnelse> tidslinjeForValg(FastsettInntektDto dto) {
         return dto.getPerioder().stream().map(
-            p -> new LocalDateTimeline<>(p.getPeriode().getFom(), p.getPeriode().getTom(), p.getValg())
+            p -> new LocalDateTimeline<>(p.periode().getFom(), p.periode().getTom(), new ValgOgBegrunnelse(p.valg(), p.begrunnelse()))
         ).reduce(LocalDateTimeline::crossJoin).orElse(LocalDateTimeline.empty());
     }
 
@@ -99,8 +99,8 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private static LocalDateTimeline<BigDecimal> finnSaksbehandlersFastsatteInntekterTidslinje(FastsettInntektDto dto) {
         return dto.getPerioder().stream()
-            .filter(it -> it.getFastsattInnntekt() != null)
-            .map(p -> new LocalDateTimeline<>(p.getPeriode().getFom(), p.getPeriode().getTom(), BigDecimal.valueOf(p.getFastsattInnntekt())))
+            .filter(it -> it.fastsattInnntekt() != null)
+            .map(p -> new LocalDateTimeline<>(p.periode().getFom(), p.periode().getTom(), BigDecimal.valueOf(p.fastsattInnntekt())))
             .reduce(LocalDateTimeline::crossJoin).orElse(LocalDateTimeline.empty());
     }
 
@@ -114,6 +114,9 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     record InntekterPrKilde(Set<RapportertInntekt> brukersRapporterteInntekt,
                             Set<RapportertInntekt> registersRapporterteInntekt,
                             BigDecimal saksbehandlersFastsatteInntekt) {
+    }
+
+    record ValgOgBegrunnelse(BrukKontrollertInntektValg valg, String begrunnelse) {
     }
 
 }
