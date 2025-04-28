@@ -10,16 +10,12 @@ import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.abakus.mapping.IAYFraDtoMapper;
 import no.nav.ung.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.typer.AktørId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -29,7 +25,6 @@ import java.util.*;
 @Default
 public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(AbakusInntektArbeidYtelseTjeneste.class);
     private AbakusTjeneste abakusTjeneste;
     private BehandlingRepository behandlingRepository;
     private IAYRequestCache requestCache;
@@ -50,8 +45,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
                                              AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
                                              BehandlingRepository behandlingRepository,
-                                             MottatteDokumentRepository mottatteDokumentRepository,
-                                             FagsakRepository fagsakRepository,
                                              IAYRequestCache requestCache) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
@@ -59,30 +52,10 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         this.asyncIayTjeneste = asyncIayTjeneste;
     }
 
-    @Override
-    public InntektArbeidYtelseGrunnlag hentGrunnlag(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        InntektArbeidYtelseGrunnlag grunnlag = hentGrunnlagHvisEksisterer(behandling);
-        if (grunnlag == null) {
-            throw new IllegalStateException("Fant ikke IAY grunnlag som forventet.");
-        }
-        return grunnlag;
-    }
-
     private InntektArbeidYtelseGrunnlag hentGrunnlagHvisEksisterer(Behandling behandling) {
         var request = initRequest(behandling);
         AktørId aktørId = behandling.getAktørId();
         return hentOgMapGrunnlag(request, aktørId);
-    }
-
-    @Override
-    public InntektArbeidYtelseGrunnlag hentGrunnlag(UUID behandlingUuid) {
-        var behandling = behandlingRepository.hentBehandling(behandlingUuid);
-        InntektArbeidYtelseGrunnlag grunnlag = hentGrunnlagHvisEksisterer(behandling);
-        if (grunnlag == null) {
-            throw new IllegalStateException("Fant ikke IAY grunnlag som forventet.");
-        }
-        return grunnlag;
     }
 
     @Override
@@ -241,7 +214,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         }
         throw new IllegalStateException("Kunne ikke finne riktig versjon av InntektArbeidYtelseAggregat");
     }
-
 
 
 }

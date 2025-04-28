@@ -39,14 +39,18 @@ public class RapportertInntektMapper {
 
     public LocalDateTimeline<RapporterteInntekter> mapAlleGjeldendeRegisterOgBrukersInntekter(Long behandlingId) {
         // Henter iay-grunnlag (kall til abakus)
-        final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
+        final var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
+        if (iayGrunnlag.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
         final var månedsvisYtelseTidslinje = ytelsesperiodeutleder.periodiserMånedsvis(behandlingId);
 
 
-        final var brukersRapporterteInntekter = finnBrukersRapporterteInntekter(iayGrunnlag, månedsvisYtelseTidslinje);
+        final var brukersRapporterteInntekter = finnBrukersRapporterteInntekter(iayGrunnlag.get(), månedsvisYtelseTidslinje);
         validerBrukersRapporterteInntekterTidslinje(brukersRapporterteInntekter, månedsvisYtelseTidslinje);
 
-        final var grupperteInntekter = grupperInntekter(iayGrunnlag);
+        final var grupperteInntekter = grupperInntekter(iayGrunnlag.get());
 
         final var registerTidslinje = finnRegisterInntektTidslinje(månedsvisYtelseTidslinje, grupperteInntekter);
         return kombinerTidslinjer(brukersRapporterteInntekter, registerTidslinje);
