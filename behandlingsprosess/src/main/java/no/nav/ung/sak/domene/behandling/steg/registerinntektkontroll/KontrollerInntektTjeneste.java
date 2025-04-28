@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +14,13 @@ import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.Finn
 
 public class KontrollerInntektTjeneste {
 
-    public static LocalDateTimeline<KontrollResultat> utførKontroll(
+    private final BigDecimal akseptertDifferanse;
+
+    public KontrollerInntektTjeneste(BigDecimal akseptertDifferanse) {
+        this.akseptertDifferanse = akseptertDifferanse;
+    }
+
+    public LocalDateTimeline<KontrollResultat> utførKontroll(
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
         LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
@@ -34,7 +41,7 @@ public class KontrollerInntektTjeneste {
         var kontrollresultatForIkkeGodkjentUttalelse = finnKontrollresultatForIkkeGodkjentUttalelse(gjeldendeRapporterteInntekter, relevantIkkeGodkjentUttalelse);
         resultatTidslinje = resultatTidslinje.crossJoin(kontrollresultatForIkkeGodkjentUttalelse, StandardCombinators::coalesceLeftHandSide);
 
-        var avviksvurderingMotRegisterinntekt = Avviksvurdering.gjørAvviksvurderingMotRegisterinntekt(
+        var avviksvurderingMotRegisterinntekt = new Avviksvurdering(akseptertDifferanse).gjørAvviksvurderingMotRegisterinntekt(
             gjeldendeRapporterteInntekter,
             etterlysningTidslinje,
             tidslinjeRelevanteÅrsaker);

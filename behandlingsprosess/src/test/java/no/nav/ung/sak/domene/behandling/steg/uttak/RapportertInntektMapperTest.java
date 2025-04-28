@@ -69,7 +69,7 @@ class RapportertInntektMapperTest {
         final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()));
         final var arbeidsinntekt = BigDecimal.TEN;
         final var næringsinntekt = BigDecimal.ONE;
-        final var oppgittOpptjening = lagMottattATFLOgNæringInntekt(periode, arbeidsinntekt, næringsinntekt, LocalDateTime.now());
+        final var oppgittOpptjening = lagMottattATFLInntekt(periode, arbeidsinntekt, næringsinntekt, LocalDateTime.now());
         mockIAY(List.of(oppgittOpptjening));
 
         // Act
@@ -78,9 +78,8 @@ class RapportertInntektMapperTest {
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
             new RapporterteInntekter(Set.of(
-                new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, arbeidsinntekt),
-                new RapportertInntekt(InntektType.SELVSTENDIG_NÆRINGSDRIVENDE, næringsinntekt)
-                ), Set.of()));
+                new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, arbeidsinntekt)
+            ), Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 
@@ -109,11 +108,11 @@ class RapportertInntektMapperTest {
             List.of(
                 new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new RapporterteInntekter(
                     Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)),
-                        Set.of())),
+                    Set.of())),
                 new LocalDateSegment<>(periode2.getFomDato(), periode2.getTomDato(), new RapporterteInntekter(
                     Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)),
                     Set.of()))
-                ));
+            ));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 
@@ -155,14 +154,12 @@ class RapportertInntektMapperTest {
         return oppgittOpptjening;
     }
 
-    private static OppgittOpptjening lagMottattATFLOgNæringInntekt(DatoIntervallEntitet periode, BigDecimal atflInntekt, BigDecimal næringsinntekt, LocalDateTime innsendt) {
+    private static OppgittOpptjening lagMottattATFLInntekt(DatoIntervallEntitet periode, BigDecimal atflInntekt, BigDecimal næringsinntekt, LocalDateTime innsendt) {
         final var oppgittArbeidsforhold = lagOppgittArbeidOgFrilansInntekt(periode, atflInntekt);
-        final var oppgittNæring = lagOppgittNæringsinntekt(periode, næringsinntekt);
         final var oppgittOpptjening = OppgittOpptjeningBuilder.ny()
             .medInnsendingstidspunkt(innsendt)
             .medJournalpostId(new JournalpostId("21412"))
             .leggTilOppgittArbeidsforhold(oppgittArbeidsforhold)
-            .leggTilEgneNæringer(List.of(oppgittNæring))
             .build();
         return oppgittOpptjening;
     }
@@ -179,11 +176,4 @@ class RapportertInntektMapperTest {
             .medPeriode(periode)
             .medInntekt(inntekt);
     }
-
-    private static OppgittOpptjeningBuilder.EgenNæringBuilder lagOppgittNæringsinntekt(DatoIntervallEntitet periode, BigDecimal inntekt) {
-        return OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
-            .medPeriode(periode)
-            .medBruttoInntekt(inntekt);
-    }
-
 }

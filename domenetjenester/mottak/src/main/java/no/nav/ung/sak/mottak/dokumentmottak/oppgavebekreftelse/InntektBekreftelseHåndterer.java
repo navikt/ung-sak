@@ -39,16 +39,13 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
 
 
     private final EtterlysningRepository etterlysningRepository;
-    private final ProsessTaskTjeneste prosessTaskTjeneste;
     private final MottatteDokumentRepository mottatteDokumentRepository;
 
 
     @Inject
     public InntektBekreftelseHåndterer(EtterlysningRepository etterlysningRepository,
-                                       ProsessTaskTjeneste prosessTaskTjeneste,
                                        MottatteDokumentRepository mottatteDokumentRepository) {
         this.etterlysningRepository = etterlysningRepository;
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
@@ -62,16 +59,9 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
             throw new IllegalStateException("Etterlysning må hå status VENTER for å motta bekreftelse. Status var " + etterlysning.getStatus());
         }
 
-        ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
-
-        if (inntektBekreftelse.harBrukerGodtattEndringen()) {
-            var abakusTask = lagOppdaterAbakusTask(oppgaveBekreftelseInnhold);
-            gruppe.addNesteSekvensiell(abakusTask);
-        } else {
-            mottatteDokumentRepository.oppdaterStatus(List.of(oppgaveBekreftelseInnhold.mottattDokument()), DokumentStatus.GYLDIG);
-            Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
-                "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
-        }
+        mottatteDokumentRepository.oppdaterStatus(List.of(oppgaveBekreftelseInnhold.mottattDokument()), DokumentStatus.GYLDIG);
+        Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
+            "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
 
         etterlysning.mottattUttalelse(
             oppgaveBekreftelseInnhold.mottattDokument().getJournalpostId(),
@@ -80,7 +70,6 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         );
 
         etterlysningRepository.lagre(etterlysning);
-        prosessTaskTjeneste.lagre(gruppe);
     }
 
     @Override

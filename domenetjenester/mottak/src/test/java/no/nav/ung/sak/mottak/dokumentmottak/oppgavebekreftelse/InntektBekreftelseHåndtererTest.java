@@ -6,11 +6,6 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.oppgave.OppgaveBekreftelse;
 import no.nav.k9.oppgave.bekreftelse.ung.inntekt.InntektBekreftelse;
 import no.nav.k9.oppgave.bekreftelse.ung.inntekt.OppgittInntektForPeriode;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
-import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.k9.søknad.felles.Versjon;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
@@ -27,7 +22,6 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +32,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,7 +44,6 @@ class InntektBekreftelseHåndtererTest {
     @Inject
     private EntityManager em;
     private EtterlysningRepository etterlysningRepository;
-    private ProsessTaskTjeneste prosessTaskTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
 
@@ -59,9 +51,6 @@ class InntektBekreftelseHåndtererTest {
     void setup() {
         etterlysningRepository = new EtterlysningRepository(em);
         mottatteDokumentRepository = new MottatteDokumentRepository(em);
-        ProsessTaskRepositoryImpl prosessTaskRepository = new ProsessTaskRepositoryImpl(em, null, null);
-        prosessTaskTjeneste = new ProsessTaskTjenesteImpl(prosessTaskRepository);
-
     }
 
     @Test
@@ -98,7 +87,7 @@ class InntektBekreftelseHåndtererTest {
             null));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste, mottatteDokumentRepository);
+        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, mottatteDokumentRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
@@ -106,14 +95,6 @@ class InntektBekreftelseHåndtererTest {
         // Dokument er under behandling
         final var dokumentTilBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.BEHANDLER);
         assertThat(dokumentTilBehandling).hasSize(1);
-
-        //abakus er oppdatert
-        List<ProsessTaskData> abakusTasker = prosessTaskTjeneste.finnAlle(AsyncAbakusLagreOpptjeningTask.TASKTYPE, ProsessTaskStatus.KLAR);
-        assertThat(abakusTasker).hasSize(1);
-        var abakusTask = abakusTasker.getFirst();
-        assertThat(abakusTask.getPropertyValue(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID)).isEqualTo(String.valueOf(journalpostId));
-        assertThat(abakusTask.getPropertyValue(AsyncAbakusLagreOpptjeningTask.BREVKODER)).isEqualTo(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getKode());
-        assertThat(abakusTask.getPayloadAsString()).contains(String.valueOf(oppgittInntekt));
 
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
@@ -155,7 +136,7 @@ class InntektBekreftelseHåndtererTest {
             "en uttalelse"));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, prosessTaskTjeneste, mottatteDokumentRepository);
+        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, mottatteDokumentRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
@@ -163,10 +144,6 @@ class InntektBekreftelseHåndtererTest {
         // Dokument er gyldig
         final var dokumentTilBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.GYLDIG);
         assertThat(dokumentTilBehandling).hasSize(1);
-
-        //abakus skal ikke oppdateres
-        List<ProsessTaskData> abakusTasker = prosessTaskTjeneste.finnAlle(AsyncAbakusLagreOpptjeningTask.TASKTYPE, ProsessTaskStatus.KLAR);
-        assertThat(abakusTasker).hasSize(0);
 
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());

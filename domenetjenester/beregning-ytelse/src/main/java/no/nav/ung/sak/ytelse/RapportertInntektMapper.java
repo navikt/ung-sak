@@ -201,20 +201,8 @@ public class RapportertInntektMapper {
     }
 
     private static InntektForMottattidspunkt finnInntekterPrMottattidspunkt(OppgittOpptjening o) {
-        final var res = new ArrayList<LocalDateSegment<Set<RapportertInntekt>>>();
-        res.addAll(finnArbeidOgFrilansSegmenter(o));
-        res.addAll(finnNæringssegmenter(o));
+        final var res = new ArrayList<>(finnArbeidOgFrilansSegmenter(o));
         return new InntektForMottattidspunkt(o.getInnsendingstidspunkt(), new LocalDateTimeline<>(res, StandardCombinators::union));
-    }
-
-    private static List<LocalDateSegment<Set<RapportertInntekt>>> finnNæringssegmenter(OppgittOpptjening o) {
-        return o.getEgenNæring().stream()
-            .map(it -> new LocalDateSegment<>(
-                it.getPeriode().toLocalDateInterval(),
-                Set.of(new RapportertInntekt(
-                    InntektType.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    it.getBruttoInntekt())
-                ))).toList();
     }
 
     private static List<LocalDateSegment<Set<RapportertInntekt>>> finnArbeidOgFrilansSegmenter(OppgittOpptjening o) {

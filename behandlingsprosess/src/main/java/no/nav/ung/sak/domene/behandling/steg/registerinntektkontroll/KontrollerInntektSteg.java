@@ -33,6 +33,7 @@ import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 public class KontrollerInntektSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(KontrollerInntektSteg.class);
+    public static final BigDecimal AKSEPTERT_DIFFERANSE = BigDecimal.valueOf(1000);
 
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RapportertInntektMapper rapportertInntektMapper;
@@ -99,7 +101,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
         var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);
 
-        var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
+        var kontrollResultat = new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
 
         log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
         håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, etterlysninger);
@@ -127,7 +129,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(kontekst.getBehandlingId());
         for (var kontrollSegment : kontrollResultat.toSegments()) {
             switch (kontrollSegment.getValue()) {
-                case BRUK_INNTEKT_FRA_BRUKER -> {
+                case BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER -> {
                     log.info("Bruker inntekt fra bruker for periode {}", kontrollSegment.getLocalDateInterval());
                     etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment));
                     kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
