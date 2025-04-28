@@ -92,8 +92,8 @@ class InntektBekreftelseHåndtererTest {
         em.flush();
 
         // Assert
-        // Dokument er under behandling
-        final var dokumentTilBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.BEHANDLER);
+        // Dokument er gyldig
+        final var dokumentTilBehandling = mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.GYLDIG);
         assertThat(dokumentTilBehandling).hasSize(1);
 
         //etterlysning er oppdatert
