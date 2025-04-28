@@ -37,7 +37,7 @@ public class IAYDtoMapperLagretKonverteringTest {
     private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
     private InntektArbeidYtelseGrunnlag hentGrunnlag(Long behandlingId) {
-        return iayTjeneste.hentGrunnlag(behandlingId);
+        return iayTjeneste.finnGrunnlag(behandlingId).get();
     }
 
     @Test

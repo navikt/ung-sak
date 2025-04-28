@@ -7,21 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface InntektArbeidYtelseTjeneste {
-    /**
-     * Hent grunnlag.
-     *
-     * @param behandlingId
-     * @return henter aggregat, kaster feil hvis det ikke finnes.
-     */
-    InntektArbeidYtelseGrunnlag hentGrunnlag(Long behandlingId);
 
-    /**
-     * Hent grunnlag.
-     *
-     * @param behandlingUuid
-     * @return henter aggregat, kaster feil hvis det ikke finnes.
-     */
-    InntektArbeidYtelseGrunnlag hentGrunnlag(UUID behandlingUuid);
 
     /**
      * Hent grunnlag gitt grunnlag id
