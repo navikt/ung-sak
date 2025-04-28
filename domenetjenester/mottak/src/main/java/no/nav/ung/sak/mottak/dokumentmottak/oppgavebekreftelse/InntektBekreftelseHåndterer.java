@@ -60,8 +60,10 @@ public class InntektBekreftelseHåndterer implements BekreftelseHåndterer {
         }
 
         mottatteDokumentRepository.oppdaterStatus(List.of(oppgaveBekreftelseInnhold.mottattDokument()), DokumentStatus.GYLDIG);
-        Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
-            "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
+        if (!inntektBekreftelse.harBrukerGodtattEndringen()) {
+            Objects.requireNonNull(inntektBekreftelse.getUttalelseFraBruker(),
+                "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
+        }
 
         etterlysning.mottattUttalelse(
             oppgaveBekreftelseInnhold.mottattDokument().getJournalpostId(),
