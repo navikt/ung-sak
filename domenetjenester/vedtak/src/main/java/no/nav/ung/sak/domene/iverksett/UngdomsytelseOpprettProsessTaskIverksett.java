@@ -19,7 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
-import no.nav.ung.sak.ytelse.ManglendeKontrollperioderTjeneste;
+import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 
 @ApplicationScoped

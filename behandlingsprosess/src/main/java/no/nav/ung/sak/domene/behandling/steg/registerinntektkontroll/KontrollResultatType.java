@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-public enum KontrollResultat {
+public enum KontrollResultatType {
     BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER,
     OPPRETT_AKSJONSPUNKT,
     OPPRETT_OPPGAVE_TIL_BRUKER,

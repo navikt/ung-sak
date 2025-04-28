@@ -20,13 +20,13 @@ public class KontrollerInntektTjeneste {
         this.akseptertDifferanse = akseptertDifferanse;
     }
 
-    public LocalDateTimeline<KontrollResultat> utførKontroll(
+    public LocalDateTimeline<Kontrollresultat> utførKontroll(
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
         LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
 
 
-        var resultatTidslinje = new LocalDateTimeline<KontrollResultat>(List.of());
+        var resultatTidslinje = new LocalDateTimeline<Kontrollresultat>(List.of());
 
 
         // Sjekker først om vi har relevante årsaker
@@ -34,11 +34,11 @@ public class KontrollerInntektTjeneste {
         final var harIkkePassertRapporteringsfrist = tidslinjeRelevanteÅrsaker.filterValue(it -> !it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
         // Dersom vi ikkje har passert rapporteringsfrist (ikkje har kontroll-årsak) så skal vi vente til rapporteringsfrist
-        resultatTidslinje = resultatTidslinje.crossJoin(harIkkePassertRapporteringsfrist.mapValue(it -> KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST));
+        resultatTidslinje = resultatTidslinje.crossJoin(harIkkePassertRapporteringsfrist.mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST)));
 
 
         final var relevantIkkeGodkjentUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgIkkeGodkjent()).intersection(tidslinjeRelevanteÅrsaker);
-        var kontrollresultatForIkkeGodkjentUttalelse = finnKontrollresultatForIkkeGodkjentUttalelse(gjeldendeRapporterteInntekter, relevantIkkeGodkjentUttalelse);
+        var kontrollresultatForIkkeGodkjentUttalelse = finnKontrollresultatForIkkeGodkjentUttalelse(gjeldendeRapporterteInntekter, relevantIkkeGodkjentUttalelse).mapValue(Kontrollresultat::utenInntektresultat);
         resultatTidslinje = resultatTidslinje.crossJoin(kontrollresultatForIkkeGodkjentUttalelse, StandardCombinators::coalesceLeftHandSide);
 
         var avviksvurderingMotRegisterinntekt = new Avviksvurdering(akseptertDifferanse).gjørAvviksvurderingMotRegisterinntekt(

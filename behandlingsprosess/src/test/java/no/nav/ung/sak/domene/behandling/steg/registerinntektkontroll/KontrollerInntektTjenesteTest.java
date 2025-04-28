@@ -36,7 +36,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST), resultat);
     }
 
     @Test
@@ -55,7 +55,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_AKSJONSPUNKT), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_AKSJONSPUNKT), resultat);
     }
 
     @Test
@@ -75,7 +75,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST), resultat);
     }
 
     @Test
@@ -91,7 +91,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
     }
 
     @Test
@@ -107,7 +107,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
     }
 
     @Test
@@ -123,7 +123,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER), resultat);
     }
 
     @Test
@@ -139,7 +139,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER), resultat);
     }
 
     @Test
@@ -155,7 +155,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
     }
 
     @Test
@@ -174,7 +174,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
     }
 
     @Test
@@ -195,7 +195,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
     }
 
 
@@ -213,7 +213,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST), resultat);
     }
 
     @Test
@@ -229,7 +229,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.OPPRETT_AKSJONSPUNKT), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_AKSJONSPUNKT), resultat);
     }
 
     @Test
@@ -245,11 +245,12 @@ class KontrollerInntektTjenesteTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultat.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER), resultat);
     }
 
-    private LocalDateTimeline<KontrollResultat> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
-        return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+    private LocalDateTimeline<KontrollResultatType> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
+        return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje)
+            .mapValue(Kontrollresultat::type);
     }
 
 

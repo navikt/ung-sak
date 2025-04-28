@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse;
+package no.nav.ung.sak.ytelse.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -10,6 +10,8 @@ import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.ytelse.RapportertInntekt;
+import no.nav.ung.sak.ytelse.RapportertInntektOgKilde;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +43,9 @@ public class KontrollerteInntektperioderTjeneste {
 
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId,
                                                               LocalDateInterval vurdertPeriode,
-                                                              LocalDateTimeline<Set<RapportertInntekt>> inntektTidslinje) {
+                                                              Inntektsresultat inntektsresultat) {
         final var kontrollertePerioder = mapAutomatiskKontrollerteInntektperioder(new LocalDateTimeline<>(vurdertPeriode, true),
-            inntektTidslinje.mapValue(it -> new RapportertInntektOgKilde(KontrollertInntektKilde.BRUKER, summerRapporterteInntekter(it))),
+            new LocalDateTimeline<>(vurdertPeriode, new RapportertInntektOgKilde(inntektsresultat.kilde(), inntektsresultat.inntekt())),
             Optional.of(KontrollertInntektKilde.BRUKER)
         );
         LOG.info("Lagrer inntekt fra bruker: {}", kontrollertePerioder);

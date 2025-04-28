@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse;
+package no.nav.ung.sak.ytelse.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
