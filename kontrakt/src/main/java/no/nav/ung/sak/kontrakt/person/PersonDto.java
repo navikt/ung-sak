@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.typer.AktørId;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -26,17 +25,11 @@ public class PersonDto {
     @JsonProperty("dodsdato")
     private LocalDate dodsdato;
 
-    @JsonProperty("erKvinne")
-    private Boolean erKvinne;
-
     @JsonProperty("navn")
     private String navn;
 
     @JsonProperty("personnummer")
     private String personnummer;
-
-    @JsonProperty("personstatusType")
-    private PersonstatusType personstatusType;
 
     @JsonProperty("aktørId")
     private AktørId aktørId;
@@ -48,16 +41,12 @@ public class PersonDto {
     public PersonDto(String navn,
                      Integer alder,
                      String personnummer,
-                     boolean erKvinne,
-                     PersonstatusType personstatusType,
                      String diskresjonskode,
                      LocalDate dodsdato,
                      AktørId aktørId) {
         this.navn = navn;
         this.alder = alder;
         this.personnummer = personnummer;
-        this.erKvinne = erKvinne;
-        this.personstatusType = personstatusType;
         this.diskresjonskode = diskresjonskode;
         this.dodsdato = dodsdato;
         this.aktørId = aktørId;
@@ -79,8 +68,8 @@ public class PersonDto {
         if (!personnummer.equals(personDto.personnummer))
             return false;
         if (!aktørId.equals(personDto.aktørId))
-            return false;
-        return erKvinne.equals(personDto.erKvinne);
+            return false;;
+        return true;
     }
 
     public Integer getAlder() {
@@ -95,25 +84,12 @@ public class PersonDto {
         return dodsdato;
     }
 
-    @JsonGetter
-    public Boolean getErDod() {
-        return PersonstatusType.erDød(personstatusType);
-    }
-
-    public Boolean getErKvinne() {
-        return erKvinne;
-    }
-
     public String getNavn() {
         return navn;
     }
 
     public String getPersonnummer() {
         return personnummer;
-    }
-
-    public PersonstatusType getPersonstatusType() {
-        return personstatusType;
     }
 
     public AktørId getAktørId() {
@@ -125,7 +101,6 @@ public class PersonDto {
         int result = navn.hashCode();
         result = 31 * result + alder.hashCode();
         result = 31 * result + personnummer.hashCode();
-        result = 31 * result + erKvinne.hashCode();
         return result;
     }
 
@@ -141,20 +116,12 @@ public class PersonDto {
         this.dodsdato = dodsdato;
     }
 
-    public void setErKvinne(Boolean erKvinne) {
-        this.erKvinne = erKvinne;
-    }
-
     public void setNavn(String navn) {
         this.navn = navn;
     }
 
     public void setPersonnummer(String personnummer) {
         this.personnummer = personnummer;
-    }
-
-    public void setPersonstatusType(PersonstatusType personstatusType) {
-        this.personstatusType = personstatusType;
     }
 
     public void setAktørId(AktørId aktørId) {
@@ -166,7 +133,6 @@ public class PersonDto {
         return "<navn='" + navn + '\'' +
             ", alder=" + alder +
             ", personnummer='" + personnummer + '\'' +
-            ", erKvinne=" + erKvinne +
             '>';
     }
 }

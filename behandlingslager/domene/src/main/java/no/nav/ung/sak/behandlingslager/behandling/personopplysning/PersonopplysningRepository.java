@@ -174,16 +174,7 @@ public class PersonopplysningRepository {
 
     private void persisterPersonInformasjon(PersonInformasjonEntitet registerVersjon) {
         entityManager.persist(registerVersjon);
-        for (PersonAdresseEntitet entitet : registerVersjon.getAdresser()) {
-            entityManager.persist(entitet);
-        }
         for (PersonRelasjonEntitet entitet : registerVersjon.getRelasjoner()) {
-            entityManager.persist(entitet);
-        }
-        for (PersonstatusEntitet entitet : registerVersjon.getPersonstatus()) {
-            entityManager.persist(entitet);
-        }
-        for (StatsborgerskapEntitet entitet : registerVersjon.getStatsborgerskap()) {
             entityManager.persist(entitet);
         }
         for (PersonopplysningEntitet entitet : registerVersjon.getPersonopplysninger()) {

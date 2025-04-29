@@ -4,12 +4,6 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.kodeverk.geografisk.Region;
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
-import no.nav.ung.kodeverk.person.SivilstandType;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -24,20 +18,11 @@ import java.util.List;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public class PersonopplysningDto extends PersonIdentDto {
 
-    @JsonProperty(value = "adresser")
-    @Valid
-    @Size(max = 100)
-    private List<PersonadresseDto> adresser = new ArrayList<>();
-
     /** Angitt annen part (dersom ytelse er knyttet til søker&lt;-&gt;annen part */
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "annenPart")
     @Valid
     private PersonopplysningDto annenPart;
-
-    @JsonProperty(value = "avklartPersonstatus")
-    @Valid
-    private AvklartPersonstatus avklartPersonstatus;
 
     /** Registrerte barn og fosterbarn. */
     @JsonInclude(value = Include.NON_EMPTY)
@@ -71,11 +56,6 @@ public class PersonopplysningDto extends PersonIdentDto {
     @Valid
     private boolean harVerge;
 
-    @JsonAlias("kjønn")
-    @JsonProperty(value = "navBrukerKjonn")
-    @Valid
-    private NavBrukerKjønn navBrukerKjonn;
-
     @JsonProperty(value = "navn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -86,36 +66,12 @@ public class PersonopplysningDto extends PersonIdentDto {
     @Max(Integer.MAX_VALUE)
     private Integer nummer;
 
-    @JsonProperty(value = "personstatus")
-    @Valid
-    private PersonstatusType personstatus;
-
-    @JsonProperty(value = "region")
-    @Valid
-    private Region region;
-
-    @JsonProperty(value = "sivilstand")
-    @Valid
-    private SivilstandType sivilstand;
-
-    @JsonProperty(value = "statsborgerskap")
-    @Valid
-    private Landkoder statsborgerskap;
-
     public PersonopplysningDto() {
         //
     }
 
-    public List<PersonadresseDto> getAdresser() {
-        return adresser;
-    }
-
     public PersonopplysningDto getAnnenPart() {
         return annenPart;
-    }
-
-    public AvklartPersonstatus getAvklartPersonstatus() {
-        return avklartPersonstatus;
     }
 
     public List<PersonopplysningDto> getBarn() {
@@ -138,10 +94,6 @@ public class PersonopplysningDto extends PersonIdentDto {
         return fodselsdato;
     }
 
-    public NavBrukerKjønn getNavBrukerKjonn() {
-        return navBrukerKjonn;
-    }
-
     public String getNavn() {
         return navn;
     }
@@ -150,36 +102,12 @@ public class PersonopplysningDto extends PersonIdentDto {
         return nummer;
     }
 
-    public PersonstatusType getPersonstatus() {
-        return personstatus;
-    }
-
-    public Region getRegion() {
-        return region;
-    }
-
-    public SivilstandType getSivilstand() {
-        return sivilstand;
-    }
-
-    public Landkoder getStatsborgerskap() {
-        return statsborgerskap;
-    }
-
     public boolean isHarVerge() {
         return harVerge;
     }
 
-    public void setAdresser(List<PersonadresseDto> adresser) {
-        this.adresser = adresser;
-    }
-
     public void setAnnenPart(PersonopplysningDto annenPart) {
         this.annenPart = annenPart;
-    }
-
-    public void setAvklartPersonstatus(AvklartPersonstatus avklartPersonstatus) {
-        this.avklartPersonstatus = avklartPersonstatus;
     }
 
     public void setBarn(List<PersonopplysningDto> barn) {
@@ -206,10 +134,6 @@ public class PersonopplysningDto extends PersonIdentDto {
         this.harVerge = harVerge;
     }
 
-    public void setNavBrukerKjonn(NavBrukerKjønn navBrukerKjonn) {
-        this.navBrukerKjonn = navBrukerKjonn;
-    }
-
     public void setNavn(String navn) {
         this.navn = navn;
     }
@@ -217,21 +141,4 @@ public class PersonopplysningDto extends PersonIdentDto {
     public void setNummer(Integer nummer) {
         this.nummer = nummer;
     }
-
-    public void setPersonstatus(PersonstatusType personstatus) {
-        this.personstatus = personstatus;
-    }
-
-    public void setRegion(Region region) {
-        this.region = region;
-    }
-
-    public void setSivilstand(SivilstandType sivilstand) {
-        this.sivilstand = sivilstand;
-    }
-
-    public void setStatsborgerskap(Landkoder statsborgerskap) {
-        this.statsborgerskap = statsborgerskap;
-    }
-
 }

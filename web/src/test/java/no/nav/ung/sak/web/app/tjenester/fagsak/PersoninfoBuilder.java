@@ -1,13 +1,10 @@
 package no.nav.ung.sak.web.app.tjenester.fagsak;
 
 import static java.time.Month.OCTOBER;
-import static no.nav.ung.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 
 import no.nav.ung.kodeverk.geografisk.Språkkode;
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -20,8 +17,6 @@ class PersoninfoBuilder {
     private static final LocalDate DEFAULT_FØDSELDATO = LocalDate.of(1972, OCTOBER, 13);
     private static final Språkkode DEFAULT_FORETRUKKET_SPRÅK = Språkkode.nb;
     private static final String DEFAULT_DISKRESJONSKODE = "6";
-    private static final PersonstatusType DEFAULT_PERSONSTATUSTYPE = PersonstatusType.BOSA;
-    private NavBrukerKjønn kjønn = KVINNE;
 
     private AktørId aktørId;
     private PersonIdent personIdent;
@@ -30,7 +25,6 @@ class PersoninfoBuilder {
     private Språkkode foretrukketSpråk;
 
     private String diskresjonskode;
-    private PersonstatusType personstatusType;
 
     PersoninfoBuilder() {
     }
@@ -66,11 +60,6 @@ class PersoninfoBuilder {
         return this;
     }
 
-    PersoninfoBuilder medPersonstatusType(PersonstatusType personstatusType) {
-        this.personstatusType = personstatusType;
-        return this;
-    }
-
     Personinfo build() {
         if (aktørId == null) {
             aktørId = DEFAULT_AKTØR_ID;
@@ -90,17 +79,13 @@ class PersoninfoBuilder {
         if (diskresjonskode == null) {
             diskresjonskode = DEFAULT_DISKRESJONSKODE;
         }
-        if (personstatusType == null) {
-            personstatusType = DEFAULT_PERSONSTATUSTYPE;
-        }
+
         return new Personinfo.Builder()
             .medAktørId(aktørId)
             .medPersonIdent(personIdent)
             .medNavn(navn)
             .medFødselsdato(fødselsdato)
-            .medKjønn(kjønn)
             .medDiskresjonsKode(diskresjonskode)
-            .medPersonstatusType(personstatusType)
             .medForetrukketSpråk(foretrukketSpråk)
             .build();
     }

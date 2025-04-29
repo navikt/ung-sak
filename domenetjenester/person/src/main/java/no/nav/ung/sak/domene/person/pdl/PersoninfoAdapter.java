@@ -12,11 +12,9 @@ import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
-import no.nav.ung.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 
 @ApplicationScoped
@@ -55,10 +53,6 @@ public class PersoninfoAdapter {
         } else {
             return Optional.empty();
         }
-    }
-
-    public Personhistorikkinfo innhentPersonopplysningerHistorikk(AktørId aktørId, Periode periode) {
-        return personinfoTjeneste.hentPersoninfoHistorikk(aktørId, periode);
     }
 
     /**

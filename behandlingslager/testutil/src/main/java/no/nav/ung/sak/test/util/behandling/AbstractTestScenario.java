@@ -31,10 +31,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.kodeverk.geografisk.Region;
-import no.nav.ung.kodeverk.person.PersonstatusType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -75,7 +71,6 @@ import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
-import no.nav.ung.sak.test.util.behandling.personopplysning.Personstatus;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -424,8 +419,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             PersonInformasjon personInformasjon = opprettBuilderForRegisteropplysninger()
                 .medPersonas()
                 .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn())
-                .statsborgerskap(Landkoder.NOR)
-                .personstatus(PersonstatusType.BOSA)
                 .build();
             medRegisterOpplysninger(personInformasjon);
         }
@@ -521,13 +514,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
                     Personopplysning.builder()
                         .aktørId(behandling.getAktørId())
                         .navn("Forelder")
-                        .fødselsdato(LocalDate.now().minusYears(25))
-                        .sivilstand(SivilstandType.UOPPGITT)
-                        .region(Region.NORDEN))
-                .leggTilPersonstatus(Personstatus.builder()
-                    .personstatus(PersonstatusType.BOSA)
-                    .periode(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
-                    .aktørId(behandling.getAktørId()))
+                        .fødselsdato(LocalDate.now().minusYears(25)))
                 .build();
             lagrePersoninfo(behandling, registerInformasjon, personopplysningRepository);
         }
@@ -558,39 +545,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             PersonInformasjonBuilder.PersonopplysningBuilder builder = personInformasjonBuilder.getPersonopplysningBuilder(e.getAktørId());
             builder.medNavn(e.getNavn())
                 .medFødselsdato(e.getFødselsdato())
-                .medDødsdato(e.getDødsdato())
-                .medKjønn(e.getBrukerKjønn())
-                .medRegion(e.getRegion())
-                .medSivilstand(e.getSivilstand());
+                .medDødsdato(e.getDødsdato());
 
-            personInformasjonBuilder.leggTil(builder);
-        });
-
-        personInformasjon.getAdresser().forEach(e -> {
-            PersonInformasjonBuilder.AdresseBuilder builder = personInformasjonBuilder.getAdresseBuilder(e.getAktørId(), e.getPeriode(), e.getAdresseType());
-            builder.medAdresselinje1(e.getAdresselinje1())
-                .medLand(e.getLand())
-                .medPostnummer(e.getPostnummer());
-            personInformasjonBuilder.leggTil(builder);
-        });
-
-        personInformasjon.getPersonstatuser().forEach(e -> {
-            PersonInformasjonBuilder.PersonstatusBuilder builder = personInformasjonBuilder.getPersonstatusBuilder(e.getAktørId(), e.getPeriode());
-            builder.medPersonstatus(e.getPersonstatus());
-            personInformasjonBuilder.leggTil(builder);
-        });
-
-        personInformasjon.getStatsborgerskap().forEach(e -> {
-            Region region = Region.finnHøyestRangertRegion(List.of(e.getStatsborgerskap().getKode()));
-            PersonInformasjonBuilder.StatsborgerskapBuilder builder = personInformasjonBuilder.getStatsborgerskapBuilder(e.getAktørId(), e.getPeriode(),
-                e.getStatsborgerskap(), region);
             personInformasjonBuilder.leggTil(builder);
         });
 
         personInformasjon.getRelasjoner().forEach(e -> {
             PersonInformasjonBuilder.RelasjonBuilder builder = personInformasjonBuilder.getRelasjonBuilder(e.getAktørId(), e.getTilAktørId(),
                 e.getRelasjonsrolle());
-            builder.harSammeBosted(e.getHarSammeBosted());
             personInformasjonBuilder.leggTil(builder);
         });
 

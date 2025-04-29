@@ -6,8 +6,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
@@ -19,8 +17,6 @@ public class PersoninfoBasis {
     private PersonIdent personIdent;
     private LocalDate fødselsdato;
     private LocalDate dødsdato;
-    private PersonstatusType personstatus;
-    private NavBrukerKjønn kjønn;
     private String diskresjonskode;
 
     private PersoninfoBasis() {
@@ -38,24 +34,12 @@ public class PersoninfoBasis {
         return navn;
     }
 
-    public NavBrukerKjønn getKjønn() {
-        return kjønn;
-    }
-
-    public PersonstatusType getPersonstatus() {
-        return personstatus;
-    }
-
     public LocalDate getFødselsdato() {
         return fødselsdato;
     }
 
     public int getAlder() {
         return (int) ChronoUnit.YEARS.between(fødselsdato, LocalDate.now());
-    }
-
-    public boolean erKvinne() {
-        return kjønn.equals(NavBrukerKjønn.KVINNE);
     }
 
     public LocalDate getDødsdato() {
@@ -76,8 +60,6 @@ public class PersoninfoBasis {
             Objects.equals(personIdent, that.personIdent) &&
             Objects.equals(fødselsdato, that.fødselsdato) &&
             Objects.equals(dødsdato, that.dødsdato) &&
-            personstatus == that.personstatus &&
-            kjønn == that.kjønn &&
             Objects.equals(diskresjonskode, that.diskresjonskode);
     }
 
@@ -123,16 +105,6 @@ public class PersoninfoBasis {
             return this;
         }
 
-        public Builder medPersonstatusType(PersonstatusType personstatus) {
-            personinfoMal.personstatus = personstatus;
-            return this;
-        }
-
-        public Builder medNavBrukerKjønn(NavBrukerKjønn kjønn) {
-            personinfoMal.kjønn = kjønn;
-            return this;
-        }
-
         public Builder medDiskresjonsKode(String diskresjonsKode) {
             personinfoMal.diskresjonskode = diskresjonsKode;
             return this;
@@ -143,7 +115,6 @@ public class PersoninfoBasis {
             requireNonNull(personinfoMal.personIdent, "Navbruker må ha fødselsnummer"); //$NON-NLS-1$
             requireNonNull(personinfoMal.navn, "Navbruker må ha navn"); //$NON-NLS-1$
             requireNonNull(personinfoMal.fødselsdato, "Navbruker må ha fødselsdato"); //$NON-NLS-1$
-            requireNonNull(personinfoMal.kjønn, "Navbruker må ha kjønn"); //$NON-NLS-1$
             return personinfoMal;
         }
 

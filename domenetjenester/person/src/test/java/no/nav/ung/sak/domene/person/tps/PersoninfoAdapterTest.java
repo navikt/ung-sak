@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
@@ -81,10 +80,10 @@ public class PersoninfoAdapterTest {
     }
 
     private Personinfo lagHentPersonResponseForSøker() {
-        return new Personinfo.Builder().medAktørId(AKTØR_ID_SØKER).medPersonIdent(PERSONIDENT_FNR_SØKER).medNavn("Kari Nordmann").medFødselsdato(LocalDate.of(1985, 7, 7)).medKjønn(NavBrukerKjønn.KVINNE).build();
+        return new Personinfo.Builder().medAktørId(AKTØR_ID_SØKER).medPersonIdent(PERSONIDENT_FNR_SØKER).medNavn("Kari Nordmann").medFødselsdato(LocalDate.of(1985, 7, 7)).build();
     }
 
     private Personinfo lagHentPersonResponseForBarn() {
-        return new Personinfo.Builder().medAktørId(AKTØR_ID_BARN).medPersonIdent(PERSONIDENT_FNR_BARN).medNavn("Kari Nordmann Junior").medFødselsdato(LocalDate.of(2000, 7, 7)).medKjønn(NavBrukerKjønn.KVINNE).build();
+        return new Personinfo.Builder().medAktørId(AKTØR_ID_BARN).medPersonIdent(PERSONIDENT_FNR_BARN).medNavn("Kari Nordmann Junior").medFødselsdato(LocalDate.of(2000, 7, 7)).build();
     }
 }

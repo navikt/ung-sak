@@ -9,7 +9,6 @@ public final class PersonRelasjon implements HarAktørId {
     private AktørId fraAktørId;
     private AktørId tilAktørId;
     private RelasjonsRolleType relasjonsrolle;
-    private Boolean harSammeBosted;
 
     @Override
     public AktørId getAktørId() {
@@ -24,15 +23,10 @@ public final class PersonRelasjon implements HarAktørId {
         return relasjonsrolle;
     }
 
-    public Boolean getHarSammeBosted() {
-        return harSammeBosted;
-    }
-
     private PersonRelasjon(Builder builder) {
         this.fraAktørId = builder.fraAktørId;
         this.tilAktørId = builder.tilAktørId;
         this.relasjonsrolle = builder.relasjonsrolle;
-        this.harSammeBosted = builder.harSammeBosted;
     }
 
     public static Builder builder() {

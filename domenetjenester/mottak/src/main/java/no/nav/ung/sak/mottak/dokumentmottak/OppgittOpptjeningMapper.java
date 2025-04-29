@@ -21,7 +21,6 @@ import no.nav.k9.søknad.felles.opptjening.UtenlandskArbeidsforhold;
 import no.nav.k9.søknad.felles.type.Organisasjonsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.domene.abakus.mapping.IAYTilDtoMapper;
@@ -129,9 +128,7 @@ public class OppgittOpptjeningMapper {
     private OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder mapOppgittArbeidsforhold(UtenlandskArbeidsforhold arbeidsforhold) {
         var arbeidsforholdBuilder = OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny()
             .medArbeidType(ArbeidType.UTENLANDSK_ARBEIDSFORHOLD)
-            .medUtenlandskVirksomhet(new OppgittUtenlandskVirksomhet(
-                Landkoder.fraKode(arbeidsforhold.getLand().getLandkode()),
-                arbeidsforhold.getArbeidsgiversnavn()))
+            .medUtenlandskVirksomhet(new OppgittUtenlandskVirksomhet(arbeidsforhold.getArbeidsgiversnavn()))
             .medPeriode(DatoIntervallEntitet.fra(
                 arbeidsforhold.getAnsettelsePeriode().getFraOgMed(),
                 arbeidsforhold.getAnsettelsePeriode().getTilOgMed())

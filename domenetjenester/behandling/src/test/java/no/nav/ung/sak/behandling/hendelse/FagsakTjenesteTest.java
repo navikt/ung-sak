@@ -20,7 +20,6 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -56,7 +55,6 @@ public class FagsakTjenesteTest {
             .medPersonIdent(new PersonIdent("12345678901"))
             .medNavn("Kari Nordmann")
             .medFødselsdato(forelderFødselsdato)
-            .medKjønn(NavBrukerKjønn.KVINNE)
             .medForetrukketSpråk(Språkkode.nb)
             .build();
 

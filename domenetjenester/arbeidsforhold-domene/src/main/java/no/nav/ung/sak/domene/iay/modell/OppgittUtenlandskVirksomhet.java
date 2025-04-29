@@ -3,7 +3,6 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.io.Serializable;
 
 import no.nav.ung.kodeverk.api.IndexKey;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 
 /**
@@ -11,32 +10,25 @@ import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
  */
 public class OppgittUtenlandskVirksomhet implements IndexKey, Serializable {
 
-    private Landkoder landkode = Landkoder.NOR;
 
     private String utenlandskVirksomhetNavn;
 
     OppgittUtenlandskVirksomhet() {
     }
 
-    public OppgittUtenlandskVirksomhet(Landkoder landkode, String utenlandskVirksomhetNavn) {
-        this.landkode = landkode == null? Landkoder.NOR : landkode;
+    public OppgittUtenlandskVirksomhet(String utenlandskVirksomhetNavn) {
         this.utenlandskVirksomhetNavn = utenlandskVirksomhetNavn;
     }
 
     /** deep copy ctor. */
     OppgittUtenlandskVirksomhet(OppgittUtenlandskVirksomhet kopierFra) {
-        this.landkode=kopierFra.landkode;
         this.utenlandskVirksomhetNavn =kopierFra.utenlandskVirksomhetNavn;
     }
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { utenlandskVirksomhetNavn, landkode };
+        Object[] keyParts = { utenlandskVirksomhetNavn };
         return IndexKeyComposer.createKey(keyParts);
-    }
-
-    public Landkoder getLandkode() {
-        return landkode;
     }
 
     public String getNavn() {

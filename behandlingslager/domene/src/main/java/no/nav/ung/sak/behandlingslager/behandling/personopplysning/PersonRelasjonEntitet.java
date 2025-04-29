@@ -51,10 +51,6 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
     @ChangeTracked
     private RelasjonsRolleType relasjonsrolle;
 
-    @Column(name = "har_samme_bosted")
-    @ChangeTracked
-    private Boolean harSammeBosted = Boolean.FALSE;
-
     @ManyToOne(optional = false)
     @JoinColumn(name = "po_informasjon_id", nullable = false, updatable = false)
     private PersonInformasjonEntitet personopplysningInformasjon;
@@ -66,7 +62,6 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
         this.fraAktørId = relasjon.getAktørId();
         this.tilAktørId = relasjon.getTilAktørId();
         this.relasjonsrolle = relasjon.getRelasjonsrolle();
-        this.harSammeBosted = relasjon.getHarSammeBosted();
     }
 
     @Override
@@ -81,10 +76,6 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
 
     void setTilAktørId(AktørId tilAktørId) {
         this.tilAktørId = tilAktørId;
-    }
-
-    void setHarSammeBosted(Boolean harSammeBosted) {
-        this.harSammeBosted = harSammeBosted;
     }
 
     void setRelasjonsrolle(RelasjonsRolleType relasjonsrolle) {
@@ -108,10 +99,6 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
         return relasjonsrolle;
     }
 
-    public Boolean getHarSammeBosted() {
-        return harSammeBosted;
-    }
-
     @Override
     public String toString() {
         // tar ikke med til/fra Aktør da det fort lekker sensitive opplysninger i logger
@@ -132,13 +119,12 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
         PersonRelasjonEntitet entitet = (PersonRelasjonEntitet) o;
         return Objects.equals(fraAktørId, entitet.fraAktørId) &&
             Objects.equals(tilAktørId, entitet.tilAktørId) &&
-            Objects.equals(harSammeBosted, entitet.harSammeBosted) &&
             Objects.equals(relasjonsrolle, entitet.relasjonsrolle);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fraAktørId, tilAktørId, harSammeBosted, relasjonsrolle);
+        return Objects.hash(fraAktørId, tilAktørId, relasjonsrolle);
     }
 
 }

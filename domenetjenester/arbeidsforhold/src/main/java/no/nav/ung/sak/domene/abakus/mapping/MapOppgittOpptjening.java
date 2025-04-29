@@ -22,7 +22,6 @@ import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.ung.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.ung.sak.domene.iay.modell.OppgittEgenNæring;
@@ -149,11 +148,8 @@ class MapOppgittOpptjening {
 
             var virksomhet = arbeidsforhold.getUtenlandskVirksomhet();
             if (virksomhet != null) {
-                var landKode = virksomhet.getLandkode() == null ? Landkode.NOR : Landkode.fraKode(virksomhet.getLandkode().getKode());
                 if (virksomhet.getNavn() != null) {
-                    dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(virksomhet.getNavn()), landKode);
-                } else {
-                    dto.setLandkode(landKode);
+                    dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(virksomhet.getNavn()), Landkode.NOR);
                 }
             } else {
                 dto.setLandkode(Landkode.NOR);
@@ -188,12 +184,9 @@ class MapOppgittOpptjening {
 
             var virksomhet = egenNæring.getVirksomhet();
             if (virksomhet != null) {
-                var landkode = virksomhet.getLandkode() == null ? Landkode.NOR : Landkode.fraKode(virksomhet.getLandkode().getKode());
                 var navn = virksomhet.getNavn();
                 if (navn != null) {
-                    dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(navn), landkode);
-                } else {
-                    dto.setLandkode(landkode);
+                    dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(navn), Landkode.NOR);
                 }
             } else {
                 dto.setLandkode(Landkode.NOR);
@@ -300,12 +293,10 @@ class MapOppgittOpptjening {
             var org = dto.getVirksomhet() == null ? null : new OrgNummer(dto.getVirksomhet().getIdent());
             var periode = dto.getPeriode();
 
-            var virksomhet = tilUtenlandskVirksomhet(dto);
             builder
                 .medBegrunnelse(dto.getBegrunnelse())
                 .medBruttoInntekt(dto.getBruttoInntekt())
                 .medEndringDato(dto.getEndringDato())
-                .medUtenlandskVirksomhet(virksomhet)
                 .medVirksomhet(org)
                 .medVirksomhetType(dto.getVirksomhetTypeDto())
                 .medRegnskapsførerNavn(dto.getRegnskapsførerNavn())
@@ -324,31 +315,13 @@ class MapOppgittOpptjening {
                 return null;
 
             Periode dto1 = dto.getPeriode();
-            var virksomhet = tilUtenlandskVirksomhet(dto);
             var builder = OppgittArbeidsforholdBuilder.ny()
                 .medArbeidType(KodeverkMapper.mapArbeidType(dto.getArbeidTypeDto()))
                 .medInntekt(dto.getInntekt())
                 .medErUtenlandskInntekt(dto.isErUtenlandskInntekt())
-                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(dto1.getFom(), dto1.getTom()))
-                .medUtenlandskVirksomhet(virksomhet);
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(dto1.getFom(), dto1.getTom()));
 
             return builder;
-        }
-
-        private static OppgittUtenlandskVirksomhet tilUtenlandskVirksomhet(OppgittArbeidsforholdDto dto) {
-            if (dto == null)
-                return null;
-
-            var landkode = dto.getLandkode() == null ? null : Landkoder.fraKode(dto.getLandkode().getKode());
-            return new OppgittUtenlandskVirksomhet(landkode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(dto.getVirksomhetNavn()));
-        }
-
-        private static OppgittUtenlandskVirksomhet tilUtenlandskVirksomhet(OppgittEgenNæringDto dto) {
-            if (dto == null)
-                return null;
-
-            var landkode = dto.getLandkode() == null ? null : Landkoder.fraKode(dto.getLandkode().getKode());
-            return new OppgittUtenlandskVirksomhet(landkode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(dto.getVirksomhetNavn()));
         }
 
         private static OppgittAnnenAktivitet mapAnnenAktivitet(OppgittAnnenAktivitetDto dto) {

@@ -1,35 +1,16 @@
 package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 
-import java.time.LocalDate;
-import java.util.Objects;
-
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
+import jakarta.persistence.*;
 import no.nav.ung.kodeverk.api.IndexKey;
-import no.nav.ung.kodeverk.geografisk.Region;
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
-import no.nav.ung.sak.behandlingslager.kodeverk.KjønnKodeverdiConverter;
-import no.nav.ung.sak.behandlingslager.kodeverk.RegionKodeverdiConverter;
-import no.nav.ung.sak.behandlingslager.kodeverk.SivilstandTypeKodeverdiConverter;
 import no.nav.ung.sak.typer.AktørId;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity(name = "Personopplysning")
 @Table(name = "PO_PERSONOPPLYSNING")
@@ -45,15 +26,17 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", updatable = false)))
     private AktørId aktørId;
 
-    @ChangeTracked
+    // TODO: Fjerne kolonne fra skjema når det er avklart at det ikke er nødvendig
+    /*@ChangeTracked
     @Convert(converter = KjønnKodeverdiConverter.class)
     @Column(name = "bruker_kjoenn")
-    private NavBrukerKjønn brukerKjønn = NavBrukerKjønn.UDEFINERT;
+    private NavBrukerKjønn brukerKjønn = NavBrukerKjønn.UDEFINERT;*/
 
-    @ChangeTracked
+    // TODO: Fjerne kolonne fra skjema når det er avklart at det ikke er nødvendig
+    /*@ChangeTracked
     @Convert(converter = SivilstandTypeKodeverdiConverter.class)
     @Column(name = "sivilstand_type", nullable = false)
-    private SivilstandType sivilstand = SivilstandType.UOPPGITT;
+    private SivilstandType sivilstand = SivilstandType.UOPPGITT;*/
 
     @ChangeTracked()
     @Column(name = "navn")
@@ -67,10 +50,11 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     @Column(name = "foedselsdato", nullable = false)
     private LocalDate fødselsdato;
 
-    @ChangeTracked
+    // TODO: Fjerne kolonne fra skjema når det er avklart at det ikke er nødvendig
+    /*@ChangeTracked
     @Convert(converter = RegionKodeverdiConverter.class)
     @Column(name = "region", nullable = false)
-    private Region region = Region.UDEFINERT;
+    private Region region = Region.UDEFINERT;*/
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "po_informasjon_id", nullable = false, updatable = false)
@@ -82,21 +66,8 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     PersonopplysningEntitet(PersonopplysningEntitet personopplysning) {
         this.aktørId = personopplysning.getAktørId();
         this.navn = personopplysning.getNavn();
-        this.brukerKjønn = personopplysning.getKjønn();
         this.fødselsdato = personopplysning.getFødselsdato();
         this.dødsdato = personopplysning.getDødsdato();
-        this.region = personopplysning.getRegion();
-        this.sivilstand = personopplysning.getSivilstand();
-    }
-
-    private boolean harAltValgtKjønn() {
-        return !NavBrukerKjønn.UDEFINERT.equals(brukerKjønn);
-    }
-
-    void setBrukerKjønn(NavBrukerKjønn brukerKjønn) {
-        if (!harAltValgtKjønn()) {
-            this.brukerKjønn = brukerKjønn;
-        }
     }
 
     void setPersonopplysningInformasjon(PersonInformasjonEntitet personopplysningInformasjon) {
@@ -108,7 +79,7 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { getAktørId() };
+        Object[] keyParts = {getAktørId()};
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -129,18 +100,6 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
         this.navn = navn;
     }
 
-    public NavBrukerKjønn getKjønn() {
-        return brukerKjønn;
-    }
-
-    public SivilstandType getSivilstand() {
-        return sivilstand;
-    }
-
-    void setSivilstand(SivilstandType sivilstand) {
-        this.sivilstand = sivilstand;
-    }
-
     public LocalDate getFødselsdato() {
         return fødselsdato;
     }
@@ -157,14 +116,6 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
         this.dødsdato = dødsdato;
     }
 
-    public Region getRegion() {
-        return region;
-    }
-
-    void setRegion(Region region) {
-        this.region = region;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -174,29 +125,23 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
             return false;
         }
         PersonopplysningEntitet entitet = (PersonopplysningEntitet) o;
-        return Objects.equals(brukerKjønn, entitet.brukerKjønn) &&
-            Objects.equals(sivilstand, entitet.sivilstand) &&
-            Objects.equals(aktørId, entitet.aktørId) &&
+        return Objects.equals(aktørId, entitet.aktørId) &&
             Objects.equals(navn, entitet.navn) &&
             Objects.equals(fødselsdato, entitet.fødselsdato) &&
-            Objects.equals(dødsdato, entitet.dødsdato) &&
-            Objects.equals(region, entitet.region);
+            Objects.equals(dødsdato, entitet.dødsdato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(brukerKjønn, sivilstand, aktørId, navn, fødselsdato, dødsdato, region);
+        return Objects.hash(aktørId, navn, fødselsdato, dødsdato);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" + "id=" + id +
-            ", brukerKjønn=" + brukerKjønn +
-            ", sivilstand=" + sivilstand +
             ", navn='" + navn + '\'' +
             ", fødselsdato=" + fødselsdato +
             ", dødsdato=" + dødsdato +
-            ", region=" + region +
             '>';
     }
 

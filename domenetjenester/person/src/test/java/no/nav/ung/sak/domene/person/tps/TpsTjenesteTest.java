@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.person.tps;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
-import static no.nav.ung.kodeverk.person.NavBrukerKjønn.KVINNE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,7 +42,7 @@ public class TpsTjenesteTest {
     // Familierelasjon
     private static final AktørId AKTØR_ID_RELASJON = AktørId.dummy();
     private static final PersonIdent FNR_RELASJON = new PersonIdent("01345678901");
-    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN);
+    private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, RelasjonsRolleType.FARA);
     private static final Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
     private PersoninfoAdapter personinfoAdapter;
 
@@ -74,7 +73,6 @@ public class TpsTjenesteTest {
                 .medPersonIdent(FNR)
                 .medNavn(NAVN)
                 .medFødselsdato(FØDSELSDATO)
-                .medKjønn(KVINNE)
                 .medFamilierelasjon(new HashSet<>(singletonList(FAMILIERELASJON)))
                 .build()
         );

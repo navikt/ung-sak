@@ -95,8 +95,12 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
         query.setIdent(aktør.getAktørId());
         var projection = new PersonResponseProjection()
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
-            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsRolle()
-                .relatertPersonsIdent().minRolleForPerson());
+            .forelderBarnRelasjon(
+                new ForelderBarnRelasjonResponseProjection()
+                    .relatertPersonsRolle()
+                    .relatertPersonsIdent()
+                    .minRolleForPerson()
+            );
         return pdlKlient.hentPerson(query, projection);
     }
 
