@@ -34,7 +34,7 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
         this.behandlingId = behandlingId;
         this.redigert = redigert;
         this.hindret = hindret;
-        this.redigertBrevHtml = redigertBrevHtml;
+        this.redigertBrevHtml = sanitizeHtml(redigertBrevHtml);
 
     }
 
@@ -80,10 +80,14 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
     }
 
     public void setRedigertBrevHtml(String redigertBrevHtml) {
-        this.redigertBrevHtml = redigertBrevHtml;
+        this.redigertBrevHtml = sanitizeHtml(redigertBrevHtml);
     }
 
-    public void tilbakestill() {
+    private static String sanitizeHtml(String redigertBrevHtml) {
+        return new XhtmlBrevRenser().rens(redigertBrevHtml);
+    }
+
+    public void tilbakestillVedTilbakehopp() {
         //Fjerner ikke redigert tekst i tilfelle saksbehandler ønsker å bruke den
         setRedigert(false);
         setHindret(false);

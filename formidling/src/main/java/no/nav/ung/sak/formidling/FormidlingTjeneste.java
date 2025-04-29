@@ -111,7 +111,7 @@ public class FormidlingTjeneste {
             return;
         }
 
-        vedtaksbrevValgEntitet.tilbakestill();
+        vedtaksbrevValgEntitet.tilbakestillVedTilbakehopp();
         vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }
