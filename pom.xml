@@ -39,11 +39,11 @@
         <swagger.version>2.2.30</swagger.version>
         <junit.version>5.12.2</junit.version>
         <k9format.version>11.5.0</k9format.version>
-        <jackson.version>2.18.3</jackson.version>
+        <jackson.version>2.19.0</jackson.version>
         <asm.version>9.8</asm.version>
         <kotlin-stdlib.version>2.1.20</kotlin-stdlib.version>
         <jandex.version>3.3.0</jandex.version>
-        <flyway.version>11.7.1</flyway.version>
+        <flyway.version>11.8.0</flyway.version>
         <pdfgen-core.version>1.1.43</pdfgen-core.version>
         <confluent.platform.version>7.9.0</confluent.platform.version>
         <mockito.version>5.17.0</mockito.version>
@@ -465,7 +465,7 @@
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
-                <version>1.19.1</version>
+                <version>1.20.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
