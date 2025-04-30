@@ -131,7 +131,7 @@ public class BrevScenarioer {
      * 24 år, søker måneden ungdom blir 25 år. Får både lav og høy sats
      * ingen inntektsgradering og ingen barn
      */
-    public static UngTestScenario innvilget24ÅrSøkerPå25årsdagen(LocalDate fødselsdato) {
+    public static UngTestScenario innvilget24ÅrSøkerPå25årsdagMåneden(LocalDate fødselsdato) {
         LocalDate tjuvefemårsdag = fødselsdato.plusYears(25);
         LocalDate tom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
         LocalDate fom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth());

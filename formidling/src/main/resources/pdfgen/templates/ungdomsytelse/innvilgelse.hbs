@@ -4,15 +4,13 @@
     {{#> felles/seksjon/hoved }}
         <h1>Du får ungdomsprogramytelse</h1>
 
-        {{#if resultat.enDagsats}}
-            <p>Fra {{ytelseFom}} får du ungdomsprogramytelse på {{> felles/beløp tilkjentePerioder.[0].tilkjentYtelse.dagsats}} per dag utenom lørdag og søknad.
+        <p>Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du ungdomsprogramytelse på {{> felles/beløp tilkjentPeriode.tilkjentYtelse.dagsats}} per dag utenom lørdag og søndag.
+        </p>
+
+        {{#if resultat.varierendeSats}}
+            <p>
+                Fordi du fylte {{satser.aldersgrenseLav}} år {{tilkjentPeriode.periode.tom}}, får du mer penger fra denne datoen. Da får du 954 kroner per dag, utenom lørdag og søndag.
             </p>
-        {{else}}
-            <p>Du har rett til ungdomsytelse fra {{ytelseFom}} i {{antallDager}} dager.</p>
-            {{#each tilkjentePerioder}}
-                <p>{{> felles/periode periode}} får du utbetalt {{currency_no tilkjentYtelse.dagsats true}} kroner
-                    dagen, før skatt.</p>
-            {{/each}}
         {{/if}}
 
         <p>Pengene får du utbetalt én gang i måneden før den 10. i måneden.
@@ -37,24 +35,27 @@
             Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet.
             Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år.
         </p>
-        {{#with tilkjentePerioder.[0].tilkjentYtelse}}
-            {{#if resultat.lavSats}}
-                <p>
-                    Når du er under {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no satser.lav}}.
-                    Det vil si {{> felles/beløp årsbeløp}} i året.
-                    Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
-                </p>
-            {{else if resultat.høySats}}
-                <p>
-                    Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no satser.høy}}.
-                    Det vil si {{> felles/beløp årsbeløp}} i året.
-                    Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
-                </p>
+        <p>
+            {{#if resultat.høySats}}
+                Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no satser.høy}}.
+            {{else}}
+                Når du er under {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no satser.lav}}.
             {{/if}}
-            <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
-            <p>Slik regner vi ut hvor mye penger du kan får per dag.</p>
-            <p><a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på.</a></p>
-        {{/with}}
+
+            Det vil si {{> felles/beløp tilkjentPeriode.tilkjentYtelse.årsbeløp}} i året.
+            Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
+        </p>
+        <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriode.tilkjentYtelse.dagsats}} per dag.</p>
+        {{#if resultat.varierendeSats}}
+            <p>
+                Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no satser.høy}} som blir {{> felles/beløp tilkjentPeriodeHøy.tilkjentYtelse.årsbeløp}} i året.
+            </p>
+            <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriodeHøy.tilkjentYtelse.dagsats}} per dag.</p>
+        {{/if}}
+        <p>Slik regner vi ut hvor mye penger du kan får per dag.</p>
+
+
+        <p><a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på.</a></p>
 
         <h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen </h2>
         <p>Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det.</p>

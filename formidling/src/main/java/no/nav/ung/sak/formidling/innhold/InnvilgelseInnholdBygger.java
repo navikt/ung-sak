@@ -19,9 +19,11 @@ import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.*;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -68,8 +70,28 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             .compress();
 
         var tilkjentePerioder = lagTilkjentePerioderDto(grunnlagOgTilkjentYtelseTidslinje);
+
+        var tilkjenteYtelserHøy = mapTilTilkjentYtelseDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.HØY);
+        var tilkjenteYtelserLav = mapTilTilkjentYtelseDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.LAV);
+
+        if (tilkjenteYtelserHøy.size() > 1) {
+            throw new IllegalStateException("Kan ikke ha mer enn 1 periode med høy sats. Fant %d".formatted(tilkjenteYtelserHøy.size()));
+        }
+
+        if (tilkjenteYtelserLav.size() > 1 ) {
+            throw new IllegalStateException("Kan ikke ha mer enn 1 periode med lav sats. Fant %d".formatted(tilkjenteYtelserLav.size()));
+        }
+
+        if (tilkjenteYtelserLav.isEmpty() && tilkjenteYtelserHøy.isEmpty()) {
+            throw new IllegalStateException("Fant ingen tilkjente perioder");
+        }
+
+        var tilkjentYtelseHøy = tilkjenteYtelserHøy.stream().findFirst();
+        var tilkjentYtelseLav = tilkjenteYtelserLav.stream().findFirst();
+
+
         var gBeløpPerioder = lagGbeløpPerioderDto(grunnlagOgTilkjentYtelseTidslinje);
-        var ytelseFom = grunnlagOgTilkjentYtelseTidslinje.getMinLocalDate();
+        var ytelseFom = detaljertResultatTidslinje.getMinLocalDate();
         var satser = lagSatsDto(grunnlagOgTilkjentYtelseTidslinje);
 
         var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnVirkedagerTidslinje(behandlingId);
@@ -79,15 +101,32 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         if (antallDager <= 0) {
             throw new IllegalStateException("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
         }
+        var ytelseTom = FinnForbrukteDager.MAKS_ANTALL_DAGER != antallDager ? detaljertResultatTidslinje.getMaxLocalDate() : null;
 
         return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 resultatFlagg,
                 ytelseFom,
-                antallDager,
+                ytelseTom,
                 tilkjentePerioder,
                 gBeløpPerioder,
-                satser));
+                satser,
+                tilkjentYtelseLav.orElseGet(tilkjentYtelseHøy::orElseThrow),
+                tilkjentYtelseHøy.orElse(null)
+            ));
+    }
+
+    @NotNull
+    private static List<TilkjentPeriodeDto> mapTilTilkjentYtelseDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType lav) {
+        return grunnlagOgTilkjentYtelseTidslinje
+            .filterValue(it -> it.satsType() == lav)
+            .compress().stream()
+            .map(s -> {
+                var it = s.getValue();
+                return new TilkjentPeriodeDto(
+                    new PeriodeDto(s.getFom(), s.getTom()),
+                    new TilkjentYtelseDto(it.dagsats(), it.grunnbeløpFaktor(), it.grunnbeløp(), it.årsbeløp()));
+            }).toList();
     }
 
     private ResultatFlaggDto lagResultatFlaggDto(
@@ -113,6 +152,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             .getGjeldendeVersjon()
             .getPersonopplysning(behandling.getAktørId())
             .getFødselsdato();
+        //TODO er dette mulig?
         boolean oppnårMaksAlder = vurderAntallDagerResultat.tidslinjeNokDager()
             .getMaxLocalDate()
             .isAfter(fødselsdato.plusYears(Sats.HØY.getTomAlder()));

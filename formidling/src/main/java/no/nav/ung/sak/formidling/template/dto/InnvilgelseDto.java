@@ -15,10 +15,14 @@ import java.util.Set;
 public record InnvilgelseDto(
     ResultatFlaggDto resultat,
     LocalDate ytelseFom,
-    @Deprecated // erstattes av en tom dato
-    long antallDager,
+    LocalDate ytelseTom,
+    @Deprecated
     List<TilkjentPeriodeDto> tilkjentePerioder,
+    @Deprecated
     Set<GbeløpPeriodeDto> gbeløpPerioder,
-    SatserDto satser) implements TemplateInnholdDto {
+    SatserDto satser,
+    TilkjentPeriodeDto tilkjentPeriode,
+    TilkjentPeriodeDto tilkjentPeriodeHøy
+) implements TemplateInnholdDto {
 
 }
