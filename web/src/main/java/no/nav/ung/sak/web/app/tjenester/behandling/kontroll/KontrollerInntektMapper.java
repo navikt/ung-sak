@@ -128,7 +128,7 @@ public class KontrollerInntektMapper {
             throw new IllegalStateException("Forventet å finne maks en overlappende etterlysninger for periode " + periode + ", men fant " + overlappendeEtterlysning.toSegments().size());
         }
         final var uttalelseData = overlappendeEtterlysning.toSegments().first().getValue().uttalelseData();
-        return uttalelseData != null ? Optional.of(uttalelseData.uttalelse()) : Optional.empty();
+        return uttalelseData != null ? Optional.ofNullable(uttalelseData.uttalelse()) : Optional.empty();
     }
 
     private static RapporterteInntekterDto mapRapporterteInntekter(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,

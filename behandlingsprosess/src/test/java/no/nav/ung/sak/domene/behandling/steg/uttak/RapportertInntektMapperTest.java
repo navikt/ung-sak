@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -167,7 +168,7 @@ class RapportertInntektMapperTest {
     private void mockIAY(List<OppgittOpptjening> oppgittOpptjeninger) {
         final var iayGrunnlag = InntektArbeidYtelseGrunnlagBuilder.nytt()
             .medOppgitteOpptjeninger(oppgittOpptjeninger).build();
-        when(inntektArbeidYtelseTjeneste.hentGrunnlag(anyLong())).thenReturn(iayGrunnlag);
+        when(inntektArbeidYtelseTjeneste.finnGrunnlag(anyLong())).thenReturn(Optional.of(iayGrunnlag));
     }
 
     private static OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder lagOppgittArbeidOgFrilansInntekt(DatoIntervallEntitet periode, BigDecimal inntekt) {

@@ -13,8 +13,4 @@ public interface OpplysningsperiodeTjeneste {
 
     Periode utledOpplysningsperiode(Long behandlingId, boolean tomDagensDato);
 
-    default Periode utledOpplysningsperiodeSkattegrunnlag(Long behandlingId) {
-        throw new IllegalStateException("Kan ikke utlede opplysningsperiode for behandling " + behandlingId);
-    }
-
 }
