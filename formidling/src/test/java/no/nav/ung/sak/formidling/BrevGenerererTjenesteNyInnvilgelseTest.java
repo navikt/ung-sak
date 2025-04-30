@@ -129,23 +129,32 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. desember 2024 får du ungdomsprogramytelse på 636 lrpmer åer dag. utenom lørdag og søknad. \
-                Nav utbetaler pengene innen den 25. i hver måned. \
-                Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
-                Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
-                Ungdomsprogrammet skal sikre deg inntekt mens du samarbeider med veileder i Nav om tiltak som skal hjelpe deg med arbeid. \
-                Utbetalingene fra Nav kan endre seg etterhvert som du får eller mister inntekt. \
-                Det er derfor viktig at du melder i fra om endringer i din inntekt på nav.no/ungdomsytelse/endring og informerer veileder. \
-                Hvis du ikke gir beskjed om endringer i inntekten, kan Nav kreve penger tilbake, så det er viktig å gi beskjed med en gang det skjer endringer. \
-                Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får. \
-                Siden du er under 25 år så får du 1.33 ganger grunnbeløpet. \
-                Nav regner med 260 virkedager per år utenom helger og ferie. \
-                For å regne ut hva du får per dag, deles årsbeløpet på antall dager. \
-                Det betyr at du har rett på 1.33 x 124 028 = 165 370 kroner i året. \
-                Dette gir en dagsats på 636 kroner. \
-                For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
-                Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
+                Fra 1. desember 2024 får du ungdomsprogramytelse på 636 kroner per dag utenom lørdag og søknad. \
+                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Pengene du får, blir det trukket skatt av. \
+                Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                Hvorfor får du ungdomsprogramytelsen? \
+                Du får ytelsen fordi du er med i ungdomsprogrammet. \
+                Ytelsen gir deg en inntekt mens du deltar i ungdomsprogrammet. \
+                Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i mer enn ett år. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
+                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,33. \
+                Det vil si 165 370 kroner i året. \
+                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Det vil si at du har rett på 636 kroner per dag. \
+                Slik regner vi ut hvor mye penger du kan får per dag. \
+                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
+                Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det. \
+                Du får en SMS den 1. hver måned. \
+                Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om hva du har hatt i inntekt måneden før. \
+                Når du har en inntekt, får du mindre penger gjennom ungdomsprogramytelsen. \
+                Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får ytelsen. \
+                Se hvordan du skal gi beskjed om inntekten din i Ungdomsportalen. \
                 """);
 
         assertThatHtml(brevtekst)
@@ -172,9 +181,14 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Du får ungdomsprogramytelse \
                 Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager. \
                 Du får utbetalt 954 kroner dagen, før skatt. \
-                Nav utbetaler pengene innen den 25. i hver måned. \
-                Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
-                Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
+                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Pengene du får, blir det trukket skatt av. \
+                Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                Hvorfor får du ungdomsprogramytelsen? \
+                Du får ytelsen fordi du er med i ungdomsprogrammet. Ytelsen gir deg en inntekt mens du deltar i ungdomsprogrammet. \
+                Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i mer enn ett år. \
+                \
                 Ungdomsprogrammet skal sikre deg inntekt mens du samarbeider med veileder i Nav om tiltak som skal hjelpe deg med arbeid. \
                 Utbetalingene fra Nav kan endre seg etterhvert som du får eller mister inntekt. \
                 Det er derfor viktig at du melder i fra om endringer i din inntekt på nav.no/ungdomsytelse/endring og informerer veileder. \
@@ -207,8 +221,9 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Du får ungdomsprogramytelse \
                 Du har rett til ungdomsytelse fra 1. desember 2024 i 130 dager. \
                 Du får utbetalt 954 kroner dagen, før skatt. \
-                Nav utbetaler pengene innen den 25. i hver måned. \
-                Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
+                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Pengene du får, blir det trukket skatt av. \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
                 Ungdomsprogrammet skal sikre deg inntekt mens du samarbeider med veileder i Nav om tiltak som skal hjelpe deg med arbeid. \
                 Utbetalingene fra Nav kan endre seg etterhvert som du får eller mister inntekt. \
@@ -249,8 +264,9 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Du har rett til ungdomsytelse fra 1. mai 2025 i 260 dager. \
                 Fra 1. mai 2025 til 15. mai 2025 får du utbetalt 636 kroner dagen, før skatt. \
                 Fra 16. mai 2025 til 31. mai 2025 får du utbetalt 954 kroner dagen, før skatt. \
-                Nav utbetaler pengene innen den 25. i hver måned. \
-                Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
+                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Pengene du får, blir det trukket skatt av. \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
                 Ungdomsprogrammet skal sikre deg inntekt mens du samarbeider med veileder i Nav om tiltak som skal hjelpe deg med arbeid. \
                 Utbetalingene fra Nav kan endre seg etterhvert som du får eller mister inntekt. \

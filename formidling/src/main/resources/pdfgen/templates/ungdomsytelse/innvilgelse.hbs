@@ -5,78 +5,67 @@
         <h1>Du får ungdomsprogramytelse</h1>
 
         {{#if resultat.enDagsats}}
-            <p>Du har rett til ungdomsytelse fra {{ytelseFom}} i {{antallDager}} dager.
-                Du får utbetalt {{currency_no tilkjentePerioder.[0].tilkjentYtelse.dagsats true}} kroner dagen, før skatt.</p>
+            <p>Fra {{ytelseFom}} får du ungdomsprogramytelse på {{> felles/beløp tilkjentePerioder.[0].tilkjentYtelse.dagsats}} per dag utenom lørdag og søknad.
+            </p>
         {{else}}
             <p>Du har rett til ungdomsytelse fra {{ytelseFom}} i {{antallDager}} dager.</p>
             {{#each tilkjentePerioder}}
-                <p>{{> felles/periode periode}} får du utbetalt {{currency_no tilkjentYtelse.dagsats true}} kroner dagen, før skatt.</p>
+                <p>{{> felles/periode periode}} får du utbetalt {{currency_no tilkjentYtelse.dagsats true}} kroner
+                    dagen, før skatt.</p>
             {{/each}}
         {{/if}}
 
-        <p>Nav utbetaler pengene innen den 25. i hver måned. Informasjon om utbetaling finner du under
-            utbetalingsoversikten på "Min side".</p>
+        <p>Pengene får du utbetalt én gang i måneden før den 10. i måneden.
+            Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet.
+            Pengene du får, blir det trukket skatt av. </p>
 
-        <p>Du får ungdomsytelse fordi du er med ungdomsprogrammet. Ungdomsprogrammet skal sikre deg inntekt mens du
-            samarbeider med veileder i Nav om tiltak som skal hjelpe deg med arbeid.</p>
-
-        <p>Utbetalingene fra Nav kan endre seg etterhvert som du får eller mister inntekt. Det er derfor viktig at du
-            melder i fra om endringer i din inntekt på <a href="https://nav.no/ungdomsytelse/endring">nav.no/ungdomsytelse/endring</a>
-            og informerer veileder. Hvis du ikke
-            gir beskjed om endringer i inntekten, kan Nav kreve penger tilbake, så det er viktig å gi beskjed med en
-            gang det skjer endringer.</p>
-
-        {{#if resultat.ettGbeløp}}
-            Nav bruker grunnbeløpet på {{currency_no gbeløpPerioder.[0].gBeløp true}} kroner for å regne ut hvor mye du får.
-        {{else}}
-             <p>Nav bruker et grunnbeløp for å regne ut hvor mye du får.</p>
-            <ul>
-                {{#each gbeløpPerioder}}
-                    <li>{{> felles/periode periode}} bruker Nav grunnbeløpet på {{currency_no gBeløp true}} kroner.</li>
-                {{/each}}
-            </ul>
-        {{/if}}
-
-        {{#if resultat.lavSats}}
-            Siden du er under {{satser.aldersgrenseLav}} år så får du {{satser.lav}} ganger grunnbeløpet.
-        {{else if resultat.høySats}}
-            <p>Siden du er over {{satser.aldersgrenseLav}} år så får du {{satser.høy}} ganger
-                grunnbeløpet{{#if resultat.oppnårMaksAlder}} til måneden du fyller {{satser.aldersgrenseHøy}} år{{/if}}.</p>
-        {{else if resultat.varierendeSats}}
-           <p>Du får {{satser.lav}} ganger grunnbeløpet mens du er under {{satser.aldersgrenseLav}} år
-                og {{satser.høy}} ganger grunnbeløpet fra måneden etter du fyller {{satser.aldersgrenseLav}} år.</p>
-        {{/if}}
-
-
-        {{#if resultat.enDagsats}}
-            <p>Nav regner med 260 virkedager per år utenom helger og ferie. For å regne ut hva du får per dag, deles
-            årsbeløpet på antall dager.
-            {{#with tilkjentePerioder.[0].tilkjentYtelse}}
-                Det betyr at du har rett på {{satsFaktor}} x {{currency_no gBeløp true}} =
-                {{currency_no årsbeløp true}} kroner i året. Dette gir en dagsats på {{currency_no dagsats true}}
-                    kroner.</p>
-            {{/with}}
-        {{else}}
-            <p>Nav regner med 260 virkedager per år utenom helger og ferie. For å regne ut hva du får per dag, deles
-                årsbeløpet på antall dager.</p>
-            <ul>
-                {{#each tilkjentePerioder}}
-                    <li>{{> felles/periode periode}}
-                        {{#with tilkjentYtelse}}har du rett på {{satsFaktor}} x {{currency_no gBeløp true}} =
-                        {{currency_no årsbeløp true}} kroner i årsbeløp. Dette gir en dagsats på {{currency_no dagsats true}} kroner i perioden.
-                        {{/with}}
-                    </li>
-                {{/each}}
-            </ul>
-        {{/if}}
-
-
-        <p>For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. Du kan regne ut
-            hva du får for en måned samt se flere eksempler på utregninger på
-            <a href="https://nav.no/ungdomsytelse">nav.no/ungdomsytelse</a>.
+        <p>
+            Du finner mer informasjon om utbetalingen hvis du <a href="https://www.nav.no/min-side">logger inn på Min
+            side på nav.no</a>.
         </p>
 
+        <h2>Hvorfor får du ungdomsprogramytelsen?</h2>
+        <p>Du får ytelsen fordi du er med i ungdomsprogrammet. Ytelsen gir deg en inntekt mens du deltar i
+            ungdomsprogrammet.</p>
+        <p>Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i
+            mer enn ett år.</p>
+
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.</p>
+
+        <h2>Hvordan regner vi oss fram til hvor mye penger du har rett på?</h2>
+        <p>
+            Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet.
+            Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år.
+        </p>
+        {{#with tilkjentePerioder.[0].tilkjentYtelse}}
+            {{#if resultat.lavSats}}
+                <p>
+                    Når du er under {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no satser.lav}}.
+                    Det vil si {{> felles/beløp årsbeløp}} i året.
+                    Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
+                </p>
+            {{else if resultat.høySats}}
+                <p>
+                    Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no satser.høy}}.
+                    Det vil si {{> felles/beløp årsbeløp}} i året.
+                    Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
+                </p>
+            {{/if}}
+            <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
+            <p>Slik regner vi ut hvor mye penger du kan får per dag.</p>
+            <p><a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på.</a></p>
+        {{/with}}
+
+        <h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen </h2>
+        <p>Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det.</p>
+        <p>
+            Du får en SMS den 1. hver måned.
+            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om hva du har hatt i inntekt måneden før.</p>
+        <p>
+            Når du har en inntekt, får du mindre penger gjennom ungdomsprogramytelsen.
+            Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får ytelsen.</p>
+
+        <p><a href="https://www.nav.no/ungdomsportalen">Se hvordan du skal gi beskjed om inntekten din i Ungdomsportalen.</a></p>
 
     {{/felles/seksjon/hoved}}
 
