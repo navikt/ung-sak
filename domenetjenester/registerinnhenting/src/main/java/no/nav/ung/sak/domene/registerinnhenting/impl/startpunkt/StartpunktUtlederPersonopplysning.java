@@ -66,9 +66,6 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
 
-        if (poDiff.erRelasjonerEndret()) {
-            leggTilForRelasjoner(oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag), poDiff, startpunkter);
-        }
         if (startpunkter.isEmpty()) {
             // Endringen som trigget utledning av startpunkt skal ikke styre startpunkt
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UDEFINERT, "personopplysning - andre endringer", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
@@ -81,20 +78,4 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
         return forrigeGrunnlag != null ? forrigeGrunnlag.getId() : null;
     }
 
-    private void leggTilForRelasjoner(Long g1Id, Long g2Id, PersonopplysningGrunnlagDiff poDiff, Set<StartpunktType> startpunkter) {
-        if (poDiff.erRelasjonerEndretSøkerAntallBarn()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UDEFINERT, "personopplysning - relasjon på grunn av fødsel", g1Id, g2Id);
-            startpunkter.add(StartpunktType.UDEFINERT);
-        }
-
-        var relasjonStartpunkt = StartpunktType.KONTROLLER_FAKTA;
-        if (poDiff.erRelasjonerEndretForSøkerUtenomNyeBarn()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, relasjonStartpunkt, "personopplysning - brukers relasjoner annet enn fødsel", g1Id, g2Id);
-            startpunkter.add(relasjonStartpunkt);
-        }
-        if (poDiff.erRelasjonerEndretForEksisterendeBarn()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, relasjonStartpunkt, "personopplysning - barns relasjoner annet enn fødsel", g1Id, g2Id);
-            startpunkter.add(relasjonStartpunkt);
-        }
-    }
 }
