@@ -10,6 +10,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
@@ -32,22 +33,22 @@ public class ManglendeKontrollperioderTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(ManglendeKontrollperioderTjeneste.class);
 
     private final int rapporteringsfristIMåned;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private BehandlingRepository behandlingRepository;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
     public ManglendeKontrollperioderTjeneste(BehandlingRepository behandlingRepository,
-                                             KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
                                              MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                              ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
-                                             @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristIMåned) {
-        this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
+                                             @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristIMåned,
+                                             TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapporteringsfristIMåned = rapporteringsfristIMåned;
         this.behandlingRepository = behandlingRepository;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
     /**
@@ -99,7 +100,7 @@ public class ManglendeKontrollperioderTjeneste {
     }
 
     private LocalDateTimeline<Boolean> finnPerioderSomErKontrollertITidligereBehandlinger(Long behandlingId) {
-        return kontrollerteInntektperioderTjeneste.hentTidslinje(behandlingId).mapValue(it -> true);
+        return tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandlingId).mapValue(it -> true);
     }
 
     private LocalDateTimeline<Boolean> finnPerioderMedPassertRapporteringsfrist() {

@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -113,6 +114,17 @@ public class TilkjentYtelseRepository {
             .setParameter("id", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public LocalDateTimeline<BigDecimal> hentKontrollerInntektTidslinje(Long behandlingId) {
+        return hentKontrollertInntektPerioder(behandlingId)
+            .stream()
+            .flatMap(it -> it.getPerioder().stream())
+            .map(p -> new LocalDateTimeline<>(
+                p.getPeriode().getFomDato(),
+                p.getPeriode().getTomDato(),
+                p.getInntekt())).reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
     }
 
 

@@ -33,6 +33,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -201,7 +202,8 @@ public class BrevScenarioer {
 
         var satserPrMåned = splitPrMåned(satser);
         var rapportertInntektTimeline = splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, rapportertInntektPrMåned != null ? BigDecimal.valueOf(rapportertInntektPrMåned) : BigDecimal.ZERO));
-        var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
+        var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektTimeline);
+
 
         var opptjening = OppgittOpptjeningBuilder.ny();
 
@@ -281,8 +283,8 @@ public class BrevScenarioer {
     }
 
     //TODO Endre til å bruke TilkjentYtelseBeregner
-    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
-        return satsperioder.intersection(tilkjentPeriode).combine(rapportertInntektTimeline,
+    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
+        return satsperioder.combine(rapportertInntektTimeline,
             (s, lhs, rhs) -> {
 
                 int antallVirkedager = Virkedager.beregnAntallVirkedager(s.getFomDato(), s.getTomDato());
@@ -307,7 +309,7 @@ public class BrevScenarioer {
     @Test
     void testTilkjentYtelseReduksjonScenario() {
         var scenario = endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
-        var andreMåned = scenario.tilkjentYtelsePerioder().toSegments().first();
+        var andreMåned = scenario.tilkjentYtelsePerioder().getSegment(new LocalDateInterval(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 31)));
 
         assertThat(andreMåned.getFom()).isEqualTo(LocalDate.of(2025, 1, 1));
         assertThat(andreMåned.getTom()).isEqualTo(LocalDate.of(2025, 1, 31));
