@@ -6942,12 +6942,6 @@
         "responses" : {
           "200" : {
             "content" : {
-              "application/json" : {
-                "schema" : {
-                  "format" : "binary",
-                  "type" : "string"
-                }
-              },
               "application/octet-stream" : {
                 "schema" : {
                   "format" : "binary",
@@ -6957,6 +6951,11 @@
               "application/pdf" : {
                 "schema" : {
                   "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "text/html" : {
+                "schema" : {
                   "type" : "string"
                 }
               }
