@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -80,10 +81,22 @@ public class PersoninfoAdapterTest {
     }
 
     private Personinfo lagHentPersonResponseForSøker() {
-        return new Personinfo.Builder().medAktørId(AKTØR_ID_SØKER).medPersonIdent(PERSONIDENT_FNR_SØKER).medNavn("Kari Nordmann").medFødselsdato(LocalDate.of(1985, 7, 7)).build();
+        return new Personinfo.Builder()
+            .medAktørId(AKTØR_ID_SØKER)
+            .medPersonIdent(PERSONIDENT_FNR_SØKER)
+            .medNavn("Kari Nordmann")
+            .medFødselsdato(LocalDate.of(1985, 7, 7))
+            .medKjønn(NavBrukerKjønn.KVINNE)
+            .build();
     }
 
     private Personinfo lagHentPersonResponseForBarn() {
-        return new Personinfo.Builder().medAktørId(AKTØR_ID_BARN).medPersonIdent(PERSONIDENT_FNR_BARN).medNavn("Kari Nordmann Junior").medFødselsdato(LocalDate.of(2000, 7, 7)).build();
+        return new Personinfo.Builder()
+            .medAktørId(AKTØR_ID_BARN)
+            .medPersonIdent(PERSONIDENT_FNR_BARN)
+            .medNavn("Kari Nordmann Junior")
+            .medFødselsdato(LocalDate.of(2000, 7, 7))
+            .medKjønn(NavBrukerKjønn.KVINNE)
+            .build();
     }
 }

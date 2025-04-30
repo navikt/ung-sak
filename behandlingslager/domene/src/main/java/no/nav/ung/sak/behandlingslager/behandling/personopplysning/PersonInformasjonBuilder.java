@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -87,6 +88,11 @@ public class PersonInformasjonBuilder {
 
         public PersonopplysningBuilder medAktørId(AktørId aktørId) {
             kladd.setAktørId(aktørId);
+            return this;
+        }
+
+        public PersonopplysningBuilder medKjønn(NavBrukerKjønn brukerKjønn) {
+            kladd.setBrukerKjønn(brukerKjønn);
             return this;
         }
 

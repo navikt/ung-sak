@@ -63,11 +63,6 @@ public class OppgittOpptjeningBuilder {
         return this;
     }
 
-    public OppgittOpptjeningBuilder leggTilEgneNæringer(List<EgenNæringBuilder> builders) {
-        builders.forEach(builder -> this.kladd.leggTilEgenNæring(builder.build()));
-        return this;
-    }
-
     public OppgittOpptjeningBuilder leggTilOppgittArbeidsforhold(OppgittArbeidsforholdBuilder builder) {
         this.kladd.leggTilOppgittArbeidsforhold(builder.build());
         return this;
@@ -94,96 +89,6 @@ public class OppgittOpptjeningBuilder {
 
     public void leggTilInnsendingstidspunkt(LocalDateTime tidspunkt) {
         this.kladd.setInnsendingstidspunkt(tidspunkt);
-    }
-
-    public static class EgenNæringBuilder {
-        private final OppgittEgenNæring entitet;
-
-        private EgenNæringBuilder(OppgittEgenNæring entitet) {
-            this.entitet = entitet;
-        }
-
-        public static EgenNæringBuilder fraEksisterende(OppgittEgenNæring kopierFra) {
-            return new EgenNæringBuilder(new OppgittEgenNæring(kopierFra));
-        }
-
-        public static EgenNæringBuilder ny() {
-            return new EgenNæringBuilder(new OppgittEgenNæring());
-        }
-
-        public EgenNæringBuilder medPeriode(DatoIntervallEntitet periode) {
-            this.entitet.setPeriode(periode);
-            return this;
-        }
-
-        public EgenNæringBuilder medVirksomhet(String orgNr) {
-            return medVirksomhet(new OrgNummer(orgNr));
-        }
-
-        public EgenNæringBuilder medVirksomhetType(VirksomhetType type) {
-            this.entitet.setVirksomhetType(type);
-            return this;
-        }
-
-        public EgenNæringBuilder medRegnskapsførerNavn(String navn) {
-            this.entitet.setRegnskapsførerNavn(navn);
-            return this;
-        }
-
-        public EgenNæringBuilder medRegnskapsførerTlf(String tlf) {
-            this.entitet.setRegnskapsførerTlf(tlf);
-            return this;
-        }
-
-        public EgenNæringBuilder medEndringDato(LocalDate dato) {
-            this.entitet.setEndringDato(dato);
-            return this;
-        }
-
-        public EgenNæringBuilder medBegrunnelse(String begrunnelse) {
-            this.entitet.setBegrunnelse(begrunnelse);
-            return this;
-        }
-
-        public EgenNæringBuilder medNyoppstartet(Boolean nyoppstartet) {
-            this.entitet.setNyoppstartet(nyoppstartet);
-            return this;
-        }
-
-        public EgenNæringBuilder medVarigEndring(Boolean varigEndring) {
-            this.entitet.setVarigEndring(varigEndring);
-            return this;
-        }
-
-        public EgenNæringBuilder medNærRelasjon(Boolean nærRelasjon) {
-            this.entitet.setNærRelasjon(nærRelasjon);
-            return this;
-        }
-
-        public EgenNæringBuilder medBruttoInntekt(BigDecimal bruttoInntekt) {
-            this.entitet.setBruttoInntekt(bruttoInntekt);
-            return this;
-        }
-
-        public EgenNæringBuilder medUtenlandskVirksomhet(OppgittUtenlandskVirksomhet utenlandskVirksomhet) {
-            this.entitet.setUtenlandskVirksomhet(utenlandskVirksomhet);
-            return this;
-        }
-
-        public OppgittEgenNæring build() {
-            return entitet;
-        }
-
-        public EgenNæringBuilder medNyIArbeidslivet(Boolean nyIArbeidslivet) {
-            this.entitet.setNyIArbeidslivet(nyIArbeidslivet);
-            return this;
-
-        }
-
-        public EgenNæringBuilder medVirksomhet(OrgNummer orgNr) {
-            this.entitet.setVirksomhetOrgnr(orgNr);
-            return this;
-        }
     }
 
     public static class OppgittFrilansBuilder {
@@ -291,18 +196,8 @@ public class OppgittOpptjeningBuilder {
             return this;
         }
 
-        public OppgittArbeidsforholdBuilder medErUtenlandskInntekt(Boolean erUtenlandskInntekt) {
-            this.entitet.setErUtenlandskInntekt(erUtenlandskInntekt);
-            return this;
-        }
-
         public OppgittArbeidsforholdBuilder medArbeidType(ArbeidType arbeidType) {
             this.entitet.setArbeidType(arbeidType);
-            return this;
-        }
-
-        public OppgittArbeidsforholdBuilder medUtenlandskVirksomhet(OppgittUtenlandskVirksomhet utenlandskVirksomhet) {
-            this.entitet.setUtenlandskVirksomhet(utenlandskVirksomhet);
             return this;
         }
 

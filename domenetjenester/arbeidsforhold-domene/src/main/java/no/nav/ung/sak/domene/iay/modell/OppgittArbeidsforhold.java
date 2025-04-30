@@ -24,30 +24,24 @@ public class  OppgittArbeidsforhold implements IndexKey {
     @ChangeTracked
     private DatoIntervallEntitet periode;
 
-    private boolean erUtenlandskInntekt;
-
     @ChangeTracked
     private BigDecimal inntekt;
 
     @ChangeTracked
     private ArbeidType arbeidType;
 
-    private OppgittUtenlandskVirksomhet utenlandskVirksomhet = new OppgittUtenlandskVirksomhet();
-
     OppgittArbeidsforhold() {
     }
 
     OppgittArbeidsforhold(OppgittArbeidsforhold kopierFra) {
         this.periode = kopierFra.periode;
-        this.erUtenlandskInntekt=kopierFra.erUtenlandskInntekt;
         this.arbeidType=kopierFra.arbeidType;
-        this.utenlandskVirksomhet = kopierFra.utenlandskVirksomhet;
         this.inntekt = kopierFra.inntekt;
     }
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { periode, utenlandskVirksomhet, arbeidType };
+        Object[] keyParts = { periode, arbeidType };
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -63,32 +57,16 @@ public class  OppgittArbeidsforhold implements IndexKey {
         return periode;
     }
 
-    public Boolean erUtenlandskInntekt() {
-        return erUtenlandskInntekt;
-    }
-
     public ArbeidType getArbeidType() {
         return arbeidType;
-    }
-
-    public OppgittUtenlandskVirksomhet getUtenlandskVirksomhet() {
-        return utenlandskVirksomhet;
     }
 
     void setPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
     }
 
-    void setErUtenlandskInntekt(Boolean erUtenlandskInntekt) {
-        this.erUtenlandskInntekt = erUtenlandskInntekt;
-    }
-
     void setArbeidType(ArbeidType arbeidType) {
         this.arbeidType = arbeidType;
-    }
-
-    void setUtenlandskVirksomhet(OppgittUtenlandskVirksomhet utenlandskVirksomhet) {
-        this.utenlandskVirksomhet = utenlandskVirksomhet;
     }
 
     public BigDecimal getInntekt() {
@@ -108,22 +86,19 @@ public class  OppgittArbeidsforhold implements IndexKey {
 
         return
                 Objects.equals(periode, that.periode) &&
-                        Objects.equals(arbeidType, that.arbeidType) &&
-                        Objects.equals(utenlandskVirksomhet, that.utenlandskVirksomhet);
+                        Objects.equals(arbeidType, that.arbeidType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, arbeidType, utenlandskVirksomhet);
+        return Objects.hash(periode, arbeidType);
     }
 
     @Override
     public String toString() {
         return "OppgittArbeidsforholdImpl{" +
                 "periode=" + periode +
-                ", erUtenlandskInntekt=" + erUtenlandskInntekt +
                 ", arbeidType=" + arbeidType +
-                ", utenlandskVirksomhet=" + utenlandskVirksomhet +
                 '}';
     }
 }

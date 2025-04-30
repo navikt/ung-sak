@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,7 @@ public class FagsakTjenesteTest {
             .medPersonIdent(new PersonIdent("12345678901"))
             .medNavn("Kari Nordmann")
             .medFødselsdato(forelderFødselsdato)
+            .medKjønn(NavBrukerKjønn.KVINNE)
             .medForetrukketSpråk(Språkkode.nb)
             .build();
 

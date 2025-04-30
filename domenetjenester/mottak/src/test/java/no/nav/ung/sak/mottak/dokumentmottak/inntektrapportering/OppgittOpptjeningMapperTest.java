@@ -79,45 +79,11 @@ class OppgittOpptjeningMapperTest {
         assertThat(oppgittArbeidsforhold.getPeriode().getTom()).isEqualTo(tom);
     }
 
-    @Test
-    void skal_mappe_oppgitt_næringsinntekt() {
-        // Arrange
-        final var innsendingstidspunkt = LocalDateTime.now();
-        final var journalpostId = 6L;
-        final var mottattDokument = lagMottattDokument(innsendingstidspunkt, journalpostId);
-        final var inntekt = BigDecimal.TEN;
-        final var fom = LocalDate.now();
-        final var tom = LocalDate.now().plusDays(1);
-        final var oppgittInntekt = lagOppgittInntektForNæring(inntekt, fom, tom);
-        // Act
-        final var result = OppgittOpptjeningMapper.mapRequest(BEHANDLINGREFERANSE, mottattDokument, oppgittInntekt);
-        // Assert
-        assertThat(result.isPresent()).isTrue();
-        assertThat(result.get().getSaksnummer()).isEqualTo(SAKSNUMMER.getVerdi());
-        assertThat(result.get().getKoblingReferanse()).isEqualTo(BEHANDLING_UUID);
-        assertThat(result.get().getYtelseType()).isEqualTo(YtelseType.UNGDOMSYTELSE);
-        assertThat(result.get().harOppgittJournalpostId()).isEqualTo(true);
-
-        final var oppgittOpptjening = result.get().getOppgittOpptjening();
-        assertThat(oppgittOpptjening.getEgenNæring().size()).isEqualTo(1);
-        final var egenNæring = oppgittOpptjening.getEgenNæring().get(0);
-        assertThat(egenNæring.getBruttoInntekt().compareTo(inntekt)).isEqualTo(0);
-        assertThat(egenNæring.getPeriode().getFom()).isEqualTo(fom);
-        assertThat(egenNæring.getPeriode().getTom()).isEqualTo(tom);
-    }
-
 
     private static OppgittInntekt lagOppgittInntektForArbeidOgFrilans(BigDecimal oppgittBeløp, LocalDate fom, LocalDate tom) {
         return OppgittInntekt.builder()
             .medOppgittePeriodeinntekter(Set.of(OppgittInntektForPeriode.builder(new Periode(fom, tom))
                 .medArbeidstakerOgFrilansinntekt(oppgittBeløp)
-                .build())).build();
-    }
-
-    private static OppgittInntekt lagOppgittInntektForNæring(BigDecimal oppgittBeløp, LocalDate fom, LocalDate tom) {
-        return OppgittInntekt.builder()
-            .medOppgittePeriodeinntekter(Set.of(OppgittInntektForPeriode.builder(new Periode(fom, tom))
-                .medNæringsinntekt(oppgittBeløp)
                 .build())).build();
     }
 

@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.aktør;
 
 import no.nav.ung.kodeverk.geografisk.Språkkode;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
@@ -18,6 +19,7 @@ public class Personinfo {
     private PersonIdent personIdent;
     private LocalDate fødselsdato;
     private LocalDate dødsdato;
+    private NavBrukerKjønn kjønn;
     private Set<Familierelasjon> familierelasjoner = Collections.emptySet();
     private String diskresjonskode;
     private Språkkode foretrukketSpråk;
@@ -37,6 +39,10 @@ public class Personinfo {
         return navn;
     }
 
+    public NavBrukerKjønn getKjønn() {
+        return kjønn;
+    }
+
     public LocalDate getFødselsdato() {
         return fødselsdato;
     }
@@ -53,6 +59,9 @@ public class Personinfo {
         return Collections.unmodifiableSet(familierelasjoner);
     }
 
+    public boolean erKvinne() {
+        return kjønn.equals(NavBrukerKjønn.KVINNE);
+    }
 
     public LocalDate getDødsdato() {
         return dødsdato;
@@ -110,6 +119,16 @@ public class Personinfo {
 
         public Builder medDødsdato(LocalDate dødsdato) {
             personinfoMal.dødsdato = dødsdato;
+            return this;
+        }
+
+        public Builder medNavBrukerKjønn(NavBrukerKjønn kjønn) {
+            personinfoMal.kjønn = kjønn;
+            return this;
+        }
+
+        public Builder medKjønn(NavBrukerKjønn kjønn) {
+            personinfoMal.kjønn = kjønn;
             return this;
         }
 

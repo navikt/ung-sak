@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -99,6 +100,7 @@ public class BehandlingsgrunnlagEntitetTest {
         informasjonBuilder.leggTil(
                 informasjonBuilder.getPersonopplysningBuilder(aktørId)
                     .medNavn("Navn")
+                    .medKjønn(NavBrukerKjønn.KVINNE)
                     .medFødselsdato(fødselsdato)
                     .medDødsdato(dødsdatoForelder1));
 

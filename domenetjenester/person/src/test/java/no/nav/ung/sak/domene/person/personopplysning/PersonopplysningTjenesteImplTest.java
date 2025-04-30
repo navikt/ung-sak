@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +56,8 @@ public class PersonopplysningTjenesteImplTest {
         PersonInformasjon personInformasjon = scenario
             .opprettBuilderForRegisteropplysninger()
             .medPersonas()
-
+            .kvinne(søkerAktørId)
+            .relasjonTil(AktørId.dummy(), RelasjonsRolleType.BARN)
             .build();
 
         scenario.medRegisterOpplysninger(personInformasjon);
@@ -66,7 +68,7 @@ public class PersonopplysningTjenesteImplTest {
         PersonopplysningerAggregat personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(),
             behandling.getAktørId(), tidspunkt);
         // Assert
-        assertThat(personopplysningerAggregat.getBarnaTil(behandling.getAktørId())).isNotEmpty();
+        assertThat(personopplysningerAggregat.getRelasjoner()).isNotEmpty();
     }
 
 }

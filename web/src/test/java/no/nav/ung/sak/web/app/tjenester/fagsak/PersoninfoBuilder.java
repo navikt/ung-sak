@@ -1,10 +1,12 @@
 package no.nav.ung.sak.web.app.tjenester.fagsak;
 
 import static java.time.Month.OCTOBER;
+import static no.nav.ung.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 
 import no.nav.ung.kodeverk.geografisk.Språkkode;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -17,6 +19,7 @@ class PersoninfoBuilder {
     private static final LocalDate DEFAULT_FØDSELDATO = LocalDate.of(1972, OCTOBER, 13);
     private static final Språkkode DEFAULT_FORETRUKKET_SPRÅK = Språkkode.nb;
     private static final String DEFAULT_DISKRESJONSKODE = "6";
+    private NavBrukerKjønn kjønn = KVINNE;
 
     private AktørId aktørId;
     private PersonIdent personIdent;
@@ -85,6 +88,7 @@ class PersoninfoBuilder {
             .medPersonIdent(personIdent)
             .medNavn(navn)
             .medFødselsdato(fødselsdato)
+            .medKjønn(kjønn)
             .medDiskresjonsKode(diskresjonskode)
             .medForetrukketSpråk(foretrukketSpråk)
             .build();

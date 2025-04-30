@@ -90,6 +90,7 @@ public class PersonopplysningDtoTjeneste {
 
     private PersonopplysningDto enkelMapping(PersonopplysningEntitet personopplysning, PersonopplysningerAggregat aggregat) {
         PersonopplysningDto dto = new PersonopplysningDto();
+        dto.setNavBrukerKjonn(personopplysning.getKjønn());
         dto.setAktørId(personopplysning.getAktørId());
         dto.setNavn(formaterMedStoreOgSmåBokstaver(personopplysning.getNavn()));
         dto.setDodsdato(personopplysning.getDødsdato());

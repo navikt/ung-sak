@@ -1,5 +1,6 @@
 package no.nav.ung.sak.test.util.behandling.personopplysning;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
@@ -8,12 +9,17 @@ import java.time.LocalDate;
 public final class Personopplysning {
 
     private AktørId aktørId;
+    private NavBrukerKjønn brukerKjønn = NavBrukerKjønn.UDEFINERT;
     private String navn;
     private LocalDate dødsdato;
     private LocalDate fødselsdato;
 
     public AktørId getAktørId() {
         return aktørId;
+    }
+
+    public NavBrukerKjønn getBrukerKjønn() {
+        return brukerKjønn;
     }
 
     public String getNavn() {
@@ -30,6 +36,7 @@ public final class Personopplysning {
 
     private Personopplysning(Builder builder) {
         this.aktørId = builder.aktørId;
+        this.brukerKjønn = builder.brukerKjønn;
         this.navn = builder.navn;
         this.dødsdato = builder.dødsdato;
         this.fødselsdato = builder.fødselsdato;
@@ -44,6 +51,7 @@ public final class Personopplysning {
      */
     public static Builder builderMedDefaultVerdier(AktørId aktørId) {
         return Personopplysning.builder()
+            .brukerKjønn(NavBrukerKjønn.KVINNE)
             .fødselsdato(LocalDate.now().minusYears(25))
             .navn("Foreldre")
             .aktørId(aktørId);
@@ -51,6 +59,7 @@ public final class Personopplysning {
 
     public static final class Builder {
         private AktørId aktørId;
+        private NavBrukerKjønn brukerKjønn;
         private String navn;
         private LocalDate dødsdato;
         private LocalDate fødselsdato;
@@ -64,6 +73,11 @@ public final class Personopplysning {
 
         public Builder aktørId(AktørId aktørId) {
             this.aktørId = aktørId;
+            return this;
+        }
+
+        public Builder brukerKjønn(NavBrukerKjønn brukerKjønn) {
+            this.brukerKjønn = brukerKjønn;
             return this;
         }
 

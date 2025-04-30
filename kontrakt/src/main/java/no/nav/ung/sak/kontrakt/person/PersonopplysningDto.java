@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +58,11 @@ public class PersonopplysningDto extends PersonIdentDto {
     @Valid
     private boolean harVerge;
 
+    @JsonAlias("kjønn")
+    @JsonProperty(value = "navBrukerKjonn")
+    @Valid
+    private NavBrukerKjønn navBrukerKjonn;
+
     @JsonProperty(value = "navn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -92,6 +99,10 @@ public class PersonopplysningDto extends PersonIdentDto {
 
     public LocalDate getFodselsdato() {
         return fodselsdato;
+    }
+
+    public NavBrukerKjønn getNavBrukerKjonn() {
+        return navBrukerKjonn;
     }
 
     public String getNavn() {
@@ -132,6 +143,10 @@ public class PersonopplysningDto extends PersonIdentDto {
 
     public void setHarVerge(boolean harVerge) {
         this.harVerge = harVerge;
+    }
+
+    public void setNavBrukerKjonn(NavBrukerKjønn navBrukerKjonn) {
+        this.navBrukerKjonn = navBrukerKjonn;
     }
 
     public void setNavn(String navn) {

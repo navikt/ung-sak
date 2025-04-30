@@ -151,22 +151,7 @@ public class IAYDtoMapperRoundtripTest {
                 new OppgittOpptjeningDto(null, null, uuid, offTidspunkt)
                     .medArbeidsforhold(List.of(
                         new OppgittArbeidsforholdDto(periode, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-                            .medErUtenlandskInntekt(true)
-                            .medOppgittVirksomhetNavn("GammelDansk", Landkode.DNK)))
-                    .medEgenNæring(List.of(
-                        new OppgittEgenNæringDto(periode)
-                            .medBegrunnelse("MinBegrunnelse")
-                            .medBruttoInntekt(10000)
-                            .medEndringDato(fom)
-                            .medNyIArbeidslivet(false)
-                            .medNyoppstartet(false)
-                            .medNærRelasjon(false)
-                            .medOppgittVirksomhetNavn("DuGamleDuFria", Landkode.SWE)
-                            .medRegnskapsførerNavn("Regnskapsfører")
-                            .medRegnskapsførerTlf("+47902348732")
-                            .medVarigEndring(true)
-                            .medVirksomhet(org)
-                            .medVirksomhetType(VirksomhetType.ANNEN)))
+                            .medOppgittVirksomhetNavn(null, Landkode.NOR)))
                     .medAnnenAktivitet(List.of(new OppgittAnnenAktivitetDto(periode, arbeidType)))
                     .medFrilans(new OppgittFrilansDto(List.of(
                         new OppgittFrilansoppdragDto(periode, "MittOppdrag")))

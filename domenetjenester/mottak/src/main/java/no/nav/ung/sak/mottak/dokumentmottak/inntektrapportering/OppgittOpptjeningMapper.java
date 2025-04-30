@@ -21,15 +21,6 @@ public class OppgittOpptjeningMapper {
                                                                 MottattDokument dokument,
                                                                 OppgittInntekt oppgittInntekt) {
 
-
-        final var oppgittNæring = oppgittInntekt.getOppgittePeriodeinntekter()
-            .stream()
-            .filter(it -> it.getNæringsinntekt() != null)
-            .map(inntekter -> OppgittOpptjeningBuilder.EgenNæringBuilder.ny()
-                .medBruttoInntekt(inntekter.getNæringsinntekt())
-                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(inntekter.getPeriode().getFraOgMed(), inntekter.getPeriode().getTilOgMed())))
-            .toList();
-
         final var oppgittArbeidOgFrilans = oppgittInntekt.getOppgittePeriodeinntekter()
             .stream()
             .filter(it -> it.getArbeidstakerOgFrilansInntekt() != null)
@@ -39,10 +30,9 @@ public class OppgittOpptjeningMapper {
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(inntekter.getPeriode().getFraOgMed(), inntekter.getPeriode().getTilOgMed())))
             .toList();
 
-        if (!oppgittArbeidOgFrilans.isEmpty() || !oppgittNæring.isEmpty()) {
+        if (!oppgittArbeidOgFrilans.isEmpty()) {
             var builder = OppgittOpptjeningBuilder.ny(UUID.randomUUID(), LocalDateTime.now());
             builder.leggTilOppgittArbeidsforhold(oppgittArbeidOgFrilans);
-            builder.leggTilEgneNæringer(oppgittNæring);
             builder.leggTilJournalpostId(dokument.getJournalpostId());
             builder.leggTilInnsendingstidspunkt(dokument.getInnsendingstidspunkt());
             return Optional.of(byggRequest(behandlingReferanse, builder));

@@ -1,14 +1,5 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.ung.kodeverk.Fagsystem;
@@ -19,16 +10,20 @@ import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.Opptjeningsnøkkel;
-import no.nav.ung.sak.domene.iay.modell.YtelseBuilder;
-import no.nav.ung.sak.domene.iay.modell.YtelseStørrelseBuilder;
+import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.typer.Saksnummer;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IAYDtoMapperLagretKonverteringTest {
 

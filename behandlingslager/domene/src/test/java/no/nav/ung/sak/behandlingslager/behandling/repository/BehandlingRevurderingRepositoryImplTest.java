@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -193,6 +194,7 @@ public class BehandlingRevurderingRepositoryImplTest {
             .medNavn("Navn navnesen")
             .medAktørId(AktørId.dummy())
             .medFødselsdato(LocalDate.now().minusYears(20))
+            .medKjønn(NavBrukerKjønn.KVINNE)
             .medPersonIdent(new PersonIdent("12345678901"))
             .medForetrukketSpråk(Språkkode.nb)
             .build();

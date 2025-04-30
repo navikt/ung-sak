@@ -1,9 +1,11 @@
 package no.nav.ung.sak.domene.arbeidsforhold.testutilities.behandling;
 
 import static java.time.Month.OCTOBER;
+import static no.nav.ung.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -15,6 +17,7 @@ public class NavPersoninfoBuilder {
     private static final PersonIdent DEFAULT_FNR = PersonIdent.fra("13107221234");
     private static final LocalDate DEFAULT_FØDSELDATO = LocalDate.of(1972, OCTOBER, 13);
     private static final String DEFAULT_DISKRESJONSKODE = "6";
+    private NavBrukerKjønn kjønn = KVINNE;
 
     private AktørId aktørId;
     private PersonIdent personIdent;
@@ -38,6 +41,11 @@ public class NavPersoninfoBuilder {
 
     public NavPersoninfoBuilder medNavn(String navn) {
         this.navn = navn;
+        return this;
+    }
+
+    public NavPersoninfoBuilder medKjønn(NavBrukerKjønn kjønn) {
+        this.kjønn = kjønn;
         return this;
     }
 
@@ -73,6 +81,7 @@ public class NavPersoninfoBuilder {
             .medPersonIdent(personIdent)
             .medNavn(navn)
             .medFødselsdato(fødselsdato)
+            .medKjønn(kjønn)
             .medDiskresjonsKode(diskresjonskode)
             .build();
     }
