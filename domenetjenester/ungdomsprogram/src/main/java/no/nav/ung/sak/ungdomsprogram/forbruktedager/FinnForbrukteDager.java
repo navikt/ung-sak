@@ -18,7 +18,7 @@ public class FinnForbrukteDager {
 
         var kunVirkedager = ungdomsprogramperiode.disjoint(helger);
 
-        long antallDager = 0;
+        int antallDager = 0;
         LocalDateTimeline<Boolean> resultatTidslinje = LocalDateTimeline.empty();
         for (LocalDateSegment<Boolean> virkedagSegment : kunVirkedager.toSegments()) {
             var antallDagerISegment = virkedagSegment.getLocalDateInterval().totalDays();
@@ -27,7 +27,7 @@ public class FinnForbrukteDager {
             }
             if (antallDagerISegment + antallDager < MAKS_ANTALL_DAGER) {
                 resultatTidslinje = resultatTidslinje.crossJoin(new LocalDateTimeline<>(List.of(virkedagSegment)));
-                antallDager += antallDagerISegment;
+                antallDager += (int) antallDagerISegment;
             } else {
                 var delAvPeriode = finnDelAvPeriodeSomInnvilges(virkedagSegment, antallDager);
                 resultatTidslinje = resultatTidslinje.crossJoin(delAvPeriode);
@@ -48,7 +48,7 @@ public class FinnForbrukteDager {
         return new VurderAntallDagerResultat(LocalDateTimeline.empty(), antallDager);
     }
 
-    private static LocalDateTimeline<Boolean> finnDelAvPeriodeSomInnvilges(LocalDateSegment<Boolean> virkedagSegment, long antallDager) {
+    private static LocalDateTimeline<Boolean> finnDelAvPeriodeSomInnvilges(LocalDateSegment<Boolean> virkedagSegment, int antallDager) {
         var dagerSomGjenstår = MAKS_ANTALL_DAGER - antallDager;
 
         if (dagerSomGjenstår < 1) {

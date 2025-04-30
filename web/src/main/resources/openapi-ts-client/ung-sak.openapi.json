@@ -4261,6 +4261,23 @@
         "required" : [ "hendelseInfo", "startdato" ],
         "type" : "object"
       },
+      "UngdomsprogramInformasjonDto" : {
+        "properties" : {
+          "antallDagerBruktForTilkjentePerioder" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "maksdatoForDeltakelse" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "opphørsdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "UngdomsprogramOpphørHendelse" : {
         "allOf" : [ {
           "$ref" : "#/components/schemas/Hendelse"
@@ -7850,6 +7867,35 @@
                     "$ref" : "#/components/schemas/UngdomsytelseSatsPeriodeDto"
                   },
                   "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
+      }
+    },
+    "/api/ungdomsytelse/ungdomsprogram-informasjon" : {
+      "get" : {
+        "description" : "Henter informasjon om deltakelse i ungdomsprogram",
+        "operationId" : "getUngdomsprogramInformasjon",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UngdomsprogramInformasjonDto"
                 }
               }
             },
