@@ -4670,6 +4670,9 @@
             "minimum" : 0,
             "type" : "integer"
           },
+          "htmlVersjon" : {
+            "type" : "boolean"
+          },
           "redigertVersjon" : {
             "type" : "boolean"
           }
@@ -6954,11 +6957,6 @@
               "application/pdf" : {
                 "schema" : {
                   "format" : "binary",
-                  "type" : "string"
-                }
-              },
-              "text/html" : {
-                "schema" : {
                   "type" : "string"
                 }
               }
