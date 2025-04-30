@@ -1,21 +1,15 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.ARBEIDSFORHOLD;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_BEREGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_PENSJONSGIVENDE;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.YTELSE;
-
-import java.util.Map;
-import java.util.Set;
-
 import jakarta.enterprise.context.ApplicationScoped;
-
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+
+import java.util.Map;
+import java.util.Set;
+
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -25,20 +19,9 @@ public class DefaultInformasjonselementerUtleder implements Informasjonselemente
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
         BehandlingType.FØRSTEGANGSSØKNAD,
-        Set.of(
-            YTELSE,
-            ARBEIDSFORHOLD,
-            INNTEKT_PENSJONSGIVENDE,
-            LIGNET_NÆRING,
-            INNTEKT_BEREGNINGSGRUNNLAG,
-            INNTEKT_SAMMENLIGNINGSGRUNNLAG),
+        Set.of(INNTEKT_SAMMENLIGNINGSGRUNNLAG),
         BehandlingType.REVURDERING,
-        Set.of(
-            YTELSE,
-            ARBEIDSFORHOLD,
-            INNTEKT_PENSJONSGIVENDE,
-            INNTEKT_BEREGNINGSGRUNNLAG,
-            INNTEKT_SAMMENLIGNINGSGRUNNLAG));
+        Set.of(INNTEKT_SAMMENLIGNINGSGRUNNLAG));
 
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType) {
