@@ -109,6 +109,7 @@ public class FormidlingRestTjeneste {
         }
 
         var htmlVersjon = Boolean.TRUE.equals(dto.htmlVersjon());
+        var responseMediaType = htmlVersjon ? MediaType.TEXT_HTML : "application/pdf";
         var resultat = htmlVersjon ? generertBrev.dokument().html() : generertBrev.dokument().pdf();
 
         String mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), APPLICATION_OCTET_STREAM);
@@ -119,7 +120,7 @@ public class FormidlingRestTjeneste {
                 .build();
         }
 
-        return Response.ok(resultat).build();
+        return Response.ok(resultat).type(responseMediaType).build();
 
     }
 }
