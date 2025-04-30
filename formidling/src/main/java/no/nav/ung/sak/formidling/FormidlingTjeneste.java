@@ -94,7 +94,9 @@ public class FormidlingTjeneste {
 
     }
 
-    public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, boolean kunHtml) {
+    public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto) {
+        var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
+
         if (dto.redigertVersjon() == null) {
             return brevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
         }

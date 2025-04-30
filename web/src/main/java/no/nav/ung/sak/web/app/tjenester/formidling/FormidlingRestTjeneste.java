@@ -92,7 +92,6 @@ public class FormidlingRestTjeneste {
                 @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", format = "binary")),
-                @Content(mediaType = MediaType.TEXT_HTML, schema = @Schema(type = "string"))
             }
         )
     )
@@ -101,16 +100,15 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
     ) {
-        String mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
-        var generertBrev = formidlingTjeneste.forhåndsvisVedtaksbrev(dto, MediaType.TEXT_HTML.equals(mediaTypeReq));
+        var generertBrev = formidlingTjeneste.forhåndsvisVedtaksbrev(dto);
 
         if (generertBrev == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
+        String mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
         return switch (mediaTypeReq) {
             case PDF_MEDIA_STRING, MediaType.APPLICATION_JSON -> Response.ok(generertBrev.dokument().pdf()).build();
-            case MediaType.TEXT_HTML -> Response.ok(generertBrev.dokument().html()).build();
             default -> Response.ok(generertBrev.dokument().pdf()) //Kun for å få swagger til å laste ned pdf
                 .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
                 .build();
