@@ -36,7 +36,9 @@ import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
+import no.nav.ung.sak.web.app.ungdomsytelse.UngdomsytelseRestTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -255,7 +257,15 @@ public class BehandlingDtoTjeneste {
 
         leggTilBeregnetYtelseBaserteLinks(behandling, dto, uuidQueryParams);
 
+        leggTilUngdomsytelseSpesifikkeLinks(dto, uuidQueryParams);
+
         lagLosLink(behandling).forEach(dto::leggTil);
+    }
+
+    private static void leggTilUngdomsytelseSpesifikkeLinks(BehandlingDto dto, Map<String, String> uuidQueryParams) {
+        dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.SATSER_PATH, "satser", uuidQueryParams));
+        dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.UTTAK_PATH, "uttak", uuidQueryParams));
+        dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.UNGDOMSPROGRAM_PATH, "ungdomsprogram-informasjon", uuidQueryParams));
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {
