@@ -103,7 +103,7 @@ jobs:
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client
-      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v1
+      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v2
         id: compare-with-published
         with:
           localPath: /tmp/ung-sak-typescript-client
@@ -128,7 +128,7 @@ jobs:
        with:
          name: ung-sak-typescript-client-src
          path: /tmp/ung-sak-typescript-client
-     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
+     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v2
        with:
          contentPath: /tmp/ung-sak-typescript-client
          githubToken: ${{ secrets.GITHUB_TOKEN }}
