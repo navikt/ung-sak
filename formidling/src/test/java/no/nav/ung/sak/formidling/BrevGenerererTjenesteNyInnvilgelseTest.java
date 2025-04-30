@@ -128,9 +128,8 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
-                Nav har innvilget søknaden din om ungdomsytelse \
-                Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager. \
-                Du får utbetalt 636 kroner dagen, før skatt. \
+                Du får ungdomsprogramytelse \
+                Fra 1. desember 2024 får du ungdomsprogramytelse på 636 lrpmer åer dag. utenom lørdag og søknad. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
                 Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
@@ -152,7 +151,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+                "<h1>Du får ungdomsprogramytelse</h1>"
             );
 
     }
@@ -170,7 +169,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
-                Nav har innvilget søknaden din om ungdomsytelse \
+                Du får ungdomsprogramytelse \
                 Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager. \
                 Du får utbetalt 954 kroner dagen, før skatt. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
@@ -193,7 +192,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
-            .containsHtmlSubSequenceOnce("<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>");
+            .containsHtmlSubSequenceOnce("<h1>Du får ungdomsprogramytelse</h1>");
     }
 
     @DisplayName("blir 29 i løpet av programmet og får mindre enn maks antall dager")
@@ -205,7 +204,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
-                Nav har innvilget søknaden din om ungdomsytelse \
+                Du får ungdomsprogramytelse \
                 Du har rett til ungdomsytelse fra 1. desember 2024 i 130 dager. \
                 Du får utbetalt 954 kroner dagen, før skatt. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
@@ -235,7 +234,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+                "<h1>Du får ungdomsprogramytelse</h1>"
             );
     }
 
@@ -246,7 +245,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         var ungTestGrunnlag = BrevScenarioer.innvilget24ÅrSøkerPå25årsdagen(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
-                Nav har innvilget søknaden din om ungdomsytelse \
+                Du får ungdomsprogramytelse \
                 Du har rett til ungdomsytelse fra 1. mai 2025 i 260 dager. \
                 Fra 1. mai 2025 til 15. mai 2025 får du utbetalt 636 kroner dagen, før skatt. \
                 Fra 16. mai 2025 til 31. mai 2025 får du utbetalt 954 kroner dagen, før skatt. \
@@ -280,7 +279,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+                "<h1>Du får ungdomsprogramytelse</h1>"
             );
     }
 
@@ -299,7 +298,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             assertThat(pdDocument.getNumberOfPages()).isEqualTo(2);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Nav har innvilget søknaden din om ungdomsytelse");
+            assertThat(pdfTekst).contains("Du får ungdomsprogramytelse");
         }
 
     }
