@@ -91,6 +91,9 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
     }
 
     private static String sanitizeHtml(String redigertBrevHtml) {
+        if (redigertBrevHtml == null) {
+            return null;
+        }
         return new XhtmlBrevRenser().rens(redigertBrevHtml);
     }
 

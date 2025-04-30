@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 public class XhtmlBrevRenser {
 
@@ -23,6 +24,7 @@ public class XhtmlBrevRenser {
     private static final Safelist SAFELIST = Safelist.none().addTags(SAFE_TAGS.toArray(new String[0]));
 
     public String rens(String input) {
+        Objects.requireNonNull(input, "Input må være satt");
         String rensetHtml = Jsoup.clean(input, "", SAFELIST, XHTML_SETTINGS);
         loggHvisRenset(input, rensetHtml);
         return rensetHtml;
