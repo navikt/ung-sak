@@ -5,11 +5,9 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.oppgave.OppgaveBekreftelse;
 import no.nav.k9.oppgave.bekreftelse.ung.inntekt.InntektBekreftelse;
-import no.nav.k9.oppgave.bekreftelse.ung.inntekt.OppgittInntektForPeriode;
 import no.nav.k9.søknad.felles.Versjon;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
-import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -28,11 +26,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,14 +50,13 @@ class InntektBekreftelseHåndtererTest {
     }
 
     @Test
-    void skalOppdatereEtterlysningOppdatereIayGrunnlagOgSetteBehandlingAvVent() {
+    void skalOppdatereEtterlysningOgSetteBehandlingAvVent() {
         // Arrange
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING);
         Behandling behandling = scenarioBuilder.lagre(em);
         var periode = DatoIntervallEntitet.fra(LocalDate.now(), LocalDate.now());
         long journalpostId = 892L;
-        int oppgittInntekt = 56321;
         var oppgaveId = UUID.randomUUID();
         var grunnlagsreferanse = UUID.randomUUID();
 
@@ -79,10 +74,6 @@ class InntektBekreftelseHåndtererTest {
 
         var bekreftelse = lagBekreftelse(mottattDokument, behandling, new InntektBekreftelse(
             oppgaveId,
-            Set.of(new OppgittInntektForPeriode(
-                new Periode(periode.getFomDato(), periode.getTomDato()),
-                BigDecimal.valueOf(oppgittInntekt),
-                BigDecimal.ZERO)),
             true,
             null));
 
@@ -105,14 +96,13 @@ class InntektBekreftelseHåndtererTest {
     }
 
     @Test
-    void skalIkkeOppdatereGrunnlagVedUttalelse() {
+    void skal_håndtere_uttalelse() {
         // Arrange
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING);
         Behandling behandling = scenarioBuilder.lagre(em);
         var periode = DatoIntervallEntitet.fra(LocalDate.now(), LocalDate.now());
         long journalpostId = 892L;
-        int oppgittInntekt = 56321;
         var oppgaveId = UUID.randomUUID();
         var grunnlagsreferanse = UUID.randomUUID();
 
@@ -128,10 +118,6 @@ class InntektBekreftelseHåndtererTest {
 
         var bekreftelse = lagBekreftelse(lagMottattDokument(behandling, journalpostId), behandling, new InntektBekreftelse(
             oppgaveId,
-            Set.of(new OppgittInntektForPeriode(
-                new Periode(periode.getFomDato(), periode.getTomDato()),
-                BigDecimal.valueOf(oppgittInntekt),
-                BigDecimal.ZERO)),
             false,
             "en uttalelse"));
 
