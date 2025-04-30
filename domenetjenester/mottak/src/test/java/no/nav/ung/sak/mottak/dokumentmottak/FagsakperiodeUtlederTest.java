@@ -92,7 +92,7 @@ class FagsakperiodeUtlederTest {
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
         var nySøknadFom = LocalDate.of(2024, 12, 13);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
-        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getFomDato()).isEqualTo(nySøknadFom);
         assertThat(periode.getTomDato()).isEqualTo(LocalDate.of(2025, 12, 4));
     }
 
@@ -109,7 +109,7 @@ class FagsakperiodeUtlederTest {
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
         var nySøknadFom = LocalDate.of(2024, 12, 14);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
-        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getFomDato()).isEqualTo(nySøknadFom);
         assertThat(periode.getTomDato()).isEqualTo(LocalDate.of(2025, 12, 5));
     }
 
@@ -126,7 +126,7 @@ class FagsakperiodeUtlederTest {
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
         var nySøknadFom = LocalDate.of(2024, 12, 15);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
-        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getFomDato()).isEqualTo(nySøknadFom);
         assertThat(periode.getTomDato()).isEqualTo(LocalDate.of(2025, 12, 7));
     }
 
@@ -144,7 +144,7 @@ class FagsakperiodeUtlederTest {
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
         var nySøknadFom = fom.plusWeeks(2);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
-        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getFomDato()).isEqualTo(nySøknadFom);
         assertThat(periode.getTomDato()).isEqualTo(nySøknadFom.plusWeeks(51).plusDays(1));
     }
 
@@ -161,7 +161,7 @@ class FagsakperiodeUtlederTest {
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
         var nySøknadFom = LocalDate.of(2024,12,9);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
-        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getFomDato()).isEqualTo(nySøknadFom);
         assertThat(periode.getTomDato()).isEqualTo(nySøknadFom.plusWeeks(51).plusDays(1));
     }
 
@@ -178,7 +178,7 @@ class FagsakperiodeUtlederTest {
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
         var nySøknadFom = LocalDate.of(2024,12,10);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
-        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getFomDato()).isEqualTo(nySøknadFom);
         assertThat(periode.getTomDato()).isEqualTo(nySøknadFom.plusWeeks(51).plusDays(1));
     }
 
@@ -195,7 +195,7 @@ class FagsakperiodeUtlederTest {
         var revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING).build();
         var nySøknadFom = fom.plusWeeks(2).plusDays(3);
         var periode = fagsakperiodeUtleder.utledNyPeriodeForFagsak(revurdering, nySøknadFom);
-        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getFomDato()).isEqualTo(nySøknadFom);
         assertThat(periode.getTomDato()).isEqualTo(nySøknadFom.plusWeeks(51).plusDays(3));
     }
 
