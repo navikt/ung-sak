@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -27,12 +27,12 @@ import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;
 import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
-import no.nav.ung.sak.ytelse.KontrollerteInntektperioderTjeneste;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import no.nav.ung.sak.ytelse.*;
+import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +49,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 public class KontrollerInntektSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(KontrollerInntektSteg.class);
+    public static final BigDecimal AKSEPTERT_DIFFERANSE = BigDecimal.valueOf(1000);
 
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RapportertInntektMapper rapportertInntektMapper;
@@ -99,10 +100,10 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
         var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);
 
-        var kontrollResultat = KontrollerInntektTjeneste.utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
+        var kontrollResultat = new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
 
         log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
-        håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, rapporterteInntekterTidslinje, etterlysninger);
+        håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, etterlysninger);
         return avgjørResultat(behandlingId, kontrollResultat, prosessTriggerTidslinje);
     }
 
@@ -119,32 +120,31 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     }
 
     private void håndterPeriodisertKontrollresultat(BehandlingskontrollKontekst kontekst,
-                                                    LocalDateTimeline<KontrollResultat> kontrollResultat,
-                                                    LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
+                                                    LocalDateTimeline<Kontrollresultat> kontrollResultat,
                                                     List<Etterlysning> etterlysninger) {
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
         var grunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(kontekst.getBehandlingId());
         for (var kontrollSegment : kontrollResultat.toSegments()) {
-            switch (kontrollSegment.getValue()) {
-                case BRUK_INNTEKT_FRA_BRUKER -> {
-                    log.info("Bruker inntekt fra bruker for periode {}", kontrollSegment.getLocalDateInterval());
-                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment));
+            switch (kontrollSegment.getValue().type()) {
+                case BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER -> {
+                    log.info("Bruker inntekt fra bruker eller godkjent inntekt fra register for periode {}", kontrollSegment.getLocalDateInterval());
+                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval()));
                     kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
                         kontekst.getBehandlingId(),
                         kontrollSegment.getLocalDateInterval(),
-                        rapporterteInntekterTidslinje.mapValue(RapporterteInntekter::brukerRapporterteInntekter).intersection(kontrollSegment.getLocalDateInterval())
+                        kontrollSegment.getValue().inntektsresultat()
                     );
                 }
                 case OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST -> {
                     log.info("Oppretter ny etterlysning med utvidet frist for periode {}", kontrollSegment.getLocalDateInterval());
-                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment));
-                    etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
+                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval()));
+                    etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                 }
                 case OPPRETT_OPPGAVE_TIL_BRUKER -> {
                     log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
-                    if (!harEksisterendeEtterlysningPåVent(kontrollSegment, etterlysninger)) {
-                        etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment, grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
+                    if (!harEksisterendeEtterlysningPåVent(etterlysninger, kontrollSegment.getLocalDateInterval())) {
+                        etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(kontekst.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                     }
                 }
             }
@@ -169,24 +169,24 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
     }
 
-    private static boolean harEksisterendeEtterlysningPåVent(LocalDateSegment<KontrollResultat> segment, List<Etterlysning> etterlysninger) {
+    private static boolean harEksisterendeEtterlysningPåVent(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
         return etterlysninger.stream().anyMatch(e -> e.getStatus().equals(EtterlysningStatus.VENTER) &&
-            e.getPeriode().toLocalDateInterval().overlaps(segment.getLocalDateInterval()));
+            e.getPeriode().toLocalDateInterval().overlaps(periode));
     }
 
-    private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateSegment<KontrollResultat> segment, UUID iayRef) {
+    private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateInterval periode, UUID iayRef) {
         UUID bestillingsId = UUID.randomUUID();
         final var etterlysning = Etterlysning.forInntektKontrollUttalelse(behandlingId,
             iayRef,
             bestillingsId,
-            DatoIntervallEntitet.fra(segment.getFom(), segment.getTom()));
+            DatoIntervallEntitet.fra(periode.getFomDato(), periode.getTomDato()));
         return etterlysning;
     }
 
-    private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateSegment<KontrollResultat> segment) {
+    private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
         var etterlysningerSomSkalAvbrytes = etterlysninger.stream()
             .filter(etterlysning ->
-                etterlysning.getPeriode().toLocalDateInterval().overlaps(segment.getLocalDateInterval()))
+                etterlysning.getPeriode().toLocalDateInterval().overlaps(periode))
             .filter(e -> e.getStatus().equals(EtterlysningStatus.VENTER))
             .toList();
         etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
@@ -194,9 +194,9 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         return etterlysningerSomSkalAvbrytes;
     }
 
-    private BehandleStegResultat avgjørResultat(Long behandlingId, LocalDateTimeline<KontrollResultat> kontrollResultat, LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
+    private BehandleStegResultat avgjørResultat(Long behandlingId, LocalDateTimeline<Kontrollresultat> kontrollResultat, LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
 
-        final var skalVenteTilRapportering = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST)).isEmpty();
+        final var skalVenteTilRapportering = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST)).isEmpty();
         if (skalVenteTilRapportering) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(
                 AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST,
@@ -204,12 +204,12 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                 utledVentefrist(prosessTriggerTidslinje)));
         }
 
-        final var skalVenteGrunnetNyEtterlysning = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST)).isEmpty();
+        final var skalVenteGrunnetNyEtterlysning = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST)).isEmpty();
         if (skalVenteGrunnetNyEtterlysning) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, LocalDateTime.now().plusDays(14)));
         }
 
-        final var skalVentePåEksisterendeEtterlysning = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER)).isEmpty();
+        final var skalVentePåEksisterendeEtterlysning = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER)).isEmpty();
         if (skalVentePåEksisterendeEtterlysning) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(
                 AksjonspunktResultat.opprettForAksjonspunktMedFrist(
@@ -218,7 +218,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                     finnEksisterendeFrist(behandlingId)));
         }
 
-        final var skalOppretteAksjonspunkt = !kontrollResultat.filterValue(it -> it.equals(KontrollResultat.OPPRETT_AKSJONSPUNKT)).isEmpty();
+        final var skalOppretteAksjonspunkt = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.OPPRETT_AKSJONSPUNKT)).isEmpty();
         if (skalOppretteAksjonspunkt) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
         }

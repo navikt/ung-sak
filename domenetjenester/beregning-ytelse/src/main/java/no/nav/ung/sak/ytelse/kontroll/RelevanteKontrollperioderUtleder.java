@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse;
+package no.nav.ung.sak.ytelse.kontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
