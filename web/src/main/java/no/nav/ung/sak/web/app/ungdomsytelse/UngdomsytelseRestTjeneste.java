@@ -40,13 +40,14 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
+@Path("")
 @ApplicationScoped
 @Transactional
 @Produces(MediaType.APPLICATION_JSON)
 public class UngdomsytelseRestTjeneste {
 
 
-    public static final String UNGDOMSYTELSE_BASE_PATH = "ungdomsytelse";
+    public static final String UNGDOMSYTELSE_BASE_PATH = "/ungdomsytelse";
     public static final String SATSER_PATH = UNGDOMSYTELSE_BASE_PATH +"/satser";
     public static final String UTTAK_PATH = UNGDOMSYTELSE_BASE_PATH + "/uttak";
     public static final String UNGDOMSPROGRAM_PATH = UNGDOMSYTELSE_BASE_PATH + "/ungdomsprogram-informasjon";
