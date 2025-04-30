@@ -623,6 +623,7 @@
                 <artifactId>openhtmltopdf-slf4j</artifactId>
                 <version>${openhtmltopdf.version}</version>
             </dependency>
+            <!-- Brukes for å gjøre htmloperasjoner, f.eks. rense html for redigerte brev -->
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
