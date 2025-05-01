@@ -13,7 +13,6 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.formidling.FormidlingTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.slf4j.Logger;
@@ -28,8 +27,6 @@ class ForeslåVedtakTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(ForeslåVedtakTjeneste.class);
 
-    private SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste;
-    private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
@@ -40,14 +37,10 @@ class ForeslåVedtakTjeneste {
     }
 
     @Inject
-    ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
-                          BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                          SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
+    ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
                           FormidlingTjeneste formidlingTjeneste) {
-        this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
-        this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
@@ -56,7 +49,6 @@ class ForeslåVedtakTjeneste {
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
-        aksjonspunktDefinisjoner.addAll(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
         // TODO: Fiks integrering mot k9-tilbake
 //        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
