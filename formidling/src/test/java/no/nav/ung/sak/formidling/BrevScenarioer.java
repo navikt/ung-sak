@@ -138,8 +138,8 @@ public class BrevScenarioer {
         var p = new LocalDateInterval(fom25årmnd, fom25årmnd.plusWeeks(52).minusDays(1));
 
         var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom25årmnd, tjuvefemårsdag, lavSatsBuilder().build()),
-            new LocalDateSegment<>(tjuvefemårsdag.plusDays(1), p.getTomDato(), høySatsBuilder().build())
+            new LocalDateSegment<>(fom25årmnd, tjuvefemårsdag.minusDays(1), lavSatsBuilder().build()),
+            new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), høySatsBuilder().build())
         ));
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
