@@ -115,7 +115,7 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+        var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.KONTROLLER_INNTEKT); // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
 
         var vedtaksbrevRegler = lagVedtaksbrevRegler(ManuellVedtaksbrevInnholdBygger.class);
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
@@ -129,7 +129,7 @@ class VedtaksbrevReglerTest {
         assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
 
-        assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT.getKode());
+        assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
 
     }
 
