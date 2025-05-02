@@ -13,14 +13,11 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.ungdomsytelse.UngdomsprogramInformasjonDto;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,7 +26,6 @@ import java.util.List;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -83,7 +79,7 @@ class UngdomsytelseRestTjenesteTest {
         final var forventetMaksdato = fom.plusWeeks(52);
         assertThat(ungdomsprogramInformasjon.maksdatoForDeltakelse()).isEqualTo(forventetMaksdato.minusDays(1));
         assertThat(ungdomsprogramInformasjon.opphørsdato()).isNull();
-        assertThat(ungdomsprogramInformasjon.antallDagerBruktForTilkjentePerioder()).isNull();
+        assertThat(ungdomsprogramInformasjon.antallDagerTidligereUtbetalt()).isNull();
     }
 
     @Test
@@ -101,7 +97,7 @@ class UngdomsytelseRestTjenesteTest {
         final var forventetMaksdato = fom.plusWeeks(52);
         assertThat(ungdomsprogramInformasjon.maksdatoForDeltakelse()).isEqualTo(forventetMaksdato.minusDays(1));
         assertThat(ungdomsprogramInformasjon.opphørsdato()).isEqualTo(opphørsdato);
-        assertThat(ungdomsprogramInformasjon.antallDagerBruktForTilkjentePerioder()).isNull();
+        assertThat(ungdomsprogramInformasjon.antallDagerTidligereUtbetalt()).isNull();
     }
 
     @Test
@@ -127,7 +123,7 @@ class UngdomsytelseRestTjenesteTest {
         final var forventetMaksdato = fom.plusWeeks(52);
         assertThat(ungdomsprogramInformasjon.maksdatoForDeltakelse()).isEqualTo(forventetMaksdato.minusDays(1));
         assertThat(ungdomsprogramInformasjon.opphørsdato()).isNull();
-        assertThat(ungdomsprogramInformasjon.antallDagerBruktForTilkjentePerioder()).isEqualTo(23);
+        assertThat(ungdomsprogramInformasjon.antallDagerTidligereUtbetalt()).isEqualTo(23);
     }
 
 }
