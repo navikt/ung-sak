@@ -120,6 +120,7 @@ class MapOppgittOpptjening {
             var arbeidType = KodeverkMapper.mapArbeidTypeTilDto(arbeidsforhold.getArbeidType());
 
             var dto = new OppgittArbeidsforholdDto(periode, arbeidType);
+            dto.medErUtenlandskInntekt(false); // feiler mot Abakus hvis det ikke settes.
 
             dto.setInntekt(arbeidsforhold.getInntekt());
             return dto;
