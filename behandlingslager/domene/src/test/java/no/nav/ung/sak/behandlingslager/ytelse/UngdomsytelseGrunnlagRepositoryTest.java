@@ -61,7 +61,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var periode1 = new LocalDateInterval(LocalDate.now(), LocalDate.now());
         var dagsats = BigDecimal.TEN;
         var grunnbeløp = BigDecimal.valueOf(50);
-        var grunnbeløpFaktor = BigDecimal.valueOf(2);
+        var grunnbeløpFaktor = BigDecimal.valueOf(2.041);
         lagreBeregning(periode1, dagsats, grunnbeløp, hentSatstypeOgGrunnbeløp(Sats.HØY), 0, 0);
 
         var ungdomsytelseGrunnlag = repository.hentGrunnlag(behandling.getId());
@@ -81,7 +81,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var periode1 = new LocalDateInterval(LocalDate.now(), LocalDate.now());
         var dagsats = BigDecimal.TEN;
         var grunnbeløp = BigDecimal.valueOf(50);
-        var grunnbeløpFaktor = BigDecimal.valueOf(2);
+        var grunnbeløpFaktor = BigDecimal.valueOf(2.041);
         var antallBarn = 2;
         var barnetilleggDagsats = 100;
         lagreBeregning(periode1, dagsats, grunnbeløp, hentSatstypeOgGrunnbeløp(Sats.HØY), antallBarn, barnetilleggDagsats);
