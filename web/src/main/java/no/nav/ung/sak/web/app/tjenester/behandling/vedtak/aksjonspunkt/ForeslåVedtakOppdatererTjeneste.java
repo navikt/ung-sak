@@ -38,13 +38,8 @@ public class ForeslåVedtakOppdatererTjeneste {
 
         if (AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
-            opprettAksjonspunktForFatterVedtak(builder);
         }
         opprettHistorikkinnslag(behandling);
-    }
-
-    private void opprettAksjonspunktForFatterVedtak(OppdateringResultat.Builder builder) {
-        builder.medEkstraAksjonspunktResultat(AksjonspunktDefinisjon.FATTER_VEDTAK, AksjonspunktStatus.OPPRETTET);
     }
 
     private void opprettHistorikkinnslag(Behandling behandling) {

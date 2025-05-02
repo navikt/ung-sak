@@ -89,12 +89,6 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
         utgangAksjonpunktKoder.add(kode);
     }
 
-    @Deprecated
-    protected void leggTilAksjonspunktVurderingInngang(String kode) {
-        behandlingModell.validerErIkkeAlleredeMappet(kode);
-        inngangAksjonpunktKoder.add(kode);
-    }
-
     void destroy() {
         if (stegInstances != null && steg != null) {
             stegInstances.destroy(steg);

@@ -140,7 +140,7 @@ public class BehandlingskontrollEventPublisererTest {
     public void skal_fyre_event_for_behandlingskontroll_tilbakeføring_ved_prosessering() throws Exception {
         // Arrange
         TestScenario scenario = nyttScenario(STEG_3);
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE, STEG_4);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING, STEG_4);
 
         Behandling behandling = scenario.lagre(serviceProvider);
 
@@ -195,23 +195,20 @@ public class BehandlingskontrollEventPublisererTest {
 
     private BehandlingModellImpl byggModell() {
         // Arrange - noen utvalge, tilfeldige aksjonspunkter
-        AksjonspunktDefinisjon a0_0 = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
         AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST;
-        AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
-        AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT;
-        AksjonspunktDefinisjon a2_0 = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
-        AksjonspunktDefinisjon a2_1 = AksjonspunktDefinisjon.AVKLAR_TILLEGGSOPPLYSNINGER;
+        AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
+        AksjonspunktDefinisjon a2_1 = AksjonspunktDefinisjon.VURDER_TILBAKETREKK;
 
         DummySteg steg = new DummySteg();
-        DummySteg steg0 = new DummySteg(opprettForAksjonspunkt(a2_0));
+        DummySteg steg0 = new DummySteg(opprettForAksjonspunkt(a2_1));
         DummySteg steg1 = new DummySteg();
         DummySteg steg2 = new DummySteg();
 
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, steg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, steg0, ap(a0_0), ap(a0_1)),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, steg1, ap(a1_0), ap(a1_1)),
-            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, steg2, ap(a2_0), ap(a2_1)));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, steg, ap()),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, steg0, ap(a0_1)),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, steg1, ap(a1_1)),
+            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, steg2, ap(a2_1)));
 
         return ModifiserbarBehandlingModell.setupModell(behandlingType, fagsakYtelseType, modellData);
     }

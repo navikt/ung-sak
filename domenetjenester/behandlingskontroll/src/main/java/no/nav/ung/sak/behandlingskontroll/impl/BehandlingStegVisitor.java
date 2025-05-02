@@ -14,7 +14,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
@@ -105,7 +104,7 @@ class BehandlingStegVisitor {
             return StegProsesseringResultat.medMuligTransisjon(førStegStatus, BehandleStegResultat.settPåVent().getTransisjon());
         }
         BehandlingStatus førStatus = behandling.getStatus();
-        BehandlingStegStatus førsteStegStatus = utledStegStatusFørUtføring(stegModell);
+        BehandlingStegStatus førsteStegStatus = utledStegStatusFørUtføring();
         oppdaterBehandlingStegStatus(behandling, stegType, førStegStatus, førsteStegStatus);
         var stegTilstand = behandling.getSisteBehandlingStegTilstand();
         // Utfør steg hvis tillatt av stegets før-status. Utled stegets nye status.
@@ -231,27 +230,18 @@ class BehandlingStegVisitor {
         }
     }
 
-    private BehandlingStegStatus utledStegStatusFørUtføring(BehandlingStegModell stegModell) {
-
+    private BehandlingStegStatus utledStegStatusFørUtføring() {
         BehandlingStegStatus nåBehandlingStegStatus = behandling.getBehandlingStegStatus();
-
-        BehandlingStegType stegType = stegModell.getBehandlingStegType();
-
         if (erForbiInngang(nåBehandlingStegStatus)) {
             // Hvis vi har kommet forbi INNGANG, så gå direkte videre til det gjeldende statusen
             return nåBehandlingStegStatus;
         } else {
-            boolean måHåndereAksjonspunktHer = behandling.getÅpneAksjonspunkter().stream().anyMatch(ap -> skalHåndteresHer(stegType, ap, VurderingspunktType.INN));
-
-            BehandlingStegStatus nyStatus = måHåndereAksjonspunktHer ? behandlingStegKonfigurasjon.getInngang()
-                : behandlingStegKonfigurasjon.getStartet();
-
-            return nyStatus;
+            return behandlingStegKonfigurasjon.getStartet();
         }
     }
 
-    private boolean skalHåndteresHer(BehandlingStegType stegType, Aksjonspunkt ap, VurderingspunktType vurderingspunktType) {
-        return ap.getAksjonspunktDefinisjon().getBehandlingSteg().equals(stegType) && ap.getAksjonspunktDefinisjon().getVurderingspunktType().equals(vurderingspunktType);
+    private boolean skalHåndteresHer(BehandlingStegType stegType, Aksjonspunkt ap) {
+        return ap.getAksjonspunktDefinisjon().getBehandlingSteg().equals(stegType);
     }
 
     private boolean erForbiInngang(BehandlingStegStatus nåBehandlingStegStatus) {
@@ -326,7 +316,7 @@ class BehandlingStegVisitor {
     private boolean harÅpneAksjonspunkter(Behandling behandling, BehandlingStegType behandlingStegType) {
         boolean måHåndereAksjonspunktHer = behandling.getÅpneAksjonspunkter()
             .stream()
-            .anyMatch(ap -> skalHåndteresHer(behandlingStegType, ap, VurderingspunktType.UT));
+            .anyMatch(ap -> skalHåndteresHer(behandlingStegType, ap));
 
         return måHåndereAksjonspunktHer;
     }
@@ -416,11 +406,10 @@ class BehandlingStegVisitor {
 
     private void filterVekkAksjonspunktHåndtertAvFremtidigVurderingspunkt(BehandlingStegModell bsm, List<Aksjonspunkt> åpneAksjonspunkter) {
         BehandlingStegType stegType = bsm.getBehandlingStegType();
-        List<AksjonspunktDefinisjon> inngangKriterier = stegType.getAksjonspunktDefinisjonerInngang();
         List<AksjonspunktDefinisjon> utgangKriterier = stegType.getAksjonspunktDefinisjonerUtgang();
         åpneAksjonspunkter.removeIf(elem -> {
             AksjonspunktDefinisjon elemAksDef = elem.getAksjonspunktDefinisjon();
-            return elem.erÅpentAksjonspunkt() && (inngangKriterier.contains(elemAksDef) || utgangKriterier.contains(elemAksDef));
+            return elem.erÅpentAksjonspunkt() && utgangKriterier.contains(elemAksDef);
         });
     }
 

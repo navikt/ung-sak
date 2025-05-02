@@ -25,7 +25,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModellVisitor;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
@@ -412,10 +411,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
     }
 
     protected void leggTilAksjonspunktDefinisjoner(BehandlingStegType stegType, BehandlingStegModellImpl entry) {
-        AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType, VurderingspunktType.INN)
-            .forEach(ad -> entry.leggTilAksjonspunktVurderingInngang(ad.getKode()));
-
-        AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType, VurderingspunktType.UT)
+        AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType)
             .forEach(ad -> entry.leggTilAksjonspunktVurderingUtgang(ad.getKode()));
     }
 
@@ -423,13 +419,6 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
         Objects.requireNonNull(aksjonspunktKode, "aksjonspunktKode"); //$NON-NLS-1$
 
         for (BehandlingStegModellImpl bsm : this.steg) {
-            if (bsm.getInngangAksjonpunktKoder().contains(aksjonspunktKode)) {
-                throw new IllegalStateException("Aksjonpunktkode [" + aksjonspunktKode + "] allerede mappet til inngang av " + //$NON-NLS-1$ //$NON-NLS-2$
-                    bsm.getBehandlingStegType().getKode()
-                    + " [behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                // //
-                // NOSONAR
-            }
             if (bsm.getUtgangAksjonpunktKoder().contains(aksjonspunktKode)) {
                 throw new IllegalStateException("Aksjonpunktkode [" + aksjonspunktKode + "] allerede mappet til utgang av " + //$NON-NLS-1$ //$NON-NLS-2$
                     bsm.getBehandlingStegType().getKode()

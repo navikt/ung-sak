@@ -111,7 +111,7 @@ public class ForeslåVedtakTjenesteTest {
     @Test
     public void oppretterAksjonspunktVedTotrinnskontrollOgSetterStegPåVent() {
         // Arrange
-        var aksjonspunkt = leggTilAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT);
+        var aksjonspunkt = leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
         Whitebox.setInternalState(aksjonspunkt, "status", AksjonspunktStatus.UTFØRT);
         Whitebox.setInternalState(aksjonspunkt, "toTrinnsBehandling", true);
 

@@ -125,7 +125,6 @@ class ForeslåVedtakTjeneste {
         // Er det grunn til å tro at disse finnes når man er i FORVED-steg - de skal utledes i steget?
         List<Aksjonspunkt> skalAvbrytes = new ArrayList<>();
         behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FORESLÅ_VEDTAK).ifPresent(skalAvbrytes::add);
-        behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK).ifPresent(skalAvbrytes::add);
         if (!skalAvbrytes.isEmpty()) {
             behandlingskontrollTjeneste.lagreAksjonspunkterAvbrutt(kontekst, behandling.getAktivtBehandlingSteg(), skalAvbrytes);
         }

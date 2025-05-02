@@ -98,7 +98,7 @@ public class AksjonspunktRestTjenesteTest {
 
     private AksjonspunktGodkjenningDto opprettetGodkjentAksjonspunkt(boolean godkjent) {
         AksjonspunktGodkjenningDto endretDto = new AksjonspunktGodkjenningDto();
-        endretDto.setAksjonspunktKode(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE);
+        endretDto.setAksjonspunktKode(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
         endretDto.setGodkjent(godkjent);
         return endretDto;
     }
