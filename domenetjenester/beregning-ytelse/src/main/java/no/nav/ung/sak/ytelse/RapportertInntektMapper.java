@@ -205,8 +205,7 @@ public class RapportertInntektMapper {
     }
 
     private static InntektForMottattidspunkt finnInntekterPrMottattidspunkt(OppgittOpptjening o) {
-        final var res = new ArrayList<LocalDateSegment<Set<RapportertInntekt>>>();
-        res.addAll(finnArbeidOgFrilansSegmenter(o));
+        final var res = new ArrayList<>(finnArbeidOgFrilansSegmenter(o));
         return new InntektForMottattidspunkt(o.getInnsendingstidspunkt(), new LocalDateTimeline<>(res, StandardCombinators::union));
     }
 

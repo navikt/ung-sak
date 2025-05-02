@@ -69,7 +69,7 @@ class RapportertInntektMapperTest {
         // Arrange
         final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()));
         final var arbeidsinntekt = BigDecimal.TEN;
-        final var oppgittOpptjening = RapportertInntektMapperTest.lagMottattATFLInntekt(periode, arbeidsinntekt, LocalDateTime.now());
+        final var oppgittOpptjening = lagMottattATFLInntekt(periode, arbeidsinntekt, LocalDateTime.now());
         mockIAY(List.of(oppgittOpptjening));
 
         // Act
@@ -79,7 +79,7 @@ class RapportertInntektMapperTest {
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
             new RapporterteInntekter(Set.of(
                 new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, arbeidsinntekt)
-                ), Set.of()));
+            ), Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 
@@ -108,11 +108,11 @@ class RapportertInntektMapperTest {
             List.of(
                 new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new RapporterteInntekter(
                     Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)),
-                        Set.of())),
+                    Set.of())),
                 new LocalDateSegment<>(periode2.getFomDato(), periode2.getTomDato(), new RapporterteInntekter(
                     Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)),
                     Set.of()))
-                ));
+            ));
         assertThat(tidslinje).isEqualTo(forventet);
     }
 

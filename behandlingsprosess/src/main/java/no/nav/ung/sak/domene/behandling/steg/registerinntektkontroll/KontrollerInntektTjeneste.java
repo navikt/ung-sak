@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -13,13 +14,19 @@ import static no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.Finn
 
 public class KontrollerInntektTjeneste {
 
-    public static LocalDateTimeline<KontrollResultat> utførKontroll(
+    private final BigDecimal akseptertDifferanse;
+
+    public KontrollerInntektTjeneste(BigDecimal akseptertDifferanse) {
+        this.akseptertDifferanse = akseptertDifferanse;
+    }
+
+    public LocalDateTimeline<Kontrollresultat> utførKontroll(
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
         LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
 
 
-        var resultatTidslinje = new LocalDateTimeline<KontrollResultat>(List.of());
+        var resultatTidslinje = new LocalDateTimeline<Kontrollresultat>(List.of());
 
 
         // Sjekker først om vi har relevante årsaker
@@ -27,14 +34,14 @@ public class KontrollerInntektTjeneste {
         final var harIkkePassertRapporteringsfrist = tidslinjeRelevanteÅrsaker.filterValue(it -> !it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
         // Dersom vi ikkje har passert rapporteringsfrist (ikkje har kontroll-årsak) så skal vi vente til rapporteringsfrist
-        resultatTidslinje = resultatTidslinje.crossJoin(harIkkePassertRapporteringsfrist.mapValue(it -> KontrollResultat.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST));
+        resultatTidslinje = resultatTidslinje.crossJoin(harIkkePassertRapporteringsfrist.mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST)));
 
 
         final var relevantIkkeGodkjentUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgIkkeGodkjent()).intersection(tidslinjeRelevanteÅrsaker);
-        var kontrollresultatForIkkeGodkjentUttalelse = finnKontrollresultatForIkkeGodkjentUttalelse(gjeldendeRapporterteInntekter, relevantIkkeGodkjentUttalelse);
+        var kontrollresultatForIkkeGodkjentUttalelse = finnKontrollresultatForIkkeGodkjentUttalelse(gjeldendeRapporterteInntekter, relevantIkkeGodkjentUttalelse).mapValue(Kontrollresultat::utenInntektresultat);
         resultatTidslinje = resultatTidslinje.crossJoin(kontrollresultatForIkkeGodkjentUttalelse, StandardCombinators::coalesceLeftHandSide);
 
-        var avviksvurderingMotRegisterinntekt = Avviksvurdering.gjørAvviksvurderingMotRegisterinntekt(
+        var avviksvurderingMotRegisterinntekt = new Avviksvurdering(akseptertDifferanse).gjørAvviksvurderingMotRegisterinntekt(
             gjeldendeRapporterteInntekter,
             etterlysningTidslinje,
             tidslinjeRelevanteÅrsaker);

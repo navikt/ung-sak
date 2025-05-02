@@ -3,6 +3,7 @@ package no.nav.ung.sak.test.util.behandling;
 import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -29,6 +30,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 import no.nav.ung.sak.behandlingslager.fagsak.*;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -45,6 +48,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -444,6 +449,25 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         if (ungTestscenario.tilkjentYtelsePerioder() != null) {
+            final var startdato = Objects.requireNonNull(ungTestscenario.programPerioder())
+                .stream().min(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).stream().findFirst()
+                .map(UngdomsprogramPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getFomDato)
+                .orElseThrow();
+
+            final var sluttdato = Objects.requireNonNull(ungTestscenario.programPerioder())
+                .stream().max(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).stream().findFirst()
+                .map(UngdomsprogramPeriode::getPeriode)
+                .map(DatoIntervallEntitet::getTomDato)
+                .orElseThrow();
+            final var kontrollertePerioder = ungTestscenario.tilkjentYtelsePerioder().stream()
+                .filter(p -> !p.getFom().equals(startdato) && !p.getTom().equals(sluttdato))
+                .map(p -> KontrollertInntektPeriode.ny()
+                    .medInntekt(p.getValue().reduksjon().divide(BigDecimal.valueOf(0.66), 2, RoundingMode.HALF_UP))
+                    .medKilde(KontrollertInntektKilde.REGISTER)
+                    .medPeriode(DatoIntervallEntitet.fra(p.getLocalDateInterval())).build())
+                .toList();
+            repositories.tilkjentYtelseRepository().lagre(behandling.getId(), kontrollertePerioder);
             repositories.tilkjentYtelseRepository().lagre(behandling.getId(), ungTestscenario.tilkjentYtelsePerioder(), "input", "sporing");
         }
 

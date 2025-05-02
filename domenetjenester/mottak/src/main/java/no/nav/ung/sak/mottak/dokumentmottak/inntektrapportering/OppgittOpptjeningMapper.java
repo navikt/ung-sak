@@ -1,9 +1,5 @@
 package no.nav.ung.sak.mottak.dokumentmottak.inntektrapportering;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
@@ -15,11 +11,16 @@ import no.nav.ung.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
 public class OppgittOpptjeningMapper {
 
     public static Optional<OppgittOpptjeningMottattRequest> mapRequest(BehandlingReferanse behandlingReferanse,
-                                                                MottattDokument dokument,
-                                                                OppgittInntekt oppgittInntekt) {
+                                                                       MottattDokument dokument,
+                                                                       OppgittInntekt oppgittInntekt) {
+
 
         final var oppgittArbeidOgFrilans = oppgittInntekt.getOppgittePeriodeinntekter()
             .stream()
