@@ -117,10 +117,10 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     }
 
     @NotNull
-    private static List<TilkjentPeriodeDto> mapTilTilkjentYtelseDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType lav) {
+    private static List<TilkjentPeriodeDto> mapTilTilkjentYtelseDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType satsType) {
         return grunnlagOgTilkjentYtelseTidslinje
-            .filterValue(it -> it.satsType() == lav)
-            .compress().stream()
+            .filterValue(it -> it.satsType() == satsType)
+            .stream()
             .map(s -> {
                 var it = s.getValue();
                 return new TilkjentPeriodeDto(
@@ -140,7 +140,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             .toList();
 
 
-        boolean enDagsats = grunnlagOgTilkjentYtelse.stream().collect(Collectors.groupingBy(GrunnlagOgTilkjentYtelse::dagsats)).size() == 1;
+        boolean enDagsats = grunnlagOgTilkjentYtelse.stream().collect(Collectors.groupingBy(GrunnlagOgTilkjentYtelse::dagsatsTilkjentYtelse)).size() == 1;
         boolean ettGbeløp = grunnlagOgTilkjentYtelse.stream().collect(Collectors.groupingBy(GrunnlagOgTilkjentYtelse::grunnbeløp)).size() == 1;
 
         var satsTyper = grunnlagOgTilkjentYtelse.stream().map(GrunnlagOgTilkjentYtelse::satsType).collect(Collectors.toSet());
@@ -172,14 +172,8 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var satsPerioder = rhs.getValue();
         return new LocalDateSegment<>(di,
             new GrunnlagOgTilkjentYtelse(
-                dagsatsOgUtbetalingsgrad.dagsats(),
-                avrundTilHeltall(dagsatsOgUtbetalingsgrad.utbetalingsgrad()),
-                satsPerioder.satsType(),
-                satsPerioder.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
-                avrundTilHeltall(satsPerioder.grunnbeløp()).longValue(),
-                avrundTilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())).longValue(),
-                satsPerioder.antallBarn(),
-                satsPerioder.dagsatsBarnetillegg()
+                satsPerioder.satsType(), avrundTilHeltall(satsPerioder.grunnbeløp()).longValue(), satsPerioder.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP), avrundTilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())).longValue(), satsPerioder.dagsats().setScale(0, RoundingMode.HALF_UP).longValue(), satsPerioder.antallBarn(), satsPerioder.dagsatsBarnetillegg(), dagsatsOgUtbetalingsgrad.dagsats(),
+                avrundTilHeltall(dagsatsOgUtbetalingsgrad.utbetalingsgrad())
             ));
 
     }
@@ -216,7 +210,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     private static List<TilkjentPeriodeDto> lagTilkjentePerioderDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTimeline) {
         return grunnlagOgTilkjentYtelseTimeline
             .mapSegment(it ->
-                new TilkjentYtelseDto(it.dagsats(), it.grunnbeløpFaktor(), it.grunnbeløp(), it.årsbeløp()))
+                new TilkjentYtelseDto(it.dagsatsTilkjentYtelse(), it.grunnbeløpFaktor(), it.grunnbeløp(), it.årsbeløp()))
             .compress().stream()
             .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval)) //eldste først for tilkjent perioder
             .map(it ->

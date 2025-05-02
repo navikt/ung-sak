@@ -134,11 +134,13 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                \
                 Hvorfor får du ungdomsprogramytelsen? \
                 Du får ytelsen fordi du er med i ungdomsprogrammet. \
                 Ytelsen gir deg en inntekt mens du deltar i ungdomsprogrammet. \
                 Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i mer enn ett år. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                \
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
@@ -148,6 +150,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si at du har rett på 636 kroner per dag. \
                 Slik regner vi ut hvor mye penger du kan får per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
                 Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det. \
                 Du får en SMS den 1. hver måned. \
@@ -187,11 +190,13 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                \
                 Hvorfor får du ungdomsprogramytelsen? \
                 Du får ytelsen fordi du er med i ungdomsprogrammet. \
                 Ytelsen gir deg en inntekt mens du deltar i ungdomsprogrammet. \
                 Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i mer enn ett år. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                \
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
@@ -201,6 +206,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si at du har rett på 954 kroner per dag. \
                 Slik regner vi ut hvor mye penger du kan får per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
                 Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det. \
                 Du får en SMS den 1. hver måned. \
@@ -230,11 +236,13 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                \
                 Hvorfor får du ungdomsprogramytelsen? \
                 Du får ytelsen fordi du er med i ungdomsprogrammet. \
                 Ytelsen gir deg en inntekt mens du deltar i ungdomsprogrammet. \
                 Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i mer enn ett år. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                \
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
@@ -244,6 +252,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si at du har rett på 954 kroner per dag. \
                 Slik regner vi ut hvor mye penger du kan får per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
                 Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det. \
                 Du får en SMS den 1. hver måned. \
@@ -270,7 +279,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
     @Test
     void lavOgHøySats() {
         var fødselsdato = LocalDate.of(2000, 5, 15); //Blir 25 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget24ÅrSøkerPå25årsdagMåneden(fødselsdato);
+        var ungTestGrunnlag = BrevScenarioer.innvilget25årBle25årførsteMåned(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
