@@ -23,7 +23,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.ung.sak.formidling.FormidlingTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
@@ -43,11 +42,9 @@ import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -77,9 +74,6 @@ public class ForeslåVedtakTjenesteTest {
     private OppgaveTjeneste oppgaveTjeneste;
 
     @Mock
-    private OverlappendeYtelserTjeneste overlappendeYtelserTjeneste;
-
-    @Mock
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekreving;
 
     @Mock
@@ -107,13 +101,11 @@ public class ForeslåVedtakTjenesteTest {
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
         when(oppgaveTjeneste.harÅpneOppgaverAvType(any(AktørId.class), any(), any())).thenReturn(false);
-        when(overlappendeYtelserTjeneste.finnOverlappendeYtelser(any(), anySet())).thenReturn(Map.of());
         when(sjekkMotTilbakekreving.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any(Behandling.class))).thenReturn(List.of());
 
-        SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere, formidlingTjeneste);
+        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere, formidlingTjeneste);
     }
 
     @Test
@@ -189,42 +181,6 @@ public class ForeslåVedtakTjenesteTest {
         assertThat(behandling.isToTrinnsBehandling()).isFalse();
     }
 
-    @Test
-    public void lagerRiktigAksjonspunkterNårDetErOppgaveriGsak() {
-        // Arrange
-        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_KONST_YTELSE);
-        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_DOKUMENT);
-
-        // Act
-        @SuppressWarnings("unused")
-        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
-
-        //TODO: Skrives inn når VKY for K9 er på plass
-        // Assert
-        //assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        //verify(historikkRepository, times(2)).lagre(any());
-        //assertThat(stegResultat.getAksjonspunktListe().contains(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK)).isTrue();
-        //assertThat(stegResultat.getAksjonspunktListe().contains(AksjonspunktDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK)).isTrue();
-    }
-
-    @Test
-    public void lagerIkkeNyeAksjonspunkterNårAksjonspunkterAlleredeFinnes() {
-        /*
-        // Arrange
-        var aksjonspunkt = leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK);
-        Whitebox.setInternalState(aksjonspunkt, "status", AksjonspunktStatus.UTFØRT);
-
-        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_KONST_YTELSE);
-        oppgaveinfoerSomReturneres.add(Oppgaveinfo.VURDER_DOKUMENT);
-
-        // Act
-        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
-
-        // Assert
-        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        verify(historikkRepository, times(0)).lagre(any());
-         */
-    }
 
     @Test
     public void utførerUtenAksjonspunktHvisRevurderingIkkeOpprettetManueltOgIkkeTotrinnskontroll() {

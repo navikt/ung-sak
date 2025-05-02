@@ -48,11 +48,6 @@ public interface InntektArbeidYtelseTjeneste {
      */
     void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
 
-    /**
-     * Lagre nytt grunnlag for Overstyrt Oppgitt Opptjening.
-     */
-    void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder);
-
 
     /**
      * (async) Kopier IAY grunnlag fra en behandling til en annen.
@@ -70,8 +65,5 @@ public interface InntektArbeidYtelseTjeneste {
      * @param dataset         - aggregatene som skal kopieres
      */
     void kopierGrunnlagFraEksisterendeBehandling(Long fraBehandlingId, Long tilBehandlingId, Set<Dataset> dataset);
-
-    Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId);
-
 
 }

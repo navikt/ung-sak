@@ -90,18 +90,6 @@ public class InntektArbeidYtelseGrunnlag {
         this.oppgittOpptjeningAggregat = oppgittOpptjeningAggregat;
     }
 
-
-    public Optional<AktørYtelse> getAktørYtelseFraRegister(AktørId aktørId) {
-        if (register != null) {
-            var aktørYtelse = register.getAktørYtelse().stream().filter(aa -> Objects.equals(aa.getAktørId(), aktørId)).collect(Collectors.toList());
-            if (aktørYtelse.size() > 1) {
-                throw new IllegalStateException("Kan kun ha ett innslag av AktørYtelse for aktørId:" + aktørId + " i  grunnlag " + this.getEksternReferanse());
-            }
-            return aktørYtelse.stream().findFirst();
-        }
-        return Optional.empty();
-    }
-
     public Optional<AktørInntekt> getAktørInntektFraRegister(AktørId aktørId) {
         if (register != null) {
             var aktørInntekt = register.getAktørInntekt().stream().filter(aa -> Objects.equals(aa.getAktørId(), aktørId)).collect(Collectors.toList());
