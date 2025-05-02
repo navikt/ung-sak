@@ -5,8 +5,8 @@ public record ResultatFlaggDto(
     boolean enDagsats,
     @Deprecated
     boolean ettGbeløp,
-    boolean lavSats,
-    boolean høySats,
+    boolean kunLavSats,
+    boolean kunHøySats,
     boolean varierendeSats,
     @Deprecated
     boolean oppnårMaksAlder

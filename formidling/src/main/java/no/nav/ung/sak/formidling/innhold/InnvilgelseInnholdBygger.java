@@ -172,7 +172,14 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var satsPerioder = rhs.getValue();
         return new LocalDateSegment<>(di,
             new GrunnlagOgTilkjentYtelse(
-                satsPerioder.satsType(), avrundTilHeltall(satsPerioder.grunnbeløp()).longValue(), satsPerioder.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP), avrundTilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())).longValue(), satsPerioder.dagsats().setScale(0, RoundingMode.HALF_UP).longValue(), satsPerioder.antallBarn(), satsPerioder.dagsatsBarnetillegg(), dagsatsOgUtbetalingsgrad.dagsats(),
+                satsPerioder.satsType(),
+                avrundTilHeltall(satsPerioder.grunnbeløp()).longValue(),
+                satsPerioder.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
+                avrundTilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())).longValue(),
+                satsPerioder.dagsats().setScale(0, RoundingMode.HALF_UP).longValue(),
+                satsPerioder.antallBarn(),
+                satsPerioder.dagsatsBarnetillegg(),
+                dagsatsOgUtbetalingsgrad.dagsats(),
                 avrundTilHeltall(dagsatsOgUtbetalingsgrad.utbetalingsgrad())
             ));
 
@@ -207,6 +214,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         return new SatserDto(nyesteHøySats.orElse(null), nyesteLavSats.orElse(null), Sats.LAV.getTomAlder(), Sats.HØY.getTomAlder());
     }
 
+    @Deprecated 
     private static List<TilkjentPeriodeDto> lagTilkjentePerioderDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTimeline) {
         return grunnlagOgTilkjentYtelseTimeline
             .mapSegment(it ->

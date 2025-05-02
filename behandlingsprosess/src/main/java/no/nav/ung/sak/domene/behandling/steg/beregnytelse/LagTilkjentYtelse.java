@@ -4,9 +4,9 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.ytelse.BeregnetSats;
-import no.nav.ung.sak.ytelse.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
+import no.nav.ung.sak.ytelse.kontroll.RelevanteKontrollperioderUtleder;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
