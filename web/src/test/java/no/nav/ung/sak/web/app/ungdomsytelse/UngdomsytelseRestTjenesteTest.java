@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.ungdomsytelse;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -101,7 +102,7 @@ class UngdomsytelseRestTjenesteTest {
     }
 
     @Test
-    void skal_utlede_antall_dager_brukt() {
+    void skal_utlede_antall_dager_brukt_fra_original_behandling() {
         // arrange
         final var fom = LocalDate.now().withDayOfYear(1);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
@@ -116,8 +117,15 @@ class UngdomsytelseRestTjenesteTest {
                 .build()
         ), "test", "test");
 
+        var revurdering = TestScenarioBuilder.builderMedSøknad()
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
+            .lagre(entityManager);
+        ungdomsprogramPeriodeRepository.lagre(revurdering.getId(),
+            List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
+
+
         // act
-        final var ungdomsprogramInformasjon = ungdomsytelseRestTjeneste.getUngdomsprogramInformasjon(new BehandlingUuidDto(behandling.getUuid()));
+        final var ungdomsprogramInformasjon = ungdomsytelseRestTjeneste.getUngdomsprogramInformasjon(new BehandlingUuidDto(revurdering.getUuid()));
 
         // assert
         final var forventetMaksdato = fom.plusWeeks(52);
