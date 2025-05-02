@@ -22,7 +22,7 @@ public record InnvilgelseDto(
     Set<GbeløpPeriodeDto> gbeløpPerioder,
     SatserDto satser,
     TilkjentPeriodeDto tilkjentPeriode,
-    TilkjentPeriodeDto tilkjentPeriodeHøy
-) implements TemplateInnholdDto {
+    TilkjentPeriodeDto tilkjentPeriodeHøy,
+    String ikkeStøttetBrevTekst) implements TemplateInnholdDto {
 
 }

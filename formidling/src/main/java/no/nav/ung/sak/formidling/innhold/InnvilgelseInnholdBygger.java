@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
@@ -24,6 +25,7 @@ import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,22 +38,27 @@ import java.util.stream.Collectors;
 @Dependent
 public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InnvilgelseInnholdBygger.class);
+
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private final PersonopplysningRepository personopplysningRepository;
+    private final boolean ignoreIkkeStøttedeBrev;
 
     @Inject
     public InnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
         TilkjentYtelseUtleder tilkjentYtelseUtleder,
-        PersonopplysningRepository personopplysningRepository) {
+        PersonopplysningRepository personopplysningRepository,
+        @KonfigVerdi(value = "IGNORE_FLERE_SATSPERIODER_BREV", defaultVerdi = "false") boolean ignoreFlereSatsperioder) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
         this.personopplysningRepository = personopplysningRepository;
+        this.ignoreIkkeStøttedeBrev = ignoreFlereSatsperioder;
     }
 
 
@@ -73,18 +80,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
         var tilkjenteYtelserHøy = mapTilTilkjentYtelseDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.HØY);
         var tilkjenteYtelserLav = mapTilTilkjentYtelseDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.LAV);
-
-        if (tilkjenteYtelserHøy.size() > 1) {
-            throw new IllegalStateException("Kan ikke ha mer enn 1 periode med høy sats. Fant %d".formatted(tilkjenteYtelserHøy.size()));
-        }
-
-        if (tilkjenteYtelserLav.size() > 1 ) {
-            throw new IllegalStateException("Kan ikke ha mer enn 1 periode med lav sats. Fant %d".formatted(tilkjenteYtelserLav.size()));
-        }
-
-        if (tilkjenteYtelserLav.isEmpty() && tilkjenteYtelserHøy.isEmpty()) {
-            throw new IllegalStateException("Fant ingen tilkjente perioder");
-        }
+        var ikkeStøttetBrevTekst = validerTilkjentYtelse(tilkjenteYtelserHøy, tilkjenteYtelserLav);
 
         var tilkjentYtelseHøy = tilkjenteYtelserHøy.stream().findFirst();
         var tilkjentYtelseLav = tilkjenteYtelserLav.stream().findFirst();
@@ -112,8 +108,40 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
                 gBeløpPerioder,
                 satser,
                 tilkjentYtelseLav.orElseGet(tilkjentYtelseHøy::orElseThrow),
-                tilkjentYtelseHøy.orElse(null)
-            ));
+                tilkjentYtelseHøy.orElse(null),
+                ikkeStøttetBrevTekst));
+    }
+
+    private String validerTilkjentYtelse(List<TilkjentPeriodeDto> tilkjenteYtelserHøy, List<TilkjentPeriodeDto> tilkjenteYtelserLav) {
+        if (tilkjenteYtelserHøy.size() > 1) {
+            String feiltekst = "Kan ikke ha mer enn 1 periode med høy sats. Fant %d".formatted(tilkjenteYtelserHøy.size());
+            if (ignoreIkkeStøttedeBrev){
+                var logg = "Dette brevet vil ikke bli laget i prod: " + feiltekst;
+                LOG.warn(logg);
+                return logg;
+            } else {
+                throw new IllegalStateException(feiltekst);
+
+            }
+        }
+
+        if (tilkjenteYtelserLav.size() > 1 ) {
+            String feiltekst = "Kan ikke ha mer enn 1 periode med lav sats. Fant %d".formatted(tilkjenteYtelserLav.size());
+            if (ignoreIkkeStøttedeBrev){
+                String logg = "Dette brevet vil ikke bli laget i prod: " + feiltekst;
+                LOG.warn(logg);
+                return logg;
+            } else {
+                throw new IllegalStateException(feiltekst);
+
+            }
+        }
+
+        if (tilkjenteYtelserLav.isEmpty() && tilkjenteYtelserHøy.isEmpty()) {
+            throw new IllegalStateException("Fant ingen tilkjente perioder");
+        }
+
+        return null;
     }
 
     @NotNull
@@ -214,7 +242,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         return new SatserDto(nyesteHøySats.orElse(null), nyesteLavSats.orElse(null), Sats.LAV.getTomAlder(), Sats.HØY.getTomAlder());
     }
 
-    @Deprecated 
+    @Deprecated
     private static List<TilkjentPeriodeDto> lagTilkjentePerioderDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTimeline) {
         return grunnlagOgTilkjentYtelseTimeline
             .mapSegment(it ->

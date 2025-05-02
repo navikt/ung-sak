@@ -59,7 +59,7 @@ class BrevGenerererTjenesteTest {
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository()),
             new UngdomsytelseTilkjentYtelseUtleder(ungTestRepositories.tilkjentYtelseRepository()),
-            repositoryProvider.getPersonopplysningRepository());
+            repositoryProvider.getPersonopplysningRepository(), false );
         BrevGenerererTjeneste brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
