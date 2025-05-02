@@ -1,16 +1,11 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InntektArbeidYtelseAggregat {
 
@@ -18,9 +13,6 @@ public class InntektArbeidYtelseAggregat {
 
     @ChangeTracked
     private Set<AktørInntekt> aktørInntekt = new LinkedHashSet<>();
-
-    @ChangeTracked
-    private Set<AktørYtelse> aktørYtelse = new LinkedHashSet<>();
 
     @DiffIgnore
     private LocalDateTime opprettetTidspunkt;
@@ -43,11 +35,6 @@ public class InntektArbeidYtelseAggregat {
         this.setAktørInntekt(kopierFra.getAktørInntekt().stream().map(ai -> {
             AktørInntekt aktørInntekt = new AktørInntekt(ai);
             return aktørInntekt;
-        }).collect(Collectors.toList()));
-
-        this.setAktørYtelse(kopierFra.getAktørYtelse().stream().map(ay -> {
-            AktørYtelse aktørYtelse = new AktørYtelse(ay);
-            return aktørYtelse;
         }).collect(Collectors.toList()));
 
         setOpprettetTidspunkt(opprettetTidspunkt);
@@ -84,21 +71,6 @@ public class InntektArbeidYtelseAggregat {
         this.aktørInntekt.add(aktørInntekt);
     }
 
-
-    void leggTilAktørYtelse(AktørYtelse aktørYtelse) {
-        this.aktørYtelse.add(aktørYtelse);
-    }
-
-
-
-    public Collection<AktørYtelse> getAktørYtelse() {
-        return Collections.unmodifiableSet(aktørYtelse);
-    }
-
-    void setAktørYtelse(Collection<AktørYtelse> aktørYtelse) {
-        this.aktørYtelse = new LinkedHashSet<>(aktørYtelse);
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -107,20 +79,18 @@ public class InntektArbeidYtelseAggregat {
             return false;
         }
         InntektArbeidYtelseAggregat other = (InntektArbeidYtelseAggregat) obj;
-        return Objects.equals(this.getAktørInntekt(), other.getAktørInntekt())
-            && Objects.equals(this.getAktørYtelse(), other.getAktørYtelse());
+        return Objects.equals(this.getAktørInntekt(), other.getAktørInntekt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(aktørInntekt, aktørYtelse);
+        return Objects.hash(aktørInntekt);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" +
             "aktørInntekt=" + aktørInntekt +
-            ", aktørYtelse=" + aktørYtelse +
             '>';
     }
 
