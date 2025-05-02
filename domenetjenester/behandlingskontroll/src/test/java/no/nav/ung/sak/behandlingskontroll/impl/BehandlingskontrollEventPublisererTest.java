@@ -35,7 +35,7 @@ public class BehandlingskontrollEventPublisererTest {
     private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_FAKTA;
     private static final BehandlingStegType STEG_3 = BehandlingStegType.VURDER_KOMPLETTHET;
 
-    private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR;
+    private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_TILBAKETREKK;
 
     @Inject
     BehandlingskontrollEventPubliserer eventPubliserer;
@@ -96,7 +96,7 @@ public class BehandlingskontrollEventPublisererTest {
         // Assert
 
         BehandlingskontrollEvent startEvent = new BehandlingskontrollEvent.StartetEvent(null, null, STEG_1, null);
-        BehandlingskontrollEvent stoppEvent = new BehandlingskontrollEvent.StoppetEvent(null, null, STEG_4, BehandlingStegStatus.INNGANG);
+        BehandlingskontrollEvent stoppEvent = new BehandlingskontrollEvent.StoppetEvent(null, null, STEG_4, BehandlingStegStatus.UTGANG);
         TestEventObserver.containsExactly(startEvent, stoppEvent);
 
     }
@@ -127,12 +127,15 @@ public class BehandlingskontrollEventPublisererTest {
             BehandlingStegStatus.STARTET);
         BehandlingStegStatusEvent steg3StatusEvent = new BehandlingStegStatusEvent(kontekst, STEG_3, BehandlingStegStatus.STARTET,
             BehandlingStegStatus.UTFØRT);
-        BehandlingStegStatusEvent steg4StatusEvent = new BehandlingStegStatusEvent(kontekst, STEG_4, null,
-            BehandlingStegStatus.INNGANG);
+        BehandlingStegStatusEvent steg4StatusEvent0 = new BehandlingStegStatusEvent(kontekst, STEG_4, null,
+            BehandlingStegStatus.STARTET);
+        BehandlingStegStatusEvent steg4StatusEvent1 = new BehandlingStegStatusEvent(kontekst, STEG_4, BehandlingStegStatus.STARTET,
+            BehandlingStegStatus.UTGANG);
         TestEventObserver.containsExactly(steg1StatusEvent0, steg1StatusEvent1 //
             , steg2StatusEvent0, steg2StatusEvent//
             , steg3StatusEvent0, steg3StatusEvent//
-            , steg4StatusEvent//
+            , steg4StatusEvent0
+            , steg4StatusEvent1//
         );
     }
 
@@ -140,7 +143,7 @@ public class BehandlingskontrollEventPublisererTest {
     public void skal_fyre_event_for_behandlingskontroll_tilbakeføring_ved_prosessering() throws Exception {
         // Arrange
         TestScenario scenario = nyttScenario(STEG_3);
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING, STEG_4);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_TILBAKETREKK, STEG_4);
 
         Behandling behandling = scenario.lagre(serviceProvider);
 
