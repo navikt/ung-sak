@@ -18,17 +18,16 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
+import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
@@ -128,10 +127,13 @@ public class BrevScenarioer {
     }
 
     /**
-     * 24 år, søker måneden ungdom blir 25 år. Får både lav og høy sats
+     * Søker bakover i tid med startdato lik første i måneden fylte 25 år.
+     * Søker måneden etter fylte 25 år.
+     * Så er 24 år ved startdato.
+     * Får både lav og høy sats i førstegangsbehandlingen
      * ingen inntektsgradering og ingen barn
      */
-    public static UngTestScenario innvilget24ÅrSøkerPå25årsdagMåneden(LocalDate fødselsdato) {
+    public static UngTestScenario innvilget25årBle25årførsteMåned(LocalDate fødselsdato) {
         LocalDate tjuvefemårsdag = fødselsdato.plusYears(25);
         LocalDate tom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
         LocalDate fom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth());
@@ -267,42 +269,20 @@ public class BrevScenarioer {
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(LocalDateTimeline<UngdomsytelseSatser> satser, LocalDateInterval tilkjentPeriode) {
-        return satser.intersection(tilkjentPeriode).map(s ->
-        {
-            BigDecimal multiply = s.getValue().dagsats().multiply(BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(s.getFom(), s.getTom())));
-            return List.of(
-                new LocalDateSegment<>(s.getLocalDateInterval(), new TilkjentYtelseVerdi(
-                    multiply,
-                    BigDecimal.ZERO,
-                    multiply,
-                    s.getValue().dagsats(),
-                    100
-                ))
-            );
-        });
+        return tilkjentYtelsePerioderMedReduksjon(satser, tilkjentPeriode, LocalDateTimeline.empty());
+
     }
 
-    //TODO Endre til å bruke TilkjentYtelseBeregner
-    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
-        return satsperioder.combine(rapportertInntektTimeline,
+    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
+        LocalDateTimeline<Boolean> ytelseTidslinje = new LocalDateTimeline<>(tilkjentPeriode, true);
+        LocalDateTimeline<BeregnetSats> beregnetSats = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
+        return beregnetSats.intersection(ytelseTidslinje).combine(rapportertInntektTimeline,
             (s, lhs, rhs) -> {
-
-                int antallVirkedager = Virkedager.beregnAntallVirkedager(s.getFomDato(), s.getTomDato());
-
-                var uredusertBeløp = lhs.getValue().dagsats().multiply(BigDecimal.valueOf(antallVirkedager));
                 var rapportertInntekt = rhs == null ? BigDecimal.ZERO : rhs.getValue();
-                var reduksjon = rapportertInntekt.multiply(EndringRapportertInntektInnholdBygger.REDUKSJONS_FAKTOR);
-                var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
-                var dagsats = antallVirkedager == 0 ? BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, RoundingMode.HALF_UP);
-                var utbetalingsgrad = redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(uredusertBeløp, 0, RoundingMode.HALF_UP).intValue();
-
-                return new LocalDateSegment<>(s, new TilkjentYtelseVerdi(
-                    uredusertBeløp,
-                    reduksjon,
-                    redusertBeløp,
-                    dagsats,
-                    utbetalingsgrad));
-            }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), rapportertInntekt).verdi());
+            },
+            LocalDateTimeline.JoinStyle.LEFT_JOIN
+        );
     }
 
 
