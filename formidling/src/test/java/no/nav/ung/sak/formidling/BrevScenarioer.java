@@ -274,7 +274,7 @@ public class BrevScenarioer {
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
-        LocalDateTimeline<Boolean> ytelseTidslinje = new LocalDateTimeline<>(tilkjentPeriode, true);
+        LocalDateTimeline<Boolean> ytelseTidslinje = splitPrMåned(new LocalDateTimeline<>(tilkjentPeriode, true));
         LocalDateTimeline<BeregnetSats> beregnetSats = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
         return beregnetSats.intersection(ytelseTidslinje).combine(rapportertInntektTimeline,
             (s, lhs, rhs) -> {
