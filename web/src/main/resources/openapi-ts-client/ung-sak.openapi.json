@@ -4482,7 +4482,7 @@
       },
       "UngdomsprogramInformasjonDto" : {
         "properties" : {
-          "antallDagerBruktForTilkjentePerioder" : {
+          "antallDagerTidligereUtbetalt" : {
             "format" : "int32",
             "type" : "integer"
           },
@@ -4491,6 +4491,10 @@
             "type" : "string"
           },
           "opphørsdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "startdato" : {
             "format" : "date",
             "type" : "string"
           }

@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.ungdomsytelse;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -13,14 +14,11 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.ungdomsytelse.UngdomsprogramInformasjonDto;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,7 +27,6 @@ import java.util.List;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -83,7 +80,7 @@ class UngdomsytelseRestTjenesteTest {
         final var forventetMaksdato = fom.plusWeeks(52);
         assertThat(ungdomsprogramInformasjon.maksdatoForDeltakelse()).isEqualTo(forventetMaksdato.minusDays(1));
         assertThat(ungdomsprogramInformasjon.opphørsdato()).isNull();
-        assertThat(ungdomsprogramInformasjon.antallDagerBruktForTilkjentePerioder()).isNull();
+        assertThat(ungdomsprogramInformasjon.antallDagerTidligereUtbetalt()).isNull();
     }
 
     @Test
@@ -101,11 +98,11 @@ class UngdomsytelseRestTjenesteTest {
         final var forventetMaksdato = fom.plusWeeks(52);
         assertThat(ungdomsprogramInformasjon.maksdatoForDeltakelse()).isEqualTo(forventetMaksdato.minusDays(1));
         assertThat(ungdomsprogramInformasjon.opphørsdato()).isEqualTo(opphørsdato);
-        assertThat(ungdomsprogramInformasjon.antallDagerBruktForTilkjentePerioder()).isNull();
+        assertThat(ungdomsprogramInformasjon.antallDagerTidligereUtbetalt()).isNull();
     }
 
     @Test
-    void skal_utlede_antall_dager_brukt() {
+    void skal_utlede_antall_dager_brukt_fra_original_behandling() {
         // arrange
         final var fom = LocalDate.now().withDayOfYear(1);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
@@ -120,14 +117,21 @@ class UngdomsytelseRestTjenesteTest {
                 .build()
         ), "test", "test");
 
+        var revurdering = TestScenarioBuilder.builderMedSøknad()
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
+            .lagre(entityManager);
+        ungdomsprogramPeriodeRepository.lagre(revurdering.getId(),
+            List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
+
+
         // act
-        final var ungdomsprogramInformasjon = ungdomsytelseRestTjeneste.getUngdomsprogramInformasjon(new BehandlingUuidDto(behandling.getUuid()));
+        final var ungdomsprogramInformasjon = ungdomsytelseRestTjeneste.getUngdomsprogramInformasjon(new BehandlingUuidDto(revurdering.getUuid()));
 
         // assert
         final var forventetMaksdato = fom.plusWeeks(52);
         assertThat(ungdomsprogramInformasjon.maksdatoForDeltakelse()).isEqualTo(forventetMaksdato.minusDays(1));
         assertThat(ungdomsprogramInformasjon.opphørsdato()).isNull();
-        assertThat(ungdomsprogramInformasjon.antallDagerBruktForTilkjentePerioder()).isEqualTo(23);
+        assertThat(ungdomsprogramInformasjon.antallDagerTidligereUtbetalt()).isEqualTo(23);
     }
 
 }

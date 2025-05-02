@@ -12,15 +12,16 @@ class UngdomsprogramInformasjonDtoTest {
 
     @Test
     void skal_deserialisere_og_serialisere_riktig() throws IOException {
-        UngdomsprogramInformasjonDto dto = new UngdomsprogramInformasjonDto(LocalDate.of(2025,4,30), LocalDate.of(2025,4,30), 20);
+        UngdomsprogramInformasjonDto dto = new UngdomsprogramInformasjonDto(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 4, 30), LocalDate.of(2025, 4, 30), 20);
 
         final var json = JsonUtil.getJson(dto);
 
         assertThat(json).isEqualTo("""
             {
+              "startdato" : "2025-01-01",
               "maksdatoForDeltakelse" : "2025-04-30",
               "opphørsdato" : "2025-04-30",
-              "antallDagerBruktForTilkjentePerioder" : 20
+              "antallDagerTidligereUtbetalt" : 20
             }""");
 
         final var fromJson = JsonUtil.fromJson(json, UngdomsprogramInformasjonDto.class);
@@ -28,7 +29,6 @@ class UngdomsprogramInformasjonDtoTest {
         assertThat(fromJson).isEqualTo(dto);
 
     }
-
 
 
 }
