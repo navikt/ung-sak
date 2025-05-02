@@ -22,6 +22,8 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
+
 @Dependent
 public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnholdBygger {
 
@@ -92,8 +94,8 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         return new LocalDateSegment<>(p,
             new EndringRapportertInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
-                rhs.getValue().setScale(0, RoundingMode.HALF_UP).longValue(),
-                ty.redusertBeløp().setScale(0, RoundingMode.HALF_UP).longValue(),
+                tilHeltall(rhs.getValue()),
+                tilHeltall(ty.redusertBeløp()),
                 REDUSJON_PROSENT
             )
         );

@@ -8,6 +8,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Dependent
 public class UngdomsytelseTilkjentYtelseUtleder implements TilkjentYtelseUtleder {
@@ -23,7 +24,7 @@ public class UngdomsytelseTilkjentYtelseUtleder implements TilkjentYtelseUtleder
     @Override
     public LocalDateTimeline<DagsatsOgUtbetalingsgrad> utledTilkjentYtelseTidslinje(Long behandlingId) {
         final var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandlingId);
-        return tilkjentYtelseTidslinje.mapValue(v -> new DagsatsOgUtbetalingsgrad(v.dagsats().longValue(), BigDecimal.valueOf(v.utbetalingsgrad())));
+        return tilkjentYtelseTidslinje.mapValue(v -> new DagsatsOgUtbetalingsgrad(v.dagsats().setScale(0, RoundingMode.HALF_UP ).longValue(), BigDecimal.valueOf(v.utbetalingsgrad())));
     }
 
 }
