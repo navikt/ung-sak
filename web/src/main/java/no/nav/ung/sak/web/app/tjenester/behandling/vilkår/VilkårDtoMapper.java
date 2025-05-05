@@ -1,6 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vilkår;
 
-import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -23,7 +22,6 @@ class VilkårDtoMapper {
         if (vilkårene != null) {
             return vilkårene.getVilkårene()
                 .stream()
-                .filter(it -> !VilkårType.OPPTJENINGSPERIODEVILKÅR.equals(it.getVilkårType()))
                 .map(vilkår -> mapVilkår(vilkår, medVilkårkjøring, behandling))
                 .collect(Collectors.toList());
         }
