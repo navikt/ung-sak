@@ -12,8 +12,7 @@ public class GrunnbeløpfaktorTidslinje {
 
     private static final LocalDateTimeline<BigDecimal> HØY_GRUNNBELØPFAKTOR_TIDSLINJE = new LocalDateTimeline<>(
         List.of(
-            new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2099, 12, 31), BigDecimal.valueOf(2.041)),
-            new LocalDateSegment<>(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31), BigDecimal.valueOf(2)) // TODO: Kan fjernes før lansering
+            new LocalDateSegment<>(LocalDate.of(2024, 1, 1), LocalDate.of(2099, 12, 31), BigDecimal.valueOf(2.041))
         )
     );
 
