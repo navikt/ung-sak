@@ -1,24 +1,12 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
-import java.math.BigDecimal;
-import java.time.YearMonth;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.logging.Logger;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -27,8 +15,16 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.ytelse.*;
+import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+
+import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.logging.Logger;
 
 
 @ApplicationScoped
@@ -37,12 +33,9 @@ import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 @BehandlingTypeRef
 public class BeregnYtelseSteg implements BehandlingSteg {
 
-    private static final Logger LOGGER = Logger.getLogger(BeregnYtelseSteg.class.getName());
-
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
 
     public BeregnYtelseSteg() {
     }
@@ -50,12 +43,10 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     @Inject
     public BeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                             TilkjentYtelseRepository tilkjentYtelseRepository,
-                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
-                            KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste) {
+                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
-        this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
     }
 
     @Override
@@ -67,7 +58,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         }
         final var månedsvisYtelseTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(kontekst.getBehandlingId());
 
-        final var kontrollertInntektperiodeTidslinje = kontrollerteInntektperioderTjeneste.hentTidslinje(kontekst.getBehandlingId());
+        final var kontrollertInntektperiodeTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(kontekst.getBehandlingId());
 
         // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);

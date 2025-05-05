@@ -315,7 +315,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
                 throw new UnsupportedOperationException("Utvikler-feil: Håpet på å hente inn noe registerdata for ytelseType=" + behandling.getFagsakYtelseType());
             }
 
-            gruppe.addNesteParallell(tasks);
+            tasks.forEach(gruppe::addNesteSekvensiell);
             log.info("Henter inn registerdata: {}", gruppe.getTasks().stream().map(ProsessTaskGruppe.Entry::getTask).map(ProsessTaskData::getTaskType).collect(Collectors.toList()));
         }
 
@@ -333,12 +333,13 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     @Override
     public List<String> utledRegisterinnhentingTaskTyper(Behandling behandling) {
         var tasks = new ArrayList<String>();
+        // Rekkefølgen her viktig
+        // Innhenting av ungdomsprogramperioder må komme før annen innhenting siden denne påvirker opplysningsperioden
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
+            .ifPresent(u -> tasks.add(InnhentUngdomsprogramperioderTask.TASKTYPE));
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())
             .ifPresent(u -> tasks.add(InnhentPersonopplysningerTask.TASKTYPE));
-
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
-            .ifPresent(u -> tasks.add(InnhentUngdomsprogramperioderTask.TASKTYPE));
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
             if (skalInnhenteAbakus(behandling)) {

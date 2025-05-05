@@ -150,24 +150,7 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         lagreOgFlush(behandlingId, iayGrunnlag.build());
     }
 
-    @Override
-    public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjening) {
-        if (oppgittOpptjening == null) {
-            return;
-        }
-        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
 
-        var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
-        iayGrunnlag.medOppgittOpptjening(oppgittOpptjening);
-
-        lagreOgFlush(behandlingId, iayGrunnlag.build());
-    }
-
-
-    @Override
-    public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
-        return finnGrunnlag(behandlingId).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
-    }
 
     private Optional<InntektArbeidYtelseGrunnlag> getAktivtInntektArbeidGrunnlag(@SuppressWarnings("unused") UUID behandlingId) {
         throw new UnsupportedOperationException("NOT IMPLEMENTED (mangler kobling til behandlingUUid): #" + getCallerMethod());

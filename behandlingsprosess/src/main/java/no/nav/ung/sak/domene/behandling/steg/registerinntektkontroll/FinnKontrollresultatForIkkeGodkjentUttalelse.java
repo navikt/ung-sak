@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class FinnKontrollresultatForIkkeGodkjentUttalelse {
 
-    static LocalDateTimeline<KontrollResultat> finnKontrollresultatForIkkeGodkjentUttalelse(
+    static LocalDateTimeline<KontrollResultatType> finnKontrollresultatForIkkeGodkjentUttalelse(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
         LocalDateTimeline<EtterlysningOgRegisterinntekt> relevantIkkeGodkjentUttalelse) {
 
@@ -19,10 +19,10 @@ public class FinnKontrollresultatForIkkeGodkjentUttalelse {
         final var ikkeGodkjentUttalelseResultater = relevantIkkeGodkjentUttalelse.combine(registerInntektTidslinje, (di, uttalelse, register) -> {
             if (!harDiff(uttalelse.getValue().registerInntekt(), register != null ? register.getValue() : Set.of())) {
                 // Ingen endring i registeropplysninger etter at bruker har gitt uttalelse, oppretter aksjonspunkt
-                return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_AKSJONSPUNKT);
+                return new LocalDateSegment<>(di, KontrollResultatType.OPPRETT_AKSJONSPUNKT);
             } else {
                 // Nye registeropplysninger etter at bruker har gitt uttalelse, oppretter ny oppgave med ny frist
-                return new LocalDateSegment<>(di, KontrollResultat.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST);
+                return new LocalDateSegment<>(di, KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST);
             }
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
 

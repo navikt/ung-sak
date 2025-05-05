@@ -51,22 +51,6 @@ public class InntektArbeidYtelseAggregatBuilder {
         return this;
     }
 
-
-    /**
-     * Legger til tilstøtende ytelser for en gitt aktør hvis det ikke er en oppdatering av eksisterende.
-     * Ved oppdatering eksisterer koblingen for denne aktøren allerede så en kopi av forrige innslag manipuleres før lagring.
-     *
-     * @param aktørYtelse {@link AktørYtelseBuilder}
-     * @return this
-     */
-    public InntektArbeidYtelseAggregatBuilder leggTilAktørYtelse(AktørYtelseBuilder aktørYtelse) {
-        if (!aktørYtelse.getErOppdatering() && aktørYtelse.harVerdi()) {
-            // Hvis ny så skal den legges til, hvis ikke ligger den allerede der og blir manipulert.
-            this.kladd.leggTilAktørYtelse(aktørYtelse.build());
-        }
-        return this;
-    }
-
     /**
      * Oppretter builder for inntekter for en gitt aktør. Baserer seg på en kopi av forrige innslag for aktøren hvis det eksisterer.
      *
@@ -78,17 +62,6 @@ public class InntektArbeidYtelseAggregatBuilder {
         final AktørInntektBuilder oppdatere = AktørInntektBuilder.oppdatere(aktørInntekt);
         oppdatere.medAktørId(aktørId);
         return oppdatere;
-    }
-
-    /**
-     * Oppretter builder for tilstøtende ytelser for en gitt aktør. Baserer seg på en kopi av forrige innslag for aktøren hvis det eksisterer.
-     *
-     * @param aktørId aktøren
-     * @return builder {@link AktørYtelseBuilder}
-     */
-    public AktørYtelseBuilder getAktørYtelseBuilder(AktørId aktørId) {
-        Optional<AktørYtelse> aktørYtelse = kladd.getAktørYtelse().stream().filter(ay -> aktørId.equals(ay.getAktørId())).findFirst();
-        return AktørYtelseBuilder.oppdatere(aktørYtelse).medAktørId(aktørId);
     }
 
     public InntektArbeidYtelseAggregat build() {
@@ -154,56 +127,6 @@ public class InntektArbeidYtelseAggregatBuilder {
         public AktørInntektBuilder fjernInntekterFraKilde(InntektsKilde inntektsKilde) {
             kladd.fjernInntekterFraKilde(inntektsKilde);
             return this;
-        }
-    }
-
-    public static class AktørYtelseBuilder {
-        private final AktørYtelse kladd;
-        private final boolean oppdatering;
-
-        private AktørYtelseBuilder(AktørYtelse aktørYtelse, boolean oppdatering) {
-            this.kladd = aktørYtelse;
-            this.oppdatering = oppdatering;
-        }
-
-        static AktørYtelseBuilder ny() {
-            return new AktørYtelseBuilder(new AktørYtelse(), false);
-        }
-
-        static AktørYtelseBuilder oppdatere(AktørYtelse oppdatere) {
-            return new AktørYtelseBuilder(oppdatere, true);
-        }
-
-        public static AktørYtelseBuilder oppdatere(Optional<AktørYtelse> oppdatere) {
-            return oppdatere.map(AktørYtelseBuilder::oppdatere).orElseGet(AktørYtelseBuilder::ny);
-        }
-
-        boolean getErOppdatering() {
-            return oppdatering;
-        }
-
-        public AktørYtelseBuilder medAktørId(AktørId aktørId) {
-            this.kladd.setAktørId(aktørId);
-            return this;
-        }
-
-        public AktørYtelseBuilder leggTilYtelse(YtelseBuilder builder) {
-            Ytelse ytelse = builder.build();
-            if (!builder.getErOppdatering()) {
-                this.kladd.leggTilYtelse(ytelse);
-            }
-            return this;
-        }
-
-        boolean harVerdi() {
-            return kladd.hasValues();
-        }
-
-        public AktørYtelse build() {
-            if (this.kladd.hasValues()) {
-                return kladd;
-            }
-            throw new IllegalStateException("Har ikke innhold");
         }
     }
 

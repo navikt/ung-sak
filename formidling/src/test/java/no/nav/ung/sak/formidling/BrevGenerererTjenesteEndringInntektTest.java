@@ -22,8 +22,6 @@ import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -72,10 +70,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-        var endringInnholdBygger =
-            new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
-                new RapportertInntektMapper(ungTestRepositories.abakusInMemoryInntektArbeidYtelseTjeneste(), new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()))
-            );
+        var endringInnholdBygger = new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
@@ -116,7 +111,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsytelsen din " +
-                "Du får 8 029 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Du får 8 329 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
                 "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
                 "Pengene får du utbetalt før den 10. denne måneden. " +
                 "Når du har en inntekt, får du mindre penger i ungdomsytelse. " +
@@ -147,7 +142,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsytelsen din " +
-                "Du får 14 150 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
+                "Du får 14 710 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
                 "Det er fordi du har hatt en inntekt på 20 000 kroner i denne perioden. " +
                 "Pengene får du utbetalt før den 10. denne måneden. " +
                 "Vi har registrert følgende inntekter på deg: " +

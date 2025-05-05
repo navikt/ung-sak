@@ -29,8 +29,6 @@ import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,10 +72,7 @@ class FormidlingTjenesteTest {
 
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-        var endringInnholdBygger =
-            new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository,
-                new RapportertInntektMapper(ungTestRepositories.abakusInMemoryInntektArbeidYtelseTjeneste(), new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository()))
-            );
+        var endringInnholdBygger = new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository);
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),

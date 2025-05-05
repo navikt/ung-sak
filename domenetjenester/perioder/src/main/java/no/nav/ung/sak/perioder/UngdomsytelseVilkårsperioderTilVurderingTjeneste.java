@@ -89,7 +89,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         UtledeteVilkår utledeteVilkår = inngangsvilkårUtleder.utledVilkår(null);
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
         final var fagsakperiode = behandling.getFagsak().getPeriode();
-        var programperioder = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinjeFraOriginal(BehandlingReferanse.fra(behandling))
+        var programperioder = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)
             .intersection(fagsakperiode.toLocalDateInterval()).compress();
         utledeteVilkår.getAlleAvklarte()
                 .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, TidslinjeUtil.tilDatoIntervallEntiteter(programperioder)));

@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.initperioder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -30,19 +31,14 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseStartdatoRepository startdatoRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
-    private FagsakRepository fagsakRepository;
 
     @Inject
     public InitierPerioderSteg(BehandlingRepository behandlingRepository,
                                UngdomsytelseStartdatoRepository startdatoRepository,
-                               MottatteDokumentRepository mottatteDokumentRepository,
-                               UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, FagsakRepository fagsakRepository) {
+                               MottatteDokumentRepository mottatteDokumentRepository) {
         this.behandlingRepository = behandlingRepository;
         this.startdatoRepository = startdatoRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
-        this.fagsakRepository = fagsakRepository;
     }
 
     public InitierPerioderSteg() {
@@ -51,12 +47,6 @@ public class InitierPerioderSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         initierRelevanteSøknader(kontekst);
-        var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(kontekst.getBehandlingId());
-        if (!periodeTidslinje.isEmpty()) {
-            final var fagsak = fagsakRepository.finnEksaktFagsak(kontekst.getFagsakId());
-            final var maksdato = periodeTidslinje.getMaxLocalDate().equals(TIDENES_ENDE) ? fagsak.getPeriode().getTomDato() : periodeTidslinje.getMaxLocalDate();
-            fagsakRepository.utvidPeriode(kontekst.getFagsakId(), periodeTidslinje.getMinLocalDate(), maksdato);
-        }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

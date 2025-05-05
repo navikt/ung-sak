@@ -9,7 +9,6 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.OverlapendeYtelserRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollerInntektRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste;
@@ -76,7 +75,6 @@ public class RestImplementationClasses {
         classes.add(TilbakekrevingRestTjeneste.class);
         classes.add(AktørRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
-        classes.add(OverlapendeYtelserRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);
         classes.add(LosRestTjeneste.class);
 

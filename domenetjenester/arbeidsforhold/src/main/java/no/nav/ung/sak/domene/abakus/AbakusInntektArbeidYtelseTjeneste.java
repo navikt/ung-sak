@@ -7,13 +7,11 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
-import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.abakus.mapping.IAYFraDtoMapper;
-import no.nav.ung.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -112,34 +110,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     /** @deprecated (brukes kun i test) Bruk AsyncAbakusLagreOpptjeningTask i modul mottak i stedet */
     public void lagreOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
         throw new UnsupportedOperationException("Ikke lenger i bruk, bruk heller AsyncAbakusLagreOpptjeningTask");
-    }
-
-    @Override
-    public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjeningBuilder) {
-        if (oppgittOpptjeningBuilder == null) {
-            return;
-        }
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
-        var saksnummer = behandling.getFagsak().getSaksnummer();
-        var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
-        var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
-        var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
-
-        try {
-            abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
-        }
-
-    }
-
-    @Override
-    public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var request = initRequest(behandling);
-        AktørId aktørId = behandling.getAktørId();
-        return Optional.ofNullable(hentOgMapGrunnlag(request, aktørId)).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
     }
 
     @Override

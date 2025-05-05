@@ -3193,53 +3193,6 @@
         },
         "type" : "object"
       },
-      "OverlappendeYtelseDto" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/OverlappendeYtelseDtoKilde"
-          },
-          "overlappendePerioder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/OverlappendeYtelsePeriodeDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          },
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "ytelseType" : {
-            "$ref" : "#/components/schemas/OverlappendeYtelseDtoYtelseType"
-          }
-        },
-        "required" : [ "kilde", "ytelseType" ],
-        "type" : "object"
-      },
-      "OverlappendeYtelseDtoKilde" : {
-        "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ]
-      },
-      "OverlappendeYtelseDtoYtelseType" : {
-        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
-      },
-      "OverlappendeYtelsePeriodeDto" : {
-        "properties" : {
-          "fom" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "tom" : {
-            "format" : "date",
-            "type" : "string"
-          }
-        },
-        "required" : [ "fom", "tom" ],
-        "type" : "object"
-      },
       "OverstyringAksjonspunktDto" : {
         "properties" : {
           "avbrutt" : {
@@ -4525,6 +4478,27 @@
           "type" : "object"
         } ],
         "required" : [ "hendelseInfo", "startdato" ],
+        "type" : "object"
+      },
+      "UngdomsprogramInformasjonDto" : {
+        "properties" : {
+          "antallDagerTidligereUtbetalt" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "maksdatoForDeltakelse" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "opphørsdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "startdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "UngdomsprogramOpphørHendelse" : {
@@ -5929,39 +5903,6 @@
           }
         },
         "tags" : [ "vilkår" ]
-      }
-    },
-    "/api/behandling/ytelser" : {
-      "get" : {
-        "description" : "Hent andre overlappende K9-ytelser som påvirker denne behandlingen",
-        "operationId" : "hentOverlappendeYtelser",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/OverlappendeYtelseDto"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Hent andre overlappende K9-ytelser som påvirker denne behandlingen",
-        "tags" : [ "ytelser" ]
       }
     },
     "/api/behandlinger" : {
@@ -8113,6 +8054,35 @@
                     "$ref" : "#/components/schemas/UngdomsytelseSatsPeriodeDto"
                   },
                   "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
+      }
+    },
+    "/api/ungdomsytelse/ungdomsprogram-informasjon" : {
+      "get" : {
+        "description" : "Henter informasjon om deltakelse i ungdomsprogram",
+        "operationId" : "getUngdomsprogramInformasjon",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UngdomsprogramInformasjonDto"
                 }
               }
             },

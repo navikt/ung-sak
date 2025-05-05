@@ -1,15 +1,28 @@
 package no.nav.ung.sak.domene.vedtak.fp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
+import no.nav.k9.prosesstask.impl.TaskManager;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
+import no.nav.ung.sak.domene.iverksett.UngdomsytelseOpprettProsessTaskIverksett;
+import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
+import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
+import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
+import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
+import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
+import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
+import no.nav.ung.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -20,29 +33,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
-import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
-import no.nav.k9.prosesstask.impl.TaskManager;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
-import no.nav.ung.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
-import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
-import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
-import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
-import no.nav.ung.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.when;
 
 @Disabled
 @ExtendWith(CdiAwareExtension.class)
@@ -64,6 +62,8 @@ public class OpprettProsessTaskIverksettTest {
     @Mock
     private StønadstatistikkService stønadstatistikkService;
 
+    @Mock
+    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
 
     private Behandling behandling;
     private OpprettProsessTaskIverksett opprettProsessTaskIverksett;
@@ -75,7 +75,7 @@ public class OpprettProsessTaskIverksettTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(fagsakProsessTaskRepository, oppgaveTjeneste, stønadstatistikkService);
+        opprettProsessTaskIverksett = new UngdomsytelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService, manglendeKontrollperioderTjeneste);
     }
 
     @Test
@@ -91,7 +91,6 @@ public class OpprettProsessTaskIverksettTest {
         List<String> tasktyper = prosessTaskDataList.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toList());
         assertThat(tasktyper).contains(AvsluttBehandlingTask.TASKTYPE,
             SendØkonomiOppdragTask.TASKTYPE,
-            VurderOppgaveArenaTask.TASKTYPE,
             VurderOppgaveTilbakekrevingTask.TASKTYPE);
     }
 
@@ -109,7 +108,6 @@ public class OpprettProsessTaskIverksettTest {
         assertThat(tasktyper).contains(AvsluttBehandlingTask.TASKTYPE,
             AvsluttOppgaveTask.TASKTYPE,
             SendØkonomiOppdragTask.TASKTYPE,
-            VurderOppgaveArenaTask.TASKTYPE,
             VurderOppgaveTilbakekrevingTask.TASKTYPE);
     }
 

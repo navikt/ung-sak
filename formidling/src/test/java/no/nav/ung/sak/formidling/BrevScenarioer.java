@@ -201,7 +201,8 @@ public class BrevScenarioer {
 
         var satserPrMåned = splitPrMåned(satser);
         var rapportertInntektTimeline = splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, rapportertInntektPrMåned != null ? BigDecimal.valueOf(rapportertInntektPrMåned) : BigDecimal.ZERO));
-        var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
+        var tilkjentYtelsePerioder = tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektTimeline);
+
 
         var opptjening = OppgittOpptjeningBuilder.ny();
 
@@ -281,8 +282,8 @@ public class BrevScenarioer {
     }
 
     //TODO Endre til å bruke TilkjentYtelseBeregner
-    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
-        return satsperioder.intersection(tilkjentPeriode).combine(rapportertInntektTimeline,
+    private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
+        return satsperioder.combine(rapportertInntektTimeline,
             (s, lhs, rhs) -> {
 
                 int antallVirkedager = Virkedager.beregnAntallVirkedager(s.getFomDato(), s.getTomDato());
@@ -307,18 +308,18 @@ public class BrevScenarioer {
     @Test
     void testTilkjentYtelseReduksjonScenario() {
         var scenario = endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
-        var andreMåned = scenario.tilkjentYtelsePerioder().toSegments().first();
+        var andreMåned = scenario.tilkjentYtelsePerioder().getSegment(new LocalDateInterval(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 31)));
 
         assertThat(andreMåned.getFom()).isEqualTo(LocalDate.of(2025, 1, 1));
         assertThat(andreMåned.getTom()).isEqualTo(LocalDate.of(2025, 1, 31));
 
-        //23 virkningsdager i januar 2025 med lav dagsats på 636,04. Rapportert inntekt er 10 000kr
+        //23 virkningsdager i januar 2025 med lav dagsats på 649,08. Rapportert inntekt er 10 000kr
         TilkjentYtelseVerdi t = andreMåned.getValue();
-        assertThat(t.uredusertBeløp()).isEqualByComparingTo("14628.92"); //636,04 * 23
+        assertThat(t.uredusertBeløp()).isEqualByComparingTo("14928.84"); //649,08 * 23
         assertThat(t.reduksjon()).isEqualByComparingTo("6600"); //66% av 10 0000
-        assertThat(t.dagsats()).isEqualByComparingTo("349"); //636 - ((6600/22)  )
-        assertThat(t.redusertBeløp()).isEqualByComparingTo("8028.92"); // 14628.92 - 6600
-        assertThat(t.utbetalingsgrad()).isEqualTo(55); // 8028.92 / 14628.92 * 100
+        assertThat(t.dagsats()).isEqualByComparingTo("362"); //649 - ((6600/22)  )
+        assertThat(t.redusertBeløp()).isEqualByComparingTo("8328.84"); // 14928.84 - 6600
+        assertThat(t.utbetalingsgrad()).isEqualTo(56); // 8328.84 / 14928.84 * 100
 
     }
 
