@@ -19,7 +19,6 @@ import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -72,8 +71,8 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
-            new UngdomsytelseTilkjentYtelseUtleder(tilkjentYtelseRepository),
-            repositoryProvider.getPersonopplysningRepository());
+            repositoryProvider.getPersonopplysningRepository(),
+            tilkjentYtelseRepository);
 
         var ungdomsytelseSøknadsperiodeTjeneste =
             new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
@@ -130,7 +129,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             """
                 Nav har innvilget søknaden din om ungdomsytelse \
                 Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager. \
-                Du får utbetalt 636 kroner dagen, før skatt. \
+                Du får utbetalt 649 kroner dagen, før skatt. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
                 Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
@@ -139,11 +138,11 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det er derfor viktig at du melder i fra om endringer i din inntekt på nav.no/ungdomsytelse/endring og informerer veileder. \
                 Hvis du ikke gir beskjed om endringer i inntekten, kan Nav kreve penger tilbake, så det er viktig å gi beskjed med en gang det skjer endringer. \
                 Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får. \
-                Siden du er under 25 år så får du 1.33 ganger grunnbeløpet. \
+                Siden du er under 25 år så får du 1.361 ganger grunnbeløpet. \
                 Nav regner med 260 virkedager per år utenom helger og ferie. \
                 For å regne ut hva du får per dag, deles årsbeløpet på antall dager. \
-                Det betyr at du har rett på 1.33 x 124 028 = 165 370 kroner i året. \
-                Dette gir en dagsats på 636 kroner. \
+                Det betyr at du har rett på 1.361 x 124 028 = 168 761 kroner i året. \
+                Dette gir en dagsats på 649 kroner. \
                 For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
                 Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
@@ -172,7 +171,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             """
                 Nav har innvilget søknaden din om ungdomsytelse \
                 Du har rett til ungdomsytelse fra 1. desember 2024 i 260 dager. \
-                Du får utbetalt 954 kroner dagen, før skatt. \
+                Du får utbetalt 974 kroner dagen, før skatt. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
                 Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
@@ -181,11 +180,11 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det er derfor viktig at du melder i fra om endringer i din inntekt på nav.no/ungdomsytelse/endring og informerer veileder. \
                 Hvis du ikke gir beskjed om endringer i inntekten, kan Nav kreve penger tilbake, så det er viktig å gi beskjed med en gang det skjer endringer. \
                 Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får. \
-                Siden du er over 25 år så får du 2 ganger grunnbeløpet. \
+                Siden du er over 25 år så får du 2.041 ganger grunnbeløpet. \
                 Nav regner med 260 virkedager per år utenom helger og ferie. \
                 For å regne ut hva du får per dag, deles årsbeløpet på antall dager. \
-                Det betyr at du har rett på 2 x 124 028 = 248 056 kroner i året. \
-                Dette gir en dagsats på 954 kroner. \
+                Det betyr at du har rett på 2.041 x 124 028 = 253 141 kroner i året. \
+                Dette gir en dagsats på 974 kroner. \
                 For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
                 Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
@@ -207,7 +206,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             """
                 Nav har innvilget søknaden din om ungdomsytelse \
                 Du har rett til ungdomsytelse fra 1. desember 2024 i 130 dager. \
-                Du får utbetalt 954 kroner dagen, før skatt. \
+                Du får utbetalt 974 kroner dagen, før skatt. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
                 Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
@@ -216,11 +215,11 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det er derfor viktig at du melder i fra om endringer i din inntekt på nav.no/ungdomsytelse/endring og informerer veileder. \
                 Hvis du ikke gir beskjed om endringer i inntekten, kan Nav kreve penger tilbake, så det er viktig å gi beskjed med en gang det skjer endringer. \
                 Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får. \
-                Siden du er over 25 år så får du 2 ganger grunnbeløpet til måneden du fyller 29 år. \
+                Siden du er over 25 år så får du 2.041 ganger grunnbeløpet til måneden du fyller 29 år. \
                 Nav regner med 260 virkedager per år utenom helger og ferie. \
                 For å regne ut hva du får per dag, deles årsbeløpet på antall dager. \
-                Det betyr at du har rett på 2 x 124 028 = 248 056 kroner i året. \
-                Dette gir en dagsats på 954 kroner. \
+                Det betyr at du har rett på 2.041 x 124 028 = 253 141 kroner i året. \
+                Dette gir en dagsats på 974 kroner. \
                 For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
                 Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
@@ -248,8 +247,8 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             """
                 Nav har innvilget søknaden din om ungdomsytelse \
                 Du har rett til ungdomsytelse fra 1. mai 2025 i 260 dager. \
-                Fra 1. mai 2025 til 15. mai 2025 får du utbetalt 636 kroner dagen, før skatt. \
-                Fra 16. mai 2025 til 31. mai 2025 får du utbetalt 954 kroner dagen, før skatt. \
+                Fra 1. mai 2025 til 15. mai 2025 får du utbetalt 649 kroner dagen, før skatt. \
+                Fra 16. mai 2025 til 31. mai 2025 får du utbetalt 974 kroner dagen, før skatt. \
                 Nav utbetaler pengene innen den 25. i hver måned. \
                 Informasjon om utbetaling finner du under utbetalingsoversikten på "Min side". \
                 Du får ungdomsytelse fordi du er med ungdomsprogrammet. \
@@ -258,13 +257,13 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det er derfor viktig at du melder i fra om endringer i din inntekt på nav.no/ungdomsytelse/endring og informerer veileder. \
                 Hvis du ikke gir beskjed om endringer i inntekten, kan Nav kreve penger tilbake, så det er viktig å gi beskjed med en gang det skjer endringer. \
                 Nav bruker grunnbeløpet på 124 028 kroner for å regne ut hvor mye du får. \
-                Du får 1.33 ganger grunnbeløpet mens du er under 25 år og 2 ganger grunnbeløpet fra måneden etter du fyller 25 år. \
+                Du får 1.361 ganger grunnbeløpet mens du er under 25 år og 2.041 ganger grunnbeløpet fra måneden etter du fyller 25 år. \
                 Nav regner med 260 virkedager per år utenom helger og ferie. \
                 For å regne ut hva du får per dag, deles årsbeløpet på antall dager. \
-                Fra 1. mai 2025 til 15. mai 2025 har du rett på 1.33 x 124 028 = 165 370 kroner i årsbeløp. \
-                Dette gir en dagsats på 636 kroner i perioden. \
-                Fra 16. mai 2025 til 31. mai 2025 har du rett på 2 x 124 028 = 248 056 kroner i årsbeløp. \
-                Dette gir en dagsats på 954 kroner i perioden. \
+                Fra 1. mai 2025 til 15. mai 2025 har du rett på 1.361 x 124 028 = 168 761 kroner i årsbeløp. \
+                Dette gir en dagsats på 649 kroner i perioden. \
+                Fra 16. mai 2025 til 31. mai 2025 har du rett på 2.041 x 124 028 = 253 141 kroner i årsbeløp. \
+                Dette gir en dagsats på 974 kroner i perioden. \
                 For å regne hva du får utbetalt i måneden ganges dagsatsen med antall virkedager i måneden. \
                 Du kan regne ut hva du får for en måned samt se flere eksempler på utregninger på nav.no/ungdomsytelse. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \

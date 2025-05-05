@@ -4,6 +4,9 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public interface VedtaksbrevInnholdBygger {
 
     /**
@@ -15,6 +18,20 @@ public interface VedtaksbrevInnholdBygger {
      */
     TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje);
 
+
+    /**
+     * Standard desimal avrunding for brev
+     */
+    static BigDecimal tilFaktor(BigDecimal faktor) {
+        return faktor.setScale(3, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Standard heltall avrunding for brev
+     */
+    static long tilHeltall(BigDecimal faktor) {
+        return faktor.setScale(0, RoundingMode.HALF_UP).longValue();
+    }
 }
 
 
