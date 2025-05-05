@@ -53,8 +53,8 @@ public class BehandlingskontrollFremoverhoppTransisjonEventObserver {
 
         boolean medInngangFørsteSteg = førsteStegStatus.isEmpty() || førsteStegStatus.get().erVedInngang();
 
-        Set<String> aksjonspunktDefinisjonerEtterFra = modell.finnAksjonspunktDefinisjonerFraOgMed(førsteSteg, medInngangFørsteSteg);
-        Set<String> aksjonspunktDefinisjonerEtterTil = modell.finnAksjonspunktDefinisjonerFraOgMed(sisteSteg, true);
+        Set<String> aksjonspunktDefinisjonerEtterFra = modell.finnAksjonspunktDefinisjonerFraOgMed(førsteSteg);
+        Set<String> aksjonspunktDefinisjonerEtterTil = modell.finnAksjonspunktDefinisjonerFraOgMed(sisteSteg);
 
         Set<String> mellomliggende = new HashSet<>(aksjonspunktDefinisjonerEtterFra);
         mellomliggende.removeAll(aksjonspunktDefinisjonerEtterTil);

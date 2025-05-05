@@ -75,7 +75,7 @@ public class BehandlingskontrollTjenesteImplTest {
         steg5 = modell.finnNesteSteg(steg4).getBehandlingStegType();
         manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, steg3);
 
-        steg2UtgangAksjonspunkt = modell.finnAksjonspunktDefinisjonerUtgang(steg2).iterator().next();
+        steg2UtgangAksjonspunkt = modell.finnAksjonspunktDefinisjoner(steg2).iterator().next();
 
         initBehandlingskontrollTjeneste();
 

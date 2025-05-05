@@ -1,10 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.vedtak;
 
-import static java.lang.Boolean.TRUE;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
@@ -19,7 +14,11 @@ import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.lang.Boolean.TRUE;
 
 @ApplicationScoped
 public class FatteVedtakTjeneste {
@@ -95,7 +94,6 @@ public class FatteVedtakTjeneste {
         return fatterVedtakAksjonspunkt.getStatus().equals(AksjonspunktStatus.UTFØRT) && !totrinnaksjonspunktvurderinger.isEmpty() && totrinnaksjonspunktvurderinger.stream().allMatch(Totrinnsvurdering::isGodkjent);
     }
 
-    @NotNull
     private static List<AksjonspunktDefinisjon> finnIkkeGodkjenteVurderinger(Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger) {
         return totrinnaksjonspunktvurderinger.stream()
             .filter(a -> !TRUE.equals(a.isGodkjent()))
