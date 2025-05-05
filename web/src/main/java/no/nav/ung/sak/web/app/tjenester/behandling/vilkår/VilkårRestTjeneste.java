@@ -102,7 +102,7 @@ public class VilkårRestTjeneste {
         var vilkåreneOpt = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
         var dto = vilkåreneOpt.map(vilkårene -> {
             var vilkårPeriodeMap = utledFaktiskeVilkårPerioder(behandling, vilkårene);
-            return VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene, vilkårPeriodeMap);
+            return VilkårDtoMapper.lagVilkarMedPeriodeDto(behandling, inkluderVilkårkjøring, vilkårene);
         }).orElse(Collections.emptyList());
         return dto;
     }
