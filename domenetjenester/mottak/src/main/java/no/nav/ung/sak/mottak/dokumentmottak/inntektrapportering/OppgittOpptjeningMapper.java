@@ -46,7 +46,7 @@ public class OppgittOpptjeningMapper {
         var aktør = new AktørIdPersonident(behandlingReferanse.getAktørId().getId());
         var saksnummer = behandlingReferanse.getSaksnummer();
         var ytelseType = YtelseType.fraKode(behandlingReferanse.getFagsakYtelseType().getKode());
-        var oppgittOpptjening = new IAYTilDtoMapper(behandlingReferanse.getAktørId(), null, behandlingReferanse.getBehandlingUuid()).mapTilDto(builder);
+        var oppgittOpptjening = IAYTilDtoMapper.mapTilDto(builder);
         var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandlingReferanse.getBehandlingUuid(), aktør, ytelseType, oppgittOpptjening);
         return request;
     }

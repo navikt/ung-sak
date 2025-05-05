@@ -17,7 +17,6 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederFake;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,8 +57,8 @@ class BrevGenerererTjenesteTest {
         InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository()),
-            new UngdomsytelseTilkjentYtelseUtleder(ungTestRepositories.tilkjentYtelseRepository()),
-            repositoryProvider.getPersonopplysningRepository());
+            repositoryProvider.getPersonopplysningRepository(),
+            ungTestRepositories.tilkjentYtelseRepository());
         BrevGenerererTjeneste brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),

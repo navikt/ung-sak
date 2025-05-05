@@ -1,20 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.iverksettevedtak;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDateTime;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -40,12 +25,26 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
 import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
+import no.nav.ung.sak.domene.iverksett.UngdomsytelseOpprettProsessTaskIverksett;
 import no.nav.ung.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -79,6 +78,9 @@ public class IverksetteVedtakStegYtelseTest {
     @Mock
     private StønadstatistikkService stønadstatistikkService;
 
+    @Mock
+    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
+
     private IverksetteVedtakSteg iverksetteVedtakSteg;
 
     @BeforeEach
@@ -91,7 +93,7 @@ public class IverksetteVedtakStegYtelseTest {
         historikkRepository = repositoryProvider.getHistorikkRepository();
 
 
-        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, stønadstatistikkService));
+        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new UngdomsytelseOpprettProsessTaskIverksett(prosessTaskRepository, stønadstatistikkService, manglendeKontrollperioderTjeneste));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse);

@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -314,13 +313,13 @@ public class BrevScenarioer {
         assertThat(andreMåned.getFom()).isEqualTo(LocalDate.of(2025, 1, 1));
         assertThat(andreMåned.getTom()).isEqualTo(LocalDate.of(2025, 1, 31));
 
-        //23 virkningsdager i januar 2025 med lav dagsats på 636,04. Rapportert inntekt er 10 000kr
+        //23 virkningsdager i januar 2025 med lav dagsats på 649,08. Rapportert inntekt er 10 000kr
         TilkjentYtelseVerdi t = andreMåned.getValue();
-        assertThat(t.uredusertBeløp()).isEqualByComparingTo("14628.92"); //636,04 * 23
+        assertThat(t.uredusertBeløp()).isEqualByComparingTo("14928.84"); //649,08 * 23
         assertThat(t.reduksjon()).isEqualByComparingTo("6600"); //66% av 10 0000
-        assertThat(t.dagsats()).isEqualByComparingTo("349"); //636 - ((6600/22)  )
-        assertThat(t.redusertBeløp()).isEqualByComparingTo("8028.92"); // 14628.92 - 6600
-        assertThat(t.utbetalingsgrad()).isEqualTo(55); // 8028.92 / 14628.92 * 100
+        assertThat(t.dagsats()).isEqualByComparingTo("362"); //649 - ((6600/22)  )
+        assertThat(t.redusertBeløp()).isEqualByComparingTo("8328.84"); // 14928.84 - 6600
+        assertThat(t.utbetalingsgrad()).isEqualTo(56); // 8328.84 / 14928.84 * 100
 
     }
 
