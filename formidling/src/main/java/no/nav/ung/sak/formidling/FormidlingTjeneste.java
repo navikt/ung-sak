@@ -48,8 +48,6 @@ public class FormidlingTjeneste {
 
         return new VedtaksbrevValgDto(
             egenskaper.harBrev(),
-            null,
-            false,
             egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreHindre(),
