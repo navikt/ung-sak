@@ -285,8 +285,8 @@ class FormidlingTjenesteTest {
 
     private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
         GenerertBrev generertBrev = formidlingTjeneste.forhåndsvisVedtaksbrev(
-            new VedtaksbrevForhåndsvisDto(behandling.getId(), redigertVersjon),
-            true);
+            new VedtaksbrevForhåndsvisDto(behandling.getId(), redigertVersjon, true)
+        );
         return Optional.ofNullable(generertBrev).map(it -> it.dokument().html()).orElse(null);
     }
 

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
+import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
@@ -69,7 +70,7 @@ public class FormidlingRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling",
         responses = @ApiResponse(responseCode = "200", description = "lagret ok")
-)
+    )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response lagreVedtaksbrevValg(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequestDto dto) {
@@ -83,15 +84,15 @@ public class FormidlingRestTjeneste {
     @POST
     @Path("/formidling/vedtaksbrev/forhaandsvis")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
+    //Json er med fordi frontend klienten alltid setter Accept = json, men denne produserer ikke json
+    @Produces({APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
     @Operation(description = "Forhåndsvise vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ", tags = "formidling",
         responses = @ApiResponse(
             responseCode = "200",
             description = "pdf",
             content = {
-                @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
+                @Content(mediaType = APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary")),
-                @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", format = "binary")),
                 @Content(mediaType = MediaType.TEXT_HTML, schema = @Schema(type = "string"))
             }
         )
@@ -101,23 +102,26 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
     ) {
-        String mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), MediaType.APPLICATION_OCTET_STREAM);
-        var generertBrev = formidlingTjeneste.forhåndsvisVedtaksbrev(dto, MediaType.TEXT_HTML.equals(mediaTypeReq));
+        var generertBrev = formidlingTjeneste.forhåndsvisVedtaksbrev(dto);
 
         if (generertBrev == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        return switch (mediaTypeReq) {
-            case PDF_MEDIA_STRING, MediaType.APPLICATION_JSON -> Response.ok(generertBrev.dokument().pdf()).build();
-            case MediaType.TEXT_HTML -> Response.ok(generertBrev.dokument().html()).build();
-            default -> Response.ok(generertBrev.dokument().pdf()) //Kun for å få swagger til å laste ned pdf
-                .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.pdf\"", dto.behandlingId(), generertBrev.malType().getKode()))
+        var htmlVersjon = Boolean.TRUE.equals(dto.htmlVersjon());
+        var responseMediaType = htmlVersjon ? MediaType.TEXT_HTML : "application/pdf";
+        var resultat = htmlVersjon ? generertBrev.dokument().html() : generertBrev.dokument().pdf();
+
+        String mediaTypeReq = Objects.requireNonNullElse(request.getHeader(HttpHeaders.ACCEPT), APPLICATION_OCTET_STREAM);
+        if (Objects.equals(mediaTypeReq, APPLICATION_OCTET_STREAM)) {
+            var extension = htmlVersjon ? ".html" : ".pdf";
+            return Response.ok(resultat) //Kun for å få swagger til å laste ned pdf
+                .header("Content-Disposition", String.format("attachment; filename=\"%s-%s.%s\"", dto.behandlingId(), generertBrev.malType().getKode(), extension))
                 .build();
+        }
 
-        };
+        return Response.ok(resultat).type(responseMediaType).build();
+
     }
-
-
 }
 
