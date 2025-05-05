@@ -1,17 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -36,8 +24,13 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class RegisterdataInnhenter {
@@ -137,7 +130,7 @@ public class RegisterdataInnhenter {
         }
         return barn.getFamilierelasjoner().stream()
             .filter(fr -> fr.getPersonIdent().equals(personinfo.getPersonIdent()))
-            .map(rel -> rel.getMinRelasjonsRolle())
+            .map(Familierelasjon::getRelasjonsrolle)
             .toList();
     }
 
