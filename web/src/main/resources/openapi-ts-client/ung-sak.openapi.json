@@ -641,17 +641,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ]
       },
-      "AutomatiskBrevOperasjoner" : {
-        "properties" : {
-          "enableRediger" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          }
-        },
-        "type" : "object"
-      },
       "AvklartPersonstatus" : {
         "properties" : {
           "orginalPersonstatus" : {
@@ -4656,9 +4645,6 @@
       },
       "VedtaksbrevValgDto" : {
         "properties" : {
-          "automatiskBrevOperasjoner" : {
-            "$ref" : "#/components/schemas/AutomatiskBrevOperasjoner"
-          },
           "enableHindre" : {
             "type" : "boolean"
           },
@@ -4667,9 +4653,6 @@
           },
           "forklaring" : {
             "type" : "string"
-          },
-          "fritekstbrev" : {
-            "type" : "boolean"
           },
           "harBrev" : {
             "type" : "boolean"
