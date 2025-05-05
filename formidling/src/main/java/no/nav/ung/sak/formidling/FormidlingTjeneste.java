@@ -48,8 +48,6 @@ public class FormidlingTjeneste {
 
         return new VedtaksbrevValgDto(
             egenskaper.harBrev(),
-            null,
-            false,
             egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreHindre(),
@@ -88,13 +86,15 @@ public class FormidlingTjeneste {
 
         vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
         vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
-        vedtaksbrevValgEntitet.setRedigertBrevHtml(dto.redigertHtml()); //TODO sanitize html!
+        vedtaksbrevValgEntitet.rensOgSettRedigertHtml(dto.redigertHtml());
 
         return vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }
 
-    public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto, boolean kunHtml) {
+    public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto) {
+        var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
+
         if (dto.redigertVersjon() == null) {
             return brevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
         }
@@ -111,7 +111,7 @@ public class FormidlingTjeneste {
             return;
         }
 
-        vedtaksbrevValgEntitet.tilbakestill();
+        vedtaksbrevValgEntitet.tilbakestillVedTilbakehopp();
         vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }

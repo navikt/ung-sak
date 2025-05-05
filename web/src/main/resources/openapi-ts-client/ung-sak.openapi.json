@@ -641,17 +641,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ]
       },
-      "AutomatiskBrevOperasjoner" : {
-        "properties" : {
-          "enableRediger" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          }
-        },
-        "type" : "object"
-      },
       "AvklartPersonstatus" : {
         "properties" : {
           "orginalPersonstatus" : {
@@ -4644,6 +4633,9 @@
             "minimum" : 0,
             "type" : "integer"
           },
+          "htmlVersjon" : {
+            "type" : "boolean"
+          },
           "redigertVersjon" : {
             "type" : "boolean"
           }
@@ -4653,9 +4645,6 @@
       },
       "VedtaksbrevValgDto" : {
         "properties" : {
-          "automatiskBrevOperasjoner" : {
-            "$ref" : "#/components/schemas/AutomatiskBrevOperasjoner"
-          },
           "enableHindre" : {
             "type" : "boolean"
           },
@@ -4664,9 +4653,6 @@
           },
           "forklaring" : {
             "type" : "string"
-          },
-          "fritekstbrev" : {
-            "type" : "boolean"
           },
           "harBrev" : {
             "type" : "boolean"
@@ -6880,12 +6866,6 @@
         "responses" : {
           "200" : {
             "content" : {
-              "application/json" : {
-                "schema" : {
-                  "format" : "binary",
-                  "type" : "string"
-                }
-              },
               "application/octet-stream" : {
                 "schema" : {
                   "format" : "binary",

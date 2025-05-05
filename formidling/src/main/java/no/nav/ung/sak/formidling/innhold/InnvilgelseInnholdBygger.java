@@ -12,6 +12,8 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
@@ -22,9 +24,6 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
-import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
-import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import java.math.BigDecimal;
@@ -35,6 +34,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilFaktor;
+import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
+
 @Dependent
 public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
@@ -42,22 +44,22 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
-    private final TilkjentYtelseUtleder tilkjentYtelseUtleder;
     private final PersonopplysningRepository personopplysningRepository;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
     private final boolean ignoreIkkeStøttedeBrev;
 
     @Inject
     public InnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-        TilkjentYtelseUtleder tilkjentYtelseUtleder,
         PersonopplysningRepository personopplysningRepository,
+        TilkjentYtelseRepository tilkjentYtelseRepository,
         @KonfigVerdi(value = "IGNORE_FLERE_SATSPERIODER_BREV", defaultVerdi = "false") boolean ignoreFlereSatsperioder) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
-        this.tilkjentYtelseUtleder = tilkjentYtelseUtleder;
         this.personopplysningRepository = personopplysningRepository;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.ignoreIkkeStøttedeBrev = ignoreFlereSatsperioder;
     }
 
@@ -66,7 +68,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         Long behandlingId = behandling.getId();
-        var tilkjentYtelseTidslinje = tilkjentYtelseUtleder.utledTilkjentYtelseTidslinje(behandlingId);
+        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandlingId);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
@@ -144,7 +146,6 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         return null;
     }
 
-    @NotNull
     private static List<TilkjentPeriodeDto> mapTilTilkjentYtelseDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType satsType) {
         return grunnlagOgTilkjentYtelseTidslinje
             .filterValue(it -> it.satsType() == satsType)
@@ -195,20 +196,19 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     }
 
     private static LocalDateSegment<GrunnlagOgTilkjentYtelse> sammenstillGrunnlagOgTilkjentYtelse(
-        LocalDateInterval di, LocalDateSegment<DagsatsOgUtbetalingsgrad> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
-        var dagsatsOgUtbetalingsgrad = lhs.getValue();
+        LocalDateInterval di, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<UngdomsytelseSatser> rhs) {
+        var tilkjentYtelse = lhs.getValue();
         var satsPerioder = rhs.getValue();
         return new LocalDateSegment<>(di,
             new GrunnlagOgTilkjentYtelse(
+                tilHeltall(tilkjentYtelse.dagsats()),
+                tilkjentYtelse.utbetalingsgrad(),
                 satsPerioder.satsType(),
-                avrundTilHeltall(satsPerioder.grunnbeløp()).longValue(),
-                satsPerioder.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP),
-                avrundTilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())).longValue(),
-                satsPerioder.dagsats().setScale(0, RoundingMode.HALF_UP).longValue(),
+                tilFaktor(satsPerioder.grunnbeløpFaktor()),
+                tilHeltall(satsPerioder.grunnbeløp()),
+                tilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())),
                 satsPerioder.antallBarn(),
-                satsPerioder.dagsatsBarnetillegg(),
-                dagsatsOgUtbetalingsgrad.dagsats(),
-                avrundTilHeltall(dagsatsOgUtbetalingsgrad.utbetalingsgrad())
+                satsPerioder.dagsatsBarnetillegg()
             ));
 
     }

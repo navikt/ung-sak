@@ -14,7 +14,6 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.RoundingMode;
 import java.time.LocalDate;
 
 @Dependent
@@ -46,9 +45,9 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_HØY_SATS,
                 new EndringHøySatsDto(
                         satsendringsdato,
-                        nyeSatser.dagsats().setScale(0, RoundingMode.HALF_UP).longValue(),
+                        VedtaksbrevInnholdBygger.tilHeltall(nyeSatser.dagsats()),
                         Sats.HØY.getFomAlder(),
-                        nyeSatser.grunnbeløpFaktor().setScale(2, RoundingMode.HALF_UP)
+                        VedtaksbrevInnholdBygger.tilFaktor(nyeSatser.grunnbeløpFaktor())
                 ));
     }
 

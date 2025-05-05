@@ -34,28 +34,21 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- TODO flytt til parent eller hent transitativt -->
         <dependency>
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
-            <version>4.4.0</version>
         </dependency>
-        <!-- TODO flytt til parent eller hent transitativt -->
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model-jakarta</artifactId>
-            <version>1.26.5</version>
         </dependency>
-        <!-- TODO brukes bare for å sette loglevel. Prøv å endre pdfgen-core til å gjøre dette for oss -->
         <dependency>
             <groupId>io.github.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-core</artifactId>
-            <version>1.1.26</version>
         </dependency>
         <dependency>
             <groupId>io.github.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-slf4j</artifactId>
-            <version>1.1.26</version>
         </dependency>
 
 		<!-- Test avhengigheter -->
