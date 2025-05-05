@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -268,19 +269,26 @@ public class ForeslåVedtakTjenesteTest {
     }
 
     @Test
-    public void skalAvbryteForeslåOgFatteVedtakAksjonspunkterNårDeFinnesPåBehandlingUtenTotrinnskontroll() {
+    public void skalAvbryteForeslåAksjonspunkterNårDeFinnesPåBehandlingUtenTotrinnskontroll() {
         // Arrange
         leggTilAksjonspunkt(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK);
 
         // Act
         tjeneste.foreslåVedtak(behandling, kontekst);
 
         // Assert
         assertThat(behandling.isToTrinnsBehandling()).isFalse();
-        assertThat(behandling.getAksjonspunkter()).hasSize(2);
+        assertThat(behandling.getAksjonspunkter()).hasSize(1);
         assertThat(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FORESLÅ_VEDTAK).getStatus()).isEqualTo(AksjonspunktStatus.AVBRUTT);
-        assertThat(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FATTER_VEDTAK).getStatus()).isEqualTo(AksjonspunktStatus.AVBRUTT);
+    }
+
+    @Test
+    public void skalKasteFeilDersomViHarFatteVedtakUtenTotrinnPåBehandling() {
+        // Arrange
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK);
+
+        // Act
+        assertThrows(IllegalStateException.class, () -> tjeneste.foreslåVedtak(behandling, kontekst));
     }
 
     private Aksjonspunkt leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
