@@ -142,7 +142,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsytelsen din " +
-                "Du får 14 711 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
+                "Du får 14 710 kroner i ungdomsytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
                 "Det er fordi du har hatt en inntekt på 20 000 kroner i denne perioden. " +
                 "Pengene får du utbetalt før den 10. denne måneden. " +
                 "Vi har registrert følgende inntekter på deg: " +

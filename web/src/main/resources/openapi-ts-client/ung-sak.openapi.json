@@ -616,6 +616,27 @@
         },
         "type" : "object"
       },
+      "AvklartPersonstatus" : {
+        "properties" : {
+          "orginalPersonstatus" : {
+            "$ref" : "#/components/schemas/AvklartPersonstatusOrginalPersonstatus"
+          },
+          "overstyrtPersonstatus" : {
+            "$ref" : "#/components/schemas/AvklartPersonstatusOverstyrtPersonstatus"
+          }
+        },
+        "type" : "object"
+      },
+      "AvklartPersonstatusOrginalPersonstatus" : {
+        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
+      },
+      "AvklartPersonstatusOverstyrtPersonstatus" : {
+        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
+      },
       "AvklarteOpplysninger" : {
         "properties" : {
           "begrunnelse" : {
@@ -4378,6 +4399,9 @@
             "minimum" : 0,
             "type" : "integer"
           },
+          "htmlVersjon" : {
+            "type" : "boolean"
+          },
           "redigertVersjon" : {
             "type" : "boolean"
           }
@@ -4387,9 +4411,6 @@
       },
       "VedtaksbrevValgDto" : {
         "properties" : {
-          "automatiskBrevOperasjoner" : {
-            "$ref" : "#/components/schemas/AutomatiskBrevOperasjoner"
-          },
           "enableHindre" : {
             "type" : "boolean"
           },
@@ -4398,9 +4419,6 @@
           },
           "forklaring" : {
             "type" : "string"
-          },
-          "fritekstbrev" : {
-            "type" : "boolean"
           },
           "harBrev" : {
             "type" : "boolean"
@@ -6614,12 +6632,6 @@
         "responses" : {
           "200" : {
             "content" : {
-              "application/json" : {
-                "schema" : {
-                  "format" : "binary",
-                  "type" : "string"
-                }
-              },
               "application/octet-stream" : {
                 "schema" : {
                   "format" : "binary",

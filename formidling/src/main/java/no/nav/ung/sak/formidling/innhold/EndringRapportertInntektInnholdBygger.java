@@ -55,20 +55,31 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             EndringRapportertInntektInnholdBygger::mapTilPeriodeDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        EndringRapportertInntektDto dto = aggregerOgLagDto(periodeDtoTidslinje);
+        var utbetalingSum = relevantTilkjentYtelse.toSegments().stream()
+            .map(it -> it.getValue().redusertBeløp())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        var rapportertInntektSum = kontrollertInntektPerioderTidslinje.toSegments().stream()
+            .map(LocalDateSegment::getValue)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        EndringRapportertInntektDto dto = new EndringRapportertInntektDto(
+            new PeriodeDto(periodeDtoTidslinje.getMinLocalDate(), periodeDtoTidslinje.getMaxLocalDate()),
+            tilHeltall(rapportertInntektSum),
+            tilHeltall(utbetalingSum),
+            REDUSJON_PROSENT,
+            periodeDtoTidslinje.size() > 1,
+            periodeDtoTidslinje.toSegments().stream()
+                .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
+                .map(LocalDateSegment::getValue)
+                .collect(Collectors.toList())
+        );
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT, dto);
     }
 
     private EndringRapportertInntektDto aggregerOgLagDto(
-        LocalDateTimeline<EndringRapportertInntektPeriodeDto> periodeDtoTidslinje) {
-        long sumRapportertInntekt = periodeDtoTidslinje.toSegments().stream()
-            .map(it -> it.getValue().rapportertInntekt())
-            .reduce(0L, Long::sum);
-
-        long sumUtbetaling = periodeDtoTidslinje.toSegments().stream()
-            .map(it -> it.getValue().utbetalingBeløp())
-            .reduce(0L, Long::sum);
+        LocalDateTimeline<EndringRapportertInntektPeriodeDto> periodeDtoTidslinje, long sumUtbetaling, long sumRapportertInntekt) {
 
         return new EndringRapportertInntektDto(
             new PeriodeDto(periodeDtoTidslinje.getMinLocalDate(), periodeDtoTidslinje.getMaxLocalDate()),

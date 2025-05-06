@@ -32,7 +32,14 @@ public record VedtaksbrevForhåndsvisDto(
      */
     @JsonProperty("redigertVersjon")
     @Valid
-    Boolean redigertVersjon
+    Boolean redigertVersjon,
+
+    /**
+     * Angir om html versjon skal hentes. False eller null henter PDF.
+     */
+    @JsonProperty("htmlVersjon")
+    @Valid
+    Boolean htmlVersjon
 
 ) {
 }

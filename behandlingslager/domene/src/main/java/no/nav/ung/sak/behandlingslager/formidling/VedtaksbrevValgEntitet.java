@@ -2,10 +2,13 @@ package no.nav.ung.sak.behandlingslager.formidling;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import org.slf4j.Logger;
 
 @Entity(name = "VedtaksbrevValgEntitet")
 @Table(name = "vedtaksbrev_valg")
 public class VedtaksbrevValgEntitet extends BaseEntitet {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(VedtaksbrevValgEntitet.class);
 
     @Id
     @SequenceGenerator(name = "seq_vedtaksbrev_valg", sequenceName = "seq_vedtaksbrev_valg")
@@ -34,7 +37,7 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
         this.behandlingId = behandlingId;
         this.redigert = redigert;
         this.hindret = hindret;
-        this.redigertBrevHtml = redigertBrevHtml;
+        this.redigertBrevHtml = sanitizeHtml(redigertBrevHtml);
 
     }
 
@@ -79,11 +82,22 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
         this.hindret = hindret;
     }
 
-    public void setRedigertBrevHtml(String redigertBrevHtml) {
-        this.redigertBrevHtml = redigertBrevHtml;
+    public void rensOgSettRedigertHtml(String redigertBrevHtml) {
+        if ((redigertBrevHtml == null || redigertBrevHtml.isBlank()) && this.redigertBrevHtml != null && !this.redigertBrevHtml.isBlank()) {
+            LOG.info("Fjerner redigert brev html!");
+        }
+
+        this.redigertBrevHtml = sanitizeHtml(redigertBrevHtml);
     }
 
-    public void tilbakestill() {
+    private static String sanitizeHtml(String redigertBrevHtml) {
+        if (redigertBrevHtml == null) {
+            return null;
+        }
+        return new XhtmlBrevRenser().rens(redigertBrevHtml);
+    }
+
+    public void tilbakestillVedTilbakehopp() {
         //Fjerner ikke redigert tekst i tilfelle saksbehandler ønsker å bruke den
         setRedigert(false);
         setHindret(false);
