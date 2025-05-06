@@ -605,38 +605,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ]
       },
-      "AutomatiskBrevOperasjoner" : {
-        "properties" : {
-          "enableRediger" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          }
-        },
-        "type" : "object"
-      },
-      "AvklartPersonstatus" : {
-        "properties" : {
-          "orginalPersonstatus" : {
-            "$ref" : "#/components/schemas/AvklartPersonstatusOrginalPersonstatus"
-          },
-          "overstyrtPersonstatus" : {
-            "$ref" : "#/components/schemas/AvklartPersonstatusOverstyrtPersonstatus"
-          }
-        },
-        "type" : "object"
-      },
-      "AvklartPersonstatusOrginalPersonstatus" : {
-        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
-      },
-      "AvklartPersonstatusOverstyrtPersonstatus" : {
-        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
-      },
       "AvklarteOpplysninger" : {
         "properties" : {
           "begrunnelse" : {
