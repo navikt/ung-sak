@@ -66,7 +66,7 @@ public class VilkårTjenesteTest {
     @Test
     void skal_kopiere_resultat_fra_forrige_behandling() {
         // Arrange
-        var vilkårBuilder = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var fom = LocalDate.now();
         var tom = LocalDate.now();
 
@@ -75,7 +75,7 @@ public class VilkårTjenesteTest {
         var vilkårResultatBuilder = Vilkårene.builder().leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
 
-        var vilkårBuilder2 = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder2 = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         vilkårBuilder2.leggTil(lagVilkårperiode(vilkårBuilder2, fom, tom, Utfall.IKKE_VURDERT,
             null,
             null));
@@ -83,7 +83,7 @@ public class VilkårTjenesteTest {
         vilkårResultatRepository.lagre(revurdering.getId(), vilkårResultatBuilder2.build());
 
         // Act
-        var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(BehandlingReferanse.fra(revurdering), VilkårType.BEREGNINGSGRUNNLAGVILKÅR, List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().plusDays(2), LocalDate.now().plusDays(2))), false);
+        var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(BehandlingReferanse.fra(revurdering), VilkårType.UNGDOMSPROGRAMVILKÅRET, List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().plusDays(2), LocalDate.now().plusDays(2))), false);
 
         // Assert
         assertThat(resultat.gjenopprettetPerioder().size()).isEqualTo(1);
@@ -92,7 +92,7 @@ public class VilkårTjenesteTest {
         assertThat(gjenopprettetPeriode.getTomDato()).isEqualTo(tom);
 
         var nyttVilkårResultat = vilkårResultatRepository.hentHvisEksisterer(revurdering.getId());
-        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .get()
             .finnPeriodeForSkjæringstidspunkt(fom);
         assertThat(nyPeriode.getUtfall()).isEqualTo(Utfall.OPPFYLT);
@@ -103,7 +103,7 @@ public class VilkårTjenesteTest {
     @Test
     void skal_ikke_kopiere_resultat_fra_forrige_behandling_dersom_alle_perioder_er_til_vurdering() {
         // Arrange
-        var vilkårBuilder = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var fom = LocalDate.now();
         var tom = LocalDate.now();
 
@@ -112,7 +112,7 @@ public class VilkårTjenesteTest {
         var vilkårResultatBuilder = Vilkårene.builder().leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
 
-        var vilkårBuilder2 = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder2 = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         vilkårBuilder2.leggTil(lagVilkårperiode(vilkårBuilder2, fom, tom, Utfall.IKKE_VURDERT,
             null,
             null));
@@ -122,13 +122,13 @@ public class VilkårTjenesteTest {
         // Act
         var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(
             BehandlingReferanse.fra(revurdering),
-            VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            VilkårType.UNGDOMSPROGRAMVILKÅRET,
             List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)), false);
 
         // Assert
         assertThat(resultat.gjenopprettetPerioder().size()).isEqualTo(0);
         var nyttVilkårResultat = vilkårResultatRepository.hentHvisEksisterer(revurdering.getId());
-        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .get()
             .finnPeriodeForSkjæringstidspunkt(fom);
         assertThat(nyPeriode.getUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
@@ -139,7 +139,7 @@ public class VilkårTjenesteTest {
     @Test
     void skal_klippe_bort_periode_dersom_den_ikke_finnes_i_original() {
         // Arrange
-        var vilkårBuilder = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var fom = LocalDate.now();
         var tom = LocalDate.now();
 
@@ -148,7 +148,7 @@ public class VilkårTjenesteTest {
         var vilkårResultatBuilder = Vilkårene.builder().leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
 
-        var vilkårBuilder2 = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder2 = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         vilkårBuilder2.leggTil(lagVilkårperiode(vilkårBuilder2, fom, tom, Utfall.IKKE_VURDERT,
             null,
             null));
@@ -162,14 +162,14 @@ public class VilkårTjenesteTest {
         // Act
         var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(
             BehandlingReferanse.fra(revurdering),
-            VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            VilkårType.UNGDOMSPROGRAMVILKÅRET,
             List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(10), tom.minusDays(9))), true);
 
         // Assert
         assertThat(resultat.gjenopprettetPerioder().size()).isEqualTo(0);
         assertThat(resultat.fjernetPerioder().size()).isEqualTo(1);
         var nyttVilkårResultat = vilkårResultatRepository.hentHvisEksisterer(revurdering.getId());
-        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .get()
             .finnPeriodeForSkjæringstidspunktHvisFinnes(fom);
         assertThat(nyPeriode.isPresent()).isFalse();
@@ -178,7 +178,7 @@ public class VilkårTjenesteTest {
     @Test
     void skal_ikke_kopiere_resultat_fra_forrige_behandling_dersom_perioden_er_inkludert_i_periode_til_vurdering() {
         // Arrange
-        var vilkårBuilder = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var fom = LocalDate.now();
         var tom = LocalDate.now().plusDays(10);
 
@@ -187,7 +187,7 @@ public class VilkårTjenesteTest {
         var vilkårResultatBuilder = Vilkårene.builder().leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
 
-        var vilkårBuilder2 = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var vilkårBuilder2 = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         vilkårBuilder2.leggTil(lagVilkårperiode(vilkårBuilder2, fom.plusDays(5), tom, Utfall.IKKE_VURDERT,
             null,
             null));
@@ -197,14 +197,14 @@ public class VilkårTjenesteTest {
         // Act
         var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(
             BehandlingReferanse.fra(revurdering),
-            VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            VilkårType.UNGDOMSPROGRAMVILKÅRET,
             List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)), true);
 
         // Assert
         assertThat(resultat.gjenopprettetPerioder().size()).isEqualTo(0);
         assertThat(resultat.fjernetPerioder().size()).isEqualTo(0);
         var nyttVilkårResultat = vilkårResultatRepository.hentHvisEksisterer(revurdering.getId());
-        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .get()
             .finnPeriodeForSkjæringstidspunkt(fom.plusDays(5));
         assertThat(nyPeriode.getUtfall()).isEqualTo(Utfall.IKKE_VURDERT);

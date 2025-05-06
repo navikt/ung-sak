@@ -19,7 +19,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_opprette_perioder_for_resultat() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer());
 
         var førsteSkjæringstidspunkt = LocalDate.now();
@@ -72,7 +72,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_teste_mellomliggende_perioder() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -96,7 +96,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_revertere_mellomliggende_perioder() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -118,7 +118,7 @@ public class VilkårBuilderTest {
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getFomDato)).containsExactly(førsteSkjæringstidspunkt);
         assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).map(DatoIntervallEntitet::getTomDato)).containsExactly(sluttAndrePeriode);
 
-        var fullstendigTidslinje = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var fullstendigTidslinje = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .somDummy()
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
@@ -139,7 +139,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_teste_mellomliggende_perioder_forskjellig_begrunnelse() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -166,7 +166,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_få_to_perioder_hvis_avstand_er_mer_enn_6_dager() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -191,7 +191,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_håndtere_tilbakestilling_av_periode() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -227,7 +227,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_få_periode_selv_om_denne_er_en_del_etterspurt_periode() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -265,7 +265,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_utvide_godkjent_periode_ved_ny_dag_til_vurdering() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -299,7 +299,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_utvide_godkjent_periode_ved_ny_dag_til_vurdering_selv_ved_overstyring() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -334,7 +334,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_utvide_avslag_periode_ved_ny_dag_til_vurdering_selv_ved_overstyring() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new PåTversAvHelgErKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -365,7 +365,7 @@ public class VilkårBuilderTest {
 
     @Test
     public void skal_nullstille_ved_nulltimer() {
-        var vilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET)
+        var vilkårBuilder = new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .medKantIKantVurderer(new DefaultKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(7);
 
@@ -402,15 +402,15 @@ public class VilkårBuilderTest {
         var v1 = LocalDate.now();
         var v2 = v1.plusYears(18);
 
-        var vilkårene1 = opprettVilkår(VilkårType.UTVIDETRETT, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_UTVIDETRETT, null, v1, v2);
+        var vilkårene1 = opprettVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, Utfall.IKKE_OPPFYLT, Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM, null, v1, v2);
 
-        var timeline1 = vilkårene1.getVilkårTimeline(VilkårType.UTVIDETRETT);
+        var timeline1 = vilkårene1.getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         assertThat(timeline1.getMinLocalDate()).isEqualTo(v1);
         assertThat(timeline1.getMaxLocalDate()).isEqualTo(v2);
 
-        var vilkårene2 = opprettVilkår(VilkårType.UTVIDETRETT, Utfall.OPPFYLT, null, vilkårene1, v1, v2);
+        var vilkårene2 = opprettVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, Utfall.OPPFYLT, null, vilkårene1, v1, v2);
 
-        var timeline2 = vilkårene2.getVilkårTimeline(VilkårType.UTVIDETRETT);
+        var timeline2 = vilkårene2.getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         assertThat(timeline2.getMinLocalDate()).isEqualTo(v1);
         assertThat(timeline2.getMaxLocalDate()).isEqualTo(v2);
 

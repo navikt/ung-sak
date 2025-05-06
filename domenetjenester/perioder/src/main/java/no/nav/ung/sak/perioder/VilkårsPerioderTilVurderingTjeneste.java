@@ -68,6 +68,6 @@ public interface VilkårsPerioderTilVurderingTjeneste {
      * @return vilkårene
      */
     default Set<VilkårType> definerendeVilkår() {
-        return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        return Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET);
     }
 }

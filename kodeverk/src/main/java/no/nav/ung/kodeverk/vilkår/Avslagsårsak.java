@@ -129,6 +129,9 @@ public enum Avslagsårsak implements Kodeverdi {
             FagsakYtelseType.OMSORGSPENGER_MA, "9-5 3. ledd")
     ),
 
+    OPPHØRT_UNGDOMSPROGRAM("2001", "Ikke tilstrekkelig opptjening",
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskriften for ungomsprogram")),
+
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen",
             Map.of()),
     UDEFINERT("-", "Ikke definert",
