@@ -139,8 +139,6 @@ public class AktørIdSplittTjeneste {
         oppdaterPoTabell(gammelAktørId, nyAktørId, "po_relasjon", "fra_aktoer_id", 0, 100);
         oppdaterPoTabell(gammelAktørId, nyAktørId, "po_relasjon", "til_aktoer_id", 0, 100);
         oppdaterPoTabell(gammelAktørId, nyAktørId, "po_personopplysning", "aktoer_id", 1, 100);
-        oppdaterPoTabell(gammelAktørId, nyAktørId, "po_statsborgerskap", "aktoer_id", 1, 100);
-        oppdaterPoTabell(gammelAktørId, nyAktørId, "po_personstatus", "aktoer_id", 1, 100);
     }
 
     private void oppdaterPoTabell(AktørId gammelAktørId, AktørId nyAktørId, String tabellnavn, String kolonne, int minsteForventeTreff, int maxForventetTreff) {

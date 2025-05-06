@@ -7,8 +7,6 @@
 	<sequence-generator name="SEQ_GR_PERSONOPPLYSNING" allocation-size="50" sequence-name="SEQ_GR_PERSONOPPLYSNING" />
 	<sequence-generator name="SEQ_PO_INFORMASJON" allocation-size="50" sequence-name="SEQ_PO_INFORMASJON" />
 	<sequence-generator name="SEQ_PO_PERSONOPPLYSNING" allocation-size="50" sequence-name="SEQ_PO_PERSONOPPLYSNING" />
-	<sequence-generator name="SEQ_PO_PERSONSTATUS" allocation-size="50" sequence-name="SEQ_PO_PERSONSTATUS" />
-	<sequence-generator name="SEQ_PO_STATSBORGERSKAP" allocation-size="50" sequence-name="SEQ_PO_STATSBORGERSKAP" />
 	<sequence-generator name="SEQ_PO_RELASJON" allocation-size="50" sequence-name="SEQ_PO_RELASJON" />
 
 	<!-- Personopplysning aggregat og grunnlag -->
