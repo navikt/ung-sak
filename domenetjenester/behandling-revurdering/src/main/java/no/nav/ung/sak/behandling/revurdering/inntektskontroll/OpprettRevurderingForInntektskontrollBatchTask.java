@@ -42,7 +42,7 @@ import no.nav.ung.sak.vilkår.VilkårTjeneste;
  * Kjører hver dag kl 07:15.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 7 * *", maxFailedRuns = 1)
+@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 6 * *", maxFailedRuns = 1)
 public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettRevurderingForInntektskontrollBatch";

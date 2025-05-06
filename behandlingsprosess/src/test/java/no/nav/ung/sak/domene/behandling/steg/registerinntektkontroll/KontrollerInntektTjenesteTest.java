@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
 
@@ -23,12 +24,30 @@ class KontrollerInntektTjenesteTest {
 
     public static final BigDecimal AKSEPTERT_DIFFERANSE = BigDecimal.valueOf(1000);
 
+
+    @Test
+    void skal_returnere_tom_tidslinje_dersom_ingen_kontrollårsak() {
+        // Arrange
+        final var fom = LocalDate.now().plusMonths(1).withDayOfMonth(1);
+        final var tom = LocalDate.now().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapportering(fom, tom);
+        final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinje(fom, tom);
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
+
+        // Act
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+
+        // Assert
+        assertEquals(LocalDateTimeline.empty(), resultat);
+    }
+
+
     @Test
     void skal_sette_på_vent_til_rapporteringsfrist() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
-        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapportering(fom, tom);
+        final var fom = LocalDate.now().plusMonths(1).withDayOfMonth(1);
+        final var tom = LocalDate.now().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinje(fom, tom);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
@@ -42,8 +61,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_opprette_aksjonspunkt_dersom_brukes_har_gitt_uttalelse_og_registerinntekt_er_lik() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         final var bruker = 10;
         final var register = 10_000;
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(fom, tom);
@@ -61,8 +80,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_sette_på_vent_på_nytt_dersom_bruker_har_gitt_uttalelse_og_registerinntekt_er_ulik() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         final var bruker = 10;
         final var register = 10_000;
         final var registerFraUttalelse = 9999;
@@ -81,8 +100,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_bruke_brukers_inntekt_dersom_diff_mellom_rapportert_inntekt_fra_register_og_bruker_er_mindre_enn_akseptert_grense() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 10_000, 10_001);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
@@ -97,8 +116,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_bruke_brukers_inntekt_dersom_ingen_rapportert_inntekt_fra_register_eller_bruker() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = ingenRapporterteInntekter(fom, tom);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
@@ -113,8 +132,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_opprette_oppgave_dersom_diff_mellom_rapportert_inntekt_fra_register_og_bruker_er_større_enn_akseptert_grense() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 10_000, 11_001);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
@@ -129,8 +148,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_opprette_oppgave_dersom_det_finnes_ytelse_som_er_større_enn_akseptert_grense() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1001, 0);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
@@ -145,8 +164,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_bruke_brukers_inntekt_dersom_det_finnes_ytelse_som_er_lik_akseptert_grense() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1000, 0);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
@@ -161,8 +180,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_har_godkjent_ytelse_og_inntekt_fra_register() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1001, 0);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
@@ -180,8 +199,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_tidligere_har_rapportert_inntekt_og_har_godkjent_gjeldende_ytelse_og_inntekt_fra_register() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 2000, 10_000, 500);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
@@ -202,8 +221,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_opprette_oppgave_med_ny_frist_dersom_diff_mellom_rapportert_inntekt_fra_register_og_bruker_er_større_enn_akseptert_grense_og_det_finnes_eksisterende_ikke_bekreftet_oppgave_med_ulik_registerinntekt() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 10_000, 11_001);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> uttalelseTidslinje = new LocalDateTimeline<>(fom, tom,
@@ -219,8 +238,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_opprette_aksjonspunkt_dersom_ingen_inntekt_i_register_og_rapportert_inntekt_fra_bruker() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 11_001);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
@@ -235,8 +254,8 @@ class KontrollerInntektTjenesteTest {
     @Test
     void skal_gå_videre_med_brukers_inntekt_dersom_ingen_inntekt_i_register_eller_rapportert_fra_bruker() {
         // Arrange
-        final var fom = LocalDate.now().minusDays(10);
-        final var tom = LocalDate.now().plusDays(10);
+        final var fom = LocalDate.of(2025,3,1);
+        final var tom = LocalDate.of(2025,3,31);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = new LocalDateTimeline<RapporterteInntekter>(Set.of());
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
@@ -249,7 +268,7 @@ class KontrollerInntektTjenesteTest {
     }
 
     private LocalDateTimeline<KontrollResultatType> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
-        return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje)
+        return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE, 5).utførKontroll(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje)
             .mapValue(Kontrollresultat::type);
     }
 
