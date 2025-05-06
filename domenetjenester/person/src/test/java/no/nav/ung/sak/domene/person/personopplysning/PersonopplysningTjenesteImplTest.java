@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.kodeverk.person.PersonstatusType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -58,9 +56,8 @@ public class PersonopplysningTjenesteImplTest {
         PersonInformasjon personInformasjon = scenario
             .opprettBuilderForRegisteropplysninger()
             .medPersonas()
-            .kvinne(søkerAktørId, SivilstandType.SAMBOER)
-            .statsborgerskap(Landkoder.NOR)
-            .personstatus(PersonstatusType.BOSA)
+            .kvinne(søkerAktørId)
+            .relasjonTil(AktørId.dummy(), RelasjonsRolleType.BARN)
             .build();
 
         scenario.medRegisterOpplysninger(personInformasjon);
@@ -71,7 +68,7 @@ public class PersonopplysningTjenesteImplTest {
         PersonopplysningerAggregat personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(),
             behandling.getAktørId(), tidspunkt);
         // Assert
-        assertThat(personopplysningerAggregat.getPersonstatuserFor(behandling.getAktørId())).isNotEmpty();
+        assertThat(personopplysningerAggregat.getRelasjoner()).isNotEmpty();
     }
 
 }

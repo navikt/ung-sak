@@ -60,10 +60,6 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "foreldres død", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
-        if (poDiff.erSivilstandEndretForBruker()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "sivilstand", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
-            startpunkter.add(StartpunktType.UTTAKSVILKÅR);
-        }
 
         if (poDiff.erBarnDødsdatoEndret()) {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));

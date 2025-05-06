@@ -569,9 +569,9 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
     // TODO: (PK-49128) Midlertidig løsning for å filtrere aksjonspunkter til høyre for steg i hendelsemodul
     @Override
-    public Set<String> finnAksjonspunktDefinisjonerFraOgMed(Behandling behandling, BehandlingStegType steg, boolean medInngangOgså) {
+    public Set<String> finnAksjonspunktDefinisjonerFraOgMed(Behandling behandling, BehandlingStegType steg) {
         BehandlingModell modell = getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return modell.finnAksjonspunktDefinisjonerFraOgMed(steg, medInngangOgså);
+        return modell.finnAksjonspunktDefinisjonerFraOgMed(steg);
     }
 
     protected BehandlingStegUtfall doProsesserBehandling(BehandlingskontrollKontekst kontekst, BehandlingModell modell, BehandlingModellVisitor visitor) {

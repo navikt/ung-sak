@@ -24,8 +24,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.ung.kodeverk.dokument.DokumentTypeId;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.kodeverk.geografisk.Region;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
@@ -40,8 +38,6 @@ import no.nav.ung.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.ung.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.ung.kodeverk.medlem.MedlemskapType;
 import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.ung.kodeverk.person.PersonstatusType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -58,7 +54,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<OppgaveÅrsak>> oppgaveÅrsaker,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<MedlemskapManuellVurderingType>> medlemskapManuellVurderingTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<BehandlingResultatType>> behandlingResultatTyper,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<PersonstatusType>> personstatusTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<VenteårsakSomObjekt> venteårsaker,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<BehandlingType>> behandlingTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<ArbeidType>> arbeidTyper,
@@ -68,7 +63,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<AktivitetStatus>> aktivitetStatuser,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Arbeidskategori>> arbeidskategorier,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Fagsystem>> fagsystemer,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<SivilstandType>> sivilstandTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<FaktaOmBeregningTilfelle>> faktaOmBeregningTilfeller,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<SkjermlenkeType>> skjermlenkeTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<HistorikkOpplysningType>> historikkOpplysningTyper,
@@ -87,8 +81,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VurderArbeidsforholdHistorikkinnslag>> vurderArbeidsforholdHistorikkinnslag,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<TilbakekrevingVidereBehandling>> tilbakekrevingVidereBehandlinger,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VurderÅrsak>> vurderingsÅrsaker,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Region>> regioner,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Landkoder>> landkoder,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Språkkode>> språkkoder,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VedtakResultatType>> vedtakResultatTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<DokumentTypeId>> dokumentTypeIder,

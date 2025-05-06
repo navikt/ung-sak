@@ -122,7 +122,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
 
         var behandling = lagScenario(
-            BrevScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE);
+            BrevScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
@@ -183,7 +183,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
 
         return lagScenario(
             BrevScenarioer.endring0KrInntekt_19år(fom),
-            AksjonspunktDefinisjon.MANUELL_TILKJENT_YTELSE
+            AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT
         );
     }
 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,12 +13,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.geografisk.AdresseType;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.kodeverk.geografisk.Region;
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
@@ -25,7 +20,6 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -108,21 +102,7 @@ public class BehandlingsgrunnlagEntitetTest {
                     .medNavn("Navn")
                     .medKjønn(NavBrukerKjønn.KVINNE)
                     .medFødselsdato(fødselsdato)
-                    .medDødsdato(dødsdatoForelder1)
-                    .medSivilstand(SivilstandType.GIFT)
-                    .medRegion(Region.NORDEN))
-            .leggTil(informasjonBuilder
-                .getPersonstatusBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1)).medPersonstatus(PersonstatusType.BOSA))
-            .leggTil(informasjonBuilder
-                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), AdresseType.BOSTEDSADRESSE)
-                .medAdresselinje1("Testadresse")
-                .medLand("NOR").medPostnummer("1234"))
-            .leggTil(informasjonBuilder
-                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), AdresseType.MIDLERTIDIG_POSTADRESSE_UTLAND)
-                .medAdresselinje1("Testadresse")
-                .medLand("Sverige").medPostnummer("1234"))
-            .leggTil(informasjonBuilder
-                .getStatsborgerskapBuilder(aktørId, DatoIntervallEntitet.fraOgMedTilOgMed(fødselsdato, dødsdatoForelder1), Landkoder.NOR, Region.NORDEN));
+                    .medDødsdato(dødsdatoForelder1));
 
         personopplysningRepository.lagre(behandlingId, informasjonBuilder);
         repository.flushAndClear();
@@ -135,15 +115,7 @@ public class BehandlingsgrunnlagEntitetTest {
 
         PersonInformasjonEntitet personInformasjon = personopplysninger.getGjeldendeVersjon();
         assertThat(personInformasjon.getPersonopplysninger()).hasSize(1);
-        assertThat(personInformasjon.getAdresser()).hasSize(2);
         assertThat(personInformasjon.getRelasjoner()).isEmpty();
-        assertThat(personInformasjon.getPersonstatus()).hasSize(1);
-        assertThat(personInformasjon.getStatsborgerskap()).hasSize(1);
-
-        assertThat(personInformasjon.getPersonstatus().get(0).getPersonstatus()).isEqualTo(PersonstatusType.BOSA);
-
-        StatsborgerskapEntitet statsborgerskap = personInformasjon.getStatsborgerskap().get(0);
-        assertThat(statsborgerskap.getStatsborgerskap()).isEqualTo(Landkoder.NOR);
 
         // Assert på de øvrige attributter
         PersonopplysningEntitet personopplysning = personInformasjon.getPersonopplysninger().get(0);

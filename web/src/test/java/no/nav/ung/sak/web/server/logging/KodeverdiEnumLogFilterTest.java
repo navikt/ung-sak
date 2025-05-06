@@ -6,7 +6,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import org.antlr.v4.runtime.misc.OrderedHashSet;
@@ -117,10 +116,8 @@ public class KodeverdiEnumLogFilterTest {
         final var enum1 = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
         final var enum2 = VilkårType.MEDISINSKEVILKÅR_18_ÅR;
         final var enum3 = DokumentStatus.MOTTATT;
-        final var landkode = Landkoder.SWE; // <- kodeverdi som ikkje er enum
         map.put(enum1, enum2);
         map.put(enum2, enum3);
-        map.put(enum3, landkode);
         log.info("{}", map);
         assertThat(appender.list).size().isEqualTo(1);
         final var event = appender.list.getFirst();
@@ -129,7 +126,6 @@ public class KodeverdiEnumLogFilterTest {
             .asString();
         extractedString.contains("%s(%s)=%s(%s)".formatted(enum1.name(), enum1.getKode(), enum2.name(), enum2.getKode()));
         extractedString.contains("%s(%s)=%s".formatted(enum2.name(), enum2.getKode(), enum3.getKode()));
-        extractedString.contains("%s=%s".formatted(enum3.name(), landkode));
     }
 
     @Test

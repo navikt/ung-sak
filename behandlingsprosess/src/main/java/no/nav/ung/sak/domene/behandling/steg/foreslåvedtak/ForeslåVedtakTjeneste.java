@@ -125,7 +125,10 @@ class ForeslåVedtakTjeneste {
         // Er det grunn til å tro at disse finnes når man er i FORVED-steg - de skal utledes i steget?
         List<Aksjonspunkt> skalAvbrytes = new ArrayList<>();
         behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FORESLÅ_VEDTAK).ifPresent(skalAvbrytes::add);
-        behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK).ifPresent(skalAvbrytes::add);
+        final var fatterVedtakAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK).filter(it -> !it.erAvbrutt());
+        if (fatterVedtakAksjonspunkt.isPresent()) {
+            throw new IllegalStateException("Hadde fatter vedtak aksjonspunkt som ikke allerede var avbrutt i foreslå vedtak uten totrinnsvurdering på behandling: "  + fatterVedtakAksjonspunkt.get());
+        }
         if (!skalAvbrytes.isEmpty()) {
             behandlingskontrollTjeneste.lagreAksjonspunkterAvbrutt(kontekst, behandling.getAktivtBehandlingSteg(), skalAvbrytes);
         }

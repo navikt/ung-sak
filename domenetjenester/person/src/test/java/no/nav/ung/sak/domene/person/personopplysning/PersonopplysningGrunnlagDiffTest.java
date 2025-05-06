@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
@@ -54,7 +53,7 @@ public class PersonopplysningGrunnlagDiffTest {
 
         final PersonopplysningGrunnlagBuilder oppdatert = PersonopplysningGrunnlagBuilder.oppdatere(Optional.empty());
         final PersonInformasjonBuilder builder2 = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
-        builder2.leggTil(builder2.getPersonopplysningBuilder(SØKER_AKTØR_ID).medSivilstand(SivilstandType.GIFT));
+        builder2.leggTil(builder2.getPersonopplysningBuilder(SØKER_AKTØR_ID));
         builder2.leggTil(builder2.getPersonopplysningBuilder(ANNEN_AKTØR_ID).medFødselsdato(LocalDate.now().minusDays(1)));
         builder2.leggTil(builder2.getRelasjonBuilder(SØKER_AKTØR_ID, ANNEN_AKTØR_ID, RelasjonsRolleType.BARN));
         builder2.leggTil(builder2.getRelasjonBuilder(ANNEN_AKTØR_ID, SØKER_AKTØR_ID, RelasjonsRolleType.MORA));
@@ -73,12 +72,12 @@ public class PersonopplysningGrunnlagDiffTest {
         // Arrange
         final PersonopplysningGrunnlagBuilder orginalt = PersonopplysningGrunnlagBuilder.oppdatere(Optional.empty());
         final PersonInformasjonBuilder builder1 = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
-        builder1.leggTil(builder1.getPersonopplysningBuilder(SØKER_AKTØR_ID).medSivilstand(SivilstandType.GIFT));
+        builder1.leggTil(builder1.getPersonopplysningBuilder(SØKER_AKTØR_ID));
         orginalt.medRegistrertVersjon(builder1);
 
         final PersonopplysningGrunnlagBuilder oppdatert = PersonopplysningGrunnlagBuilder.oppdatere(Optional.empty());
         final PersonInformasjonBuilder builder2 = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
-        builder2.leggTil(builder2.getPersonopplysningBuilder(SØKER_AKTØR_ID).medSivilstand(SivilstandType.UGIFT));
+        builder2.leggTil(builder2.getPersonopplysningBuilder(SØKER_AKTØR_ID));
         builder2.leggTil(builder2.getPersonopplysningBuilder(ANNEN_AKTØR_ID).medFødselsdato(LocalDate.now().minusDays(1)));
         builder2.leggTil(builder2.getRelasjonBuilder(SØKER_AKTØR_ID, ANNEN_AKTØR_ID, RelasjonsRolleType.BARN));
         builder2.leggTil(builder2.getRelasjonBuilder(ANNEN_AKTØR_ID, SØKER_AKTØR_ID, RelasjonsRolleType.MORA));
@@ -90,7 +89,6 @@ public class PersonopplysningGrunnlagDiffTest {
         Assertions.assertThat(differ.erRelasjonerEndretSøkerAntallBarn()).isTrue();
         Assertions.assertThat(differ.erRelasjonerEndretForSøkerUtenomNyeBarn()).isFalse();
         Assertions.assertThat(differ.erRelasjonerEndretForEksisterendeBarn()).isFalse();
-        Assertions.assertThat(differ.erSivilstandEndretForBruker()).isTrue();
     }
 
     @Test

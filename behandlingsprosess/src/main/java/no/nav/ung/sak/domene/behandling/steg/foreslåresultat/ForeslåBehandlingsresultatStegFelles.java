@@ -115,10 +115,6 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
             var behandlingId = kontekst.getBehandlingId();
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
             behandling.setBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
-
-            var beslutterFatteVedtak = behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK);
-            beslutterFatteVedtak.ifPresent(Aksjonspunkt::avbryt);
-
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
     }

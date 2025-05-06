@@ -74,8 +74,6 @@ public class AktørRestTjeneste {
                     pi.getNavn(),
                     pi.getAlderIDag(),
                     String.valueOf(pi.getPersonIdent().getIdent()),
-                    pi.erKvinne(),
-                    pi.getPersonstatus(),
                     pi.getDiskresjonskode(),
                     pi.getDødsdato(),
                     pi.getAktørId()

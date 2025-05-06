@@ -1,14 +1,11 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl;
 
-import static no.nav.ung.sak.behandlingslager.hendelser.StartpunktType.UDEFINERT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -60,7 +57,7 @@ public class EndringskontrollerTest {
         historikkinnslagTjenesteMock = mock(RegisterinnhentingHistorikkinnslagTjeneste.class);
 
         behandlingskontrollTjenesteMock = mock(BehandlingskontrollTjeneste.class);
-        when(behandlingskontrollTjenesteMock.finnAksjonspunktDefinisjonerFraOgMed(any(), any(BehandlingStegType.class), anyBoolean())).thenReturn(new HashSet<>());
+        when(behandlingskontrollTjenesteMock.finnAksjonspunktDefinisjonerFraOgMed(any(), any(BehandlingStegType.class))).thenReturn(new HashSet<>());
         when(behandlingskontrollTjenesteMock.finnBehandlingSteg(any(StartpunktType.class), any(FagsakYtelseType.class), any(BehandlingType.class))).thenReturn(BehandlingStegType.KONTROLLER_FAKTA);
 
         startpunktTjenesteMock = mock(EndringStartpunktTjeneste.class);

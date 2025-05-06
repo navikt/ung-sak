@@ -110,8 +110,12 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
         query.setIdent(ident);
         var projection = new PersonResponseProjection()
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
-            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsRolle()
-                .relatertPersonsIdent().minRolleForPerson());
+            .forelderBarnRelasjon(
+                new ForelderBarnRelasjonResponseProjection()
+                    .relatertPersonsRolle()
+                    .relatertPersonsIdent()
+                    .minRolleForPerson()
+            );
         return pdlKlient.hentPerson(query, projection);
     }
 
