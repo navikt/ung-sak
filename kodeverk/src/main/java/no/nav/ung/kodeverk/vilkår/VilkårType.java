@@ -32,10 +32,7 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.SØKT_FOR_SENT),
     SØKERSOPPLYSNINGSPLIKT("FP_VK_34",
         "Søkers opplysningsplikt",
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§§ 21-3 og 21-7",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§§ 21-3 og 21-7",
-            FagsakYtelseType.OPPLÆRINGSPENGER, "§§ 21-3 og 21-7",
-            FagsakYtelseType.OMSORGSPENGER, "§§ 21-3 og 21-7"),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "forskrift om ungdomsprogrammet § 4"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     // TODO: Gå over dette før lansering
     UNGDOMSPROGRAMVILKÅRET(
