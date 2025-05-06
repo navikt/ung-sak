@@ -84,7 +84,7 @@ public class PersoninfoTjeneste {
                     .minRolleForPerson()
             );
 
-        var personFraPdl = pdlKlient.hentPerson(query, projection);
+        var personFraPdl = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
 
         var fødselsdato = personFraPdl.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)
