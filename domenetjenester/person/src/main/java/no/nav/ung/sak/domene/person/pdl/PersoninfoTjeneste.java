@@ -77,7 +77,6 @@ public class PersoninfoTjeneste {
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
-            .folkeregisterpersonstatus(new FolkeregisterpersonstatusResponseProjection().forenkletStatus().status())
             .forelderBarnRelasjon(
                 new ForelderBarnRelasjonResponseProjection()
                     .relatertPersonsRolle()
