@@ -1,8 +1,6 @@
 package no.nav.ung.sak.test.util.behandling.personopplysning;
 
-import no.nav.ung.kodeverk.geografisk.Region;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
@@ -12,11 +10,9 @@ public final class Personopplysning {
 
     private AktørId aktørId;
     private NavBrukerKjønn brukerKjønn = NavBrukerKjønn.UDEFINERT;
-    private SivilstandType sivilstand = SivilstandType.UOPPGITT;
     private String navn;
     private LocalDate dødsdato;
     private LocalDate fødselsdato;
-    private Region region = Region.UDEFINERT;
 
     public AktørId getAktørId() {
         return aktørId;
@@ -24,10 +20,6 @@ public final class Personopplysning {
 
     public NavBrukerKjønn getBrukerKjønn() {
         return brukerKjønn;
-    }
-
-    public SivilstandType getSivilstand() {
-        return sivilstand;
     }
 
     public String getNavn() {
@@ -42,18 +34,12 @@ public final class Personopplysning {
         return fødselsdato;
     }
 
-    public Region getRegion() {
-        return region;
-    }
-
     private Personopplysning(Builder builder) {
         this.aktørId = builder.aktørId;
         this.brukerKjønn = builder.brukerKjønn;
-        this.sivilstand = builder.sivilstand;
         this.navn = builder.navn;
         this.dødsdato = builder.dødsdato;
         this.fødselsdato = builder.fødselsdato;
-        this.region = builder.region;
     }
 
     public static Builder builder() {
@@ -68,19 +54,15 @@ public final class Personopplysning {
             .brukerKjønn(NavBrukerKjønn.KVINNE)
             .fødselsdato(LocalDate.now().minusYears(25))
             .navn("Foreldre")
-            .aktørId(aktørId)
-            .sivilstand(SivilstandType.UOPPGITT)
-            .region(Region.NORDEN);
+            .aktørId(aktørId);
     }
 
     public static final class Builder {
         private AktørId aktørId;
         private NavBrukerKjønn brukerKjønn;
-        private SivilstandType sivilstand;
         private String navn;
         private LocalDate dødsdato;
         private LocalDate fødselsdato;
-        private Region region;
 
         private Builder() {
         }
@@ -99,11 +81,6 @@ public final class Personopplysning {
             return this;
         }
 
-        public Builder sivilstand(SivilstandType sivilstand) {
-            this.sivilstand = sivilstand;
-            return this;
-        }
-
         public Builder navn(String navn) {
             this.navn = navn;
             return this;
@@ -116,11 +93,6 @@ public final class Personopplysning {
 
         public Builder fødselsdato(LocalDate fødselsdato) {
             this.fødselsdato = fødselsdato;
-            return this;
-        }
-
-        public Builder region(Region region) {
-            this.region = region;
             return this;
         }
     }

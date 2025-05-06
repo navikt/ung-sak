@@ -35,7 +35,6 @@ import no.nav.ung.kodeverk.historikk.HistorikkinnslagMal;
 import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
 import no.nav.ung.kodeverk.medlem.MedlemskapManuellVurderingType;
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -70,9 +69,6 @@ public class HistorikkInnslagTekstBuilder {
         new SimpleEntry<>(Utfall.KODEVERK, Utfall.kodeMap()),
 
         // ulike domenespesifikke kodeverk som tillates
-
-        // Domene : personopplysninger
-        new SimpleEntry<>(PersonstatusType.KODEVERK, PersonstatusType.kodeMap()),
 
         // Domene : Medlemskap
         new SimpleEntry<>(MedlemskapManuellVurderingType.KODEVERK, MedlemskapManuellVurderingType.kodeMap()),

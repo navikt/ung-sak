@@ -50,8 +50,8 @@ public class EnhetsTjenesteTest {
 
     private static final Set<AktørId> FAMILIE = Set.of(MOR_AKTØR_ID, FAR_AKTØR_ID, BARN_AKTØR_ID);
 
-    private static Familierelasjon relasjontilBarn = new Familierelasjon(BARN_IDENT, RelasjonsRolleType.BARN);
-    private static Familierelasjon relasjonEkteFar = new Familierelasjon(FAR_IDENT, RelasjonsRolleType.EKTE);
+    private static Familierelasjon relasjontilBarn = new Familierelasjon(BARN_IDENT, RelasjonsRolleType.BARN, RelasjonsRolleType.FARA);
+    private static Familierelasjon relasjonEkteFar = new Familierelasjon(FAR_IDENT, RelasjonsRolleType.EKTE, RelasjonsRolleType.FARA);
 
     private static OrganisasjonsEnhet enhetNormal = new OrganisasjonsEnhet("4802", "NAV Bærum");
     private static OrganisasjonsEnhet enhetKode6 = new OrganisasjonsEnhet("2103", "NAV Viken");
@@ -178,12 +178,12 @@ public class EnhetsTjenesteTest {
             relasjoner.add(relasjonEkteFar);
         }
         MOR_PINFO = new Personinfo.Builder().medAktørId(MOR_AKTØR_ID).medPersonIdent(MOR_IDENT).medNavn("Kari Dunk")
-            .medFødselsdato(LocalDate.of(1989, 12, 12)).medAdresse("Vei")
+            .medFødselsdato(LocalDate.of(1989, 12, 12))
             .medFamilierelasjon(relasjoner).build();
         FAR_PINFO = new Personinfo.Builder().medAktørId(FAR_AKTØR_ID).medPersonIdent(FAR_IDENT).medNavn("Ola Dunk")
-            .medFødselsdato(LocalDate.of(1991, 11, 11)).medAdresse("Vei").build();
+            .medFødselsdato(LocalDate.of(1991, 11, 11)).build();
         BARN_PINFO = new Personinfo.Builder().medAktørId(BARN_AKTØR_ID).medPersonIdent(BARN_IDENT).medFødselsdato(BARN_FØDT)
-            .medNavn("Dunk junior d.y.").medAdresse("Vei").build();
+            .medNavn("Dunk junior d.y.").build();
 
         when(tpsTjeneste.hentFnrForAktør(MOR_AKTØR_ID)).thenReturn(MOR_IDENT);
         when(tpsTjeneste.hentFnrForAktør(FAR_AKTØR_ID)).thenReturn(FAR_IDENT);

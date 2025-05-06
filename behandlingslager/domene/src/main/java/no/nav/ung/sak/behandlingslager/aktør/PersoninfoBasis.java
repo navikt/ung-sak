@@ -7,7 +7,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
@@ -19,7 +18,6 @@ public class PersoninfoBasis {
     private PersonIdent personIdent;
     private LocalDate fødselsdato;
     private LocalDate dødsdato;
-    private PersonstatusType personstatus;
     private NavBrukerKjønn kjønn;
     private String diskresjonskode;
 
@@ -40,10 +38,6 @@ public class PersoninfoBasis {
 
     public NavBrukerKjønn getKjønn() {
         return kjønn;
-    }
-
-    public PersonstatusType getPersonstatus() {
-        return personstatus;
     }
 
     public LocalDate getFødselsdato() {
@@ -76,7 +70,6 @@ public class PersoninfoBasis {
             Objects.equals(personIdent, that.personIdent) &&
             Objects.equals(fødselsdato, that.fødselsdato) &&
             Objects.equals(dødsdato, that.dødsdato) &&
-            personstatus == that.personstatus &&
             kjønn == that.kjønn &&
             Objects.equals(diskresjonskode, that.diskresjonskode);
     }
@@ -120,11 +113,6 @@ public class PersoninfoBasis {
 
         public Builder medDødsdato(LocalDate dødsdato) {
             personinfoMal.dødsdato = dødsdato;
-            return this;
-        }
-
-        public Builder medPersonstatusType(PersonstatusType personstatus) {
-            personinfoMal.personstatus = personstatus;
             return this;
         }
 

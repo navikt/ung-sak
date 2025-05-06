@@ -1,17 +1,11 @@
 package no.nav.ung.sak.test.util.behandling.personopplysning;
 
-import java.time.LocalDate;
-
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.ung.kodeverk.geografisk.AdresseType;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.kodeverk.geografisk.Region;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon.Builder;
 import no.nav.ung.sak.typer.AktørId;
+
+import java.time.LocalDate;
 
 public class Personas {
     private Builder builder;
@@ -25,7 +19,7 @@ public class Personas {
         this.persInfoBuilder = Personopplysning.builder();
     }
 
-    private Personas voksenPerson(AktørId aktørId, SivilstandType st, NavBrukerKjønn kjønn, Region region) {
+    private Personas voksenPerson(AktørId aktørId, NavBrukerKjønn kjønn) {
         if (this.aktørId == null) {
             this.aktørId = aktørId;
             this.persInfoBuilder = Personopplysning.builder();
@@ -36,12 +30,9 @@ public class Personas {
         builder.leggTilPersonopplysninger(persInfoBuilder
             .aktørId(aktørId)
             .brukerKjønn(kjønn)
-            .fødselsdato(fødselsdato)
-            .sivilstand(st)
-            .region(region));
+            .fødselsdato(fødselsdato));
         return this;
     }
-
 
 
     public Personas ungdom(AktørId aktørId, LocalDate fødselsdato) {
@@ -57,21 +48,14 @@ public class Personas {
         }
         builder.leggTilPersonopplysninger(persInfoBuilder
             .aktørId(aktørId)
-            .fødselsdato(fødselsdato)
-            .navn(navn)
             .brukerKjønn(NavBrukerKjønn.MANN)
-            .sivilstand(SivilstandType.UGIFT)
-            .region(Region.NORDEN));
+            .fødselsdato(fødselsdato)
+            .navn(navn));
 
         return this;
     }
 
     public Personas barn(AktørId aktørId, LocalDate fødselsdato) {
-        barn(aktørId, fødselsdato, null);
-        return this;
-    }
-
-    public Personas barn(AktørId aktørId, LocalDate fødselsdato, PersonstatusType personstatus) {
         if (this.aktørId == null) {
             this.aktørId = aktørId;
             this.fødselsdato = fødselsdato;
@@ -81,13 +65,9 @@ public class Personas {
         builder.leggTilPersonopplysninger(persInfoBuilder
             .aktørId(aktørId)
             .fødselsdato(fødselsdato)
-            .brukerKjønn(NavBrukerKjønn.MANN)
-            .sivilstand(SivilstandType.UOPPGITT)
-            .region(Region.NORDEN));
+            .brukerKjønn(NavBrukerKjønn.UDEFINERT)
+        );
 
-        if (personstatus!= null) {
-            builder.leggTilPersonstatus(Personstatus.builder().aktørId(aktørId).periode(fødselsdato, fødselsdato.plusYears(100)).personstatus(personstatus));
-        }
         return this;
     }
 
@@ -96,55 +76,13 @@ public class Personas {
         return this;
     }
 
-    public Personas statsborgerskap(Landkoder landkode) {
-        // NB: logik her tilsvarer at dersom dødsdato skal settes bør det settes før.
-        return statsborgerskap(landkode, fødselsdato, dødsdato);
-    }
-
-    public Personas statsborgerskap(Landkoder landkode, LocalDate fom, LocalDate tom) {
-        builder.leggTilStatsborgerskap(
-            Statsborgerskap.builder().aktørId(aktørId).statsborgerskap(landkode).periode(fom, tom == null ? Tid.TIDENES_ENDE : tom));
+    public Personas kvinne(AktørId aktørId) {
+        voksenPerson(aktørId, NavBrukerKjønn.KVINNE);
         return this;
     }
 
-    public Personas personstatus(PersonstatusType personstatus) {
-        return personstatus(personstatus, fødselsdato, dødsdato);
-    }
-
-    public Personas personstatus(PersonstatusType personstatus, LocalDate fom, LocalDate tom) {
-        builder.leggTilPersonstatus(Personstatus.builder().aktørId(aktørId).personstatus(personstatus).periode(fom, tom == null ? Tid.TIDENES_ENDE : tom));
-        return this;
-    }
-
-    public Personas kvinne(AktørId aktørId, SivilstandType st) {
-        voksenPerson(aktørId, st, NavBrukerKjønn.KVINNE, Region.NORDEN);
-        return this;
-    }
-
-    public Personas kvinne(AktørId aktørId, SivilstandType st, Region region) {
-        voksenPerson(aktørId, st, NavBrukerKjønn.KVINNE, region);
-        return this;
-    }
-
-    public Personas mann(AktørId aktørId, SivilstandType st) {
-        voksenPerson(aktørId, st, NavBrukerKjønn.MANN, Region.NORDEN);
-        return this;
-    }
-
-    public Personas adresse(AdresseType adresseType, PersonAdresse.Builder adresseBuilder) {
-        adresseBuilder.aktørId(aktørId);
-
-        if (adresseBuilder.getPeriode() == null) {
-            // for test formål
-            adresseBuilder.periode(LocalDate.of(2000, 1, 1), Tid.TIDENES_ENDE);
-        }
-        adresseBuilder.adresseType(adresseType);
-        builder.leggTilAdresser(adresseBuilder);
-        return this;
-    }
-
-    public Personas mann(AktørId aktørId, SivilstandType st, Region region) {
-        voksenPerson(aktørId, st, NavBrukerKjønn.MANN, region);
+    public Personas mann(AktørId aktørId) {
+        voksenPerson(aktørId, NavBrukerKjønn.MANN);
         return this;
     }
 
@@ -153,12 +91,10 @@ public class Personas {
     }
 
     public Personas relasjonTil(AktørId tilAktørId, RelasjonsRolleType rolle) {
-        Boolean sammeBosted = true;
-        return relasjonTil(tilAktørId, rolle, sammeBosted);
-    }
-
-    public Personas relasjonTil(AktørId tilAktørId, RelasjonsRolleType rolle, Boolean sammeBosted) {
-        builder.leggTilRelasjon(PersonRelasjon.builder().fraAktørId(aktørId).tilAktørId(tilAktørId).relasjonsrolle(rolle).harSammeBosted(sammeBosted));
+        builder.leggTilRelasjon(PersonRelasjon.builder()
+            .fraAktørId(aktørId)
+            .tilAktørId(tilAktørId)
+            .relasjonsrolle(rolle));
         return this;
     }
 

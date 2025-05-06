@@ -361,15 +361,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "landkoder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektLandkoder"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "medlemskapDekningTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapDekningType"
@@ -415,24 +406,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "personstatusTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektPersonstatusType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "regioner" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektRegion"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "relatertYtelseTilstander" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektRelatertYtelseTilstand"
@@ -445,15 +418,6 @@
           "revurderingVarslingÅrsaker" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektRevurderingVarslingÅrsak"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "sivilstandTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektSivilstandType"
             },
             "maxItems" : 1000,
             "minItems" : 1,
@@ -542,7 +506,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "AngittPersonDto" : {
@@ -640,27 +604,6 @@
         "enum" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ],
         "type" : "string",
         "x-enum-varnames" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ]
-      },
-      "AvklartPersonstatus" : {
-        "properties" : {
-          "orginalPersonstatus" : {
-            "$ref" : "#/components/schemas/AvklartPersonstatusOrginalPersonstatus"
-          },
-          "overstyrtPersonstatus" : {
-            "$ref" : "#/components/schemas/AvklartPersonstatusOverstyrtPersonstatus"
-          }
-        },
-        "type" : "object"
-      },
-      "AvklartPersonstatusOrginalPersonstatus" : {
-        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
-      },
-      "AvklartPersonstatusOverstyrtPersonstatus" : {
-        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
       },
       "AvklarteOpplysninger" : {
         "properties" : {
@@ -2238,21 +2181,6 @@
         "required" : [ "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
-      "KodeverdiSomObjektLandkoder" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
       "KodeverdiSomObjektMedlemskapDekningType" : {
         "properties" : {
           "kode" : {
@@ -2328,36 +2256,6 @@
         "required" : [ "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
-      "KodeverdiSomObjektPersonstatusType" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektRegion" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
       "KodeverdiSomObjektRelatertYtelseTilstand" : {
         "properties" : {
           "kode" : {
@@ -2374,21 +2272,6 @@
         "type" : "object"
       },
       "KodeverdiSomObjektRevurderingVarslingÅrsak" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektSivilstandType" : {
         "properties" : {
           "kode" : {
             "type" : "string"
@@ -2666,28 +2549,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ]
       },
-      "KodeverkPerson" : {
-        "properties" : {
-          "personstatusType" : {
-            "$ref" : "#/components/schemas/KodeverkPersonPersonstatusType"
-          },
-          "sivilstandType" : {
-            "$ref" : "#/components/schemas/KodeverkPersonSivilstandType"
-          }
-        },
-        "required" : [ "personstatusType", "sivilstandType" ],
-        "type" : "object"
-      },
-      "KodeverkPersonPersonstatusType" : {
-        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
-      },
-      "KodeverkPersonSivilstandType" : {
-        "enum" : [ "ENKE", "GIFT", "GJPA", "GLAD", "NULL", "REPA", "SAMB", "SEPA", "SEPR", "SKIL", "SKPA", "UGIF" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ENKEMANN", "GIFT", "GJENLEVENDE_PARTNER", "GIFT_ADSKILT", "UOPPGITT", "REGISTRERT_PARTNER", "SAMBOER", "SEPARERT_PARTNER", "SEPARERT", "SKILT", "SKILT_PARTNER", "UGIFT" ]
-      },
       "KodeverkWeb" : {
         "properties" : {
           "arbeidsforhold" : {
@@ -2711,14 +2572,11 @@
           "opptjening" : {
             "$ref" : "#/components/schemas/KodeverkOpptjening"
           },
-          "person" : {
-            "$ref" : "#/components/schemas/KodeverkPerson"
-          },
           "vilkårtype" : {
             "$ref" : "#/components/schemas/KodeverkWebVilkårtype"
           }
         },
-        "required" : [ "arbeidsforhold", "behandling", "fagsystem", "historikk", "iaygrunnlag", "medlem", "opptjening", "person", "vilkårtype" ],
+        "required" : [ "arbeidsforhold", "behandling", "fagsystem", "historikk", "iaygrunnlag", "medlem", "opptjening", "vilkårtype" ],
         "type" : "object"
       },
       "KodeverkWebFagsystem" : {
@@ -2851,22 +2709,6 @@
         "enum" : [ "INNTEKTSMELDING", "SØKNAD" ],
         "type" : "string",
         "x-enum-varnames" : [ "INNTEKTSMELDING", "SØKNAD" ]
-      },
-      "Landkoder" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "readOnly" : true,
-            "type" : "string"
-          },
-          "navn" : {
-            "readOnly" : true,
-            "type" : "string"
-          }
-        },
-        "type" : "object"
       },
       "LocalDateInterval" : {
         "properties" : {
@@ -3270,103 +3112,22 @@
             "format" : "date",
             "type" : "string"
           },
-          "erDod" : {
-            "type" : "boolean"
-          },
-          "erKvinne" : {
-            "type" : "boolean"
-          },
           "navn" : {
             "type" : "string"
           },
           "personnummer" : {
             "type" : "string"
-          },
-          "personstatusType" : {
-            "$ref" : "#/components/schemas/PersonDtoPersonstatusType"
           }
         },
         "type" : "object"
-      },
-      "PersonDtoPersonstatusType" : {
-        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
-      },
-      "PersonadresseDto" : {
-        "properties" : {
-          "adresseType" : {
-            "$ref" : "#/components/schemas/PersonadresseDtoAdresseType"
-          },
-          "adresselinje1" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "adresselinje2" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "adresselinje3" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "land" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}\\p{Space}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "mottakerNavn" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "postNummer" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "poststed" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{P}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "adresseType", "land" ],
-        "type" : "object"
-      },
-      "PersonadresseDtoAdresseType" : {
-        "enum" : [ "BOSTEDSADRESSE", "DELT_BOSTEDSADRESSE", "POSTADRESSE", "POSTADRESSE_UTLAND", "MIDLERTIDIG_POSTADRESSE_NORGE", "MIDLERTIDIG_POSTADRESSE_UTLAND", "UKJENT_ADRESSE" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "BOSTEDSADRESSE", "DELT_BOSTEDSADRESSE", "POSTADRESSE", "POSTADRESSE_UTLAND", "MIDLERTIDIG_POSTADRESSE_NORGE", "MIDLERTIDIG_POSTADRESSE_UTLAND", "UKJENT_ADRESSE" ]
       },
       "PersonopplysningDto" : {
         "properties" : {
-          "adresser" : {
-            "items" : {
-              "$ref" : "#/components/schemas/PersonadresseDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          },
           "aktoerId" : {
             "type" : "string"
           },
           "annenPart" : {
             "$ref" : "#/components/schemas/PersonopplysningDto"
-          },
-          "avklartPersonstatus" : {
-            "$ref" : "#/components/schemas/AvklartPersonstatus"
           },
           "barn" : {
             "items" : {
@@ -3421,18 +3182,6 @@
             "maximum" : 2147483647,
             "minimum" : 0,
             "type" : "integer"
-          },
-          "personstatus" : {
-            "$ref" : "#/components/schemas/PersonopplysningDtoPersonstatus"
-          },
-          "region" : {
-            "$ref" : "#/components/schemas/PersonopplysningDtoRegion"
-          },
-          "sivilstand" : {
-            "$ref" : "#/components/schemas/PersonopplysningDtoSivilstand"
-          },
-          "statsborgerskap" : {
-            "$ref" : "#/components/schemas/Landkoder"
           }
         },
         "required" : [ "aktoerId", "fnr" ],
@@ -3447,21 +3196,6 @@
         "enum" : [ "K", "M", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "KVINNE", "MANN", "UDEFINERT" ]
-      },
-      "PersonopplysningDtoPersonstatus" : {
-        "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "UDEFINERT" ]
-      },
-      "PersonopplysningDtoRegion" : {
-        "enum" : [ "NORDEN", "EOS", "ANNET", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "NORDEN", "EOS", "TREDJELANDS_BORGER", "UDEFINERT" ]
-      },
-      "PersonopplysningDtoSivilstand" : {
-        "enum" : [ "ENKE", "GIFT", "GJPA", "GLAD", "NULL", "REPA", "SAMB", "SEPA", "SEPR", "SKIL", "SKPA", "UGIF" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ENKEMANN", "GIFT", "GJENLEVENDE_PARTNER", "GIFT_ADSKILT", "UOPPGITT", "REGISTRERT_PARTNER", "SAMBOER", "SEPARERT_PARTNER", "SEPARERT", "SKILT", "SKILT_PARTNER", "UGIFT" ]
       },
       "PipDto" : {
         "properties" : {

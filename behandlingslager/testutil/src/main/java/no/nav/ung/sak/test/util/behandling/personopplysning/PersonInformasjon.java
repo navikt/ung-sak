@@ -8,26 +8,11 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 public final class PersonInformasjon {
 
     private PersonopplysningVersjonType type;
-    private List<Personstatus> personstatuser = new ArrayList<>();
-    private List<Statsborgerskap> statsborgerskap = new ArrayList<>();
-    private List<PersonAdresse> adresser = new ArrayList<>();
     private List<Personopplysning> personopplysninger = new ArrayList<>();
     private List<PersonRelasjon> relasjoner = new ArrayList<>();
 
     public PersonopplysningVersjonType getType() {
         return type;
-    }
-
-    public List<Personstatus> getPersonstatuser() {
-        return personstatuser;
-    }
-
-    public List<Statsborgerskap> getStatsborgerskap() {
-        return statsborgerskap;
-    }
-
-    public List<PersonAdresse> getAdresser() {
-        return adresser;
     }
 
     public List<Personopplysning> getPersonopplysninger() {
@@ -47,21 +32,6 @@ public final class PersonInformasjon {
 
         private Builder(PersonopplysningVersjonType type) {
             kladd.type = type;
-        }
-
-        public Builder leggTilPersonstatus(Personstatus.Builder builder) {
-            kladd.personstatuser.add(builder.build());
-            return this;
-        }
-
-        public Builder leggTilStatsborgerskap(Statsborgerskap.Builder builder) {
-            kladd.statsborgerskap.add(builder.build());
-            return this;
-        }
-
-        public Builder leggTilAdresser(PersonAdresse.Builder builder) {
-            kladd.adresser.add(builder.build());
-            return this;
         }
 
         public Builder leggTilPersonopplysninger(Personopplysning.Builder builder) {

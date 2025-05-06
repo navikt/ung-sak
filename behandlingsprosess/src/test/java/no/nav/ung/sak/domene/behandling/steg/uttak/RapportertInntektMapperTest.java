@@ -65,12 +65,11 @@ class RapportertInntektMapperTest {
     }
 
     @Test
-    void skal_mappe_mottatte_inntekter_for_næring_og_arbeid() {
+    void skal_mappe_mottatte_inntekter_for_arbeid() {
         // Arrange
         final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()));
         final var arbeidsinntekt = BigDecimal.TEN;
-        final var næringsinntekt = BigDecimal.ONE;
-        final var oppgittOpptjening = lagMottattATFLInntekt(periode, arbeidsinntekt, næringsinntekt, LocalDateTime.now());
+        final var oppgittOpptjening = lagMottattATFLInntekt(periode, arbeidsinntekt, LocalDateTime.now());
         mockIAY(List.of(oppgittOpptjening));
 
         // Act
@@ -147,16 +146,6 @@ class RapportertInntektMapperTest {
 
     private static OppgittOpptjening lagMottattATFLInntekt(DatoIntervallEntitet periode, BigDecimal inntekt, LocalDateTime innsendt) {
         final var oppgittArbeidsforhold = lagOppgittArbeidOgFrilansInntekt(periode, inntekt);
-        final var oppgittOpptjening = OppgittOpptjeningBuilder.ny()
-            .medInnsendingstidspunkt(innsendt)
-            .medJournalpostId(new JournalpostId("21412"))
-            .leggTilOppgittArbeidsforhold(oppgittArbeidsforhold)
-            .build();
-        return oppgittOpptjening;
-    }
-
-    private static OppgittOpptjening lagMottattATFLInntekt(DatoIntervallEntitet periode, BigDecimal atflInntekt, BigDecimal næringsinntekt, LocalDateTime innsendt) {
-        final var oppgittArbeidsforhold = lagOppgittArbeidOgFrilansInntekt(periode, atflInntekt);
         final var oppgittOpptjening = OppgittOpptjeningBuilder.ny()
             .medInnsendingstidspunkt(innsendt)
             .medJournalpostId(new JournalpostId("21412"))

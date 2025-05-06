@@ -246,8 +246,6 @@ public class FagsakRestTjeneste {
             brukerInfo.getNavn(),
             brukerInfo.getAlderIDag(),
             String.valueOf(brukerInfo.getPersonIdent().getIdent()),
-            brukerInfo.erKvinne(),
-            brukerInfo.getPersonstatus(),
             brukerInfo.getDiskresjonskode(),
             brukerInfo.getDødsdato(),
             brukerInfo.getAktørId());
@@ -275,8 +273,12 @@ public class FagsakRestTjeneste {
     }
 
     private PersonDto mapFraPersoninfoBasis(PersoninfoBasis pi) {
-        return new PersonDto(pi.getNavn(), pi.getAlder(), String.valueOf(pi.getPersonIdent().getIdent()),
-            pi.erKvinne(), pi.getPersonstatus(), pi.getDiskresjonskode(), pi.getDødsdato(), pi.getAktørId());
+        return new PersonDto(pi.getNavn(),
+            pi.getAlder(),
+            String.valueOf(pi.getPersonIdent().getIdent()),
+            pi.getDiskresjonskode(),
+            pi.getDødsdato(),
+            pi.getAktørId());
     }
 
     public static class MatchFagsakAttributter implements Function<Object, AbacDataAttributter> {

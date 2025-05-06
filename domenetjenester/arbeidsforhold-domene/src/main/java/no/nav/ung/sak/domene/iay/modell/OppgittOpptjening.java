@@ -24,9 +24,6 @@ public class OppgittOpptjening {
     private List<OppgittArbeidsforhold> oppgittArbeidsforhold;
 
     @ChangeTracked
-    private List<OppgittEgenNæring> egenNæring;
-
-    @ChangeTracked
     private List<OppgittAnnenAktivitet> annenAktivitet;
 
     @ChangeTracked
@@ -58,10 +55,6 @@ public class OppgittOpptjening {
             ? new ArrayList<>()
             : kopierFra.oppgittArbeidsforhold.stream().map(OppgittArbeidsforhold::new).collect(Collectors.toList());
 
-        this.egenNæring = kopierFra.egenNæring == null
-            ? new ArrayList<>()
-            : kopierFra.egenNæring.stream().map(OppgittEgenNæring::new).collect(Collectors.toList());
-
         this.annenAktivitet = kopierFra.annenAktivitet == null
             ? new ArrayList<>()
             : kopierFra.annenAktivitet.stream().map(OppgittAnnenAktivitet::new).collect(Collectors.toList());
@@ -77,10 +70,6 @@ public class OppgittOpptjening {
         this.oppgittArbeidsforhold = kopierFra.oppgittArbeidsforhold == null
             ? new ArrayList<>()
             : kopierFra.oppgittArbeidsforhold.stream().map(OppgittArbeidsforhold::new).collect(Collectors.toList());
-
-        this.egenNæring = kopierFra.egenNæring == null
-            ? new ArrayList<>()
-            : kopierFra.egenNæring.stream().map(OppgittEgenNæring::new).collect(Collectors.toList());
 
         this.annenAktivitet = kopierFra.annenAktivitet == null
             ? new ArrayList<>()
@@ -101,13 +90,6 @@ public class OppgittOpptjening {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(oppgittArbeidsforhold);
-    }
-
-    public List<OppgittEgenNæring> getEgenNæring() {
-        if (this.egenNæring == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(egenNæring);
     }
 
     public List<OppgittAnnenAktivitet> getAnnenAktivitet() {
@@ -131,15 +113,6 @@ public class OppgittOpptjening {
         }
         if (annenAktivitet != null) {
             this.annenAktivitet.add(annenAktivitet);
-        }
-    }
-
-    void leggTilEgenNæring(OppgittEgenNæring egenNæring) {
-        if (this.egenNæring == null) {
-            this.egenNæring = new ArrayList<>();
-        }
-        if (egenNæring != null) {
-            this.egenNæring.add(egenNæring);
         }
     }
 
@@ -177,7 +150,6 @@ public class OppgittOpptjening {
             return false;
         OppgittOpptjening that = (OppgittOpptjening) o;
         return Objects.equals(oppgittArbeidsforhold, that.oppgittArbeidsforhold) &&
-            Objects.equals(egenNæring, that.egenNæring) &&
             Objects.equals(annenAktivitet, that.annenAktivitet) &&
             Objects.equals(frilans, that.frilans) &&
             Objects.equals(journalpostId, that.journalpostId) &&
@@ -187,14 +159,13 @@ public class OppgittOpptjening {
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgittArbeidsforhold, egenNæring, annenAktivitet, frilans, journalpostId, innsendingstidspunkt);
+        return Objects.hash(oppgittArbeidsforhold, annenAktivitet, frilans, journalpostId, innsendingstidspunkt);
     }
 
     @Override
     public String toString() {
         return "OppgittOpptjeningEntitet{" +
             "oppgittArbeidsforhold=" + oppgittArbeidsforhold +
-            ", egenNæring=" + egenNæring +
             ", frilans=" + frilans +
             ", annenAktivitet=" + annenAktivitet +
             '}';

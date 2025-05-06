@@ -1,43 +1,20 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import no.nav.abakus.iaygrunnlag.JournalpostId;
-import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.iaygrunnlag.Periode;
-import no.nav.abakus.iaygrunnlag.kodeverk.Landkode;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittAnnenAktivitetDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittArbeidsforholdDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittEgenNæringDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.sak.domene.iay.modell.OppgittAnnenAktivitet;
-import no.nav.ung.sak.domene.iay.modell.OppgittArbeidsforhold;
-import no.nav.ung.sak.domene.iay.modell.OppgittEgenNæring;
-import no.nav.ung.sak.domene.iay.modell.OppgittFrilans;
-import no.nav.ung.sak.domene.iay.modell.OppgittFrilansoppdrag;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningAggregat;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.EgenNæringBuilder;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.*;
+import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
-import no.nav.ung.sak.domene.iay.modell.OppgittUtenlandskVirksomhet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.OrgNummer;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class MapOppgittOpptjening {
 
@@ -110,8 +87,6 @@ class MapOppgittOpptjening {
 
             dto.medArbeidsforhold(oppgittOpptjening.getOppgittArbeidsforhold().stream().map(MapTilDto::mapArbeidsforhold).sorted(COMP_OPPGITT_ARBEIDSFORHOLD)
                 .collect(Collectors.toList()));
-            dto.medEgenNæring(
-                oppgittOpptjening.getEgenNæring().stream().map(MapTilDto::mapEgenNæring).sorted(COMP_OPPGITT_EGEN_NÆRING).collect(Collectors.toList()));
             dto.medAnnenAktivitet(
                 oppgittOpptjening.getAnnenAktivitet().stream().map(MapTilDto::mapAnnenAktivitet).sorted(COMP_ANNEN_AKTIVITET).collect(Collectors.toList()));
 
@@ -144,61 +119,10 @@ class MapOppgittOpptjening {
             var periode = new Periode(periode1.getFomDato(), periode1.getTomDato());
             var arbeidType = KodeverkMapper.mapArbeidTypeTilDto(arbeidsforhold.getArbeidType());
 
-            var dto = new OppgittArbeidsforholdDto(periode, arbeidType)
-                .medErUtenlandskInntekt(arbeidsforhold.erUtenlandskInntekt());
-
-            var virksomhet = arbeidsforhold.getUtenlandskVirksomhet();
-            if (virksomhet != null) {
-                var landKode = virksomhet.getLandkode() == null ? Landkode.NOR : Landkode.fraKode(virksomhet.getLandkode().getKode());
-                if (virksomhet.getNavn() != null) {
-                    dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(virksomhet.getNavn()), landKode);
-                } else {
-                    dto.setLandkode(landKode);
-                }
-            } else {
-                dto.setLandkode(Landkode.NOR);
-            }
+            var dto = new OppgittArbeidsforholdDto(periode, arbeidType);
+            dto.medErUtenlandskInntekt(false); // feiler mot Abakus hvis det ikke settes.
 
             dto.setInntekt(arbeidsforhold.getInntekt());
-            return dto;
-        }
-
-        private static OppgittEgenNæringDto mapEgenNæring(OppgittEgenNæring egenNæring) {
-            if (egenNæring == null)
-                return null;
-
-            var periode = new Periode(egenNæring.getPeriode().getFomDato(), egenNæring.getPeriode().getTomDato());
-
-            var org = egenNæring.getOrgnr() == null ? null : new Organisasjon(egenNæring.getOrgnr());
-            var virksomhetType = egenNæring.getVirksomhetType();
-
-            var dto = new OppgittEgenNæringDto(periode)
-                .medBegrunnelse(egenNæring.getBegrunnelse())
-                .medBruttoInntekt(minMax(egenNæring.getBruttoInntekt(), BigDecimal.ZERO, null))
-                .medEndringDato(egenNæring.getEndringDato())
-                .medRegnskapsførerNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(egenNæring.getRegnskapsførerNavn()))
-                .medRegnskapsførerTlf(fjernUnicodeControlOgAlternativeWhitespaceCharacters(egenNæring.getRegnskapsførerTlf()))
-                .medVirksomhet(org)
-                .medVirksomhetType(virksomhetType);
-
-            dto.medNyIArbeidslivet(booleanOrFalse(egenNæring.getNyIArbeidslivet()));
-            dto.medNyoppstartet(booleanOrFalse(egenNæring.getNyoppstartet()));
-            dto.medNærRelasjon(booleanOrFalse(egenNæring.getNærRelasjon()));
-            dto.medVarigEndring(booleanOrFalse(egenNæring.getVarigEndring()));
-
-            var virksomhet = egenNæring.getVirksomhet();
-            if (virksomhet != null) {
-                var landkode = virksomhet.getLandkode() == null ? Landkode.NOR : Landkode.fraKode(virksomhet.getLandkode().getKode());
-                var navn = virksomhet.getNavn();
-                if (navn != null) {
-                    dto.medOppgittVirksomhetNavn(fjernUnicodeControlOgAlternativeWhitespaceCharacters(navn), landkode);
-                } else {
-                    dto.setLandkode(landkode);
-                }
-            } else {
-                dto.setLandkode(Landkode.NOR);
-            }
-
             return dto;
         }
 
@@ -254,9 +178,6 @@ class MapOppgittOpptjening {
             var arbeidsforhold = mapEach(dto.getArbeidsforhold(), MapFraDto::mapOppgittArbeidsforhold);
             arbeidsforhold.forEach(builder::leggTilOppgittArbeidsforhold);
 
-            var egenNæring = mapEach(dto.getEgenNæring(), MapFraDto::mapEgenNæring);
-            builder.leggTilEgneNæringer(egenNæring);
-
             var frilans = mapFrilans(dto.getFrilans());
             builder.leggTilFrilansOpplysninger(frilans);
 
@@ -291,64 +212,17 @@ class MapOppgittOpptjening {
             return frilansBuilder.build();
         }
 
-        private static EgenNæringBuilder mapEgenNæring(OppgittEgenNæringDto dto) {
-            if (dto == null)
-                return null;
-
-            var builder = EgenNæringBuilder.ny();
-
-            var org = dto.getVirksomhet() == null ? null : new OrgNummer(dto.getVirksomhet().getIdent());
-            var periode = dto.getPeriode();
-
-            var virksomhet = tilUtenlandskVirksomhet(dto);
-            builder
-                .medBegrunnelse(dto.getBegrunnelse())
-                .medBruttoInntekt(dto.getBruttoInntekt())
-                .medEndringDato(dto.getEndringDato())
-                .medUtenlandskVirksomhet(virksomhet)
-                .medVirksomhet(org)
-                .medVirksomhetType(dto.getVirksomhetTypeDto())
-                .medRegnskapsførerNavn(dto.getRegnskapsførerNavn())
-                .medRegnskapsførerTlf(dto.getRegnskapsførerTlf())
-                .medNyIArbeidslivet(dto.isNyIArbeidslivet())
-                .medNyoppstartet(dto.isNyoppstartet())
-                .medNærRelasjon(dto.isNærRelasjon())
-                .medVarigEndring(dto.isVarigEndring())
-                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()));
-
-            return builder;
-        }
-
         private static OppgittArbeidsforholdBuilder mapOppgittArbeidsforhold(OppgittArbeidsforholdDto dto) {
             if (dto == null)
                 return null;
 
             Periode dto1 = dto.getPeriode();
-            var virksomhet = tilUtenlandskVirksomhet(dto);
             var builder = OppgittArbeidsforholdBuilder.ny()
                 .medArbeidType(KodeverkMapper.mapArbeidType(dto.getArbeidTypeDto()))
                 .medInntekt(dto.getInntekt())
-                .medErUtenlandskInntekt(dto.isErUtenlandskInntekt())
-                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(dto1.getFom(), dto1.getTom()))
-                .medUtenlandskVirksomhet(virksomhet);
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(dto1.getFom(), dto1.getTom()));
 
             return builder;
-        }
-
-        private static OppgittUtenlandskVirksomhet tilUtenlandskVirksomhet(OppgittArbeidsforholdDto dto) {
-            if (dto == null)
-                return null;
-
-            var landkode = dto.getLandkode() == null ? null : Landkoder.fraKode(dto.getLandkode().getKode());
-            return new OppgittUtenlandskVirksomhet(landkode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(dto.getVirksomhetNavn()));
-        }
-
-        private static OppgittUtenlandskVirksomhet tilUtenlandskVirksomhet(OppgittEgenNæringDto dto) {
-            if (dto == null)
-                return null;
-
-            var landkode = dto.getLandkode() == null ? null : Landkoder.fraKode(dto.getLandkode().getKode());
-            return new OppgittUtenlandskVirksomhet(landkode, fjernUnicodeControlOgAlternativeWhitespaceCharacters(dto.getVirksomhetNavn()));
         }
 
         private static OppgittAnnenAktivitet mapAnnenAktivitet(OppgittAnnenAktivitetDto dto) {
