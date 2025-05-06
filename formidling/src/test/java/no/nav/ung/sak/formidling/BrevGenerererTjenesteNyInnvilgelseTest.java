@@ -72,7 +72,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             repositoryProvider.getPersonopplysningRepository(),
-            tilkjentYtelseRepository);
+            tilkjentYtelseRepository, false);
 
         var ungdomsytelseSøknadsperiodeTjeneste =
             new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
@@ -230,7 +230,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. desember 2024 til 31. mai 2025 får du ungdomsprogramytelse på 954 kroner per dag utenom lørdag og søndag. \
+                Fra 1. desember 2024 til 31. mai 2025 får du ungdomsprogramytelse på 974 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -246,9 +246,9 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
-                Det vil si 248 056 kroner i året. \
+                Det vil si 253 141 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
-                Det vil si at du har rett på 954 kroner per dag. \
+                Det vil si at du har rett på 974 kroner per dag. \
                 Slik regner vi ut hvor mye penger du kan får per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 \
@@ -282,8 +282,8 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. mai 2025 får du ungdomsprogramytelse på 636 kroner per dag utenom lørdag og søndag. \
-                Fordi du fylte 25 år 15. mai 2025, får du mer penger fra denne datoen. Da får du 954 kroner per dag, utenom lørdag og søndag. \
+                Fra 1. mai 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
+                Fordi du fylte 25 år 15. mai 2025, får du mer penger fra denne datoen. Da får du 974 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -298,12 +298,12 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,33. \
-                Det vil si 165 370 kroner i året. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
+                Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
-                Det vil si at du har rett på 636 kroner per dag. \
-                Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 248 056 kroner i året. \
-                Det vil si at du har rett på 954 kroner per dag. \
+                Det vil si at du har rett på 649 kroner per dag. \
+                Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 253 141 kroner i året. \
+                Det vil si at du har rett på 974 kroner per dag. \
                 Slik regner vi ut hvor mye penger du kan får per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 \

@@ -201,15 +201,16 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var satsPerioder = rhs.getValue();
         return new LocalDateSegment<>(di,
             new GrunnlagOgTilkjentYtelse(
-                tilHeltall(tilkjentYtelse.dagsats()),
-                tilkjentYtelse.utbetalingsgrad(),
                 satsPerioder.satsType(),
-                tilFaktor(satsPerioder.grunnbeløpFaktor()),
                 tilHeltall(satsPerioder.grunnbeløp()),
+                tilFaktor(satsPerioder.grunnbeløpFaktor()),
                 tilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())),
+                tilHeltall(satsPerioder.dagsats()),
                 satsPerioder.antallBarn(),
-                satsPerioder.dagsatsBarnetillegg()
-            ));
+                satsPerioder.dagsatsBarnetillegg(),
+                tilHeltall(tilkjentYtelse.dagsats()),
+                tilkjentYtelse.utbetalingsgrad()
+                ));
 
     }
 

@@ -27,6 +27,6 @@ public record GrunnlagOgTilkjentYtelse(
     Integer antallBarn,
     int barnetillegg,
     long dagsatsTilkjentYtelse,
-    BigDecimal utbetalingsgrad
+    long utbetalingsgrad
 ) {
 }
