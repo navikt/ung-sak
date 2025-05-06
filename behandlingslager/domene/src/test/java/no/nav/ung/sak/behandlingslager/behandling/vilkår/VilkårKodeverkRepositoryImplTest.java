@@ -14,7 +14,7 @@ public class VilkårKodeverkRepositoryImplTest {
 
     @Test
     public void test_finn_vilkårtype_fra_avslagårsak() {
-        assertThat(Avslagsårsak.fraKode(Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT.getKode()).getVilkårTyper()).isNotEmpty();
+        assertThat(Avslagsårsak.fraKode(Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM.getKode()).getVilkårTyper()).isNotEmpty();
     }
 
     @Test

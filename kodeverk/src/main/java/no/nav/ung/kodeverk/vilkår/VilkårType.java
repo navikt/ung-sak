@@ -41,7 +41,8 @@ public enum VilkårType implements Kodeverdi {
     UNGDOMSPROGRAMVILKÅRET(
         "UNG_VK_XXX",
         "Deltar i ungdomsprogrammet",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "§ xxx")
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "§ xxx"),
+        Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM
     ),
     /**
      * Brukes i stedet for null der det er optional.
