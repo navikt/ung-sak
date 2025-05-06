@@ -9,6 +9,6 @@ public record ResultatFlaggDto(
     boolean kunHøySats,
     boolean varierendeSats,
     @Deprecated
-    boolean oppnårMaksAlder
-) {
+    boolean oppnårMaksAlder,
+    boolean harBarn) {
 }

@@ -9,10 +9,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
@@ -84,7 +81,7 @@ public class BrevScenarioer {
     public static UngTestScenario innvilget19årMedToBarn(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusYears(1));
 
-        var satser = new LocalDateTimeline<>(p, lavSatsBuilder().build());
+        var satser = new LocalDateTimeline<>(p, lavSatsMedBarnBuilder(fom, 2).build());
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
@@ -294,7 +291,6 @@ public class BrevScenarioer {
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(LocalDateTimeline<UngdomsytelseSatser> satser, LocalDateInterval tilkjentPeriode) {
         return tilkjentYtelsePerioderMedReduksjon(satser, tilkjentPeriode, LocalDateTimeline.empty());
-
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
@@ -345,6 +341,17 @@ public class BrevScenarioer {
             .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(0)
             .medBarnetilleggDagsats(0);
+    }
+
+    public static UngdomsytelseSatser.Builder lavSatsMedBarnBuilder(LocalDate startDato, int antallBarn) {
+        SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
+        var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(new LocalDateInterval(startDato, startDato)).getValue();
+        return UngdomsytelseSatser.builder()
+            .medGrunnbeløp(G_BELØP_24)
+            .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
+            .medSatstype(satsOgGrunnbeløpfaktor.satstype())
+            .medAntallBarn(antallBarn)
+            .medBarnetilleggDagsats(barneTillegg.intValue());
     }
 
     public static UngdomsytelseSatser.Builder høySatsBuilder() {

@@ -2,10 +2,13 @@ package no.nav.ung.sak.formidling.template.dto.innvilgelse;
 
 import java.math.BigDecimal;
 
-public record TilkjentYtelseDto(
+public record TilkjentSatsDto(
     long dagsats,
     BigDecimal satsFaktor,
+    long dagsatsGrunnbeløpFaktor,
     long gBeløp,
-    long årsbeløp
+    long årsbeløp,
+    int antallBarn,
+    int barnetilleggSats
 ) {
 }

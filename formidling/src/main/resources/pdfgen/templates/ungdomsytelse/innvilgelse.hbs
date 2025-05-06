@@ -7,12 +7,12 @@
     {{#> felles/seksjon/hoved }}
         <h1>Du får ungdomsprogramytelse</h1>
 
-        <p>Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du ungdomsprogramytelse på {{> felles/beløp tilkjentPeriode.tilkjentYtelse.dagsats}} per dag utenom lørdag og søndag.
+        <p>Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du ungdomsprogramytelse på {{> felles/beløp tilkjentPeriode.tilkjentSats.dagsats}} per dag utenom lørdag og søndag.
         </p>
 
         {{#if resultat.varierendeSats}}
             <p>
-                Fordi du fylte {{satser.aldersgrenseLav}} år {{tilkjentPeriodeHøy.periode.fom}}, får du mer penger fra denne datoen. Da får du {{> felles/beløp tilkjentPeriodeHøy.tilkjentYtelse.dagsats}} per dag, utenom lørdag og søndag.
+                Fordi du fylte {{satser.aldersgrenseLav}} år {{tilkjentPeriodeHøy.periode.fom}}, får du mer penger fra denne datoen. Da får du {{> felles/beløp tilkjentPeriodeHøy.tilkjentSats.dagsats}} per dag, utenom lørdag og søndag.
             </p>
         {{/if}}
 
@@ -45,16 +45,22 @@
                 Når du er under {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec satser.lav}}.
             {{/if}}
 
-            Det vil si {{> felles/beløp tilkjentPeriode.tilkjentYtelse.årsbeløp}} i året.
+            Det vil si {{> felles/beløp tilkjentPeriode.tilkjentSats.årsbeløp}} i året.
             Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
         </p>
-        <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriode.tilkjentYtelse.dagsats}} per dag.</p>
+        <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriode.tilkjentSats.dagsatsGrunnbeløpFaktor}} per dag.</p>
         {{#if resultat.varierendeSats}}
             <p>
-                Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec satser.høy}} som blir {{> felles/beløp tilkjentPeriodeHøy.tilkjentYtelse.årsbeløp}} i året.
+                Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec satser.høy}} som blir {{> felles/beløp tilkjentPeriodeHøy.tilkjentSats.årsbeløp}} i året.
             </p>
-            <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriodeHøy.tilkjentYtelse.dagsats}} per dag.</p>
+            <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriodeHøy.tilkjentSats.dagsatsGrunnbeløpFaktor}} per dag.</p>
         {{/if}}
+
+        {{#if resultat.harBarn}}
+            <p>Fordi du har {{tilkjentPeriode.tilkjentSats.antallBarn}} barn, får du i tillegg {{> felles/beløp tilkjentPeriode.tilkjentSats.barnetilleggSats}} per dag i barnetillegg.
+                Det vil si at du til sammen får {{> felles/beløp tilkjentPeriode.tilkjentSats.dagsats}} per dag.</p>
+        {{/if}}
+
         <p>Slik regner vi ut hvor mye penger du kan få per dag.</p>
 
 

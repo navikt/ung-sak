@@ -80,12 +80,12 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
         var tilkjentePerioder = lagTilkjentePerioderDto(grunnlagOgTilkjentYtelseTidslinje);
 
-        var tilkjenteYtelserHøy = mapTilTilkjentYtelseDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.HØY);
-        var tilkjenteYtelserLav = mapTilTilkjentYtelseDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.LAV);
-        var ikkeStøttetBrevTekst = validerTilkjentYtelse(tilkjenteYtelserHøy, tilkjenteYtelserLav);
+        var tilkjentSatserHøy = mapTilTilkjentSatsDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.HØY);
+        var tilkjentSatserLav = mapTilTilkjentSatsDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.LAV);
+        var ikkeStøttetBrevTekst = validerTilkjentYtelse(tilkjentSatserHøy, tilkjentSatserLav);
 
-        var tilkjentYtelseHøy = tilkjenteYtelserHøy.stream().findFirst();
-        var tilkjentYtelseLav = tilkjenteYtelserLav.stream().findFirst();
+        var tilkjentSatsHøy = tilkjentSatserHøy.stream().findFirst();
+        var tilkjentSatsLav = tilkjentSatserLav.stream().findFirst();
 
 
         var gBeløpPerioder = lagGbeløpPerioderDto(grunnlagOgTilkjentYtelseTidslinje);
@@ -109,8 +109,8 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
                 tilkjentePerioder,
                 gBeløpPerioder,
                 satser,
-                tilkjentYtelseLav.orElseGet(tilkjentYtelseHøy::orElseThrow),
-                tilkjentYtelseHøy.orElse(null),
+                tilkjentSatsLav.orElseGet(tilkjentSatsHøy::orElseThrow),
+                tilkjentSatsHøy.orElse(null),
                 ikkeStøttetBrevTekst));
     }
 
@@ -146,7 +146,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         return null;
     }
 
-    private static List<TilkjentPeriodeDto> mapTilTilkjentYtelseDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType satsType) {
+    private static List<TilkjentPeriodeDto> mapTilTilkjentSatsDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType satsType) {
         return grunnlagOgTilkjentYtelseTidslinje
             .filterValue(it -> it.satsType() == satsType)
             .stream()
@@ -154,7 +154,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
                 var it = s.getValue();
                 return new TilkjentPeriodeDto(
                     new PeriodeDto(s.getFom(), s.getTom()),
-                    new TilkjentYtelseDto(it.dagsats(), it.grunnbeløpFaktor(), it.grunnbeløp(), it.årsbeløp()));
+                    new TilkjentSatsDto(it.dagsats(), it.grunnbeløpFaktor(), it.dagsatsGrunnbeløpFaktor(), it.grunnbeløp(), it.årsbeløp(), it.antallBarn(), it.barnetilleggSats()));
             }).toList();
     }
 
@@ -176,6 +176,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         boolean lavSats = satsTyper.stream().allMatch(it -> it == UngdomsytelseSatsType.LAV);
         boolean høySats = satsTyper.stream().allMatch(it -> it == UngdomsytelseSatsType.HØY);
         boolean varierendeSats = satsTyper.contains(UngdomsytelseSatsType.LAV) && satsTyper.contains(UngdomsytelseSatsType.HØY);
+        boolean harBarn = grunnlagOgTilkjentYtelse.stream().anyMatch(it -> it.antallBarn() > 0);
 
         LocalDate fødselsdato = personopplysningRepository.hentPersonopplysninger(behandling.getId())
             .getGjeldendeVersjon()
@@ -192,7 +193,8 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             lavSats,
             høySats,
             varierendeSats,
-            oppnårMaksAlder);
+            oppnårMaksAlder,
+            harBarn);
     }
 
     private static LocalDateSegment<GrunnlagOgTilkjentYtelse> sammenstillGrunnlagOgTilkjentYtelse(
@@ -202,7 +204,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         return new LocalDateSegment<>(di,
             new GrunnlagOgTilkjentYtelse(
                 satsPerioder.satsType(),
-                tilHeltall(satsPerioder.grunnbeløp()),
+                tilHeltall(satsPerioder.dagsats().add(BigDecimal.valueOf(satsPerioder.dagsatsBarnetillegg()))), tilHeltall(satsPerioder.grunnbeløp()),
                 tilFaktor(satsPerioder.grunnbeløpFaktor()),
                 tilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())),
                 tilHeltall(satsPerioder.dagsats()),
@@ -247,7 +249,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     private static List<TilkjentPeriodeDto> lagTilkjentePerioderDto(LocalDateTimeline<GrunnlagOgTilkjentYtelse> grunnlagOgTilkjentYtelseTimeline) {
         return grunnlagOgTilkjentYtelseTimeline
             .mapSegment(it ->
-                new TilkjentYtelseDto(it.dagsatsTilkjentYtelse(), it.grunnbeløpFaktor(), it.grunnbeløp(), it.årsbeløp()))
+                new TilkjentSatsDto(it.dagsats(), it.grunnbeløpFaktor(), it.dagsatsTilkjentYtelse(), it.grunnbeløp(), it.årsbeløp(), it.antallBarn(), it.barnetilleggSats()))
             .compress().stream()
             .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval)) //eldste først for tilkjent perioder
             .map(it ->

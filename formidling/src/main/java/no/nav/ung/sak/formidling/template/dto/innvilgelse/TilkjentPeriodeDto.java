@@ -4,6 +4,6 @@ import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 
 public record TilkjentPeriodeDto(
     PeriodeDto periode,
-    TilkjentYtelseDto tilkjentYtelse
+    TilkjentSatsDto tilkjentSats
 ) {
 }

@@ -333,7 +333,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
     @DisplayName("Innvilgelse med barnetillegg")
     @Test
     void barnetillegg() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
+        LocalDate fom = LocalDate.of(2025, 1, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedToBarn(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -346,7 +346,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. desember 2024 får du ungdomsprogramytelse på 686 kroner per dag utenom lørdag og søndag. \
+                Fra 1. januar 2025 får du ungdomsprogramytelse på 686 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -365,9 +365,9 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan få per dag. \
                 Fordi du har 2 barn, får du i tillegg 37 kroner per dag i barnetillegg. \
                 Det vil si at du til sammen får 686 kroner per dag. \
+                Slik regner vi ut hvor mye penger du kan få per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
