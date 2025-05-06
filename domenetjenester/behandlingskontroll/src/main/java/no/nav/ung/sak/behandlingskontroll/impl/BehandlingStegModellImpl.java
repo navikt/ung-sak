@@ -1,12 +1,5 @@
 package no.nav.ung.sak.behandlingskontroll.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
 import jakarta.enterprise.inject.Instance;
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
@@ -15,20 +8,19 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
 
+import java.util.*;
+
 /**
  * Modellerer ett behandlingssteg, inklusiv hvilke aksjonspunkter må løses før/etter steget.
  * Dersom det ved kjøring oppdages aksjonspunkter som ikke er registrert må disse løses før utgang av et
  * behandlingssteg.
  */
 class BehandlingStegModellImpl implements BehandlingStegModell {
-    /**
-     * Aksjonspunkter som må løses ved inngang til behandlingsteg.
-     */
-    private final Set<String> inngangAksjonpunktKoder = new LinkedHashSet<>();
+
     /**
      * Aksjonspunkter som må løses ved utgang fra behandlingsteg.
      */
-    private final Set<String> utgangAksjonpunktKoder = new LinkedHashSet<>();
+    private final Set<String> aksjonpunktKoder = new LinkedHashSet<>();
     private Instance<BehandlingSteg> stegInstances;
     private BehandlingSteg steg;
     private BehandlingStegType behandlingStegType;
@@ -62,13 +54,8 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
         return behandlingModell;
     }
 
-    @Deprecated(forRemoval = true)
-    Set<String> getInngangAksjonpunktKoder() {
-        return Collections.unmodifiableSet(inngangAksjonpunktKoder);
-    }
-
-    Set<String> getUtgangAksjonpunktKoder() {
-        return Collections.unmodifiableSet(utgangAksjonpunktKoder);
+    Set<String> getAksjonpunktKoder() {
+        return Collections.unmodifiableSet(aksjonpunktKoder);
     }
 
     protected void initSteg() {
@@ -86,13 +73,7 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
 
     protected void leggTilAksjonspunktVurderingUtgang(String kode) {
         behandlingModell.validerErIkkeAlleredeMappet(kode);
-        utgangAksjonpunktKoder.add(kode);
-    }
-
-    @Deprecated
-    protected void leggTilAksjonspunktVurderingInngang(String kode) {
-        behandlingModell.validerErIkkeAlleredeMappet(kode);
-        inngangAksjonpunktKoder.add(kode);
+        aksjonpunktKoder.add(kode);
     }
 
     void destroy() {
@@ -132,9 +113,7 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
      */
     Optional<BehandlingStegStatus> avledStatus(Collection<String> aksjonspunkter) {
 
-        if (!Collections.disjoint(aksjonspunkter, inngangAksjonpunktKoder)) { // NOSONAR
-            return Optional.of(BehandlingStegStatus.INNGANG);
-        } else if (!Collections.disjoint(aksjonspunkter, utgangAksjonpunktKoder)) { // NOSONAR
+        if (!Collections.disjoint(aksjonspunkter, aksjonpunktKoder)) { // NOSONAR
             return Optional.of(BehandlingStegStatus.UTGANG);
         } else {
             return Optional.empty();
@@ -144,8 +123,7 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" + behandlingStegType.getKode() + ", " //$NON-NLS-1$ //$NON-NLS-2$
-            + "inngangAksjonspunkter=" + inngangAksjonpunktKoder + ", " //$NON-NLS-1$ //$NON-NLS-2$
-            + "utgangAksjonspunkter=" + utgangAksjonpunktKoder + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "aksjonpunktKoder=" + aksjonpunktKoder + ", " //$NON-NLS-1$ //$NON-NLS-2$
             + "impl=" + steg //$NON-NLS-1$
             + ">"; //$NON-NLS-1$
     }
