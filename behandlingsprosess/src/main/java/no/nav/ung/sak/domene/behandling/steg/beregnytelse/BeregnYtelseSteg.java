@@ -14,17 +14,14 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.logging.Logger;
 
 
 @ApplicationScoped
@@ -64,7 +61,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);
 
         final var satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
-        final var totalsatsTidslinje = mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
+        final var totalsatsTidslinje = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
         final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
 
         // Utfør reduksjon og map til tilkjent ytelse
@@ -116,32 +113,6 @@ public class BeregnYtelseSteg implements BehandlingSteg {
 
     private static boolean harIkkeMatchendeYtelseMåned(LocalDateSegment<?> s, LocalDateTimeline<YearMonth> månedstidslinje) {
         return månedstidslinje.getLocalDateIntervals().stream().noneMatch(intervall -> intervall.equals(s.getLocalDateInterval()));
-    }
-
-
-    public <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(
-        LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
-        LocalDateTimeline<V> ytelseTidslinje) {
-        final var mappetTidslinje = ytelseTidslinje.map(mapTotaltSatsbeløpForSegment(satsTidslinje));
-        return mappetTidslinje;
-    }
-
-    private <V> Function<LocalDateSegment<V>, List<LocalDateSegment<BeregnetSats>>> mapTotaltSatsbeløpForSegment(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {
-        return (inntektSegment) -> {
-            var delTidslinje = satsTidslinje.intersection(inntektSegment.getLocalDateInterval());
-            final BeregnetSats totatSatsbeløpForPeriode = reduser(delTidslinje);
-            return List.of(new LocalDateSegment<>(inntektSegment.getFom(), inntektSegment.getTom(), totatSatsbeløpForPeriode));
-        };
-    }
-
-    private BeregnetSats reduser(LocalDateTimeline<UngdomsytelseSatser> delTidslinje) {
-        return delTidslinje.stream().reduce(BeregnetSats.ZERO, this::reduserSegmenterIDelTidslinje, BeregnetSats::adder);
-    }
-
-    private BeregnetSats reduserSegmenterIDelTidslinje(BeregnetSats beregnetSats, LocalDateSegment<UngdomsytelseSatser> s2) {
-        final var antallVirkedager = Virkedager.beregnAntallVirkedager(s2.getFom(), s2.getTom());
-        final var bergnetForSegment = new BeregnetSats(s2.getValue().dagsats(), s2.getValue().dagsatsBarnetillegg()).multipliser(antallVirkedager);
-        return beregnetSats.adder(bergnetForSegment);
     }
 
 

@@ -1,19 +1,18 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
+import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.ytelse.BeregnetSats;
-import no.nav.ung.sak.ytelse.TikjentYtelseBeregner;
-
-class TikjentYtelseBeregnerTest {
+class TilkjentYtelseBeregnerTest {
 
     @Test
     void test_null_verdier() {
@@ -38,7 +37,7 @@ class TikjentYtelseBeregnerTest {
     }
 
     private static TilkjentYtelseVerdi beregn(LocalDateInterval di, BeregnetSats sats, BigDecimal rapporertinntekt) {
-        return TikjentYtelseBeregner.beregn(di, sats, rapporertinntekt).verdi();
+        return TilkjentYtelseBeregner.beregn(di, sats, rapporertinntekt).verdi();
     }
 
     @Test
