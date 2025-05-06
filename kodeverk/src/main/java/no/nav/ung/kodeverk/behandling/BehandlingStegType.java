@@ -1,25 +1,20 @@
 package no.nav.ung.kodeverk.behandling;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStatus.IVERKSETTER_VEDTAK;
-import static no.nav.ung.kodeverk.behandling.BehandlingStatus.UTREDES;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import no.nav.ung.kodeverk.TempAvledeKode;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
+import static no.nav.ung.kodeverk.behandling.BehandlingStatus.IVERKSETTER_VEDTAK;
+import static no.nav.ung.kodeverk.behandling.BehandlingStatus.UTREDES;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -144,18 +139,12 @@ public enum BehandlingStegType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    public List<AksjonspunktDefinisjon> getAksjonspunktDefinisjoner(VurderingspunktType type) {
-        return AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(this, type);
-    }
-
-    @Deprecated(forRemoval = true)
-    // Skal ikkje ha aksjonspunkter i inngang
-    public List<AksjonspunktDefinisjon> getAksjonspunktDefinisjonerInngang() {
-        return AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(this, VurderingspunktType.INN);
+    public List<AksjonspunktDefinisjon> getAksjonspunktDefinisjoner() {
+        return AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(this);
     }
 
     public List<AksjonspunktDefinisjon> getAksjonspunktDefinisjonerUtgang() {
-        return AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(this, VurderingspunktType.UT);
+        return AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(this);
     }
 
     public BehandlingStatus getDefinertBehandlingStatus() {

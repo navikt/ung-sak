@@ -29,136 +29,113 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     @Deprecated(forRemoval = true)
     AVKLAR_TILLEGGSOPPLYSNINGER(
         AksjonspunktKodeDefinisjon.AVKLAR_TILLEGGSOPPLYSNINGER_KODE, AksjonspunktType.MANUELL, "Avklar tilleggsopplysninger",
-        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+
     FORESLÅ_VEDTAK(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_KODE,
-        AksjonspunktType.MANUELL, "Foreslå vedtak", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
+        AksjonspunktType.MANUELL, "Foreslå vedtak", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK,
         UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN, AVVENTER_SAKSBEHANDLER),
+
     FATTER_VEDTAK(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE,
-        AksjonspunktType.MANUELL, "Fatter vedtak", Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.UTREDES), BehandlingStegType.FATTE_VEDTAK, VurderingspunktType.INN, UTEN_VILKÅR,
+        AksjonspunktType.MANUELL, "Fatter vedtak",
+        Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.UTREDES), BehandlingStegType.FATTE_VEDTAK,
+        UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK,
-        ENTRINN, AVVENTER_SAKSBEHANDLER),
+        ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
+
     SØKERS_OPPLYSNINGSPLIKT_MANU(
         AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU_KODE, AksjonspunktType.MANUELL,
         "Vurder søkers opplysningsplikt ved ufullstendig/ikke-komplett søknad", BehandlingStatus.UTREDES,
-        BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT, VurderingspunktType.UT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VEDTAK_UTEN_TOTRINNSKONTROLL(
         AksjonspunktKodeDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL_KODE, AksjonspunktType.MANUELL, "Foreslå vedtak uten totrinnskontroll",
-        BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
-    @Deprecated(forRemoval = true)
-    AVKLAR_LOVLIG_OPPHOLD(AksjonspunktKodeDefinisjon.AVKLAR_LOVLIG_OPPHOLD_KODE,
-        AksjonspunktType.MANUELL, "Avklar lovlig opphold.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-        VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, AVVENTER_SAKSBEHANDLER),
-    @Deprecated(forRemoval = true)
-    AVKLAR_OM_ER_BOSATT(AksjonspunktKodeDefinisjon.AVKLAR_OM_ER_BOSATT_KODE,
-        AksjonspunktType.MANUELL, "Avklar om bruker er bosatt.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-        VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, AVVENTER_SAKSBEHANDLER),
-    @Deprecated(forRemoval = true)
-    AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE(
-        AksjonspunktKodeDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE, AksjonspunktType.MANUELL, "Avklar om bruker har gyldig periode.",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET,
-        SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, AVVENTER_SAKSBEHANDLER),
-    @Deprecated(forRemoval = true)
-    AVKLAR_OPPHOLDSRETT(AksjonspunktKodeDefinisjon.AVKLAR_OPPHOLDSRETT_KODE,
-        AksjonspunktType.MANUELL, "Avklar oppholdsrett.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR,
-        VurderingspunktType.INN, VilkårType.MEDLEMSKAPSVILKÅRET, SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+
     VARSEL_REVURDERING_MANUELL(
         AksjonspunktKodeDefinisjon.VARSEL_REVURDERING_MANUELL_KODE, AksjonspunktType.MANUELL, "Varsel om revurdering opprettet manuelt",
-        BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     FORESLÅ_VEDTAK_MANUELT(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_MANUELT_KODE,
-        AksjonspunktType.MANUELL, "Foreslå vedtak manuelt", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR,
+        AksjonspunktType.MANUELL, "Foreslå vedtak manuelt", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
 
     VURDERE_ANNEN_YTELSE_FØR_VEDTAK(
         AksjonspunktKodeDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere annen ytelse før vedtak",
-        BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDERE_DOKUMENT_FØR_VEDTAK(
         AksjonspunktKodeDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere dokument før vedtak",
         BehandlingStatus.UTREDES,
-        BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK(
         AksjonspunktKodeDefinisjon.VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere overlappende ytelse før vedtak",
         BehandlingStatus.UTREDES,
-        BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
 
     KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST(
         AksjonspunktKodeDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE, AksjonspunktType.MANUELL,
         "Vurder varsel ved vedtak til ugunst",
-        BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING(
         AksjonspunktKodeDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING_KODE, AksjonspunktType.MANUELL,
-        "Kontroll av manuelt opprettet revurderingsbehandling", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT,
+        "Kontroll av manuelt opprettet revurderingsbehandling", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.FORESLÅ_VEDTAK,
         UTEN_VILKÅR, UTEN_SKJERMLENKE,
         ENTRINN, AVVENTER_SAKSBEHANDLER),
-    MANUELL_TILKJENT_YTELSE(
-        AksjonspunktKodeDefinisjon.MANUELL_TILKJENT_YTELSE_KODE, AksjonspunktType.MANUELL,
-        "Manuell tilkjenning av ytelse", Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_TILKJENNING_YTELSE, VurderingspunktType.INN,
-        UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE,
-        TOTRINN, AVVENTER_SAKSBEHANDLER),
+
 
     VURDER_FEILUTBETALING(AksjonspunktKodeDefinisjon.VURDER_FEILUTBETALING_KODE,
-        AksjonspunktType.MANUELL, "Vurder feilutbetaling", BehandlingStatus.UTREDES, BehandlingStegType.SIMULER_OPPDRAG, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        AksjonspunktType.MANUELL, "Vurder feilutbetaling", BehandlingStatus.UTREDES, BehandlingStegType.SIMULER_OPPDRAG, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     SJEKK_TILBAKEKREVING(AksjonspunktKodeDefinisjon.SJEKK_TILBAKEKREVING_KODE,
-        AksjonspunktType.MANUELL, "Sjekk om ytelsesbehandlingen skal utføres før eller etter tilbakekrevingsbehandlingen", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        AksjonspunktType.MANUELL, "Sjekk om ytelsesbehandlingen skal utføres før eller etter tilbakekrevingsbehandlingen", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_TILBAKETREKK(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE,
-        AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILBAKETREKK, VurderingspunktType.UT,
+        AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILBAKETREKK,
         UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, AVVENTER_SAKSBEHANDLER),
     KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE,
-        AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT,
+        AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST,
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 60xx
     OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE,
         AksjonspunktType.SAKSBEHANDLEROVERSTYRING, "Overstyring av Søknadsfrist",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT, VilkårType.SØKNADSFRIST,
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VilkårType.SØKNADSFRIST,
         SkjermlenkeType.SOEKNADSFRIST, TOTRINN, AVVENTER_SAKSBEHANDLER),
     OVERSTYRING_AV_INNTEKT(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_INNTEKT_KODE,
-        AksjonspunktType.OVERSTYRING, "Overstyring av intekt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, VurderingspunktType.UT,
+        AksjonspunktType.OVERSTYRING, "Overstyring av intekt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT,
         UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 70xx
 
     AUTO_MANUELT_SATT_PÅ_VENT(AksjonspunktKodeDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT_KODE, AksjonspunktType.AUTOPUNKT,
-        "Manuelt satt på vent", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE,
+        "Manuelt satt på vent", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, UTEN_VILKÅR, UTEN_SKJERMLENKE,
         ENTRINN, FORBLI, "P4W", AVVENTER_ANNET),
     AUTO_VENTER_PÅ_KOMPLETT_SØKNAD(AksjonspunktKodeDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT,
-        "Venter på komplett søknad", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W", AVVENTER_SØKER),
+        "Venter på komplett søknad", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W", AVVENTER_SØKER),
     AUTO_SATT_PÅ_VENT_REVURDERING(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING_KODE, AksjonspunktType.AUTOPUNKT,
-        "Satt på vent etter varsel om revurdering", BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, VurderingspunktType.UT, UTEN_VILKÅR,
+        "Satt på vent etter varsel om revurdering", BehandlingStatus.UTREDES, BehandlingStegType.VARSEL_REVURDERING, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
     AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST(AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE, AksjonspunktType.AUTOPUNKT,
-        "Satt på vent etter kontroll av inntekt til rapporteringsfrist har passert", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, VurderingspunktType.UT, UTEN_VILKÅR,
+        "Satt på vent etter kontroll av inntekt til rapporteringsfrist har passert", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_ARBEIDSGIVER),
     AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKT_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
-        "Satt på vent etter kontroll av inntekt til rapporteringsfrist har passert", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, VurderingspunktType.UT, UTEN_VILKÅR,
+        "Satt på vent etter kontroll av inntekt til rapporteringsfrist har passert", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
     @Deprecated(forRemoval = true)
     VENT_PGA_FOR_TIDLIG_SØKNAD(AksjonspunktKodeDefinisjon.VENT_PGA_FOR_TIDLIG_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT, "Satt på vent pga for tidlig søknad",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, AVVENTER_ANNET_IKKE_SAKSBEHANDLINGSTID),
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, AVVENTER_ANNET_IKKE_SAKSBEHANDLINGSTID),
     @Deprecated(forRemoval = true)
     AUTO_VENT_ETTERLYST_INNTEKTSMELDING(AksjonspunktKodeDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE, AksjonspunktType.AUTOPUNKT, "Vent på etterlyst inntektsmelding",
-        BehandlingStatus.UTREDES, BehandlingStegType.INREG_AVSL, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P4D", AVVENTER_ARBEIDSGIVER),
+        BehandlingStatus.UTREDES, BehandlingStegType.INREG_AVSL, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P4D", AVVENTER_ARBEIDSGIVER),
 
 
     // Gruppe: 80xx
     KONTROLLER_INNTEKT(
         AksjonspunktKodeDefinisjon.KONTROLLER_INNTEKT_KODE, AksjonspunktType.MANUELL, "Kontroller inntekt",
-        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, VurderingspunktType.UT,
-        UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, AVVENTER_SAKSBEHANDLER),
-
-
-    // Gruppe : 90xx
-    // TODO: Fjern fra test
-    @Deprecated(forRemoval = true)
-    KONTROLLER_LEGEERKLÆRING(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE,
-        AksjonspunktType.MANUELL, "Kontroller legeerklæring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT,
-        VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, SkjermlenkeType.FAKTA_OM_MEDISINSK, ENTRINN, KAN_OVERSTYRE_TOTRINN_ETTER_LUKKING, FORBLI, SKAL_IKKE_AVBRYTES, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT,
+        UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 999x
     AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
-        BehandlingStatus.UTREDES, BehandlingStegType.VARIANT_FILTER, VurderingspunktType.UT, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", AVVENTER_TEKNISK_FEIL),
+        BehandlingStatus.UTREDES, BehandlingStegType.VARIANT_FILTER, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", AVVENTER_TEKNISK_FEIL),
 
     UNDEFINED,
 
@@ -235,9 +212,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     private String navn;
 
     @JsonIgnore
-    private VurderingspunktType vurderingspunktType;
-
-    @JsonIgnore
     private boolean erUtgått = false;
 
     private String kode;
@@ -271,7 +245,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    String navn,
                                    BehandlingStatus behandlingStatus,
                                    BehandlingStegType behandlingStegType,
-                                   VurderingspunktType vurderingspunktType,
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
                                    boolean defaultTotrinnBehandling,
@@ -281,7 +254,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.navn = navn;
         this.aksjonspunktType = aksjonspunktType;
         this.behandlingStegType = behandlingStegType;
-        this.vurderingspunktType = vurderingspunktType;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
         this.skjermlenkeType = skjermlenkeType;
@@ -296,7 +268,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    String navn,
                                    Set<BehandlingStatus> behandlingStatus,
                                    BehandlingStegType behandlingStegType,
-                                   VurderingspunktType vurderingspunktType,
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
                                    boolean defaultTotrinnBehandling,
@@ -306,7 +277,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.navn = navn;
         this.aksjonspunktType = aksjonspunktType;
         this.behandlingStegType = behandlingStegType;
-        this.vurderingspunktType = vurderingspunktType;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
         this.skjermlenkeType = skjermlenkeType;
@@ -321,7 +291,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    String navn,
                                    BehandlingStatus behandlingStatus,
                                    BehandlingStegType behandlingStegType,
-                                   VurderingspunktType vurderingspunktType,
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
                                    boolean defaultTotrinnBehandling,
@@ -333,7 +302,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.aksjonspunktType = aksjonspunktType;
         this.behandlingStatus = Set.of(behandlingStatus);
         this.behandlingStegType = behandlingStegType;
-        this.vurderingspunktType = vurderingspunktType;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
         this.skjermlenkeType = skjermlenkeType;
@@ -345,9 +313,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     private AksjonspunktDefinisjon(String kode,
                                    AksjonspunktType aksjonspunktType,
                                    String navn,
-                                   BehandlingStatus behandlingStatus,
+                                   Set<BehandlingStatus> behandlingStatus,
                                    BehandlingStegType behandlingStegType,
-                                   VurderingspunktType vurderingspunktType,
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
                                    boolean defaultTotrinnBehandling,
@@ -357,9 +324,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.kode = Objects.requireNonNull(kode);
         this.navn = navn;
         this.aksjonspunktType = aksjonspunktType;
-        this.behandlingStatus = Set.of(behandlingStatus);
+        this.behandlingStatus = behandlingStatus;
         this.behandlingStegType = behandlingStegType;
-        this.vurderingspunktType = vurderingspunktType;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
         this.skjermlenkeType = skjermlenkeType;
@@ -373,7 +339,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
                                    String navn,
                                    BehandlingStatus behandlingStatus,
                                    BehandlingStegType behandlingStegType,
-                                   VurderingspunktType vurderingspunktType,
                                    VilkårType vilkårType,
                                    SkjermlenkeType skjermlenkeType,
                                    boolean defaultTotrinnBehandling,
@@ -386,7 +351,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.aksjonspunktType = aksjonspunktType;
         this.behandlingStatus = Set.of(behandlingStatus);
         this.behandlingStegType = behandlingStegType;
-        this.vurderingspunktType = vurderingspunktType;
         this.vilkårType = vilkårType;
         this.defaultTotrinnBehandling = defaultTotrinnBehandling;
         this.kanOverstyreTotrinnEtterLukking = kanOverstyreTotrinnEtterLukking;
@@ -413,9 +377,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    public static List<AksjonspunktDefinisjon> finnAksjonspunktDefinisjoner(BehandlingStegType behandlingStegType, VurderingspunktType vurderingspunktType) {
+    public static List<AksjonspunktDefinisjon> finnAksjonspunktDefinisjoner(BehandlingStegType behandlingStegType) {
         return KODER.values().stream()
-            .filter(ad -> Objects.equals(ad.getBehandlingSteg(), behandlingStegType) && Objects.equals(ad.getVurderingspunktType(), vurderingspunktType))
+            .filter(ad -> Objects.equals(ad.getBehandlingSteg(), behandlingStegType))
             .collect(Collectors.toList());
     }
 
@@ -434,7 +398,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             String navn = v.navn == null ? "" : "\"" + v.navn + "\"";
             sb2.append(navn).append(",");
             sb2.append(v.defaultTotrinnBehandling).append(",");
-            sb2.append(v.behandlingStegType == null ? "" : v.behandlingStegType.getKode() + (v.vurderingspunktType == null ? "" : ":" + v.vurderingspunktType));
+            sb2.append(v.behandlingStegType == null ? "" : v.behandlingStegType.getKode());
 
             sb.append(sb2).append("\n");
 
@@ -521,10 +485,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     public BehandlingStegType getBehandlingSteg() {
         return behandlingStegType;
-    }
-
-    public VurderingspunktType getVurderingspunktType() {
-        return vurderingspunktType;
     }
 
     public Set<BehandlingStatus> getGyldigBehandlingStatus() {

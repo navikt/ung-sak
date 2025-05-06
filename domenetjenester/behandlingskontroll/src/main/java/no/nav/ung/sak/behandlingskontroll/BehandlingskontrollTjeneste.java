@@ -66,7 +66,7 @@ public interface BehandlingskontrollTjeneste {
 
     boolean erStegPassert(Long behandlingId, BehandlingStegType stegType);
 
-    Set<String> finnAksjonspunktDefinisjonerFraOgMed(Behandling behandling, BehandlingStegType steg, boolean medInngangOgså);
+    Set<String> finnAksjonspunktDefinisjonerFraOgMed(Behandling behandling, BehandlingStegType steg);
 
     BehandlingStegType finnBehandlingSteg(StartpunktType startpunktType, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType);
 

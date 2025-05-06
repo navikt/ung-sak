@@ -43,7 +43,7 @@ public class BehandlingModellTest {
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
     private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_FAKTA;
-    private static final BehandlingStegType STEG_3 = BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR;
+    private static final BehandlingStegType STEG_3 = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
     private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_OPPTJENING_FAKTA;
 
     @Inject
@@ -54,18 +54,15 @@ public class BehandlingModellTest {
 
     private final DummySteg nullSteg = new DummySteg();
     private final DummyVenterSteg nullVenterSteg = new DummyVenterSteg();
-    private final DummySteg aksjonspunktSteg = new DummySteg(opprettForAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE));
+    private final DummySteg aksjonspunktSteg = new DummySteg(opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
     private final DummySteg aksjonspunktModifisererSteg = new DummySteg(opprettForAksjonspunktMedFrist(
-        AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE, Venteårsak.AVV_DOK, FRIST_TID));
+        AksjonspunktDefinisjon.KONTROLLER_INNTEKT, Venteårsak.AVV_DOK, FRIST_TID));
 
     @Test
     public void skal_finne_aksjonspunkter_som_ligger_etter_et_gitt_steg() {
         // Arrange - noen utvalge, tilfeldige aksjonspunkter
-        AksjonspunktDefinisjon a0_0 = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
-        AksjonspunktDefinisjon a1_0 = AksjonspunktDefinisjon.AVKLAR_LOVLIG_OPPHOLD;
-        AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.AVKLAR_OM_ER_BOSATT;
-        AksjonspunktDefinisjon a2_0 = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
+        AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST;
+        AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         AksjonspunktDefinisjon a2_1 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
 
         DummySteg steg = new DummySteg();
@@ -74,26 +71,26 @@ public class BehandlingModellTest {
         DummySteg steg2 = new DummySteg();
 
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, steg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, steg0, ap(a0_0), ap(a0_1)),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, steg1, ap(a1_0), ap(a1_1)),
-            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, steg2, ap(a2_0), ap(a2_1)));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, steg, ap()),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, steg0, ap(a0_1)),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, steg1, ap(a1_1)),
+            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, steg2, ap(a2_1)));
 
         BehandlingModellImpl modell = setupModell(modellData);
 
-        Set<String> ads = null;
+        Set<String> ads;
 
         ads = modell.finnAksjonspunktDefinisjonerEtter(STEG_1);
 
-        assertThat(ads).containsOnly(a0_0.getKode(), a0_1.getKode(), a1_0.getKode(), a1_1.getKode(), a2_0.getKode(), a2_1.getKode());
+        assertThat(ads).containsOnly(a0_1.getKode(), a1_1.getKode(), a2_1.getKode());
 
         ads = modell.finnAksjonspunktDefinisjonerEtter(STEG_2);
 
-        assertThat(ads).containsOnly(a1_0.getKode(), a1_1.getKode(), a2_0.getKode(), a2_1.getKode());
+        assertThat(ads).containsOnly(a1_1.getKode(), a2_1.getKode());
 
         ads = modell.finnAksjonspunktDefinisjonerEtter(STEG_3);
 
-        assertThat(ads).containsOnly(a2_0.getKode(), a2_1.getKode());
+        assertThat(ads).containsOnly(a2_1.getKode());
         ads = modell.finnAksjonspunktDefinisjonerEtter(STEG_4);
 
         assertThat(ads).
@@ -103,13 +100,13 @@ public class BehandlingModellTest {
     }
 
     @Test
-    public void skal_stoppe_på_steg_2_når_får_aksjonspunkt() throws Exception {
+    public void skal_stoppe_på_steg_3_når_får_aksjonspunkt() throws Exception {
         // Arrange
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, aksjonspunktSteg, ap(), ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE), ap()),
-            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, aksjonspunktSteg, ap()),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(AksjonspunktDefinisjon.KONTROLLER_INNTEKT)),
+            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, nullSteg, ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
         TestScenario scenario = TestScenario.dummyScenario();
@@ -129,9 +126,9 @@ public class BehandlingModellTest {
     public void skal_kjøre_til_siste_når_ingen_gir_aksjonspunkt() throws Exception {
         // Arrange
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
         TestScenario scenario = TestScenario.dummyScenario();
@@ -147,9 +144,9 @@ public class BehandlingModellTest {
     public void skal_stoppe_når_settes_på_vent_deretter_fortsette() {
         // Arrange
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullVenterSteg, ap(), ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullVenterSteg, ap()),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
         TestScenario scenario = TestScenario.dummyScenario();
@@ -197,9 +194,9 @@ public class BehandlingModellTest {
         Assertions.assertThrows(IllegalStateException.class, () -> {
             // Arrange
             List<TestStegKonfig> modellData = List.of(
-                new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-                new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-                new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
+                new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap()),
+                new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap()),
+                new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap()));
             BehandlingModellImpl modell = setupModell(modellData);
 
             TestScenario scenario = TestScenario.dummyScenario();
@@ -217,10 +214,10 @@ public class BehandlingModellTest {
         DummySteg tilbakeføringssteg = new DummySteg(true, opprettForAksjonspunkt(aksjonspunktDefinisjon));
         // Arrange
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(aksjonspunktDefinisjon), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, tilbakeføringssteg, ap(), ap()),
-            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(aksjonspunktDefinisjon)),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, tilbakeføringssteg, ap()),
+            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, nullSteg, ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
         TestScenario scenario = TestScenario.dummyScenario();
@@ -243,9 +240,9 @@ public class BehandlingModellTest {
     public void skal_modifisere_aksjonspunktet_ved_å_kalle_funksjon_som_legger_til_frist() throws Exception {
         // Arrange
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, aksjonspunktModifisererSteg, ap(), ap()),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(), ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE), ap()));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, aksjonspunktModifisererSteg, ap()),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap(AksjonspunktDefinisjon.VURDER_FEILUTBETALING)));
         BehandlingModellImpl modell = setupModell(modellData);
         TestScenario scenario = TestScenario.dummyScenario();
         Behandling behandling = scenario.lagre(serviceProvider);
