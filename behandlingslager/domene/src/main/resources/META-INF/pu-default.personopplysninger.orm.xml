@@ -10,7 +10,6 @@
 	<sequence-generator name="SEQ_PO_PERSONSTATUS" allocation-size="50" sequence-name="SEQ_PO_PERSONSTATUS" />
 	<sequence-generator name="SEQ_PO_STATSBORGERSKAP" allocation-size="50" sequence-name="SEQ_PO_STATSBORGERSKAP" />
 	<sequence-generator name="SEQ_PO_RELASJON" allocation-size="50" sequence-name="SEQ_PO_RELASJON" />
-	<sequence-generator name="SEQ_PO_ADRESSE" allocation-size="50" sequence-name="SEQ_PO_ADRESSE" />
 
 	<!-- Personopplysning aggregat og grunnlag -->
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet" />

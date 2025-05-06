@@ -92,46 +92,6 @@ public class PersonopplysningRepository {
         return Optional.ofNullable(entitet);
     }
 
-    public void beskyttAktørId(AktørId aktørId) {
-        final List<Long> behandlingIder = finnBehandlingerMedAdresseInformasjonFor(aktørId);
-
-        for (Long behandlingId : behandlingIder) {
-            entityManager.createNativeQuery("UPDATE vr_vilkar_periode vp\n"
-                    + "SET regel_input = NULL\n"
-                    + "WHERE EXISTS (\n"
-                    + "  SELECT *\n"
-                    + "  FROM vr_vilkar vv INNER JOIN rs_vilkars_resultat rs ON (\n"
-                    + "        rs.vilkarene_id = vv.vilkar_resultat_id\n"
-                    + "    ) \n"
-                    + "  WHERE vv.id = vp.vilkar_id\n"
-                    + "    AND rs.behandling_id = :behandlingId\n"
-                    + ")")
-                .setParameter("behandlingId", behandlingId)
-                .executeUpdate();
-        }
-
-        entityManager.createNativeQuery("DELETE FROM PO_ADRESSE WHERE AKTOER_ID = :aktor")
-            .setParameter("aktor", aktørId.getId())
-            .executeUpdate();
-
-        entityManager.flush();
-    }
-
-    private List<Long> finnBehandlingerMedAdresseInformasjonFor(AktørId aktørId) {
-        @SuppressWarnings("unchecked") final List<Long> result = entityManager.createNativeQuery("SELECT DISTINCT g.behandling_id\n"
-                + "FROM GR_PERSONOPPLYSNING g INNER JOIN PO_INFORMASJON i ON (\n"
-                + "    g.registrert_informasjon_id = i.id\n"
-                + "    OR g.overstyrt_informasjon_id = i.id\n"
-                + "  ) INNER JOIN PO_ADRESSE a ON (\n"
-                + "    i.id = a.po_informasjon_id\n"
-                + "  )\n"
-                + "WHERE a.aktoer_id = :aktor")
-            .setParameter("aktor", aktørId.getId())
-            .getResultList();
-
-        return result;
-    }
-
     private Optional<PersonopplysningGrunnlagEntitet> getAktivtGrunnlag(Long behandlingId) {
         TypedQuery<PersonopplysningGrunnlagEntitet> query = entityManager.createQuery(
                 "SELECT pbg FROM PersonopplysningGrunnlagEntitet pbg WHERE pbg.behandlingId = :behandling_id AND pbg.aktiv = true", // NOSONAR //$NON-NLS-1$
