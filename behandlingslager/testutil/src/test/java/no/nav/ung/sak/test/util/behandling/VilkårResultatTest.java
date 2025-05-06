@@ -127,7 +127,7 @@ public class VilkårResultatTest {
         vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder()
                 .medUtfall(Utfall.IKKE_OPPFYLT)
-                .medAvslagsårsak(Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING)
+                .medAvslagsårsak(Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM)
                 .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)));
 
         // Act
@@ -144,7 +144,7 @@ public class VilkårResultatTest {
         Vilkår vilkår = vilkårene.getVilkårene().get(0);
         final var periode = vilkår.getPerioder().get(0);
         assertThat(periode.getAvslagsårsak()).isNotNull();
-        assertThat(periode.getAvslagsårsak()).isEqualTo(Avslagsårsak.IKKE_TILSTREKKELIG_OPPTJENING);
+        assertThat(periode.getAvslagsårsak()).isEqualTo(Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM);
     }
 
     private Vilkårene getVilkårene(Behandling behandling) {
