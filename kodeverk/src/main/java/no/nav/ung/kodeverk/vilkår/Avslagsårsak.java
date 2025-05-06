@@ -25,8 +25,7 @@ public enum Avslagsårsak implements Kodeverdi {
     SØKER_UNDER_MINSTE_ALDER("1089", "Søker er yngre enn minste tillate alder.",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "?")),
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
-        Map.of(FagsakYtelseType.PSB, "9-3 1. ledd",
-            FagsakYtelseType.UNGDOMSYTELSE, "?")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "?")),
     SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "??")),
 
