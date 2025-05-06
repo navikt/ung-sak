@@ -4,16 +4,18 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.diff.*;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph.TraverseResult;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -112,6 +114,109 @@ public class TraverseEntityGraphTest {
         // System.out.println(diffResult.getLeafDifferences());
     }
 
+    @Test
+    public void skal_kun_diffe_på_markerte_felt() {
+        var personInformasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+
+        var olaAktørId = AktørId.dummy();
+        var testAktørId = AktørId.dummy();
+
+        var personopplysningBuilder1 = personInformasjonBuilder.getPersonopplysningBuilder(olaAktørId);
+        var personopplysningBuilder2 = personInformasjonBuilder.getPersonopplysningBuilder(testAktørId);
+
+        var olaNordmann = personopplysningBuilder1
+            .medNavn("Ola Nordmann")
+            .medFødselsdato(LocalDate.now())
+            .medKjønn(NavBrukerKjønn.MANN)
+            .build();
+        var testTestesen = personopplysningBuilder2
+            .medNavn("Test Testesen")
+            .medFødselsdato(LocalDate.now())
+            .medKjønn(NavBrukerKjønn.MANN)
+            .build();
+
+        DiffEntity differ = new DiffEntity(lagTraverserForTrackedFields());
+
+        // Act
+        DiffResult diffResult = differ.diff(olaNordmann, testTestesen);
+
+        // Assert
+        assertThat(diffResult.getLeafDifferences()).hasSize(1);
+    }
+
+    @Test
+    public void skal_oppdage_diff_når_det_kommer_ny_entry() {
+        // Arrange
+        var personInformasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+        var olaAktørId = AktørId.dummy();
+
+        var personopplysningBuilder1 = personInformasjonBuilder.getPersonopplysningBuilder(olaAktørId);
+        var personopplysningBuilder2 = personInformasjonBuilder.getPersonopplysningBuilder(olaAktørId);
+
+        var olaNordmann = personopplysningBuilder1
+            .medNavn("Ola Nordmann")
+            .medFødselsdato(LocalDate.now())
+            .medKjønn(NavBrukerKjønn.MANN)
+            .build();
+
+        var testTestesen = personopplysningBuilder2
+            .medNavn("Test Testesen")
+            .medFødselsdato(LocalDate.now())
+            .medKjønn(NavBrukerKjønn.MANN)
+            .build();
+
+        DiffEntity differ = new DiffEntity(lagTraverserForTrackedFields());
+
+        // Act
+        DiffResult diffResult = differ.diff(Arrays.asList(olaNordmann), Arrays.asList(olaNordmann, testTestesen));
+
+        // Assert
+        assertThat(diffResult.getLeafDifferences()).hasSize(1);
+    }
+
+    @Test
+    public void skal_oppdage_diff_i_kodeverk() throws Exception {
+        // Arrange
+        var personInformasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+        var olaAktørId = AktørId.dummy();
+        var testAktørId = AktørId.dummy();
+
+        var personopplysningBuilder1 = personInformasjonBuilder.getPersonopplysningBuilder(olaAktørId);
+        var personopplysningBuilder2 = personInformasjonBuilder.getPersonopplysningBuilder(testAktørId);
+
+        var olaNordmann = personopplysningBuilder1
+            .medNavn("Ola Nordmann")
+            .medFødselsdato(LocalDate.now())
+            .medKjønn(NavBrukerKjønn.MANN)
+            .build();
+
+        var testTestesen = personopplysningBuilder2
+            .medNavn("Test Testesen")
+            .medFødselsdato(LocalDate.now())
+            .medKjønn(NavBrukerKjønn.MANN)
+            .build();
+
+        DiffEntity differ = new DiffEntity(lagTraverser());
+
+        // Act
+        DiffResult diffResult = differ.diff(olaNordmann, testTestesen);
+
+        // Assert
+        Map<Node, Pair> leafDiffs = diffResult.getLeafDifferences();
+        assertThat(leafDiffs).hasSize(1);
+
+
+        // diff mot seg selv
+        DiffResult diffResultNy = differ.diff(olaNordmann, olaNordmann);
+        assertThat(diffResultNy.getLeafDifferences()).isEmpty();
+
+        // diff mot kopi
+        var build = personopplysningBuilder1.build();
+        DiffResult diffResultNy2 = differ.diff(olaNordmann, build);
+        assertThat(diffResultNy2.getLeafDifferences()).isEmpty();
+
+    }
+
     private boolean containsKey(Map<Node, Pair> leafDifferences, String key) {
         for (Node node : leafDifferences.keySet()) {
             if (node.toString().equals(key)) {
@@ -119,6 +224,15 @@ public class TraverseEntityGraphTest {
             }
         }
         return false;
+    }
+
+    private TraverseGraph lagTraverserForTrackedFields() {
+        var config = new TraverseJpaEntityGraphConfig();
+        config.setIgnoreNulls(true);
+        config.addRootClasses(Behandling.class);
+        config.addLeafClasses(Kodeverdi.class);
+        config.setOnlyCheckTrackedFields(true);
+        return new TraverseGraph(config);
     }
 
     private TraverseGraph lagTraverser() {
