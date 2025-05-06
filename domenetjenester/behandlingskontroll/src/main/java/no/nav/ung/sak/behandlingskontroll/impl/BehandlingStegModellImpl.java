@@ -123,7 +123,7 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" + behandlingStegType.getKode() + ", " //$NON-NLS-1$ //$NON-NLS-2$
-            + "utgangAksjonspunkter=" + aksjonpunktKoder + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "aksjonpunktKoder=" + aksjonpunktKoder + ", " //$NON-NLS-1$ //$NON-NLS-2$
             + "impl=" + steg //$NON-NLS-1$
             + ">"; //$NON-NLS-1$
     }

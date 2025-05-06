@@ -91,12 +91,12 @@ public class FatteVedtakTjeneste {
     }
 
     private static boolean harUtførtAksjonspunktOgGodkjentAlleVurderinger(Aksjonspunkt fatterVedtakAksjonspunkt, Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger) {
-        return fatterVedtakAksjonspunkt.getStatus().equals(AksjonspunktStatus.UTFØRT) && !totrinnaksjonspunktvurderinger.isEmpty() && totrinnaksjonspunktvurderinger.stream().allMatch(Totrinnsvurdering::isGodkjent);
+        return fatterVedtakAksjonspunkt.getStatus() == AksjonspunktStatus.UTFØRT && !totrinnaksjonspunktvurderinger.isEmpty() && totrinnaksjonspunktvurderinger.stream().allMatch(Totrinnsvurdering::isGodkjent);
     }
 
     private static List<AksjonspunktDefinisjon> finnIkkeGodkjenteVurderinger(Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger) {
         return totrinnaksjonspunktvurderinger.stream()
-            .filter(a -> !TRUE.equals(a.isGodkjent()))
+            .filter(a -> !a.isGodkjent())
             .map(Totrinnsvurdering::getAksjonspunktDefinisjon)
             .collect(Collectors.toList());
     }
