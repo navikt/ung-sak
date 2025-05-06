@@ -1,9 +1,5 @@
 package no.nav.ung.sak.test.util.behandling;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -12,6 +8,10 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.trigger.Trigger;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Hjelpeobjekt for å populere databasen med diverse ung data. Brukes av TestScenarioBuilder
@@ -25,6 +25,7 @@ import no.nav.ung.sak.trigger.Trigger;
  * @param søknadStartDato      - startdatoer fra søknad
  * @param behandlingTriggere
  * @param abakusInntekt
+ * @param barnFødselsdato      -
  */
 public record UngTestScenario(
     String navn,
@@ -37,7 +38,9 @@ public record UngTestScenario(
     LocalDate fødselsdato,
     List<LocalDate> søknadStartDato,
     Set<Trigger> behandlingTriggere,
-    OppgittOpptjeningBuilder abakusInntekt) {
+    @Deprecated // Inntekt hentes nå fra tilkjent ytelse i brev istedenfor abakus.
+    OppgittOpptjeningBuilder abakusInntekt,
+    Set<LocalDate> barnFødselsdato) {
 }
 
 

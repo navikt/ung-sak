@@ -147,7 +147,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan får per dag. \
+                Slik regner vi ut hvor mye penger du kan få per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
@@ -203,7 +203,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si 253 141 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 974 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan får per dag. \
+                Slik regner vi ut hvor mye penger du kan få per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
@@ -249,7 +249,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si 253 141 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 974 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan får per dag. \
+                Slik regner vi ut hvor mye penger du kan få per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
@@ -304,7 +304,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Det vil si at du har rett på 649 kroner per dag. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 253 141 kroner i året. \
                 Det vil si at du har rett på 974 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan får per dag. \
+                Slik regner vi ut hvor mye penger du kan få per dag. \
                 Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 \
                 Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
@@ -328,6 +328,63 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ungdomsprogramytelse</h1>"
             );
+    }
+
+    @DisplayName("Innvilgelse med barnetillegg")
+    @Test
+    void barnetillegg() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedToBarn(fom);
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får ungdomsprogramytelse \
+                Fra 1. desember 2024 får du ungdomsprogramytelse på 686 kroner per dag utenom lørdag og søndag. \
+                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Pengene du får, blir det trukket skatt av. \
+                Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                \
+                Hvorfor får du ungdomsprogramytelsen? \
+                Du får ytelsen fordi du er med i ungdomsprogrammet. \
+                Ytelsen gir deg en inntekt mens du deltar i ungdomsprogrammet. \
+                Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i mer enn ett år. \
+                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                \
+                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
+                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
+                Det vil si 168 761 kroner i året. \
+                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Det vil si at du har rett på 649 kroner per dag. \
+                Slik regner vi ut hvor mye penger du kan få per dag. \
+                Fordi du har 2 barn, får du i tillegg 37 kroner per dag i barnetillegg. \
+                Det vil si at du til sammen får 686 kroner per dag. \
+                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                \
+                Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
+                Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det. \
+                Du får en SMS den 1. hver måned. \
+                Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om hva du har hatt i inntekt måneden før. \
+                Når du har en inntekt, får du mindre penger gjennom ungdomsprogramytelsen. \
+                Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får ytelsen. \
+                Se hvordan du skal gi beskjed om inntekten din i Ungdomsportalen. \
+                """);
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ungdomsprogramytelse</h1>"
+            );
+
     }
 
     @Test
