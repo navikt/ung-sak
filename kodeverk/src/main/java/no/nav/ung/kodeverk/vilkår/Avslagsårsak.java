@@ -19,7 +19,7 @@ import java.util.Set;
 public enum Avslagsårsak implements Kodeverdi {
 
     SØKT_FOR_SENT("1007", "Søkt for sent",
-        Map.of(FagsakYtelseType.OMSORGSPENGER, "22-13, 3. ledd")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "22-13, 3. ledd")),
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "forskrift om ungdomsprogrammet § 4")),
     SØKER_UNDER_MINSTE_ALDER("1089", "Søker er yngre enn minste tillate alder.",
