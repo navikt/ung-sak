@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -59,7 +60,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private EtterlysningTjeneste etterlysningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-
+    private Integer rapporteringsfristDagIMåned;
 
 
     @Inject
@@ -70,7 +71,8 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                  EtterlysningRepository etterlysningRepository,
                                  EtterlysningTjeneste etterlysningTjeneste,
                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                 ProsessTaskTjeneste prosessTaskTjeneste) {
+                                 ProsessTaskTjeneste prosessTaskTjeneste,
+                                 @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "5") Integer rapporteringsfristDagIMåned) {
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
@@ -79,6 +81,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.rapporteringsfristDagIMåned = rapporteringsfristDagIMåned;
     }
 
     public KontrollerInntektSteg() {
@@ -100,7 +103,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
         var registerinntekterForEtterlysninger = rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingId, etterlysningsperioder);
 
-        var kontrollResultat = new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
+        var kontrollResultat = new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE, rapporteringsfristDagIMåned).utførKontroll(prosessTriggerTidslinje, rapporterteInntekterTidslinje, registerinntekterForEtterlysninger);
 
         log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
         håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, etterlysninger);
