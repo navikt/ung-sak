@@ -116,7 +116,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
                     .relatertPersonsIdent()
                     .minRolleForPerson()
             );
-        return pdlKlient.hentPerson(query, projection);
+        return pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
     }
 
     private boolean deltarIProgramPåHendelsedato(Fagsak fagsak, LocalDate relevantDato, String hendelseId) {
