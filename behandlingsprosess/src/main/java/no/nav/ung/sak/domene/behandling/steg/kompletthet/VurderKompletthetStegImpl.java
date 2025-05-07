@@ -35,7 +35,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     }
 
     @Inject
-    public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository, @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
+    public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository, @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
         this.etterlysningRepository = etterlysningRepository;
         this.ventePeriode = Duration.parse(ventePeriode);
     }
