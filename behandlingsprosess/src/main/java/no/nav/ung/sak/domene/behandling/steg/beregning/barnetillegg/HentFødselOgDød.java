@@ -2,17 +2,12 @@ package no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
-import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
-import no.nav.k9.felles.integrasjon.pdl.FoedselsdatoResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.sak.typer.AktørId;
 
 @Dependent
@@ -33,7 +28,7 @@ public class HentFødselOgDød {
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato());
 
-        var personFraPdl = pdlKlient.hentPerson(query, projection);
+        var personFraPdl = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
 
         var fødselsdato = personFraPdl.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)
