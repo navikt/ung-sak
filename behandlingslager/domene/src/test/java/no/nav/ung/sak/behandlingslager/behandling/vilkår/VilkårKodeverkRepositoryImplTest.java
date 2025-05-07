@@ -14,13 +14,13 @@ public class VilkårKodeverkRepositoryImplTest {
 
     @Test
     public void test_finn_vilkårtype_fra_avslagårsak() {
-        assertThat(Avslagsårsak.fraKode(Avslagsårsak.SØKER_HAR_IKKE_OPPHOLDSRETT.getKode()).getVilkårTyper()).isNotEmpty();
+        assertThat(Avslagsårsak.fraKode(Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM.getKode()).getVilkårTyper()).isNotEmpty();
     }
 
     @Test
     public void skal_hente_alle_avslagsårsaker_gruppert_på_vilkårstype() {
         Map<VilkårType, Set<Avslagsårsak>> map = VilkårType.finnAvslagårsakerGruppertPåVilkårType();
         assertThat(map.get(VilkårType.SØKERSOPPLYSNINGSPLIKT)).containsOnly(Avslagsårsak.MANGLENDE_DOKUMENTASJON);
-        assertThat(map.get(VilkårType.OPPTJENINGSVILKÅRET)).isNotEmpty();
+        assertThat(map.get(VilkårType.UNGDOMSPROGRAMVILKÅRET)).isNotEmpty();
     }
 }

@@ -89,12 +89,12 @@ public class DebugPersoninfoTjeneste {
             );
 
 
-        var personFraPdl = pdlKlient.hentPerson(query, projection);
+        var personFraPdl = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
 
         dumpinnhold.add("pdl-kjerneinfo-query for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(query));
         dumpinnhold.add("pdl-kjerneinfo-projection for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(projection));
 
-        var person = pdlKlient.hentPerson(query, projection);
+        var person = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
 
         dumpinnhold.add("pdl-kjerneinfo-svar for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(person));
 

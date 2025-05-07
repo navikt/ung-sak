@@ -178,7 +178,7 @@ public class BehandlingRevurderingRepositoryImplTest {
     private void oppdaterMedBehandlingsresultatAvslagOgLagre(Behandling behandling) {
         final var resultatBuilder = Vilkårene.builder();
         final var vilkårBuilder = resultatBuilder
-            .hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
+            .hentBuilderFor(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder().medPeriode(LocalDate.now(), LocalDate.now().plusDays(30)).medUtfall(Utfall.IKKE_OPPFYLT));
         final var vilkårResultat = resultatBuilder
             .leggTil(vilkårBuilder)

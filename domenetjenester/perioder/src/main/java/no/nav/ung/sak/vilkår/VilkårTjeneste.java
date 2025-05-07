@@ -191,7 +191,7 @@ public class VilkårTjeneste {
     }
 
     private static boolean erLøpendeVilkår(VilkårType vilkårType) {
-        return VilkårType.MEDLEMSKAPSVILKÅRET.equals(vilkårType);
+        return Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET, VilkårType.ALDERSVILKÅR).contains(vilkårType);
     }
 
     private Set<DatoIntervallEntitet> finnPerioderForGjenopprettingAvVilkårsutfall(BehandlingReferanse ref, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {

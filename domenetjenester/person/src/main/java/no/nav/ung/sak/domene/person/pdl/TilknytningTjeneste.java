@@ -6,23 +6,16 @@ import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE6;
 import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE7;
 import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.UGRADERT;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse;
-import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering;
-import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.GeografiskTilknytningResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.GtType;
-import no.nav.k9.felles.integrasjon.pdl.HentGeografiskTilknytningQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 
 @ApplicationScoped
 public class TilknytningTjeneste {
@@ -75,7 +68,7 @@ public class TilknytningTjeneste {
             .gtType().gtBydel().gtKommune().gtLand();
 
         var diskresjon = hentDiskresjonskode(aktørId);
-        var tilknytning = getTilknytning(pdlKlient.hentGT(queryGT, projectionGT));
+        var tilknytning = getTilknytning(pdlKlient.hentGT(queryGT, projectionGT, List.of(Behandlingsnummer.UNGDOMSYTELSEN)));
         return new GeografiskTilknytning(tilknytning, diskresjon);
     }
 
@@ -84,7 +77,7 @@ public class TilknytningTjeneste {
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-        var person = pdlKlient.hentPerson(query, projection);
+        var person = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
 
         return diskresjonskodeFor(person.getAdressebeskyttelse().stream());
     }

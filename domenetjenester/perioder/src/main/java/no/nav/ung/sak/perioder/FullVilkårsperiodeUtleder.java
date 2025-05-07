@@ -39,7 +39,7 @@ public class FullVilkårsperiodeUtleder implements EndretUtbetalingPeriodeutlede
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse behandlingReferanse) {
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
-        return periodeTjeneste.utled(behandlingReferanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream()
+        return periodeTjeneste.utled(behandlingReferanse.getBehandlingId(), VilkårType.UNGDOMSPROGRAMVILKÅRET).stream()
             .flatMap(p -> utledPerioder(behandlingReferanse, p).stream())
             .collect(Collectors.toCollection(TreeSet::new));
     }
