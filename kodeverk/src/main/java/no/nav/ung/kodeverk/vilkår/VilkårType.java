@@ -13,32 +13,23 @@ import java.util.*;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum VilkårType implements Kodeverdi {
-    ALDERSVILKÅR("K9_VK_3",
+    ALDERSVILKÅR("UNG_VK_1",
         "Aldersvilkåret",
-        Map.of(
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 9-3 første ledd",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-3 første ledd",
-            FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-3 første ledd",
-            FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
-            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd",
-            FagsakYtelseType.UNGDOMSYTELSE, ""), // TODO: Finn riktig paragraf. Vurder å trekke ut til egen VilkårsType.
-        Avslagsårsak.SØKER_OVER_HØYESTE_ALDER),
-    SØKNADSFRIST("FP_VK_3",
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 3 bokstav a"), // TODO: Finn riktig paragraf
+        Avslagsårsak.SØKER_OVER_HØYESTE_ALDER,
+        Avslagsårsak.SØKER_UNDER_MINSTE_ALDER),
+    SØKNADSFRIST("UNG_VK_3",
         "Søknadsfristvilkåret",
-        Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 22-13 tredje ledd",
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 22-13 tredje ledd",
-            FagsakYtelseType.OPPLÆRINGSPENGER, "§ 22-13 tredje ledd",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 22-13 tredje ledd"),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, ""), // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
         Avslagsårsak.SØKT_FOR_SENT),
-    SØKERSOPPLYSNINGSPLIKT("FP_VK_34",
+    SØKERSOPPLYSNINGSPLIKT("UNG_VK_4",
         "Søkers opplysningsplikt",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "forskrift om ungdomsprogrammet § 4"),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 4"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON),
-    // TODO: Gå over dette før lansering
     UNGDOMSPROGRAMVILKÅRET(
-        "UNG_VK_XXX",
+        "UNG_VK_2",
         "Deltar i ungdomsprogrammet",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "§ xxx"),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 8"),
         Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM
     ),
     /**

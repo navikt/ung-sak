@@ -23,9 +23,9 @@ public enum Avslagsårsak implements Kodeverdi {
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "forskrift om ungdomsprogrammet § 4")),
     SØKER_UNDER_MINSTE_ALDER("1089", "Søker er yngre enn minste tillate alder.",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "?")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "?")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
     SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "??")),
 
