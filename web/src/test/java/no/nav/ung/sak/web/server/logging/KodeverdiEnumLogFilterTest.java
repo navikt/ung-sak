@@ -43,18 +43,18 @@ public class KodeverdiEnumLogFilterTest {
 
     @Test
     public void testLoggKodeverdiEnumMedUlikNameOgKode() {
-        log.warn("{}", VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        log.warn("{}", VilkårType.UNGDOMSPROGRAMVILKÅRET);
         assertThat(appender.list)
             .extracting(ILoggingEvent::getFormattedMessage)
-            .containsExactly("%s(%s)".formatted(VilkårType.BEREGNINGSGRUNNLAGVILKÅR.name(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR.getKode()));
+            .containsExactly("%s(%s)".formatted(VilkårType.UNGDOMSPROGRAMVILKÅRET.name(), VilkårType.UNGDOMSPROGRAMVILKÅRET.getKode()));
     }
 
     @Test
     public void testLoggFlereKodeverdiEnumsMedUlikNameOgKode() {
-        log.warn("VilkårType: {}, {}", VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.OPPTJENINGSVILKÅRET);
+        log.warn("VilkårType: {}, {}", VilkårType.ALDERSVILKÅR, VilkårType.UNGDOMSPROGRAMVILKÅRET);
         assertThat(appender.list)
             .extracting(ILoggingEvent::getFormattedMessage)
-            .containsExactly("VilkårType: %s(%s), %s(%s)".formatted(VilkårType.BEREGNINGSGRUNNLAGVILKÅR.name(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR.getKode(), VilkårType.OPPTJENINGSVILKÅRET.name(), VilkårType.OPPTJENINGSVILKÅRET.getKode()));
+            .containsExactly("VilkårType: %s(%s), %s(%s)".formatted(VilkårType.ALDERSVILKÅR.name(), VilkårType.ALDERSVILKÅR.getKode(), VilkårType.UNGDOMSPROGRAMVILKÅRET.name(), VilkårType.UNGDOMSPROGRAMVILKÅRET.getKode()));
     }
 
     @Test
@@ -67,10 +67,10 @@ public class KodeverdiEnumLogFilterTest {
 
     @Test
     public void testLoggUlikeKodeverdiEnums() {
-        log.warn("VilkårType: {}, Avslagsårsak: {}, int: {}", VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, Avslagsårsak.MANGLENDE_DOKUMENTASJON, 123);
+        log.warn("VilkårType: {}, Avslagsårsak: {}, int: {}", VilkårType.UNGDOMSPROGRAMVILKÅRET, Avslagsårsak.MANGLENDE_DOKUMENTASJON, 123);
         assertThat(appender.list)
             .extracting(ILoggingEvent::getFormattedMessage)
-            .containsExactly("VilkårType: %s(%s), Avslagsårsak: %s(%s), int: 123".formatted(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.name(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.getKode(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.name(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.getKode()));
+            .containsExactly("VilkårType: %s(%s), Avslagsårsak: %s(%s), int: 123".formatted(VilkårType.UNGDOMSPROGRAMVILKÅRET.name(), VilkårType.UNGDOMSPROGRAMVILKÅRET.getKode(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.name(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.getKode()));
     }
 
     @Test
@@ -98,8 +98,8 @@ public class KodeverdiEnumLogFilterTest {
     @Test
     public void testLoggingAvKodeverdiSet() {
         final Set<Kodeverdi> set = new OrderedHashSet<>();
-        final var enum1 = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
-        final var enum2 = VilkårType.MEDISINSKEVILKÅR_18_ÅR;
+        final var enum1 = VilkårType.ALDERSVILKÅR;
+        final var enum2 = VilkårType.UNGDOMSPROGRAMVILKÅRET;
         final var enum3 = DokumentStatus.MOTTATT;
         set.add(enum1);
         set.add(enum2);
@@ -113,8 +113,8 @@ public class KodeverdiEnumLogFilterTest {
     @Test
     public void testLoggingAvKodeverdiMap() {
         final Map<Kodeverdi, Kodeverdi> map = new HashMap<>();
-        final var enum1 = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
-        final var enum2 = VilkårType.MEDISINSKEVILKÅR_18_ÅR;
+        final var enum1 = VilkårType.UNGDOMSPROGRAMVILKÅRET;
+        final var enum2 = VilkårType.ALDERSVILKÅR;
         final var enum3 = DokumentStatus.MOTTATT;
         map.put(enum1, enum2);
         map.put(enum2, enum3);

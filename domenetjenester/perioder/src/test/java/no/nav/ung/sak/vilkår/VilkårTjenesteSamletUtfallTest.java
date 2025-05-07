@@ -1,17 +1,5 @@
 package no.nav.ung.sak.vilkår;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.atIndex;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.Test;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -23,7 +11,17 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
-import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.atIndex;
 
 public class VilkårTjenesteSamletUtfallTest {
 
@@ -33,8 +31,8 @@ public class VilkårTjenesteSamletUtfallTest {
         var vilkårTjeneste = new VilkårTjeneste();
 
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
-            VilkårType.OMSORGEN_FOR, toTimeline(List.of()),
-            VilkårType.UTVIDETRETT, toTimeline(List.of()));
+            VilkårType.ALDERSVILKÅR, toTimeline(List.of()),
+            VilkårType.UNGDOMSPROGRAMVILKÅRET, toTimeline(List.of()));
         var output = vilkårTjeneste.samletVilkårUtfall(input, input.keySet());
         assertThat(output).isEmpty();
     }
@@ -48,8 +46,8 @@ public class VilkårTjenesteSamletUtfallTest {
         LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
 
         var vilkårene = Vilkårene.builder()
-            .leggTil(new VilkårBuilder(VilkårType.OMSORGEN_FOR).leggTil(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT)))
-            .leggTil(new VilkårBuilder(VilkårType.UTVIDETRETT).leggTil(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT)))
+            .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR).leggTil(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT)))
+            .leggTil(new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET).leggTil(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT)))
             .build();
 
         var output = vilkårTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(f1, t2));
@@ -78,8 +76,8 @@ public class VilkårTjenesteSamletUtfallTest {
         var vilkårTjeneste = new VilkårTjeneste();
 
         var vilkårene = Vilkårene.builder()
-            .leggTil(new VilkårBuilder(VilkårType.OMSORGEN_FOR).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(0).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
-            .leggTil(new VilkårBuilder(VilkårType.UTVIDETRETT).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(1).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
+            .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(0).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
+            .leggTil(new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET).leggTil(new VilkårPeriodeBuilder().medPeriode(t.get(1).d0, t.get(1).d1).medUtfall(Utfall.OPPFYLT)))
             .build();
 
         var output = vilkårTjeneste.samleVilkårUtfall(vilkårene, DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato));
@@ -103,9 +101,9 @@ public class VilkårTjenesteSamletUtfallTest {
         var vilkårTjeneste = new VilkårTjeneste();
 
         var vilkårene = Vilkårene.builder()
-            .leggTil(new VilkårBuilder(VilkårType.OMSORGEN_FOR)
+            .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-08-01", "9999-12-31").medUtfall(Utfall.IKKE_OPPFYLT)))
-            .leggTil(new VilkårBuilder(VilkårType.UTVIDETRETT)
+            .leggTil(new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-11-01", "2021-12-31").medUtfall(Utfall.IKKE_VURDERT))
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2022-01-01", "9999-12-31").medUtfall(Utfall.OPPFYLT)))
             .build();
@@ -127,11 +125,11 @@ public class VilkårTjenesteSamletUtfallTest {
         VilkårUtfallSamlet firstValue = output.getSegment(first).getValue();
         assertThat(firstValue.getSamletUtfall()).as(first.toString()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(firstValue.getUnderliggendeVilkårUtfall()).as(first.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.OMSORGEN_FOR);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.ALDERSVILKÅR);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         }, atIndex(0));
         assertThat(firstValue.getUnderliggendeVilkårUtfall()).as(first.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UTVIDETRETT);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UNGDOMSPROGRAMVILKÅRET);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
         }, atIndex(1));
 
@@ -139,11 +137,11 @@ public class VilkårTjenesteSamletUtfallTest {
 
         assertThat(secondValue.getSamletUtfall()).as(second.toString()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(secondValue.getUnderliggendeVilkårUtfall()).as(second.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.OMSORGEN_FOR);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.ALDERSVILKÅR);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         }, atIndex(0));
         assertThat(secondValue.getUnderliggendeVilkårUtfall()).as(second.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UTVIDETRETT);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UNGDOMSPROGRAMVILKÅRET);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.OPPFYLT);
         }, atIndex(1));
 
@@ -155,9 +153,9 @@ public class VilkårTjenesteSamletUtfallTest {
         var vilkårTjeneste = new VilkårTjeneste();
 
         var vilkårene = Vilkårene.builder()
-            .leggTil(new VilkårBuilder(VilkårType.OMSORGEN_FOR)
+            .leggTil(new VilkårBuilder(VilkårType.ALDERSVILKÅR)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-08-01", "9999-12-31").medUtfall(Utfall.OPPFYLT)))
-            .leggTil(new VilkårBuilder(VilkårType.UTVIDETRETT)
+            .leggTil(new VilkårBuilder(VilkårType.UNGDOMSPROGRAMVILKÅRET)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2020-11-01", "2021-12-31").medUtfall(Utfall.IKKE_VURDERT))
                 .leggTil(new VilkårPeriodeBuilder().medPeriode("2022-01-01", "9999-12-31").medUtfall(Utfall.OPPFYLT)))
             .build();
@@ -179,11 +177,11 @@ public class VilkårTjenesteSamletUtfallTest {
         VilkårUtfallSamlet firstValue = output.getSegment(first).getValue();
         assertThat(firstValue.getSamletUtfall()).as(first.toString()).isEqualTo(Utfall.IKKE_VURDERT);
         assertThat(firstValue.getUnderliggendeVilkårUtfall()).as(first.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.OMSORGEN_FOR);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.ALDERSVILKÅR);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.OPPFYLT);
         }, atIndex(0));
         assertThat(firstValue.getUnderliggendeVilkårUtfall()).as(first.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UTVIDETRETT);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UNGDOMSPROGRAMVILKÅRET);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
         }, atIndex(1));
 
@@ -191,11 +189,11 @@ public class VilkårTjenesteSamletUtfallTest {
 
         assertThat(secondValue.getSamletUtfall()).as(second.toString()).isEqualTo(Utfall.OPPFYLT);
         assertThat(secondValue.getUnderliggendeVilkårUtfall()).as(second.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.OMSORGEN_FOR);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.ALDERSVILKÅR);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.OPPFYLT);
         }, atIndex(0));
         assertThat(secondValue.getUnderliggendeVilkårUtfall()).as(second.toString()).hasSize(2).satisfies(v -> {
-            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UTVIDETRETT);
+            assertThat(v.getVilkårType()).isEqualTo(VilkårType.UNGDOMSPROGRAMVILKÅRET);
             assertThat(v.getVilkårUtfall()).isEqualTo(Utfall.OPPFYLT);
         }, atIndex(1));
 
@@ -209,12 +207,12 @@ public class VilkårTjenesteSamletUtfallTest {
         LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
 
         var vilkårOmsorgFor = List.of(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT).build());
-        var vilkårUtvidetRett = List.of(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT).build());
+        var vilkårUNGDOMSPROGRAMVILKÅRET = List.of(new VilkårPeriodeBuilder().medPeriode(f2, t2).medUtfall(Utfall.IKKE_OPPFYLT).build());
 
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
-            VilkårType.OMSORGEN_FOR, toTimeline(vilkårOmsorgFor),
-            VilkårType.UTVIDETRETT, toTimeline(vilkårUtvidetRett));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.OMSORGEN_FOR));
+            VilkårType.ALDERSVILKÅR, toTimeline(vilkårOmsorgFor),
+            VilkårType.UNGDOMSPROGRAMVILKÅRET, toTimeline(vilkårUNGDOMSPROGRAMVILKÅRET));
+        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.ALDERSVILKÅR));
 
         assertThat(output).isNotEmpty();
 
@@ -233,7 +231,7 @@ public class VilkårTjenesteSamletUtfallTest {
     }
 
     @Test
-    void har_samlet_utfall_oppfylt_for_minst_utvidetrett_vilkår() throws Exception {
+    void har_samlet_utfall_oppfylt_for_minst_UNGDOMSPROGRAMVILKÅRET_vilkår() throws Exception {
 
         var vilkårTjeneste = new VilkårTjeneste();
 
@@ -241,14 +239,14 @@ public class VilkårTjenesteSamletUtfallTest {
         LocalDate f2 = LocalDate.now().plusDays(1), t2 = f2.plusDays(10);
 
         var vilkårOmsorgFor = List.of(new VilkårPeriodeBuilder().medPeriode(f1, t1).medUtfall(Utfall.OPPFYLT).build());
-        var vilkårUtvidetRett = List.of(
+        var vilkårUNGDOMSPROGRAMVILKÅRET = List.of(
             new VilkårPeriodeBuilder().medPeriode(f2, t1).medUtfall(Utfall.OPPFYLT).build(),
             new VilkårPeriodeBuilder().medPeriode(t1.plusDays(1), t2).medUtfall(Utfall.IKKE_OPPFYLT).build());
 
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> input = Map.of(
-            VilkårType.OMSORGEN_FOR, toTimeline(vilkårOmsorgFor),
-            VilkårType.UTVIDETRETT, toTimeline(vilkårUtvidetRett));
-        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.UTVIDETRETT));
+            VilkårType.ALDERSVILKÅR, toTimeline(vilkårOmsorgFor),
+            VilkårType.UNGDOMSPROGRAMVILKÅRET, toTimeline(vilkårUNGDOMSPROGRAMVILKÅRET));
+        var output = vilkårTjeneste.samletVilkårUtfall(input, Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET));
 
         assertThat(output).isNotEmpty();
 
