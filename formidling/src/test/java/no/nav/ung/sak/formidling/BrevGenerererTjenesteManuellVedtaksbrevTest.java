@@ -128,13 +128,13 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
             behandling.getId(),
             true,
             false,
-            "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>" +
+            "<h1>Du får ungdomsprogramytelse</h1>" +
                 "<p>Du skal få penger, men du har tjent for mye og vi vil derfor kreve tilbake et beløp.</p>" +
                 "<p>Du får mer informasjon om dette i nærmeste fremtid.</p>"
         ));
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-            "Nav har innvilget søknaden din om ungdomsytelse " +
+            "Du får ungdomsprogramytelse " +
                 "Du skal få penger, men du har tjent for mye og vi vil derfor kreve tilbake et beløp. " +
                 "Du får mer informasjon om dette i nærmeste fremtid. "
         );
@@ -149,7 +149,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har innvilget søknaden din om ungdomsytelse</h1>"
+                "<h1>Du får ungdomsprogramytelse</h1>"
             );
 
     }

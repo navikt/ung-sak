@@ -1,13 +1,13 @@
 package no.nav.ung.sak.formidling.template.dto;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.GbeløpPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.ResultatFlaggDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.SatserDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.TilkjentPeriodeDto;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Hoved-DTO for innvilgelsesbrev
@@ -15,9 +15,14 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.TilkjentPeriodeDto;
 public record InnvilgelseDto(
     ResultatFlaggDto resultat,
     LocalDate ytelseFom,
-    long antallDager,
+    LocalDate ytelseTom,
+    @Deprecated
     List<TilkjentPeriodeDto> tilkjentePerioder,
+    @Deprecated
     Set<GbeløpPeriodeDto> gbeløpPerioder,
-    SatserDto satser) implements TemplateInnholdDto {
+    SatserDto satser,
+    TilkjentPeriodeDto tilkjentPeriode,
+    TilkjentPeriodeDto tilkjentPeriodeHøy,
+    String ikkeStøttetBrevTekst) implements TemplateInnholdDto {
 
 }
