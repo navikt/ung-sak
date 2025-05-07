@@ -47,7 +47,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
-            .medSteg(BehandlingStegType.VARSEL_REVURDERING)
+            .medSteg(BehandlingStegType.KONTROLLER_UNGDOMSPROGRAM)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)

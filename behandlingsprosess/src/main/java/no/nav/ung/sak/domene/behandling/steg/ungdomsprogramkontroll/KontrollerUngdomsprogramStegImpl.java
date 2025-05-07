@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
+package no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -17,15 +17,15 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_UNGDOMSPROGRAM;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
 
-@BehandlingStegRef(value = VARSEL_REVURDERING)
+@BehandlingStegRef(value = KONTROLLER_UNGDOMSPROGRAM)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
+public class KontrollerUngdomsprogramStegImpl implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
     private EtterlysningRepository etterlysningRepository;
@@ -33,10 +33,10 @@ public class VarselRevurderingStegImpl implements VarselRevurderingSteg {
     private final Duration ventePeriode;
 
     @Inject
-    public VarselRevurderingStegImpl(BehandlingRepository behandlingRepository,
-                                     EtterlysningRepository etterlysningRepository,
-                                     ProgramperiodeendringEtterlysningTjeneste etterlysningTjeneste,
-                                     @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
+    public KontrollerUngdomsprogramStegImpl(BehandlingRepository behandlingRepository,
+                                            EtterlysningRepository etterlysningRepository,
+                                            ProgramperiodeendringEtterlysningTjeneste etterlysningTjeneste,
+                                            @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode) {
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;

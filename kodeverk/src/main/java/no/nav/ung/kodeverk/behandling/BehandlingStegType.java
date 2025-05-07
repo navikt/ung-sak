@@ -53,7 +53,7 @@ public enum BehandlingStegType implements Kodeverdi {
     KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT("VURDEROP", "Kontrollerer søkers opplysningsplikt", UTREDES),
     SIMULER_OPPDRAG("SIMOPP", "Simuler oppdrag", UTREDES),
     START_STEG("START", "Start behandling prosess", UTREDES),
-    VARSEL_REVURDERING("VRSLREV", "Varsel om revurdering", UTREDES),
+    KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Kontroller endringer i ungdomsprogram", UTREDES),
     VULOMED("VULOMED", "Vurder løpende medlemskap", UTREDES),
     /**
      * @deprecated pt. ikke i bruk i K9

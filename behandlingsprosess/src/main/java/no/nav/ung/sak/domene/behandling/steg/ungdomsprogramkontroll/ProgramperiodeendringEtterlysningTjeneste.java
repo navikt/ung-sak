@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
+package no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
