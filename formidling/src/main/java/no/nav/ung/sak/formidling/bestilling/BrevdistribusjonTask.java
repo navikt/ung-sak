@@ -24,7 +24,7 @@ import java.util.Objects;
  */
 @ApplicationScoped
 @ProsessTask(value = BrevdistribusjonTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class BrevdistribusjonTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "formidling.brevdistribusjon";
 
