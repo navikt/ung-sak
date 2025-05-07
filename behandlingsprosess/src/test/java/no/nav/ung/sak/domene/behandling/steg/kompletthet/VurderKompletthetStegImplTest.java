@@ -32,10 +32,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ExtendWith(JpaExtension.class)
 class VurderKompletthetStegImplTest {
 
-
     @Inject
     private FagsakRepository fagsakRepository;
-
     @Inject
     private BehandlingRepository behandlingRepository;
     @Inject
