@@ -63,7 +63,7 @@ class InnsynEventTjenesteTest {
 
         behandlingRepository = testScenarioBuilder.mockBehandlingRepository();
         var behandling = testScenarioBuilder.lagMocked();
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE);
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING);
         aksjonspunktTestSupport.setFrist(aksjonspunkt,  venteFrist, Venteårsak.FOR_TIDLIG_SOKNAD, null);
 
         no.nav.ung.sak.behandlingslager.fagsak.Fagsak fagsak = behandling.getFagsak();
