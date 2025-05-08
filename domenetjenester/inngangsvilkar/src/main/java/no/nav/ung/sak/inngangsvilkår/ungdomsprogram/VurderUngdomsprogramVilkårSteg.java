@@ -95,7 +95,7 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
     }
 
     private static Avslagsårsak utledAvslagsårsak(LocalDateInterval avslåttPeriode, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        return perioderTilVurdering.stream().anyMatch(p -> p.getTomDato().equals(avslåttPeriode.getTomDato())) ? Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM : Avslagsårsak.ENDRET_STARTDATO_UNGDOMSPROGRAM;
+        return perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(avslåttPeriode.getFomDato())) ? Avslagsårsak.ENDRET_STARTDATO_UNGDOMSPROGRAM : Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM;
     }
 
     private static LocalDateSegment<Utfall> settUtfall(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
