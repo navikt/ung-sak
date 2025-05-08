@@ -13,6 +13,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
@@ -82,11 +83,19 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
      * @return Vilkårperiodebuilders
      */
     private static List<VilkårPeriodeBuilder> vurderPerioder(LocalDateTimeline<Boolean> ungdomsprogramTidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårBuilder vilkårBuilder) {
-        var builders = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering).combine(ungdomsprogramTidslinje, VurderUngdomsprogramVilkårSteg::settUtfall, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+        var builders = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering)
+            .combine(ungdomsprogramTidslinje, VurderUngdomsprogramVilkårSteg::settUtfall, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .toSegments()
             .stream()
-            .map(p -> vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(p.getLocalDateInterval())).medUtfall(p.getValue()).medRegelInput("{ 'periode': '" + p.getLocalDateInterval() + "' }")).toList();
+            .map(p -> vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(p.getLocalDateInterval()))
+                .medUtfall(p.getValue())
+                .medAvslagsårsak(p.getValue() == Utfall.IKKE_OPPFYLT ? utledAvslagsårsak(p.getLocalDateInterval(), perioderTilVurdering) : null)
+                .medRegelInput("{ 'periode': '" + p.getLocalDateInterval() + "' }")).toList();
         return builders;
+    }
+
+    private static Avslagsårsak utledAvslagsårsak(LocalDateInterval avslåttPeriode, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        return perioderTilVurdering.stream().anyMatch(p -> p.getTomDato().equals(avslåttPeriode.getTomDato())) ? Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM : Avslagsårsak.ENDRET_STARTDATO_UNGDOMSPROGRAM;
     }
 
     private static LocalDateSegment<Utfall> settUtfall(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
