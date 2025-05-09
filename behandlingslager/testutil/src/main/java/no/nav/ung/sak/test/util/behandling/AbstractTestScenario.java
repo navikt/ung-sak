@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -37,6 +38,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
+import no.nav.ung.sak.test.util.behandling.personopplysning.Personas;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -399,9 +401,16 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         // Default Person
         if (personer == null) {
             var ungdom = getDefaultBrukerAktørId();
-            PersonInformasjon personInformasjon = opprettBuilderForRegisteropplysninger()
+            Personas ungdomPersonas = opprettBuilderForRegisteropplysninger()
                 .medPersonas()
-                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn())
+                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn());
+
+            ungTestscenario.barn().forEach(it -> {
+                opprettBuilderForRegisteropplysninger().leggTilPersonopplysning(it.getPersonopplysninger().getFirst());
+                ungdomPersonas.relasjonTil(it.getPersonopplysninger().getFirst().getAktørId(), RelasjonsRolleType.BARN);
+
+            });
+            PersonInformasjon personInformasjon = ungdomPersonas
                 .build();
             medRegisterOpplysninger(personInformasjon);
         }

@@ -4,6 +4,8 @@ import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public final class Personopplysning {
@@ -63,6 +65,7 @@ public final class Personopplysning {
         private String navn;
         private LocalDate dødsdato;
         private LocalDate fødselsdato;
+        private Set<LocalDate> barnsFødselsdatoer = new HashSet<>();
 
         private Builder() {
         }
@@ -93,6 +96,11 @@ public final class Personopplysning {
 
         public Builder fødselsdato(LocalDate fødselsdato) {
             this.fødselsdato = fødselsdato;
+            return this;
+        }
+
+        public Builder barn(Set<LocalDate> barnsFødselsdatoer) {
+            this.barnsFødselsdatoer.addAll(barnsFødselsdatoer);
             return this;
         }
     }

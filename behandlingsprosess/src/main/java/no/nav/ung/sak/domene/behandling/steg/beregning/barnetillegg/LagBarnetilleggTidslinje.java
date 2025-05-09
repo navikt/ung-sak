@@ -1,12 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg;
 
-import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE;
-import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -17,7 +10,14 @@ import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.BarnetilleggSatsTidslinje;
 import no.nav.ung.sak.typer.AktørId;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 
 /**
  * Finner tidslinje for barnetillegg.
@@ -25,15 +25,6 @@ import no.nav.ung.sak.typer.AktørId;
 @Dependent
 public class LagBarnetilleggTidslinje {
 
-
-    /**
-     * Tidslinje for barnetilleggsatser
-     */
-    public static final LocalDateTimeline<BigDecimal> BARNETILLEGG_DAGSATS = new LocalDateTimeline<>(
-        List.of(
-            new LocalDateSegment<>(TIDENES_BEGYNNELSE, LocalDate.of(2024, 12, 31), BigDecimal.valueOf(36)),
-            new LocalDateSegment<>(LocalDate.of(2025, 1, 1), TIDENES_ENDE, BigDecimal.valueOf(37))
-        ));
 
     private final PersonopplysningRepository personopplysningRepository;
     private final HentFødselOgDød hentFødselOgDød;
@@ -76,7 +67,7 @@ public class LagBarnetilleggTidslinje {
             .orElse(LocalDateTimeline.empty());
 
         var relevantBarnetilleggTidslinje = antallBarnGrunnlagTidslinje.intersection(perioder)
-            .combine(BARNETILLEGG_DAGSATS, barnetilleggCombinator(), LocalDateTimeline.JoinStyle.LEFT_JOIN);
+            .combine(BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS, barnetilleggCombinator(), LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         return new BarnetilleggVurdering(relevantBarnetilleggTidslinje, relevantPersonInfoBarn);
     }

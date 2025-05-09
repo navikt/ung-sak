@@ -8,7 +8,7 @@ import java.util.Objects;
 
 
 public record UngdomsytelseSatser(BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor,
-                                  UngdomsytelseSatsType satsType, Integer antallBarn, int dagsatsBarnetillegg) {
+                                  UngdomsytelseSatsType satsType, int antallBarn, int dagsatsBarnetillegg) {
 
     public static Builder builder() {
         return new Builder();

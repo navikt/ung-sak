@@ -57,8 +57,7 @@ class BrevGenerererTjenesteTest {
         InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository()),
-            repositoryProvider.getPersonopplysningRepository(),
-            ungTestRepositories.tilkjentYtelseRepository(), false );
+            false );
         BrevGenerererTjeneste brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
