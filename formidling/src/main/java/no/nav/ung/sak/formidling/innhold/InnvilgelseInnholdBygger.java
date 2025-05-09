@@ -20,6 +20,9 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.template.dto.InnvilgelseDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.*;
+import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.BarnetilleggDto;
+import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.BeregningDto;
+import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.SatsOgBeregningDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
@@ -29,9 +32,7 @@ import org.slf4j.Logger;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilFaktor;
@@ -67,14 +68,16 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+        var brevfeilSamler = new BrevfeilSamler();
         Long behandlingId = behandling.getId();
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandlingId);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
 
+        LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
         var grunnlagOgTilkjentYtelseTidslinje = tilkjentYtelseTidslinje
-            .intersection(ungdomsytelseGrunnlag.getSatsTidslinje(),
+            .intersection(satsTidslinje,
                 InnvilgelseInnholdBygger::sammenstillGrunnlagOgTilkjentYtelse)
             .compress();
 
@@ -82,36 +85,134 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
         var tilkjentSatserHøy = mapTilTilkjentSatsDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.HØY);
         var tilkjentSatserLav = mapTilTilkjentSatsDto(grunnlagOgTilkjentYtelseTidslinje, UngdomsytelseSatsType.LAV);
-        var ikkeStøttetBrevTekst = validerTilkjentYtelse(tilkjentSatserHøy, tilkjentSatserLav);
+//        var ikkeStøttetBrevTekst = validerTilkjentYtelse(tilkjentSatserHøy, tilkjentSatserLav);
 
         var tilkjentSatsHøy = tilkjentSatserHøy.stream().findFirst();
         var tilkjentSatsLav = tilkjentSatserLav.stream().findFirst();
 
 
         var gBeløpPerioder = lagGbeløpPerioderDto(grunnlagOgTilkjentYtelseTidslinje);
-        var ytelseFom = detaljertResultatTidslinje.getMinLocalDate();
         var satser = lagSatsDto(grunnlagOgTilkjentYtelseTidslinje);
+
+        var ytelseFom = detaljertResultatTidslinje.getMinLocalDate();
+        var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje, brevfeilSamler);
+        var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments(), brevfeilSamler);
+        var førsteSatser = satsTidslinje.toSegments().first().getValue();
+        var dagsatsFom = tilHeltall(førsteSatser.dagsats().add(BigDecimal.valueOf(førsteSatser.dagsatsBarnetillegg())));
 
         var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnVirkedagerTidslinje(behandlingId);
         var resultatFlagg = lagResultatFlaggDto(grunnlagOgTilkjentYtelseTidslinje, vurderAntallDagerResultat, behandling);
 
         long antallDager = vurderAntallDagerResultat.forbrukteDager();
         if (antallDager <= 0) {
-            throw new IllegalStateException("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
+            brevfeilSamler.leggTilFeilmelding("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
         }
         var ytelseTom = FinnForbrukteDager.MAKS_ANTALL_DAGER != antallDager ? detaljertResultatTidslinje.getMaxLocalDate() : null;
+
+        if (brevfeilSamler.harFeil() && !ignoreIkkeStøttedeBrev) {
+            throw new IllegalStateException(brevfeilSamler.joinedFeilmeldinger());
+        }
 
         return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 resultatFlagg,
                 ytelseFom,
                 ytelseTom,
+                dagsatsFom,
                 tilkjentePerioder,
                 gBeløpPerioder,
                 satser,
                 tilkjentSatsLav.orElseGet(tilkjentSatsHøy::orElseThrow),
                 tilkjentSatsHøy.orElse(null),
-                ikkeStøttetBrevTekst));
+                brevfeilSamler.joinedFeilmeldinger(),
+                satsEndringHendelseDtos,
+                satsOgBeregningDto));
+    }
+
+    private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, BrevfeilSamler brevfeilSamler) {
+        List<SatsEndringHendelseDto> resultat = new ArrayList<>();
+        var satsSegments = satsTidslinje.toSegments();
+        LocalDateSegment<UngdomsytelseSatser> previous = null;
+        for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
+            if (previous == null) {
+                previous = current;
+                continue;
+            }
+
+            var currentSatser = current.getValue();
+            var previousSatser = previous.getValue();
+            var fødselBarn = currentSatser.antallBarn() > previousSatser.antallBarn();
+            var dødsfallBarn = currentSatser.antallBarn() < previousSatser.antallBarn();
+            var fikkFlereBarn = currentSatser.antallBarn() > previousSatser.antallBarn() && currentSatser.antallBarn() - previousSatser.antallBarn() > 1;
+            var overgangTilHøySats = currentSatser.satsType() == UngdomsytelseSatsType.HØY && previousSatser.satsType() == UngdomsytelseSatsType.LAV;
+            var overgangLavSats = currentSatser.satsType() == UngdomsytelseSatsType.LAV && previousSatser.satsType() == UngdomsytelseSatsType.HØY;
+
+            if (overgangLavSats) {
+                brevfeilSamler.leggTilFeilmelding("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
+            }
+            if ((overgangTilHøySats ? 1 : 0) + (fødselBarn ? 1 : 0) + (dødsfallBarn ? 1 : 0) > 1) {
+                brevfeilSamler.leggTilFeilmelding("Kun én av overgangTilHøySats=%s, fødselBarn=%s eller dødsfallBarn=%s kan være true".formatted(overgangTilHøySats, fødselBarn, dødsfallBarn));
+            }
+
+            resultat.add(new SatsEndringHendelseDto(
+                overgangTilHøySats,
+                fødselBarn,
+                dødsfallBarn,
+                current.getFom(),
+                tilHeltall(currentSatser.dagsats().add(BigDecimal.valueOf(currentSatser.dagsatsBarnetillegg()))),
+                dødsfallBarn ? previousSatser.dagsatsBarnetillegg() : currentSatser.dagsatsBarnetillegg(),
+                fikkFlereBarn
+            ));
+
+            previous = current;
+        }
+
+        return resultat;
+
+    }
+
+    private static SatsOgBeregningDto mapSatsOgBeregning(NavigableSet<LocalDateSegment<UngdomsytelseSatser>> satsSegments, BrevfeilSamler brevfeilSamler) {
+        var satser = satsSegments.stream()
+            .map(it -> it.getValue().satsType())
+            .collect(Collectors.toSet());
+
+        var kunHøySats = satser.size() == 1 && satser.contains(UngdomsytelseSatsType.HØY);
+
+        var beregning = mapTilBeregningDto(satsSegments.first().getValue());
+
+        var nyesteSegment = satsSegments.last();
+        var nyesteSats = nyesteSegment.getValue();
+
+        var overgangTilHøySats = satser.size() > 1 ? mapOvergangTilHøySats(nyesteSegment, brevfeilSamler) :  null;
+
+        var barnetillegg = nyesteSats.antallBarn() > 0
+            ? new BarnetilleggDto(
+                nyesteSats.antallBarn(),
+                nyesteSats.dagsatsBarnetillegg(),
+                tilHeltall(nyesteSats.dagsats().add(BigDecimal.valueOf(nyesteSats.dagsatsBarnetillegg()))))
+            : null;
+
+        return new SatsOgBeregningDto(
+            Sats.HØY.getFomAlder(),
+            kunHøySats,
+            beregning,
+            overgangTilHøySats,
+            barnetillegg);
+    }
+
+    private static BeregningDto mapOvergangTilHøySats(LocalDateSegment<UngdomsytelseSatser> nyesteSegment, BrevfeilSamler brevfeilSamler) {
+        var nyesteSats = nyesteSegment.getValue();
+        if (nyesteSats.satsType() != UngdomsytelseSatsType.HØY) {
+            brevfeilSamler.leggTilFeilmelding("Forventet at nyeste sats skulle være høy når det er flere satser, men var %s for periode %s".formatted(nyesteSats.satsType(), nyesteSegment.getLocalDateInterval()));
+        }
+        return mapTilBeregningDto(nyesteSats);
+    }
+
+    private static BeregningDto mapTilBeregningDto(UngdomsytelseSatser sats) {
+        return new BeregningDto(
+            tilFaktor(sats.grunnbeløpFaktor()),
+            tilHeltall(sats.grunnbeløp().multiply(sats.grunnbeløpFaktor())),
+            tilHeltall(sats.dagsats()));
     }
 
     private String validerTilkjentYtelse(List<TilkjentPeriodeDto> tilkjenteYtelserHøy, List<TilkjentPeriodeDto> tilkjenteYtelserLav) {
@@ -204,7 +305,8 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         return new LocalDateSegment<>(di,
             new GrunnlagOgTilkjentYtelse(
                 satsPerioder.satsType(),
-                tilHeltall(satsPerioder.dagsats().add(BigDecimal.valueOf(satsPerioder.dagsatsBarnetillegg()))), tilHeltall(satsPerioder.grunnbeløp()),
+                tilHeltall(satsPerioder.dagsats().add(BigDecimal.valueOf(satsPerioder.dagsatsBarnetillegg()))),
+                tilHeltall(satsPerioder.grunnbeløp()),
                 tilFaktor(satsPerioder.grunnbeløpFaktor()),
                 tilHeltall(satsPerioder.grunnbeløp().multiply(satsPerioder.grunnbeløpFaktor())),
                 tilHeltall(satsPerioder.dagsats()),

@@ -40,7 +40,7 @@ public record UngTestScenario(
     Set<Trigger> behandlingTriggere,
     @Deprecated // Inntekt hentes nå fra tilkjent ytelse i brev istedenfor abakus.
     OppgittOpptjeningBuilder abakusInntekt,
-    Set<LocalDate> barnFødselsdato) {
+    List<LocalDate> barnFødselsdato) {
 }
 
 

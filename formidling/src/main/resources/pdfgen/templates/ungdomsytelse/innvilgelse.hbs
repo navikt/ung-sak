@@ -7,18 +7,32 @@
     {{#> felles/seksjon/hoved }}
         <h1>Du får ungdomsprogramytelse</h1>
 
-        <p>Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du ungdomsprogramytelse på {{> felles/beløp tilkjentPeriode.tilkjentSats.dagsats}} per dag utenom lørdag og søndag.
+        <p>
+            Fra {{ytelseFom}}{{#if ytelseTom}}
+            til {{ytelseTom}}{{/if}} får du ungdomsprogramytelse på {{> felles/beløp dagsats}} per dag utenom lørdag og
+            søndag.
         </p>
 
-        {{#if resultat.varierendeSats}}
-            <p>
-                Fordi du fylte {{satser.aldersgrenseLav}} år {{tilkjentPeriodeHøy.periode.fom}}, får du mer penger fra denne datoen. Da får du {{> felles/beløp tilkjentPeriodeHøy.tilkjentSats.dagsats}} per dag, utenom lørdag og søndag.
-            </p>
-        {{/if}}
+        {{#each satsEndringer}}
+            {{#if overgangTilHøySats}}
+                <p>Fordi du fylte {{satsOgBeregning.aldersgrenseSatsendring}} år {{fom}}, får du mer penger fra denne
+                    datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+            {{#if fødselBarn}}
+                <p>Fordi du fikk barn {{fom}}, får du {{> felles/beløp barnetillegg}} mer fra denne datoen. Da får
+                    du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+            {{#if dødsfallBarn}}
+                <p>Fordi du mistet et barn {{fom}}, får du ikke barnetillegg på {{> felles/beløp barnetillegg}} fra den
+                    datoen. Du får da {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+        {{/each}}
 
-        <p>Pengene får du utbetalt én gang i måneden før den 10. i måneden.
+        <p>
+            Pengene får du utbetalt én gang i måneden før den 10. i måneden.
             Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet.
-            Pengene du får, blir det trukket skatt av. </p>
+            Pengene du får, blir det trukket skatt av.
+        </p>
 
         <p>
             Du finner mer informasjon om utbetalingen hvis du <a href="https://www.nav.no/min-side">logger inn på Min
@@ -38,44 +52,46 @@
             Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet.
             Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år.
         </p>
-        <p>
-            {{#if resultat.kunHøySats}}
-                Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec satser.høy}}.
-            {{else}}
-                Når du er under {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec satser.lav}}.
-            {{/if}}
 
-            Det vil si {{> felles/beløp tilkjentPeriode.tilkjentSats.årsbeløp}} i året.
-            Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
-        </p>
-        <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriode.tilkjentSats.dagsatsGrunnbeløpFaktor}} per dag.</p>
-        {{#if resultat.varierendeSats}}
+        {{#with satsOgBeregning}}
             <p>
-                Når du er over {{satser.aldersgrenseLav}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec satser.høy}} som blir {{> felles/beløp tilkjentPeriodeHøy.tilkjentSats.årsbeløp}} i året.
+                Når du er {{#if kunHøySats}}over{{else}}under{{/if}} {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec beregning.faktor}}.
+                Det vil si {{> felles/beløp beregning.årsbeløp}} i året.
+                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
             </p>
-            <p>Det vil si at du har rett på {{> felles/beløp tilkjentPeriodeHøy.tilkjentSats.dagsatsGrunnbeløpFaktor}} per dag.</p>
-        {{/if}}
+            <p>Det vil si at du har rett på {{> felles/beløp beregning.dagsats}} per dag.</p>
+            {{#with overgangTilHøySats}}
+                <p>
+                    Når du er over {{satsOgBeregning.aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
+                    ganger {{currency_no_3_dec faktor}} som blir {{> felles/beløp årsbeløp}} i året.
+                </p>
+                <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
+            {{/with}}
+        {{/with}}
 
-        {{#if resultat.harBarn}}
-            <p>Fordi du har {{tilkjentPeriode.tilkjentSats.antallBarn}} barn, får du i tillegg {{> felles/beløp tilkjentPeriode.tilkjentSats.barnetilleggSats}} per dag i barnetillegg.
-                Det vil si at du til sammen får {{> felles/beløp tilkjentPeriode.tilkjentSats.dagsats}} per dag.</p>
-        {{/if}}
+        {{#with satsOgBeregning.barnetillegg}}
+            <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp dagsatsTillegg}} per dag i barnetillegg.
+                Det vil si at du til sammen får {{> felles/beløp dagsatsMedTillegg}} per dag.</p>
+        {{/with}}
 
         <p>Slik regner vi ut hvor mye penger du kan få per dag.</p>
 
-
-        <p><a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på.</a></p>
+        <p><a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempler i Ungdomsportalen på hvordan vi
+            regner ut hvor mye penger du har rett på.</a></p>
 
         <h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen </h2>
         <p>Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det.</p>
         <p>
             Du får en SMS den 1. hver måned.
-            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om hva du har hatt i inntekt måneden før.</p>
+            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om hva du har hatt i inntekt
+            måneden før.</p>
         <p>
             Når du har en inntekt, får du mindre penger gjennom ungdomsprogramytelsen.
-            Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får ytelsen.</p>
+            Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får
+            ytelsen.</p>
 
-        <p><a href="https://www.nav.no/ungdomsportalen">Se hvordan du skal gi beskjed om inntekten din i Ungdomsportalen.</a></p>
+        <p><a href="https://www.nav.no/ungdomsportalen">Se hvordan du skal gi beskjed om inntekten din i
+            Ungdomsportalen.</a></p>
 
     {{/felles/seksjon/hoved}}
 

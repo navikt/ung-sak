@@ -1,9 +1,7 @@
 package no.nav.ung.sak.formidling.template.dto;
 
-import no.nav.ung.sak.formidling.template.dto.innvilgelse.GbeløpPeriodeDto;
-import no.nav.ung.sak.formidling.template.dto.innvilgelse.ResultatFlaggDto;
-import no.nav.ung.sak.formidling.template.dto.innvilgelse.SatserDto;
-import no.nav.ung.sak.formidling.template.dto.innvilgelse.TilkjentPeriodeDto;
+import no.nav.ung.sak.formidling.template.dto.innvilgelse.*;
+import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.SatsOgBeregningDto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +14,7 @@ public record InnvilgelseDto(
     ResultatFlaggDto resultat,
     LocalDate ytelseFom,
     LocalDate ytelseTom,
+    long dagsats,
     @Deprecated
     List<TilkjentPeriodeDto> tilkjentePerioder,
     @Deprecated
@@ -23,6 +22,9 @@ public record InnvilgelseDto(
     SatserDto satser,
     TilkjentPeriodeDto tilkjentPeriode,
     TilkjentPeriodeDto tilkjentPeriodeHøy,
-    String ikkeStøttetBrevTekst) implements TemplateInnholdDto {
+    String ikkeStøttetBrevTekst,
+    List<SatsEndringHendelseDto> satsEndringer,
+    SatsOgBeregningDto satsOgBeregning)
+    implements TemplateInnholdDto {
 
 }

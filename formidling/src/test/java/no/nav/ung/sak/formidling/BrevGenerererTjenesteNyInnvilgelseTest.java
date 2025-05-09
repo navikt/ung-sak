@@ -276,12 +276,11 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 "<h1>Du får ungdomsprogramytelse</h1>"
             );
     }
-
     @DisplayName("Innvilgelse med barnetillegg")
     @Test
     void barnetillegg() {
         LocalDate fom = LocalDate.of(2025, 1, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedToBarn(fom);
+        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedToBarn15DagerEtterStartdato(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -293,7 +292,8 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. januar 2025 får du ungdomsprogramytelse på 686 kroner per dag utenom lørdag og søndag. \
+                Fra 1. januar 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
+                Fordi du fikk barn 16. januar 2025, får du 37 kroner mer fra denne datoen. Da får du 686 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -321,9 +321,9 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
 
     }
 
-    @DisplayName("Får barn etter startdato så har en periode uten barnetillegg")
+    @DisplayName("Barnet dør etter startdato så har en periode med barnetillegg")
     @Test
-    void medOgUtenBarnetillegg() {
+    void medOgUtenBarnetilleggDødsfall() {
         LocalDate fom = LocalDate.of(2025, 1, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedToBarn(fom);
 
