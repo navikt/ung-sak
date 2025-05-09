@@ -78,6 +78,10 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         }
         var ytelseTom = FinnForbrukteDager.MAKS_ANTALL_DAGER != antallDager ? detaljertResultatTidslinje.getMaxLocalDate() : null;
 
+        if (brevfeilSamler.harFeil()) {
+            LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
+        }
+
         return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
