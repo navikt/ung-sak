@@ -36,7 +36,7 @@ public class EndretUngdomsprogramperiodeEtterlysningHåndterer implements Etterl
     public EndretUngdomsprogramperiodeEtterlysningHåndterer(EtterlysningRepository etterlysningRepository,
                                                             BehandlingRepository behandlingRepository,
                                                             UngOppgaveKlient ungOppgaveKlient, PersoninfoAdapter personinfoAdapter,
-                                                            @KonfigVerdi(value = "REVURDERING_ENDRET_PERIODE_VENTEFRIST", defaultVerdi = "P14D") String ventePeriode,
+                                                            @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
                                                             UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
