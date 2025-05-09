@@ -23,7 +23,7 @@ import java.util.Locale;
 
 public class BrevUtils {
 
-    static DateTimeFormatter norwegianFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("no-NO"));
+    static final DateTimeFormatter norwegianFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("no-NO"));
 
     public static String brevDatoString(LocalDate date) {
         return date.format(norwegianFormatter);
