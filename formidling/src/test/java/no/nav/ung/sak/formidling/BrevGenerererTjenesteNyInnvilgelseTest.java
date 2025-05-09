@@ -71,8 +71,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
-            repositoryProvider.getPersonopplysningRepository(),
-            tilkjentYtelseRepository, false);
+            false);
 
         var ungdomsytelseSøknadsperiodeTjeneste =
             new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
