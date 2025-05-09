@@ -130,11 +130,6 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         if (overgangLavSats) {
             brevfeilHåndterer.registrerFeilmelding("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
         }
-        int antallEndringer = (overgangTilHøySats ? 1 : 0) + (fødselBarn ? 1 : 0) + (dødsfallBarn ? 1 : 0);
-        if (antallEndringer > 1) {
-            brevfeilHåndterer.registrerFeilmelding("Støtter ikke flere endringer for samme periode. Fant overgangTilHøySats=%s, fødselBarn=%s eller dødsfallBarn=%s for perioden %s"
-                .formatted(overgangTilHøySats, fødselBarn, dødsfallBarn, current.getLocalDateInterval()));
-        }
 
         var totaltBarnetillegg = BigDecimal.valueOf(currentSatser.dagsatsBarnetillegg()).multiply(BigDecimal.valueOf(currentSatser.antallBarn()));
 
