@@ -24,6 +24,7 @@ import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
@@ -59,24 +60,20 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var brevfeilSamler = new BrevfeilHåndterer(!ignoreIkkeStøttedeBrev);
         Long behandlingId = behandling.getId();
 
+        var ytelseFom = detaljertResultatTidslinje.getMinLocalDate();
+        var ytelseTom = finnEvtTomDato(detaljertResultatTidslinje, behandlingId, brevfeilSamler);
+
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
 
         LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
 
-        var ytelseFom = detaljertResultatTidslinje.getMinLocalDate();
-        var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje, brevfeilSamler);
-        var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments(), brevfeilSamler);
         var førsteSatser = satsTidslinje.toSegments().first().getValue();
         var dagsatsFom = tilHeltall(førsteSatser.dagsats().add(BigDecimal.valueOf(førsteSatser.dagsatsBarnetillegg())));
 
-        var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnVirkedagerTidslinje(behandlingId);
+        var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje, brevfeilSamler);
 
-        long antallDager = vurderAntallDagerResultat.forbrukteDager();
-        if (antallDager <= 0) {
-            brevfeilSamler.registrerFeilmelding("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
-        }
-        var ytelseTom = FinnForbrukteDager.MAKS_ANTALL_DAGER != antallDager ? detaljertResultatTidslinje.getMaxLocalDate() : null;
+        var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments(), brevfeilSamler);
 
         if (brevfeilSamler.harFeil()) {
             LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
@@ -90,6 +87,16 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
                 satsEndringHendelseDtos,
                 satsOgBeregningDto,
                 brevfeilSamler.samletFeiltekst()));
+    }
+
+    private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId, BrevfeilHåndterer brevfeilSamler) {
+        var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnVirkedagerTidslinje(behandlingId);
+
+        long antallDager = vurderAntallDagerResultat.forbrukteDager();
+        if (antallDager <= 0) {
+            brevfeilSamler.registrerFeilmelding("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
+        }
+        return FinnForbrukteDager.MAKS_ANTALL_DAGER != antallDager ? detaljertResultatTidslinje.getMaxLocalDate() : null;
     }
 
     private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, BrevfeilHåndterer brevfeilHåndterer) {
