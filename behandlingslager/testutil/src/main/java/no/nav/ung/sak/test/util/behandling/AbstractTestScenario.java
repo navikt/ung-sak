@@ -405,14 +405,9 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
                 .medPersonas()
                 .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn());
 
-            ungTestscenario.barnFødselsdato().forEach(it -> {
-                var aktøridBarn = AktørId.dummy();
-                medRegisterOpplysninger(
-                    opprettBuilderForRegisteropplysninger()
-                        .medPersonas()
-                        .barn(aktøridBarn, it)
-                        .build());
-                ungdomPersonas.relasjonTil(aktøridBarn, RelasjonsRolleType.BARN);
+            ungTestscenario.barn().forEach(it -> {
+                opprettBuilderForRegisteropplysninger().leggTilPersonopplysning(it.getPersonopplysninger().getFirst());
+                ungdomPersonas.relasjonTil(it.getPersonopplysninger().getFirst().getAktørId(), RelasjonsRolleType.BARN);
 
             });
             PersonInformasjon personInformasjon = ungdomPersonas

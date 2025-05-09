@@ -136,12 +136,14 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
                 .formatted(overgangTilHøySats, fødselBarn, dødsfallBarn, current.getLocalDateInterval()));
         }
 
+        var totaltBarnetillegg = BigDecimal.valueOf(currentSatser.dagsatsBarnetillegg()).multiply(BigDecimal.valueOf(currentSatser.antallBarn()));
+
         return new SatsEndringHendelseDto(
             overgangTilHøySats,
             fødselBarn,
             dødsfallBarn,
             current.getFom(),
-            tilHeltall(currentSatser.dagsats().add(BigDecimal.valueOf(currentSatser.dagsatsBarnetillegg()))),
+            tilHeltall(currentSatser.dagsats().add(totaltBarnetillegg)),
             dødsfallBarn ? previousSatser.dagsatsBarnetillegg() : currentSatser.dagsatsBarnetillegg(),
             fikkFlereBarn
         );

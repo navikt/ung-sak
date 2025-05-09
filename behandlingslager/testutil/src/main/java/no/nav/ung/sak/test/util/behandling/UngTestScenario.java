@@ -7,6 +7,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.trigger.Trigger;
 
 import java.time.LocalDate;
@@ -25,7 +26,7 @@ import java.util.Set;
  * @param søknadStartDato      - startdatoer fra søknad
  * @param behandlingTriggere
  * @param abakusInntekt
- * @param barnFødselsdato      -
+ * @param barn
  */
 public record UngTestScenario(
     String navn,
@@ -40,7 +41,7 @@ public record UngTestScenario(
     Set<Trigger> behandlingTriggere,
     @Deprecated // Inntekt hentes nå fra tilkjent ytelse i brev istedenfor abakus.
     OppgittOpptjeningBuilder abakusInntekt,
-    List<LocalDate> barnFødselsdato) {
+    List<PersonInformasjon> barn) {
 }
 
 
