@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
@@ -44,11 +45,18 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
         var nyeSatser = ungdomsytelseGrunnlag.getSatsTidslinje().getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
+        if (nyeSatser.antallBarn() == 0) {
+            throw new IllegalStateException("Ingen barn på fom=" + satsendringsdato);
+        }
+
+        var dagsatsPrBarn = BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg())
+            .divide(BigDecimal.valueOf(nyeSatser.antallBarn()), RoundingMode.HALF_UP);
+
+
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_BARNETILLEGG,
             new EndringBarnetillegg(
                 satsendringsdato,
-                tilHeltall(BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg())))
-        );
+                tilHeltall(dagsatsPrBarn)));
 
     }
 

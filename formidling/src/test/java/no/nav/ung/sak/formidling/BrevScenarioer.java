@@ -431,12 +431,13 @@ public class BrevScenarioer {
     public static UngdomsytelseSatser.Builder lavSatsMedBarnBuilder(LocalDate fom, int antallBarn) {
         SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
         var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(new LocalDateInterval(fom, fom)).getValue();
+        BigDecimal g = hentGrunnbeløpFor(fom);
         return UngdomsytelseSatser.builder()
-            .medGrunnbeløp(hentGrunnbeløpFor(fom))
+            .medGrunnbeløp(g)
             .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
             .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(antallBarn)
-            .medBarnetilleggDagsats(antallBarn > 0 ? barneTillegg.intValue(): 0);
+            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue());
     }
 
     public static UngdomsytelseSatser.Builder høySatsBuilder(LocalDate fom) {
@@ -446,13 +447,18 @@ public class BrevScenarioer {
     public static UngdomsytelseSatser.Builder høySatsBuilderMedBarn(LocalDate fom, int antallBarn) {
         SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.HØY);
         var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(new LocalDateInterval(fom, fom)).getValue();
-
+        var g = hentGrunnbeløpFor(fom);
         return UngdomsytelseSatser.builder()
-            .medGrunnbeløp(hentGrunnbeløpFor(fom))
+            .medGrunnbeløp(g)
             .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
             .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(antallBarn)
-            .medBarnetilleggDagsats(antallBarn > 0 ? barneTillegg.intValue(): 0);
+            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue());
+    }
+
+    @NotNull
+    private static BigDecimal beregnDagsatsInklBarnetillegg(int antallBarn, BigDecimal barneTillegg) {
+        return barneTillegg.multiply(BigDecimal.valueOf(antallBarn));
     }
 
     private static SatsOgGrunnbeløpfaktor hentSatstypeOgGrunnbeløp(Sats sats) {
