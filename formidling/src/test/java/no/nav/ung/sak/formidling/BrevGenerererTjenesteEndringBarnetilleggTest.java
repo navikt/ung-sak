@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -69,7 +69,7 @@ class BrevGenerererTjenesteEndringBarnetilleggTest {
 
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-        var endringInnholdBygger = new EndringHøySatsInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository());
+        var endringInnholdBygger = new EndringBarnetilleggInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository());
 
         BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
