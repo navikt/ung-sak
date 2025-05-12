@@ -343,6 +343,35 @@ public class BrevScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))), null, Collections.emptyList());
     }
 
+    /**
+     * Endring barnetillegg. Får barn etter å ha fått innvilget programmet
+     */
+    public static UngTestScenario endringBarnetillegg(LocalDate fom, LocalDate barnFødselsdato) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, barnFødselsdato.minusDays(1), lavSatsBuilder(fom).build()),
+            new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnFødselsdato, 1).build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(p),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))), null,
+            List.of(
+                lagBarn(barnFødselsdato)
+            ));
+    }
+
+
     private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {
         return satser.splitAtRegular(satser.getMinLocalDate().withDayOfMonth(1), satser.getMaxLocalDate(), Period.ofMonths(1));
     }
