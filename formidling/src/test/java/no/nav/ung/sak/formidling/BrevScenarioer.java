@@ -80,41 +80,14 @@ public class BrevScenarioer {
     }
 
     /**
-     * 19 år ungdom med full ungdomsperiode med 2 barn, ingen inntektsgradering og ingen barn
+     * 19 år ungdom med full ungdomsperiode med 1 barn 15 dager etter fom, ingen inntektsgradering
      */
-    public static UngTestScenario innvilget19årMedToBarn(LocalDate fom) {
-        var p = new LocalDateInterval(fom, fom.plusYears(1));
-
-        var satser = new LocalDateTimeline<>(p, lavSatsMedBarnBuilder(fom, 2).build());
-
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
-
-        return new UngTestScenario(
-            DEFAULT_NAVN,
-            programPerioder,
-            satser,
-            uttaksPerioder(p),
-            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fom.minusYears(19).plusDays(42),
-            List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null,
-            List.of(
-                lagBarn(fom.minusYears(1)),
-                lagBarn(fom.minusYears(2))
-            ));
-    }
-
-    /**
-     * 19 år ungdom med full ungdomsperiode med 2 barn 15 dager etter fom, ingen inntektsgradering
-     */
-    public static UngTestScenario innvilget19årMedToBarn15DagerEtterStartdato(LocalDate fom) {
+    public static UngTestScenario innvilget19årMedBarn15DagerEtterStartdato(LocalDate fom) {
         LocalDate barnFødselsdato = fom.plusDays(15);
         var p = new LocalDateInterval(fom, fom.plusYears(1));
         var satser = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(p.getFomDato(), barnFødselsdato.minusDays(1), lavSatsBuilder(fom).build()),
-            new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnFødselsdato, 2).build())
+            new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnFødselsdato, 1).build())
         ));
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
@@ -131,7 +104,6 @@ public class BrevScenarioer {
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null,
             List.of(
-                lagBarn(barnFødselsdato),
                 lagBarn(barnFødselsdato)
             ));
     }
