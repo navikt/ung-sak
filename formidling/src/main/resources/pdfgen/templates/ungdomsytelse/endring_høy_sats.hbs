@@ -1,11 +1,12 @@
 {{#> felles/base}}
 
     {{#> felles/seksjon/hoved }}
-        <h1>Vi har endret ungdomsytelsen din</h1>
+        <h1>Du får mer i ungdomsprogramytelse fordi du fyller {{aldersgrense}} år</h1>
+
+        <p>Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller {{aldersgrense}} år {{fom}}. Fra og med denne datoen får du {{> felles/beløp nyDagsats}} per dag, utenom lørdag og søndag.</p>
         <p>
-            Fra {{fom}} får du ny dagsats på {{> felles/beløp nyDagsats}} fordi du fyller {{aldersgrense}} år.
+            <a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år.</a>
         </p>
-        <p>Nav utbetaler {{satsFaktor}} ganger grunnbeløp fra deltager er {{aldersgrense}} år. </p>
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.</p>
     {{/felles/seksjon/hoved}}
 

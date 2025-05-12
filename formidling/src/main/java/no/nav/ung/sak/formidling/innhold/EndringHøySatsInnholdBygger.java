@@ -14,7 +14,10 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
 @Dependent
 public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -25,7 +28,7 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Inject
     public EndringHøySatsInnholdBygger(
-            UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
+        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
@@ -38,17 +41,16 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
         LocalDate satsendringsdato = resultatTidslinje.getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
-                .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
+            .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
 
         var nyeSatser = ungdomsytelseGrunnlag.getSatsTidslinje().getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_HØY_SATS,
-                new EndringHøySatsDto(
-                        satsendringsdato,
-                        VedtaksbrevInnholdBygger.tilHeltall(nyeSatser.dagsats()),
-                        Sats.HØY.getFomAlder(),
-                        VedtaksbrevInnholdBygger.tilFaktor(nyeSatser.grunnbeløpFaktor())
-                ));
+            new EndringHøySatsDto(
+                satsendringsdato,
+                tilHeltall(nyeSatser.dagsats().add(BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg()))),
+                Sats.HØY.getFomAlder()
+            ));
     }
 
 }
