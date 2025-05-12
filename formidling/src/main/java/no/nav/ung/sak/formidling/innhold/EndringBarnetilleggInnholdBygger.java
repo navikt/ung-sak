@@ -56,7 +56,8 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_BARNETILLEGG,
             new EndringBarnetillegg(
                 satsendringsdato,
-                tilHeltall(dagsatsPrBarn)));
+                tilHeltall(dagsatsPrBarn),
+                nyeSatser.antallBarn() > 1));
 
     }
 

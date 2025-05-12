@@ -138,6 +138,38 @@ class BrevGenerererTjenesteEndringBarnetilleggTest {
     }
 
     @Test
+    void flereBarn() {
+        LocalDate startdato = LocalDate.of(2025, 5, 3);
+        LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
+        UngTestScenario ungTestGrunnlag = BrevScenarioer.endringBarnetilleggFlereBarn(startdato, barnFødselsdato);
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får mer i ungdomsprogramytelse fordi du har fått barn \
+                Du får 37 kroner i barnetillegg per dag per barn fra og med 27. mai 2025, utenom lørdag og søndag. \
+                Det er fordi du fikk barn denne datoen. Disse pengene kommer i tillegg til ungdomsprogramytelsen. \
+                Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du får et barn. \
+                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                """
+        );
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_BARNETILLEGG);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får mer i ungdomsprogramytelse fordi du har fått barn</h1>",
+                "<a href=\"https://www.nav.no/ungdomsprogramytelse/beregning\">Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du får et barn.</a>"
+            );
+
+    }
+
+    @Test
     void pdfStrukturTest() throws IOException {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);

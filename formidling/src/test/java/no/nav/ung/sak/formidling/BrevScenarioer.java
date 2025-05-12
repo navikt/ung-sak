@@ -371,6 +371,36 @@ public class BrevScenarioer {
             ));
     }
 
+    /**
+     * Endring barnetillegg. Har allerede ett barn og får tvillinger
+     */
+    public static UngTestScenario endringBarnetilleggFlereBarn(LocalDate fom, LocalDate barnFødselsdato) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, barnFødselsdato.minusDays(1), lavSatsMedBarnBuilder(fom, 1).build()),
+            new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnFødselsdato, 3).build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(p),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))), null,
+            List.of(
+                lagBarn(barnFødselsdato.minusYears(5)),
+                lagBarn(barnFødselsdato),
+                lagBarn(barnFødselsdato)
+            ));
+    }
+
 
     private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {
         return satser.splitAtRegular(satser.getMinLocalDate().withDayOfMonth(1), satser.getMaxLocalDate(), Period.ofMonths(1));
