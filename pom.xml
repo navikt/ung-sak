@@ -39,19 +39,19 @@
         <swagger.version>2.2.30</swagger.version>
         <junit.version>5.12.2</junit.version>
         <k9format.version>12.0.0</k9format.version>
-        <jackson.version>2.18.3</jackson.version>
+        <jackson.version>2.19.0</jackson.version>
         <asm.version>9.8</asm.version>
         <kotlin-stdlib.version>2.1.20</kotlin-stdlib.version>
         <jandex.version>3.3.0</jandex.version>
-        <flyway.version>11.7.1</flyway.version>
+        <flyway.version>11.8.1</flyway.version>
         <pdfgen-core.version>1.1.43</pdfgen-core.version>
-        <confluent.platform.version>7.9.0</confluent.platform.version>
+        <confluent.platform.version>7.9.1</confluent.platform.version>
         <mockito.version>5.17.0</mockito.version>
         <ung-deltakelse-opplyser.version>1.5.0</ung-deltakelse-opplyser.version>
         <handlebars.version>4.4.0</handlebars.version>
-        <validation-model-jakarta.version>1.26.5</validation-model-jakarta.version>
-        <openhtmltopdf.version>1.1.26</openhtmltopdf.version>
-        <jsoup.version>1.19.1</jsoup.version>
+        <validation-model-jakarta.version>1.28.1</validation-model-jakarta.version>
+        <openhtmltopdf.version>1.1.28</openhtmltopdf.version>
+        <jsoup.version>1.20.1</jsoup.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
