@@ -44,12 +44,10 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
         var nyeSatser = ungdomsytelseGrunnlag.getSatsTidslinje().getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
-        BigDecimal dagsatsBarnetillegg = BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg());
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_BARNETILLEGG,
             new EndringBarnetillegg(
                 satsendringsdato,
-                tilHeltall(nyeSatser.dagsats().add(dagsatsBarnetillegg)),
-                tilHeltall(dagsatsBarnetillegg))
+                tilHeltall(BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg())))
         );
 
     }
