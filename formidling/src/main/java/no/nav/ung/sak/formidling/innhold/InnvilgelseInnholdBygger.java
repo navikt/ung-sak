@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilFaktor;
@@ -120,10 +121,11 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var currentSatser = current.getValue();
         var previousSatser = previous.getValue();
 
-        var fødselBarn = currentSatser.antallBarn() > previousSatser.antallBarn();
-        var dødsfallBarn = currentSatser.antallBarn() < previousSatser.antallBarn();
-        var fikkFlereBarn = currentSatser.antallBarn() > previousSatser.antallBarn()
-            && currentSatser.antallBarn() - previousSatser.antallBarn() > 1;
+        int gjeldendeAntallBarn = currentSatser.antallBarn();
+        int tidligereAntallBarn = previousSatser.antallBarn();
+        var fødselBarn = gjeldendeAntallBarn > tidligereAntallBarn;
+        var dødsfallBarn = gjeldendeAntallBarn < tidligereAntallBarn;
+        var fikkFlereBarn = gjeldendeAntallBarn > tidligereAntallBarn && gjeldendeAntallBarn - tidligereAntallBarn > 1;
         var overgangTilHøySats = currentSatser.satsType() == UngdomsytelseSatsType.HØY && previousSatser.satsType() == UngdomsytelseSatsType.LAV;
         var overgangLavSats = currentSatser.satsType() == UngdomsytelseSatsType.LAV && previousSatser.satsType() == UngdomsytelseSatsType.HØY;
 
@@ -131,7 +133,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             brevfeilHåndterer.registrerFeilmelding("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
         }
 
-        var totaltBarnetillegg = BigDecimal.valueOf(currentSatser.dagsatsBarnetillegg()).multiply(BigDecimal.valueOf(currentSatser.antallBarn()));
+        var totaltBarnetillegg = BigDecimal.valueOf(currentSatser.dagsatsBarnetillegg()).multiply(BigDecimal.valueOf(gjeldendeAntallBarn));
 
         return new SatsEndringHendelseDto(
             overgangTilHøySats,
@@ -149,7 +151,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             .map(it -> it.getValue().satsType())
             .collect(Collectors.toSet());
 
-        var kunHøySats = satser.size() == 1 && satser.contains(UngdomsytelseSatsType.HØY);
+        var kunHøySats = Set.of(UngdomsytelseSatsType.HØY).equals(satser);
 
         var beregning = mapTilBeregningDto(satsSegments.first().getValue());
 
