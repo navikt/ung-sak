@@ -53,6 +53,9 @@ public class InntektKontrollOppgaveMapper {
             case PLEIEPENGER_NÆRSTÅENDE -> {
                 return YtelseType.PLEIEPENGER_LIVETS_SLUTTFASE;
             }
+            case OPPLÆRINGSPENGER -> {
+                return YtelseType.OPPLAERINGSPENGER;
+            }
             default -> throw new IllegalStateException("Ikke støttet ytelsetype: " + ip.getInntektYtelseType().getYtelseType());
         }
     }
