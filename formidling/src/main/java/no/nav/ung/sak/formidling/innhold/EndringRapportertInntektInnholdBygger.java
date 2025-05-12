@@ -78,23 +78,6 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT, dto);
     }
 
-    private EndringRapportertInntektDto aggregerOgLagDto(
-        LocalDateTimeline<EndringRapportertInntektPeriodeDto> periodeDtoTidslinje, long sumUtbetaling, long sumRapportertInntekt) {
-
-        return new EndringRapportertInntektDto(
-            new PeriodeDto(periodeDtoTidslinje.getMinLocalDate(), periodeDtoTidslinje.getMaxLocalDate()),
-            sumRapportertInntekt,
-            sumUtbetaling,
-            REDUSJON_PROSENT,
-            periodeDtoTidslinje.size() > 1,
-            periodeDtoTidslinje.toSegments().stream()
-                .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
-                .map(LocalDateSegment::getValue)
-                .collect(Collectors.toList())
-        );
-
-    }
-
     private static LocalDateSegment<EndringRapportertInntektPeriodeDto> mapTilPeriodeDto(
         LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<BigDecimal> rhs) {
         var ty = lhs.getValue();

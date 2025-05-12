@@ -106,11 +106,11 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     @DisplayName("Endringsbrev for overgang til høy sats")
     @Test
     void standardEndringHøySats() {
-        LocalDate fødselsdato = LocalDate.of(1999, 3, 25);
+        LocalDate fødselsdato = LocalDate.of(2000, 3, 25);
         var ungTestGrunnlag = BrevScenarioer.endring25År(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsytelsen din " +
-            "Fra 25. mars 2024 får du ny dagsats på 974 kroner fordi du fyller 25 år. " +
+            "Fra 25. mars 2025 får du ny dagsats på 974 kroner fordi du fyller 25 år. " +
             "Nav utbetaler 2.041 ganger grunnbeløp fra deltager er 25 år. " +
             "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
 

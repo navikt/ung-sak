@@ -1,9 +1,9 @@
 package no.nav.ung.sak.test.util.behandling.personopplysning;
 
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 
 public final class PersonInformasjon {
 
@@ -36,6 +36,11 @@ public final class PersonInformasjon {
 
         public Builder leggTilPersonopplysninger(Personopplysning.Builder builder) {
             kladd.personopplysninger.add(builder.build());
+            return this;
+        }
+
+        public Builder leggTilPersonopplysning(Personopplysning personopplysning) {
+            kladd.personopplysninger.add(personopplysning);
             return this;
         }
 
