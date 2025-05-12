@@ -105,18 +105,21 @@ class BrevGenerererTjenesteEndringBarnetilleggTest {
 
     }
 
-    @DisplayName("Endringsbrev for overgang til høy sats")
     @Test
-    void standardEndringHøySats() {
+    void standardEndringBarnetillegg() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
         UngTestScenario ungTestGrunnlag = BrevScenarioer.endringBarnetillegg(startdato, barnFødselsdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-            "Vi har endret ungdomsytelsen din " +
-            "Fra 27. mai 2025 får du ny dagsats på 686 kroner fordi du fikk barn. " +
-            "Nav utbetaler 37 kroner per dag i barnetillegg. " +
-            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+            """
+                Du får mer i ungdomsprogramytelse fordi du har fått barn \
+                Du får 37 kroner i barnetillegg per dag fra og med 27. mai 2025, utenom lørdag og søndag. \
+                Det er fordi du fikk barn denne datoen. Disse pengene kommer i tillegg til ungdomsprogramytelsen. \
+                Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du får et barn. \
+                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                """
+        );
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -128,7 +131,8 @@ class BrevGenerererTjenesteEndringBarnetilleggTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsytelsen din</h1>"
+                "<h1>Du får mer i ungdomsprogramytelse fordi du har fått barn</h1>",
+                "<a href=\"https://www.nav.no/ungdomsprogramytelse/beregning\">Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du får et barn.</a>"
             );
 
     }
@@ -149,7 +153,7 @@ class BrevGenerererTjenesteEndringBarnetilleggTest {
             assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Vi har endret ungdomsytelsen din");
+            assertThat(pdfTekst).contains("Du får mer i ungdomsprogramytelse fordi du har fått barn");
         }
 
     }
