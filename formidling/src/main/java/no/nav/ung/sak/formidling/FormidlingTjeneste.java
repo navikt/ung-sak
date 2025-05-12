@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 @Dependent
 public class FormidlingTjeneste {
 
-    private BehandlingRepository behandlingRepository;
-    private BrevGenerererTjeneste brevGenerererTjeneste;
-    private VedtaksbrevRegler vedtaksbrevRegler;
-    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
+    private final BehandlingRepository behandlingRepository;
+    private final BrevGenerererTjeneste brevGenerererTjeneste;
+    private final VedtaksbrevRegler vedtaksbrevRegler;
+    private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingTjeneste.class);
 
