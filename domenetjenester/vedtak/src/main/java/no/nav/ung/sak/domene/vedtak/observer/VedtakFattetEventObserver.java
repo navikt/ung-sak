@@ -58,4 +58,5 @@ public class VedtakFattetEventObserver {
         return taskData;
     }
 
+
 }

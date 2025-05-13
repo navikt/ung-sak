@@ -70,7 +70,7 @@ class BrevGenerererTjenesteEndringInntektTest {
 
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-        var endringInnholdBygger = new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository);
+        var endringInnholdBygger = new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository, repositoryProvider.getBehandlingRepository());
 
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),

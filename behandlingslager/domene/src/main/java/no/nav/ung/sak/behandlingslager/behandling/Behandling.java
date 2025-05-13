@@ -126,6 +126,9 @@ public class Behandling extends BaseEntitet {
     @Column(name = "original_behandling_id", updatable = false)
     private Long originalBehandlingId;
 
+    @Column(name = "kontroll_behandling_id", updatable = false)
+    private Long kontrollBehandlingId;
+
     @Convert(converter = BehandlingStatusKodeverdiConverter.class)
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
@@ -280,6 +283,14 @@ public class Behandling extends BaseEntitet {
 
     public Optional<Long> getOriginalBehandlingId() {
         return Optional.ofNullable(originalBehandlingId);
+    }
+
+    public void setKontrollBehandlingId(Long kontrollBehandlingId) {
+        this.kontrollBehandlingId = kontrollBehandlingId;
+    }
+
+    public Optional<Long> getKontrollBehandlingId() {
+        return Optional.ofNullable(kontrollBehandlingId);
     }
 
     public boolean erManueltOpprettet() {
@@ -690,6 +701,10 @@ public class Behandling extends BaseEntitet {
 
     public boolean erYtelseBehandling() {
         return getType().erYtelseBehandlingType();
+    }
+
+    public boolean erKontrollbehandling() {
+        return getType().equals(BehandlingType.KONTROLLBEHANDLING);
     }
 
     public boolean harSattStartpunkt() {

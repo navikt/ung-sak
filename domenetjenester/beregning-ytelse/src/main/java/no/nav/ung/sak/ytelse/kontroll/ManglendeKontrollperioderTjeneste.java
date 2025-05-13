@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandling.revurdering.OpprettKontrollBehandlingEllerDiffTask;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -79,7 +80,7 @@ public class ManglendeKontrollperioderTjeneste {
 
     private ProsessTaskData lagProsesstask(Long fagsakId, Set<LocalDateInterval> perioder) {
         LOG.info("Oppretter revurdering for fagsak med id {} for perioder {}", fagsakId, perioder);
-        ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+        ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettKontrollBehandlingEllerDiffTask.class);
         tilVurderingTask.setFagsakId(fagsakId);
         final var perioderString = perioder.stream().map(it -> it.getFomDato() + "/" + it.getTomDato())
             .collect(Collectors.joining("|"));

@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
@@ -34,6 +35,8 @@ public class FatteVedtakTjeneste {
     private OppgaveTjeneste oppgaveTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingVedtakTjeneste behandlingVedtakTjeneste;
+    private BehandlingRepository behandlingRepository;
+    private VentPåRelevantVedtakUtleder relevantVedtakUtleder;
 
     FatteVedtakTjeneste() {
         // for CDI proxy
@@ -43,11 +46,13 @@ public class FatteVedtakTjeneste {
     public FatteVedtakTjeneste(VedtakTjeneste vedtakTjeneste,
                                OppgaveTjeneste oppgaveTjeneste,
                                TotrinnTjeneste totrinnTjeneste,
-                               BehandlingVedtakTjeneste behandlingVedtakTjeneste) {
+                               BehandlingVedtakTjeneste behandlingVedtakTjeneste, BehandlingRepository behandlingRepository, VentPåRelevantVedtakUtleder relevantVedtakUtleder) {
         this.vedtakTjeneste = vedtakTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingVedtakTjeneste = behandlingVedtakTjeneste;
+        this.behandlingRepository = behandlingRepository;
+        this.relevantVedtakUtleder = relevantVedtakUtleder;
     }
 
     public BehandleStegResultat fattVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
@@ -81,6 +86,9 @@ public class FatteVedtakTjeneste {
 
 
         // Her har vi enten ikke totrinnskontroll eller gjennomført og godkjent totrinnskontroll
+        if (behandling.erKontrollbehandling()) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
 
         behandlingVedtakTjeneste.opprettBehandlingVedtak(kontekst, behandling);
 

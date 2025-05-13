@@ -254,9 +254,40 @@ public class BehandlingRepository {
         }
     }
 
+    public Optional<Behandling> finnSisteAvsluttedeIkkeHenlagteKontrollbehandling(Long fagsakId) {
+        Objects.requireNonNull(fagsakId, FAGSAK_ID);
+        return optionalFirst(finnAlleAvsluttedeIkkeHenlagteKontrollbehandlinger(fagsakId).stream().toList());
+    }
+
+
     public Optional<Behandling> finnSisteAvsluttedeIkkeHenlagteBehandling(Long fagsakId) {
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
         return optionalFirst(finnAlleAvsluttedeIkkeHenlagteBehandlinger(fagsakId));
+    }
+
+
+    public List<Behandling> finnAlleAvsluttedeIkkeHenlagteKontrollbehandlinger(Long fagsakId) {
+        // BehandlingResultatType = Innvilget, endret, ikke endret, avslått.
+        Objects.requireNonNull(fagsakId, FAGSAK_ID); // NOSONAR
+
+        TypedQuery<Behandling> query = getEntityManager().createQuery(
+            "SELECT behandling FROM Behandling behandling " +
+                "WHERE behandling.status IN :avsluttetOgIverkKode " +
+                "  AND behandling.fagsak.id=:fagsakId " +
+                "  AND behandling.behandlingType = :behandlingType " +
+                "ORDER BY behandling.avsluttetDato DESC",
+            Behandling.class);
+
+        query.setParameter(FAGSAK_ID, fagsakId);
+        query.setParameter("avsluttetOgIverkKode", BehandlingStatus.getFerdigbehandletStatuser());
+        query.setParameter("behandlingType", BehandlingType.KONTROLLBEHANDLING);
+        query.setHint(QueryHints.HINT_READONLY, true);
+
+        // lukker bort henlagte
+        List<Behandling> behandlinger = medAktiveBehandlingTilstanderFilter(query::getResultList);
+        return behandlinger.stream()
+            .filter(b -> !b.getBehandlingResultatType().erHenleggelse())
+            .collect(Collectors.toList()); // NB List - må ivareta rekkefølge sortert på tid
     }
 
     public List<Behandling> finnAlleAvsluttedeIkkeHenlagteBehandlinger(Long fagsakId) {

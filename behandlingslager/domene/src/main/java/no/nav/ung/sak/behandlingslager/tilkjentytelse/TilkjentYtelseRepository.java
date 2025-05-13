@@ -68,6 +68,12 @@ public class TilkjentYtelseRepository {
     }
 
     public void kopierKontrollPerioder(long originalBehandlingId, long nyBehandlingId) {
+        final var aktivt = hentKontrollertInntektPerioder(nyBehandlingId);
+        aktivt.ifPresent(it -> {
+            it.setIkkeAktiv();
+            entityManager.persist(it);
+            entityManager.flush();
+        });
         final var eksisterende = hentKontrollertInntektPerioder(originalBehandlingId);
         if (eksisterende.isPresent()) {
             final var ny = KontrollertInntektPerioder.kopi(nyBehandlingId, eksisterende.get()).build();

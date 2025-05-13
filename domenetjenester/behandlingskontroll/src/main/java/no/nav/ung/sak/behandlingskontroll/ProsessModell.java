@@ -53,13 +53,27 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_UTTAK)
-            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, StartpunktType.KONTROLLER_INNTEKT)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
+        return modellBuilder.build();
+    }
+
+    @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+    @BehandlingTypeRef(BehandlingType.KONTROLLBEHANDLING)
+    @Produces
+    @ApplicationScoped
+    public BehandlingModell kontrollbehandling() {
+        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.KONTROLLBEHANDLING, FagsakYtelseType.UNGDOMSYTELSE);
+        modellBuilder
+            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
+            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, StartpunktType.KONTROLLER_INNTEKT)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.AVSLUTT_BEHANDLING);
         return modellBuilder.build();
     }
 }

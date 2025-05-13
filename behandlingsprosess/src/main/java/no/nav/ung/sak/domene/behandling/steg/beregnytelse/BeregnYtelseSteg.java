@@ -7,6 +7,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -33,6 +35,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private BehandlingRepository behandlingRepository;
 
     public BeregnYtelseSteg() {
     }
@@ -40,10 +43,12 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     @Inject
     public BeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                             TilkjentYtelseRepository tilkjentYtelseRepository,
-                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+                            BehandlingRepository behandlingRepository) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -55,7 +60,9 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         }
         final var månedsvisYtelseTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(kontekst.getBehandlingId());
 
-        final var kontrollertInntektperiodeTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(kontekst.getBehandlingId());
+        final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        oppdaterKontrollbehandling(behandling);
+        final var kontrollertInntektperiodeTidslinje = behandling.getKontrollBehandlingId().map(tilkjentYtelseRepository::hentKontrollerInntektTidslinje).orElse(LocalDateTimeline.empty());
 
         // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);
@@ -70,6 +77,12 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void oppdaterKontrollbehandling(Behandling behandling) {
+        final var sisteKontrollbehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteKontrollbehandling(behandling.getFagsakId());
+        sisteKontrollbehandling.map(Behandling::getId).ifPresent(behandling::setKontrollBehandlingId);
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }
 
     private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<YearMonth> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {

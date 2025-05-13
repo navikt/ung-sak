@@ -176,7 +176,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     }
 
     private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
-        if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
+        if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_ENDRET_KONTROLLPERIODER)) {
             if (tilkjentYtelse.utbetalingsgrad() <= 0) {
                 return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
             }

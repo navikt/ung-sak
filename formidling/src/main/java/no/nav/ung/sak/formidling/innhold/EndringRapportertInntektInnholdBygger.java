@@ -9,6 +9,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
@@ -28,6 +30,7 @@ import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHelt
 public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
+    private final BehandlingRepository behandlingRepository;
 
     //TODO hente fra et annet sted?
     public static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
@@ -35,14 +38,16 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
 
     @Inject
     public EndringRapportertInntektInnholdBygger(
-        TilkjentYtelseRepository tilkjentYtelseRepository) {
+        TilkjentYtelseRepository tilkjentYtelseRepository, BehandlingRepository behandlingRepository) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
-        final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
+        final var kontrollbehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteKontrollbehandling(behandling.getFagsakId());
+        final var kontrollertInntektPerioderTidslinje = kontrollbehandling.map(Behandling::getId).map(tilkjentYtelseRepository::hentKontrollerInntektTidslinje).orElse(LocalDateTimeline.empty());
 
         var relevantTilkjentYtelse = resultatTidslinje.combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);

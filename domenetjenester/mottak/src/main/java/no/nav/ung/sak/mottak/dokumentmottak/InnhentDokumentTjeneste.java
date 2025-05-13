@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.slf4j.Logger;
@@ -19,10 +20,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -57,6 +54,7 @@ public class InnhentDokumentTjeneste {
     private final ProsessTaskTjeneste prosessTaskTjeneste;
     private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private final ProsessTriggereRepository prosessTriggereRepository;
+    private final Instance<FinnEllerOpprettBehandling> finnEllerOpprettBehandling;
 
 
 
@@ -67,7 +65,8 @@ public class InnhentDokumentTjeneste {
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                    ProsessTaskTjeneste prosessTaskTjeneste,
                                    FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                   ProsessTriggereRepository prosessTriggereRepository) {
+                                   ProsessTriggereRepository prosessTriggereRepository,
+                                   @Any Instance<FinnEllerOpprettBehandling> finnEllerOpprettBehandling) {
         this.mottakere = mottakere;
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -77,6 +76,7 @@ public class InnhentDokumentTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.finnEllerOpprettBehandling = finnEllerOpprettBehandling;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
@@ -85,22 +85,23 @@ public class InnhentDokumentTjeneste {
             .collect(Collectors.groupingBy(MottattDokument::getType));
         var triggere = getTriggere(mottattDokument, fagsak);
 
-        var resultat = finnEllerOpprettBehandling(fagsak, triggere);
+        final var resultat = FinnEllerOpprettBehandling.finnTjeneste(finnEllerOpprettBehandling, utledBehandlingtype(fagsak, triggere))
+            .finnEllerOpprettBehandling(fagsak, triggere);
 
         ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
-        if (resultat.nyopprettet) {
-            taskGruppe.addNesteSekvensiell(asynkStartBehandling(resultat.behandling));
-        } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
-            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false, false);
+        if (resultat.nyopprettet()) {
+            taskGruppe.addNesteSekvensiell(asynkStartBehandling(resultat.behandling()));
+        } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling())) {
+            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling(), false, false, false);
         } else {
-            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false);
+            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling(), false, false);
         }
 
         // Må legges på etter at taskgruppe er satt opp for å få diff
         if (!triggere.isEmpty()) {
-            prosessTriggereRepository.leggTil(resultat.behandling.getId(), triggere.stream().map(it -> new no.nav.ung.sak.trigger.Trigger(it.behandlingÅrsak(), it.periode())).collect(Collectors.toSet()));
+            prosessTriggereRepository.leggTil(resultat.behandling().getId(), triggere.stream().map(it -> new no.nav.ung.sak.trigger.Trigger(it.behandlingÅrsak(), it.periode())).collect(Collectors.toSet()));
         }
-        lagreDokumenter(brevkodeMap, resultat.behandling);
+        lagreDokumenter(brevkodeMap, resultat.behandling());
 
         if (taskGruppe == null) {
             throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
@@ -110,48 +111,51 @@ public class InnhentDokumentTjeneste {
         prosessTaskTjeneste.lagre(taskGruppe);
     }
 
+    private BehandlingType utledBehandlingtype(Fagsak fagsak, List<Trigger> triggere) {
+        final var erKontrollbehandling = triggere.stream().map(Trigger::behandlingÅrsak).anyMatch(it -> Set.of(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).contains(it));
+        if (erKontrollbehandling) {
+            return BehandlingType.KONTROLLBEHANDLING;
+        }
+
+        final var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+
+        if (sisteBehandling.isEmpty()) {
+            return BehandlingType.FØRSTEGANGSSØKNAD;
+        }
+
+        if (erBehandlingAvsluttet(sisteBehandling)) {
+            // siste behandling er avsluttet, oppretter ny behandling
+            Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
+            sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
+
+            // Håndter avsluttet behandling
+            var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(sisteBehandling.getFagsak());
+            if (sisteHenlagteFørstegangsbehandling.isPresent()) {
+                // oppretter ny behandling når siste var henlagt førstegangsbehandling
+                var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(sisteHenlagteFørstegangsbehandling.get().getFagsak(), sisteHenlagteFørstegangsbehandling.get());
+                return no.nav.ung.sak.mottak.dokumentmottak.BehandlingMedOpprettelseResultat.nyBehandling(nyFørstegangsbehandling);
+            } else {
+                // oppretter ny behandling fra forrige (førstegangsbehandling eller revurdering)
+                var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, triggere.getFirst().behandlingÅrsak());
+                return no.nav.ung.sak.mottak.dokumentmottak.BehandlingMedOpprettelseResultat.nyBehandling(nyBehandling);
+            }
+        }
+
+        if (sisteBehandling.get().erAvsluttet()) {
+            return BehandlingType.REVURDERING;
+        }
+
+        if (sisteBehandling.get().erRevurdering()) {
+            return BehandlingType.REVURDERING;
+        }
+
+        return BehandlingType.FØRSTEGANGSSØKNAD;
+    }
+
     private boolean prosessenStårStillePåAksjonspunktForSøknadsfrist(Behandling behandling) {
         return BehandlingStegType.VURDER_SØKNADSFRIST.equals(behandling.getAktivtBehandlingSteg())
             && (behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE).map(Aksjonspunkt::erÅpentAksjonspunkt).orElse(false)
             || behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE).map(Aksjonspunkt::erÅpentAksjonspunkt).orElse(false));
-    }
-
-    private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, List<Trigger> triggere) {
-        var fagsakId = fagsak.getId();
-        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteBehandling(fagsak.getId());
-
-        if (sisteYtelsesbehandling.isEmpty()) {
-            // ingen tidligere behandling - Opprett ny førstegangsbehandling
-            log.info("Ingen tidligere behandling for fagsak {}, oppretter ny førstegangsbehandling", fagsakId);
-            Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
-            return BehandlingMedOpprettelseResultat.nyBehandling(behandling);
-        } else {
-            var sisteBehandling = sisteYtelsesbehandling.get();
-            sjekkBehandlingKanLåses(sisteBehandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
-            if (erBehandlingAvsluttet(sisteYtelsesbehandling)) {
-                // siste behandling er avsluttet, oppretter ny behandling
-                Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-                sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
-
-                // Håndter avsluttet behandling
-                var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(sisteBehandling.getFagsak());
-                if (sisteHenlagteFørstegangsbehandling.isPresent()) {
-                    // oppretter ny behandling når siste var henlagt førstegangsbehandling
-                    var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(sisteHenlagteFørstegangsbehandling.get().getFagsak(), sisteHenlagteFørstegangsbehandling.get());
-                    return BehandlingMedOpprettelseResultat.nyBehandling(nyFørstegangsbehandling);
-                } else {
-                    // oppretter ny behandling fra forrige (førstegangsbehandling eller revurdering)
-                    var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, triggere.getFirst().behandlingÅrsak());
-                    return BehandlingMedOpprettelseResultat.nyBehandling(nyBehandling);
-                }
-            } else {
-                sjekkBehandlingKanHoppesTilbake(sisteBehandling);
-                sjekkBehandlingHarIkkeÅpneTasks(sisteBehandling);
-                return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
-            }
-        }
-
-
     }
 
     public void lagreDokumenter(Map<Brevkode, List<MottattDokument>> mottattDokument, Behandling behandling) {

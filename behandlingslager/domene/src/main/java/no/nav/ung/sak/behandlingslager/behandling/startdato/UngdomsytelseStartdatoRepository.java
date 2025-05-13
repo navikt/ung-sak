@@ -76,6 +76,12 @@ public class UngdomsytelseStartdatoRepository {
     }
 
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
+        final var aktivt = hentEksisterendeGrunnlag(nyBehandlingId);
+        aktivt.ifPresent(it -> {
+            it.setAktiv(false);
+            entityManager.persist(it);
+            entityManager.flush();
+        });
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
         eksisterendeGrunnlag.ifPresent(entitet -> {
             persister(Optional.empty(), new UngdomsytelseStartdatoGrunnlag(nyBehandlingId, entitet));

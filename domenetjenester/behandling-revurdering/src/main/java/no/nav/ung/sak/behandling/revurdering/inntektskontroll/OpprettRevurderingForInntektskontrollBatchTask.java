@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.ung.sak.behandling.revurdering.OpprettKontrollBehandlingEllerDiffTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +121,7 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
                     var fagsakId = behandling.getFagsakId();
                     log.info("Oppretter revurdering for fagsak med id {}", fagsakId);
 
-                    ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+                    ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettKontrollBehandlingEllerDiffTask.class);
                     tilVurderingTask.setFagsakId(fagsakId);
                     tilVurderingTask.setProperty(PERIODER, fom + "/" + tom);
                     tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.getKode());

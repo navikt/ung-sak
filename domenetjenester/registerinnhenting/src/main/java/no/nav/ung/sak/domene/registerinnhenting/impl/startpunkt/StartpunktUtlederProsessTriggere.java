@@ -59,6 +59,9 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
         if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
         }
+        if (BehandlingÅrsakType.RE_ENDRET_KONTROLLPERIODER.equals(it.getÅrsak())) {
+            return StartpunktType.BEREGN_YTELSE;
+        }
         return StartpunktType.INNHENT_REGISTEROPPLYSNINGER;
     }
 

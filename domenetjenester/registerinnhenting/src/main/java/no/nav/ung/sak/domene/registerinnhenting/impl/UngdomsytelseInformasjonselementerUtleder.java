@@ -24,6 +24,9 @@ public class UngdomsytelseInformasjonselementerUtleder implements Informasjonsel
             INNTEKT_SAMMENLIGNINGSGRUNNLAG),
         BehandlingType.REVURDERING,
         Set.of(
+            INNTEKT_SAMMENLIGNINGSGRUNNLAG),
+        BehandlingType.KONTROLLBEHANDLING,
+        Set.of(
             INNTEKT_SAMMENLIGNINGSGRUNNLAG));
 
     @Override

@@ -35,9 +35,16 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Foreslå vedtak", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK,
         UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
-    FATTER_VEDTAK(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE,
+    FATTER_VEDTAK(FATTER_VEDTAK_KODE_2,
         AksjonspunktType.MANUELL, "Fatter vedtak",
         Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.UTREDES), BehandlingStegType.FATTE_VEDTAK,
+        UTEN_VILKÅR,
+        SkjermlenkeType.VEDTAK,
+        ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
+
+    VURDER_SAKSBEHANDLERS_VURDERINGER(FATTER_VEDTAK_KODE,
+        AksjonspunktType.MANUELL, "Fatter vedtak",
+        Set.of(BehandlingStatus.UTREDES), BehandlingStegType.AVSLUTT_BEHANDLING,
         UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK,
         ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
@@ -118,10 +125,15 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Satt på vent etter kontroll av inntekt til rapporteringsfrist har passert", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_ARBEIDSGIVER),
 
+    AUTO_SATT_PÅ_RELEVANT_BEHANDLING(AUTO_VENT_PÅ_RELEVANT_BEHANDLING_KODE, AksjonspunktType.AUTOPUNKT,
+        "Vent til relevant behandling er ferdigbehandlet", BehandlingStatus.UTREDES, BehandlingStegType.FATTE_VEDTAK, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SAKSBEHANDLER),
+
+
 
     AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKT_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
         "Satt på vent etter kontroll av inntekt til rapporteringsfrist har passert", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, UTEN_VILKÅR,
-        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P1D", AVVENTER_SØKER),
 
     // Gruppe: 80xx
     KONTROLLER_INNTEKT(
