@@ -149,12 +149,6 @@ public class Behandlingsoppretter {
     }
 
 
-    public Behandling opprettNyBehandlingFra(Behandling forrigeBehandling, BehandlingÅrsakType behandlingÅrsakType) {
-        Behandling nyBehandling = getNyBehandlingOppretter(forrigeBehandling).opprettNyBehandling(forrigeBehandling, behandlingÅrsakType);
-        return nyBehandling;
-    }
-
-
     public Optional<Behandling> sisteHenlagteFørstegangsbehandling(Fagsak fagsak) {
         Optional<Behandling> behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandling.isPresent()
