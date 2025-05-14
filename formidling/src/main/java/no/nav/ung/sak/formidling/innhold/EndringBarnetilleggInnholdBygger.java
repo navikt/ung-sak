@@ -13,11 +13,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
-
-import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
 @Dependent
 public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -49,12 +45,10 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
             throw new IllegalStateException("Ingen barn på fom=" + satsendringsdato);
         }
 
-        var dagsatsPrBarn = BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg())
-                .divide(BigDecimal.valueOf(nyeSatser.antallBarn()), RoundingMode.HALF_UP);
-
+        var sats = Satsberegner.beregnBarnetilleggSats(nyeSatser);
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_BARNETILLEGG,
-                new EndringBarnetillegg(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), tilHeltall(dagsatsPrBarn)));
+                new EndringBarnetillegg(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats));
 
     }
 

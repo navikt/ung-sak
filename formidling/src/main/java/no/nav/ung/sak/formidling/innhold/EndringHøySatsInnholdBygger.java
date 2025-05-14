@@ -14,10 +14,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
 @Dependent
 public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -48,7 +45,7 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_HØY_SATS,
             new EndringHøySatsDto(
                 satsendringsdato,
-                tilHeltall(nyeSatser.dagsats().add(BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg()))),
+                Satsberegner.beregnDagsatsInklBarnetillegg(nyeSatser),
                 Sats.HØY.getFomAlder()
             ));
     }
