@@ -28,7 +28,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
     @Inject
     public EndringBarnetilleggInnholdBygger(
-        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
+            UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
@@ -41,7 +41,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
         LocalDate satsendringsdato = resultatTidslinje.getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
-            .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
+                .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
 
         var nyeSatser = ungdomsytelseGrunnlag.getSatsTidslinje().getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
@@ -50,16 +50,11 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
         }
 
         var dagsatsPrBarn = BigDecimal.valueOf(nyeSatser.dagsatsBarnetillegg())
-            .divide(BigDecimal.valueOf(nyeSatser.antallBarn()), RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(nyeSatser.antallBarn()), RoundingMode.HALF_UP);
 
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_BARNETILLEGG,
-            new EndringBarnetillegg(
-                satsendringsdato,
-                nyeSatser.dagsatsBarnetillegg(),
-                nyeSatser.antallBarn() > 1,
-                tilHeltall(dagsatsPrBarn)
-                ));
+                new EndringBarnetillegg(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), tilHeltall(dagsatsPrBarn)));
 
     }
 

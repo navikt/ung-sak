@@ -5,6 +5,5 @@ import java.time.LocalDate;
 public record EndringBarnetillegg(
     LocalDate fom,
     long barnetillegg,
-    boolean flereBarn,
     long sats) implements TemplateInnholdDto {
 }
