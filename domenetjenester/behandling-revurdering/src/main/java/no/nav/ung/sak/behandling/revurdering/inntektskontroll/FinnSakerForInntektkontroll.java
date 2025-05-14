@@ -75,8 +75,7 @@ public class FinnSakerForInntektkontroll {
             .filter(behandling -> harIkkeAvslåtteVilkår(behandling, fom, tom))
             .filter(behandling -> harIkkeAvslåttUttak(behandling, fom, tom))
             .toList();
-        final var fagSakIder = behandlingerTilKontroll.stream().map(Behandling::getFagsakId).toList();
-        return fagSakIder;
+        return behandlingerTilKontroll.stream().map(Behandling::getFagsak).toList();
     }
 
     private boolean harIkkeAvslåttUttak(Behandling behandling, LocalDate fom, LocalDate tom) {
