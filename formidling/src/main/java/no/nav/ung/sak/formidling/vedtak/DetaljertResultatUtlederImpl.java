@@ -156,7 +156,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga ny fødsel");
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL);
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {

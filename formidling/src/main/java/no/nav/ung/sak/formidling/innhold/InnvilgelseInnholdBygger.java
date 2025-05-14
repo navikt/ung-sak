@@ -24,6 +24,7 @@ import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
 
         var førsteSatser = satsTidslinje.toSegments().first().getValue();
-        var dagsatsFom = tilHeltall(førsteSatser.dagsats().add(BigDecimal.valueOf(førsteSatser.dagsatsBarnetillegg())));
+        var dagsatsFom = beregnDagsatsInklBarnetillegg(førsteSatser);
 
         var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje, brevfeilSamler);
 
@@ -133,17 +134,19 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             brevfeilHåndterer.registrerFeilmelding("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
         }
 
-        var totaltBarnetillegg = BigDecimal.valueOf(currentSatser.dagsatsBarnetillegg()).multiply(BigDecimal.valueOf(gjeldendeAntallBarn));
-
         return new SatsEndringHendelseDto(
             overgangTilHøySats,
             fødselBarn,
             dødsfallBarn,
             current.getFom(),
-            tilHeltall(currentSatser.dagsats().add(totaltBarnetillegg)),
-            dødsfallBarn ? previousSatser.dagsatsBarnetillegg() : currentSatser.dagsatsBarnetillegg(),
+            beregnDagsatsInklBarnetillegg(currentSatser),
+            dødsfallBarn ? beregnDagsatsPrBarn(previousSatser) : beregnDagsatsPrBarn(currentSatser),
             fikkFlereBarn
         );
+    }
+
+    private static long beregnDagsatsInklBarnetillegg(UngdomsytelseSatser satser) {
+        return tilHeltall(satser.dagsats().add(BigDecimal.valueOf(satser.dagsatsBarnetillegg())));
     }
 
     private static SatsOgBeregningDto mapSatsOgBeregning(NavigableSet<LocalDateSegment<UngdomsytelseSatser>> satsSegments, BrevfeilHåndterer brevfeilHåndterer) {
@@ -163,8 +166,8 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var barnetillegg = nyesteSats.antallBarn() > 0
             ? new BarnetilleggDto(
                 nyesteSats.antallBarn(),
-                nyesteSats.dagsatsBarnetillegg(),
-                tilHeltall(nyesteSats.dagsats().add(BigDecimal.valueOf(nyesteSats.dagsatsBarnetillegg()))))
+                beregnDagsatsPrBarn(nyesteSats),
+                beregnDagsatsInklBarnetillegg(nyesteSats))
             : null;
 
         return new SatsOgBeregningDto(
@@ -173,6 +176,14 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
             beregning,
             overgangTilHøySats,
             barnetillegg);
+    }
+
+    private static long beregnDagsatsPrBarn(UngdomsytelseSatser nyesteSats) {
+        if (nyesteSats.antallBarn() <= 0) {
+            return 0;
+        }
+         return tilHeltall(BigDecimal.valueOf(nyesteSats.dagsatsBarnetillegg())
+             .divide(BigDecimal.valueOf(nyesteSats.antallBarn()), RoundingMode.HALF_UP));
     }
 
     private static BeregningDto mapOvergangTilHøySats(LocalDateSegment<UngdomsytelseSatser> nyesteSegment, BrevfeilHåndterer brevfeilHåndterer) {

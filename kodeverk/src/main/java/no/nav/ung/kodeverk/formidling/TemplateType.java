@@ -7,6 +7,7 @@ public enum TemplateType {
     INNVILGELSE("innvilgelse"),
     ENDRING_INNTEKT("endring_inntekt"),
     ENDRING_HØY_SATS("endring_høy_sats"),
+    ENDRING_BARNETILLEGG("endring_barnetillegg"),
     MANUELL_VEDTAKSBREV("manuell_vedtaksbrev");
 
     final String path;

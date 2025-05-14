@@ -8,7 +8,7 @@ public record SatsEndringHendelseDto(
     boolean dødsfallBarn,
     LocalDate fom,
     long dagsats,
-    int barnetillegg,
+    long barnetillegg,
     boolean fikkFlereBarn) {
 
 }
