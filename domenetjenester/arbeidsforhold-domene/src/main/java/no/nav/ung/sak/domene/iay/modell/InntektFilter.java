@@ -46,9 +46,6 @@ public class InntektFilter {
         return copyWith(innt, null);
     }
 
-    public InntektFilter filter(InntektsKilde kilde) {
-        return copyWith(getAlleInntekter(kilde), null);
-    }
 
     public InntektFilter filter(InntektspostType inntektspostType) {
         return filter(Set.of(inntektspostType));
@@ -62,59 +59,13 @@ public class InntektFilter {
         return filter((inntekt, inntektspost) -> typer.contains(inntektspost.getInntektspostType()));
     }
 
-    public InntektFilter filterBeregnetSkatt() {
-        return copyWith(getAlleInntektBeregnetSkatt(), null);
-    }
-
-    public InntektFilter filterBeregningsgrunnlag() {
-        return copyWith(getAlleInntektBeregningsgrunnlag(), null);
-    }
-
-    public InntektFilter filterPensjonsgivende() {
-        return copyWith(getAlleInntektPensjonsgivende(), null);
-    }
-
-    public InntektFilter filterSammenligningsgrunnlag() {
-        return copyWith(getAlleInntektSammenligningsgrunnlag(), null);
-    }
-
-    public Collection<Inntektspost> filtrer(Inntekt inntekt, Collection<Inntektspost> inntektsposter) {
-        if (inntektsposter == null)
-            return Collections.emptySet();
-        return inntektsposter.stream()
-            .filter(ip -> filtrerInntektspost(inntekt, ip))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
     public InntektFilter i(LocalDateTimeline<?> tidslinje) {
         return copyWith(this.inntekter, tidslinje);
     }
 
-
-    public List<Inntekt> getAlleInntektBeregnetSkatt() {
-        return getAlleInntekter(InntektsKilde.SIGRUN);
-    }
-
-    public List<Inntekt> getAlleInntektBeregningsgrunnlag() {
-        return getAlleInntekter(InntektsKilde.INNTEKT_BEREGNING);
-    }
-
-    public List<Inntekt> getAlleInntekter(InntektsKilde kilde) {
-        return inntekter.stream()
-            .filter(it -> kilde == null || kilde.equals(it.getInntektsKilde()))
-            .toList();
-    }
-
     public List<Inntekt> getAlleInntekter() {
-        return getAlleInntekter(null);
-    }
-
-    public List<Inntekt> getAlleInntektPensjonsgivende() {
-        return getAlleInntekter(InntektsKilde.INNTEKT_OPPTJENING);
-    }
-
-    public List<Inntekt> getAlleInntektSammenligningsgrunnlag() {
-        return getAlleInntekter(InntektsKilde.INNTEKT_SAMMENLIGNING);
+        return inntekter.stream()
+            .toList();
     }
 
     /**
@@ -136,22 +87,10 @@ public class InntektFilter {
      * Get inntektsposter - filtrert for skjæringstidspunkt, inntektsposttype, etc hvis satt på filter.
      */
     public Collection<Inntektspost> getInntektsposter(InntektsKilde kilde) {
-        Collection<Inntektspost> inntektsposter = getAlleInntekter(null).stream().filter(i -> kilde == null || kilde.equals(i.getInntektsKilde()))
+        Collection<Inntektspost> inntektsposter = getAlleInntekter().stream().filter(i -> kilde == null || kilde.equals(i.getInntektsKilde()))
             .flatMap(i -> i.getAlleInntektsposter().stream().filter(ip -> filtrerInntektspost(i, ip)))
             .collect(Collectors.toList());
         return Collections.unmodifiableCollection(inntektsposter);
-    }
-
-    public Collection<Inntektspost> getInntektsposterBeregningsgrunnlag() {
-        return getInntektsposter(getAlleInntektBeregningsgrunnlag());
-    }
-
-    public Collection<Inntektspost> getInntektsposterPensjonsgivende() {
-        return getInntektsposter(getAlleInntektPensjonsgivende());
-    }
-
-    public Collection<Inntektspost> getInntektsposterSammenligningsgrunnlag() {
-        return getInntektsposter(getAlleInntektSammenligningsgrunnlag());
     }
 
     @Override
@@ -164,7 +103,7 @@ public class InntektFilter {
 
     private boolean filtrerInntektspost(Inntekt inntekt, Inntektspost ip) {
         return (inntektspostFilter == null || inntektspostFilter.test(inntekt, ip))
-            && skalMedEtterSkjæringstidspunktVurdering(ip);
+            && skalMedEtterPeriodeVurdering(ip);
     }
 
     /**
@@ -183,7 +122,7 @@ public class InntektFilter {
         return Collections.unmodifiableCollection(inntektsposter);
     }
 
-    private boolean skalMedEtterSkjæringstidspunktVurdering(Inntektspost inntektspost) {
+    private boolean skalMedEtterPeriodeVurdering(Inntektspost inntektspost) {
         if (inntektspost == null) {
             return false;
         }

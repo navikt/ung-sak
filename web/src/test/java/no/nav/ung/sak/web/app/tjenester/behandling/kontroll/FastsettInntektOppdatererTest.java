@@ -224,7 +224,7 @@ class FastsettInntektOppdatererTest {
             .medInntektspostType(InntektspostType.LØNN)
             .medBeløp(BigDecimal.valueOf(registerinntekt));
         final var inntektBuilder = InntektBuilder.oppdatere(Optional.empty())
-            .medInntektsKilde(InntektsKilde.INNTEKT_SAMMENLIGNING)
+            .medInntektsKilde(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
             .leggTilInntektspost(inntektspostBuilder);
         aktørInntektBuilder.leggTilInntekt(inntektBuilder);
         registerBuilder.leggTilAktørInntekt(aktørInntektBuilder);
