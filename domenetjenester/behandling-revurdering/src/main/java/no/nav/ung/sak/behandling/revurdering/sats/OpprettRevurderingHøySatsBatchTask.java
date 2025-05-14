@@ -64,7 +64,7 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
             .map(fagsakerTilVurdering -> {
                 Fagsak fagsak = fagsakerTilVurdering.getKey();
                 LocalDate endringsdato = fagsakerTilVurdering.getValue();
-                log.info("Oppretter revurdering for fagsak med id {}", fagsak.getId());
+                log.info("Oppretter revurdering for fagsak med id {} for økning av sats fra {}", fagsak.getId(), endringsdato);
 
                 ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
                 tilVurderingTask.setFagsakId(fagsak.getId());

@@ -345,6 +345,65 @@ public class BrevScenarioer {
     }
 
     /**
+     * Endring barnetillegg. Får barn etter å ha fått innvilget programmet
+     */
+    public static UngTestScenario endringBarnetillegg(LocalDate fom, LocalDate barnFødselsdato) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, barnFødselsdato.minusDays(1), lavSatsBuilder(fom).build()),
+            new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnFødselsdato, 1).build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(p),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))), null,
+            List.of(
+                lagBarn(barnFødselsdato)
+            ));
+    }
+
+    /**
+     * Endring barnetillegg. Har allerede ett barn og får tvillinger
+     */
+    public static UngTestScenario endringBarnetilleggFlereBarn(LocalDate fom, LocalDate barnFødselsdato) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, barnFødselsdato.minusDays(1), lavSatsMedBarnBuilder(fom, 1).build()),
+            new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnFødselsdato, 3).build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(p),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))), null,
+            List.of(
+                lagBarn(barnFødselsdato.minusYears(5)),
+                lagBarn(barnFødselsdato),
+                lagBarn(barnFødselsdato)
+            ));
+    }
+
+
+    /**
      * 24 år blir 25 år etter 3 mnd i progrmmet og får overgang til høy sats. Har barn fra før av
      */
     public static UngTestScenario endring25ÅrMedBarn(LocalDate fødselsdato) {
@@ -437,12 +496,13 @@ public class BrevScenarioer {
     public static UngdomsytelseSatser.Builder lavSatsMedBarnBuilder(LocalDate fom, int antallBarn) {
         SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
         var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(new LocalDateInterval(fom, fom)).getValue();
+        BigDecimal g = hentGrunnbeløpFor(fom);
         return UngdomsytelseSatser.builder()
-            .medGrunnbeløp(hentGrunnbeløpFor(fom))
+            .medGrunnbeløp(g)
             .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
             .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(antallBarn)
-            .medBarnetilleggDagsats(antallBarn > 0 ? barneTillegg.intValue() : 0);
+            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue() );
     }
 
     public static UngdomsytelseSatser.Builder høySatsBuilder(LocalDate fom) {
@@ -452,13 +512,18 @@ public class BrevScenarioer {
     public static UngdomsytelseSatser.Builder høySatsBuilderMedBarn(LocalDate fom, int antallBarn) {
         SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.HØY);
         var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(new LocalDateInterval(fom, fom)).getValue();
-
+        var g = hentGrunnbeløpFor(fom);
         return UngdomsytelseSatser.builder()
-            .medGrunnbeløp(hentGrunnbeløpFor(fom))
+            .medGrunnbeløp(g)
             .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
             .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(antallBarn)
-            .medBarnetilleggDagsats(antallBarn > 0 ? barneTillegg.intValue() : 0);
+            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue() );
+    }
+
+    @NotNull
+    private static BigDecimal beregnDagsatsInklBarnetillegg(int antallBarn, BigDecimal barneTillegg) {
+        return barneTillegg.multiply(BigDecimal.valueOf(antallBarn));
     }
 
     private static SatsOgGrunnbeløpfaktor hentSatstypeOgGrunnbeløp(Sats sats) {

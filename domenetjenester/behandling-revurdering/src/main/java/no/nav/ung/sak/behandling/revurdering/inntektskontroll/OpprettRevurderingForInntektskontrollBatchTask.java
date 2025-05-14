@@ -118,7 +118,7 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
                 .stream()
                 .map(behandling -> {
                     var fagsakId = behandling.getFagsakId();
-                    log.info("Oppretter revurdering for fagsak med id {}", fagsakId);
+                    log.info("Oppretter revurdering for fagsak med id {} for inntektskontroll av periode {} - {}", fagsakId, fom, tom);
 
                     ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
                     tilVurderingTask.setFagsakId(fagsakId);

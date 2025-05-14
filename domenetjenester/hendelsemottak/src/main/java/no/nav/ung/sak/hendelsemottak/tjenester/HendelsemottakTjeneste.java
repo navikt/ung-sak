@@ -60,7 +60,7 @@ public class HendelsemottakTjeneste {
         for (Map.Entry<Fagsak, ÅrsakOgPeriode> entry : kandidaterTilRevurdering.entrySet()) {
             var fagsak = entry.getKey();
             var behandlingÅrsak = entry.getValue().behandlingÅrsak();
-
+            log.info("Oppretter revurdering for fagsak {} med behandlingÅrsak {}", fagsak.getSaksnummer().getVerdi(), behandlingÅrsak.getKode());
             ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsak.getKode());
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, entry.getValue().periode().getFomDato().toString());
