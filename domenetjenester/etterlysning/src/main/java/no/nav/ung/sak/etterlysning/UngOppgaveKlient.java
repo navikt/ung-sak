@@ -48,7 +48,15 @@ public class UngOppgaveKlient {
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
+    }
 
+
+    public void opprettInntektrapporteringOppgave(RegisterInntektOppgaveDTO oppgaver) {
+        try {
+            restClient.post(opprettKontrollerRegisterInntektURI, oppgaver);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
     }
 
     public void oppgaveUtløpt(UUID eksternRef) {

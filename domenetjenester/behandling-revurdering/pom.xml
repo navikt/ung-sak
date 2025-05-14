@@ -54,6 +54,10 @@
             <artifactId>behandlingslager-testutilities</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>etterlysning</artifactId>
+        </dependency>
 
     </dependencies>
 

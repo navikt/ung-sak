@@ -15,6 +15,8 @@ import java.util.List;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
+import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask.PERIODE_FOM;
+import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask.PERIODE_TOM;
 
 
 /**
@@ -23,21 +25,21 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
  * Kjører hver dag kl 07:15.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 7 * *", maxFailedRuns = 1)
-public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = OpprettOppgaverForInntektsrapporteringBatchTask.TASKNAME, cronExpression = "0 0 7 1 * *", maxFailedRuns = 1)
+public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "batch.opprettRevurderingForInntektskontrollBatch";
+    public static final String TASKNAME = "batch.opprettOppgaverForInntektsrapporteringBatch";
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingForInntektskontrollBatchTask.class);
+    private static final Logger log = LoggerFactory.getLogger(OpprettOppgaverForInntektsrapporteringBatchTask.class);
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private FinnSakerForInntektkontroll finnRelevanteFagsaker;
 
-    OpprettRevurderingForInntektskontrollBatchTask() {
+    OpprettOppgaverForInntektsrapporteringBatchTask() {
     }
 
     @Inject
-    public OpprettRevurderingForInntektskontrollBatchTask(ProsessTaskTjeneste prosessTaskTjeneste, FinnSakerForInntektkontroll finnRelevanteFagsaker) {
+    public OpprettOppgaverForInntektsrapporteringBatchTask(ProsessTaskTjeneste prosessTaskTjeneste, FinnSakerForInntektkontroll finnRelevanteFagsaker) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.finnRelevanteFagsaker = finnRelevanteFagsaker;
     }
@@ -60,12 +62,12 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
         var revurderTasker = fagsakerForKontroll
             .stream()
             .map(fagsak -> {
-                log.info("Oppretter revurdering for fagsak med saksnummer {} for inntektskontroll av periode {} - {}", fagsak.getSaksnummer(), fom, tom);
+                log.info("Oppretter oppgave for inntektrappportering for fagsak {} for periode {} - {}", fagsak.getSaksnummer(), fom, tom);
 
-                ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-                tilVurderingTask.setFagsakId(fagsak.getId());
-                tilVurderingTask.setProperty(PERIODER, fom + "/" + tom);
-                tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.getKode());
+                ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettOppgaveForInntektsrapporteringTask.class);
+                tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
+                tilVurderingTask.setProperty(PERIODE_FOM, fom.toString());
+                tilVurderingTask.setProperty(PERIODE_TOM, tom.toString());
                 return tilVurderingTask;
             }).toList();
 
