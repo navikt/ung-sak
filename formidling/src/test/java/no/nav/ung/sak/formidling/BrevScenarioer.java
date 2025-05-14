@@ -153,6 +153,7 @@ public class BrevScenarioer {
     private static PersonInformasjon lagBarn(LocalDate barnFødselsdato) {
         return PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).medPersonas().barn(AktørId.dummy(), barnFødselsdato).build();
     }
+
     private static PersonInformasjon lagBarnMedDødsdato(LocalDate barnFødselsdato, LocalDate barnDødsdato) {
         return PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).medPersonas().barn(AktørId.dummy(), barnFødselsdato).dødsdato(barnDødsdato).build();
     }
@@ -402,6 +403,40 @@ public class BrevScenarioer {
     }
 
 
+    /**
+     * 24 år blir 25 år etter 3 mnd i progrmmet og får overgang til høy sats. Har barn fra før av
+     */
+    public static UngTestScenario endring25ÅrMedBarn(LocalDate fødselsdato) {
+        var tjuvefemårsdag = fødselsdato.plusYears(25);
+        var fom = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
+
+        var programPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(programPeriode.getFomDato(), tjuvefemårsdag.minusDays(1), lavSatsMedBarnBuilder(fom, 1).build()),
+            new LocalDateSegment<>(tjuvefemårsdag, programPeriode.getTomDato(), høySatsBuilderMedBarn(tjuvefemårsdag, 1).build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(programPeriode.getFomDato(), programPeriode.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(programPeriode),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(programPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(programPeriode, Utfall.OPPFYLT),
+            fødselsdato,
+            List.of(programPeriode.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))),
+            null,
+            List.of(
+                lagBarn(fom.minusYears(5))
+            ));
+    }
+
+
     private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {
         return satser.splitAtRegular(satser.getMinLocalDate().withDayOfMonth(1), satser.getMaxLocalDate(), Period.ofMonths(1));
     }
@@ -467,7 +502,7 @@ public class BrevScenarioer {
             .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
             .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(antallBarn)
-            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue());
+            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue() );
     }
 
     public static UngdomsytelseSatser.Builder høySatsBuilder(LocalDate fom) {
@@ -483,7 +518,7 @@ public class BrevScenarioer {
             .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
             .medSatstype(satsOgGrunnbeløpfaktor.satstype())
             .medAntallBarn(antallBarn)
-            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue());
+            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue() );
     }
 
     @NotNull

@@ -109,10 +109,13 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         LocalDate fødselsdato = LocalDate.of(2000, 3, 25);
         var ungTestGrunnlag = BrevScenarioer.endring25År(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-            "Vi har endret ungdomsytelsen din " +
-            "Fra 25. mars 2025 får du ny dagsats på 974 kroner fordi du fyller 25 år. " +
-            "Nav utbetaler 2.041 ganger grunnbeløp fra deltager er 25 år. " +
-            "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+            """
+                Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
+                Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller 25 år 25. mars 2025. \
+                Fra og med denne datoen får du 974 kroner per dag, utenom lørdag og søndag. \
+                Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år. \
+                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                """);
 
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -125,7 +128,37 @@ class BrevGenerererTjenesteEndringHøySatsTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsytelsen din</h1>"
+                "<h1>Du får mer i ungdomsprogramytelse fordi du fyller 25 år</h1>",
+                "<a href=\"https://www.nav.no/ungdomsprogramytelse/beregning\">Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år.</a>"
+            );
+
+    }
+
+    @Test
+    void medBarnetillegg() {
+        LocalDate fødselsdato = LocalDate.of(2000, 3, 25);
+        var ungTestGrunnlag = BrevScenarioer.endring25ÅrMedBarn(fødselsdato);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
+                Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller 25 år 25. mars 2025. \
+                Fra og med denne datoen får du 1 011 kroner per dag, utenom lørdag og søndag. \
+                Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år. \
+                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                """);
+
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_HØY_SATS);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får mer i ungdomsprogramytelse fordi du fyller 25 år</h1>"
             );
 
     }
@@ -144,7 +177,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
             assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Vi har endret ungdomsytelsen din");
+            assertThat(pdfTekst).contains("Du får mer i ungdomsprogramytelse fordi du fyller 25 år");
         }
 
     }
