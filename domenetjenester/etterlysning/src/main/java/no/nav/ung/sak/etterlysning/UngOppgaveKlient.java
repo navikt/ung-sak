@@ -17,6 +17,7 @@ import java.util.UUID;
 public class UngOppgaveKlient {
     private final OidcRestClient restClient;
     private final URI opprettKontrollerRegisterInntektURI;
+    private final URI opprettInntektrapporteringURI;
     private final URI avbrytURI;
     private final URI utløptURI;
     private final URI opprettEndretProgramperiodeURI;
@@ -29,6 +30,7 @@ public class UngOppgaveKlient {
         this.restClient = restClient;
         opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
         opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endre/programperiode");
+        this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/rapportering/inntekt");
         avbrytURI = tilUri(url, "oppgave/avbryt");
         utløptURI = tilUri(url, "oppgave/utløpt");
     }
@@ -53,7 +55,7 @@ public class UngOppgaveKlient {
 
     public void opprettInntektrapporteringOppgave(RegisterInntektOppgaveDTO oppgaver) {
         try {
-            restClient.post(opprettKontrollerRegisterInntektURI, oppgaver);
+            restClient.post(opprettInntektrapporteringURI, oppgaver);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
