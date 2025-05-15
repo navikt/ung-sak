@@ -30,7 +30,7 @@ public class UngOppgaveKlient {
         this.restClient = restClient;
         opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
         opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endre/programperiode");
-        this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/rapportering/inntekt");
+        this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         avbrytURI = tilUri(url, "oppgave/avbryt");
         utløptURI = tilUri(url, "oppgave/utløpt");
     }
