@@ -28,11 +28,11 @@ public class UngOppgaveKlient {
         OidcRestClient restClient,
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
-        opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
-        opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endre/programperiode");
+        this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
+        this.opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endre/programperiode");
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
-        avbrytURI = tilUri(url, "oppgave/avbryt");
-        utløptURI = tilUri(url, "oppgave/utløpt");
+        this.avbrytURI = tilUri(url, "oppgave/avbryt");
+        this.utløptURI = tilUri(url, "oppgave/utløpt");
     }
 
     public void avbrytOppgave(UUID eksternRef) {
