@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
-public class Satsberegner {
+class Satsberegner {
 
 
     static long beregnDagsatsInklBarnetillegg(UngdomsytelseSatser satser) {
