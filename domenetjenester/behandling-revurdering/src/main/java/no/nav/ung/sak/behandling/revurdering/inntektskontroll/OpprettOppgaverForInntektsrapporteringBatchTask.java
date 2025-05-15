@@ -50,8 +50,6 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessT
         var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
         var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
         final var fagsaker = finnRelevanteFagsaker.finnFagsaker(fom, tom);
-
-        // TODO: Legg inn dette når resten er klart (vi vil ikkje kjøre i Q før vi kan teste det skikkelig i Q)
         opprettProsessTask(fagsaker, fom, tom);
     }
 
