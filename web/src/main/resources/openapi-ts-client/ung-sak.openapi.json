@@ -3635,6 +3635,10 @@
           "slåttAvInntrekk" : {
             "type" : "boolean"
           },
+          "sumEtterbetaling" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
           "sumFeilutbetaling" : {
             "format" : "int64",
             "type" : "integer"
