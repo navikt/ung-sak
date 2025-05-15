@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.formidling.template.dto.EndringBarnetillegg;
+import no.nav.ung.sak.formidling.template.dto.EndringBarnetilleggDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +48,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
         var sats = Satsberegner.beregnBarnetilleggSats(nyeSatser);
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_BARNETILLEGG,
-                new EndringBarnetillegg(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats));
+                new EndringBarnetilleggDto(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats));
 
     }
 

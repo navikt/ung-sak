@@ -18,11 +18,11 @@
                     datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
             {{/if}}
             {{#if fødselBarn}}
-                <p>Fordi du fikk barn {{fom}}, får du {{> felles/beløp barnetillegg}} mer {{#if fikkFlereBarn}}per barn{{/if}} fra denne datoen. Da får
+                <p>Fordi du fikk barn {{fom}}, får du {{> felles/beløp barnetilleggSats}} mer {{#if fikkFlereBarn}}per barn{{/if}} fra denne datoen. Da får
                     du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
             {{/if}}
             {{#if dødsfallBarn}}
-                <p>Fordi du mistet barn {{fom}}, får du ikke barnetillegg på {{> felles/beløp barnetillegg}} fra denne
+                <p>Fordi du mistet barn {{fom}}, får du ikke barnetillegg på {{> felles/beløp barnetilleggSats}} fra denne
                     datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
             {{/if}}
         {{/each}}
@@ -59,19 +59,19 @@
                 Det vil si {{> felles/beløp beregning.årsbeløp}} i året.
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
             </p>
-            <p>Det vil si at du har rett på {{> felles/beløp beregning.dagsats}} per dag. Det er dette vi kaller dagsatsen.</p>
+            <p>Det vil si at du har rett på {{> felles/beløp beregning.grunnsats}} per dag. Det er dette vi kaller dagsatsen.</p>
             {{#with overgangTilHøySats}}
                 <p>
                     Når du er over {{satsOgBeregning.aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
                     ganger {{currency_no_3_dec faktor}} som blir {{> felles/beløp årsbeløp}} i året.
                 </p>
-                <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
+                <p>Det vil si at du har rett på {{> felles/beløp grunnsats}} per dag.</p>
             {{/with}}
         {{/with}}
 
         {{#with satsOgBeregning.barnetillegg}}
-            <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp dagsats}} per dag i barnetillegg.
-                Det vil si at du til sammen får {{> felles/beløp dagsatsTotal}} per dag.</p>
+            <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp grunnsats}} per dag i barnetillegg.
+                Det vil si at du til sammen får {{> felles/beløp grunnsatsTotal}} per dag.</p>
         {{/with}}
 
         <h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen </h2>
