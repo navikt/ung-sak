@@ -80,7 +80,6 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
             .stream()
             .map(fagsak -> {
                 log.info("Setter inntektrapportering til utløpt for fagsak med saksnummer {} og periode {} - {}", fagsak.getSaksnummer(), fom, tom);
-
                 ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(SettOppgaveUtløptForInntektsrapporteringTask.class);
                 tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
                 tilVurderingTask.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));

@@ -17,12 +17,10 @@ import java.time.format.DateTimeFormatter;
 
 
 /**
- * Batchtask som starter kontroll av inntekt fra a-inntekt
- * <p>
- * Kjører hver dag kl 07:15.
+ * Setter oppgave for inntektsrapportering til utløpt.
  */
 @ApplicationScoped
-@ProsessTask(value = SettOppgaveUtløptForInntektsrapporteringTask.TASKNAME, cronExpression = "0 0 7 1 * *", maxFailedRuns = 1)
+@ProsessTask(value = SettOppgaveUtløptForInntektsrapporteringTask.TASKNAME)
 public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "batch.settUtloptForInntektsrapportering";
@@ -57,7 +55,7 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
             Oppgavetype.RAPPORTER_INNTEKT,
             fom,
             tom
-        )); // TODO: Ta i bruk egen requestdto for utløp av inntektsrapportering
+        ));
     }
 
 

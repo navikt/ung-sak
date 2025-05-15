@@ -20,12 +20,10 @@ import java.util.UUID;
 
 
 /**
- * Batchtask som starter kontroll av inntekt fra a-inntekt
- * <p>
- * Kjører hver dag kl 07:15.
+ * Task som oppretter oppgave for inntektsrapportering.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettOppgaveForInntektsrapporteringTask.TASKNAME, cronExpression = "0 0 7 1 * *", maxFailedRuns = 1)
+@ProsessTask(value = OpprettOppgaveForInntektsrapporteringTask.TASKNAME)
 public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettOppgaverForInntektsrapportering";
@@ -33,8 +31,6 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
     public static final String OPPGAVE_REF = "oppgave_ref";
-
-    private static final Logger log = LoggerFactory.getLogger(OpprettOppgaveForInntektsrapporteringTask.class);
 
     private PersoninfoAdapter personinfoAdapter;
     private UngOppgaveKlient ungOppgaveKlient;
@@ -54,13 +50,11 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         this.rapporteringsfristDagIMåned = rapporteringsfristDagIMåned;
     }
 
-
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         final var aktørId = new AktørId(prosessTaskData.getAktørId());
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
-
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         ungOppgaveKlient.opprettInntektrapporteringOppgave(new InntektrapporteringOppgaveDTO(
             deltakerIdent.getIdent(),
@@ -68,11 +62,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
             fom.plusMonths(1).withDayOfMonth(rapporteringsfristDagIMåned + 1).atStartOfDay(),
             fom,
             tom
-        )); // TODO: Ta i bruk egen requestdto for inntektsrapportering
+        ));
     }
-
-
-
-
 
 }
