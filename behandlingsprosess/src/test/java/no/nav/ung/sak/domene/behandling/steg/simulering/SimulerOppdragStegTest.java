@@ -153,7 +153,7 @@ public class SimulerOppdragStegTest {
         var varseltekst = "Her er en fin varseltekst";
         tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, varseltekst));
         tilbakekrevingRepository.deaktiverEksisterendeTilbakekrevingValg(behandling);
-        when(k9OppdragRestKlientMock.hentSimuleringResultat(any())).thenReturn(Optional.of(new SimuleringResultatDto(1000L, 0L, false)));
+        when(k9OppdragRestKlientMock.hentSimuleringResultat(any())).thenReturn(Optional.of(new SimuleringResultatDto(1000L, 0L, 0L, false)));
 
         steg = opprettSteg();
 
