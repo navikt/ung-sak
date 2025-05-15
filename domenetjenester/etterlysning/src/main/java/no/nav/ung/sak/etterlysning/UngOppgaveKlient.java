@@ -5,8 +5,11 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektrapportering.InntektrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretProgamperiodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,6 +21,7 @@ public class UngOppgaveKlient {
     private final OidcRestClient restClient;
     private final URI opprettKontrollerRegisterInntektURI;
     private final URI opprettInntektrapporteringURI;
+    private final URI utløpForTypeOgPeriodeURI;
     private final URI avbrytURI;
     private final URI utløptURI;
     private final URI opprettEndretProgramperiodeURI;
@@ -33,6 +37,7 @@ public class UngOppgaveKlient {
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utløpt");
+        this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgave/utløpt/forTypeOgPeriode");
     }
 
     public void avbrytOppgave(UUID eksternRef) {
@@ -53,7 +58,7 @@ public class UngOppgaveKlient {
     }
 
 
-    public void opprettInntektrapporteringOppgave(RegisterInntektOppgaveDTO oppgaver) {
+    public void opprettInntektrapporteringOppgave(InntektrapporteringOppgaveDTO oppgaver) {
         try {
             restClient.post(opprettInntektrapporteringURI, oppgaver);
         } catch (Exception e) {
@@ -68,6 +73,15 @@ public class UngOppgaveKlient {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
     }
+
+    public void settOppgaveTilUtløpt(SettTilUtløptDTO dto) {
+        try {
+            restClient.post(utløpForTypeOgPeriodeURI, dto);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
 
     public void opprettEndretSluttdatoOppgave(EndretProgamperiodeOppgaveDTO endretPeriodeOppgaveDTO) {
         try {

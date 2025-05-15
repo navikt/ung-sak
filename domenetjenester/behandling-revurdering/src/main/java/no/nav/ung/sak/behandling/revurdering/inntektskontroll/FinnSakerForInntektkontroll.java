@@ -1,5 +1,6 @@
 package no.nav.ung.sak.behandling.revurdering.inntektskontroll;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -13,8 +14,6 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -23,9 +22,8 @@ import java.util.Optional;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT;
 
+@ApplicationScoped
 public class FinnSakerForInntektkontroll {
-
-    private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingForInntektskontrollBatchTask.class);
 
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
