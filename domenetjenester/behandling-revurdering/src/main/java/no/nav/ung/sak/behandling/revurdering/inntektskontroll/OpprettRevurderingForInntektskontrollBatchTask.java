@@ -20,7 +20,7 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
 /**
  * Batchtask som starter kontroll av inntekt fra a-inntekt
  * <p>
- * Kjører hver dag kl 07:15.
+ * Kjører den syvende i måneden kl 07:00.
  */
 @ApplicationScoped
 @ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 7 * *", maxFailedRuns = 1)

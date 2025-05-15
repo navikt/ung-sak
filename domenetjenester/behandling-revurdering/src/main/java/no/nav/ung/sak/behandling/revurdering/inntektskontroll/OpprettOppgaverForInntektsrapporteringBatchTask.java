@@ -20,9 +20,9 @@ import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppg
 
 
 /**
- * Batchtask som starter kontroll av inntekt fra a-inntekt
+ * Batchtask som oppretter oppgaver for rapportering av inntekt
  * <p>
- * Kjører hver dag kl 07:15.
+ * Kjører den første i måneden kl 07:00.
  */
 @ApplicationScoped
 @ProsessTask(value = OpprettOppgaverForInntektsrapporteringBatchTask.TASKNAME, cronExpression = "0 0 7 1 * *", maxFailedRuns = 1)
