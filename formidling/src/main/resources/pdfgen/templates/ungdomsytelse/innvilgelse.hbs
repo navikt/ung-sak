@@ -47,18 +47,19 @@
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.</p>
 
         <h2>Hvordan regner vi oss fram til hvor mye penger du har rett på?</h2>
-        <p>
-            Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet.
-            Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år.
-        </p>
-
         {{#with satsOgBeregning}}
+            <p>
+                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet.
+                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år.
+                Nå er grunnbeløpet på {{> felles/beløp grunnbeløp}}.
+            </p>
+
             <p>
                 Når du er {{#if kunHøySats}}over{{else}}under{{/if}} {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec beregning.faktor}}.
                 Det vil si {{> felles/beløp beregning.årsbeløp}} i året.
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
             </p>
-            <p>Det vil si at du har rett på {{> felles/beløp beregning.dagsats}} per dag.</p>
+            <p>Det vil si at du har rett på {{> felles/beløp beregning.dagsats}} per dag. Det er dette vi kaller dagsatsen.</p>
             {{#with overgangTilHøySats}}
                 <p>
                     Når du er over {{satsOgBeregning.aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
@@ -73,24 +74,15 @@
                 Det vil si at du til sammen får {{> felles/beløp dagsatsTotal}} per dag.</p>
         {{/with}}
 
-        <p>Slik regner vi ut hvor mye penger du kan få per dag.</p>
-
-        <p><a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempler i Ungdomsportalen på hvordan vi
-            regner ut hvor mye penger du har rett på.</a></p>
-
         <h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen </h2>
         <p>Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det.</p>
         <p>
             Du får en SMS den 1. hver måned.
-            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om hva du har hatt i inntekt
-            måneden før.</p>
+            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all inntekt du har hatt måneden før.</p>
         <p>
             Når du har en inntekt, får du mindre penger gjennom ungdomsprogramytelsen.
             Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får
             ytelsen.</p>
-
-        <p><a href="https://www.nav.no/ungdomsportalen">Se hvordan du skal gi beskjed om inntekten din i
-            Ungdomsportalen.</a></p>
 
     {{/felles/seksjon/hoved}}
 

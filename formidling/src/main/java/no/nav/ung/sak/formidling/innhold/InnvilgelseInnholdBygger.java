@@ -156,6 +156,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         var nyesteSats = nyesteSegment.getValue();
 
         var overgangTilHøySats = satser.size() > 1 ? mapOvergangTilHøySats(nyesteSegment, brevfeilHåndterer) :  null;
+        var grunnbeløp = tilHeltall(nyesteSats.grunnbeløp());
 
         var barnetillegg = nyesteSats.antallBarn() > 0
             ? new BarnetilleggDto(
@@ -167,6 +168,7 @@ public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
         return new SatsOgBeregningDto(
             Sats.HØY.getFomAlder(),
             kunHøySats,
+            grunnbeløp,
             beregning,
             overgangTilHøySats,
             barnetillegg);

@@ -136,12 +136,12 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Nå er grunnbeløpet på 124 028 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan få per dag. \
-                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                Det er dette vi kaller dagsatsen. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -179,12 +179,12 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Nå er grunnbeløpet på 124 028 kroner. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
                 Det vil si 253 141 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 974 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan få per dag. \
-                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                Det er dette vi kaller dagsatsen. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt());
 
         assertThatHtml(brevtekst)
@@ -211,12 +211,12 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Nå er grunnbeløpet på 124 028 kroner. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
                 Det vil si 253 141 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 974 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan få per dag. \
-                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
+                Det er dette vi kaller dagsatsen. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -250,14 +250,14 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Nå er grunnbeløpet på 124 028 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
+                Det er dette vi kaller dagsatsen. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 253 141 kroner i året. \
                 Det vil si at du har rett på 974 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan få per dag. \
-                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -300,14 +300,14 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Nå er grunnbeløpet på 124 028 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
+                Det er dette vi kaller dagsatsen. \
                 Fordi du har 1 barn, får du i tillegg 37 kroner per dag i barnetillegg. \
                 Det vil si at du til sammen får 686 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan få per dag. \
-                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -346,16 +346,16 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Nå er grunnbeløpet på 124 028 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
+                Det er dette vi kaller dagsatsen. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 253 141 kroner i året. \
                 Det vil si at du har rett på 974 kroner per dag. \
                 Fordi du har 1 barn, får du i tillegg 37 kroner per dag i barnetillegg. \
                 Det vil si at du til sammen får 1 011 kroner per dag. \
-                Slik regner vi ut hvor mye penger du kan få per dag. \
-                Se eksempler i Ungdomsportalen på hvordan vi regner ut hvor mye penger du har rett på. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -372,10 +372,9 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
             Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det. \
             Du får en SMS den 1. hver måned. \
-            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om hva du har hatt i inntekt måneden før. \
+            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all inntekt du har hatt måneden før. \
             Når du har en inntekt, får du mindre penger gjennom ungdomsprogramytelsen. \
             Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får ytelsen. \
-            Se hvordan du skal gi beskjed om inntekten din i Ungdomsportalen. \
             """;
     }
 
