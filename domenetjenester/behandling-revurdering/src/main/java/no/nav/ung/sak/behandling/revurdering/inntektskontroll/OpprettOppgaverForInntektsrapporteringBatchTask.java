@@ -12,11 +12,11 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.UUID;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
-import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask.PERIODE_FOM;
-import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask.PERIODE_TOM;
+import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask.*;
 
 
 /**
@@ -68,6 +68,7 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessT
                 tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
                 tilVurderingTask.setProperty(PERIODE_FOM, fom.toString());
                 tilVurderingTask.setProperty(PERIODE_TOM, tom.toString());
+                tilVurderingTask.setProperty(OPPGAVE_REF, UUID.randomUUID().toString());
                 return tilVurderingTask;
             }).toList();
 

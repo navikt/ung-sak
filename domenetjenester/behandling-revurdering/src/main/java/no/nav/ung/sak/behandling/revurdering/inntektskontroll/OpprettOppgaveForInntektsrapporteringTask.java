@@ -31,6 +31,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
 
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
+    public static final String OPPGAVE_REF = "oppgave_ref";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgaveForInntektsrapporteringTask.class);
 
@@ -62,7 +63,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         ungOppgaveKlient.opprettInntektrapporteringOppgave(new RegisterInntektOppgaveDTO(
             deltakerIdent.getIdent(),
-            UUID.randomUUID(),
+            UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
             fom.plusMonths(1).withDayOfMonth(rapporteringsfristDagIMåned + 1).atStartOfDay(),
             fom,
             tom,
