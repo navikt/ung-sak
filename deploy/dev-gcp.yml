@@ -266,7 +266,7 @@ spec:
     - name: VENTEFRIST_UTTALELSE
       value: "PT15M"
     - name: RAPPORTERINGSFRIST_DAG_I_MAANED
-      value: "6"
+      value: "5"
 
 
       # Audit logging
