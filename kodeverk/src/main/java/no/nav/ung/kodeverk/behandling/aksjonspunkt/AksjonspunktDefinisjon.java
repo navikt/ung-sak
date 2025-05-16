@@ -26,15 +26,9 @@ import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.*;
 public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     // Gruppe : 5xxx
-    @Deprecated(forRemoval = true)
-    AVKLAR_TILLEGGSOPPLYSNINGER(
-        AksjonspunktKodeDefinisjon.AVKLAR_TILLEGGSOPPLYSNINGER_KODE, AksjonspunktType.MANUELL, "Avklar tilleggsopplysninger",
-        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
-
     FORESLÅ_VEDTAK(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_KODE,
         AksjonspunktType.MANUELL, "Foreslå vedtak", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK,
         UTEN_VILKÅR, SkjermlenkeType.VEDTAK, ENTRINN, AVVENTER_SAKSBEHANDLER),
-
     FATTER_VEDTAK(AksjonspunktKodeDefinisjon.FATTER_VEDTAK_KODE,
         AksjonspunktType.MANUELL, "Fatter vedtak",
         Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.UTREDES), BehandlingStegType.FATTE_VEDTAK,
@@ -56,20 +50,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     FORESLÅ_VEDTAK_MANUELT(AksjonspunktKodeDefinisjon.FORESLÅ_VEDTAK_MANUELT_KODE,
         AksjonspunktType.MANUELL, "Foreslå vedtak manuelt", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK, ENTRINN, AVVENTER_SAKSBEHANDLER),
-
-
-    VURDERE_ANNEN_YTELSE_FØR_VEDTAK(
-        AksjonspunktKodeDefinisjon.VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere annen ytelse før vedtak",
-        BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
-    VURDERE_DOKUMENT_FØR_VEDTAK(
-        AksjonspunktKodeDefinisjon.VURDERE_DOKUMENT_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere dokument før vedtak",
-        BehandlingStatus.UTREDES,
-        BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
-    VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK(
-        AksjonspunktKodeDefinisjon.VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK_KODE, AksjonspunktType.MANUELL, "Vurdere overlappende ytelse før vedtak",
-        BehandlingStatus.UTREDES,
-        BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
-
 
     KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST(
         AksjonspunktKodeDefinisjon.KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE, AksjonspunktType.MANUELL,
