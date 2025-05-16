@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 @ProsessTask(value = SettOppgaveUtløptForInntektsrapporteringTask.TASKNAME)
 public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "inntektsrapportering.settUtloptForInntektsrapportering";
+    public static final String TASKNAME = "inntektsrapportering.settUtlopt";
 
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
