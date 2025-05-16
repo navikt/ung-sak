@@ -6,10 +6,9 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektrapportering.InntektrapporteringOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretProgamperiodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
-import no.nav.ung.sak.typer.AktørId;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,18 +48,18 @@ public class UngOppgaveKlient {
 
     }
 
-    public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgaver) {
+    public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgave) {
         try {
-            restClient.post(opprettKontrollerRegisterInntektURI, oppgaver);
+            restClient.post(opprettKontrollerRegisterInntektURI, oppgave);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
     }
 
 
-    public void opprettInntektrapporteringOppgave(InntektrapporteringOppgaveDTO oppgaver) {
+    public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgave) {
         try {
-            restClient.post(opprettInntektrapporteringURI, oppgaver);
+            restClient.post(opprettInntektrapporteringURI, oppgave);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
