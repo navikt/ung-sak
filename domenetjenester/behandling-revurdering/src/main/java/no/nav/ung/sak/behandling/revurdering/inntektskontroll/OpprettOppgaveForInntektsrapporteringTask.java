@@ -26,7 +26,7 @@ import java.util.UUID;
 @ProsessTask(value = OpprettOppgaveForInntektsrapporteringTask.TASKNAME)
 public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "batch.opprettOppgaverForInntektsrapportering";
+    public static final String TASKNAME = "inntektsrapportering.opprettOppgaverForInntektsrapportering";
 
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
