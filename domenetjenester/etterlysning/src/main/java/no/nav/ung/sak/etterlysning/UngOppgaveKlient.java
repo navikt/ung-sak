@@ -48,18 +48,18 @@ public class UngOppgaveKlient {
 
     }
 
-    public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgaver) {
+    public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgave) {
         try {
-            restClient.post(opprettKontrollerRegisterInntektURI, oppgaver);
+            restClient.post(opprettKontrollerRegisterInntektURI, oppgave);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
     }
 
 
-    public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgaver) {
+    public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgave) {
         try {
-            restClient.post(opprettInntektrapporteringURI, oppgaver);
+            restClient.post(opprettInntektrapporteringURI, oppgave);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
