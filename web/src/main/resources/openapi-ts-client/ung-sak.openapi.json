@@ -7300,6 +7300,92 @@
         "tags" : [ "oppgave" ]
       }
     },
+    "/api/oppgave/forvaltning/opprett-inntektsrapportering" : {
+      "post" : {
+        "description" : "Oppretter oppgave for inntektsrapportering for gitt sak",
+        "operationId" : "opprettInntektsrapportering",
+        "parameters" : [ {
+          "description" : "måned",
+          "in" : "query",
+          "name" : "måned",
+          "required" : true,
+          "schema" : {
+            "enum" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
+            "x-enum-varnames" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "saksnummer" : {
+                    "description" : "saksnummer",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "saksnummer" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Oppretter oppgave for inntektsrapportering",
+        "tags" : [ "oppgave" ]
+      }
+    },
+    "/api/oppgave/forvaltning/start-inntektskontroll" : {
+      "post" : {
+        "description" : "Starter inntektskontroll for sak",
+        "operationId" : "startInntektskontroll",
+        "parameters" : [ {
+          "description" : "måned",
+          "in" : "query",
+          "name" : "måned",
+          "required" : true,
+          "schema" : {
+            "enum" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
+            "x-enum-varnames" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "saksnummer" : {
+                    "description" : "saksnummer",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "saksnummer" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Starter inntektskontroll for sak",
+        "tags" : [ "oppgave" ]
+      }
+    },
     "/api/pip/aktoer-for-sak" : {
       "get" : {
         "description" : "Henter aktørId'er tilknyttet en fagsak",
