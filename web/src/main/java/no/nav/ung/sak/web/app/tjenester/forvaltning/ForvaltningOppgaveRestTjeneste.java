@@ -28,6 +28,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
@@ -75,7 +76,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Operation(description = "Oppretter oppgave for inntektsrapportering for gitt sak", summary = ("Oppretter oppgave for inntektsrapportering"), tags = "oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public Response opprettInntektsrapportering(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
-                                                @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) MånedForRapportering måned) {
+                                                @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedForRapportering måned) {
         if (isProd) {
             throw new IllegalArgumentException("Kan ikke kjøre denne tjenesten i prod");
         }
@@ -112,7 +113,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Operation(description = "Starter inntektskontroll for sak", summary = ("Starter inntektskontroll for sak"), tags = "oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public Response startInntektskontroll(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
-                                          @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) MånedForRapportering måned) {
+                                          @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedForRapportering måned) {
         if (isProd) {
             throw new IllegalArgumentException("Kan ikke kjøre denne tjenesten i prod");
         }
