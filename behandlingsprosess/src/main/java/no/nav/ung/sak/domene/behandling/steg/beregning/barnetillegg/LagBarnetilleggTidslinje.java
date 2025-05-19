@@ -9,6 +9,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.BarnetilleggSatsTidslinje;
 import no.nav.ung.sak.typer.AktørId;
@@ -16,6 +17,7 @@ import no.nav.ung.sak.typer.AktørId;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Function;
 
 import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 
@@ -27,12 +29,10 @@ public class LagBarnetilleggTidslinje {
 
 
     private final PersonopplysningRepository personopplysningRepository;
-    private final HentFødselOgDød hentFødselOgDød;
 
     @Inject
-    public LagBarnetilleggTidslinje(PersonopplysningRepository personopplysningRepository, HentFødselOgDød hentFødselOgDød) {
+    public LagBarnetilleggTidslinje(PersonopplysningRepository personopplysningRepository) {
         this.personopplysningRepository = personopplysningRepository;
-        this.hentFødselOgDød = hentFødselOgDød;
     }
 
     /**
@@ -52,12 +52,16 @@ public class LagBarnetilleggTidslinje {
             .map(PersonRelasjonEntitet::getTilAktørId)
             .toList();
 
-        var relevantPersonInfoBarn = barnAvSøkerAktørId.stream()
-            .map(this::finnRelevantPersonInfo)
-            .toList();
+        final var relevantPersonInfo = barnAvSøkerAktørId.stream().map(mapFødselOgDødInformasjonForAktør(personopplysningGrunnlagEntitet)).toList();
+        return beregnBarnetillegg(perioder, relevantPersonInfo);
 
-        return beregnBarnetillegg(perioder, relevantPersonInfoBarn);
+    }
 
+    private static Function<AktørId, FødselOgDødInfo> mapFødselOgDødInformasjonForAktør(PersonopplysningGrunnlagEntitet personopplysningGrunnlagEntitet) {
+        return aktørId -> {
+            final var personopplysning = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getPersonopplysning(aktørId);
+            return new FødselOgDødInfo(aktørId, personopplysning.getFødselsdato(), personopplysning.getDødsdato());
+        };
     }
 
     static BarnetilleggVurdering beregnBarnetillegg(LocalDateTimeline<Boolean> perioder, List<FødselOgDødInfo> relevantPersonInfoBarn) {
@@ -91,10 +95,5 @@ public class LagBarnetilleggTidslinje {
     private static LocalDate getTilDato(FødselOgDødInfo info) {
         return info.dødsdato() != null ? info.dødsdato() : TIDENES_ENDE;
     }
-
-    private FødselOgDødInfo finnRelevantPersonInfo(AktørId barnAktørId) {
-        return hentFødselOgDød.hentFødselOgDødInfo(barnAktørId);
-    }
-
 
 }
