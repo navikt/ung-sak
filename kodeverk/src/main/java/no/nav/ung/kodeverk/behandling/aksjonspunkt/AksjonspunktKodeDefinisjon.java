@@ -18,14 +18,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_SATT_PÅ_VENT_REVURDERING_KODE = "7005";
     public static final String AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE = "7014";
 
-    public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
     public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKT_UTTALELSE_KODE = "7040";
 
-    public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
-    public static final String AVKLAR_LOVLIG_OPPHOLD_KODE = "5019";
-    public static final String AVKLAR_OM_ER_BOSATT_KODE = "5020";
-    public static final String AVKLAR_OPPHOLDSRETT_KODE = "5023";
-    public static final String AVKLAR_TILLEGGSOPPLYSNINGER_KODE = "5009";
 
     public static final String FATTER_VEDTAK_KODE = "5016";
 
@@ -43,15 +37,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VARSEL_REVURDERING_MANUELL_KODE = "5026";
     public static final String KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE = "5055";
     public static final String KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING_KODE = "5056";
-    public static final String MANUELL_TILKJENT_YTELSE_KODE = "5057";
 
     public static final String VEDTAK_UTEN_TOTRINNSKONTROLL_KODE = "5018";
-
-    public static final String VENT_PGA_FOR_TIDLIG_SØKNAD_KODE = "7008";
-
-    public static final String VURDERE_ANNEN_YTELSE_FØR_VEDTAK_KODE = "5033";
-    public static final String VURDERE_DOKUMENT_FØR_VEDTAK_KODE = "5034";
-    public static final String VURDERE_OVERLAPPENDE_YTELSER_FØR_VEDTAK_KODE = "5040";
 
 
     public static final String KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE = "5077";
@@ -66,8 +53,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String KONTROLLER_INNTEKT_KODE = "8000";
 
     // PSB
-    public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
-
     // Generelt manglende funksjonalitet.
     public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
 

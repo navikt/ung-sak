@@ -1,20 +1,14 @@
 package no.nav.ung.sak.domene.iay.modell;
 
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.typer.AktørId;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AktørInntekt implements IndexKey {
 
@@ -64,34 +58,6 @@ public class AktørInntekt implements IndexKey {
 
     public boolean hasValues() {
         return aktørId != null || inntekt != null;
-    }
-
-    InntektBuilder getInntektBuilder(InntektsKilde inntektsKilde, Opptjeningsnøkkel nøkkel) {
-        Optional<Inntekt> inntektOptional = getInntekt()
-            .stream()
-            .filter(i -> inntektsKilde.equals(i.getInntektsKilde()))
-            .filter(i -> i.getArbeidsgiver() != null && new Opptjeningsnøkkel(i.getArbeidsgiver()).matcher(nøkkel)
-                || inntektsKilde.equals(InntektsKilde.SIGRUN)).findFirst();
-        InntektBuilder oppdatere = InntektBuilder.oppdatere(inntektOptional);
-        if (!oppdatere.getErOppdatering()) {
-            oppdatere.medInntektsKilde(inntektsKilde);
-        }
-        return oppdatere;
-    }
-
-    public InntektBuilder getInntektBuilderForYtelser(InntektsKilde inntektsKilde) {
-        Optional<Inntekt> inntektOptional = getInntekt()
-            .stream()
-            .filter(i -> i.getArbeidsgiver() == null)
-            .filter(i -> inntektsKilde.equals(i.getInntektsKilde()))
-            .filter(i -> i.getAlleInntektsposter().stream()
-                .anyMatch(post -> post.getInntektspostType().equals(InntektspostType.YTELSE)))
-            .findFirst();
-        InntektBuilder oppdatere = InntektBuilder.oppdatere(inntektOptional);
-        if (!oppdatere.getErOppdatering()) {
-            oppdatere.medInntektsKilde(inntektsKilde);
-        }
-        return oppdatere;
     }
 
     void leggTilInntekt(Inntekt inntekt) {

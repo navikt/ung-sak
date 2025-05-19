@@ -131,7 +131,7 @@ class BrevGenerererTjenesteEndringInntektTest {
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har endret ungdomsytelsen din</h1>",
-                "Se <a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen."
+                "<a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen.</a>"
             );
     }
 
@@ -164,8 +164,7 @@ class BrevGenerererTjenesteEndringInntektTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsytelsen din</h1>",
-                "Se <a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">eksempel</a> på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen."
+                "<h1>Vi har endret ungdomsytelsen din</h1>"
             );
     }
 
