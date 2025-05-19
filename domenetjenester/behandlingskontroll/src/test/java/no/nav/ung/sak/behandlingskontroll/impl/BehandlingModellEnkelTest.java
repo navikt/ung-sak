@@ -15,7 +15,7 @@ import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellImpl.TriFunction;
 public class BehandlingModellEnkelTest {
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
-    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_FAKTA;
+    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
     private static final BehandlingStegType STEG_3 = BehandlingStegType.BEREGN_YTELSE;
 
     private static final BehandlingType BEHANDLING_TYPE = BehandlingType.UDEFINERT;
