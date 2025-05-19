@@ -11,7 +11,7 @@ import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import java.util.Map;
 import java.util.Set;
 
-import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_SAMMENLIGNINGSGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_UNGDOMSYTELSEGRUNNLAG;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -21,10 +21,10 @@ public class UngdomsytelseInformasjonselementerUtleder implements Informasjonsel
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
         BehandlingType.FØRSTEGANGSSØKNAD,
         Set.of(
-            INNTEKT_SAMMENLIGNINGSGRUNNLAG),
+            INNTEKT_UNGDOMSYTELSEGRUNNLAG),
         BehandlingType.REVURDERING,
         Set.of(
-            INNTEKT_SAMMENLIGNINGSGRUNNLAG));
+            INNTEKT_UNGDOMSYTELSEGRUNNLAG));
 
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType) {

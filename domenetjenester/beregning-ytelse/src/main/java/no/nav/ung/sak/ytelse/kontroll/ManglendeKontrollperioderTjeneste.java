@@ -78,7 +78,7 @@ public class ManglendeKontrollperioderTjeneste {
 
 
     private ProsessTaskData lagProsesstask(Long fagsakId, Set<LocalDateInterval> perioder) {
-        LOG.info("Oppretter revurdering for fagsak med id {} for perioder {}", fagsakId, perioder);
+        LOG.info("Oppretter revurdering for fagsak med id {} for perioder {} grunnet manglende kontroll", fagsakId, perioder);
         ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         tilVurderingTask.setFagsakId(fagsakId);
         final var perioderString = perioder.stream().map(it -> it.getFomDato() + "/" + it.getTomDato())

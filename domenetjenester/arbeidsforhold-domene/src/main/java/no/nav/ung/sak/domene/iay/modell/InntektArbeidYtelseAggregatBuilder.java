@@ -98,14 +98,6 @@ public class InntektArbeidYtelseAggregatBuilder {
             this.kladd.setAktørId(aktørId);
         }
 
-        public InntektBuilder getInntektBuilder(InntektsKilde inntektsKilde, Opptjeningsnøkkel opptjeningsnøkkel) {
-            return kladd.getInntektBuilder(inntektsKilde, opptjeningsnøkkel);
-        }
-
-        public InntektBuilder getInntektBuilderForYtelser(InntektsKilde inntektsKilde) {
-            return kladd.getInntektBuilderForYtelser(inntektsKilde);
-        }
-
         public AktørInntektBuilder leggTilInntekt(InntektBuilder builder) {
             if (!builder.getErOppdatering()) {
                 kladd.leggTilInntekt(builder.build());

@@ -68,6 +68,16 @@ public class EtterlysningRepository {
         return etterlysninger;
     }
 
+
+    public List<Etterlysning> hentEtterlysningerSomVenterPåSvar(Long behandlingId) {
+        final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
+                "where e.behandlingId = :behandlingId and status in :statuser", Etterlysning.class)
+            .setParameter("behandlingId", behandlingId)
+            .setParameter("statuser", List.of(EtterlysningStatus.OPPRETTET, EtterlysningStatus.VENTER))
+            .getResultList();
+        return etterlysninger;
+    }
+
     public List<Etterlysning> hentEtterlysningerSomSkalAvbrytes(Long behandlingId) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
                                                              "where e.behandlingId = :behandlingId and status = :status", Etterlysning.class)

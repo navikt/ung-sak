@@ -25,7 +25,7 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Inject
     public EndringHøySatsInnholdBygger(
-            UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
+        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
     }
 
@@ -38,17 +38,16 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
         LocalDate satsendringsdato = resultatTidslinje.getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
-                .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
+            .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
 
         var nyeSatser = ungdomsytelseGrunnlag.getSatsTidslinje().getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_HØY_SATS,
-                new EndringHøySatsDto(
-                        satsendringsdato,
-                        VedtaksbrevInnholdBygger.tilHeltall(nyeSatser.dagsats()),
-                        Sats.HØY.getFomAlder(),
-                        VedtaksbrevInnholdBygger.tilFaktor(nyeSatser.grunnbeløpFaktor())
-                ));
+            new EndringHøySatsDto(
+                satsendringsdato,
+                Satsberegner.beregnDagsatsInklBarnetillegg(nyeSatser),
+                Sats.HØY.getFomAlder()
+            ));
     }
 
 }

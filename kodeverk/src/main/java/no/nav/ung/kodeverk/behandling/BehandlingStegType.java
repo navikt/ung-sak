@@ -41,7 +41,6 @@ public enum BehandlingStegType implements Kodeverdi {
     INNHENT_PERSONOPPLYSNINGER("INPER", "Innhent personopplysninger", UTREDES),
     INNHENT_REGISTEROPP("INREG", "Innhent registeropplysninger - innledende oppgaver", UTREDES),
     INNHENT_SØKNADOPP("INSØK", "Innhent søknadsopplysninger", UTREDES),
-    INREG_AVSL("INREG_AVSL", "Innhent registeropplysninger - resterende oppgaver", UTREDES),
     IVERKSETT_VEDTAK("IVEDSTEG", "Iverksett Vedtak", IVERKSETTER_VEDTAK),
     KONTROLLER_FAKTA("KOFAK", "Kontroller Fakta", UTREDES),
     KONTROLLER_FAKTA_ARBEIDSFORHOLD("KOARB", "Kontroller arbeidsforhold", UTREDES),

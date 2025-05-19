@@ -1,8 +1,8 @@
 package no.nav.ung.sak.formidling;
 
-import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
-
 import java.time.LocalDate;
+
+import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 
 public class VedtaksbrevVerifikasjon {
 
@@ -19,7 +19,7 @@ public class VedtaksbrevVerifikasjon {
                    Du har rett til innsyn \
                    Du kan se dokumentene i saken din ved å logge deg inn på nav.no. \
                    Trenger du mer informasjon? \
-                   Du finner mer informasjon på nav.no/ungdomsytelse. \
+                   Du finner mer informasjon på nav.no/ungdomsprogrammet. \
                    På nav.no/kontakt kan du chatte eller skrive til oss. \
                    Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
                    Med vennlig hilsen \

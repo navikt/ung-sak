@@ -108,8 +108,9 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
         boolean slåttAvInntrekk = false;
         Long feilutbetaling = 1000L;
         Long inntrekk = 0L;
+        Long etterbetaling = 0L;
         Mockito.when(simuleringIntegrasjonTjeneste.hentResultat(behandling)).thenReturn(
-            Optional.of(new SimuleringResultatDto(feilutbetaling, inntrekk, slåttAvInntrekk)));
+            Optional.of(new SimuleringResultatDto(feilutbetaling, inntrekk, etterbetaling, slåttAvInntrekk)));
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
             new LocalDateTimeline<>(_2022_jan_01, _2022_jan_12, true)
         );
@@ -126,8 +127,9 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
         boolean slåttAvInntrekk = false;
         Long feilutbetaling = 0L;
         Long inntrekk = 1310L;
+        Long etterbetaling = 0L;
         Mockito.when(simuleringIntegrasjonTjeneste.hentResultat(behandling)).thenReturn(
-            Optional.of(new SimuleringResultatDto(feilutbetaling, inntrekk, slåttAvInntrekk)));
+            Optional.of(new SimuleringResultatDto(feilutbetaling, inntrekk, etterbetaling, slåttAvInntrekk)));
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
             new LocalDateTimeline<>(_2022_jan_01, _2022_jan_12, true)
         );

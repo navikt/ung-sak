@@ -85,6 +85,16 @@ public class VedtaksbrevRegler {
             );
         }
 
+        if (innholderBare(resultater, DetaljertResultatType.ENDRING_BARN_FØDSEL)) {
+            String forklaring = "Automatisk brev ved fødsel av barn. " + redigerRegelResultat.forklaring();
+            return VedtaksbrevRegelResulat.automatiskBrev(
+                innholdByggere.select(EndringBarnetilleggInnholdBygger.class).get(),
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
+            );
+        }
+
         if (redigerRegelResultat.kanRedigere()) {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
             String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring();

@@ -14,7 +14,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.*;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -27,7 +26,7 @@ import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;
 import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
-import no.nav.ung.sak.ytelse.*;
+import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +58,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private EtterlysningTjeneste etterlysningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-
 
 
     @Inject
@@ -104,7 +102,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
         log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
         håndterPeriodisertKontrollresultat(kontekst, kontrollResultat, etterlysninger);
-        return avgjørResultat(behandlingId, kontrollResultat, prosessTriggerTidslinje);
+        return avgjørResultat(kontrollResultat, prosessTriggerTidslinje);
     }
 
     @Override
@@ -194,7 +192,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         return etterlysningerSomSkalAvbrytes;
     }
 
-    private BehandleStegResultat avgjørResultat(Long behandlingId, LocalDateTimeline<Kontrollresultat> kontrollResultat, LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
+    private BehandleStegResultat avgjørResultat(LocalDateTimeline<Kontrollresultat> kontrollResultat, LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
 
         final var skalVenteTilRapportering = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.SETT_PÅ_VENT_TIL_RAPPORTERINGSFRIST)).isEmpty();
         if (skalVenteTilRapportering) {
@@ -202,20 +200,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                 AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST,
                 Venteårsak.VENT_INNTEKT_RAPPORTERINGSFRIST,
                 utledVentefrist(prosessTriggerTidslinje)));
-        }
-
-        final var skalVenteGrunnetNyEtterlysning = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST)).isEmpty();
-        if (skalVenteGrunnetNyEtterlysning) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunktMedFrist(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, LocalDateTime.now().plusDays(14)));
-        }
-
-        final var skalVentePåEksisterendeEtterlysning = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER)).isEmpty();
-        if (skalVentePåEksisterendeEtterlysning) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(
-                AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-                    AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE,
-                    Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
-                    finnEksisterendeFrist(behandlingId)));
         }
 
         final var skalOppretteAksjonspunkt = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.OPPRETT_AKSJONSPUNKT)).isEmpty();
@@ -238,12 +222,6 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var prosessTaskData = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
         prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
         return prosessTaskData;
-    }
-
-
-    private LocalDateTime finnEksisterendeFrist(Long behandlingId) {
-        final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        return behandling.getAksjonspunktForHvisFinnes(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE.getKode()).map(Aksjonspunkt::getFristTid).orElse(LocalDateTime.now().plusDays(14));
     }
 
     private LocalDateTime utledVentefrist(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje) {
