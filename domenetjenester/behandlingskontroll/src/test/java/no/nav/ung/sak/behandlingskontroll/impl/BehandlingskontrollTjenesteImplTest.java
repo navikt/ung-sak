@@ -69,7 +69,7 @@ public class BehandlingskontrollTjenesteImplTest {
         behandling = scenario.lagre(serviceProvider);
         modell = serviceProvider.getBehandlingModellRepository().getModell(behandling.getType(), behandling.getFagsakYtelseType());
 
-        steg2 = BehandlingStegType.KONTROLLER_FAKTA;
+        steg2 = BehandlingStegType.VURDER_SØKNADSFRIST;
         steg3 = modell.finnNesteSteg(steg2).getBehandlingStegType();
         steg4 = modell.finnNesteSteg(steg3).getBehandlingStegType();
         steg5 = modell.finnNesteSteg(steg4).getBehandlingStegType();
