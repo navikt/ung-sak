@@ -29,8 +29,10 @@ public enum Avslagsårsak implements Kodeverdi {
     SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "??")),
 
-    OPPHØRT_UNGDOMSPROGRAM("2001", "Ikke tilstrekkelig opptjening",
+    OPPHØRT_UNGDOMSPROGRAM("2001", "Opphørt ungdomsprogram",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskriften for ungomsprogram")),
+    ENDRET_STARTDATO_UNGDOMSPROGRAM("2002", "Ikke tilstrekkelig opptjening",
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Endret startdato for ungdomsprogram")),
 
     UDEFINERT("-", "Ikke definert",
         Map.of());

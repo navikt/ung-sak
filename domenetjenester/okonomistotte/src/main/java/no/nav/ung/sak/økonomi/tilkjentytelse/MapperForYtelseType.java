@@ -35,12 +35,6 @@ class MapperForYtelseType {
                     + " siden det ikke finnes tilsvarende i " + YtelseType.class.getName());
             }
         }
-
-        if (Environment.current().isDev()){
-            //FIXME fjern
-            //midlertidig mapping i dev for å kunne teste simulering
-            map.put(FagsakYtelseType.UNGDOMSYTELSE, YtelseType.FRISINN);
-        }
         return map;
     }
 

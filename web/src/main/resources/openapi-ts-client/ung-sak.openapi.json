@@ -3635,6 +3635,10 @@
           "slåttAvInntrekk" : {
             "type" : "boolean"
           },
+          "sumEtterbetaling" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
           "sumFeilutbetaling" : {
             "format" : "int64",
             "type" : "integer"
@@ -4566,8 +4570,8 @@
         "type" : "object"
       },
       "VilkårResultatDtoAvslagsårsak" : {
-        "enum" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "UDEFINERT" ],
-        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "UDEFINERT" ],
+        "enum" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ],
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ],
         "type" : "string"
       },
       "VilkårResultatDtoUtfall" : {
