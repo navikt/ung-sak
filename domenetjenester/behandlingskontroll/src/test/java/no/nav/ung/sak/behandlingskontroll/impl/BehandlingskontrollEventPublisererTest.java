@@ -32,7 +32,7 @@ public class BehandlingskontrollEventPublisererTest {
     private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.FORELDREPENGER;
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
-    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_FAKTA;
+    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
     private static final BehandlingStegType STEG_3 = BehandlingStegType.VURDER_KOMPLETTHET;
 
     private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_TILBAKETREKK;

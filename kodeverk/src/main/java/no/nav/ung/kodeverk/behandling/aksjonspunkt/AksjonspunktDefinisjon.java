@@ -109,10 +109,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT,
         UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
-    // Gruppe : 999x
-    AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET(AksjonspunktKodeDefinisjon.AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET, AksjonspunktType.AUTOPUNKT, "Venter på manglende funksjonalitet.",
-        BehandlingStatus.UTREDES, BehandlingStegType.VARIANT_FILTER, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P26W", AVVENTER_TEKNISK_FEIL),
-
     UNDEFINED,
 
     ;
