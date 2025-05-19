@@ -85,7 +85,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe : 70xx
 
     AUTO_MANUELT_SATT_PÅ_VENT(AksjonspunktKodeDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT_KODE, AksjonspunktType.AUTOPUNKT,
-        "Manuelt satt på vent", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA, UTEN_VILKÅR, UTEN_SKJERMLENKE,
+        "Manuelt satt på vent", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, UTEN_VILKÅR, UTEN_SKJERMLENKE,
         ENTRINN, FORBLI, "P4W", AVVENTER_ANNET),
     AUTO_VENTER_PÅ_KOMPLETT_SØKNAD(AksjonspunktKodeDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD_KODE, AksjonspunktType.AUTOPUNKT,
         "Venter på komplett søknad", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, FORBLI, "P4W", AVVENTER_SØKER),
@@ -119,22 +119,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     static final String KODEVERK = "AKSJONSPUNKT_DEF";
 
-    /**
-     * Liste av utgåtte aksjonspunkt. Ikke gjenbruk samme kode.
-     */
-    private static final Map<String, String> UTGÅTT = Map.of(
-        "5022", "AVKLAR_FAKTA_FOR_PERSONSTATUS",
-        "7007", "VENT_PÅ_SCANNING");
-
     private static final Map<String, AksjonspunktDefinisjon> KODER = new LinkedHashMap<>();
 
 
     static {
-        for (var v : UTGÅTT.keySet()) {
-            if (KODER.putIfAbsent(v, UNDEFINED) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v);
-            }
-        }
         // valider ingen unmapped koder
         var sjekkKodeBrukMap = new TreeMap<>(AksjonspunktKodeDefinisjon.KODER);
 

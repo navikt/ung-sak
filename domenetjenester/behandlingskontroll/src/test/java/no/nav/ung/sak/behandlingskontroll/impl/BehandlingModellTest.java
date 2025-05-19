@@ -42,9 +42,9 @@ public class BehandlingModellTest {
     private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.SVANGERSKAPSPENGER;
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
-    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_FAKTA;
-    private static final BehandlingStegType STEG_3 = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
-    private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_OPPTJENING_FAKTA;
+    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
+    private static final BehandlingStegType STEG_3 = BehandlingStegType.VURDER_KOMPLETTHET;
+    private static final BehandlingStegType STEG_4 = BehandlingStegType.FORESLÅ_VEDTAK;
 
     @Inject
     private BehandlingskontrollTjeneste kontrollTjeneste;
