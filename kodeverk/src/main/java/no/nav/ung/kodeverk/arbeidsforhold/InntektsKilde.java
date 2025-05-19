@@ -21,7 +21,9 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 public enum InntektsKilde implements Kodeverdi {
 
     UDEFINERT("-", "Ikke definert", null),
-    INNTEKT_UNGDOMSYTELSE("INNTEKT_UNGDOMSYTELSE", "INNTEKT_UNGDOMSYTELSE", null);
+    INNTEKT_UNGDOMSYTELSE("INNTEKT_UNGDOMSYTELSE", "INNTEKT_UNGDOMSYTELSE", null),
+    @Deprecated(forRemoval = true)
+    INNTEKT_SAMMENLIGNING("INNTEKT_SAMMENLIGNING", "INNTEKT_SAMMENLIGNING", null);
 
     private static final Map<String, InntektsKilde> KODER = new LinkedHashMap<>();
 
