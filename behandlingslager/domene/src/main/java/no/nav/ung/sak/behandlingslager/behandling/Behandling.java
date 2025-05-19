@@ -155,11 +155,6 @@ public class Behandling extends BaseEntitet {
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
-
-    @Convert(converter = StartpunktTypeKodeverdiConverter.class)
-    @Column(name = "startpunkt_type", nullable = false)
-    private StartpunktType startpunkt = StartpunktType.UDEFINERT;
-
     /**
      * --------------------------------------------------------------
      * FIXME: Produksjonstyringsinformasjon bør flyttes ut av Behandling klassen.
@@ -690,19 +685,6 @@ public class Behandling extends BaseEntitet {
 
     public boolean erYtelseBehandling() {
         return getType().erYtelseBehandlingType();
-    }
-
-    public boolean harSattStartpunkt() {
-        return !StartpunktType.UDEFINERT.equals(startpunkt);
-    }
-
-    public StartpunktType getStartpunkt() {
-        return startpunkt;
-    }
-
-    public void setStartpunkt(StartpunktType startpunkt) {
-        guardTilstandPåBehandling();
-        this.startpunkt = startpunkt;
     }
 
     public boolean erÅpnetForEndring() {

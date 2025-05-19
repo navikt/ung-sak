@@ -7,7 +7,6 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
@@ -57,13 +56,13 @@ class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
         Set<StartpunktType> startpunkter = new LinkedHashSet<>();
         if (forelderDødEndret) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "foreldres død", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
-            startpunkter.add(StartpunktType.UTTAKSVILKÅR);
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAK, "foreldres død", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
+            startpunkter.add(StartpunktType.UTTAK);
         }
 
         if (poDiff.erBarnDødsdatoEndret()) {
             FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
-            startpunkter.add(StartpunktType.UTTAKSVILKÅR);
+            startpunkter.add(StartpunktType.BEREGNING);
         }
 
         if (startpunkter.isEmpty()) {
