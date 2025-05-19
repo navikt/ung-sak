@@ -17,13 +17,7 @@ public class Transisjoner {
         new SettPåVent(),
         new TilbakeføringTilAksjonspunktTransisjon(),
         new TilbakeføringTilStegTransisjon(),
-        new FremoverhoppTransisjon(FellesTransisjoner.FREMHOPP_TIL_IVERKSETT_VEDTAK.getId(), BehandlingStegType.IVERKSETT_VEDTAK),
-        new SpolFremoverTransisjon(BehandlingStegType.KONTROLLER_FAKTA),
-        new SpolFremoverTransisjon(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING),
-        new SpolFremoverTransisjon(BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT),
-        new SpolFremoverTransisjon(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR),
-        new SpolFremoverTransisjon(BehandlingStegType.KONTROLLER_LØPENDE_MEDLEMSKAP),
-        new SpolFremoverTransisjon(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE)
+        new FremoverhoppTransisjon(FellesTransisjoner.FREMHOPP_TIL_IVERKSETT_VEDTAK.getId(), BehandlingStegType.IVERKSETT_VEDTAK)
     );
 
     private Transisjoner() {

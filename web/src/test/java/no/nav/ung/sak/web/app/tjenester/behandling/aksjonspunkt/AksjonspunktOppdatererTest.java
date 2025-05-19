@@ -1,17 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -38,6 +26,17 @@ import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.FatterVed
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakAksjonspunktOppdaterer;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakOppdatererTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.OpprettToTrinnsgrunnlag;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -93,7 +92,7 @@ public class AksjonspunktOppdatererTest {
     public void oppdaterer_aksjonspunkt_med_beslutters_vurdering_ved_totrinnskontroll() {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();
@@ -121,7 +120,7 @@ public class AksjonspunktOppdatererTest {
     @Test
     public void oppdaterer_aksjonspunkt_med_godkjent_totrinnskontroll() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();

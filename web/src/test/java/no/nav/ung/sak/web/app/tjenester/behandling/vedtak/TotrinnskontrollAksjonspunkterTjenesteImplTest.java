@@ -1,21 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vedtak;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -31,10 +15,19 @@ import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
-    private static final BehandlingStegType STEG_KONTROLLER_FAKTA = BehandlingStegType.KONTROLLER_FAKTA;
+    private static final BehandlingStegType STEG_KONTROLLER_REGISTER_INNTEKT = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
     private static final BehandlingStegType STEG_FATTE_VEDTAK = BehandlingStegType.FATTE_VEDTAK;
 
     private TotrinnskontrollAksjonspunkterTjeneste totrinnskontrollAksjonspunkterTjeneste;
@@ -57,7 +50,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_tom_skjermlenkecontext_for_behandling_med_ikke_status_FATTER_VEDTAK_og_ingen_totrinnsvurdering_og_ingen_aksjonspunkter(){
         // Arrange
         opprettBehandlingFor(Optional.empty());
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_FAKTA);
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_REGISTER_INNTEKT);
         TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.empty(), Optional.empty());
         setFelleseMockMetoder(totrinnskontrollAksjonspunkterDto, Collections.emptyList());
         // Act
@@ -87,7 +80,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
         boolean ttvGodkjent = false;
 
         opprettBehandlingFor(Optional.empty());
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_FAKTA);
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_REGISTER_INNTEKT);
 
         TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.empty(), Optional.empty());
         Totrinnsvurdering ttv = opprettTotrinnsvurdering(behandling, aksjonspunktDefinisjon, ttvGodkjent);

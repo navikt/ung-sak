@@ -52,11 +52,6 @@ public class AksjonspunktKodeDefinisjon {
     // Ung
     public static final String KONTROLLER_INNTEKT_KODE = "8000";
 
-    // PSB
-    // Generelt manglende funksjonalitet.
-    public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
-
-
     static final Map<String, String> KODER;
 
     static {
