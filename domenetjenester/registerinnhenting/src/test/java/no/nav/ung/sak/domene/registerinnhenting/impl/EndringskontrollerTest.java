@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,6 @@ import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.iay.modell.Inntekter;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
-import no.nav.ung.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -39,8 +37,6 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 @ExtendWith(JpaExtension.class)
 public class EndringskontrollerTest {
 
-    private KontrollerFaktaAksjonspunktUtleder kontrollerFaktaTjenesteMock;
-    private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenesterMock;
     private BehandlingskontrollTjeneste behandlingskontrollTjenesteMock;
     private Instance<EndringStartpunktTjeneste> startpunktTjenesteProviderMock;
     private EndringStartpunktTjeneste startpunktTjenesteMock;
@@ -51,9 +47,6 @@ public class EndringskontrollerTest {
 
     @BeforeEach
     public void before() {
-        kontrollerFaktaTjenesteMock = mock(KontrollerFaktaAksjonspunktUtleder.class);
-        when(kontrollerFaktaTjenesteMock.utledAksjonspunkterTilHøyreForStartpunkt(any(), any(StartpunktType.class))).thenReturn(new ArrayList<>());
-        kontrollerFaktaTjenesterMock = new UnitTestLookupInstanceImpl<>(kontrollerFaktaTjenesteMock);
         historikkinnslagTjenesteMock = mock(RegisterinnhentingHistorikkinnslagTjeneste.class);
 
         behandlingskontrollTjenesteMock = mock(BehandlingskontrollTjeneste.class);
@@ -74,7 +67,7 @@ public class EndringskontrollerTest {
         var startpunktBeregning = StartpunktType.INIT_PERIODER;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktBeregning);
         SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = Mockito.mock(SkjæringstidspunktTjeneste.class);
-        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, historikkinnslagTjenesteMock, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
+        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, historikkinnslagTjenesteMock, skjæringstidspunktTjeneste);
         when(behandlingskontrollTjenesteMock.finnBehandlingSteg(any(StartpunktType.class), any(FagsakYtelseType.class), any(BehandlingType.class))).thenReturn(BehandlingStegType.INIT_PERIODER);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Long.class), any())).thenReturn(true);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Behandling.class), any())).thenReturn(true);
@@ -98,58 +91,13 @@ public class EndringskontrollerTest {
         var startpunktUdefinert = StartpunktType.UDEFINERT;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktUdefinert);
 
-        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, null, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
+        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, null, skjæringstidspunktTjeneste);
 
         // Act
         endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(Inntekter.class, 1L, 2L));
 
         // Assert
-        assertThat(behandling.getStartpunkt()).isEqualTo(startpunktUdefinert);
         verify(behandlingskontrollTjenesteMock, times(0)).behandlingTilbakeføringHvisTidligereBehandlingSteg(any(), any());
-    }
-
-    @Test
-    public void skal_ikke_oppdatere_startpunkt_ved_tilbakespoling_til_punkt_etter_nåværende_startpunkt() {
-        // Arrange
-        Behandling revurdering = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
-            .lagMocked();
-        internalManipulerBehandling.forceOppdaterBehandlingSteg(revurdering, BehandlingStegType.INIT_PERIODER, BehandlingStegStatus.INNGANG, BehandlingStegStatus.UTFØRT);
-        var startpunktInitPerioder = StartpunktType.INIT_PERIODER;
-        revurdering.setStartpunkt(startpunktInitPerioder);
-
-        var startpunktUttak = StartpunktType.BEREGNING;
-        when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktUttak);
-
-        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, null, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
-
-        // Act
-        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(Inntekter.class, 1L, 2L));
-
-        // Assert
-        assertThat(revurdering.getStartpunkt()).isEqualTo(startpunktInitPerioder);
-    }
-
-    @Test
-    public void skal_ikke_oppdatere_startpunkt_hvis_vi_ikke_har_grunnlag_for_å_si_at_nytt_startpunkt_er_tidligere() {
-        // Arrange
-        Behandling revurdering = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
-            .lagMocked();
-        internalManipulerBehandling.forceOppdaterBehandlingSteg(revurdering, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, BehandlingStegStatus.INNGANG, BehandlingStegStatus.UTFØRT);
-        StartpunktType startpunktTypePåBehandling = StartpunktType.UDEFINERT;
-        revurdering.setStartpunkt(startpunktTypePåBehandling);
-
-        var startpunktUtledetFraEndringssjekk = StartpunktType.INIT_PERIODER;
-        when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktUtledetFraEndringssjekk);
-        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null,
-            null, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
-
-        // Act
-        endringskontroller.spolTilStartpunkt(revurdering, EndringsresultatDiff.medDiff(Inntekter.class, 1L, 2L));
-
-        // Assert
-        assertThat(revurdering.getStartpunkt()).isEqualTo(startpunktTypePåBehandling);
     }
 
     @Test
@@ -163,7 +111,7 @@ public class EndringskontrollerTest {
         var startpunktSrb = StartpunktType.INIT_PERIODER;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktSrb);
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null,
-            historikkinnslagTjenesteMock, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
+            historikkinnslagTjenesteMock, skjæringstidspunktTjeneste);
         when(behandlingskontrollTjenesteMock.finnBehandlingSteg(any(StartpunktType.class), any(FagsakYtelseType.class), any(BehandlingType.class))).thenReturn(BehandlingStegType.INIT_PERIODER);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Long.class), any())).thenReturn(false);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Behandling.class), any())).thenReturn(false);
@@ -187,7 +135,7 @@ public class EndringskontrollerTest {
         var startpunktSrb = StartpunktType.INIT_PERIODER;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktSrb);
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null,
-            historikkinnslagTjenesteMock, kontrollerFaktaTjenesterMock, skjæringstidspunktTjeneste);
+            historikkinnslagTjenesteMock, skjæringstidspunktTjeneste);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Long.class), any())).thenReturn(false);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Behandling.class), any())).thenReturn(false);
         when(behandlingskontrollTjenesteMock.sammenlignRekkefølge(any(), any(), any(), any())).thenReturn(-1);

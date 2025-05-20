@@ -31,7 +31,6 @@ public abstract class UnderBehandlingProsessTask extends BehandlingProsessTask {
         if (behandling.erAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil - saken er ferdig behandlet, kan ikke oppdateres. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()
-                + ", startpunkt=" + behandling.getStartpunkt()
                 + ", resultat=" + behandling.getBehandlingResultatType());
         } else {
             doProsesser(prosessTaskData, behandling);
