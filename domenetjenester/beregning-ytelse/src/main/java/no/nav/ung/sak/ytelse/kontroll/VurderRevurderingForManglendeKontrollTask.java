@@ -15,7 +15,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 @ProsessTask(value = VurderRevurderingForManglendeKontrollTask.TASKNAME)
 public class VurderRevurderingForManglendeKontrollTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "inntektskontroll.vurderRevurderingForManglendeKontroll";
+    public static final String TASKNAME = "inntektskontroll.vurderManglendeKontroll";
     private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
