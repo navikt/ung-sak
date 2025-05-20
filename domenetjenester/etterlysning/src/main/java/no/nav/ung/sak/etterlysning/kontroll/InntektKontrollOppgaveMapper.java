@@ -70,6 +70,9 @@ public class InntektKontrollOppgaveMapper {
                 .filter(ip -> ip.getInntektspostType().equals(InntektspostType.LØNN))
                 .filter(ip -> ip.getPeriode().overlapper(periode))
                 .map(ip -> {
+                    if (ip.getPeriode().getTomDato().isAfter(periode.getTomDato()) || ip.getPeriode().getFomDato().isBefore(periode.getFomDato())) {
+                        throw new IllegalStateException(String.format("Inntektspostens periode %s går ut over den oppgitte perioden %s", ip.getPeriode(), periode));
+                    }
                     var beløp = finnBeløpInnenforPeriode(periode, ip);
                     return new RegisterInntektArbeidOgFrilansDTO(beløp.intValue(), inntekt.getArbeidsgiver().getIdentifikator());
                 })).toList();
