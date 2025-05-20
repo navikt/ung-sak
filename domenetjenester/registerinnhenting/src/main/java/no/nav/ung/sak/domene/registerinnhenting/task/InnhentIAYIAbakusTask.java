@@ -78,7 +78,6 @@ public class InnhentIAYIAbakusTask implements ProsessTaskHandler {
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler-feil - saken er ferdig behandlet, kan ikke oppdateres. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()
-                + ", startpunkt=" + behandling.getStartpunkt()
                 + ", resultat=" + behandling.getBehandlingResultatType());
         } else {
             LOGGER.info("Innhenter IAY-opplysninger i abakus for behandling: {}", behandling.getId());

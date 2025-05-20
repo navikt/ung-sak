@@ -111,7 +111,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler feil: Kan ikke oppdater behandling med nye data når er allerede i iverksettelse/avsluttet. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()
-                + ", startpunkt=" + behandling.getStartpunkt()
                 + ", resultat=" + behandling.getBehandlingResultatType());
         }
 
