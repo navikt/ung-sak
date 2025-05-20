@@ -6,6 +6,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 
 /**
@@ -13,6 +14,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
  */
 @ApplicationScoped
 @ProsessTask(value = VurderRevurderingForManglendeKontrollTask.TASKNAME)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class VurderRevurderingForManglendeKontrollTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "inntektskontroll.vurderManglendeKontroll";
