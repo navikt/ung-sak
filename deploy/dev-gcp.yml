@@ -273,7 +273,7 @@ spec:
     - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR
-      value: "k9"
+      value: "ung"
     - name: AUDITLOGGER_PRODUCT
       value: "ung-sak"
 
