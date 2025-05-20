@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @ProsessTask(value = KandidatutledningRevurderingForManglendeKontrollBatchTask.TASKNAME, cronExpression = "* */15 * * * *", maxFailedRuns = 1)
 public class KandidatutledningRevurderingForManglendeKontrollBatchTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "batch.kandidatRevurderingManglendeKontroll";
+    public static final String TASKNAME = "batch.kandidatManglendeKontroll";
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private BehandlingKandidaterRepository behandlingKandidaterRepository;
 
