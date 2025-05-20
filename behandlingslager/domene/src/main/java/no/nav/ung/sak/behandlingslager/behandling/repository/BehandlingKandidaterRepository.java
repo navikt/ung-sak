@@ -49,7 +49,7 @@ public class BehandlingKandidaterRepository {
     }
 
     /**
-     * Hent alle behandlinger som ikke er avsluttet på fagsak.
+     * Hent alle behandlinger som er avsluttet etter oppgitt tidspunkt.
      */
     public List<Behandling> hentAvsluttedeBehandlingerEtter(LocalDateTime avsluttetEtter) {
         Objects.requireNonNull(avsluttetEtter, "avsluttetEtter");
