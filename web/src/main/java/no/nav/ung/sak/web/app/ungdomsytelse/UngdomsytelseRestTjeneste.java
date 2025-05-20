@@ -21,15 +21,19 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
+import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.UngdomsprogramInformasjonDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.uttak.UngdomsytelseUttakPeriodeDto;
+import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -49,12 +53,15 @@ public class UngdomsytelseRestTjeneste {
 
     public static final String UNGDOMSYTELSE_BASE_PATH = "/ungdomsytelse";
     public static final String SATSER_PATH = UNGDOMSYTELSE_BASE_PATH + "/satser";
+    public static final String MÅNEDSVIS_SATS_OG_UTBETALING_PATH = UNGDOMSYTELSE_BASE_PATH + "/månedsvis-sats-og-utbetaling";
+
     public static final String UTTAK_PATH = UNGDOMSYTELSE_BASE_PATH + "/uttak";
     public static final String UNGDOMSPROGRAM_PATH = UNGDOMSYTELSE_BASE_PATH + "/ungdomsprogram-informasjon";
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
 
     public UngdomsytelseRestTjeneste() {
         // for CDI proxy
@@ -64,11 +71,12 @@ public class UngdomsytelseRestTjeneste {
     public UngdomsytelseRestTjeneste(BehandlingRepository behandlingRepository,
                                      UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                                      UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-                                     TilkjentYtelseRepository tilkjentYtelseRepository) {
+                                     TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
     }
 
     @GET
@@ -82,18 +90,27 @@ public class UngdomsytelseRestTjeneste {
         if (perioder == null) {
             return Collections.emptyList();
         } else {
-            return perioder.getPerioder().stream()
-                .map(p -> new UngdomsytelseSatsPeriodeDto(
-                    p.getPeriode().getFomDato(),
-                    p.getPeriode().getTomDato(),
-                    p.getDagsats(),
-                    p.getGrunnbeløpFaktor(),
-                    p.getGrunnbeløp(),
-                    p.getSatsType(),
-                    p.getAntallBarn(),
-                    p.getDagsatsBarnetillegg()))
-                .toList();
+            return mapSatsperioder(perioder);
         }
+    }
+
+    @GET
+    @Operation(description = "Henter månedsvis satser og utbetaling", tags = "ung")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Path(MÅNEDSVIS_SATS_OG_UTBETALING_PATH)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<UngdomsytelseUtbetaltMånedDto> getSatsOgUtbetalingPerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Optional<UngdomsytelseGrunnlag> grunnlag = hentUngdomsytelseGrunnlag(behandlingUuid);
+        UngdomsytelseSatsPerioder perioder = grunnlag.map(UngdomsytelseGrunnlag::getSatsPerioder).orElse(null);
+        if (perioder == null) {
+            return Collections.emptyList();
+        }
+        final var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        final var månedsvisPeriodisering = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandling.getId());
+        final var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId());
+        final var kontrollerInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
+        final var originalTilkjentYtelse = behandling.getOriginalBehandlingId().map(tilkjentYtelseRepository::hentTidslinje).orElse(LocalDateTimeline.empty());
+        return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(månedsvisPeriodisering, tilkjentYtelseTidslinje, kontrollerInntektTidslinje, perioder, originalTilkjentYtelse);
     }
 
     @GET
@@ -113,6 +130,7 @@ public class UngdomsytelseRestTjeneste {
         }
     }
 
+
     @GET
     @Operation(description = "Henter informasjon om deltakelse i ungdomsprogram", tags = "ung")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
@@ -129,6 +147,25 @@ public class UngdomsytelseRestTjeneste {
         final var maksdato = finnProgramperiodeMaksdato(behandling, programperiodeTidslinje);
         final var forbrukteDager = finnForbrukteDager(behandling, programperiodeTidslinje);
         return new UngdomsprogramInformasjonDto(startDato, maksdato, opphørsdato, forbrukteDager.orElse(null));
+    }
+
+    private static List<UngdomsytelseSatsPeriodeDto> mapSatsperioder(UngdomsytelseSatsPerioder perioder) {
+        return perioder.getPerioder().stream()
+            .map(UngdomsytelseRestTjeneste::mapTilSatsperiode)
+            .toList();
+    }
+
+    private static UngdomsytelseSatsPeriodeDto mapTilSatsperiode(UngdomsytelseSatsPeriode p) {
+        return new UngdomsytelseSatsPeriodeDto(
+            p.getPeriode().getFomDato(),
+            p.getPeriode().getTomDato(),
+            p.getDagsats(),
+            p.getGrunnbeløpFaktor(),
+            p.getGrunnbeløp(),
+            p.getSatsType(),
+            p.getAntallBarn(),
+            p.getDagsatsBarnetillegg(),
+            Virkedager.beregnAntallVirkedager(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()));
     }
 
     private static LocalDate finnProgramperiodeMaksdato(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje) {
