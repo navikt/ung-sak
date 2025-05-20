@@ -2,7 +2,6 @@ package no.nav.ung.sak.økonomi.tilkjentytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.SatsType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;
@@ -37,12 +36,6 @@ public class MapperForTilkjentYtelse {
             return null;
         }
         Inntektskategori inntektskategori = Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER;
-        if (Environment.current().isDev()){
-            //midlertidig mapping i dev for å kunne teste simulering
-            //FIXME fjern
-            inntektskategori = Inntektskategori.FRILANSER;
-        }
-
         return new TilkjentYtelsePeriodeV1(periode.getFom(), periode.getTom(), List.of(
             new TilkjentYtelseAndelV1(true, inntektskategori, periode.getValue().dagsats(), SatsType.DAG, periode.getValue().utbetalingsgrad())));
     }
