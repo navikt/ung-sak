@@ -13,6 +13,7 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -28,11 +29,12 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
 
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
+    public static final String FRIST = "frist";
+
     public static final String OPPGAVE_REF = "oppgave_ref";
 
     private PersoninfoAdapter personinfoAdapter;
     private UngOppgaveKlient ungOppgaveKlient;
-    private int rapporteringsfristDagIMåned;
 
 
     OpprettOppgaveForInntektsrapporteringTask() {
@@ -40,12 +42,10 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
 
     @Inject
     public OpprettOppgaveForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
-                                                     UngOppgaveKlient ungOppgaveKlient,
-                                                     @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristDagIMåned) {
+                                                     UngOppgaveKlient ungOppgaveKlient) {
 
         this.personinfoAdapter = personinfoAdapter;
         this.ungOppgaveKlient = ungOppgaveKlient;
-        this.rapporteringsfristDagIMåned = rapporteringsfristDagIMåned;
     }
 
     @Override
@@ -53,11 +53,13 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         final var aktørId = new AktørId(prosessTaskData.getAktørId());
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
+        final var frist = LocalDateTime.parse(prosessTaskData.getPropertyValue(FRIST), DateTimeFormatter.ISO_DATE_TIME);
+
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         ungOppgaveKlient.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
             deltakerIdent.getIdent(),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
-            fom.plusMonths(1).withDayOfMonth(rapporteringsfristDagIMåned + 1).atStartOfDay(),
+            frist,
             fom,
             tom
         ));

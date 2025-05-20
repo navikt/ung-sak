@@ -75,7 +75,7 @@ public class OpprettProsessTaskIverksettTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new UngdomsytelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService, manglendeKontrollperioderTjeneste);
+        opprettProsessTaskIverksett = new UngdomsytelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService);
     }
 
     @Test

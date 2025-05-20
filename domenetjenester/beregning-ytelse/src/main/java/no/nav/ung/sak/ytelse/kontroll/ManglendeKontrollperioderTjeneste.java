@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,13 +59,24 @@ public class ManglendeKontrollperioderTjeneste {
      * @param behandlingId BehandlingId
      * @return
      */
-    public Optional<ProsessTaskData> lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(Long behandlingId) {
+    public Optional<ProsessTaskData> lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(Long behandlingId, Long fagsakId) {
         final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
         final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
         final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
-        final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
+
+        final var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+        var tilKontrollIÅpenBehandlingTidslinje = new LocalDateTimeline<Boolean>(List.of());
+        if (sisteBehandling.isPresent() && !sisteBehandling.get().erStatusFerdigbehandlet()) {
+            tilKontrollIÅpenBehandlingTidslinje = finnPerioderMarkertForKontroll(sisteBehandling.get().getId());
+        }
+
+
+        final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje)
+            .disjoint(markertForKontrollTidslinje)
+            .disjoint(tilKontrollIÅpenBehandlingTidslinje)
+            .intersection(passertRapporteringsfristTidslinje);
 
         final var perioderMedManglendeKontroll = splittPåMåneder(manglendeKontrollTidslinje, månedsvisYtelsestidslinje);
 
@@ -95,8 +107,8 @@ public class ManglendeKontrollperioderTjeneste {
             .getLocalDateIntervals();
     }
 
-    private LocalDateTimeline<Set<BehandlingÅrsakType>> finnPerioderMarkertForKontroll(Long behandlingId) {
-        return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+    private LocalDateTimeline<Boolean> finnPerioderMarkertForKontroll(Long behandlingId) {
+        return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).mapValue(it -> true);
     }
 
     private LocalDateTimeline<Boolean> finnPerioderSomErKontrollertITidligereBehandlinger(Long behandlingId) {

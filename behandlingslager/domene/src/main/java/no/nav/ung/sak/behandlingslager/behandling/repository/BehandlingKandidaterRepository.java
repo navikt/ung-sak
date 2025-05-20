@@ -15,6 +15,7 @@ import org.hibernate.jpa.QueryHints;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,22 @@ public class BehandlingKandidaterRepository {
     protected EntityManager getEntityManager() {
         return entityManager;
     }
+
+    /**
+     * Hent alle behandlinger som ikke er avsluttet på fagsak.
+     */
+    public List<Behandling> hentAvsluttedeBehandlingerEtter(LocalDateTime avsluttetEtter) {
+        Objects.requireNonNull(avsluttetEtter, "avsluttetEtter");
+
+        TypedQuery<Behandling> query = getEntityManager().createQuery(
+            "SELECT beh from Behandling AS beh WHERE beh.status = :status and beh.avsluttetDato > :avsluttetEtter",
+            Behandling.class);
+        query.setParameter("status", BehandlingStatus.AVSLUTTET); // NOSONAR@
+        query.setParameter("avsluttetEtter", avsluttetEtter); // NOSONAR
+        query.setHint(QueryHints.HINT_READONLY, "true");
+        return query.getResultList();
+    }
+
 
     @SuppressWarnings("unchecked")
     public List<Behandling> finnBehandlingerForAutomatiskGjenopptagelse() {
