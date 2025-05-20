@@ -60,21 +60,27 @@ public class ManglendeKontrollperioderTjeneste {
      * @return
      */
     public Optional<ProsessTaskData> lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(Long behandlingId, Long fagsakId) {
+        // Månedsvis oppdelt tidslinje for programperioden/fagsakperioden
         final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        // Tidslinje der det er påkrevd kontroll før utbetaling
         final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
+        // Tidslinje der rapporteringsfristen er passert
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
-        final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
-        var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
+        // Tidslinje for alleredee kontrollerte perioder
+        var utførtKontrollTidslinje = finnPerioderDerKontrollErGjennomført(behandlingId);
 
+        // Finner tidslinje der det enten er påkrevd kontroll eller det er utført kontroll i åpen behandling
         final var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
         var tilKontrollIÅpenBehandlingTidslinje = new LocalDateTimeline<Boolean>(List.of());
         if (sisteBehandling.isPresent() && !sisteBehandling.get().erStatusFerdigbehandlet()) {
-            tilKontrollIÅpenBehandlingTidslinje = finnPerioderMarkertForKontroll(sisteBehandling.get().getId());
+            final var sisteBehandlingId = sisteBehandling.get().getId();
+            final var kontrollertePerioderISisteBehandling = finnPerioderDerKontrollErGjennomført(behandlingId);
+            final var markertForKontrollISisteBehandling = finnPerioderMarkertForKontroll(sisteBehandlingId);
+            tilKontrollIÅpenBehandlingTidslinje = markertForKontrollISisteBehandling.crossJoin(kontrollertePerioderISisteBehandling);
         }
 
 
         final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje)
-            .disjoint(markertForKontrollTidslinje)
             .disjoint(tilKontrollIÅpenBehandlingTidslinje)
             .intersection(passertRapporteringsfristTidslinje);
 
@@ -111,7 +117,7 @@ public class ManglendeKontrollperioderTjeneste {
         return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).mapValue(it -> true);
     }
 
-    private LocalDateTimeline<Boolean> finnPerioderSomErKontrollertITidligereBehandlinger(Long behandlingId) {
+    private LocalDateTimeline<Boolean> finnPerioderDerKontrollErGjennomført(Long behandlingId) {
         return tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandlingId).mapValue(it -> true);
     }
 
