@@ -14,13 +14,16 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.domene.iay.modell.AktørInntekt;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.kontroll.KontrollerInntektDto;
@@ -29,6 +32,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
@@ -91,12 +95,13 @@ public class KontrollerInntektRestTjeneste {
             return new KontrollerInntektDto(Collections.emptyList());
         }
 
-        final var registerinntekter = iayGrunnlag.get().getRegisterVersjon()
+        final var aktørInntekt = iayGrunnlag.get().getRegisterVersjon()
             .stream()
             .flatMap(it -> it.getAktørInntekt().stream()
                 .filter(ai -> ai.getAktørId().equals(behandling.getAktørId())))
-            .flatMap(it -> it.getInntekt().stream())
-            .toList();
+            .findFirst();
+        final var registerinntekter = new InntektFilter(aktørInntekt)
+            .getAlleInntekter(InntektsKilde.INNTEKT_UNGDOMSYTELSE);
 
         return KontrollerInntektMapper.map(kontrollertInntektPerioder,
             rapporterteInntekter,

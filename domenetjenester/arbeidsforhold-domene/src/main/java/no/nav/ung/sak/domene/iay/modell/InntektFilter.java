@@ -63,6 +63,12 @@ public class InntektFilter {
         return copyWith(this.inntekter, tidslinje);
     }
 
+    public List<Inntekt> getAlleInntekter(InntektsKilde kilde) {
+        return inntekter.stream()
+            .filter(it -> kilde == null || kilde.equals(it.getInntektsKilde()))
+            .toList();
+    }
+
     public List<Inntekt> getAlleInntekter() {
         return inntekter.stream()
             .toList();
