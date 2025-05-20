@@ -28,8 +28,8 @@ public class InntektFilter {
         this(inntekter, null);
     }
 
-    public InntektFilter(Optional<AktørInntekt> aktørInntekt) {
-        this(aktørInntekt.isPresent() ? aktørInntekt.get().getInntekt() : Collections.emptyList());
+    public InntektFilter(Optional<Inntekter> inntekter) {
+        this(inntekter.isPresent() ? inntekter.get().getInntekt() : Collections.emptyList());
     }
 
     public InntektFilter(Collection<Inntekt> inntekter, LocalDateTimeline<?> perioder) {

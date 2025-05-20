@@ -8,19 +8,13 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.YtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.ung.sak.domene.iay.modell.AktørInntekt;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.InntektFilter;
-import no.nav.ung.sak.domene.iay.modell.Inntektspost;
+import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 public class InntektKontrollOppgaveMapper {
 
@@ -32,8 +26,8 @@ public class InntektKontrollOppgaveMapper {
     }
 
     private static List<RegisterInntektYtelseDTO> finnYtelseInntekter(InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet periode) {
-        final var aktørInntekt = grunnlag.getRegisterVersjon().stream().flatMap(it -> it.getAktørInntekt().stream()).findFirst();
-        final var filter = new InntektFilter(aktørInntekt)
+        final var inntekter = grunnlag.getRegisterVersjon().map(InntektArbeidYtelseAggregat::getInntekter);
+        final var filter = new InntektFilter(inntekter)
             .filter(InntektspostType.YTELSE)
             .filter((i, ip) -> ip.getPeriode().overlapper(periode));
         return filter.getInntektsposter(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
@@ -69,8 +63,8 @@ public class InntektKontrollOppgaveMapper {
     }
 
     private static List<RegisterInntektArbeidOgFrilansDTO> finnArbeidOgFrilansInntekter(InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet periode) {
-        final var aktørInntekt = grunnlag.getRegisterVersjon().stream().flatMap(it -> it.getAktørInntekt().stream()).findFirst();
-        return new InntektFilter(aktørInntekt).getAlleInntekter(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
+        final var inntekter = grunnlag.getRegisterVersjon().map(InntektArbeidYtelseAggregat::getInntekter);
+        return new InntektFilter(inntekter).getAlleInntekter(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
             .stream()
             .flatMap(inntekt -> inntekt.getAlleInntektsposter().stream()
                 .filter(ip -> ip.getInntektspostType().equals(InntektspostType.LØNN))

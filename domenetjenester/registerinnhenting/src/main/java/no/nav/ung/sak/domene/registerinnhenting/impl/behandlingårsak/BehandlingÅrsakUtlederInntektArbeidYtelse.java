@@ -25,16 +25,16 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
     private static final Logger log = LoggerFactory.getLogger(BehandlingÅrsakUtlederInntektArbeidYtelse.class);
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private BehandlingÅrsakUtlederAktørInntekt behandlingÅrsakUtlederAktørInntekt;
+    private BehandlingÅrsakUtlederInntekter behandlingÅrsakUtlederInntekter;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
 
 
     @Inject
     public BehandlingÅrsakUtlederInntektArbeidYtelse(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                     BehandlingÅrsakUtlederAktørInntekt behandlingÅrsakUtlederAktørInntekt,
+                                                     BehandlingÅrsakUtlederInntekter behandlingÅrsakUtlederInntekter,
                                                      ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.behandlingÅrsakUtlederAktørInntekt = behandlingÅrsakUtlederAktørInntekt;
+        this.behandlingÅrsakUtlederInntekter = behandlingÅrsakUtlederInntekter;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
     }
 
@@ -51,12 +51,12 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
         Set<BehandlingÅrsakType> behandlingÅrsakTyper = new HashSet<>();
 
         IAYGrunnlagDiff iayGrunnlagDiff = new IAYGrunnlagDiff(inntektArbeidYtelseGrunnlag1, inntektArbeidYtelseGrunnlag2);
-        boolean erAktørInntektEndret = iayGrunnlagDiff.erEndringPåAktørInntektForAktør(perioder, ref.getAktørId());
+        boolean erInntektEndret = iayGrunnlagDiff.erEndringPåInntekter(perioder);
 
-        if (erAktørInntektEndret) {
-            BehandlingÅrsakType behandlingÅrsakTypeAktørInntekt = behandlingÅrsakUtlederAktørInntekt.utledBehandlingÅrsak();
-            log.info("Setter behandlingårsak til {}, har endring i aktør inntekt, grunnlagId1: {}, grunnlagId2: {}", behandlingÅrsakTypeAktørInntekt, grunnlagUuid1, grunnlagUuid2);
-            behandlingÅrsakTyper.add(behandlingÅrsakTypeAktørInntekt);
+        if (erInntektEndret) {
+            BehandlingÅrsakType behandlingÅrsakTypeInntekt = behandlingÅrsakUtlederInntekter.utledBehandlingÅrsak();
+            log.info("Setter behandlingårsak til {}, har endring i aktør inntekt, grunnlagId1: {}, grunnlagId2: {}", behandlingÅrsakTypeInntekt, grunnlagUuid1, grunnlagUuid2);
+            behandlingÅrsakTyper.add(behandlingÅrsakTypeInntekt);
         }
 
         return behandlingÅrsakTyper;

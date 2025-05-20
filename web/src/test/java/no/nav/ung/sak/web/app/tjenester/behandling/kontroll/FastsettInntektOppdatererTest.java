@@ -218,7 +218,7 @@ class FastsettInntektOppdatererTest {
 
     private void lagreRegisterinntekt(DatoIntervallEntitet periode, int registerinntekt) {
         final var registerBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
-        final var aktørInntektBuilder = registerBuilder.getAktørInntektBuilder(behandling.getAktørId());
+        final var inntekterBuilder = registerBuilder.getInntekterBuilder();
         final var inntektspostBuilder = InntektspostBuilder.ny()
             .medPeriode(periode.getFomDato(), periode.getTomDato())
             .medInntektspostType(InntektspostType.LØNN)
@@ -226,8 +226,8 @@ class FastsettInntektOppdatererTest {
         final var inntektBuilder = InntektBuilder.oppdatere(Optional.empty())
             .medInntektsKilde(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
             .leggTilInntektspost(inntektspostBuilder);
-        aktørInntektBuilder.leggTilInntekt(inntektBuilder);
-        registerBuilder.leggTilAktørInntekt(aktørInntektBuilder);
+        inntekterBuilder.leggTilInntekt(inntektBuilder);
+        registerBuilder.leggTilInntekter(inntekterBuilder);
         inntektArbeidYtelseTjeneste.lagreIayAggregat(behandling.getId(), registerBuilder);
     }
 

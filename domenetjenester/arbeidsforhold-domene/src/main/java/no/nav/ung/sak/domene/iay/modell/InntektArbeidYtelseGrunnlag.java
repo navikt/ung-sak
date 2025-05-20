@@ -1,14 +1,12 @@
 package no.nav.ung.sak.domene.iay.modell;
 
+import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.ung.sak.typer.AktørId;
 
 /**
  * NB navnet her brukes av @GrunnlagRef i BehandlingÅrsakUtleder/StartpunktUtleder.
@@ -90,13 +88,9 @@ public class InntektArbeidYtelseGrunnlag {
         this.oppgittOpptjeningAggregat = oppgittOpptjeningAggregat;
     }
 
-    public Optional<AktørInntekt> getAktørInntektFraRegister(AktørId aktørId) {
+    public Optional<Inntekter> getInntekterFraRegister() {
         if (register != null) {
-            var aktørInntekt = register.getAktørInntekt().stream().filter(aa -> Objects.equals(aa.getAktørId(), aktørId)).collect(Collectors.toList());
-            if (aktørInntekt.size() > 1) {
-                throw new IllegalStateException("Kan kun ha ett innslag av AktørInntekt for aktørId:" + aktørId + " i  grunnlag " + this.getEksternReferanse());
-            }
-            return aktørInntekt.stream().findFirst();
+            return Optional.ofNullable(register.getInntekter());
         }
         return Optional.empty();
     }

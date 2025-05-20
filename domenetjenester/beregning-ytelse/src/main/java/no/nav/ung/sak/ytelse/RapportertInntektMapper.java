@@ -72,8 +72,8 @@ public class RapportertInntektMapper {
     }
 
     private Map<InntektType, List<Inntektspost>> grupperInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        final var aktørInntekt = iayGrunnlag.getRegisterVersjon().stream().flatMap(it -> it.getAktørInntekt().stream()).findFirst();
-        return new InntektFilter(aktørInntekt)
+        final var inntekter = iayGrunnlag.getRegisterVersjon().map(InntektArbeidYtelseAggregat::getInntekter);
+        return new InntektFilter(inntekter)
             .getInntektsposter(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
             .stream()
             .collect(Collectors.groupingBy(this::mapTilInntektType));

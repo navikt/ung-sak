@@ -15,7 +15,7 @@ import no.nav.ung.sak.typer.Arbeidsgiver;
 
 public class Inntekt implements IndexKey {
 
-    private AktørInntekt aktørInntekt;
+    private Inntekter inntekter;
 
     private Arbeidsgiver arbeidsgiver;
 
@@ -98,12 +98,8 @@ public class Inntekt implements IndexKey {
         this.inntektspost.add(inntektspost);
     }
 
-    public AktørInntekt getAktørInntekt() {
-        return aktørInntekt;
-    }
-
-    void setAktørInntekt(AktørInntekt aktørInntekt) {
-        this.aktørInntekt = aktørInntekt;
+    void setInntekter(Inntekter inntekter) {
+        this.inntekter = inntekter;
     }
 
     public InntektspostBuilder getInntektspostBuilder() {

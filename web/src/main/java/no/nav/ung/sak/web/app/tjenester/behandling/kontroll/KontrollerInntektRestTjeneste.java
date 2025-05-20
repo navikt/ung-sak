@@ -21,7 +21,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.domene.iay.modell.AktørInntekt;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
@@ -32,7 +32,6 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
@@ -95,18 +94,15 @@ public class KontrollerInntektRestTjeneste {
             return new KontrollerInntektDto(Collections.emptyList());
         }
 
-        final var aktørInntekt = iayGrunnlag.get().getRegisterVersjon()
-            .stream()
-            .flatMap(it -> it.getAktørInntekt().stream()
-                .filter(ai -> ai.getAktørId().equals(behandling.getAktørId())))
-            .findFirst();
-        final var registerinntekter = new InntektFilter(aktørInntekt)
+        final var inntekter = iayGrunnlag.get().getRegisterVersjon()
+            .map(InntektArbeidYtelseAggregat::getInntekter);
+        final var registerinntekter = new InntektFilter(inntekter)
             .getAlleInntekter(InntektsKilde.INNTEKT_UNGDOMSYTELSE);
 
         return KontrollerInntektMapper.map(kontrollertInntektPerioder,
             rapporterteInntekter,
             registerinntekter,
-            gjeldendeEtterlysninger,  perioderTilKontroll);
+            gjeldendeEtterlysninger, perioderTilKontroll);
     }
 
 

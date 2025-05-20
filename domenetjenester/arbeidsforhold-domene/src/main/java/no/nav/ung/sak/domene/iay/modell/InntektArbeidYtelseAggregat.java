@@ -5,14 +5,13 @@ import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class InntektArbeidYtelseAggregat {
 
     private UUID uuid;
 
     @ChangeTracked
-    private Set<AktørInntekt> aktørInntekt = new LinkedHashSet<>();
+    private Inntekter inntekter;
 
     @DiffIgnore
     private LocalDateTime opprettetTidspunkt;
@@ -32,11 +31,7 @@ public class InntektArbeidYtelseAggregat {
 
     /** copy constructor men med angitt referanse og tidspunkt. Hvis unikt kan denne instansen brukes til lagring. */
     InntektArbeidYtelseAggregat(UUID eksternReferanse, LocalDateTime opprettetTidspunkt, InntektArbeidYtelseAggregat kopierFra) {
-        this.setAktørInntekt(kopierFra.getAktørInntekt().stream().map(ai -> {
-            AktørInntekt aktørInntekt = new AktørInntekt(ai);
-            return aktørInntekt;
-        }).collect(Collectors.toList()));
-
+        this.setInntekter(new Inntekter(kopierFra.getInntekter()));
         setOpprettetTidspunkt(opprettetTidspunkt);
         this.uuid = eksternReferanse;
 
@@ -59,17 +54,14 @@ public class InntektArbeidYtelseAggregat {
         return uuid;
     }
 
-    public Collection<AktørInntekt> getAktørInntekt() {
-        return Collections.unmodifiableSet(aktørInntekt);
+    public Inntekter getInntekter() {
+        return inntekter;
     }
 
-    void setAktørInntekt(Collection<AktørInntekt> aktørInntekt) {
-        this.aktørInntekt = new LinkedHashSet<>(aktørInntekt);
+    void setInntekter(Inntekter inntekter) {
+        this.inntekter = inntekter;
     }
 
-    void leggTilAktørInntekt(AktørInntekt aktørInntekt) {
-        this.aktørInntekt.add(aktørInntekt);
-    }
 
     @Override
     public boolean equals(Object obj) {
@@ -79,18 +71,18 @@ public class InntektArbeidYtelseAggregat {
             return false;
         }
         InntektArbeidYtelseAggregat other = (InntektArbeidYtelseAggregat) obj;
-        return Objects.equals(this.getAktørInntekt(), other.getAktørInntekt());
+        return Objects.equals(this.getInntekter(), other.getInntekter());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(aktørInntekt);
+        return Objects.hash(inntekter);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" +
-            "aktørInntekt=" + aktørInntekt +
+            "inntekter=" + inntekter +
             '>';
     }
 
