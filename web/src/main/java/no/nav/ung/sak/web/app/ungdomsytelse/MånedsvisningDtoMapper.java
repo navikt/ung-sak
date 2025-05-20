@@ -20,13 +20,13 @@ public class MånedsvisningDtoMapper {
 
     static List<UngdomsytelseUtbetaltMånedDto> mapSatsOgUtbetalingPrMåned(LocalDateTimeline<YearMonth> månedsvisPeriodisering,
                                                                           LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje,
-                                                                          LocalDateTimeline<BigDecimal> kontrollerInntektTidslinje,
+                                                                          LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje,
                                                                           UngdomsytelseSatsPerioder perioder,
                                                                           LocalDateTimeline<TilkjentYtelseVerdi> originalTilkjentYtelse) {
         final var månederMedYtelse = månedsvisPeriodisering.intersection(tilkjentYtelseTidslinje.mapValue(it -> true).compress());
         return månederMedYtelse.toSegments().stream().map(måned -> {
             final var tilkjentYtelseForMåned = tilkjentYtelseTidslinje.intersection(måned.getLocalDateInterval());
-            final var kontrollertInntektForMåned = kontrollerInntektTidslinje.intersection(måned.getLocalDateInterval());
+            final var kontrollertInntektForMåned = kontrollertInntektTidslinje.intersection(måned.getLocalDateInterval());
             final var satsperioder = mapSatsperioderForMåned(måned, perioder);
             final var antallDagerIMåned = finnAntallDagerForSatsperioder(satsperioder);
             final var utbetaltBeløp = finnUtbetaltBeløp(tilkjentYtelseForMåned);
