@@ -4252,6 +4252,10 @@
             "format" : "int32",
             "type" : "integer"
           },
+          "antallDager" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
           "dagsats" : {
             "type" : "number"
           },
@@ -4277,12 +4281,66 @@
             "type" : "string"
           }
         },
-        "required" : [ "antallBarn", "dagsats", "dagsatsBarnetillegg", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
+        "required" : [ "antallDager", "dagsats", "dagsatsBarnetillegg", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
         "type" : "object"
       },
       "UngdomsytelseSatsPeriodeDtoSatsType" : {
         "enum" : [ "LAV", "HØY" ],
         "x-enum-varnames" : [ "LAV", "HØY" ],
+        "type" : "string"
+      },
+      "UngdomsytelseUtbetaltMånedDto" : {
+        "properties" : {
+          "antallDager" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "måned" : {
+            "properties" : {
+              "leapYear" : {
+                "type" : "boolean"
+              },
+              "month" : {
+                "enum" : [ "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER" ],
+                "x-enum-varnames" : [ "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER" ],
+                "type" : "string"
+              },
+              "monthValue" : {
+                "format" : "int32",
+                "type" : "integer"
+              },
+              "year" : {
+                "format" : "int32",
+                "type" : "integer"
+              }
+            },
+            "type" : "object"
+          },
+          "rapportertInntekt" : {
+            "type" : "number"
+          },
+          "reduksjon" : {
+            "type" : "number"
+          },
+          "satsperioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/UngdomsytelseSatsPeriodeDto"
+            },
+            "type" : "array"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/UngdomsytelseUtbetaltMånedDtoStatus"
+          },
+          "utbetaling" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "antallDager", "måned", "satsperioder" ],
+        "type" : "object"
+      },
+      "UngdomsytelseUtbetaltMånedDtoStatus" : {
+        "enum" : [ "TIL_UTBETALING", "UTBETALT" ],
+        "x-enum-varnames" : [ "TIL_UTBETALING", "UTBETALT" ],
         "type" : "string"
       },
       "UngdomsytelseUttakPeriodeDto" : {
@@ -7836,6 +7894,38 @@
         },
         "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
         "tags" : [ "nav-ansatt" ]
+      }
+    },
+    "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
+      "get" : {
+        "description" : "Henter månedsvis satser og utbetaling",
+        "operationId" : "getSatsOgUtbetalingPerioder",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/UngdomsytelseUtbetaltMånedDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
       }
     },
     "/api/ungdomsytelse/satser" : {
