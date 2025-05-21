@@ -1,10 +1,10 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
-public record AvbrytEtterlysningDto(@Min(0)
-                                    @Max(Long.MAX_VALUE)
-                                    @NotNull Long etterlysningId) {
+public record AvbrytEtterlysningDto(@Size(max = 50)
+                                    @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+                                    @NotNull String etterlysningId) {
 }

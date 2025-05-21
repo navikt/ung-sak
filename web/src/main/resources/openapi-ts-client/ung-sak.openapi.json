@@ -608,10 +608,10 @@
       "AvbrytEtterlysningDto" : {
         "properties" : {
           "etterlysningId" : {
-            "format" : "int64",
-            "maximum" : 9223372036854775807,
-            "minimum" : 0,
-            "type" : "integer"
+            "maxLength" : 50,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Alnum}-]+$",
+            "type" : "string"
           }
         },
         "required" : [ "etterlysningId" ],
@@ -7339,7 +7339,7 @@
         "operationId" : "avbrytEtterlysning",
         "parameters" : [ {
           "in" : "query",
-          "name" : "behandlingId",
+          "name" : "etterlysningId",
           "required" : true,
           "schema" : {
             "$ref" : "#/components/schemas/AvbrytEtterlysningDto"
