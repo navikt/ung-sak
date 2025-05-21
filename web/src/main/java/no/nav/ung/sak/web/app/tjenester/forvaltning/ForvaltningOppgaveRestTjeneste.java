@@ -19,27 +19,30 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.SettOppgaveUtløptForInntektsrapporteringTask;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
 import java.util.UUID;
 
+import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
@@ -54,21 +57,22 @@ public class ForvaltningOppgaveRestTjeneste {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private FagsakRepository fagsakRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private EtterlysningRepository etterlysningRepository;
     private boolean isProd = Environment.current().isProd();
 
     @Inject
-    public ForvaltningOppgaveRestTjeneste(EntityManager entityManager, BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskTjeneste, FagsakRepository fagsakRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+    public ForvaltningOppgaveRestTjeneste(EntityManager entityManager, BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskTjeneste, FagsakRepository fagsakRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, EtterlysningRepository etterlysningRepository) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.etterlysningRepository = etterlysningRepository;
     }
 
     public ForvaltningOppgaveRestTjeneste() {
         // For Rest-CDI
     }
-
 
 
     @POST
@@ -138,7 +142,6 @@ public class ForvaltningOppgaveRestTjeneste {
     }
 
 
-
     @POST
     @Path("fjern-uttalelse")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -169,6 +172,44 @@ public class ForvaltningOppgaveRestTjeneste {
             .executeUpdate();
 
         opprettProsessTask(behandlingId);
+        return Response.ok().build();
+    }
+
+
+    @POST
+    @Path("hent-etterlysninger")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter etterlysninger for behandling", summary = ("Henter etterlysninger for behandling"), tags = "oppgave")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentEtterlysninger(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingIdDto.getBehandlingId());
+        final var mappetEtterlysninger = etterlysninger.stream().map(it -> new EtterlysningDto(
+            it.getId(),
+            it.getStatus(),
+            it.getPeriode(),
+            it.getType(),
+            it.getGrunnlagsreferanse()
+        )).toList();
+        return Response.ok().entity(mappetEtterlysninger).build();
+    }
+
+    @POST
+    @Path("avbryt-etterlysning")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Avbryter feilopprettet etterlysning.", summary = ("Avbryter feilopprettet etterlysning"), tags = "oppgave")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    public Response avbrytEtterlysning(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) AvbrytEtterlysningDto avbrytEtterlysningDto) {
+        final var etterlysning = etterlysningRepository.hentEtterlysning(avbrytEtterlysningDto.etterlysningId());
+        if (etterlysning.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
+            throw new IllegalStateException("Kan ikke avbryte etterlysning som har mottatt svar");
+        }
+
+        etterlysning.avbryt();
+        etterlysningRepository.lagre(etterlysning);
+        final var behandling = behandlingRepository.hentBehandling(etterlysning.getBehandlingId());
+        final var avbrytTask = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
+        avbrytTask.setBehandling(behandling.getFagsakId(), behandling.getId());
+        prosessTaskTjeneste.lagre(avbrytTask);
         return Response.ok().build();
     }
 
