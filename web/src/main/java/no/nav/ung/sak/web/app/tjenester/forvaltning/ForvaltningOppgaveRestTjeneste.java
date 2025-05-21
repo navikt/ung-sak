@@ -22,6 +22,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask;
+import no.nav.ung.sak.behandling.revurdering.inntektskontroll.SettOppgaveUtløptForInntektsrapporteringTask;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -83,7 +84,7 @@ public class ForvaltningOppgaveRestTjeneste {
 
         final var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer, false);
 
-        final var periode = finnPeriode(måned, fagsak);
+        final var periode = finnPeriode(måned, fagsak.get());
 
         final var startRapporteringTask = ProsessTaskData.forProsessTask(OpprettOppgaveForInntektsrapporteringTask.class);
         startRapporteringTask.setAktørId(fagsak.get().getAktørId().getAktørId());
@@ -95,8 +96,8 @@ public class ForvaltningOppgaveRestTjeneste {
         return Response.ok().build();
     }
 
-    private LocalDateInterval finnPeriode(MånedForRapportering måned, Optional<Fagsak> fagsak) {
-        final var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.get().getId()).get();
+    private LocalDateInterval finnPeriode(MånedForRapportering måned, Fagsak fagsak) {
+        final var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).get();
 
         final var periodisertMånedvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(sisteBehandling.getId());
 
@@ -118,11 +119,18 @@ public class ForvaltningOppgaveRestTjeneste {
             throw new IllegalArgumentException("Kan ikke kjøre denne tjenesten i prod");
         }
 
-        final var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer, false);
+        final var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer, false).get();
         final var periode = finnPeriode(måned, fagsak);
 
+        ProsessTaskData utløpOppgave = ProsessTaskData.forProsessTask(SettOppgaveUtløptForInntektsrapporteringTask.class);
+        utløpOppgave.setAktørId(fagsak.getAktørId().getAktørId());
+        utløpOppgave.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_FOM, periode.getFomDato().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        utløpOppgave.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_TOM, periode.getTomDato().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        prosessTaskTjeneste.lagre(utløpOppgave);
+
+
         final var startKontrollTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-        startKontrollTask.setFagsakId(fagsak.get().getId());
+        startKontrollTask.setFagsakId(fagsak.getId());
         startKontrollTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.getKode());
         startKontrollTask.setProperty(PERIODER, periode.getFomDato().format(DateTimeFormatter.ISO_LOCAL_DATE) + "/" + periode.getTomDato().format(DateTimeFormatter.ISO_LOCAL_DATE));
         prosessTaskTjeneste.lagre(startKontrollTask);
