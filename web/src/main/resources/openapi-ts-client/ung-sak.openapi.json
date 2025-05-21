@@ -854,6 +854,12 @@
             "maximum" : 9223372036854775807,
             "minimum" : 0,
             "type" : "integer"
+          },
+          "visningsnavn" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$",
+            "type" : "string"
           }
         },
         "required" : [ "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
