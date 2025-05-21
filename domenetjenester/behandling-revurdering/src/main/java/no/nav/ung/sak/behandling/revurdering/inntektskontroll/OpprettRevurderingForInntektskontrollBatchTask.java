@@ -83,7 +83,7 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
                 ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(SettOppgaveUtløptForInntektsrapporteringTask.class);
                 tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
                 tilVurderingTask.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
-                tilVurderingTask.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_TOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+                tilVurderingTask.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
                 return tilVurderingTask;
             }).toList();
 
