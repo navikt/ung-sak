@@ -605,6 +605,18 @@
         "x-enum-varnames" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ],
         "type" : "string"
       },
+      "AvbrytEtterlysningDto" : {
+        "properties" : {
+          "etterlysningId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          }
+        },
+        "required" : [ "etterlysningId" ],
+        "type" : "object"
+      },
       "AvklarteOpplysninger" : {
         "properties" : {
           "begrunnelse" : {
@@ -7338,6 +7350,30 @@
         "tags" : [ "oppdrag" ]
       }
     },
+    "/api/oppgave/forvaltning/avbryt-etterlysning" : {
+      "post" : {
+        "description" : "Avbryter feilopprettet etterlysning.",
+        "operationId" : "avbrytEtterlysning",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/AvbrytEtterlysningDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Avbryter feilopprettet etterlysning",
+        "tags" : [ "oppgave" ]
+      }
+    },
     "/api/oppgave/forvaltning/fjern-uttalelse" : {
       "post" : {
         "description" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
@@ -7359,6 +7395,30 @@
           }
         },
         "summary" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "tags" : [ "oppgave" ]
+      }
+    },
+    "/api/oppgave/forvaltning/hent-etterlysninger" : {
+      "post" : {
+        "description" : "Henter etterlysninger for behandling",
+        "operationId" : "hentEtterlysninger_1",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter etterlysninger for behandling",
         "tags" : [ "oppgave" ]
       }
     },
