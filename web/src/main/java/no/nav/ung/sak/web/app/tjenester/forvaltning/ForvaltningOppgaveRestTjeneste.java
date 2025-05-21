@@ -198,13 +198,13 @@ public class ForvaltningOppgaveRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Avbryter feilopprettet etterlysning.", summary = ("Avbryter feilopprettet etterlysning"), tags = "oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
-    public Response avbrytEtterlysning(@QueryParam("etterlysningId") @NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) AvbrytEtterlysningDto avbrytEtterlysningDto) {
-        final var etterlysning = etterlysningRepository.hentEtterlysning(Long.parseLong(avbrytEtterlysningDto.etterlysningId()));
+    public Response avbrytEtterlysning(@NotNull @QueryParam("etterlysningId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Long etterlysningId) {
+        final var etterlysning = etterlysningRepository.hentEtterlysning(etterlysningId);
         if (etterlysning.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
             throw new IllegalStateException("Kan ikke avbryte etterlysning som har mottatt svar");
         }
 
-        etterlysning.avbryt();
+        etterlysning.skalAvbrytes();
         etterlysningRepository.lagre(etterlysning);
         final var behandling = behandlingRepository.hentBehandling(etterlysning.getBehandlingId());
         final var avbrytTask = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
