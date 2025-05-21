@@ -204,7 +204,7 @@
         <dependency>
             <groupId>no.nav.openapi.spec.utils</groupId>
             <artifactId>openapi-spec-utils</artifactId>
-            <version>1.4.0</version>
+            <version>1.5.0</version>
         </dependency>
 
         <!-- CDI -->
