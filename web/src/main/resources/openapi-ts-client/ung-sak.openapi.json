@@ -4308,25 +4308,8 @@
             "type" : "integer"
           },
           "måned" : {
-            "properties" : {
-              "leapYear" : {
-                "type" : "boolean"
-              },
-              "month" : {
-                "enum" : [ "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER" ],
-                "x-enum-varnames" : [ "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER" ],
-                "type" : "string"
-              },
-              "monthValue" : {
-                "format" : "int32",
-                "type" : "integer"
-              },
-              "year" : {
-                "format" : "int32",
-                "type" : "integer"
-              }
-            },
-            "type" : "object"
+            "format" : "year-month",
+            "type" : "string"
           },
           "rapportertInntekt" : {
             "type" : "number"
