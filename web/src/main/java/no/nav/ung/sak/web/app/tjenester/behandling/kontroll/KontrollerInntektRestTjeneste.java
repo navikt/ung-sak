@@ -14,13 +14,16 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.kontroll.KontrollerInntektDto;
@@ -91,17 +94,15 @@ public class KontrollerInntektRestTjeneste {
             return new KontrollerInntektDto(Collections.emptyList());
         }
 
-        final var registerinntekter = iayGrunnlag.get().getRegisterVersjon()
-            .stream()
-            .flatMap(it -> it.getAktørInntekt().stream()
-                .filter(ai -> ai.getAktørId().equals(behandling.getAktørId())))
-            .flatMap(it -> it.getInntekt().stream())
-            .toList();
+        final var inntekter = iayGrunnlag.get().getRegisterVersjon()
+            .map(InntektArbeidYtelseAggregat::getInntekter);
+        final var registerinntekter = new InntektFilter(inntekter)
+            .getAlleInntekter(InntektsKilde.INNTEKT_UNGDOMSYTELSE);
 
         return KontrollerInntektMapper.map(kontrollertInntektPerioder,
             rapporterteInntekter,
             registerinntekter,
-            gjeldendeEtterlysninger,  perioderTilKontroll);
+            gjeldendeEtterlysninger, perioderTilKontroll);
     }
 
 

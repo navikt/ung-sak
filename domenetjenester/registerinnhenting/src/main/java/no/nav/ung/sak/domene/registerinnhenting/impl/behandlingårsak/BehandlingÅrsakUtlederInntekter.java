@@ -6,10 +6,10 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 
 @Dependent
-class BehandlingÅrsakUtlederAktørInntekt {
+class BehandlingÅrsakUtlederInntekter {
 
     @Inject
-    public BehandlingÅrsakUtlederAktørInntekt() {
+    public BehandlingÅrsakUtlederInntekter() {
         //For CDI
     }
 

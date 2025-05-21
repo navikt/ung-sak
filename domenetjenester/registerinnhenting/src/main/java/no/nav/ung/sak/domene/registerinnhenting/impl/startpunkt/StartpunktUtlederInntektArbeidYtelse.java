@@ -53,8 +53,8 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
         var perioderTilVurdering = periodeUtleder.utledTidslinje(ref.getBehandlingId()).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
-        boolean erAktørInntektEndretForSøker = diff.erEndringPåAktørInntektForAktør(perioderTilVurdering, ref.getAktørId());
-        if (erAktørInntektEndretForSøker) {
+        boolean erInntektEndretForSøker = diff.erEndringPåInntekter(perioderTilVurdering);
+        if (erInntektEndretForSøker) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_INNTEKT, "aktør inntekt for periode " + perioderTilVurdering);
         }
 

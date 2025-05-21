@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.domene.iay.modell.*;
@@ -71,9 +72,10 @@ public class RapportertInntektMapper {
     }
 
     private Map<InntektType, List<Inntektspost>> grupperInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        return iayGrunnlag.getRegisterVersjon().stream().flatMap(it -> it.getAktørInntekt().stream())
-            .flatMap(it -> it.getInntekt().stream())
-            .flatMap(it -> it.getAlleInntektsposter().stream())
+        final var inntekter = iayGrunnlag.getRegisterVersjon().map(InntektArbeidYtelseAggregat::getInntekter);
+        return new InntektFilter(inntekter)
+            .getInntektsposter(InntektsKilde.INNTEKT_UNGDOMSYTELSE)
+            .stream()
             .collect(Collectors.groupingBy(this::mapTilInntektType));
     }
 

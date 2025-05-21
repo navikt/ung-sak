@@ -28,8 +28,8 @@ public class InntektFilter {
         this(inntekter, null);
     }
 
-    public InntektFilter(Optional<AktørInntekt> aktørInntekt) {
-        this(aktørInntekt.isPresent() ? aktørInntekt.get().getInntekt() : Collections.emptyList());
+    public InntektFilter(Optional<Inntekter> inntekter) {
+        this(inntekter.isPresent() ? inntekter.get().getInntekt() : Collections.emptyList());
     }
 
     public InntektFilter(Collection<Inntekt> inntekter, LocalDateTimeline<?> perioder) {
@@ -61,6 +61,12 @@ public class InntektFilter {
 
     public InntektFilter i(LocalDateTimeline<?> tidslinje) {
         return copyWith(this.inntekter, tidslinje);
+    }
+
+    public List<Inntekt> getAlleInntekter(InntektsKilde kilde) {
+        return inntekter.stream()
+            .filter(it -> kilde == null || kilde.equals(it.getInntektsKilde()))
+            .toList();
     }
 
     public List<Inntekt> getAlleInntekter() {

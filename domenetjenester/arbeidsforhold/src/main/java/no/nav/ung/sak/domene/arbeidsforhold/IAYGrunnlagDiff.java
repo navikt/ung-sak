@@ -4,11 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.AktørId;
 
-import java.time.LocalDate;
-import java.util.Objects;
 import java.util.Optional;
 
 public class IAYGrunnlagDiff {
@@ -24,10 +20,10 @@ public class IAYGrunnlagDiff {
         return new IAYDiffsjekker(onlyCheckTrackedFields).getDiffEntity().diff(grunnlag1, grunnlag2);
     }
 
-    public  boolean erEndringPåAktørInntektForAktør(LocalDateTimeline<?> perioder, AktørId aktørId) {
+    public  boolean erEndringPåInntekter(LocalDateTimeline<?> perioder) {
 
-        var eksisterende = Optional.ofNullable(grunnlag1).flatMap(it -> it.getAktørInntektFraRegister(aktørId));
-        var nye = Optional.ofNullable(grunnlag2).flatMap(it -> it.getAktørInntektFraRegister(aktørId));
+        var eksisterende = Optional.ofNullable(grunnlag1).flatMap(InntektArbeidYtelseGrunnlag::getInntekterFraRegister);
+        var nye = Optional.ofNullable(grunnlag2).flatMap(InntektArbeidYtelseGrunnlag::getInntekterFraRegister);
 
         // quick check
         if (eksisterende.isPresent() != nye.isPresent()) {

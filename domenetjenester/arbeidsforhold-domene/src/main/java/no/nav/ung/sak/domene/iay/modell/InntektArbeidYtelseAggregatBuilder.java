@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.ung.sak.typer.AktørId;
 
 /**
  * Builder for å håndtere en gitt versjon {@link VersjonType} av grunnlaget.
@@ -40,28 +39,24 @@ public class InntektArbeidYtelseAggregatBuilder {
      * Legger til inntekter for en gitt aktør hvis det ikke er en oppdatering av eksisterende.
      * Ved oppdatering eksisterer koblingen for denne aktøren allerede så en kopi av forrige innslag manipuleres før lagring.
      *
-     * @param aktørInntekt {@link AktørInntektBuilder}
+     * @param inntekter {@link InntekterBuilder}
      * @return this
      */
-    public InntektArbeidYtelseAggregatBuilder leggTilAktørInntekt(AktørInntektBuilder aktørInntekt) {
-        if (!aktørInntekt.getErOppdatering()) {
+    public InntektArbeidYtelseAggregatBuilder leggTilInntekter(InntekterBuilder inntekter) {
+        if (!inntekter.getErOppdatering()) {
             // Hvis ny så skal den legges til, hvis ikke ligger den allerede der og blir manipulert.
-            this.kladd.leggTilAktørInntekt(aktørInntekt.build());
+            this.kladd.setInntekter(inntekter.build());
         }
         return this;
     }
 
     /**
-     * Oppretter builder for inntekter for en gitt aktør. Baserer seg på en kopi av forrige innslag for aktøren hvis det eksisterer.
+     * Oppretter builder for inntekter. Baserer seg på en kopi av forrige innslag hvis det eksisterer.
      *
-     * @param aktørId aktøren
-     * @return builder {@link AktørInntektBuilder}
+     * @return builder {@link InntekterBuilder}
      */
-    public AktørInntektBuilder getAktørInntektBuilder(AktørId aktørId) {
-        Optional<AktørInntekt> aktørInntekt = kladd.getAktørInntekt().stream().filter(aa -> aktørId.equals(aa.getAktørId())).findFirst();
-        final AktørInntektBuilder oppdatere = AktørInntektBuilder.oppdatere(aktørInntekt);
-        oppdatere.medAktørId(aktørId);
-        return oppdatere;
+    public InntekterBuilder getInntekterBuilder() {
+        return InntekterBuilder.oppdatere(Optional.ofNullable(kladd.getInntekter()));
     }
 
     public InntektArbeidYtelseAggregat build() {
@@ -73,39 +68,35 @@ public class InntektArbeidYtelseAggregatBuilder {
     }
 
 
-    public static class AktørInntektBuilder {
-        private final AktørInntekt kladd;
+    public static class InntekterBuilder {
+        private final Inntekter kladd;
         private final boolean oppdatering;
 
-        private AktørInntektBuilder(AktørInntekt aktørInntekt, boolean oppdatering) {
-            this.kladd = aktørInntekt;
+        private InntekterBuilder(Inntekter inntekter, boolean oppdatering) {
+            this.kladd = inntekter;
             this.oppdatering = oppdatering;
         }
 
-        static AktørInntektBuilder ny() {
-            return new AktørInntektBuilder(new AktørInntekt(), false);
+        static InntekterBuilder ny() {
+            return new InntekterBuilder(new Inntekter(), false);
         }
 
-        static AktørInntektBuilder oppdatere(AktørInntekt oppdatere) {
-            return new AktørInntektBuilder(oppdatere, true);
+        static InntekterBuilder oppdatere(Inntekter oppdatere) {
+            return new InntekterBuilder(oppdatere, true);
         }
 
-        public static AktørInntektBuilder oppdatere(Optional<AktørInntekt> oppdatere) {
-            return oppdatere.map(AktørInntektBuilder::oppdatere).orElseGet(AktørInntektBuilder::ny);
+        public static InntekterBuilder oppdatere(Optional<Inntekter> oppdatere) {
+            return oppdatere.map(InntekterBuilder::oppdatere).orElseGet(InntekterBuilder::ny);
         }
 
-        void medAktørId(AktørId aktørId) {
-            this.kladd.setAktørId(aktørId);
-        }
-
-        public AktørInntektBuilder leggTilInntekt(InntektBuilder builder) {
+        public InntekterBuilder leggTilInntekt(InntektBuilder builder) {
             if (!builder.getErOppdatering()) {
                 kladd.leggTilInntekt(builder.build());
             }
             return this;
         }
 
-        public AktørInntekt build() {
+        public Inntekter build() {
             if (kladd.hasValues()) {
                 return kladd;
             }
@@ -116,7 +107,7 @@ public class InntektArbeidYtelseAggregatBuilder {
             return oppdatering;
         }
 
-        public AktørInntektBuilder fjernInntekterFraKilde(InntektsKilde inntektsKilde) {
+        public InntekterBuilder fjernInntekterFraKilde(InntektsKilde inntektsKilde) {
             kladd.fjernInntekterFraKilde(inntektsKilde);
             return this;
         }
