@@ -163,4 +163,10 @@ public enum HistorikkinnslagType implements Kodeverdi {
     public String getMal() {
         return mal;
     }
+
+    /* For å få korrekt openapi spesifikasjon med kode verdi istadenfor name() verdi */
+    @Override
+    public String toString() {
+        return this.getKode();
+    }
 }
