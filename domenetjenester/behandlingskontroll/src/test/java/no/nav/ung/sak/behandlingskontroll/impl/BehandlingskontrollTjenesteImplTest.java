@@ -10,6 +10,7 @@ import java.util.Objects;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.k9.felles.exception.TekniskException;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -206,6 +207,31 @@ public class BehandlingskontrollTjenesteImplTest {
         assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
         assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(BehandlingStegType.VURDER_KOMPLETTHET);
     }
+
+    @Test
+    public void skal_feile_dersom_behandling_på_vent_har_flere_autopunkter_med_ulike_steg_som_alle_skal_gi_tilbakehopp() {
+
+        // Arrange
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, BehandlingStegType.VURDER_KOMPLETTHET, BehandlingStegStatus.UTGANG, BehandlingStegStatus.UTFØRT);
+
+        final var aksjonspunkt1 = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
+        final var fristTid = LocalDateTime.now().plusDays(1);
+        aksjonspunktKontrollRepository.setFrist(aksjonspunkt1, fristTid, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, null);
+
+        final var aksjonspunkt2 = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING, BehandlingStegType.VURDER_KOMPLETTHET);
+        aksjonspunktKontrollRepository.setFrist(aksjonspunkt2, fristTid, Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE, null);
+
+
+        final var behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
+        final var behandlingLås = behandlingLåsRepository.taLås(behandling.getId());
+        Mockito.when(kontekst.getSkriveLås()).thenReturn(behandlingLås);
+
+        // Act
+        Assertions.assertThrows(TekniskException.class, () -> {
+            this.kontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
+        });
+    }
+
 
 
     @Test
