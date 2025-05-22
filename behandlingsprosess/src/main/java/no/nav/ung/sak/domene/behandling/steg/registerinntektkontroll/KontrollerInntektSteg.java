@@ -85,7 +85,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        kontrollerteInntektperioderTjeneste.ryddPerioderFritattForKontroll(behandlingId);
+        kontrollerteInntektperioderTjeneste.ryddPerioderFritattForKontrollEllerTilVurderingIBehandlingen(behandlingId);
         var prosessTriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
         var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingId);
         var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(kontekst.getBehandlingId(), kontekst.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
