@@ -104,10 +104,6 @@ public class RevurderingTjeneste {
     }
 
     public void opprettHistorikkinnslag(Behandling behandling, BehandlingÅrsakType revurderingÅrsak, boolean manueltOpprettet) {
-        if (BehandlingÅrsakType.BERØRT_BEHANDLING.equals(revurderingÅrsak)) {
-            return;
-        }
-
         HistorikkAktør historikkAktør = manueltOpprettet ? HistorikkAktør.SAKSBEHANDLER : HistorikkAktør.VEDTAKSLØSNINGEN;
 
         Historikkinnslag revurderingsInnslag = new Historikkinnslag();
