@@ -37,6 +37,12 @@ import no.nav.ung.sak.kontrakt.ResourceLink;
 public class BehandlingDto {
 
     @JsonInclude(value = Include.NON_EMPTY)
+    @JsonProperty(value = "visningsnavn")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String visningsnavn;
+
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "ansvarligSaksbehandler")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -204,6 +210,14 @@ public class BehandlingDto {
     @Min(0L)
     @Max(Long.MAX_VALUE)
     private Long versjon;
+
+    public String getVisningsnavn() {
+        return visningsnavn;
+    }
+
+    public void setVisningsnavn(String visningsnavn) {
+        this.visningsnavn = visningsnavn;
+    }
 
     public String getAnsvarligSaksbehandler() {
         return ansvarligSaksbehandler;
