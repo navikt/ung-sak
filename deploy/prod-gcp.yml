@@ -60,13 +60,12 @@ spec:
         - "https://ung.intern.nav.no/ung/sak/cb"
       claims:
         groups:
-          # FIXME bytt ut med ung-grupper når opprettet
-          # 0000-GA-k9-saksbehandler
-          - id: 466d0df7-22ba-4c68-b848-73478cfd0486
-          # 0000-GA-k9-veileder
-          - id: be11a922-59a2-4afa-b5ad-b9e9bd445268
-          # 0000-GA-k9-drift
-          - id: 1509dc91-a955-4e72-b64c-2f049e37c0c6
+          # 0000-CA-ung-saksbehandler
+          - id: a7b4ffd6-d512-4b0d-991d-24d582b83a57
+          # 0000-CA-ung-veileder
+          - id: 9fe53d71-5eca-4b26-b77a-534468e0db4a
+          # 0000-CA-ung-drift
+          - id: 873ae729-e918-4f35-9a26-652ca994b9c3
         extra:
           - "NAVident"
           - "azp_name"
