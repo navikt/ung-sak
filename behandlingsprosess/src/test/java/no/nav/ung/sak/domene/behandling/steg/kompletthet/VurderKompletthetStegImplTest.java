@@ -89,6 +89,21 @@ class VurderKompletthetStegImplTest {
     }
 
     @Test
+    void skal_ikke_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_der_frist_er_passert() {
+        // Arrange
+        final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var frist = LocalDateTime.now().minusMinutes(1);
+        etterlysning.vent(frist);
+        etterlysningRepository.lagre(etterlysning);
+
+        // Act
+        final var resultat = vurderKompletthetSteg.utførSteg(new BehandlingskontrollKontekst(revurdering.getFagsakId(), aktørId, behandlingRepository.taSkriveLås(revurdering)));
+
+        // Assert
+        assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(0);
+    }
+
+    @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent() {
         // Arrange
         final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
@@ -104,6 +119,7 @@ class VurderKompletthetStegImplTest {
         assertThat(resultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE);
         assertThat(resultat.getAksjonspunktResultater().get(0).getFrist()).isEqualTo(frist);
     }
+
 
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_og_opprettet() {

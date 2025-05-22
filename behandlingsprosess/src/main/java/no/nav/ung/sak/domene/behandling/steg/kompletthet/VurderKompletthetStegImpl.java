@@ -3,12 +3,15 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -28,6 +31,7 @@ import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon
 public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
     private EtterlysningRepository etterlysningRepository;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
     private Duration ventePeriode;
 
 
@@ -35,8 +39,9 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     }
 
     @Inject
-    public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository, @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
+    public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository, ProsessTaskTjeneste prosessTaskTjeneste, @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
         this.etterlysningRepository = etterlysningRepository;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.ventePeriode = Duration.parse(ventePeriode);
     }
 
@@ -48,6 +53,17 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             .stream()
             .filter(e -> harIkkePassertFrist(e.getValue().getFrist()))
             .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
+
+        final var harUtløpteEtterlysninger = etterlysningerSomVenterPåSvar.stream()
+            .anyMatch(e -> !harIkkePassertFrist(e.getFrist()));
+
+        if (harUtløpteEtterlysninger) {
+            // Dersom vi har utløpte etterlysninger ønsker vi å oppdatere status på disse
+            var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptTask.class);
+            prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
+            prosessTaskTjeneste.lagre(prosessTaskData);
+        }
+
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktresultater);
     }
 
