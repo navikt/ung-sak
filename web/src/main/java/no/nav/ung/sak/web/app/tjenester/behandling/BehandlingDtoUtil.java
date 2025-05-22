@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import org.apache.http.client.utils.URIBuilder;
 
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -60,6 +61,7 @@ public class BehandlingDtoUtil {
             dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
         }
 
+        dto.setVisningsnavn(utledVisningsnavn(behandling));
         dto.setFagsakId(behandling.getFagsakId());
         dto.setSakstype(behandling.getFagsakYtelseType());
         dto.setId(behandling.getId());
@@ -90,6 +92,26 @@ public class BehandlingDtoUtil {
             dto.setBehandlingStegTilstand(new BehandlingStegTilstandDto(st.getBehandlingSteg(), st.getBehandlingStegStatus(), st.getOpprettetTidspunkt()));
         });
 
+    }
+
+    private static String utledVisningsnavn(Behandling behandling) {
+        final var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper().stream().filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER).toList();
+        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT == it || BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT == it)) {
+            return "Kontroll av inntekt";
+        }
+        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS == it)) {
+            return "Beregning av høy sats";
+        }
+        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_FØDSEL == it || BehandlingÅrsakType.RE_HENDELSE_DØD_BARN == it)) {
+            return "Endring av barnetillegg";
+        }
+        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER == it)) {
+            return "Brukers dødsfall";
+        }
+        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM == it || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
+            return "Ungdomsprogramendring";
+        }
+        return null;
     }
 
     static Optional<BehandlingÅrsakDto> førsteÅrsak(Behandling behandling) {
