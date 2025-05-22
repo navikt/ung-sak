@@ -51,11 +51,11 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         final var lengsteFristPrType = etterlysningerSomVenterPåSvar.stream().collect(Collectors.toMap(Etterlysning::getType, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Etterlysning::getFrist, Comparator.nullsLast(Comparator.naturalOrder())))));
         final var aksjonspunktresultater = lengsteFristPrType.entrySet()
             .stream()
-            .filter(e -> harIkkePassertFrist(e.getValue().getFrist()))
+            .filter(e -> !harPassertFrist(e.getValue().getFrist()))
             .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
 
         final var harUtløpteEtterlysninger = etterlysningerSomVenterPåSvar.stream()
-            .anyMatch(e -> !harIkkePassertFrist(e.getFrist()));
+            .anyMatch(e -> harPassertFrist(e.getFrist()));
 
         if (harUtløpteEtterlysninger) {
             // Dersom vi har utløpte etterlysninger ønsker vi å oppdatere status på disse
@@ -67,8 +67,8 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktresultater);
     }
 
-    private static boolean harIkkePassertFrist(LocalDateTime frist) {
-        return frist == null || !frist.isBefore(LocalDateTime.now());
+    private static boolean harPassertFrist(LocalDateTime frist) {
+        return frist != null && frist.isBefore(LocalDateTime.now());
     }
 
     private static AksjonspunktDefinisjon mapTilDefinisjon(EtterlysningType type) {
