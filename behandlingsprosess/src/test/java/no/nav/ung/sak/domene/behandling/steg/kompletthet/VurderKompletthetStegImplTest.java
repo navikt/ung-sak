@@ -2,6 +2,10 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -16,6 +20,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -38,6 +44,8 @@ class VurderKompletthetStegImplTest {
     private BehandlingRepository behandlingRepository;
     @Inject
     private EtterlysningRepository etterlysningRepository;
+    @Inject
+    private ProsessTaskRepositoryImpl prosessTaskRepository;
 
     private VurderKompletthetStegImpl vurderKompletthetSteg;
 
@@ -59,7 +67,7 @@ class VurderKompletthetStegImplTest {
 
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
 
-        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, "P14D");
+        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, new ProsessTaskTjenesteImpl(prosessTaskRepository), "P14D");
 
     }
 
@@ -70,9 +78,6 @@ class VurderKompletthetStegImplTest {
 
         assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(0);
     }
-
-
-
 
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_er_opprettet() {
@@ -86,6 +91,24 @@ class VurderKompletthetStegImplTest {
         assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(1);
         assertThat(resultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE);
         assertThat(resultat.getAksjonspunktResultater().get(0).getFrist()).isNotNull();
+    }
+
+    @Test
+    void skal_ikke_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_der_frist_er_passert() {
+        // Arrange
+        final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var frist = LocalDateTime.now().minusMinutes(1);
+        etterlysning.vent(frist);
+        etterlysningRepository.lagre(etterlysning);
+
+        // Act
+        final var resultat = vurderKompletthetSteg.utførSteg(new BehandlingskontrollKontekst(revurdering.getFagsakId(), aktørId, behandlingRepository.taSkriveLås(revurdering)));
+
+        // Assert
+        assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(0);
+
+        final var prosessTaskData = prosessTaskRepository.finnAlle(SettEtterlysningTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        assertThat(prosessTaskData.size()).isEqualTo(1);
     }
 
     @Test
@@ -104,6 +127,7 @@ class VurderKompletthetStegImplTest {
         assertThat(resultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE);
         assertThat(resultat.getAksjonspunktResultater().get(0).getFrist()).isEqualTo(frist);
     }
+
 
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_og_opprettet() {

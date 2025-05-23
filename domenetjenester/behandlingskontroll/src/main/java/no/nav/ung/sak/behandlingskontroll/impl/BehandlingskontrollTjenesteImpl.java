@@ -487,17 +487,18 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
             .filter(Aksjonspunkt::tilbakehoppVedGjenopptakelse)
             .collect(Collectors.toList());
 
-        if (aksjonspunkterSomMedførerTilbakehopp.size() > 1) {
-            throw BehandlingskontrollFeil.FACTORY.kanIkkeGjenopptaBehandlingFantFlereAksjonspunkterSomMedførerTilbakehopp(behandling.getId()).toException();
-        }
         if (erHenleggelse) {
             settAutopunkterTilAvbrutt(kontekst, behandling);
         } else {
             settAutopunkterTilUtført(kontekst, behandling);
         }
-        if (aksjonspunkterSomMedførerTilbakehopp.size() == 1) {
-            Aksjonspunkt ap = aksjonspunkterSomMedførerTilbakehopp.get(0);
-            BehandlingStegType behandlingStegFunnet = ap.getBehandlingStegFunnet();
+        if (!aksjonspunkterSomMedførerTilbakehopp.isEmpty()) {
+            final var unikeSteg = aksjonspunkterSomMedførerTilbakehopp.stream().map(Aksjonspunkt::getBehandlingStegFunnet)
+                .collect(Collectors.toSet());
+            if (unikeSteg.size() > 1) {
+                throw BehandlingskontrollFeil.FACTORY.kanIkkeTilbakeføreBehandlingTilFlereSteg(behandling.getId()).toException();
+            }
+            BehandlingStegType behandlingStegFunnet = unikeSteg.iterator().next();
             behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, behandlingStegFunnet);
             // I tilfelle tilbakehopp reåpner autopunkt - de skal reutledes av steget.
             settAutopunkterTilUtført(kontekst, behandling);
