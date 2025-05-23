@@ -453,9 +453,6 @@ public class BehandlingRestTjeneste {
         if (behandling.isBehandlingPåVent()) {
             throw BehandlingRestTjenesteFeil.FACTORY.måTaAvVent(behandlingId).toException();
         }
-        if (behandling.harBehandlingÅrsak(BehandlingÅrsakType.BERØRT_BEHANDLING)) {
-            throw BehandlingRestTjenesteFeil.FACTORY.erBerørtBehandling(behandlingId).toException();
-        }
         behandlingsprosessTjeneste.asynkTilbakestillOgÅpneBehandlingForEndringer(behandlingId);
         behandling = behandlingsprosessTjeneste.hentBehandling(behandlingId);
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.empty());
@@ -481,9 +478,6 @@ public class BehandlingRestTjeneste {
 
         @FunksjonellFeil(feilkode = "K9-722320", feilmelding = "Behandling må tas av vent før den kan åpnes", løsningsforslag = "Ta behandling av vent")
         Feil måTaAvVent(Long behandlingId);
-
-        @FunksjonellFeil(feilkode = "K9-722321", feilmelding = "Behandling er berørt må gjennomføres", løsningsforslag = "Behandle ferdig berørt og opprett revurdering")
-        Feil erBerørtBehandling(Long behandlingId);
 
     }
 

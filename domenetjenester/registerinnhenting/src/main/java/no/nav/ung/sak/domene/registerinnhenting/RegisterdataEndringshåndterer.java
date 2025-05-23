@@ -133,36 +133,15 @@ public class RegisterdataEndringshåndterer {
     }
 
     private void lagHistorikkinnslag(Behandling behandling, Set<BehandlingÅrsakType> behandlingÅrsakTyper) {
+        if (behandlingÅrsakTyper.isEmpty()) {
+            return;
+        }
         if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD)) {
             historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD);
             return;
         }
-        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER)) {
-            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_YTELSER);
-            return;
-        }
-        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON) && harEnÅrsakSomIndikererHvaViHarInnhentet(behandlingÅrsakTyper)) {
-            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, utledEndringFraAnnenSak(behandlingÅrsakTyper));
-            return;
-        }
-        var redusert = behandlingÅrsakTyper.stream()
-            .filter(it -> !BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER.contains(it))
-            .filter(it -> !Objects.equals(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, it))
-            .collect(Collectors.toList());
-        if (redusert.isEmpty()) {
-            return;
-        }
+        // TODO: Lag egnet historikkinnslag for endret programperiode og kontroll av inntekt
         historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
     }
 
-    private boolean harEnÅrsakSomIndikererHvaViHarInnhentet(Set<BehandlingÅrsakType> behandlingÅrsakTyper) {
-        return behandlingÅrsakTyper.stream().anyMatch(BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER::contains);
-    }
-
-    private BehandlingÅrsakType utledEndringFraAnnenSak(Set<BehandlingÅrsakType> behandlingÅrsakTyper) {
-        return behandlingÅrsakTyper.stream()
-            .filter(BehandlingÅrsakType.ANNEN_OMSORGSPERSON_TYPER::contains)
-            .findAny()
-            .orElse(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON);
-    }
 }

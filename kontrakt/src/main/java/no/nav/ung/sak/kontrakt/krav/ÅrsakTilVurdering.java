@@ -19,13 +19,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum ÅrsakTilVurdering implements Kodeverdi {
 
-    MANUELT_REVURDERER_PERIODE("MANUELT_REVURDERER_PERIODE", "Manuell revurdering"),
-    // Ligger kant-i-kant med ny periode eller endring og blir dermed tatt med til vurdering
-    REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE", "Tilstøtende periode"),
-    // Tilkommet opplysninger på ny søknad fra bruker / punsj
     ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER", "Endring fra søknad/Punsj"),
-    // Kravet for perioden har blitt trukket
-    TRUKKET_KRAV("TRUKKET_KRAV", "Endret/fjernet søknadsperiode"),
     HENDELSE_DØD_BRUKER("HENDELSE_DØD_BRUKER", "Dødsfall bruker"),
     HENDELSE_DØD_BARN("HENDELSE_DØD_BARN", "Dødsfall barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
@@ -42,11 +36,6 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_SATS_REGULERING, G_REGULERING);;
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, HENDELSE_DØD_BARN);
-        sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, REVURDERER_BERØRT_PERIODE);
-        sammenheng.put(BehandlingÅrsakType.RE_KLAGE_NATTEVÅKBEREDSKAP, MANUELT_REVURDERER_PERIODE);
-        sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG, MANUELT_REVURDERER_PERIODE);
-        sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_OPPTJENING, MANUELT_REVURDERER_PERIODE);
-        sammenheng.put(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, REVURDERER_BEREGNING);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, OPPHØR_UNGDOMSPROGRAM);
         SAMMENHENG = Collections.unmodifiableMap(sammenheng);
     }
