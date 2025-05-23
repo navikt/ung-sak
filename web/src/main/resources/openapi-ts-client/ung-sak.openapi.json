@@ -3968,7 +3968,7 @@
           },
           "satsBeloep" : {
             "format" : "int64",
-            "maximum" : 3440,
+            "maximum" : 3610,
             "minimum" : 1,
             "type" : "integer"
           },
