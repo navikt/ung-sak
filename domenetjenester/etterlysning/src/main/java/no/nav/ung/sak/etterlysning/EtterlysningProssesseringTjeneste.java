@@ -3,10 +3,12 @@ package no.nav.ung.sak.etterlysning;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.etterlysning.kontroll.InntektkontrollEtterlysningHåndterer;
 import no.nav.ung.sak.etterlysning.ungdomsprogramperiode.EndretUngdomsprogramperiodeEtterlysningHåndterer;
 
+import java.util.List;
 import java.util.Objects;
 
 @ApplicationScoped
@@ -33,6 +35,10 @@ public class EtterlysningProssesseringTjeneste {
     public void settTilUtløpt(Long behandlingId) {
         final var etterlysninger = etterlysningRepository.hentUtløpteEtterlysningerSomVenterPåSvar(behandlingId);
 
+        settEttelysningerUtløpt(etterlysninger);
+    }
+
+    public void settEttelysningerUtløpt(List<Etterlysning> etterlysninger) {
         etterlysninger.forEach(e -> {
             oppgaveKlient.oppgaveUtløpt(e.getEksternReferanse());
             e.utløpt();
