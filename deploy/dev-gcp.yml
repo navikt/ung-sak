@@ -33,6 +33,10 @@ spec:
     enabled: true
     path: /ung/sak/internal/metrics/prometheus
   observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
     autoInstrumentation:
       enabled: true
       runtime: java

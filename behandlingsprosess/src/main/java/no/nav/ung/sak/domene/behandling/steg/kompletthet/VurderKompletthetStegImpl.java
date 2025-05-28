@@ -12,6 +12,8 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -30,6 +32,7 @@ import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon
 @ApplicationScoped
 public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
+    private static final Logger log = LoggerFactory.getLogger(VurderKompletthetStegImpl.class);
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private Duration ventePeriode;
@@ -49,10 +52,11 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         final var lengsteFristPrType = etterlysningerSomVenterPåSvar.stream().collect(Collectors.toMap(Etterlysning::getType, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Etterlysning::getFrist, Comparator.nullsLast(Comparator.naturalOrder())))));
+        LocalDateTime now = LocalDateTime.now();
         final var aksjonspunktresultater = lengsteFristPrType.entrySet()
             .stream()
             .filter(e -> !harPassertFrist(e.getValue().getFrist()))
-            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
+            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? now.plus(ventePeriode) : e.getValue().getFrist())).toList();
 
         final var harUtløpteEtterlysninger = etterlysningerSomVenterPåSvar.stream()
             .anyMatch(e -> harPassertFrist(e.getFrist()));
@@ -64,6 +68,11 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             prosessTaskTjeneste.lagre(prosessTaskData);
         }
 
+        log.info("Aksjonspunktresultatfrist={}, etterlysningfrister={}, harPassertFrist={}, now={}",
+            aksjonspunktresultater.stream().map(AksjonspunktResultat::getFrist).toList(),
+            etterlysningerSomVenterPåSvar.stream().map(Etterlysning::getFrist).toList(),
+            etterlysningerSomVenterPåSvar.stream().map(it -> harPassertFrist(it.getFrist())).toList(),
+            now);
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktresultater);
     }
 
