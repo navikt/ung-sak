@@ -32,7 +32,6 @@ public enum BehandlingStegType implements Kodeverdi {
     KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT("VURDEROP", "Kontrollerer søkers opplysningsplikt", UTREDES),
     SIMULER_OPPDRAG("SIMOPP", "Simuler oppdrag", UTREDES),
     START_STEG("START", "Start behandling prosess", UTREDES),
-    KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Kontroller endringer i ungdomsprogram", UTREDES),
     VURDER_KOMPLETTHET("VURDERKOMPLETT", "Vurder kompletthet", UTREDES),
     ALDERSVILKÅRET("VURDER_ALDER", "Vurder søkers alder", UTREDES),
     VURDER_TILBAKETREKK("VURDER_TILBAKETREKK", "Vurder tilbaketrekk", UTREDES),

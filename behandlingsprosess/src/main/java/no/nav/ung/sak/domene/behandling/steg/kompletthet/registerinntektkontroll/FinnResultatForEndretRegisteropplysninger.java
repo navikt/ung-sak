@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
+package no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -9,24 +9,26 @@ import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import java.math.BigDecimal;
 import java.util.Set;
 
-public class FinnKontrollresultatForIkkeGodkjentUttalelse {
+import static no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.FinnResultatForEndretRegisteropplysninger.Endringsresultat.ENDRING;
+import static no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.FinnResultatForEndretRegisteropplysninger.Endringsresultat.INGEN_ENDRING;
 
-    static LocalDateTimeline<KontrollResultatType> finnKontrollresultatForIkkeGodkjentUttalelse(
+public class FinnResultatForEndretRegisteropplysninger {
+
+    static LocalDateTimeline<Endringsresultat> finnTidslinjeForEndring(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-        LocalDateTimeline<EtterlysningOgRegisterinntekt> relevantIkkeGodkjentUttalelse) {
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningOgRegisterinntekt) {
 
         final var registerInntektTidslinje = gjeldendeRapporterteInntekter.mapValue(RapporterteInntekter::registerRapporterteInntekter);
-        final var ikkeGodkjentUttalelseResultater = relevantIkkeGodkjentUttalelse.combine(registerInntektTidslinje, (di, uttalelse, register) -> {
-            if (!harDiff(uttalelse.getValue().registerInntekt(), register != null ? register.getValue() : Set.of())) {
-                // Ingen endring i registeropplysninger etter at bruker har gitt uttalelse, oppretter aksjonspunkt
-                return new LocalDateSegment<>(di, KontrollResultatType.OPPRETT_AKSJONSPUNKT);
+
+        return etterlysningOgRegisterinntekt.combine(registerInntektTidslinje, (di, uttalelse, register) -> {
+            if (harDiff(uttalelse.getValue().registerInntekt(), register != null ? register.getValue() : Set.of())) {
+                // Nye registeropplysninger
+                return new LocalDateSegment<>(di, ENDRING);
             } else {
-                // Nye registeropplysninger etter at bruker har gitt uttalelse, oppretter ny oppgave med ny frist
-                return new LocalDateSegment<>(di, KontrollResultatType.OPPRETT_OPPGAVE_TIL_BRUKER_MED_NY_FRIST);
+                // Ingen nye registeropplysninger
+                return new LocalDateSegment<>(di, INGEN_ENDRING);
             }
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
-
-        return ikkeGodkjentUttalelseResultater;
     }
 
     static boolean harDiff(Set<RapportertInntekt> registerInntekFraUttalelse, Set<RapportertInntekt> gjeldendeRegisterinntekt) {
@@ -40,6 +42,11 @@ public class FinnKontrollresultatForIkkeGodkjentUttalelse {
             .map(RapportertInntekt::beløp)
             .reduce(BigDecimal::add)
             .orElse(BigDecimal.ZERO);
+    }
+
+    public enum Endringsresultat {
+        INGEN_ENDRING,
+        ENDRING
     }
 
 }

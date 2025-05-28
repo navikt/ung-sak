@@ -45,7 +45,7 @@ public class EtterlysningTjeneste {
     }
 
     /**
-     * Henter gjeldende etterlysninger for en behandling og fagsak.
+     * Henter gjeldende etterlysninger for en behandling og fagsak. Sjekker både VENTER, UTLØPT og MOTTATT_SVAR statuser.
      * Gjeldende etterlysning er den som ble opprettet sist for en periode dersom den ikke er koblet til en uttalelse (statuser VENTER eller UTLØPT)
      * eller den etterlysningern som sist fikk innsendt uttalelse dersom den er koblet til en uttalelse (status MOTTATT_SVAR)
      *
