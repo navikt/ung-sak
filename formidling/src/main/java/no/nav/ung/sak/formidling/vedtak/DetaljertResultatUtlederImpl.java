@@ -133,6 +133,11 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
                 return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRING_STARTDATO);
             }
 
+            if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+                && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
+                return DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR);
+            }
+
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
         }
 

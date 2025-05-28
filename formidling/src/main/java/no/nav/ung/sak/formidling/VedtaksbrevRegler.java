@@ -65,6 +65,16 @@ public class VedtaksbrevRegler {
             );
         }
 
+        if (innholderBare(resultater, DetaljertResultatType.OPPHØR)) {
+            String forklaring = "Automatisk brev ved opphør. " + redigerRegelResultat.forklaring();
+            return VedtaksbrevRegelResulat.automatiskBrev(
+                innholdByggere.select(OpphørInnholdBygger.class).get(),
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
+            );
+        }
+
         if (resultater.contains(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
             String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
