@@ -17,6 +17,8 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -50,6 +52,7 @@ import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon
 @ApplicationScoped
 public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
+    private static final Logger log = LoggerFactory.getLogger(VurderKompletthetStegImpl.class);
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -100,7 +103,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
 
-
         // Steg 3 Håndterer utløpte etterlysninger
         håndterUtløpteEtterlysninger(kontekst, etterlysningerSomVenterPåSvar);
 
@@ -125,6 +127,11 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             .stream()
             .filter(e -> !harPassertFrist(e.getValue().getFrist()))
             .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
+        log.info("Aksjonspunktresultatfrist={}, etterlysningfrister={}, harPassertFrist={}, now={}",
+            aksjonspunktresultater.stream().map(AksjonspunktResultat::getFrist).toList(),
+            etterlysningerSomVenterPåSvar.stream().map(Etterlysning::getFrist).toList(),
+            etterlysningerSomVenterPåSvar.stream().map(it -> harPassertFrist(it.getFrist())).toList(),
+            now);        
         return aksjonspunktresultater;
     }
 
