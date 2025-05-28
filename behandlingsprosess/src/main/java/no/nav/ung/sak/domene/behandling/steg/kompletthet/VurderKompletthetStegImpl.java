@@ -131,7 +131,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             aksjonspunktresultater.stream().map(AksjonspunktResultat::getFrist).toList(),
             etterlysningerSomVenterPåSvar.stream().map(Etterlysning::getFrist).toList(),
             etterlysningerSomVenterPåSvar.stream().map(it -> harPassertFrist(it.getFrist())).toList(),
-            now);        
+            LocalDateTime.now());
         return aksjonspunktresultater;
     }
 
