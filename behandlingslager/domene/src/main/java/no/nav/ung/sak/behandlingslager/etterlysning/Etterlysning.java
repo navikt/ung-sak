@@ -147,6 +147,10 @@ public class Etterlysning extends BaseEntitet {
         return frist;
     }
 
+    public void setFrist(LocalDateTime frist) {
+        this.frist = frist;
+    }
+
     public void vent(LocalDateTime frist) {
         if (status != EtterlysningStatus.OPPRETTET) {
             throw new IllegalStateException("Kan vente på etterlysning som ikke er satt til OPPRETTET. Status er " + status);
