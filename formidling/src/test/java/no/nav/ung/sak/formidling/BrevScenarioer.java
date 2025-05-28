@@ -158,38 +158,6 @@ public class BrevScenarioer {
         return PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).medPersonas().barn(AktørId.dummy(), barnFødselsdato).dødsdato(barnDødsdato).build();
     }
 
-    /**
-     * Veileder setter stoppdato første gang
-     */
-    public static UngTestScenario endringStoppdato(LocalDate fom, LocalDate stoppdato) {
-        var tidligereProgramperiode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-
-        var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(tidligereProgramperiode.getFomDato(), tidligereProgramperiode.getTomDato(), lavSatsBuilder(fom).build())
-        ));
-
-        var programPerioder = List.of(new UngdomsprogramPeriode(tidligereProgramperiode.getFomDato(), tidligereProgramperiode.getTomDato()));
-
-        LocalDateTimeline<Utfall> ungdomsprogramvilkår = new LocalDateTimeline<>(
-            List.of(
-                new LocalDateSegment<>(fom, stoppdato.minusDays(1), Utfall.OPPFYLT),
-                new LocalDateSegment<>(stoppdato, tidligereProgramperiode.getTomDato(), Utfall.IKKE_OPPFYLT)
-                )
-            );
-
-        return new UngTestScenario(
-            DEFAULT_NAVN,
-            programPerioder,
-            satser,
-            uttaksPerioder(tidligereProgramperiode),
-            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
-            new LocalDateTimeline<>(tidligereProgramperiode, Utfall.OPPFYLT),
-            ungdomsprogramvilkår,
-            fom,
-            List.of(tidligereProgramperiode.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(fom, tidligereProgramperiode.getTomDato()))), null, Collections.emptyList());
-    }
-
 
     /**
      * 27 år ungdom med full ungdomsperiode, ingen inntektsgradering og ingen barn, høy sats
@@ -497,7 +465,13 @@ public class BrevScenarioer {
             ),
             fom.minusYears(19).plusDays(42),
             List.of(opprinneligProgramPeriode.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(opphørsdato, opprinneligProgramPeriode.getTomDato()))), null, Collections.emptyList());
+            Set.of(
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), opphørsdato.minusDays(1))),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(opphørsdato, opprinneligProgramPeriode.getTomDato()))
+            ),
+            null,
+            Collections.emptyList()
+        );
     }
 
     private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {

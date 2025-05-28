@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.template.dto.OpphørDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +24,12 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        // Min. dato i resultattidslinjen er da opphøret "starter"
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.OPPHØR,
             new OpphørDto(
-                resultatTidslinje.getMinLocalDate()
+                resultatTidslinje
+                    .filterValue(it -> it.resultatInfo().stream()
+                        .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.OPPHØR))
+                    .getMinLocalDate()
             ));
     }
 
