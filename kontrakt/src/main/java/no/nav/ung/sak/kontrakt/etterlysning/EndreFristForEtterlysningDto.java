@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
@@ -18,6 +19,7 @@ public class EndreFristForEtterlysningDto {
      */
     @Valid
     @NotNull
+    @Size(min = 1, max = 20)
     private List<EndreFristDto> endretFrister;
 
 
