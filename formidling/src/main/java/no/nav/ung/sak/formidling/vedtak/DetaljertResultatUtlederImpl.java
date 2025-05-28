@@ -133,6 +133,11 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
                 return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRING_STARTDATO);
             }
 
+            if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+                && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
+                return DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR);
+            }
+
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
         }
 
@@ -169,7 +174,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (relevanteÅrsaker.isEmpty()) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Uendret innvilget periode i kant med en endret periode");
+            return DetaljertResultatInfo.of(DetaljertResultatType.UENDRET_INNVILGET, "Uendret innvilget periode i kant med en endret periode");
         }
 
         throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"

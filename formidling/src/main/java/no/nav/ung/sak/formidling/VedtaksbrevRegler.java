@@ -50,12 +50,13 @@ public class VedtaksbrevRegler {
             .flatMap(it -> it.getValue().resultatInfo().stream())
             .collect(Collectors.toSet());
 
-        var resultater = resultaterInfo.stream().map(DetaljertResultatInfo::detaljertResultatType).collect(Collectors.toSet());
+        var resultater = new ResultatHelper(resultaterInfo);
 
         var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
 
-        if (innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
-            || innholderBare(resultater, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE, DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE) ) {
+        if (resultater
+            .utenom(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE)
+            .innholderBare(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)) {
             String forklaring = "Automatisk brev ved ny innvilgelse. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(InnvilgelseInnholdBygger.class).get(),
@@ -65,7 +66,19 @@ public class VedtaksbrevRegler {
             );
         }
 
-        if (resultater.contains(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
+        if (resultater
+            .utenom(DetaljertResultatType.UENDRET_INNVILGET)
+            .innholderBare(DetaljertResultatType.OPPHØR)) {
+            String forklaring = "Automatisk brev ved opphør. " + redigerRegelResultat.forklaring();
+            return VedtaksbrevRegelResulat.automatiskBrev(
+                innholdByggere.select(OpphørInnholdBygger.class).get(),
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
+            );
+        }
+
+        if (resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
             String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
@@ -75,7 +88,7 @@ public class VedtaksbrevRegler {
             );
         }
 
-        if (innholderBare(resultater, DetaljertResultatType.ENDRING_ØKT_SATS)) {
+        if (resultater.innholderBare(DetaljertResultatType.ENDRING_ØKT_SATS)) {
             String forklaring = "Automatisk brev ved endring til høy sats. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(EndringHøySatsInnholdBygger.class).get(),
@@ -85,7 +98,7 @@ public class VedtaksbrevRegler {
             );
         }
 
-        if (innholderBare(resultater, DetaljertResultatType.ENDRING_BARN_FØDSEL)) {
+        if (resultater.innholderBare(DetaljertResultatType.ENDRING_BARN_FØDSEL)) {
             String forklaring = "Automatisk brev ved fødsel av barn. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(EndringBarnetilleggInnholdBygger.class).get(),
@@ -123,10 +136,33 @@ public class VedtaksbrevRegler {
     }
 
 
-    @SafeVarargs
-    private static <V> boolean innholderBare(Set<V> set, V... value) {
-        return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
-    }
-
     private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {}
+
+    private static class ResultatHelper {
+        private final Set<DetaljertResultatInfo> resultatInfo;
+        private final Set<DetaljertResultatType> resultatTyper;
+
+        ResultatHelper(Set<DetaljertResultatInfo> resultatInfo) {
+            this.resultatInfo = resultatInfo;
+            this.resultatTyper = resultatInfo.stream()
+                .map(DetaljertResultatInfo::detaljertResultatType)
+                .collect(Collectors.toSet());
+        }
+
+        boolean innholderBare(DetaljertResultatType... typer) {
+            return resultatTyper.equals(Arrays.stream(typer).collect(Collectors.toSet()));
+        }
+
+        ResultatHelper utenom(DetaljertResultatType... typer) {
+            var typerSet = Arrays.stream(typer).collect(Collectors.toSet());
+            var filtrert = resultatInfo.stream()
+                .filter(it -> !typerSet.contains(it.detaljertResultatType()))
+                .collect(Collectors.toSet());
+            return new ResultatHelper(filtrert);
+        }
+
+        public boolean innholder(DetaljertResultatType detaljertResultatType) {
+            return resultatTyper.contains(detaljertResultatType);
+        }
+    }
 }
