@@ -28,16 +28,16 @@ public class EtterlysningutlederKontrollerInntekt {
         KontrollerInntektInput input) {
         var relevantTidslinje = input.relevantTidslinje();
         var gjeldendeRapporterteInntekter = input.gjeldendeRapporterteInntekter();
-        var etterlysningTidslinje = input.etterlysningTidslinje();
+        var gjeldendeEtterlysningTidslinje = input.gjeldendeEtterlysningTidslinje();
 
         var resultatTidslinje = new LocalDateTimeline<EtterlysningBehov>(List.of());
 
         // Sjekker om bruker har etterlysning/uttalelse som ikke lenger er gyldig pga endret registeropplysning
-        var etterlysningResultatFraEndretRegisteropplysning = finnNyeEtterlysningerGrunnetRegisterendring(gjeldendeRapporterteInntekter, etterlysningTidslinje, relevantTidslinje);
+        var etterlysningResultatFraEndretRegisteropplysning = finnNyeEtterlysningerGrunnetRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, relevantTidslinje);
         resultatTidslinje = resultatTidslinje.crossJoin(etterlysningResultatFraEndretRegisteropplysning, StandardCombinators::coalesceLeftHandSide);
 
         // Sjekker om bruker har svart på etterlysning og denne fortsatt er gyldig
-        var resultatForGodkjenteInntekter = finnTidslinjeForMottatteSvarUtenRegisterendring(gjeldendeRapporterteInntekter, etterlysningTidslinje, relevantTidslinje);
+        var resultatForGodkjenteInntekter = finnTidslinjeForMottatteSvarUtenRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, relevantTidslinje);
         resultatTidslinje = resultatTidslinje.crossJoin(resultatForGodkjenteInntekter, StandardCombinators::coalesceLeftHandSide);
 
         // Sjekker vi må ha etterlysning pga avvik mellom rapportert inntekt og registerinntekt

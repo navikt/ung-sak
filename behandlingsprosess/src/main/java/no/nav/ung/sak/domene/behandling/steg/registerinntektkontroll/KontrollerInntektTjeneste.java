@@ -24,8 +24,8 @@ public class KontrollerInntektTjeneste {
     }
 
     public LocalDateTimeline<Kontrollresultat> utførKontroll(KontrollerInntektInput input) {
-        var etterlysningTidslinje = input.etterlysningTidslinje();
-        if (harEtterlysningerUtenSvar(etterlysningTidslinje)) {
+        var gjeldendeEtterlysningTidslinje = input.gjeldendeEtterlysningTidslinje();
+        if (harEtterlysningerUtenSvar(gjeldendeEtterlysningTidslinje)) {
             throw new IllegalStateException("Alle etterlysninger må enten ha mottatt svar, være avbrutt eller være utløpt før kontroll av inntekter kan utføres.");
         }
 
@@ -34,7 +34,7 @@ public class KontrollerInntektTjeneste {
         var resultatTidslinje = new LocalDateTimeline<Kontrollresultat>(List.of());
 
         // Ikke godkjent uttalelse => Aksjonspunkt
-        var kontrollresultatForIkkeGodkjentUttalelse = opprettAksjonspunktForIkkeGodkjentUttalelse(etterlysningTidslinje, relevantTidslinje);
+        var kontrollresultatForIkkeGodkjentUttalelse = opprettAksjonspunktForIkkeGodkjentUttalelse(gjeldendeEtterlysningTidslinje, relevantTidslinje);
         resultatTidslinje = resultatTidslinje.crossJoin(kontrollresultatForIkkeGodkjentUttalelse, StandardCombinators::coalesceLeftHandSide);
 
         var avviksresultat = new Avviksvurdering(akseptertDifferanse).finnAvviksresultatTidslinje(gjeldendeRapporterteInntekter, relevantTidslinje);
@@ -48,7 +48,7 @@ public class KontrollerInntektTjeneste {
         resultatTidslinje = resultatTidslinje.crossJoin(ingenAvvikUtenRapportertInntektFraBruker, StandardCombinators::coalesceLeftHandSide);
 
         // Bruker inntekt fra bruker eller godkjent inntekt => Ferdig kontrollert
-        final var resultatFraGodkjenteInntekter = finnResultatFraGodkjenteInntekter(relevantTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
+        final var resultatFraGodkjenteInntekter = finnResultatFraGodkjenteInntekter(relevantTidslinje, gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje);
         resultatTidslinje = resultatTidslinje.crossJoin(resultatFraGodkjenteInntekter, StandardCombinators::coalesceLeftHandSide);
 
 
