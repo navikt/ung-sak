@@ -1,5 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Dependent
 public class KontrollerInntektEtterlysningOppretter {
 
     private static final Logger log = LoggerFactory.getLogger(KontrollerInntektEtterlysningOppretter.class);
@@ -37,6 +40,7 @@ public class KontrollerInntektEtterlysningOppretter {
     private KontrollerInntektInputMapper inputMapper;
     private final int akseptertDifferanse;
 
+    @Inject
     public KontrollerInntektEtterlysningOppretter(EtterlysningRepository etterlysningRepository,
                                                   EtterlysningTjeneste etterlysningTjeneste,
                                                   InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
@@ -65,12 +69,12 @@ public class KontrollerInntektEtterlysningOppretter {
         var grunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getBehandlingId());
         for (var kontrollSegment : resultat.toSegments()) {
             switch (kontrollSegment.getValue()) {
-                case MED_NY_FRIST -> {
+                case ERSTATT_EKSISTERENDE -> {
                     log.info("Oppretter ny etterlysning med utvidet frist for periode {}", kontrollSegment.getLocalDateInterval());
                     etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval()));
                     etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(behandlingReferanse.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                 }
-                case UTEN_NY_FRIST -> {
+                case NY_ETTERLYSNING_DERSOM_INGEN_FINNES -> {
                     log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
                     if (!harEksisterendeEtterlysningPåVent(etterlysninger, kontrollSegment.getLocalDateInterval())) {
                         etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(behandlingReferanse.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));

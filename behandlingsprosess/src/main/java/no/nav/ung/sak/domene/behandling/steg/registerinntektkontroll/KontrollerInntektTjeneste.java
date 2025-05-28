@@ -16,7 +16,6 @@ import java.util.Set;
 
 public class KontrollerInntektTjeneste {
 
-
     public static final Set<EtterlysningStatus> VENTER_STATUSER = Set.of(EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
     private BigDecimal akseptertDifferanse;
 
@@ -42,15 +41,15 @@ public class KontrollerInntektTjeneste {
 
         // Avvik der registerinntekt = 0 => Aksjonspunkt
         var avvikUtenRegisterinntektResultat = opprettAksjonspunktForAvvikUtenRegisterinntekt(avviksresultat);
-        resultatTidslinje.crossJoin(avvikUtenRegisterinntektResultat, StandardCombinators::coalesceLeftHandSide);
+        resultatTidslinje = resultatTidslinje.crossJoin(avvikUtenRegisterinntektResultat, StandardCombinators::coalesceLeftHandSide);
 
         // Inntekt fra bruker = 0 og ingen avvik => Ferdig kontrollert
         var ingenAvvikUtenRapportertInntektFraBruker = lagResultatDersomIngenRapportertInntektFraBrukerOgRegister(avviksresultat, gjeldendeRapporterteInntekter);
-        resultatTidslinje.crossJoin(ingenAvvikUtenRapportertInntektFraBruker, StandardCombinators::coalesceLeftHandSide);
+        resultatTidslinje = resultatTidslinje.crossJoin(ingenAvvikUtenRapportertInntektFraBruker, StandardCombinators::coalesceLeftHandSide);
 
         // Bruker inntekt fra bruker eller godkjent inntekt => Ferdig kontrollert
         final var resultatFraGodkjenteInntekter = finnResultatFraGodkjenteInntekter(relevantTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
-        resultatTidslinje = resultatTidslinje.crossJoin(resultatFraGodkjenteInntekter);
+        resultatTidslinje = resultatTidslinje.crossJoin(resultatFraGodkjenteInntekter, StandardCombinators::coalesceLeftHandSide);
 
 
         var uhåndertTidslinje = relevantTidslinje.disjoint(resultatTidslinje);
@@ -63,15 +62,13 @@ public class KontrollerInntektTjeneste {
 
     private static LocalDateTimeline<Kontrollresultat> opprettAksjonspunktForIkkeGodkjentUttalelse(LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje, LocalDateTimeline<Boolean> relevantTidslinje) {
         final var relevantIkkeGodkjentUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgIkkeGodkjent()).intersection(relevantTidslinje);
-        var kontrollresultatForIkkeGodkjentUttalelse = relevantIkkeGodkjentUttalelse
+        return relevantIkkeGodkjentUttalelse
             .mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.OPPRETT_AKSJONSPUNKT));
-        return kontrollresultatForIkkeGodkjentUttalelse;
     }
 
     private LocalDateTimeline<Kontrollresultat> opprettAksjonspunktForAvvikUtenRegisterinntekt(LocalDateTimeline<AvvikResultatType> avviksresultat) {
-        var avvikUtenRegisterinntektResultat = avviksresultat.filterValue(it -> it == AvvikResultatType.AVVIK_UTEN_REGISTERINNTEKT)
+        return avviksresultat.filterValue(it -> it == AvvikResultatType.AVVIK_UTEN_REGISTERINNTEKT)
             .mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.OPPRETT_AKSJONSPUNKT));
-        return avvikUtenRegisterinntektResultat;
     }
 
     private LocalDateTimeline<Kontrollresultat> lagResultatDersomIngenRapportertInntektFraBrukerOgRegister(LocalDateTimeline<AvvikResultatType> avviksresultat, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter) {

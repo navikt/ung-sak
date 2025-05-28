@@ -19,6 +19,9 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
+import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
+import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
 import no.nav.ung.sak.typer.AktørId;
@@ -30,9 +33,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -53,6 +60,7 @@ class VurderKompletthetStegImplTest {
     private Behandling førstegangsbehandling;
     private Behandling revurdering;
     private AktørId aktørId;
+    private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
 
     @BeforeEach
     void setUp() {
@@ -67,7 +75,13 @@ class VurderKompletthetStegImplTest {
 
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
 
-        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, new ProsessTaskTjenesteImpl(prosessTaskRepository), behandlingRepository, "P14D");
+        rapporteringsfristAutopunktUtleder = mock(RapporteringsfristAutopunktUtleder.class);
+        when(rapporteringsfristAutopunktUtleder.utledAutopunktForForRapporteringsfrist(any())).thenReturn(Optional.empty());
+        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, new ProsessTaskTjenesteImpl(prosessTaskRepository), behandlingRepository,
+            mock(KontrollerInntektEtterlysningOppretter.class),
+            mock(ProgramperiodeendringEtterlysningTjeneste.class),
+            rapporteringsfristAutopunktUtleder,
+            "P14D");
 
     }
 

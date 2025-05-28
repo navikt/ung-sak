@@ -6,10 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.UtledEtterlysningResultatType;
-import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollResultatType;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
-import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektTjeneste;
-import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.Kontrollresultat;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;
 import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
 import no.nav.ung.sak.ytelse.InntektType;
@@ -47,7 +44,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.MED_NY_FRIST), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
     @Test
@@ -95,7 +92,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.UTEN_NY_FRIST), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
     @Test
@@ -111,7 +108,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.MED_NY_FRIST), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
     @Test
@@ -146,7 +143,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(LocalDateTimeline.empty(), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -167,7 +164,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(LocalDateTimeline.empty(), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
     }
 
 
@@ -185,7 +182,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.MED_NY_FRIST), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.ERSTATT_EKSISTERENDE), resultat);
     }
 
     @Test
