@@ -60,7 +60,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(LocalDateTimeline.empty(), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -76,7 +76,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(LocalDateTimeline.empty(), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -124,7 +124,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(LocalDateTimeline.empty(), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -218,7 +218,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(LocalDateTimeline.empty(), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -234,7 +234,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(LocalDateTimeline.empty(), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
     }
 
     private LocalDateTimeline<UtledEtterlysningResultatType> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,

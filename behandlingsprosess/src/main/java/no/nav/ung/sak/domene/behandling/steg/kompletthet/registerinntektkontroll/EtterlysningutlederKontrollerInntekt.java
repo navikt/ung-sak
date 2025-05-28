@@ -42,6 +42,9 @@ public class EtterlysningutlederKontrollerInntekt {
         var avviksvurderingMotRegisterinntekt = finnTidslinjeForEtterlysningFraAvvik(gjeldendeRapporterteInntekter, restTidslinjeÅVurdere);
         resultatTidslinje = resultatTidslinje.crossJoin(avviksvurderingMotRegisterinntekt, StandardCombinators::coalesceLeftHandSide);
 
+
+        resultatTidslinje = resultatTidslinje.crossJoin(relevantTidslinje.mapValue(it -> UtledEtterlysningResultatType.INGEN_ETTERLYSNING), StandardCombinators::coalesceLeftHandSide);
+
         return resultatTidslinje;
 
     }

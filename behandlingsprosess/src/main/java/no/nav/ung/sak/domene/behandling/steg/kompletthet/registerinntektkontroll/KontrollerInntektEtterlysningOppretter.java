@@ -58,11 +58,11 @@ public class KontrollerInntektEtterlysningOppretter {
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
         var input = inputMapper.mapInput(behandlingReferanse);
         var opprettEtterlysningResultatTidslinje = new EtterlysningutlederKontrollerInntekt(BigDecimal.valueOf(akseptertDifferanse)).finnEtterlysninger(input);
-        håndterPeriodisertKontrollresultat(behandlingReferanse, opprettEtterlysningResultatTidslinje);
+        håndterPeriodisertResultat(behandlingReferanse, opprettEtterlysningResultatTidslinje);
     }
 
-    private void håndterPeriodisertKontrollresultat(BehandlingReferanse behandlingReferanse,
-                                                    LocalDateTimeline<UtledEtterlysningResultatType> resultat) {
+    private void håndterPeriodisertResultat(BehandlingReferanse behandlingReferanse,
+                                            LocalDateTimeline<UtledEtterlysningResultatType> resultat) {
         var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
@@ -78,6 +78,13 @@ public class KontrollerInntektEtterlysningOppretter {
                     log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
                     if (!harEksisterendeEtterlysningPåVent(etterlysninger, kontrollSegment.getLocalDateInterval())) {
                         etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(behandlingReferanse.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
+                    }
+                }
+                case INGEN_ETTERLYSNING -> {
+                    var etterlysningerForPeriode = avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval());
+                    if (!etterlysningerForPeriode.isEmpty()) {
+                        log.info("Avbryter etterlysninger {}  for periode {}", etterlysningerForPeriode, kontrollSegment.getLocalDateInterval());
+                        etterlysningerSomSkalAvbrytes.addAll(etterlysningerForPeriode);
                     }
                 }
             }
@@ -117,24 +124,24 @@ public class KontrollerInntektEtterlysningOppretter {
 
     private static boolean harEksisterendeEtterlysningPåVent(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
         return etterlysninger.stream().anyMatch(e -> e.getStatus().equals(EtterlysningStatus.VENTER) &&
-            e.getPeriode().toLocalDateInterval().overlaps(periode));
+                e.getPeriode().toLocalDateInterval().overlaps(periode));
     }
 
     private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateInterval periode, UUID iayRef) {
         UUID bestillingsId = UUID.randomUUID();
         final var etterlysning = Etterlysning.forInntektKontrollUttalelse(behandlingId,
-            iayRef,
-            bestillingsId,
-            DatoIntervallEntitet.fra(periode.getFomDato(), periode.getTomDato()));
+                iayRef,
+                bestillingsId,
+                DatoIntervallEntitet.fra(periode.getFomDato(), periode.getTomDato()));
         return etterlysning;
     }
 
     private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
         var etterlysningerSomSkalAvbrytes = etterlysninger.stream()
-            .filter(etterlysning ->
-                etterlysning.getPeriode().toLocalDateInterval().overlaps(periode))
-            .filter(e -> e.getStatus().equals(EtterlysningStatus.VENTER))
-            .toList();
+                .filter(etterlysning ->
+                        etterlysning.getPeriode().toLocalDateInterval().overlaps(periode))
+                .filter(e -> e.getStatus().equals(EtterlysningStatus.VENTER))
+                .toList();
         etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
 
         return etterlysningerSomSkalAvbrytes;
