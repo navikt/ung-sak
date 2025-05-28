@@ -1465,6 +1465,44 @@
         "required" : [ "dødsdato", "hendelseInfo" ],
         "type" : "object"
       },
+      "EndreFristDto" : {
+        "properties" : {
+          "etterlysningEksternReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "frist" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "etterlysningEksternReferanse", "frist" ],
+        "type" : "object"
+      },
+      "EndreFristForEtterlysningDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "behandlingVersjon" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "endretFrister" : {
+            "items" : {
+              "$ref" : "#/components/schemas/EndreFristDto"
+            },
+            "maxItems" : 20,
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "behandlingId", "behandlingVersjon", "endretFrister" ],
+        "type" : "object"
+      },
       "EndreNotatDto" : {
         "properties" : {
           "notatId" : {
@@ -5136,6 +5174,31 @@
             "description" : "default response"
           }
         }
+      }
+    },
+    "/api/behandling/etterlysninger/endre-frist" : {
+      "post" : {
+        "description" : "Endrer frist for etterlysning",
+        "operationId" : "endreFrist",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EndreFristForEtterlysningDto"
+              }
+            }
+          },
+          "description" : "Liste over etterlysninger med ny frist."
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "etterlysning" ]
       }
     },
     "/api/behandling/kontrollerinntekt" : {
