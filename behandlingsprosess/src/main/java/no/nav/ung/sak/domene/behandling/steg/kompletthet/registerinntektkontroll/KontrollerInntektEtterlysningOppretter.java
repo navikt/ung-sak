@@ -13,7 +13,7 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.UtledEtterlysningResultatType;
+import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInputMapper;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -57,12 +57,12 @@ public class KontrollerInntektEtterlysningOppretter {
 
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
         var input = inputMapper.mapInput(behandlingReferanse);
-        var opprettEtterlysningResultatTidslinje = new EtterlysningutlederKontrollerInntekt(BigDecimal.valueOf(akseptertDifferanse)).finnEtterlysninger(input);
+        var opprettEtterlysningResultatTidslinje = new EtterlysningutlederKontrollerInntekt(BigDecimal.valueOf(akseptertDifferanse)).utledBehovForEtterlysninger(input);
         håndterPeriodisertResultat(behandlingReferanse, opprettEtterlysningResultatTidslinje);
     }
 
     private void håndterPeriodisertResultat(BehandlingReferanse behandlingReferanse,
-                                            LocalDateTimeline<UtledEtterlysningResultatType> resultat) {
+                                            LocalDateTimeline<EtterlysningBehov> resultat) {
         var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();

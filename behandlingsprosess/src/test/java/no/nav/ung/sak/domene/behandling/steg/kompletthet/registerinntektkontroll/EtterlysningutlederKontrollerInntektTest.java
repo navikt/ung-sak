@@ -5,7 +5,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.UtledEtterlysningResultatType;
+import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;
 import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
@@ -44,7 +44,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.ERSTATT_EKSISTERENDE), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.ERSTATT_EKSISTERENDE), resultat);
     }
 
     @Test
@@ -60,7 +60,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -76,7 +76,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -92,7 +92,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
     @Test
@@ -108,7 +108,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
     }
 
     @Test
@@ -124,7 +124,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -143,7 +143,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -162,7 +162,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
 
@@ -184,7 +184,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
 
@@ -202,7 +202,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.ERSTATT_EKSISTERENDE), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.ERSTATT_EKSISTERENDE), resultat);
     }
 
     @Test
@@ -218,7 +218,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
     @Test
@@ -234,13 +234,13 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
-    private LocalDateTimeline<UtledEtterlysningResultatType> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
-                                                                   LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-                                                                   LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
-        return new EtterlysningutlederKontrollerInntekt(AKSEPTERT_DIFFERANSE).finnEtterlysninger(
+    private LocalDateTimeline<EtterlysningBehov> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
+                                                       LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
+                                                       LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
+        return new EtterlysningutlederKontrollerInntekt(AKSEPTERT_DIFFERANSE).utledBehovForEtterlysninger(
             new KontrollerInntektInput(prosessTriggerTidslinje.mapValue(it -> true),
                 gjeldendeRapporterteInntekter,
             ikkeGodkjentUttalelseTidslinje));
