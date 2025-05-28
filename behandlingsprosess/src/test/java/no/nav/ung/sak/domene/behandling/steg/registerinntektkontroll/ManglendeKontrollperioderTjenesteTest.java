@@ -24,7 +24,6 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +58,6 @@ class ManglendeKontrollperioderTjenesteTest {
     private FagsakRepository fagsakRepository;
     private Behandling behandling;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
 
@@ -69,7 +67,6 @@ class ManglendeKontrollperioderTjenesteTest {
         final var ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, behandlingRepository);
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste);
         ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
-        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, ytelsesperiodeutleder);
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
     }
 
@@ -86,7 +83,7 @@ class ManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId());
+        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId(), behandling.getFagsakId());
 
         assertThat(prosessTaskData.isEmpty()).isTrue();
     }
@@ -102,7 +99,7 @@ class ManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId());
+        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId(), behandling.getFagsakId());
 
         assertThat(prosessTaskData.isEmpty()).isTrue();
     }
@@ -118,7 +115,7 @@ class ManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId());
+        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId(), behandling.getFagsakId());
 
         assertThat(prosessTaskData.isEmpty()).isFalse();
         final var perioder = parseToPeriodeSet(prosessTaskData.get().getPropertyValue("perioder"));
@@ -138,7 +135,7 @@ class ManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId());
+        manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId(), behandling.getFagsakId());
 
         final var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandling.getId());
         assertThat(prosessTriggere.isEmpty()).isTrue();
@@ -156,7 +153,7 @@ class ManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId());
+        final var prosessTaskData = manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId(), behandling.getFagsakId());
 
         assertThat(prosessTaskData.isEmpty()).isFalse();
         final var perioder = parseToPeriodeSet(prosessTaskData.get().getPropertyValue("perioder"));
@@ -178,7 +175,7 @@ class ManglendeKontrollperioderTjenesteTest {
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
         tilkjentYtelseRepository.lagre(behandling.getId(), List.of(KontrollertInntektPeriode.ny().medPeriode(månedNrTre).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.BRUKER).medErManueltVurdert(false).build()));
 
-        manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId());
+        manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId(), behandling.getFagsakId());
 
         final var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandling.getId());
         assertThat(prosessTriggere.isEmpty()).isTrue();

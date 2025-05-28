@@ -19,7 +19,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
-import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 
 @ApplicationScoped
@@ -28,7 +27,6 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private StønadstatistikkService stønadstatistikkService;
-    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
 
     protected UngdomsytelseOpprettProsessTaskIverksett() {
         // for CDI proxy
@@ -36,10 +34,9 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
 
     @Inject
     public UngdomsytelseOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                                    StønadstatistikkService stønadstatistikkService, ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste) {
+                                                    StønadstatistikkService stønadstatistikkService) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.stønadstatistikkService = stønadstatistikkService;
-        this.manglendeKontrollperioderTjeneste = manglendeKontrollperioderTjeneste;
     }
 
     @Override
@@ -61,7 +58,6 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
 
         taskData.addNesteParallell(parallelle);
         taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));
-        manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId()).ifPresent(taskData::addNesteSekvensiell);
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
         taskData.setCallIdFraEksisterende();
