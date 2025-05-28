@@ -27,11 +27,12 @@ public class RapporteringsfristAutopunktUtleder {
         var årsakTidslinje = kontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingReferanse.getBehandlingId(), Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT));
 
 
-        final var ikkePassertRapporteringsfrist = årsakTidslinje.filterValue(it -> !it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        final var ikkePassertRapporteringsfristTidslinje = årsakTidslinje.filterValue(it -> !it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
-        if (!ikkePassertRapporteringsfrist.isEmpty()) {
+        var harIkkePassertRapporteringsfrist = !ikkePassertRapporteringsfristTidslinje.isEmpty();
+        if (harIkkePassertRapporteringsfrist) {
             // Dersom vi ikkje har passert rapporteringsfrist (ikkje har kontroll-årsak) så skal vi vente til rapporteringsfrist
-            final var sisteDatoForRapportertInntekt = ikkePassertRapporteringsfrist.getMaxLocalDate();
+            final var sisteDatoForRapportertInntekt = ikkePassertRapporteringsfristTidslinje.getMaxLocalDate();
             LocalDateTime venteFrist;
             if (sisteDatoForRapportertInntekt.getDayOfMonth() < 7) {
                 venteFrist = sisteDatoForRapportertInntekt.withDayOfMonth(7).atStartOfDay();
