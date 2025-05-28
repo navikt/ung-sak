@@ -7,6 +7,7 @@ import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -65,7 +66,8 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
             ungdomsprogramPeriodeRepository,
             prosessTaskTjeneste,
             etterlysningRepository,
-            new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository)
+            new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository),
+            scenario.mockBehandlingRepository()
         );
     }
 
@@ -79,7 +81,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
             new UngdomsprogramPeriode(fom2, fom2.plusDays(1))
         ));
 
-        assertThrows(IllegalStateException.class, () -> programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId()));
+        assertThrows(IllegalStateException.class, () -> programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling)));
     }
 
 
@@ -92,7 +94,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
 
         // act
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId());
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
         assertThat(etterlysninger.size()).isEqualTo(1);
@@ -114,7 +116,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         opprettEtterlysningPåVent(ungdomsprogramPeriodeGrunnlag, fom, tom);
 
         // act
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId());
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
         // assert
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -147,7 +149,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var ungdomsprogramPeriodeGrunnlag2 = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
 
 
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId());
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
 
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -176,7 +178,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
 
         // ACT
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId());
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
 
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -199,7 +201,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         opprettEtterlysningMedMottattSvar(ungdomsprogramPeriodeGrunnlag, fom, tom);
 
         // act
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId());
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
         // Assert
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -226,7 +228,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var ungdomsprogramPeriodeGrunnlag2 = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
 
         // act
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId());
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
         // Assert
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -260,7 +262,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var ungdomsprogramPeriodeGrunnlag3 = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
 
         // act
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandling.getId(), behandling.getFagsakId());
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
         // Assert
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());

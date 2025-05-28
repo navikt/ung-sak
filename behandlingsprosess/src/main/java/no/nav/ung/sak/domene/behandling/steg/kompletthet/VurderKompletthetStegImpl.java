@@ -8,14 +8,24 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
+import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
+import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,6 +42,10 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private BehandlingRepository behandlingRepository;
+    private KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter;
+    private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
+    private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
     private Duration ventePeriode;
 
 
@@ -39,21 +53,46 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     }
 
     @Inject
-    public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository, ProsessTaskTjeneste prosessTaskTjeneste, @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
+    public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository,
+                                     ProsessTaskTjeneste prosessTaskTjeneste,
+                                     BehandlingRepository behandlingRepository,
+                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.behandlingRepository = behandlingRepository;
         this.ventePeriode = Duration.parse(ventePeriode);
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
-        final var lengsteFristPrType = etterlysningerSomVenterPåSvar.stream().collect(Collectors.toMap(Etterlysning::getType, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Etterlysning::getFrist, Comparator.nullsLast(Comparator.naturalOrder())))));
-        final var aksjonspunktresultater = lengsteFristPrType.entrySet()
-            .stream()
-            .filter(e -> !harPassertFrist(e.getValue().getFrist()))
-            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
 
+        final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        final var behandlingReferanse = BehandlingReferanse.fra(behandling);
+
+        // Steg 1: Opprett etterlysninger
+        kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+
+
+        // Steg 2: Utled aksjonspunkter
+        List<AksjonspunktResultat> aksjonspunktResultater = new ArrayList<>();
+
+        // Sjekker rapporteringsfrist
+        rapporteringsfristAutopunktUtleder.utledAutopunktForForRapporteringsfrist(behandlingReferanse)
+            .ifPresent(aksjonspunktResultater::add);
+
+        // Sjekker etterlysninger opprettet i steg 1
+        final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
+        aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
+
+
+        // Steg 3 Håndterer utløpte etterlysninger
+        håndterUtløpteEtterlysninger(kontekst, etterlysningerSomVenterPåSvar);
+
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
+    }
+
+    private void håndterUtløpteEtterlysninger(BehandlingskontrollKontekst kontekst, List<Etterlysning> etterlysningerSomVenterPåSvar) {
         final var harUtløpteEtterlysninger = etterlysningerSomVenterPåSvar.stream()
             .anyMatch(e -> harPassertFrist(e.getFrist()));
 
@@ -63,8 +102,15 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
             prosessTaskTjeneste.lagre(prosessTaskData);
         }
+    }
 
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktresultater);
+    private List<AksjonspunktResultat> utledFraEtterlysninger(List<Etterlysning> etterlysningerSomVenterPåSvar) {
+        final var lengsteFristPrType = etterlysningerSomVenterPåSvar.stream().collect(Collectors.toMap(Etterlysning::getType, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Etterlysning::getFrist, Comparator.nullsLast(Comparator.naturalOrder())))));
+        final var aksjonspunktresultater = lengsteFristPrType.entrySet()
+            .stream()
+            .filter(e -> !harPassertFrist(e.getValue().getFrist()))
+            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
+        return aksjonspunktresultater;
     }
 
     private static boolean harPassertFrist(LocalDateTime frist) {

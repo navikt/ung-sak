@@ -67,7 +67,7 @@ class VurderKompletthetStegImplTest {
 
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
 
-        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, new ProsessTaskTjenesteImpl(prosessTaskRepository), "P14D");
+        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, new ProsessTaskTjenesteImpl(prosessTaskRepository), behandlingRepository, "P14D");
 
     }
 
