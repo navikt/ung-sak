@@ -19,6 +19,10 @@ import java.util.List;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
+/**
+ * Fullfører kontroll av inntekt basert på rapporterte inntekter og svar på etterlysninger. Steget oppretter perioder for kontrollert inntekt dersom det enten ikke er avvik eller bruker har godkjent bruk av registerinntekt.
+ * Steget returnerer aksjonspunkt dersom bruker ikke har godkjent registerinntekt eller dersom det er bruker har rapportert inntekt uten at det er inntekt i registeret.
+ */
 @ApplicationScoped
 @BehandlingStegRef(value = KONTROLLER_REGISTER_INNTEKT)
 @BehandlingTypeRef

@@ -76,6 +76,16 @@ public class KontrollerteInntektperioderTjeneste {
             final var perioderSomBeholdes = eksisterendePerioder.stream()
                 .filter(it -> !relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
                 .toList();
+
+
+            var perioderSomFjernes = eksisterendePerioder.stream()
+                .filter(it -> relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
+                .toList();
+
+            if (!perioderSomFjernes.isEmpty()) {
+                LOG.info("Fjerner kontrollerte perioder siden det ikke er påkrevd kontroll for første og siste måned i programperioden. Perioder som beholdes: {}, perioder som fjernes: {}",
+                    perioderSomBeholdes.size(), perioderSomFjernes.size());
+            }
             tilkjentYtelseRepository.lagre(behandlingId, perioderSomBeholdes);
         }
     }
@@ -113,10 +123,12 @@ public class KontrollerteInntektperioderTjeneste {
             .orElse(LocalDateTimeline.empty());
     }
 
-    /** Mapper til kontrollerte inntekter for automatisk vurdering
+    /**
+     * Mapper til kontrollerte inntekter for automatisk vurdering
+     *
      * @param vurdertTidslinje Vurdert tidslinje
      * @param inntektTidslinje Rapportert inntekt tidslinje
-     * @param defaultKilde Kilde som skal settes der vi ikke har rapporterte inntekter
+     * @param defaultKilde     Kilde som skal settes der vi ikke har rapporterte inntekter
      * @return List med kontrollerte perioder
      */
     private static List<KontrollertInntektPeriode> mapAutomatiskKontrollerteInntektperioder(LocalDateTimeline<Boolean> vurdertTidslinje,
@@ -134,26 +146,28 @@ public class KontrollerteInntektperioderTjeneste {
             ).toList();
     }
 
-    /** Mapper tidslinje for manuelt vurderte data til kontrollerte inntekter
+    /**
+     * Mapper tidslinje for manuelt vurderte data til kontrollerte inntekter
+     *
      * @param inntektTidslinje Manuelt kontrollert inntekt tidslinje
      * @return List med kontrollerte perioder
      */
     private static List<KontrollertInntektPeriode> mapManueltKontrollerteInntektperioder(LocalDateTimeline<ManueltKontrollertInntekt> inntektTidslinje) {
         return inntektTidslinje.toSegments().stream().map(
-                s -> KontrollertInntektPeriode.ny()
-                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                    .medInntekt(s.getValue().samletInntekt())
-                    .medKilde(s.getValue().kilde())
-                    .medErManueltVurdert(true)
-                    .medBegrunnelse(s.getValue().begrunnelse())
-                    .build()
-            ).toList();
+            s -> KontrollertInntektPeriode.ny()
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+                .medInntekt(s.getValue().samletInntekt())
+                .medKilde(s.getValue().kilde())
+                .medErManueltVurdert(true)
+                .medBegrunnelse(s.getValue().begrunnelse())
+                .build()
+        ).toList();
     }
 
     private static LocalDateSegmentCombinator<Boolean, RapportertInntektOgKilde, RapportertInntektOgKilde> settVerdiForIngenInntekter(Optional<KontrollertInntektKilde> kilde) {
         return (di, lhs, rhs) ->
             rhs == null ?
-            new LocalDateSegment<>(di, new RapportertInntektOgKilde(kilde.orElseThrow(() -> new IllegalStateException("Forventer å få default kilde dersom tidslinjen med inntekter ikke dekker alle perioder til vurdering")), BigDecimal.ZERO)) :
+                new LocalDateSegment<>(di, new RapportertInntektOgKilde(kilde.orElseThrow(() -> new IllegalStateException("Forventer å få default kilde dersom tidslinjen med inntekter ikke dekker alle perioder til vurdering")), BigDecimal.ZERO)) :
                 rhs;
     }
 }
