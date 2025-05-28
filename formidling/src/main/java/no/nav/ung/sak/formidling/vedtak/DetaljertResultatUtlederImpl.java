@@ -75,6 +75,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     }
 
+    @SuppressWarnings("Convert2MethodRef")
     private Map<VilkårType, LocalDateTimeline<DetaljertVilkårResultat>> hentVilkårTidslinjer(Long behandlingId) {
         return vilkårResultatRepository.hentVilkårResultater(behandlingId).stream()
             .collect(Collectors.groupingBy(
@@ -86,7 +87,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
                             new DetaljertVilkårResultat(it.getAvslagsårsak(), it.getVilkårType(), it.getUtfall())
                         ), Collectors.toList()
                     ),
-                    LocalDateTimeline::new
+                    list -> new LocalDateTimeline<>(list) // Ikke bruk Method reference da det gir kompilerings feil runtime!
                 )
             ));
     }
