@@ -19,9 +19,9 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.SettOppgaveUtløptForInntektsrapporteringTask;
@@ -30,17 +30,16 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
-import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Optional;
 import java.util.UUID;
 
 import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
@@ -59,18 +58,16 @@ public class ForvaltningOppgaveRestTjeneste {
     private FagsakRepository fagsakRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private EtterlysningRepository etterlysningRepository;
-    private final static boolean isProd = Environment.current().isProd();
-    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    private boolean isProd = Environment.current().isProd();
 
     @Inject
-    public ForvaltningOppgaveRestTjeneste(EntityManager entityManager, BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskTjeneste, FagsakRepository fagsakRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, EtterlysningRepository etterlysningRepository, BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
+    public ForvaltningOppgaveRestTjeneste(EntityManager entityManager, BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskTjeneste, FagsakRepository fagsakRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, EtterlysningRepository etterlysningRepository) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.etterlysningRepository = etterlysningRepository;
-        this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
     }
 
     public ForvaltningOppgaveRestTjeneste() {
@@ -201,7 +198,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Avbryter feilopprettet etterlysning.", summary = ("Avbryter feilopprettet etterlysning"), tags = "oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
-    public Response avbrytEtterlysning(@NotNull @QueryParam("etterlysningId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Long etterlysningId, @QueryParam("gjennoppta") Boolean gjennoppta) {
+    public Response avbrytEtterlysning(@NotNull @QueryParam("etterlysningId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Long etterlysningId) {
         final var etterlysning = etterlysningRepository.hentEtterlysning(etterlysningId);
         if (etterlysning.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
             throw new IllegalStateException("Kan ikke avbryte etterlysning som har mottatt svar");
@@ -213,41 +210,6 @@ public class ForvaltningOppgaveRestTjeneste {
         final var avbrytTask = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
         avbrytTask.setBehandling(behandling.getFagsakId(), behandling.getId());
         prosessTaskTjeneste.lagre(avbrytTask);
-
-        if (gjennoppta != null && gjennoppta) {
-            behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, true);
-        }
-        return Response.ok().build();
-    }
-
-    @POST
-    @Path("utløp-etterlysning")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Utløper etterlysning som venter, hovedsaklig for enklere testing.", summary = ("Utløper feilopprettet etterlysning"), tags = "oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
-    public Response utløpEtterlysning(@NotNull @QueryParam("etterlysningId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Long etterlysningId,
-                                      @QueryParam("trekkFraDuration") String trekkFraDuration,
-                                      @QueryParam("gjennoppta") Boolean gjennoppta) {
-        if (isProd) {
-            throw new IllegalArgumentException("Kan ikke kjøre denne tjenesten i prod");
-        }
-
-        final var etterlysning = etterlysningRepository.hentEtterlysning(etterlysningId);
-        if (trekkFraDuration == null) {
-            etterlysning.tvingFrist(etterlysning.getFrist().minusMinutes(1));
-        } else {
-            etterlysning.tvingFrist(etterlysning.getFrist().minus(Duration.parse(trekkFraDuration)));
-        }
-        etterlysningRepository.lagre(etterlysning);
-
-        final var behandling = behandlingRepository.hentBehandling(etterlysning.getBehandlingId());
-        final var utløpTask = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptTask.class);
-        utløpTask.setBehandling(behandling.getFagsakId(), behandling.getId());
-        prosessTaskTjeneste.lagre(utløpTask);
-
-        if (gjennoppta != null && gjennoppta) {
-            behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, true);
-        }
         return Response.ok().build();
     }
 

@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
 import jakarta.persistence.*;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
@@ -15,8 +14,6 @@ import java.util.UUID;
 @Entity(name = "Etterlysning")
 @Table(name = "ETTERLYSNING")
 public class Etterlysning extends BaseEntitet {
-
-    private static boolean isProd = Environment.current().isProd();
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ETTERLYSNING")
@@ -188,21 +185,6 @@ public class Etterlysning extends BaseEntitet {
         }
         this.status = EtterlysningStatus.MOTTATT_SVAR;
         this.uttalelse = new UttalelseEntitet(erEndringGodkjent, uttalelse, svarJournalpostId);
-    }
-
-    /**
-     * Brukes bare ved testing
-     */
-    public void tvingFrist(LocalDateTime nyFrist) {
-        if (isProd) {
-            throw new IllegalStateException("Kan ikke tvinge frist i prod");
-        }
-
-        if (status != EtterlysningStatus.VENTER) {
-            throw new IllegalStateException("Kan ikke tvinge frist på etterlysning som ikke er satt til VENTER. Status er " + status);
-        }
-
-        this.frist = nyFrist;
     }
 
     public Optional<UttalelseEntitet> getUttalelse() {
