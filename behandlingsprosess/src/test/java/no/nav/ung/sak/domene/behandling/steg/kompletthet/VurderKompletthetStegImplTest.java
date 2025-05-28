@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
@@ -10,7 +9,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -32,7 +30,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -76,7 +73,7 @@ class VurderKompletthetStegImplTest {
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
 
         rapporteringsfristAutopunktUtleder = mock(RapporteringsfristAutopunktUtleder.class);
-        when(rapporteringsfristAutopunktUtleder.utledAutopunktForForRapporteringsfrist(any())).thenReturn(Optional.empty());
+        when(rapporteringsfristAutopunktUtleder.utledAutopunktForRapporteringsfrist(any())).thenReturn(Optional.empty());
         vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, new ProsessTaskTjenesteImpl(prosessTaskRepository), behandlingRepository,
             mock(KontrollerInntektEtterlysningOppretter.class),
             mock(ProgramperiodeendringEtterlysningTjeneste.class),

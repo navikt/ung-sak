@@ -23,7 +23,7 @@ public class RapporteringsfristAutopunktUtleder {
         this.kontrollperioderUtleder = kontrollperioderUtleder;
     }
 
-    public Optional<AksjonspunktResultat> utledAutopunktForForRapporteringsfrist(BehandlingReferanse behandlingReferanse) {
+    public Optional<AksjonspunktResultat> utledAutopunktForRapporteringsfrist(BehandlingReferanse behandlingReferanse) {
         var årsakTidslinje = kontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingReferanse.getBehandlingId(), Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT));
 
 

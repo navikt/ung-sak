@@ -96,7 +96,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         List<AksjonspunktResultat> aksjonspunktResultater = new ArrayList<>();
 
         // Sjekker rapporteringsfrist
-        rapporteringsfristAutopunktUtleder.utledAutopunktForForRapporteringsfrist(behandlingReferanse)
+        rapporteringsfristAutopunktUtleder.utledAutopunktForRapporteringsfrist(behandlingReferanse)
             .ifPresent(aksjonspunktResultater::add);
 
         // Sjekker etterlysninger opprettet i steg 1
