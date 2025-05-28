@@ -44,7 +44,7 @@ class EtterlysningutlederKontrollerInntektTest {
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.NY_ETTERLYSNING_DERSOM_INGEN_FINNES), resultat);
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.ERSTATT_EKSISTERENDE), resultat);
     }
 
     @Test
@@ -118,17 +118,17 @@ class EtterlysningutlederKontrollerInntektTest {
         final var tom = LocalDate.now().plusDays(10);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1000, 0);
-        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = LocalDateTimeline.empty();
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> godkjentUttalelseTidslinje = LocalDateTimeline.empty();
 
         // Act
-        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(LocalDateTimeline.empty(), resultat);
     }
 
     @Test
-    void skal_ikke_opprette_etterlysning_dersom_bruker_har_godkjent_ytelse_og_inntekt_fra_register() {
+    void skal_ikke_opprette_etterlysning_dersom_bruker_ikke_har_godkjent_ytelse_og_inntekt_fra_register() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
         final var tom = LocalDate.now().plusDays(10);
@@ -136,7 +136,7 @@ class EtterlysningutlederKontrollerInntektTest {
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1001, 0);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
             fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
         );
 
         // Act
@@ -147,13 +147,33 @@ class EtterlysningutlederKontrollerInntektTest {
     }
 
     @Test
+    void skal_ikke_opprette_etterlysning_dersom_bruker_har_godkjent_ytelse_og_inntekt_fra_register() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1001, 0);
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> godkjentUttalelseTidslinje = new LocalDateTimeline<>(
+            fom, tom,
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
+        );
+
+        // Act
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
+
+        // Assert
+        assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);
+    }
+
+
+    @Test
     void skal_ikke_opprette_etterlysning_dersom_bruker_tidligere_har_rapportert_inntekt_og_har_godkjent_gjeldende_ytelse_og_inntekt_fra_register() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
         final var tom = LocalDate.now().plusDays(10);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 2000, 10_000, 500);
-        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> godkjentUttalelseTidslinje = new LocalDateTimeline<>(
             fom, tom,
             new EtterlysningOgRegisterinntekt(Set.of(
                 new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000)),
@@ -161,7 +181,7 @@ class EtterlysningutlederKontrollerInntektTest {
         );
 
         // Act
-        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, godkjentUttalelseTidslinje);
 
         // Assert
         assertEquals(new LocalDateTimeline<>(fom, tom, UtledEtterlysningResultatType.INGEN_ETTERLYSNING), resultat);

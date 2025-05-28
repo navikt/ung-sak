@@ -33,8 +33,8 @@ public class EtterlysningutlederKontrollerInntekt {
         var etterlysningResultatFraEndretRegisteropplysning = finnNyeEtterlysningerGrunnetRegisterendring(gjeldendeRapporterteInntekter, etterlysningTidslinje, relevantTidslinje);
         resultatTidslinje = resultatTidslinje.crossJoin(etterlysningResultatFraEndretRegisteropplysning, StandardCombinators::coalesceLeftHandSide);
 
-        // Sjekker om bruker har godkjent inntekt fra register og denne fortsatt er gyldig
-        var resultatForGodkjenteInntekter = finnTidslinjeForGodkjentInntekt(gjeldendeRapporterteInntekter, etterlysningTidslinje, relevantTidslinje);
+        // Sjekker om bruker har svart på etterlysning og denne fortsatt er gyldig
+        var resultatForGodkjenteInntekter = finnTidslinjeForMottatteSvarUtenRegisterendring(gjeldendeRapporterteInntekter, etterlysningTidslinje, relevantTidslinje);
         resultatTidslinje = resultatTidslinje.crossJoin(resultatForGodkjenteInntekter, StandardCombinators::coalesceLeftHandSide);
 
         // Sjekker vi må ha etterlysning pga avvik mellom rapportert inntekt og registerinntekt
@@ -49,28 +49,22 @@ public class EtterlysningutlederKontrollerInntekt {
     private static LocalDateTimeline<UtledEtterlysningResultatType> finnNyeEtterlysningerGrunnetRegisterendring(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
                                                                                                                 LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
                                                                                                                 LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
-        // Perioder med uttalelse fra bruker går til aksjonspunkt og trenger ikkje å sjekkes mot diff for gjeldende register
-        var etterlysningUtenInnvendinger = etterlysningTidslinje
-            .filterValue(it -> !it.etterlysning().erBesvartOgIkkeGodkjent()).intersection(tidslinjeRelevanteÅrsaker);
+        var etterlysningUtenInnvendinger = etterlysningTidslinje.intersection(tidslinjeRelevanteÅrsaker);
         var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, etterlysningUtenInnvendinger);
         return endringsresultatEtterlysninger.filterValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.ENDRING)
             .mapValue(it -> UtledEtterlysningResultatType.ERSTATT_EKSISTERENDE);
     }
 
 
-    private static LocalDateTimeline<UtledEtterlysningResultatType> finnTidslinjeForGodkjentInntekt(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
-                                                                                                                LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
-                                                                                                                LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
-        // Perioder med uttalelse fra bruker går til aksjonspunkt og trenger ikkje å sjekkes mot diff for gjeldende register
+    private static LocalDateTimeline<UtledEtterlysningResultatType> finnTidslinjeForMottatteSvarUtenRegisterendring(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
+                                                                                                                    LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
+                                                                                                                    LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
         var godkjentUttalelse = etterlysningTidslinje
-                .filterValue(it -> it.etterlysning().etterlysningStatus() == EtterlysningStatus.MOTTATT_SVAR && it.etterlysning().erEndringenGodkjent()).intersection(tidslinjeRelevanteÅrsaker);
+                .filterValue(it -> it.etterlysning().etterlysningStatus() == EtterlysningStatus.MOTTATT_SVAR).intersection(tidslinjeRelevanteÅrsaker);
         var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, godkjentUttalelse);
         return endringsresultatEtterlysninger.filterValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.INGEN_ENDRING)
                 .mapValue(it -> UtledEtterlysningResultatType.INGEN_ETTERLYSNING);
     }
-
-
-
 
     private LocalDateTimeline<UtledEtterlysningResultatType> finnTidslinjeForEtterlysningFraAvvik(
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
