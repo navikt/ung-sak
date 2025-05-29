@@ -2,8 +2,6 @@ package no.nav.ung.sak.formidling;
 
 import java.time.LocalDate;
 
-import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
-
 public class VedtaksbrevVerifikasjon {
 
 
@@ -28,11 +26,4 @@ public class VedtaksbrevVerifikasjon {
     }
 
 
-    static void verifiserStandardOverskrifter(String brevHtml) {
-        assertThatHtml(brevHtml).containsHtmlSubSequenceOnce(
-            "<h2>Du har rett til å klage</h2>",
-            "<h2>Du har rett til innsyn</h2>",
-            "<h2>Trenger du mer informasjon?</h2>"
-        );
-    }
 }

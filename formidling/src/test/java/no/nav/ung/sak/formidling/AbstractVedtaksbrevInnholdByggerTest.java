@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 
+import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -98,7 +99,11 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
         var brevtekst = generertBrev.dokument().html();
 
-        VedtaksbrevVerifikasjon.verifiserStandardOverskrifter(brevtekst);
+        assertThatHtml(brevtekst).containsHtmlSubSequenceOnce(
+            "<h2>Du har rett til å klage</h2>",
+            "<h2>Du har rett til innsyn</h2>",
+            "<h2>Trenger du mer informasjon?</h2>"
+        );
 
     }
 
