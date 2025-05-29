@@ -24,7 +24,7 @@ public class VedtaksbrevVerifikasjon {
                    Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
                    Med vennlig hilsen \
                    Nav Arbeid og ytelser \
-                   side av""".formatted(BrevUtils.brevDatoString(brevdato), BrevScenarioer.DEFAULT_NAVN, fnr, body);
+                   side av""".formatted(BrevTestUtils.brevDatoString(brevdato), BrevScenarioer.DEFAULT_NAVN, fnr, body);
     }
 
 

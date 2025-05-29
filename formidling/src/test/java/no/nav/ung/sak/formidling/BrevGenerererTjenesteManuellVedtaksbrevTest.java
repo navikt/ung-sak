@@ -64,7 +64,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
         vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
-        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
+        ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
@@ -215,7 +215,7 @@ class BrevGenerererTjenesteManuellVedtaksbrevTest {
 
 
     private GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return BrevUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
+        return BrevTestUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
     }
 
 

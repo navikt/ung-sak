@@ -41,7 +41,7 @@ class BrevGenerererTjenesteTest {
 
     @BeforeEach
     void setup() {
-        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
+        ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
     }
 
 

@@ -1,11 +1,11 @@
 package no.nav.ung.sak.formidling;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.SoftAssertions;
 
 import java.util.Arrays;
 
-import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.SoftAssertions;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Gjør det enklere å assert tekster i html. Fjerner urelevante tagger og linjeskift
@@ -20,8 +20,8 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
         super(actual, HtmlAssert.class);
         this.actual = actual;
 
-        actualHtmlTrimmed = BrevUtils.trimmedHtml(actual);
-        actualTextTrimmed = BrevUtils.htmlToPlainText(actual);
+        actualHtmlTrimmed = BrevTestUtils.trimmedHtml(actual);
+        actualTextTrimmed = BrevTestUtils.htmlToPlainText(actual);
     }
 
     public static HtmlAssert assertThatHtml(String actual) {

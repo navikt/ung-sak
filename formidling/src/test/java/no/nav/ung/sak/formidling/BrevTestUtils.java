@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public class BrevUtils {
+public class BrevTestUtils {
 
     static final DateTimeFormatter norwegianFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("no-NO"));
 
@@ -32,7 +32,7 @@ public class BrevUtils {
     public static GenerertBrev genererBrevOgLagreHvisEnabled(TestInfo testInfo, Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste ) {
         if (System.getenv("LAGRE_PDF") != null) {
             var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
-            BrevUtils.lagrePdf(generertBrev, testInfo);
+            BrevTestUtils.lagrePdf(generertBrev, testInfo);
             return generertBrev;
         }
 

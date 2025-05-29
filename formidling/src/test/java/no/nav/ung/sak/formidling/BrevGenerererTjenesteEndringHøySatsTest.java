@@ -60,7 +60,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
     @BeforeEach
     void setup(TestInfo testInfo) {
         this.testInfo = testInfo;
-        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
+        ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         brevGenerererTjeneste = lagBrevGenererTjeneste();
     }
 
@@ -199,7 +199,7 @@ class BrevGenerererTjenesteEndringHøySatsTest {
 
 
     private GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return BrevUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
+        return BrevTestUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
     }
 
 
