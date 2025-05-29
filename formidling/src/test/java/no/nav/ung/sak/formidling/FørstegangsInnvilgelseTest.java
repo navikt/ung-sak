@@ -3,7 +3,7 @@ package no.nav.ung.sak.formidling;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -314,7 +314,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-        return  new InnvilgelseInnholdBygger(
+        return  new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             false);

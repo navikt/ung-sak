@@ -123,7 +123,13 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return BrevTestUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
+        if (System.getenv("LAGRE_PDF") != null) {
+            var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
+            BrevTestUtils.lagrePdf(generertBrev, testInfo);
+            return generertBrev;
+        }
+
+        return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
     }
 
     /**

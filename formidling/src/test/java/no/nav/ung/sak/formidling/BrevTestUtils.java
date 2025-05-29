@@ -29,16 +29,6 @@ public class BrevTestUtils {
         return date.format(norwegianFormatter);
     }
 
-    public static GenerertBrev genererBrevOgLagreHvisEnabled(TestInfo testInfo, Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste ) {
-        if (System.getenv("LAGRE_PDF") != null) {
-            var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
-            BrevTestUtils.lagrePdf(generertBrev, testInfo);
-            return generertBrev;
-        }
-
-        return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
-    }
-
     public static UngTestRepositories lagAlleUngTestRepositories(EntityManager entityManager) {
         return UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, new AbakusInMemoryInntektArbeidYtelseTjeneste());
     }
@@ -52,7 +42,7 @@ public class BrevTestUtils {
         lagrePdf(pdf, filnavn);
     }
 
-    public static void lagrePdf(byte[] data, String filename) {
+    private static void lagrePdf(byte[] data, String filename) {
         Path directory;
         try {
             directory = Files.createDirectories(Paths.get("pdfresultater"));

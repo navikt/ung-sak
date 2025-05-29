@@ -7,7 +7,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
@@ -54,7 +54,7 @@ class BrevGenerererTjenesteTest {
 
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
-        InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
+        FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository()),
             false );
@@ -65,7 +65,7 @@ class BrevGenerererTjenesteTest {
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(),
-                new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger), new DetaljertResultatUtlederFake(
+                new UnitTestLookupInstanceImpl<>(førstegangsInnvilgelseInnholdBygger), new DetaljertResultatUtlederFake(
                 ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet())))), ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
 
 
