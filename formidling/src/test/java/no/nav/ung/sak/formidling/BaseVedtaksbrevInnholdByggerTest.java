@@ -40,16 +40,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(JpaExtension.class)
 abstract class BaseVedtaksbrevInnholdByggerTest {
 
-
-    protected BrevGenerererTjeneste brevGenerererTjeneste;
-
     @Inject
     private EntityManager entityManager;
-    protected UngTestRepositories ungTestRepositories;
 
-    PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    private final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    private final int antallPdfSider;
+    private final String pdfHovedOverskrift;
+
+    private TestInfo testInfo;
+
     protected String fnr = pdlKlient.fnr();
-    protected TestInfo testInfo;
+    protected UngTestRepositories ungTestRepositories;
+    protected BrevGenerererTjeneste brevGenerererTjeneste;
+
+    BaseVedtaksbrevInnholdByggerTest(int antallPdfSider, String pdfHovedOverskrift) {
+        this.antallPdfSider = antallPdfSider;
+        this.pdfHovedOverskrift = pdfHovedOverskrift;
+    }
 
 
     @BeforeEach
@@ -104,10 +111,10 @@ abstract class BaseVedtaksbrevInnholdByggerTest {
         var pdf = generertBrev.dokument().pdf();
 
         try (PDDocument pdDocument = Loader.loadPDF(pdf)) {
-            assertThat(pdDocument.getNumberOfPages()).isEqualTo(1);
+            assertThat(pdDocument.getNumberOfPages()).isEqualTo(antallPdfSider);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains(standardOverskrift());
+            assertThat(pdfTekst).contains(pdfHovedOverskrift);
         }
 
     }
@@ -118,11 +125,6 @@ abstract class BaseVedtaksbrevInnholdByggerTest {
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
         return BrevTestUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
     }
-
-    /**
-     * Brukes av fellestester i base klasse
-     */
-    protected abstract String standardOverskrift();
 
     /**
      * Brukes for å lage BrevGenerererTjeneste

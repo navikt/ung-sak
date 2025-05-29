@@ -18,6 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BrevGenerererTjenesteEndringBarnetilleggTest extends BaseVedtaksbrevInnholdByggerTest {
 
 
+    BrevGenerererTjenesteEndringBarnetilleggTest() {
+        super(1, "Du får mer i ungdomsprogramytelse fordi du har fått barn");
+    }
+
     @Test
     void standardEndringBarnetillegg() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
@@ -100,11 +104,6 @@ class BrevGenerererTjenesteEndringBarnetilleggTest extends BaseVedtaksbrevInnhol
     @Override
     protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
         return new EndringBarnetilleggInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository());
-    }
-
-    @Override
-    protected String standardOverskrift() {
-        return "Du får mer i ungdomsprogramytelse fordi du har fått barn";
     }
 
     @Override
