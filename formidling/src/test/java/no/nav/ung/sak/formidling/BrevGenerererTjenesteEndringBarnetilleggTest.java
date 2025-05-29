@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BrevGenerererTjenesteEndringBarnetilleggTest extends BaseVedtaksbrevInnholdByggerTest {
+class BrevGenerererTjenesteEndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
     BrevGenerererTjenesteEndringBarnetilleggTest() {
@@ -107,7 +107,7 @@ class BrevGenerererTjenesteEndringBarnetilleggTest extends BaseVedtaksbrevInnhol
     }
 
     @Override
-    protected Behandling lagBehandlingMedStandardScenario() {
+    protected Behandling lagScenarioForFellesTester() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
         return lagStandardScenario(BrevScenarioer.endringBarnetillegg(startdato, barnFødselsdato));

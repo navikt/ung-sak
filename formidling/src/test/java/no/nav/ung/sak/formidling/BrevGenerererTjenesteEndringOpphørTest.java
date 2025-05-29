@@ -17,7 +17,7 @@ import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class BrevGenerererTjenesteEndringOpphørTest extends BaseVedtaksbrevInnholdByggerTest {
+class BrevGenerererTjenesteEndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
 
    BrevGenerererTjenesteEndringOpphørTest() {
         super(1, "Du får ikke lenger ungdomsprogramytelse");
@@ -75,7 +75,7 @@ class BrevGenerererTjenesteEndringOpphørTest extends BaseVedtaksbrevInnholdBygg
     }
 
     @Override
-    protected Behandling lagBehandlingMedStandardScenario() {
+    protected Behandling lagScenarioForFellesTester() {
         return lagScenario(BrevScenarioer.endringOpphør(LocalDate.of(2024, 12, 1)));
     }
 }

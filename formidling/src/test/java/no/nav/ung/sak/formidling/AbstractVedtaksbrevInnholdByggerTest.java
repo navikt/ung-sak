@@ -38,14 +38,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-abstract class BaseVedtaksbrevInnholdByggerTest {
+abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     @Inject
-    private EntityManager entityManager;
+    protected EntityManager entityManager;
 
     private final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
-    private final int antallPdfSider;
-    private final String pdfHovedOverskrift;
+    private final int forventetAntallPdfSider;
+    private final String forventetPdfHovedoverskrift;
 
     private TestInfo testInfo;
 
@@ -53,14 +53,14 @@ abstract class BaseVedtaksbrevInnholdByggerTest {
     protected UngTestRepositories ungTestRepositories;
     protected BrevGenerererTjeneste brevGenerererTjeneste;
 
-    BaseVedtaksbrevInnholdByggerTest(int antallPdfSider, String pdfHovedOverskrift) {
-        this.antallPdfSider = antallPdfSider;
-        this.pdfHovedOverskrift = pdfHovedOverskrift;
+    AbstractVedtaksbrevInnholdByggerTest(int forventetAntallPdfSider, String forventetPdfHovedoverskrift) {
+        this.forventetAntallPdfSider = forventetAntallPdfSider;
+        this.forventetPdfHovedoverskrift = forventetPdfHovedoverskrift;
     }
 
 
     @BeforeEach
-    void setup(TestInfo testInfo) {
+    void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         brevGenerererTjeneste = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
@@ -91,7 +91,7 @@ abstract class BaseVedtaksbrevInnholdByggerTest {
     @Test
     @DisplayName("Verifiserer formatering på overskrifter")
     void verifiserOverskrifter() {
-        var behandling = lagBehandlingMedStandardScenario();
+        var behandling = lagScenarioForFellesTester();
 
         Long behandlingId = (behandling.getId());
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
@@ -104,17 +104,17 @@ abstract class BaseVedtaksbrevInnholdByggerTest {
 
     @Test
     void pdfStrukturTest() throws IOException {
-        var behandling = lagBehandlingMedStandardScenario();
+        var behandling = lagScenarioForFellesTester();
 
         GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 
         try (PDDocument pdDocument = Loader.loadPDF(pdf)) {
-            assertThat(pdDocument.getNumberOfPages()).isEqualTo(antallPdfSider);
+            assertThat(pdDocument.getNumberOfPages()).isEqualTo(forventetAntallPdfSider);
             String pdfTekst = new PDFTextStripper().getText(pdDocument);
             assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains(pdfHovedOverskrift);
+            assertThat(pdfTekst).contains(forventetPdfHovedoverskrift);
         }
 
     }
@@ -134,7 +134,7 @@ abstract class BaseVedtaksbrevInnholdByggerTest {
     /**
      * Brukes av fellestester i base klasse
      */
-    protected abstract Behandling lagBehandlingMedStandardScenario();
+    protected abstract Behandling lagScenarioForFellesTester();
 
 
 }

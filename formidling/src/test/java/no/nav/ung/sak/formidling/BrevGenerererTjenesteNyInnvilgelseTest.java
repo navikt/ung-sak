@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BrevGenerererTjenesteNyInnvilgelseTest extends BaseVedtaksbrevInnholdByggerTest {
+class BrevGenerererTjenesteNyInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
     BrevGenerererTjenesteNyInnvilgelseTest() {
@@ -321,7 +321,7 @@ class BrevGenerererTjenesteNyInnvilgelseTest extends BaseVedtaksbrevInnholdBygge
     }
 
     @Override
-    protected Behandling lagBehandlingMedStandardScenario() {
+    protected Behandling lagScenarioForFellesTester() {
         UngTestScenario ungTestscenario = BrevScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
         return lagScenario(ungTestscenario);
     }
