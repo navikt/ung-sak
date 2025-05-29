@@ -17,9 +17,9 @@ import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class BrevGenerererTjenesteEndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
+class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-   BrevGenerererTjenesteEndringOpphørTest() {
+   EndringOpphørTest() {
         super(1, "Du får ikke lenger ungdomsprogramytelse");
     }
 

@@ -17,9 +17,9 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BrevGenerererTjenesteEndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
+class EndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-    BrevGenerererTjenesteEndringInntektTest() {
+    EndringInntektTest() {
         super(1, "Vi har endret ungdomsytelsen din");
     }
 

@@ -15,10 +15,10 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BrevGenerererTjenesteEndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
+class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
-    BrevGenerererTjenesteEndringBarnetilleggTest() {
+    EndringBarnetilleggTest() {
         super(1, "Du får mer i ungdomsprogramytelse fordi du har fått barn");
     }
 

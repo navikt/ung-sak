@@ -25,11 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // TODO test som først får automatisk brev som redigeres.
 
-class BrevGenerererTjenesteManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
+class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
-    BrevGenerererTjenesteManuellVedtaksbrevTest() {
+    ManuellVedtaksbrevTest() {
         super(1, "Manuell skrevet overskrift");
     }
 

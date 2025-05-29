@@ -16,10 +16,10 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BrevGenerererTjenesteNyInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
+class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
-    BrevGenerererTjenesteNyInnvilgelseTest() {
+    FørstegangsInnvilgelseTest() {
         super(2, "Du får ungdomsprogramytelse");
     }
 

@@ -16,9 +16,9 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BrevGenerererTjenesteEndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
+class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-    BrevGenerererTjenesteEndringHøySatsTest() {
+    EndringHøySatsTest() {
         super(1, "Du får mer i ungdomsprogramytelse fordi du fyller 25 år");
     }
 
