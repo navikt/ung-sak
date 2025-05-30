@@ -111,7 +111,7 @@ public class IverksetteVedtakStegYtelseTest {
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
         Historikkinnslag historikkinnslag = historikkRepository.hent(behandling.getId()).get(0);
         assertThat(historikkinnslag.getLinjer()).hasSize(1);
-        assertThat(historikkinnslag.getTittel()).isEqualTo("Iverksettelse");
+        assertThat(historikkinnslag.getTittel()).isEqualTo("Behandlingen venter på iverksettelse");
     }
 
     @Test
