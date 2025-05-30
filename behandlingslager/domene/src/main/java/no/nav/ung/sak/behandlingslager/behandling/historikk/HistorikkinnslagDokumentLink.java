@@ -1,23 +1,13 @@
 package no.nav.ung.sak.behandlingslager.behandling.historikk;
 
-import java.util.Objects;
-
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.typer.JournalpostId;
+
+import java.util.Objects;
+
 
 @Entity(name = "HistorikkinnslagDokumentLink")
 @Table(name = "HISTORIKKINNSLAG_DOK_LINK")
@@ -31,20 +21,19 @@ public class HistorikkinnslagDokumentLink extends BaseEntitet implements IndexKe
     private String linkTekst;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "historikkinnslag_id", nullable = false, updatable=false)
+    @JoinColumn(name = "historikkinnslag_id", nullable = false)
     private Historikkinnslag historikkinnslag;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id", updatable=false)))
+    @AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id"))
     private JournalpostId journalpostId;
 
-    @Column(name = "dokument_id", updatable=false)
+    @Column(name = "dokument_id")
     private String dokumentId;
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { journalpostId, dokumentId, linkTekst };
-        return IndexKeyComposer.createKey(keyParts);
+        return IndexKeyComposer.createKey(journalpostId, dokumentId, linkTekst);
     }
 
     public String getLinkTekst() {
@@ -112,10 +101,9 @@ public class HistorikkinnslagDokumentLink extends BaseEntitet implements IndexKe
         if (this == o) {
             return true;
         }
-        if (!(o instanceof HistorikkinnslagDokumentLink)) {
+        if (!(o instanceof HistorikkinnslagDokumentLink that)) {
             return false;
         }
-        HistorikkinnslagDokumentLink that = (HistorikkinnslagDokumentLink) o;
         return
             Objects.equals(getLinkTekst(), that.getLinkTekst()) &&
             Objects.equals(historikkinnslag, that.historikkinnslag) &&

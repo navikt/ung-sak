@@ -23,10 +23,10 @@ public class HistorikkInnslagKonverterTest {
         HistorikkinnslagDokumentLink lenke = new HistorikkinnslagDokumentLink();
         JournalpostId journalpostId = new JournalpostId(1L);
         lenke.setJournalpostId(journalpostId);
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setDokumentLinker(Collections.singletonList(lenke));
-        HistorikkinnslagDto resultat = konverterer.mapFra(historikkinnslag, Collections.emptyList());
-        assertThat(resultat.getDokumentLinks().get(0).isUtgått()).isTrue();
+        var historikkinnslag = new Historikkinnslag.Builder();
+        historikkinnslag.medDokumenter(Collections.singletonList(lenke));
+        HistorikkinnslagDto resultat = konverterer.map(historikkinnslag.build(), Collections.emptyList());
+        assertThat(resultat.dokumenter().get(0).isUtgått()).isTrue();
     }
 
     @Test
@@ -36,13 +36,11 @@ public class HistorikkInnslagKonverterTest {
         HistorikkinnslagDokumentLink lenke = new HistorikkinnslagDokumentLink();
         JournalpostId journalpostId = new JournalpostId(1L);
         lenke.setJournalpostId(journalpostId);
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setDokumentLinker(Collections.singletonList(lenke));
-        ArkivJournalPost ikkeMatchendeArkivJournalPost = ArkivJournalPost.Builder.ny()
-            .medJournalpostId(new JournalpostId(2L))
-            .build();
-        HistorikkinnslagDto resultat = konverterer.mapFra(historikkinnslag, Collections.singletonList(ikkeMatchendeArkivJournalPost));
-        assertThat(resultat.getDokumentLinks().get(0).isUtgått()).isTrue();
+        var historikkinnslag = new Historikkinnslag.Builder();
+        historikkinnslag.medDokumenter(Collections.singletonList(lenke));
+        var ikkeMatchendeJournalpostId = new JournalpostId(2L);
+        HistorikkinnslagDto resultat = konverterer.map(historikkinnslag.build(), Collections.singletonList(ikkeMatchendeJournalpostId));
+        assertThat(resultat.dokumenter().get(0).isUtgått()).isTrue();
     }
 
     @Test
@@ -52,16 +50,16 @@ public class HistorikkInnslagKonverterTest {
         HistorikkinnslagDokumentLink lenke = new HistorikkinnslagDokumentLink();
         JournalpostId journalpostId = new JournalpostId(1L);
         lenke.setJournalpostId(journalpostId);
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setDokumentLinker(Collections.singletonList(lenke));
+        var historikkinnslag = new Historikkinnslag.Builder();
+        historikkinnslag.medDokumenter(Collections.singletonList(lenke));
         ArkivJournalPost ikkeMatchendeArkivJournalPost = ArkivJournalPost.Builder.ny()
             .medJournalpostId(journalpostId)
             .build();
-        HistorikkinnslagDto resultat = konverterer.mapFra(historikkinnslag, Collections.singletonList(ikkeMatchendeArkivJournalPost));
-        assertThat(resultat.getDokumentLinks().get(0).isUtgått()).isFalse();
+        HistorikkinnslagDto resultat = konverterer.map(historikkinnslag.build(), Collections.singletonList(journalpostId));
+        assertThat(resultat.dokumenter().get(0).isUtgått()).isFalse();
     }
 
     private HistorikkInnslagKonverter konverterer() {
-        return new HistorikkInnslagKonverter();
+        return new HistorikkInnslagKonverter(null);
     }
 }

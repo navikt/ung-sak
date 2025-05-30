@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
@@ -78,7 +79,7 @@ public class AksjonspunktOppdatererTest {
 
         var dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
         var vedtaksbrevHåndterer = new ForeslåVedtakOppdatererTjeneste(
-            mock(HistorikkTjenesteAdapter.class),
+            mock(HistorikkinnslagRepository.class),
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 

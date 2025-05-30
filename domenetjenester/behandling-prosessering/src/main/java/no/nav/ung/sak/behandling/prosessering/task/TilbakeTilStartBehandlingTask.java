@@ -1,27 +1,21 @@
 package no.nav.ung.sak.behandling.prosessering.task;
 
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -29,7 +23,10 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
@@ -46,7 +43,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
     private FagsakProsessTaskRepository prosessTaskRepository;
@@ -60,7 +57,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     public TilbakeTilStartBehandlingTask(BehandlingRepository behandlingRepository,
                                          BehandlingLåsRepository behandlingLåsRepository,
                                          MottatteDokumentRepository mottatteDokumentRepository,
-                                         HistorikkRepository historikkRepository,
+                                         HistorikkinnslagRepository historikkinnslagRepository,
                                          ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                          BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                          FagsakProsessTaskRepository prosessTaskRepository,
@@ -68,7 +65,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         super(behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.historikkRepository = historikkRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
@@ -154,17 +151,13 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     }
 
     private void lagHistorikkinnslag(Behandling behandling, String tilStegNavn) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        historikkinnslag.setType(HistorikkinnslagType.SPOLT_TILBAKE);
-        historikkinnslag.setBehandlingId(behandling.getId());
-
         String fraStegNavn = behandling.getAktivtBehandlingSteg() != null ? behandling.getAktivtBehandlingSteg().getNavn() : null;
-        HistorikkInnslagTekstBuilder historieBuilder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.SPOLT_TILBAKE)
-            .medBegrunnelse("Behandlingen er flyttet fra " + fraStegNavn + " tilbake til " + tilStegNavn);
-        historieBuilder.build(historikkinnslag);
-        historikkRepository.lagre(historikkinnslag);
+        var historikkinnslagBuilder = new Historikkinnslag.Builder();
+        historikkinnslagBuilder.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+        historikkinnslagBuilder.medBehandlingId(behandling.getId());
+        historikkinnslagBuilder.medTittel("Behandlingen er flyttet");
+        historikkinnslagBuilder.addLinje("Behandlingen er flyttet fra " + fraStegNavn + "  tilbake til " + tilStegNavn);
+        historikkinnslagRepository.lagre(historikkinnslagBuilder.build());
     }
 
 }
