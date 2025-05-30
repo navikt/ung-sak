@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -32,10 +33,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,7 +61,7 @@ public class BrevScenarioer {
 
         var satser = new LocalDateTimeline<>(p, lavSatsBuilder(fom).build());
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), Tid.TIDENES_ENDE));
 
         return new UngTestScenario(
             DEFAULT_NAVN,
@@ -438,15 +436,14 @@ public class BrevScenarioer {
 
 
     /**
-     * Opphør av programmet etter 3 mnd i programmet
+     * Opphør av programmet. OpprinneligProgramPeriode kan hentes fra et annet sceario
      */
-    public static UngTestScenario endringOpphør(LocalDate opphørsdato) {
-        var fom = opphørsdato.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
-
-        var opprinneligProgramPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+    public static UngTestScenario endringOpphør(LocalDate opphørsdato, LocalDateInterval opprinneligProgramPeriode) {
+        var fom = opprinneligProgramPeriode.getFomDato();
+        var fagsakPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var nyProgramPeriode = new LocalDateInterval(fom, opphørsdato.minusDays(1));
         var satser = new LocalDateTimeline<>(List.of(
-           new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), opprinneligProgramPeriode.getTomDato(), lavSatsBuilder(fom).build())
+           new LocalDateSegment<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), lavSatsBuilder(fom).build())
         ));
 
 
@@ -456,10 +453,10 @@ public class BrevScenarioer {
             satser,
             uttaksPerioder(nyProgramPeriode),
             tilkjentYtelsePerioder(satser, nyProgramPeriode),
-            new LocalDateTimeline<>(opprinneligProgramPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
             new LocalDateTimeline<>(List.of(
                 new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
-                new LocalDateSegment<>(opphørsdato, opprinneligProgramPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+                new LocalDateSegment<>(opphørsdato, fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
                 )
 
             ),
@@ -467,7 +464,100 @@ public class BrevScenarioer {
             List.of(opprinneligProgramPeriode.getFomDato()),
             Set.of(
                 new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), opphørsdato.minusDays(1))),
-                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(opphørsdato, opprinneligProgramPeriode.getTomDato()))
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(opphørsdato, fagsakPeriode.getTomDato()))
+            ),
+            null,
+            Collections.emptyList()
+        );
+    }
+
+    /**
+     * Har allerede opphørt, endrer opphørsdato
+     */
+    public static UngTestScenario endringSluttdato(LocalDate nySluttdato, LocalDateInterval opprinneligProgramPeriode) {
+        if (nySluttdato.isEqual(opprinneligProgramPeriode.getTomDato())) {
+            throw new IllegalArgumentException("Ny sluttdato er lik opprinnelig sluttdato");
+        }
+
+        var fagsakPeriode = new LocalDateInterval(opprinneligProgramPeriode.getFomDato(), opprinneligProgramPeriode.getFomDato().plusWeeks(52).minusDays(1));
+
+        var fom = opprinneligProgramPeriode.getFomDato();
+
+        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato.minusDays(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), opprinneligProgramPeriode.getTomDato(), lavSatsBuilder(fom).build())
+        ));
+
+        boolean flyttetBakover = nySluttdato.isBefore(opprinneligProgramPeriode.getTomDato());
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), nyProgramPeriode.getTomDato())),
+            satser,
+            uttaksPerioder(nyProgramPeriode),
+            tilkjentYtelsePerioder(satser, nyProgramPeriode),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
+                new LocalDateSegment<>(nySluttdato, fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+            )),
+            fom.minusYears(19).plusDays(42),
+            List.of(opprinneligProgramPeriode.getFomDato()),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nySluttdato.minusDays(1))),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+                    flyttetBakover ?
+                        DatoIntervallEntitet.fra(nySluttdato, opprinneligProgramPeriode.getTomDato()) :
+                        DatoIntervallEntitet.fra(opprinneligProgramPeriode.getTomDato().plusDays(1), nySluttdato))
+            ),
+            null,
+            Collections.emptyList()
+        );
+    }
+
+    /**
+     * Endrer startdato
+     */
+    public static UngTestScenario endringStartdato(LocalDate nyStartdato, LocalDateInterval opprinneligProgramPeriode) {
+
+        if (nyStartdato.isEqual(opprinneligProgramPeriode.getFomDato())) {
+            throw new IllegalArgumentException("Ny startdato er lik opprinnelig sluttdato");
+        }
+
+        boolean flyttetFremover = nyStartdato.isAfter(opprinneligProgramPeriode.getFomDato());
+        LocalDate fom = flyttetFremover ? opprinneligProgramPeriode.getFomDato() : nyStartdato;
+
+        var fagsakPeriode = new LocalDateInterval(fom,
+            opprinneligProgramPeriode.getFomDato().plusWeeks(52).minusDays(1));
+
+        var nyProgramPeriode = new LocalDateInterval(nyStartdato, opprinneligProgramPeriode.getTomDato());
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(nyStartdato, fagsakPeriode.getTomDato(), lavSatsBuilder(fom).build())
+        ));
+
+        var ungVilkårSegments = new ArrayList<LocalDateSegment<Utfall>>();
+        ungVilkårSegments.add(new LocalDateSegment<>(nyStartdato, fagsakPeriode.getTomDato(), Utfall.OPPFYLT));
+
+        if (flyttetFremover) {
+            ungVilkårSegments.add(new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), nyStartdato.minusDays(1), Utfall.IKKE_OPPFYLT));
+        }
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), nyProgramPeriode.getTomDato())),
+            satser,
+            uttaksPerioder(fagsakPeriode),
+            tilkjentYtelsePerioder(satser, fagsakPeriode),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(ungVilkårSegments),
+            fom.minusYears(19).plusDays(42),
+            List.of(opprinneligProgramPeriode.getFomDato()),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(fom, fagsakPeriode.getTomDato())),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+                    flyttetFremover ?
+                        DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nyStartdato.minusDays(1)) :
+                        DatoIntervallEntitet.fra(fom, fagsakPeriode.getTomDato()))
             ),
             null,
             Collections.emptyList()

@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
@@ -70,7 +71,8 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     private BrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
 
         BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
@@ -86,7 +88,12 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             new PdfGenKlient(),
             repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
-                behandlingRepository, innholdByggere, detaljertResultatUtleder), ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
+                    behandlingRepository,
+                    innholdByggere,
+                    detaljertResultatUtleder,
+                    ungdomsprogramPeriodeRepository),
+                ungTestRepositories.vedtaksbrevValgRepository(),
+                new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
     }
 
     @Test

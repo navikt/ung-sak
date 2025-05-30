@@ -380,7 +380,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     public Behandling lagre(BehandlingRepositoryProvider repositoryProvider) {
 
-        build(repositoryProvider.getBehandlingRepository(), repositoryProvider);
+        build(repositoryProvider);
         return behandling;
     }
 
@@ -395,6 +395,24 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     public Behandling buildOgLagreMedUng(UngTestRepositories repositories) {
+        settOppVilkårOgPersoner();
+
+        build(repositories.repositoryProvider());
+
+        //Ung ting
+        buildUng(repositories, behandling);
+        return behandling;
+    }
+
+    public Behandling buildOgLagreNyUngBehandlingPåEksisterendeSak(UngTestRepositories repositories) {
+        settOppVilkårOgPersoner();
+        Behandling nyBehandling = buildBehandling(repositories.repositoryProvider());
+        buildUng(repositories, nyBehandling);
+        return nyBehandling;
+    }
+
+
+    private void settOppVilkårOgPersoner() {
         if (ungTestscenario == null)
             throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
 
@@ -423,18 +441,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         if (ungTestscenario.ungdomsprogramvilkår() != null) {
             ungTestscenario.ungdomsprogramvilkår().forEach(it -> leggTilVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, it.getValue(), new Periode(it.getFom(), it.getTom())));
         }
-
-        build(repositories.repositoryProvider().getBehandlingRepository(), repositories.repositoryProvider());
-
-        //Ung ting
-        buildUng(repositories);
-        return behandling;
     }
 
-    private void buildUng(UngTestRepositories repositories) {
+    private void buildUng(UngTestRepositories repositories, Behandling behandling1) {
 
         if (ungTestscenario.satser() != null) {
-            repositories.ungdomsytelseGrunnlagRepository().lagre(behandling.getId(), new UngdomsytelseSatsResultat(
+            repositories.ungdomsytelseGrunnlagRepository().lagre(behandling1.getId(), new UngdomsytelseSatsResultat(
                 ungTestscenario.satser(),
                 "regelInputSats",
                 "regelSporing"
@@ -442,19 +454,19 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         if (ungTestscenario.uttakPerioder() != null) {
-            repositories.ungdomsytelseGrunnlagRepository().lagre(behandling.getId(), ungTestscenario.uttakPerioder());
+            repositories.ungdomsytelseGrunnlagRepository().lagre(behandling1.getId(), ungTestscenario.uttakPerioder());
         }
 
         if (ungTestscenario.programPerioder() != null) {
-            repositories.ungdomsprogramPeriodeRepository().lagre(behandling.getId(), ungTestscenario.programPerioder());
+            repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder());
 
         }
 
         if (ungTestscenario.søknadStartDato() != null) {
             List<UngdomsytelseSøktStartdato> starDatoer = ungTestscenario.søknadStartDato().stream().map(it -> new UngdomsytelseSøktStartdato(it, new JournalpostId("123")))
                 .toList();
-            repositories.ungdomsytelseStartdatoRepository().lagre(behandling.getId(), starDatoer);
-            repositories.ungdomsytelseStartdatoRepository().lagreRelevanteSøknader(behandling.getId(), new UngdomsytelseStartdatoer(starDatoer));
+            repositories.ungdomsytelseStartdatoRepository().lagre(behandling1.getId(), starDatoer);
+            repositories.ungdomsytelseStartdatoRepository().lagreRelevanteSøknader(behandling1.getId(), new UngdomsytelseStartdatoer(starDatoer));
         }
 
         if (ungTestscenario.tilkjentYtelsePerioder() != null) {
@@ -476,17 +488,17 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
                     .medKilde(KontrollertInntektKilde.REGISTER)
                     .medPeriode(DatoIntervallEntitet.fra(p.getLocalDateInterval())).build())
                 .toList();
-            repositories.tilkjentYtelseRepository().lagre(behandling.getId(), kontrollertePerioder);
-            repositories.tilkjentYtelseRepository().lagre(behandling.getId(), ungTestscenario.tilkjentYtelsePerioder(), "input", "sporing");
+            repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), kontrollertePerioder);
+            repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), ungTestscenario.tilkjentYtelsePerioder(), "input", "sporing");
         }
 
         if (ungTestscenario.behandlingTriggere() != null && repositories.prosessTriggereRepository() != null) {
-            repositories.prosessTriggereRepository().leggTil(behandling.getId(), ungTestscenario.behandlingTriggere());
+            repositories.prosessTriggereRepository().leggTil(behandling1.getId(), ungTestscenario.behandlingTriggere());
         }
 
         if (ungTestscenario.abakusInntekt() != null) {
             repositories.abakusInMemoryInntektArbeidYtelseTjeneste().lagreOppgittOpptjening(
-                behandling.getId(),
+                behandling1.getId(),
                 ungTestscenario.abakusInntekt()
             );
         }
@@ -590,36 +602,44 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return (S) this;
     }
 
-    private void build(BehandlingRepository behandlingRepo, BehandlingRepositoryProvider repositoryProvider) {
+    private void build(BehandlingRepositoryProvider repositoryProvider) {
         if (behandling != null) {
             throw new IllegalStateException("build allerede kalt.  Hent Behandling via getBehandling eller opprett nytt scenario.");
         }
+        behandling = buildBehandling(repositoryProvider);
+    }
+
+
+    private Behandling buildBehandling(BehandlingRepositoryProvider repositoryProvider) {
         Builder behandlingBuilder = grunnBuild(repositoryProvider);
 
-        this.behandling = behandlingBuilder.build();
-        this.behandling.setBehandlingResultatType(behandlingResultatType);
+        Behandling nyBehandling = behandlingBuilder.build();
+        nyBehandling.setBehandlingResultatType(behandlingResultatType);
 
         if (startSteg != null) {
-            new InternalManipulerBehandling().forceOppdaterBehandlingSteg(behandling, startSteg);
+            new InternalManipulerBehandling().forceOppdaterBehandlingSteg(nyBehandling, startSteg);
         }
 
-        leggTilAksjonspunkter(behandling);
+        leggTilAksjonspunkter(nyBehandling);
 
-        BehandlingLås lås = behandlingRepo.taSkriveLås(behandling);
-        behandlingRepo.lagre(behandling, lås);
+        BehandlingRepository behandlingRepo1 = repositoryProvider.getBehandlingRepository();
+        BehandlingLås lås = behandlingRepo1.taSkriveLås(nyBehandling);
+        behandlingRepo1.lagre(nyBehandling, lås);
 
-        lagrePersonopplysning(repositoryProvider, behandling);
-        lagreSøknad(repositoryProvider);
+        lagrePersonopplysning(repositoryProvider, nyBehandling);
+        lagreSøknad(repositoryProvider, nyBehandling);
         // opprett og lagre resulater på behandling
-        lagreVilkårResultat(repositoryProvider, lås);
+        lagreVilkårResultat(repositoryProvider, lås, nyBehandling);
 
         if (this.opplysningerOppdatertTidspunkt != null) {
-            behandlingRepo.oppdaterSistOppdatertTidspunkt(this.behandling, this.opplysningerOppdatertTidspunkt);
+            behandlingRepo1.oppdaterSistOppdatertTidspunkt(nyBehandling, this.opplysningerOppdatertTidspunkt);
         }
 
         // få med behandlingsresultat etc.
-        behandlingRepo.lagre(behandling, lås);
+        behandlingRepo1.lagre(nyBehandling, lås);
+        return nyBehandling;
     }
+
 
     private void leggTilAksjonspunkter(Behandling behandling) {
         aksjonspunktDefinisjoner.forEach(
@@ -632,10 +652,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             });
     }
 
-    private void lagreSøknad(BehandlingRepositoryProvider repositoryProvider) {
+    private void lagreSøknad(BehandlingRepositoryProvider repositoryProvider, Behandling behandling1) {
         if (søknadBuilder != null) {
             final SøknadRepository søknadRepository = repositoryProvider.getSøknadRepository();
-            søknadRepository.lagreOgFlush(behandling, søknadBuilder.build());
+            søknadRepository.lagreOgFlush(behandling1, søknadBuilder.build());
         }
     }
 
@@ -683,7 +703,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         fagsak.setId(fagsakId);
     }
 
-    private void lagreVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås) {
+    private void lagreVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås, Behandling behandling1) {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
         vilkår.forEach(v -> {
@@ -694,11 +714,11 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         final var build = inngangsvilkårBuilder.build();
 
-        repoProvider.getVilkårResultatRepository().lagre(behandling.getId(), build);
+        repoProvider.getVilkårResultatRepository().lagre(behandling1.getId(), build);
 
         if (behandlingVedtakBuilder != null) {
             // Må lagre Behandling for at Behandlingsresultat ikke skal være transient når BehandlingVedtak blir lagret:
-            behandlingVedtak = behandlingVedtakBuilder.medBehandling(behandling.getId()).build();
+            behandlingVedtak = behandlingVedtakBuilder.medBehandling(behandling1.getId()).build();
             repoProvider.getBehandlingVedtakRepository().lagre(behandlingVedtak, lås);
         }
     }

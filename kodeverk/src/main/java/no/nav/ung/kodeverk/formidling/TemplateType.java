@@ -9,7 +9,8 @@ public enum TemplateType {
     ENDRING_HØY_SATS("endring_høy_sats"),
     ENDRING_BARNETILLEGG("endring_barnetillegg"),
     MANUELL_VEDTAKSBREV("manuell_vedtaksbrev"),
-    OPPHØR("opphør");
+    OPPHØR("opphør"),
+    ENDRING_PROGRAMPERIODE("endring_programperiode"),;
 
     final String path;
     final String dir = "ungdomsytelse";

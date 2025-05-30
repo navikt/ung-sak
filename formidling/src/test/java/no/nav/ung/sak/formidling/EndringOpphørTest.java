@@ -28,7 +28,8 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void standardOpphørsbrev() {
         LocalDate opphørsdato = LocalDate.of(2025, 8, 15);
-        var ungTestGrunnlag = BrevScenarioer.endringOpphør(opphørsdato);
+        var forrigeBehandlingGrunnlag = BrevScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
+        var ungTestGrunnlag = BrevScenarioer.endringOpphør(opphørsdato, forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ikke lenger ungdomsprogramytelse \
@@ -38,7 +39,7 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
                 """);
 
 
-        var behandling = lagScenario(ungTestGrunnlag);
+        var behandling = lagOpphørscenario(ungTestGrunnlag, forrigeBehandlingGrunnlag);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.OPPHØR);
@@ -53,12 +54,21 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
-    private Behandling lagScenario(UngTestScenario ungTestscenario) {
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
-            .medUngTestGrunnlag(ungTestscenario);
+    private Behandling lagOpphørscenario(UngTestScenario ungTestscenario, UngTestScenario forrigeBehandlingScenario) {
+        TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()
+                .medBehandlingType(BehandlingType.REVURDERING)
+                .medUngTestGrunnlag(forrigeBehandlingScenario)
+                ;
+        var originalBehandling = builder.buildOgLagreMedUng(ungTestRepositories);
+        originalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        originalBehandling.avsluttBehandling();
 
-        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
+        builder
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestscenario)
+            .medOriginalBehandling(originalBehandling, null);
+
+        var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
 
 
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
@@ -76,7 +86,10 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
-        return lagScenario(BrevScenarioer.endringOpphør(LocalDate.of(2024, 12, 1)));
+        LocalDate opphørsdato = LocalDate.of(2025, 8, 15);
+        var forrigeBehandlingGrunnlag = BrevScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
+        var ungTestGrunnlag = BrevScenarioer.endringOpphør(opphørsdato, forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        return lagOpphørscenario(ungTestGrunnlag, forrigeBehandlingGrunnlag);
     }
 }
 

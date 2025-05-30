@@ -148,8 +148,8 @@ class VedtaksbrevReglerTest {
         return new VedtaksbrevRegler(
             behandlingRepository,
             forventetBygger != null ? new UnitTestLookupInstanceImpl<>(mock(forventetBygger)) : null,
-            detaljertResultatUtleder
-        );
+            detaljertResultatUtleder,
+            ungTestRepositories.ungdomsprogramPeriodeRepository());
 
     }
 
