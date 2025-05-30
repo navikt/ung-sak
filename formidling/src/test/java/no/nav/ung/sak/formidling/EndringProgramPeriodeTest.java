@@ -9,8 +9,8 @@ import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDate;
 
@@ -25,12 +25,15 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
     }
 
 
-    @DisplayName("Endret eksisterende sluttdato")
-    @Test
-    void flytterSluttdatoBakover() {
+    @ParameterizedTest
+    @CsvSource({
+        "2025-08-20, 20. august 2025", //fremover
+        "2025-08-10, 10. august 2025" //bakover
+    })
+    void flytteSluttdato(String nyOpphørsdatoStr, String forventetDatoTekst) {
         LocalDate fomDato = LocalDate.of(2024, 12, 1);
         LocalDate opprinneligOpphørsdato = LocalDate.of(2025, 8, 15);
-        LocalDate nyOpphørsdato = LocalDate.of(2025, 8, 10);
+        LocalDate nyOpphørsdato = LocalDate.parse(nyOpphørsdatoStr);
 
         var opphørGrunnlag = BrevScenarioer.endringOpphør(opprinneligOpphørsdato, new LocalDateInterval(fomDato, fomDato.plusWeeks(52)));
         var endringGrunnlag = BrevScenarioer.endringSluttdato(nyOpphørsdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
@@ -39,14 +42,48 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Vi har endret ungdomsprogramytelse din \
-                Fra 10. august 2025 får du ikke lenger penger gjennom ungdomsprogramytelse. \
+                Fra %s får du ikke lenger penger gjennom ungdomsprogramytelse. \
                 Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse til og med 14. august 2025, \
                 men den datoen gjelder ikke lenger fordi den er endret av din veileder. \
                 Derfor har du nå fått en ny dato for når ungdomsprogramytelse din stopper. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
-                """);
+                """.formatted(forventetDatoTekst));
 
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_PROGRAMPERIODE);
 
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelse din</h1>"
+            );
+
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "2025-08-20, 20. august 2025", //fremover
+        "2025-08-10, 10. august 2025" //bakover
+    })
+    void flytteStartdato(String nyOpphørsdatoStr, String forventetDatoTekst) {
+        LocalDate opprinneligStartdato = LocalDate.of(2025, 8, 15);
+        LocalDate nyStartdato = LocalDate.parse(nyOpphørsdatoStr);
+
+        var førstegangsbehandling = BrevScenarioer.innvilget19år(opprinneligStartdato);
+        var endringGrunnlag = BrevScenarioer.endringStartdato(nyStartdato, førstegangsbehandling.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        var behandling = lagEndringScenario(endringGrunnlag, førstegangsbehandling);
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Vi har endret ungdomsprogramytelse din \
+                Fra %s får du penger gjennom ungdomsprogramytelse. \
+                Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse fra og med 14. august 2025, \
+                men den datoen gjelder ikke lenger fordi den er endret av din veileder. \
+                Derfor har du nå fått en ny dato for når ungdomsprogramytelse din starter. \
+                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                """.formatted(forventetDatoTekst));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_PROGRAMPERIODE);
