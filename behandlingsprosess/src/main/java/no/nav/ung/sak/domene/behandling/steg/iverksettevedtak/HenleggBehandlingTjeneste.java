@@ -1,31 +1,22 @@
 package no.nav.ung.sak.domene.behandling.steg.iverksettevedtak;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -33,10 +24,15 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.ung.sak.kontrakt.dokument.BestillBrevDtoGammel;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveSendTilInfotrygdTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @ApplicationScoped
 public class HenleggBehandlingTjeneste {
@@ -47,8 +43,7 @@ public class HenleggBehandlingTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private ProsessTaskTjeneste prosessTaskRepository;
     private SøknadRepository søknadRepository;
-    private FagsakRepository fagsakRepository;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<HenleggelsePostopsTjeneste> henleggelsePostopsTjenester;
@@ -69,8 +64,7 @@ public class HenleggBehandlingTjeneste {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
         this.søknadRepository = repositoryProvider.getSøknadRepository();
-        this.fagsakRepository = repositoryProvider.getFagsakRepository();
-        this.historikkRepository = repositoryProvider.getHistorikkRepository();
+        this.historikkinnslagRepository = repositoryProvider.getHistorikkinnslagRepository();
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.henleggelsePostopsTjenester = henleggelsePostopsTjenester;
     }
@@ -122,7 +116,7 @@ public class HenleggBehandlingTjeneste {
         if (BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET.equals(årsakKode)) {
             sendHenleggelsesbrev(behandling.getId(), HistorikkAktør.VEDTAKSLØSNINGEN);
         }
-        lagHistorikkinnslagForHenleggelse(behandling.getId(), årsakKode, begrunnelse, historikkAktør);
+        lagHistorikkinnslagForHenleggelse(behandling, årsakKode, begrunnelse, historikkAktør);
 
         HenleggelsePostopsTjeneste.finnTjeneste(henleggelsePostopsTjenester, behandling.getFagsakYtelseType())
             .ifPresent(postOps -> postOps.utfør(behandling));
@@ -181,21 +175,19 @@ public class HenleggBehandlingTjeneste {
 //        dokumentBestillerApplikasjonTjeneste.bestillDokument(bestillBrevDto, aktør);
     }
 
-    public void lagHistorikkInnslagForHenleggelseFraSteg(Long behandlingId, BehandlingResultatType årsakKode, String begrunnelse) {
-        lagHistorikkinnslagForHenleggelse(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
+    private void lagHistorikkinnslagForHenleggelse(Behandling behandling, BehandlingResultatType aarsak, String begrunnelse, HistorikkAktør aktør) {
+        var historikkinnslag = opprettHistorikkinnslagForHenleggelse(behandling, aarsak, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
+        historikkinnslagRepository.lagre(historikkinnslag);
     }
 
-    private void lagHistorikkinnslagForHenleggelse(Long behandlingsId, BehandlingResultatType aarsak, String begrunnelse, HistorikkAktør aktør) {
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.AVBRUTT_BEH)
-            .medÅrsak(aarsak)
-            .medBegrunnelse(begrunnelse);
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setType(HistorikkinnslagType.AVBRUTT_BEH);
-        historikkinnslag.setBehandlingId(behandlingsId);
-        builder.build(historikkinnslag);
-
-        historikkinnslag.setAktør(aktør);
-        historikkRepository.lagre(historikkinnslag);
+    public static Historikkinnslag opprettHistorikkinnslagForHenleggelse(Behandling behandling, BehandlingResultatType årsakKode, String begrunnelse, HistorikkAktør aktør) {
+        return new Historikkinnslag.Builder()
+            .medAktør(aktør)
+            .medBehandlingId(behandling.getId())
+            .medFagsakId(behandling.getFagsakId())
+            .medTittel("Behandling er henlagt")
+            .addLinje(årsakKode.getNavn())
+            .addLinje(begrunnelse)
+            .build();
     }
 }
