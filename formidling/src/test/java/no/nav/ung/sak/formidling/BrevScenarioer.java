@@ -438,12 +438,11 @@ public class BrevScenarioer {
 
 
     /**
-     * Opphør av programmet etter 3 mnd i programmet
+     * Opphør av programmet. OpprinneligProgramPeriode kan hentes fra et annet sceario
      */
-    public static UngTestScenario endringOpphør(LocalDate opphørsdato) {
-        var fom = opphørsdato.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
+    public static UngTestScenario endringOpphør(LocalDate opphørsdato, LocalDateInterval opprinneligProgramPeriode) {
+        var fom = opprinneligProgramPeriode.getFomDato();
 
-        var opprinneligProgramPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var nyProgramPeriode = new LocalDateInterval(fom, opphørsdato.minusDays(1));
         var satser = new LocalDateTimeline<>(List.of(
            new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), opprinneligProgramPeriode.getTomDato(), lavSatsBuilder(fom).build())
@@ -461,6 +460,43 @@ public class BrevScenarioer {
                 new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
                 new LocalDateSegment<>(opphørsdato, opprinneligProgramPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
                 )
+
+            ),
+            fom.minusYears(19).plusDays(42),
+            List.of(opprinneligProgramPeriode.getFomDato()),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), opphørsdato.minusDays(1))),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(opphørsdato, opprinneligProgramPeriode.getTomDato()))
+            ),
+            null,
+            Collections.emptyList()
+        );
+    }
+
+    /**
+     * Har allerede opphørt, endrer opphørsdato
+     */
+    public static UngTestScenario endringSluttdato(LocalDate opphørsdato) {
+        var fom = opphørsdato.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
+
+        var opprinneligProgramPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+        var nyProgramPeriode = new LocalDateInterval(fom, opphørsdato.minusDays(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), opprinneligProgramPeriode.getTomDato(), lavSatsBuilder(fom).build())
+        ));
+
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), nyProgramPeriode.getTomDato())),
+            satser,
+            uttaksPerioder(nyProgramPeriode),
+            tilkjentYtelsePerioder(satser, nyProgramPeriode),
+            new LocalDateTimeline<>(opprinneligProgramPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
+                new LocalDateSegment<>(opphørsdato, opprinneligProgramPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+            )
 
             ),
             fom.minusYears(19).plusDays(42),

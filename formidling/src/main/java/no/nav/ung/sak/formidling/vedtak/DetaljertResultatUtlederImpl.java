@@ -130,12 +130,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         if (!avslåtteVilkår.isEmpty()) {
             if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ENDRING_STARTDATO);
+                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO_FREMOVER);
             }
 
             if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR);
+                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_OPPHØR);
             }
 
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
@@ -147,7 +147,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ENDRING_STARTDATO);
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO_BAKOVER);
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
@@ -158,7 +158,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør av ungdomsprogram");
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_OPPHØR_FREMOVER, "Opphørsdato flyttet fremover");
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {

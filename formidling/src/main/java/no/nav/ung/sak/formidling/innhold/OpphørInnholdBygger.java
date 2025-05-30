@@ -28,7 +28,7 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
             new OpphørDto(
                 resultatTidslinje
                     .filterValue(it -> it.resultatInfo().stream()
-                        .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.OPPHØR))
+                        .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.ENDRING_OPPHØR))
                     .getMinLocalDate()
             ));
     }
