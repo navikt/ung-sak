@@ -28,6 +28,7 @@ public class RegisterinnhentingHistorikkinnslagTjeneste {
         nyeRegisteropplysningerInnslagBuilder.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
         nyeRegisteropplysningerInnslagBuilder.medTittel("Nye registeropplysninger");
         nyeRegisteropplysningerInnslagBuilder.medBehandlingId(behandling.getId());
+        nyeRegisteropplysningerInnslagBuilder.medFagsakId(behandling.getFagsakId());
         nyeRegisteropplysningerInnslagBuilder.addLinje("Saksbehandling starter på nytt");
 
         historikkinnslagRepository.lagre(nyeRegisteropplysningerInnslagBuilder.build());

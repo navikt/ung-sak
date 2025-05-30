@@ -155,6 +155,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         var historikkinnslagBuilder = new Historikkinnslag.Builder();
         historikkinnslagBuilder.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
         historikkinnslagBuilder.medBehandlingId(behandling.getId());
+        historikkinnslagBuilder.medFagsakId(behandling.getFagsakId());
         historikkinnslagBuilder.medTittel("Behandlingen er flyttet");
         historikkinnslagBuilder.addLinje("Behandlingen er flyttet fra " + fraStegNavn + "  tilbake til " + tilStegNavn);
         historikkinnslagRepository.lagre(historikkinnslagBuilder.build());
