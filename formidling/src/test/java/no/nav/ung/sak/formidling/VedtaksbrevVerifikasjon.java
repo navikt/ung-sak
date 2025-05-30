@@ -2,8 +2,6 @@ package no.nav.ung.sak.formidling;
 
 import java.time.LocalDate;
 
-import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
-
 public class VedtaksbrevVerifikasjon {
 
 
@@ -24,15 +22,8 @@ public class VedtaksbrevVerifikasjon {
                    Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
                    Med vennlig hilsen \
                    Nav Arbeid og ytelser \
-                   side av""".formatted(BrevUtils.brevDatoString(brevdato), BrevScenarioer.DEFAULT_NAVN, fnr, body);
+                   side av""".formatted(BrevTestUtils.brevDatoString(brevdato), BrevScenarioer.DEFAULT_NAVN, fnr, body);
     }
 
 
-    static void verifiserStandardOverskrifter(String brevHtml) {
-        assertThatHtml(brevHtml).containsHtmlSubSequenceOnce(
-            "<h2>Du har rett til å klage</h2>",
-            "<h2>Du har rett til innsyn</h2>",
-            "<h2>Trenger du mer informasjon?</h2>"
-        );
-    }
 }

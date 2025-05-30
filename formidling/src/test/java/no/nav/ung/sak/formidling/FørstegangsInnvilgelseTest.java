@@ -1,115 +1,27 @@
 package no.nav.ung.sak.formidling;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.InnvilgelseInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
-import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
+import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.IOException;
 import java.time.LocalDate;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for brevtekster for innvilgelse. Bruker html for å validere.
- * For manuell verifikasjon av pdf kan env variabel LAGRE_PDF brukes.
- */
-@ExtendWith(CdiAwareExtension.class)
-@ExtendWith(JpaExtension.class)
-class BrevGenerererTjenesteNyInnvilgelseTest {
-
-    private BrevGenerererTjeneste brevGenerererTjeneste;
-
-    @Inject
-    private EntityManager entityManager;
-    private UngTestRepositories ungTestRepositories;
-
-    PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
-    String fnr = pdlKlient.fnr();
-    private TestInfo testInfo;
+class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
-    @BeforeEach
-    void setup(TestInfo testInfo) {
-        this.testInfo = testInfo;
-        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
-        brevGenerererTjeneste = lagBrevGenererTjeneste();
+    FørstegangsInnvilgelseTest() {
+        super(2, "Du får ungdomsprogramytelse");
     }
-
-    @NotNull
-    private BrevGenerererTjeneste lagBrevGenererTjeneste() {
-        var repositoryProvider = ungTestRepositories.repositoryProvider();
-        var tilkjentYtelseRepository = ungTestRepositories.tilkjentYtelseRepository();
-
-        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
-
-        InnvilgelseInnholdBygger innvilgelseInnholdBygger = new InnvilgelseInnholdBygger(
-            ungTestRepositories.ungdomsytelseGrunnlagRepository(),
-            ungdomsprogramPeriodeTjeneste,
-            false);
-
-        var ungdomsytelseSøknadsperiodeTjeneste =
-            new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository());
-
-        DetaljertResultatUtlederImpl detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), ungdomsytelseSøknadsperiodeTjeneste),
-            tilkjentYtelseRepository, repositoryProvider.getVilkårResultatRepository());
-
-        VedtaksbrevRegler vedtaksbrevRegler = new VedtaksbrevRegler(
-            repositoryProvider.getBehandlingRepository(), new UnitTestLookupInstanceImpl<>(innvilgelseInnholdBygger),
-            detaljertResultatUtleder);
-
-        return new BrevGenerererTjenesteImpl(
-            repositoryProvider.getBehandlingRepository(),
-            new AktørTjeneste(pdlKlient),
-            new PdfGenKlient(),
-            repositoryProvider.getPersonopplysningRepository(),
-            vedtaksbrevRegler,
-            ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
-    }
-
-    @Test()
-    @DisplayName("Verifiserer formatering på overskrifter")
-    void verifiserOverskrifter() {
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
-
-        var behandling = scenarioBuilder.getBehandling();
-
-        Long behandlingId = (behandling.getId());
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
-
-        var brevtekst = generertBrev.dokument().html();
-
-        VedtaksbrevVerifikasjon.verifiserStandardOverskrifter(brevtekst);
-
-
-    }
-
 
     @DisplayName("Innvilgelse med riktig fom dato, maks antall dager, lav sats, grunnbeløp, hjemmel")
     @Test
@@ -388,26 +300,6 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
             """;
     }
 
-    @Test
-    void pdfStrukturTest() throws IOException {
-        TestScenarioBuilder scenarioBuilder = BrevScenarioer
-            .lagAvsluttetStandardBehandling(ungTestRepositories);
-
-        var behandling = scenarioBuilder.getBehandling();
-
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
-
-        var pdf = generertBrev.dokument().pdf();
-
-        try (PDDocument pdDocument = Loader.loadPDF(pdf)) {
-            assertThat(pdDocument.getNumberOfPages()).isEqualTo(2);
-            String pdfTekst = new PDFTextStripper().getText(pdDocument);
-            assertThat(pdfTekst).isNotEmpty();
-            assertThat(pdfTekst).contains("Du får ungdomsprogramytelse");
-        }
-
-    }
-
     private Behandling lagScenario(UngTestScenario ungTestscenario) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestscenario);
 
@@ -418,12 +310,21 @@ class BrevGenerererTjenesteNyInnvilgelseTest {
         return behandling;
     }
 
+    @Override
+    protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
+        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-    private GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return BrevUtils.genererBrevOgLagreHvisEnabled(testInfo, behandlingId, brevGenerererTjeneste);
+        return  new FørstegangsInnvilgelseInnholdBygger(
+            ungTestRepositories.ungdomsytelseGrunnlagRepository(),
+            ungdomsprogramPeriodeTjeneste,
+            false);
     }
 
-
+    @Override
+    protected Behandling lagScenarioForFellesTester() {
+        UngTestScenario ungTestscenario = BrevScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
+        return lagScenario(ungTestscenario);
+    }
 }
 
 

@@ -5,8 +5,13 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -18,6 +23,7 @@ import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,21 +39,39 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private EtterlysningRepository etterlysningRepository;
     private EtterlysningTjeneste etterlysningTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
     public ProgramperiodeendringEtterlysningTjeneste(UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
                                                      UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                                      ProsessTaskTjeneste prosessTaskTjeneste,
                                                      EtterlysningRepository etterlysningRepository,
-                                                     EtterlysningTjeneste EtterlysningTjeneste) {
+                                                     EtterlysningTjeneste EtterlysningTjeneste, BehandlingRepository behandlingRepository) {
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.etterlysningRepository = etterlysningRepository;
         this.etterlysningTjeneste = EtterlysningTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
-    void opprettEtterlysningerForProgramperiodeEndring(Long behandlingId, Long fagsakId) {
+    public void opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse behandlingReferanse) {
+        final var behandlingId = behandlingReferanse.getBehandlingId();
+        final var fagsakId = behandlingReferanse.getFagsakId();
+
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        List<BehandlingÅrsakType> behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper();
+
+        boolean skalOppretteEtterlysning = behandlingÅrsakerTyper.stream()
+            .anyMatch(årsak ->
+                BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM == årsak ||
+                    BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == årsak
+            );
+
+        if (!skalOppretteEtterlysning) {
+            return;
+        }
+
         final var gjeldendePeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
 
         // Finner etterlysninger som skal opprettes og avbrytes for endring av programperiode

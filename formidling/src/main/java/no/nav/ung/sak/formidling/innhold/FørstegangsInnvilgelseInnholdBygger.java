@@ -34,16 +34,16 @@ import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilFakt
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
 @Dependent
-public class InnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
+public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InnvilgelseInnholdBygger.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FørstegangsInnvilgelseInnholdBygger.class);
 
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final boolean ignoreIkkeStøttedeBrev;
 
     @Inject
-    public InnvilgelseInnholdBygger(
+    public FørstegangsInnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
         @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil) {

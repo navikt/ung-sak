@@ -42,9 +42,9 @@ public class BehandlingModellTest {
     private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.SVANGERSKAPSPENGER;
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
-    private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_UNGDOMSPROGRAM;
+    private static final BehandlingStegType STEG_2 = BehandlingStegType.INIT_VILKÅR;
     private static final BehandlingStegType STEG_3 = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
-    private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_KOMPLETTHET;
+    private static final BehandlingStegType STEG_4 = BehandlingStegType.BEREGN_YTELSE;
 
     @Inject
     private BehandlingskontrollTjeneste kontrollTjeneste;
@@ -210,14 +210,14 @@ public class BehandlingModellTest {
 
     @Test
     public void tilbakefører_til_tidligste_steg_med_åpent_aksjonspunkt() {
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = STEG_2.getAksjonspunktDefinisjonerUtgang().get(0);
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = STEG_3.getAksjonspunktDefinisjonerUtgang().get(0);
         DummySteg tilbakeføringssteg = new DummySteg(true, opprettForAksjonspunkt(aksjonspunktDefinisjon));
         // Arrange
         List<TestStegKonfig> modellData = List.of(
-            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap(aksjonspunktDefinisjon)),
-            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap()),
-            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, tilbakeføringssteg, ap()),
-            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, nullSteg, ap()));
+            new TestStegKonfig(STEG_1, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_2, behandlingType, fagsakYtelseType, nullSteg, ap(aksjonspunktDefinisjon)),
+            new TestStegKonfig(STEG_3, behandlingType, fagsakYtelseType, nullSteg, ap()),
+            new TestStegKonfig(STEG_4, behandlingType, fagsakYtelseType, tilbakeføringssteg, ap()));
         BehandlingModellImpl modell = setupModell(modellData);
 
         TestScenario scenario = TestScenario.dummyScenario();
@@ -225,14 +225,14 @@ public class BehandlingModellTest {
         BehandlingStegVisitorUtenLagring visitor = lagVisitor(behandling);
 
         Aksjonspunkt aksjonspunkt = serviceProvider.getAksjonspunktKontrollRepository().leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon,
-            STEG_1);
+            STEG_2);
         serviceProvider.getAksjonspunktKontrollRepository().setReåpnet(aksjonspunkt);
 
-        BehandlingStegUtfall siste = modell.prosesserFra(STEG_3, visitor);
-        assertThat(siste.getBehandlingStegType()).isEqualTo(STEG_3);
+        BehandlingStegUtfall siste = modell.prosesserFra(STEG_4, visitor);
+        assertThat(siste.getBehandlingStegType()).isEqualTo(STEG_4);
 
         Behandling beh = hentBehandling(behandling.getId());
-        assertThat(beh.getAktivtBehandlingSteg()).isEqualTo(STEG_2);
+        assertThat(beh.getAktivtBehandlingSteg()).isEqualTo(STEG_3);
     }
 
 

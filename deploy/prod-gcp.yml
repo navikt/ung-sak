@@ -256,6 +256,8 @@ spec:
       value: "PT1H"
     - name: RAPPORTERINGSFRIST_DAG_I_MAANED
       value: "5"
+    - name: AKSEPTERT_DIFFERANSE_KONTROLL
+      value: "100"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

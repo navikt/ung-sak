@@ -34,7 +34,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String SØKERS_OPPLYSNINGSPLIKT_MANU_KODE = "5017";
 
     public static final String VARSEL_REVURDERING_ETTERKONTROLL_KODE = "5025";
-    public static final String VARSEL_REVURDERING_MANUELL_KODE = "5026";
     public static final String KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE = "5055";
     public static final String KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING_KODE = "5056";
 

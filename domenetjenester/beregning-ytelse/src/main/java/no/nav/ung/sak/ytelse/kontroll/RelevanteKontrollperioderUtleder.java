@@ -1,12 +1,44 @@
 package no.nav.ung.sak.ytelse.kontroll;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.time.YearMonth;
+import java.util.Set;
 
+@Dependent
 public class RelevanteKontrollperioderUtleder {
+
+
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+
+    @Inject
+    public RelevanteKontrollperioderUtleder(ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+    }
+
+    public LocalDateTimeline<Set<BehandlingÅrsakType>> utledPerioderForKontrollAvInntekt(Long behandlingId) {
+        return utledPerioderForKontrollAvInntekt(behandlingId, Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+    }
+
+
+    public LocalDateTimeline<Set<BehandlingÅrsakType>> utledPerioderForKontrollAvInntekt(Long behandlingId,
+                                                                                         Set<BehandlingÅrsakType> årsakerForKontroll) {
+
+        final var periodisertMånedsvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
+        final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.stream().anyMatch(årsakerForKontroll::contains));
+        return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje);
+    }
+
 
     /**
      * Utleder måneder der vi skal gjøre kontroll av inntekt

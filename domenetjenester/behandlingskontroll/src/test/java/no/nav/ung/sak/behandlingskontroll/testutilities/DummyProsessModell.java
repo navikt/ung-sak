@@ -29,7 +29,6 @@ public class DummyProsessModell {
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.VURDER_SØKNADSFRIST)
-            .medSteg(BehandlingStegType.KONTROLLER_UNGDOMSPROGRAM)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)

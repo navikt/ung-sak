@@ -649,9 +649,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         if (originalBehandling == null) {
             behandlingBuilder = Behandling.nyBehandlingFor(fagsak, behandlingType);
         } else {
-            behandlingBuilder = Behandling.fraTidligereBehandling(originalBehandling, behandlingType)
-                .medBehandlingÅrsak(
-                    BehandlingÅrsak.builder(behandlingÅrsakType).medManueltOpprettet(manueltOpprettet));
+            behandlingBuilder = Behandling.fraTidligereBehandling(originalBehandling, behandlingType);
+        }
+
+        if (behandlingÅrsakType != null) {
+            behandlingBuilder.medBehandlingÅrsak(
+                BehandlingÅrsak.builder(behandlingÅrsakType).medManueltOpprettet(manueltOpprettet));
         }
 
         if (behandlingstidFrist != null) {
@@ -745,6 +748,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         this.behandlingStatus = Objects.requireNonNull(status, "status");
         return (S) this;
     }
+
+    @SuppressWarnings("unchecked")
+    public S medBehandlingÅrsak(BehandlingÅrsakType behandlingÅrsakType) {
+        this.behandlingÅrsakType = Objects.requireNonNull(behandlingÅrsakType, "behandlingÅrsakType");
+        return (S) this;
+    }
+
 
     @SuppressWarnings("unchecked")
     public S medBehandlingsresultat(BehandlingResultatType behandlingResultatType) {

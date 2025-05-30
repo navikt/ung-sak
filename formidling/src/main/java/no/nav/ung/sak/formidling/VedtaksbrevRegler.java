@@ -59,7 +59,7 @@ public class VedtaksbrevRegler {
             .innholderBare(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)) {
             String forklaring = "Automatisk brev ved ny innvilgelse. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(InnvilgelseInnholdBygger.class).get(),
+                innholdByggere.select(FørstegangsInnvilgelseInnholdBygger.class).get(),
                 detaljertResultat,
                 forklaring,
                 redigerRegelResultat.kanRedigere()
