@@ -72,13 +72,12 @@ public class VedtaksbrevRegler {
             );
         }
 
-        ResultatHelper resultatUtenomInnvilgelseUtenÅrsak = resultater
-            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK);
-
-        if (resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_OPPHØR)) {
+        if (resultater
+            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
+            .innholderBare(DetaljertResultatType.ENDRING_PROGRAM_PERIODE)) {
             var erFørsteOpphør = erFørsteOpphør(behandling);
             if (erFørsteOpphør) {
-                String forklaring = "Automatisk brev ved første opphør. " + redigerRegelResultat.forklaring();
+                String forklaring = "Automatisk brev ved opphør. " + redigerRegelResultat.forklaring();
                 return VedtaksbrevRegelResulat.automatiskBrev(
                     innholdByggere.select(OpphørInnholdBygger.class).get(),
                     detaljertResultat,
@@ -87,19 +86,6 @@ public class VedtaksbrevRegler {
                 );
             }
 
-            String forklaring = "Automatisk brev ved endring av sluttdato bakover. " + redigerRegelResultat.forklaring();
-            return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
-                detaljertResultat,
-                forklaring,
-                redigerRegelResultat.kanRedigere()
-            );
-        }
-
-        if (resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_STARTDATO_FREMOVER) ||
-            resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_STARTDATO_BAKOVER) ||
-            resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_OPPHØR_FREMOVER)
-        ) {
             String forklaring = "Automatisk brev ved endring av programperiode. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
                 innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
@@ -108,7 +94,6 @@ public class VedtaksbrevRegler {
                 redigerRegelResultat.kanRedigere()
             );
         }
-
 
         if (resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
             String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();

@@ -130,12 +130,12 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         if (!avslåtteVilkår.isEmpty()) {
             if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO_FREMOVER);
+                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_PROGRAM_PERIODE, "Endring av startdato fremover");
             }
 
             if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_OPPHØR);
+                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_PROGRAM_PERIODE, "Opphør av ungdomsprogramperiode");
             }
 
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
@@ -147,7 +147,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO_BAKOVER);
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_PROGRAM_PERIODE, "Endring av startdato bakover");
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
@@ -158,7 +158,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_OPPHØR_FREMOVER, "Opphørsdato flyttet fremover");
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_PROGRAM_PERIODE, "Opphørsdato flyttet fremover");
         }
 
         if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
