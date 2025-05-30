@@ -53,6 +53,7 @@ public class HistorikkRepositoryImplTest {
         var historikkinnslagBuilder = new Historikkinnslag.Builder();
         historikkinnslagBuilder.medAktør(HistorikkAktør.SØKER);
         historikkinnslagBuilder.medBehandlingId(behandling.getId());
+        historikkinnslagBuilder.medFagsakId(behandling.getFagsakId());
         historikkinnslagBuilder.medTittel(SkjermlenkeType.VEDTAK);
         historikkinnslagBuilder.addLinje("Vedtak er fattet");
 
@@ -77,6 +78,7 @@ public class HistorikkRepositoryImplTest {
         vedtakFattetHistorikkBuilder.medAktør(HistorikkAktør.SØKER);
         vedtakFattetHistorikkBuilder.medBehandlingId(behandling.getId());
         vedtakFattetHistorikkBuilder.medFagsakId(behandling.getFagsakId());
+        vedtakFattetHistorikkBuilder.medFagsakId(behandling.getFagsakId());
         vedtakFattetHistorikkBuilder.medTittel(SkjermlenkeType.VEDTAK);
         vedtakFattetHistorikkBuilder.addLinje("Vedtak er fattet");
 
@@ -84,6 +86,7 @@ public class HistorikkRepositoryImplTest {
 
         var brevSentHistorikkBuilder = new Historikkinnslag.Builder();
         brevSentHistorikkBuilder.medBehandlingId(behandling.getId());
+        brevSentHistorikkBuilder.medFagsakId(behandling.getFagsakId());
         brevSentHistorikkBuilder.medTittel("Brev er sendt");
         brevSentHistorikkBuilder.addLinje("Brev er sendt til søker");
         brevSentHistorikkBuilder.medAktør(HistorikkAktør.SØKER);
