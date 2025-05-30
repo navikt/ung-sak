@@ -20,7 +20,9 @@ create table HISTORIKKINNSLAG
     SKJERMLENKE             varchar(100),
     TITTEL                  varchar(1000),
     OPPRETTET_TID           timestamp default CURRENT_TIMESTAMP not null,
-    OPPRETTET_AV            varchar(20) not null default 'VL'
+    OPPRETTET_AV            varchar(20) not null default 'VL',
+    ENDRET_AV               varchar(20),
+    ENDRET_TID              timestamp
 );
 
 comment on table HISTORIKKINNSLAG is 'Historikk over hendelser i saken';
@@ -49,7 +51,9 @@ create table HISTORIKKINNSLAG_LINJE
     TEKST               varchar(4000),
     SEKVENS_NR          smallint                              not null,
     OPPRETTET_TID           timestamp default CURRENT_TIMESTAMP not null,
-    OPPRETTET_AV            varchar(20) not null default 'VL'
+    OPPRETTET_AV            varchar(20) not null default 'VL',
+    ENDRET_AV               varchar(20),
+    ENDRET_TID              timestamp
 );
 
 comment on table HISTORIKKINNSLAG_LINJE is 'Linjer i historikkinnslag';
@@ -73,7 +77,9 @@ create table HISTORIKKINNSLAG_DOK_LINK
     JOURNALPOST_ID      varchar(100),
     DOKUMENT_ID         varchar(100),
     OPPRETTET_TID           timestamp default CURRENT_TIMESTAMP not null,
-    OPPRETTET_AV            varchar(20) not null default 'VL'
+    OPPRETTET_AV            varchar(20) not null default 'VL',
+    ENDRET_AV               varchar(20),
+    ENDRET_TID              timestamp
 );
 
 create sequence SEQ_HISTORIKKINNSLAG_DOK_LINK
