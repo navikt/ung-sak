@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import org.junit.jupiter.api.Test;
 
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
@@ -25,6 +26,9 @@ public class HistorikkInnslagKonverterTest {
         lenke.setJournalpostId(journalpostId);
         var historikkinnslag = new Historikkinnslag.Builder();
         historikkinnslag.medDokumenter(Collections.singletonList(lenke));
+        historikkinnslag.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+        historikkinnslag.medFagsakId(1L);
+        historikkinnslag.medTittel("Tittel");
         HistorikkinnslagDto resultat = konverterer.map(historikkinnslag.build(), Collections.emptyList());
         assertThat(resultat.dokumenter().get(0).isUtgått()).isTrue();
     }
@@ -38,6 +42,9 @@ public class HistorikkInnslagKonverterTest {
         lenke.setJournalpostId(journalpostId);
         var historikkinnslag = new Historikkinnslag.Builder();
         historikkinnslag.medDokumenter(Collections.singletonList(lenke));
+        historikkinnslag.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+        historikkinnslag.medFagsakId(1L);
+        historikkinnslag.medTittel("Tittel");
         var ikkeMatchendeJournalpostId = new JournalpostId(2L);
         HistorikkinnslagDto resultat = konverterer.map(historikkinnslag.build(), Collections.singletonList(ikkeMatchendeJournalpostId));
         assertThat(resultat.dokumenter().get(0).isUtgått()).isTrue();
@@ -51,10 +58,10 @@ public class HistorikkInnslagKonverterTest {
         JournalpostId journalpostId = new JournalpostId(1L);
         lenke.setJournalpostId(journalpostId);
         var historikkinnslag = new Historikkinnslag.Builder();
+        historikkinnslag.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+        historikkinnslag.medFagsakId(1L);
+        historikkinnslag.medTittel("Tittel");
         historikkinnslag.medDokumenter(Collections.singletonList(lenke));
-        ArkivJournalPost ikkeMatchendeArkivJournalPost = ArkivJournalPost.Builder.ny()
-            .medJournalpostId(journalpostId)
-            .build();
         HistorikkinnslagDto resultat = konverterer.map(historikkinnslag.build(), Collections.singletonList(journalpostId));
         assertThat(resultat.dokumenter().get(0).isUtgått()).isFalse();
     }
