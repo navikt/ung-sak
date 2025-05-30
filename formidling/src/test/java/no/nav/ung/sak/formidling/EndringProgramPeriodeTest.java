@@ -21,7 +21,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
    EndringProgramPeriodeTest() {
         super(1,
-            "Vi har endret ungdomsprogramytelse din");
+            "Vi har endret ungdomsprogramytelsen din");
     }
 
 
@@ -41,7 +41,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
-                Vi har endret ungdomsprogramytelse din \
+                Vi har endret ungdomsprogramytelsen din \
                 Fra %s får du ikke lenger penger gjennom ungdomsprogramytelse. \
                 Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse til og med 14. august 2025, \
                 men den datoen gjelder ikke lenger fordi den er endret av din veileder. \
@@ -57,7 +57,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsprogramytelse din</h1>"
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
             );
 
     }
@@ -77,7 +77,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
-                Vi har endret ungdomsprogramytelse din \
+                Vi har endret ungdomsprogramytelsen din \
                 Fra %s får du penger gjennom ungdomsprogramytelse. \
                 Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse fra og med 14. august 2025, \
                 men den datoen gjelder ikke lenger fordi den er endret av din veileder. \
@@ -93,7 +93,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsprogramytelse din</h1>"
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
             );
 
     }
