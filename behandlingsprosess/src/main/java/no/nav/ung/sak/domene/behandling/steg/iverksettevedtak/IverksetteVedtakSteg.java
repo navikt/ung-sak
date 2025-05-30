@@ -102,7 +102,8 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
 
 
     private void opprettHistorikkinnslagNårIverksettelsePåVent(Behandling behandling) {
-        var historikkinnslag = new Historikkinnslag.Builder().medFagsakId(behandling.getFagsakId())
+        var historikkinnslag = new Historikkinnslag.Builder()
+            .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
             .medTittel("Behandlingen venter på iverksettelse")
             .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN)
