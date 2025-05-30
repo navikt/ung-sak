@@ -34,15 +34,15 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
             LOG.warn("Fant flere enn 1 programperiode={} i denne behandlingen. Bruker den siste", denneProgramPerioder);
         }
 
-        var forrigeProgramPeriode = hentProgramperiodeTidslinje(behandling.getOriginalBehandlingId()
+        var forrigeProgramPerioder = hentProgramperiodeTidslinje(behandling.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Trenger forrige behandling ved endring av programperiode")));
 
-        if (forrigeProgramPeriode.size() > 1) {
-            LOG.warn("Fant flere enn 1 programperiode={} i forrige behandling. Bruker den siste", forrigeProgramPeriode);
+        if (forrigeProgramPerioder.size() > 1) {
+            LOG.warn("Fant flere enn 1 programperiode={} i forrige behandling. Bruker den siste", forrigeProgramPerioder);
         }
 
         var denneProgramperiode = denneProgramPerioder.toSegments().last();
-        var forrigeProgramperiode = forrigeProgramPeriode.toSegments().last();
+        var forrigeProgramperiode = forrigeProgramPerioder.toSegments().last();
 
         var endretStartdato = !denneProgramperiode.getFom().equals(forrigeProgramperiode.getFom()) ?
             new EndretDatoDto(denneProgramperiode.getFom(), forrigeProgramperiode.getFom()) : null;
