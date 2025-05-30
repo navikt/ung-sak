@@ -1,21 +1,26 @@
 DROP TABLE HISTORIKKINNSLAG_FELT;
+DROP sequence SEQ_HISTORIKKINNSLAG_FELT;
+
 DROP TABLE HISTORIKKINNSLAG_DEL;
+DROP sequence SEQ_HISTORIKKINNSLAG_DEL;
+
+DROP TABLE HISTORIKKINNSLAG_DOK_LINK;
+DROP sequence SEQ_HISTORIKKINNSLAG_DOK_LINK;
+
 DROP TABLE HISTORIKKINNSLAG;
+DROP sequence SEQ_HISTORIKKINNSLAG;
+
 
 create table HISTORIKKINNSLAG
 (
-    ID             NUMBER(19)                             not null
-        constraint PK_HISTORIKKINNSLAG
-            primary key,
-    FAGSAK_ID      NUMBER(19)                             not null
-        constraint FK_HISTORIKKINNSLAG_01 references FAGSAK,
-    BEHANDLING_ID  NUMBER(19)
-        constraint FK_HISTORIKKINNSLAG_02 references BEHANDLING,
-    AKTOER         VARCHAR2(100 char)                     not null,
-    SKJERMLENKE    VARCHAR2(100 char),
-    TITTEL         VARCHAR2(1000 char),
-    OPPRETTET_AV   VARCHAR2(20 char) default 'VL'         not null,
-    OPPRETTET_TID  TIMESTAMP(3)      default systimestamp not null,
+    ID                      bigint      not null primary key,
+    FAGSAK_ID               bigint                            not null references FAGSAK(ID),
+    BEHANDLING_ID           bigint references BEHANDLING(ID),
+    AKTOER                  varchar(100)                     not null,
+    SKJERMLENKE             varchar(100),
+    TITTEL                  varchar(1000),
+    OPPRETTET_TID           timestamp default CURRENT_TIMESTAMP not null,
+    OPPRETTET_AV            varchar(20) not null default 'VL'
 );
 
 comment on table HISTORIKKINNSLAG is 'Historikk over hendelser i saken';
@@ -34,21 +39,17 @@ create index IDX_HISTORIKKINNSLAG_02
 
 create sequence SEQ_HISTORIKKINNSLAG
     minvalue 1000000
-    increment by 50
-    nocache;
+    increment by 50;
 
 create table HISTORIKKINNSLAG_LINJE
 (
-    ID                  NUMBER(19)                             not null
-        constraint PK_HISTORIKKINNSLAG_LINJE
-            primary key,
-    HISTORIKKINNSLAG_ID NUMBER(19)                             not null
-        constraint FK_HISTORIKKINNSLAG_LINJE_1 references HISTORIKKINNSLAG,
-    TYPE                VARCHAR2(100 char)                     not null,
-    TEKST               VARCHAR2(4000 char),
-    SEKVENS_NR          NUMBER(5)                              not null,
-    OPPRETTET_AV        VARCHAR2(20 char) default 'VL'         not null,
-    OPPRETTET_TID       TIMESTAMP(3)      default systimestamp not null
+    ID                  bigint                             not null primary key,
+    HISTORIKKINNSLAG_ID bigint                             not null references HISTORIKKINNSLAG(ID),
+    TYPE                varchar(100)                     not null,
+    TEKST               varchar(4000),
+    SEKVENS_NR          smallint                              not null,
+    OPPRETTET_TID           timestamp default CURRENT_TIMESTAMP not null,
+    OPPRETTET_AV            varchar(20) not null default 'VL'
 );
 
 comment on table HISTORIKKINNSLAG_LINJE is 'Linjer i historikkinnslag';
@@ -62,28 +63,22 @@ create index IDX_HISTORIKKINNSLAG_LINJE_01
 
 create sequence SEQ_HISTORIKKINNSLAG_LINJE
     minvalue 1000000
-    increment by 50
-    nocache;
+    increment by 50;
 
 create table HISTORIKKINNSLAG_DOK_LINK
 (
-    ID                  NUMBER(19)                             not null
-        constraint PK_HISTORIKKINNSLAG_DOK_LINK
-            primary key,
-    LINK_TEKST          VARCHAR2(100 char)                     not null,
-    HISTORIKKINNSLAG_ID NUMBER(19)                             not null
-        constraint FK_HISTORIKKINNSLAG_DOK_LINK_01
-            references HISTORIKKINNSLAG,
-    JOURNALPOST_ID      VARCHAR2(100 char),
-    DOKUMENT_ID         VARCHAR2(100 char),
-    OPPRETTET_AV        VARCHAR2(20 char) default 'VL'         not null,
-    OPPRETTET_TID       TIMESTAMP(3)      default systimestamp not null
+    ID                  bigint                             not null primary key,
+    LINK_TEKST          varchar(100)                     not null,
+    HISTORIKKINNSLAG_ID bigint                            not null references HISTORIKKINNSLAG(ID),
+    JOURNALPOST_ID      varchar(100),
+    DOKUMENT_ID         varchar(100),
+    OPPRETTET_TID           timestamp default CURRENT_TIMESTAMP not null,
+    OPPRETTET_AV            varchar(20) not null default 'VL'
 );
 
 create sequence SEQ_HISTORIKKINNSLAG_DOK_LINK
     minvalue 1000000
-    increment by 50
-    nocache;
+    increment by 50;
 
 comment on table HISTORIKKINNSLAG_DOK_LINK is 'Kobling fra historikkinnslag til aktuell dokumentasjon';
 
