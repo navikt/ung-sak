@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,10 +86,10 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
 
         verify(historikkinnslagRepository).lagre(captor.capture());
         Historikkinnslag historikkinnslag = captor.getValue();
-        var linje = historikkinnslag.getLinjer().get(0);
+        var tittel = historikkinnslag.getTittel();
 
         assertThat(historikkinnslag.getBehandlingId()).isEqualTo(behandlingId);
-        assertThat(linje.getTekst()).isEqualTo("");
+        assertThat(tittel).isEqualTo("Behandlingen er satt på vent til " + localDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
     }
 
     @Test
