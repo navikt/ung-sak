@@ -18,7 +18,7 @@ public enum DetaljertResultatType {
     AVSLAG_ANNET("Avslag pga annen årsak - se forklaring"),
     //Bør spisse nærmere når det kommer brevtester,
     INNVILGELSE_ANNET("Innvilgelse pga annen årsak - se forklaring"),
-    UENDRET_INNVILGET("Uendret periode fra tidligere i kant med endret periode")
+    INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak")
     ;
 
     private final String navn;

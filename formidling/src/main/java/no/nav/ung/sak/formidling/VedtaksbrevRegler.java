@@ -72,11 +72,10 @@ public class VedtaksbrevRegler {
             );
         }
 
-        //TODO endre til  å sjekke om det eksisterer en sluttdato
-        if (resultater
-            .utenom(DetaljertResultatType.UENDRET_INNVILGET)
-            .innholderBare(DetaljertResultatType.ENDRING_OPPHØR) ) {
+        ResultatHelper resultatUtenomInnvilgelseUtenÅrsak = resultater
+            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK);
 
+        if (resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_OPPHØR)) {
             var erFørsteOpphør = erFørsteOpphør(behandling);
             if (erFørsteOpphør) {
                 String forklaring = "Automatisk brev ved første opphør. " + redigerRegelResultat.forklaring();
@@ -90,7 +89,20 @@ public class VedtaksbrevRegler {
 
             String forklaring = "Automatisk brev ved endring av sluttdato bakover. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(OpphørInnholdBygger.class).get(),
+                innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
+            );
+        }
+
+        if (resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_STARTDATO_FREMOVER) ||
+            resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_STARTDATO_BAKOVER) ||
+            resultatUtenomInnvilgelseUtenÅrsak.innholderBare(DetaljertResultatType.ENDRING_OPPHØR_FREMOVER)
+        ) {
+            String forklaring = "Automatisk brev ved endring av programperiode. " + redigerRegelResultat.forklaring();
+            return VedtaksbrevRegelResulat.automatiskBrev(
+                innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
                 detaljertResultat,
                 forklaring,
                 redigerRegelResultat.kanRedigere()
@@ -145,7 +157,7 @@ public class VedtaksbrevRegler {
     private boolean erFørsteOpphør(Behandling behandling) {
         var forrigeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getOriginalBehandlingId().orElseThrow(
             () -> new IllegalStateException("Må ha original behandling ved opphør")
-        )).orElseThrow( () -> new IllegalStateException("Mangler grunnlag for forrige behandling"));
+        )).orElseThrow(() -> new IllegalStateException("Mangler grunnlag for forrige behandling"));
         return forrigeGrunnlag.getUngdomsprogramPerioder().getPerioder().stream()
             .anyMatch(it -> Tid.TIDENES_ENDE.equals(it.getPeriode().getTomDato()));
     }
@@ -164,7 +176,8 @@ public class VedtaksbrevRegler {
     }
 
 
-    private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {}
+    private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {
+    }
 
     private static class ResultatHelper {
         private final Set<DetaljertResultatInfo> resultatInfo;
