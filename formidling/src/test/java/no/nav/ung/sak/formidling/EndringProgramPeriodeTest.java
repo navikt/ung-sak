@@ -67,9 +67,9 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         "2025-08-20, 20. august 2025", //fremover
         "2025-08-10, 10. august 2025" //bakover
     })
-    void flytteStartdato(String nyOpphørsdatoStr, String forventetDatoTekst) {
+    void flytteStartdato(String nyStartdatoStr, String forventetDatoTekst) {
         LocalDate opprinneligStartdato = LocalDate.of(2025, 8, 15);
-        LocalDate nyStartdato = LocalDate.parse(nyOpphørsdatoStr);
+        LocalDate nyStartdato = LocalDate.parse(nyStartdatoStr);
 
         var førstegangsbehandling = BrevScenarioer.innvilget19år(opprinneligStartdato);
         var endringGrunnlag = BrevScenarioer.endringStartdato(nyStartdato, førstegangsbehandling.programPerioder().getFirst().getPeriode().toLocalDateInterval());
@@ -79,7 +79,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
             """
                 Vi har endret ungdomsprogramytelsen din \
                 Fra %s får du penger gjennom ungdomsprogramytelse. \
-                Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse fra og med 14. august 2025, \
+                Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse fra og med 15. august 2025, \
                 men den datoen gjelder ikke lenger fordi den er endret av din veileder. \
                 Derfor har du nå fått en ny dato for når ungdomsprogramytelse din starter. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \

@@ -519,20 +519,20 @@ public class BrevScenarioer {
      * Endrer startdato
      */
     public static UngTestScenario endringStartdato(LocalDate nyStartdato, LocalDateInterval opprinneligProgramPeriode) {
+
         if (nyStartdato.isEqual(opprinneligProgramPeriode.getFomDato())) {
             throw new IllegalArgumentException("Ny startdato er lik opprinnelig sluttdato");
         }
 
         boolean flyttetFremover = nyStartdato.isAfter(opprinneligProgramPeriode.getFomDato());
+        LocalDate fom = flyttetFremover ? opprinneligProgramPeriode.getFomDato() : nyStartdato;
 
-        var fagsakPeriode = new LocalDateInterval(nyStartdato,
+        var fagsakPeriode = new LocalDateInterval(fom,
             opprinneligProgramPeriode.getFomDato().plusWeeks(52).minusDays(1));
 
-        var fom = nyStartdato;
-
-        var nyProgramPeriode = new LocalDateInterval(fom, opprinneligProgramPeriode.getTomDato());
+        var nyProgramPeriode = new LocalDateInterval(nyStartdato, opprinneligProgramPeriode.getTomDato());
         var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), fagsakPeriode.getTomDato(), lavSatsBuilder(fom).build())
+            new LocalDateSegment<>(nyStartdato, fagsakPeriode.getTomDato(), lavSatsBuilder(fom).build())
         ));
 
         var ungVilkårSegments = new ArrayList<LocalDateSegment<Utfall>>();
@@ -553,11 +553,11 @@ public class BrevScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(opprinneligProgramPeriode.getFomDato()),
             Set.of(
-                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(nyStartdato, fagsakPeriode.getTomDato())),
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(fom, fagsakPeriode.getTomDato())),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
                     flyttetFremover ?
                         DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nyStartdato.minusDays(1)) :
-                        DatoIntervallEntitet.fra(nyStartdato, fagsakPeriode.getTomDato()))
+                        DatoIntervallEntitet.fra(fom, fagsakPeriode.getTomDato()))
             ),
             null,
             Collections.emptyList()

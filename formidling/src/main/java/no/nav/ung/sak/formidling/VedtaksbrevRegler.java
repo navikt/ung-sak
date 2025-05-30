@@ -75,8 +75,7 @@ public class VedtaksbrevRegler {
         if (resultater
             .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
             .innholderBare(DetaljertResultatType.ENDRING_SLUTTDATO)) {
-            var erFørsteOpphør = erFørsteOpphør(behandling);
-            if (erFørsteOpphør) {
+            if (erFørsteOpphør(behandling)) {
                 String forklaring = "Automatisk brev ved opphør. " + redigerRegelResultat.forklaring();
                 return VedtaksbrevRegelResulat.automatiskBrev(
                     innholdByggere.select(OpphørInnholdBygger.class).get(),
