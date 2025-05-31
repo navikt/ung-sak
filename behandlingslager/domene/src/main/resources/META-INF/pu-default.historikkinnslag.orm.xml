@@ -5,9 +5,11 @@
         version="3.0">
 
 	<sequence-generator name="SEQ_HISTORIKKINNSLAG" allocation-size="50" sequence-name="SEQ_HISTORIKKINNSLAG" />
-	<sequence-generator name="SEQ_HISTORIKKINNSLAG_DOK_LINK" allocation-size="50" sequence-name="SEQ_HISTORIKKINNSLAG_DOK_LINK" />
+    <sequence-generator name="SEQ_HISTORIKKINNSLAG_LINJE" allocation-size="50" sequence-name="SEQ_HISTORIKKINNSLAG_LINJE" />
+    <sequence-generator name="SEQ_HISTORIKKINNSLAG_DOK_LINK" allocation-size="50" sequence-name="SEQ_HISTORIKKINNSLAG_DOK_LINK" />
 
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag" />
-	<entity class="no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinje" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink" />
 
 </entity-mappings>
