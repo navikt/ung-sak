@@ -1,33 +1,30 @@
 package no.nav.ung.sak.behandling.prosessering;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkBegrunnelseType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandling.prosessering.task.ÅpneBehandlingForEndringerTask;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.ung.sak.typer.AktørId;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Dependent
 public class BehandlingsprosessApplikasjonTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -46,13 +43,13 @@ public class BehandlingsprosessApplikasjonTjeneste {
         BehandlingRepository behandlingRepository,
         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
         BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-        HistorikkRepository historikkRepository, BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
+        HistorikkinnslagRepository historikkinnslagRepository, BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
 
         Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.behandlingRepository = behandlingRepository;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
-        this.historikkRepository = historikkRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
 
@@ -114,7 +111,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
      * @return gruppenavn (prosesstask) hvis noe startet asynkront.
      */
     public Optional<String> gjenopptaBehandling(Behandling behandling) {
-        opprettHistorikkinnslagForManueltGjenopptakelse(behandling, HistorikkinnslagType.BEH_MAN_GJEN);
+        opprettHistorikkinnslagForManueltGjenopptakelse(behandling);
         return Optional.of(asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling));
     }
 
@@ -153,17 +150,17 @@ public class BehandlingsprosessApplikasjonTjeneste {
         AktørId aktørId = behandling.getAktørId();
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
 
-        ProsessTaskData åpneBehandlingForEndringerTask =  ProsessTaskData.forProsessTask(ÅpneBehandlingForEndringerTask.class);
+        ProsessTaskData åpneBehandlingForEndringerTask = ProsessTaskData.forProsessTask(ÅpneBehandlingForEndringerTask.class);
         åpneBehandlingForEndringerTask.setProperty(ÅpneBehandlingForEndringerTask.START_STEG, startSteg.getKode());
         åpneBehandlingForEndringerTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         gruppe.addNesteSekvensiell(åpneBehandlingForEndringerTask);
 
-        ProsessTaskData fortsettBehandlingTask =  ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+        ProsessTaskData fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandlingId, aktørId.getId());
         fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
 
-        opprettHistorikkinnslagForBehandlingStartetPåNytt(behandling);
+        opprettHistorikkinnslagForBehandlingStartetPåNytt(behandling, startSteg);
         gruppe.setCallIdFraEksisterende();
         return prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandlingId), gruppe);
     }
@@ -174,29 +171,22 @@ public class BehandlingsprosessApplikasjonTjeneste {
      * {@link AksjonspunktStatusEvent})
      * som eies av systembruker. Derfor velger vi her å legge på et innslag til med saksbehandler som eier slik at historikken blir korrekt.
      */
-    private void opprettHistorikkinnslagForManueltGjenopptakelse(Behandling behandling,
-                                                                 HistorikkinnslagType historikkinnslagType) {
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder();
-        builder.medHendelse(historikkinnslagType);
-
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(HistorikkAktør.SAKSBEHANDLER);
-        historikkinnslag.setType(historikkinnslagType);
-        historikkinnslag.setBehandlingId(behandling.getId());
-        historikkinnslag.setFagsakId(behandling.getFagsakId());
-        builder.build(historikkinnslag);
-        historikkRepository.lagre(historikkinnslag);
+    private void opprettHistorikkinnslagForManueltGjenopptakelse(Behandling behandling) {
+        var historikkinnslagBuilder = new Historikkinnslag.Builder();
+        historikkinnslagBuilder.medAktør(HistorikkAktør.SAKSBEHANDLER);
+        historikkinnslagBuilder.medTittel("Behandlingen er gjenopptatt");
+        historikkinnslagBuilder.medBehandlingId(behandling.getId());
+        historikkinnslagBuilder.medFagsakId(behandling.getFagsakId());
+        historikkinnslagRepository.lagre(historikkinnslagBuilder.build());
     }
 
-    private void opprettHistorikkinnslagForBehandlingStartetPåNytt(Behandling behandling) {
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setType(HistorikkinnslagType.BEH_STARTET_PÅ_NYTT);
-        historikkinnslag.setAktør(HistorikkAktør.SAKSBEHANDLER);
-        HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.BEH_STARTET_PÅ_NYTT)
-            .medBegrunnelse(HistorikkBegrunnelseType.BEH_STARTET_PA_NYTT);
-        historikkInnslagTekstBuilder.build(historikkinnslag);
-        historikkinnslag.setBehandling(behandling);
-        historikkRepository.lagre(historikkinnslag);
+    private void opprettHistorikkinnslagForBehandlingStartetPåNytt(Behandling behandling, BehandlingStegType startSteg) {
+        var historikkinnslagBuilder = new Historikkinnslag.Builder();
+        historikkinnslagBuilder.medTittel("Behandling er startet på nytt")
+            .addLinje("Behandlingen er startet på nytt for å åpne for endringer. Starter fra steg " + startSteg.getNavn())
+            .medAktør(HistorikkAktør.SAKSBEHANDLER)
+            .medBehandlingId(behandling.getId())
+            .medFagsakId(behandling.getFagsakId());
+        historikkinnslagRepository.lagre(historikkinnslagBuilder.build());
     }
 }

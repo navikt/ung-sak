@@ -4,6 +4,7 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collections;
+import java.util.Comparator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -26,6 +27,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
@@ -40,14 +42,16 @@ public class HistorikkRestTjeneste {
     public static final String PATH = "/historikk";
 
     private HistorikkTjenesteAdapter historikkTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     public HistorikkRestTjeneste() {
         // Rest CDI
     }
 
     @Inject
-    public HistorikkRestTjeneste(HistorikkTjenesteAdapter historikkTjeneste) {
+    public HistorikkRestTjeneste(HistorikkTjenesteAdapter historikkTjeneste, BehandlingRepository behandlingRepository) {
         this.historikkTjeneste = historikkTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @GET
@@ -74,8 +78,8 @@ public class HistorikkRestTjeneste {
         if (!historikkinnslag.isEmpty()) {
 
             EntityTag etag = historikkinnslag.stream()
-                .max(Historikkinnslag.COMP_REKKEFØLGE)
-                .map(h -> new EntityTag(h.getUuid().toString()))
+                .max( Comparator.comparing(Historikkinnslag::getOpprettetTidspunkt))
+                .map(h -> h.getBehandlingId() != null ? new EntityTag(behandlingRepository.hentBehandling(h.getBehandlingId()).getUuid().toString()) : null)
                 .get();
 
             var rb = req.evaluatePreconditions(etag);
@@ -84,7 +88,7 @@ public class HistorikkRestTjeneste {
                 // utsetter til vi har funnet etag her slik at vi unngår Saf kall. Men her er utdatert, så må gjøres.
                 var dtoer = historikkTjeneste.mapTilDto(historikkinnslag, saksnummer);
                 for (var dto : dtoer) {
-                    for (var linkDto : dto.getDokumentLinks()) {
+                    for (var linkDto : dto.dokumenter()) {
                         String journalpostId = linkDto.getJournalpostId();
                         String dokumentId = linkDto.getDokumentId();
                         UriBuilder uriBuilder = UriBuilder.fromPath(url);

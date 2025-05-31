@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import no.nav.ung.kodeverk.TempAvledeKode;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
@@ -146,6 +148,19 @@ public enum SkjermlenkeType implements Kodeverdi {
     @Deprecated
     public static SkjermlenkeType finnSkjermlenkeType(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         return aksjonspunktDefinisjon.getSkjermlenkeType();
+    }
+
+    @Converter(autoApply = true)
+    public static class KodeverdiConverter implements AttributeConverter<SkjermlenkeType, String> {
+        @Override
+        public String convertToDatabaseColumn(SkjermlenkeType attribute) {
+            return attribute == null ? null : attribute.getKode();
+        }
+
+        @Override
+        public SkjermlenkeType convertToEntityAttribute(String dbData) {
+            return dbData == null ? null : fraKode(dbData);
+        }
     }
 
 }

@@ -2,6 +2,8 @@ package no.nav.ung.sak.økonomi.tilbakekreving.samkjøring;
 
 import java.util.Optional;
 
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +25,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 
 @ApplicationScoped
@@ -36,7 +37,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
 
     private BehandlingLåsRepository behandlingLåsRepository;
     private BehandlingRepository behandlingRepository;
-    private HistorikkTjenesteAdapter historikkTjenesteAdapter;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private K9TilbakeRestKlient k9TilbakeRestKlient;
@@ -49,7 +50,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
     @Inject
     public GjenopptaVenterPåTilbakekrevingTask(BehandlingLåsRepository behandlingLåsRepository,
                                                BehandlingRepository behandlingRepository,
-                                               HistorikkTjenesteAdapter historikkTjenesteAdapter,
+                                               HistorikkinnslagRepository historikkinnslagRepository,
                                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                                K9TilbakeRestKlient k9TilbakeRestKlient,
@@ -57,9 +58,9 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
         super(behandlingLåsRepository);
         this.behandlingLåsRepository = behandlingLåsRepository;
         this.behandlingRepository = behandlingRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
-        this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.k9TilbakeRestKlient = k9TilbakeRestKlient;
         this.sjekkTilbakekrevingAksjonspunktUtleder = sjekkTilbakekrevingAksjonspunktUtleder;
     }
@@ -78,7 +79,13 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
             Aksjonspunkt autopunktet = autopunkt.get();
             autopunktet.avbryt();
             logger.info("Avbryter autopunkt {} med venteårsak {}", autopunktet.getAksjonspunktDefinisjon(), autopunktet.getVenteårsak());
-            historikkTjenesteAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.BEH_GJEN, HistorikkAktør.VEDTAKSLØSNINGEN);
+            var historikkinnslagBuilder = new Historikkinnslag.Builder();
+            historikkinnslagBuilder.medTittel("Behandling er gjenopptatt");
+            historikkinnslagBuilder
+                .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN)
+                .medBehandlingId(behandling.getId())
+                .medFagsakId(behandling.getFagsakId());
+            historikkinnslagRepository.lagre(historikkinnslagBuilder.build());
         }
         Optional<Aksjonspunkt> aksjonspunkt = finnSjekkTilbakekrevingAksjonspunkt(behandling);
         if (aksjonspunkt.isPresent()) {

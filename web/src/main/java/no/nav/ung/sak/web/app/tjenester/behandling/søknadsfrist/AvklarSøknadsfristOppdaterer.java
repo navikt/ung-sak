@@ -63,7 +63,7 @@ public class AvklarSøknadsfristOppdaterer implements AksjonspunktOppdaterer<Avk
 
         avklartSøknadsfristRepository.lagreAvklaring(param.getBehandlingId(), avklaringer);
 
-        lagHistorikkInnslag(param, avklaringer);
+        // TODO: Lag historikk
 
         var builder = OppdateringResultat.builder()
             .medTotrinn().build();
@@ -72,13 +72,5 @@ public class AvklarSøknadsfristOppdaterer implements AksjonspunktOppdaterer<Avk
         return builder;
     }
 
-    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Set<AvklartKravDokument> avklaringer) {
-        for (AvklartKravDokument avklaring : avklaringer) {
-            historikkAdapter.tekstBuilder()
-                .medHendelse(HistorikkinnslagType.SØKNADSFRIST_VURDERT, avklaring.getUtfall() + (avklaring.getUtfall() == Utfall.OPPFYLT ? " fra " : " før ") + avklaring.getFraDato() )
-                .medBegrunnelse(avklaring.getBegrunnelse(), param.erBegrunnelseEndret())
-                .medSkjermlenke(SkjermlenkeType.SOEKNADSFRIST);
-        }
 
-    }
 }

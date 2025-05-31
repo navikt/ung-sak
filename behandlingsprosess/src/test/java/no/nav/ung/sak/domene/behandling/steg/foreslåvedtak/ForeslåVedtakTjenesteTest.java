@@ -17,7 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -80,9 +80,6 @@ public class ForeslåVedtakTjenesteTest {
     @Mock
     private FormidlingTjeneste formidlingTjeneste;
 
-    @Spy
-    private HistorikkRepository historikkRepository;
-
     private Behandling behandling;
 
     private BehandlingskontrollKontekst kontekst;
@@ -96,7 +93,6 @@ public class ForeslåVedtakTjenesteTest {
     @BeforeEach
     public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        historikkRepository = repositoryProvider.getHistorikkRepository();
 
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(repositoryProvider);
         kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);

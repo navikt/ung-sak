@@ -5,7 +5,9 @@ public interface Kodeverdi extends IndexKey {
 
     String getKode();
 
-    String getOffisiellKode();
+    default String getOffisiellKode( ) {;
+        return getKode();
+    }
 
     String getKodeverk();
 
