@@ -52,7 +52,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        kontrollerteInntektperioderTjeneste.ryddPerioderFritattForKontroll(behandlingId);
+        kontrollerteInntektperioderTjeneste.ryddPerioderFritattForKontrollEllerTilVurderingIBehandlingen(behandlingId);
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var behandlingReferanse = BehandlingReferanse.fra(behandling);
         var input = inputMapper.mapInput(behandlingReferanse);
