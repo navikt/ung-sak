@@ -42,10 +42,10 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Vi har endret ungdomsprogramytelsen din \
-                Fra %s får du ikke lenger penger gjennom ungdomsprogramytelse. \
+                Fra %s får du ikke lenger penger gjennom ungdomsprogramytelsen. \
                 Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse til og med 14. august 2025, \
                 men den datoen gjelder ikke lenger fordi den er endret av din veileder. \
-                Derfor har du nå fått en ny dato for når ungdomsprogramytelse din stopper. \
+                Derfor har du nå fått en ny dato for når ungdomsprogramytelsen din stopper. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
                 """.formatted(forventetDatoTekst));
 
@@ -78,10 +78,10 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Vi har endret ungdomsprogramytelsen din \
-                Fra %s får du penger gjennom ungdomsprogramytelse. \
+                Fra %s får du penger gjennom ungdomsprogramytelsen. \
                 Du fikk tidligere beskjed om at du skulle få ungdomsprogramytelse fra og med 15. august 2025, \
                 men den datoen gjelder ikke lenger fordi den er endret av din veileder. \
-                Derfor har du nå fått en ny dato for når ungdomsprogramytelse din starter. \
+                Derfor har du nå fått en ny dato for når ungdomsprogramytelsen din starter. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
                 """.formatted(forventetDatoTekst));
 
