@@ -23,7 +23,7 @@ public class VurderStrukturertDokumentTaskTest {
         data.setPayload(payload);
 
         var melding = new MottattMelding(data);
-        melding.setTema(OmrådeTema.OMS);
+        melding.setTema(OmrådeTema.UNG);
         melding.setJournalPostId(new JournalpostId("4247"));
 
         var task = new VurderStrukturertDokumentTask(null);
@@ -42,7 +42,7 @@ public class VurderStrukturertDokumentTaskTest {
         data.setPayload(payload);
 
         var melding = new MottattMelding(data);
-        melding.setTema(OmrådeTema.OMS);
+        melding.setTema(OmrådeTema.UNG);
         melding.setJournalPostId(new JournalpostId("4247"));
 
         var task = new VurderStrukturertDokumentTask(null);

@@ -80,7 +80,7 @@ public class HentDataFraJoarkTaskTest {
     @Test
     void skal_ikke_behandle_dersom_allerede_mottatt() {
         var melding = mottattMeldingFraNavNo("ungdomsytelse/gyldigSøknad");
-        melding.setTema(OmrådeTema.OMS);
+        melding.setTema(OmrådeTema.UNG);
         melding.setBrevkode(no.nav.ung.kodeverk.dokument.Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode());
 
         var task = initTask(melding, Journalstatus.MOTTATT);
@@ -99,7 +99,7 @@ public class HentDataFraJoarkTaskTest {
     @Test
     void skal_route_ungdomsytelsen() {
         var melding = mottattMeldingFraNavNo("ungdomsytelse/gyldigSøknad");
-        melding.setTema(OmrådeTema.OMS); // TODO: Bruk UNG når det er støttet
+        melding.setTema(OmrådeTema.UNG);
         melding.setBrevkode(no.nav.ung.kodeverk.dokument.Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode());
 
         var task = initTask(melding, Journalstatus.MOTTATT);
@@ -153,7 +153,6 @@ public class HentDataFraJoarkTaskTest {
         journalpostInfo.setStrukturertPayload(melding.getPayloadAsString().orElse(null));
         journalpostInfo.setForsendelseTidspunkt(melding.getForsendelseMottattTidspunkt().orElseThrow());
         journalpostInfo.setBrevkode(Optional.ofNullable(melding.getBrevkode()).orElse(EN_BREVKODE));
-        // TODO: no.nav.k9.felles.integrasjon.saf.Tema trenger å støtte UNG
         journalpostInfo.setTema(no.nav.k9.felles.integrasjon.saf.Tema.valueOf(melding.getTema().getKode()));
         journalpostInfo.setJournalstatus(journalstatus);
         return journalpostInfo;
@@ -203,7 +202,7 @@ public class HentDataFraJoarkTaskTest {
         var mm = new MottattMelding(new ProsessTaskData(HentDataFraJoarkTask.class).medSekvens("1"));
         mm.setJournalPostId(new JournalpostId("journalpost-" + counter.incrementAndGet()));
         mm.setBrevkode(brevkode);
-        mm.setTema(OmrådeTema.OMS);
+        mm.setTema(OmrådeTema.UNG);
         mm.setForsendelseMottattTidspunkt(LocalDateTime.now());
         mm.setJournalføringHendelsetype(JournalføringHendelsetype.MOTTATT);
         return mm;

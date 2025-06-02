@@ -129,8 +129,8 @@ class BrevbestillingTaskTest {
         var innvilgelseTittel = "Ungdomsytelse Innvilgelse";
         // Verify main request fields
         assertThat(request.journalpostType()).isEqualTo("UTGAAENDE");
-        assertThat(request.tema()).isEqualTo("OMS");
-        assertThat(request.behandlingstema()).isEqualTo("ab0271");
+        assertThat(request.tema()).isEqualTo("UNG");
+        assertThat(request.behandlingstema()).isNull();
         assertThat(request.tittel()).isEqualTo(innvilgelseTittel);
         assertThat(request.kanal()).isNull();
         assertThat(request.journalfoerendeEnhet()).isEqualTo("9999");
@@ -158,7 +158,7 @@ class BrevbestillingTaskTest {
         var sak = request.sak();
         assertThat(sak.sakstype()).isEqualTo("FAGSAK");
         assertThat(sak.fagsakId()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
-        assertThat(sak.fagsaksystem()).isEqualTo("K9");
+        assertThat(sak.fagsaksystem()).isEqualTo("UNG_SAK");
 
         // Verify Dokumenter
         assertThat(request.dokumenter()).hasSize(1);

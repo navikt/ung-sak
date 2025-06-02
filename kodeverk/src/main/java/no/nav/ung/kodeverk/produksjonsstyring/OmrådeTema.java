@@ -17,8 +17,6 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum OmrådeTema implements Kodeverdi {
 
-    FORELDRE_OG_SVANGERSKAPSPENGER("FOR_SVA", "FOR", "Foreldrepenger og svangerskapspenger"),
-    OMS("OMS", "OMS", "Omsorgspenger, Pleiepenger og opplæringspenger"), // Omsorgspenger, Pleiepenger og opplæringspenger
     UNG("UNG", "UNG", "Ungdomsytelse"), // Ungdomsytelse
     UDEFINERT("-", null, null),
     ;

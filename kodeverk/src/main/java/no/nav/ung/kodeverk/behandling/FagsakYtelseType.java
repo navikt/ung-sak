@@ -52,7 +52,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     ENSLIG_FORSØRGER("EF", "Enslig forsørger", null, null),
 
     /** Folketrygdloven ?? ytelser. */
-    UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "OMS"){
+    UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "UNG"){
         @Override
         public boolean vurderÅpneOppgaverFørVedtak() {
             return false;
