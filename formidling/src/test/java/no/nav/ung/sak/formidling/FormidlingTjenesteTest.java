@@ -57,7 +57,7 @@ class FormidlingTjenesteTest {
 
     @BeforeEach
     void setup() {
-        ungTestRepositories = BrevUtils.lagAlleUngTestRepositories(entityManager);
+        ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         lagBrevgenererOgVedtaksbrevRegler();
         vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
         formidlingTjeneste = new FormidlingTjeneste(

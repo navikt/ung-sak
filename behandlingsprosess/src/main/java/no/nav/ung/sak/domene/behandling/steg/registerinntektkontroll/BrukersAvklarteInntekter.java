@@ -5,5 +5,5 @@ import no.nav.ung.sak.ytelse.RapportertInntekt;
 
 import java.util.Set;
 
-public record BrukersAvklarteInntekter(Set<RapportertInntekt> inntekter, BrukersAvklarteInntekterKilde kilde) {
+public record BrukersAvklarteInntekter(Set<RapportertInntekt> inntekter, KontrollertInntektKilde kilde) {
 }

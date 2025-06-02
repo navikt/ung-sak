@@ -35,8 +35,8 @@ public class UngOppgaveKlient {
         this.opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endre/programperiode");
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
-        this.utløptURI = tilUri(url, "oppgave/utløpt");
-        this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgave/utløpt/forTypeOgPeriode");
+        this.utløptURI = tilUri(url, "oppgave/utlopt");
+        this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgave/utlopt/forTypeOgPeriode");
     }
 
     public void avbrytOppgave(UUID eksternRef) {

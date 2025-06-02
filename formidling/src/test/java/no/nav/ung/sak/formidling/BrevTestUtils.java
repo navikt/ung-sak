@@ -21,22 +21,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public class BrevUtils {
+public class BrevTestUtils {
 
     static final DateTimeFormatter norwegianFormatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("no-NO"));
 
     public static String brevDatoString(LocalDate date) {
         return date.format(norwegianFormatter);
-    }
-
-    public static GenerertBrev genererBrevOgLagreHvisEnabled(TestInfo testInfo, Long behandlingId, BrevGenerererTjeneste brevGenerererTjeneste ) {
-        if (System.getenv("LAGRE_PDF") != null) {
-            var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
-            BrevUtils.lagrePdf(generertBrev, testInfo);
-            return generertBrev;
-        }
-
-        return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
     }
 
     public static UngTestRepositories lagAlleUngTestRepositories(EntityManager entityManager) {
@@ -52,7 +42,7 @@ public class BrevUtils {
         lagrePdf(pdf, filnavn);
     }
 
-    public static void lagrePdf(byte[] data, String filename) {
+    private static void lagrePdf(byte[] data, String filename) {
         Path directory;
         try {
             directory = Files.createDirectories(Paths.get("pdfresultater"));

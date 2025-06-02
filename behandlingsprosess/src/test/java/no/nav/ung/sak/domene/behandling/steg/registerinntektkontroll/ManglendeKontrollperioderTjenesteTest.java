@@ -24,7 +24,6 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +58,6 @@ class ManglendeKontrollperioderTjenesteTest {
     private FagsakRepository fagsakRepository;
     private Behandling behandling;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
 
@@ -69,7 +67,6 @@ class ManglendeKontrollperioderTjenesteTest {
         final var ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, behandlingRepository);
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste);
         ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
-        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, ytelsesperiodeutleder);
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
     }
 
@@ -78,7 +75,7 @@ class ManglendeKontrollperioderTjenesteTest {
 
         var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(behandlingRepository,
             ytelsesperiodeutleder,
-                prosessTriggerPeriodeUtleder, 6, tilkjentYtelseRepository);
+            prosessTriggerPeriodeUtleder, 6, tilkjentYtelseRepository);
 
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());

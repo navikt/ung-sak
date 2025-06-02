@@ -32,14 +32,18 @@ public enum BehandlingStegType implements Kodeverdi {
     KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT("VURDEROP", "Kontrollerer søkers opplysningsplikt", UTREDES),
     SIMULER_OPPDRAG("SIMOPP", "Simuler oppdrag", UTREDES),
     START_STEG("START", "Start behandling prosess", UTREDES),
-    KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Kontroller endringer i ungdomsprogram", UTREDES),
     VURDER_KOMPLETTHET("VURDERKOMPLETT", "Vurder kompletthet", UTREDES),
     ALDERSVILKÅRET("VURDER_ALDER", "Vurder søkers alder", UTREDES),
     VURDER_TILBAKETREKK("VURDER_TILBAKETREKK", "Vurder tilbaketrekk", UTREDES),
     VURDER_UTTAK("VURDER_UTTAK", "Vurder antall dager og uttak", UTREDES),
     VURDER_UNGDOMSPROGRAMVILKÅR("VURDER_UNGDOMSPROGRAMVILKÅR", "Vurder deltakelse i ungdomsprogrammet", UTREDES),
     UNGDOMSYTELSE_BEREGNING("UNGDOMSYTELSE_BEREGNING", "Beregner sats for ungdomsytelsen", UTREDES),
-    KONTROLLER_REGISTER_INNTEKT("KONTROLLER_REGISTER_INNTEKT", "Kontroller brukers rapporterte inntekt mot registerinntekt", UTREDES);
+    KONTROLLER_REGISTER_INNTEKT("KONTROLLER_REGISTER_INNTEKT", "Kontroller brukers rapporterte inntekt mot registerinntekt", UTREDES),
+
+    // Utgåtte steg: Lagres på behandling og aksjonspunkt og kan ikke fjernes med mindre man håndterer dette i BehandlingStegTypeKodeverdiConverter
+    @Deprecated
+    KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Utgått steg: Kontroller endring i ungdomsprogram", UTREDES);
+
 
     private static final Map<String, BehandlingStegType> KODER = new LinkedHashMap<>();
 
