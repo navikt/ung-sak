@@ -18,7 +18,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Fagsystem implements Kodeverdi {
-    UNG_SAK("UNG_SAK", "Vedtaksløsning Ungdomsytelse", "UNG_SAK"),
+    UNG_SAK("UNG-SAK", "Vedtaksløsning Ungdomsytelse", "UNG-SAK"),
     K9SAK("K9SAK", "Vedtaksløsning K9 - Pleiepenger", "K9"),
     FPSAK("FPSAK", "Vedtaksløsning Foreldrepenger", "FS36"),
     TPS("TPS", "TPS", "FS03"),
