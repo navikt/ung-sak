@@ -30,6 +30,7 @@ public enum VilkårType implements Kodeverdi {
         "UNG_VK_2",
         "Deltar i ungdomsprogrammet",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 8"),
+        Avslagsårsak.ENDRET_STARTDATO_UNGDOMSPROGRAM,
         Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM
     ),
     /**
