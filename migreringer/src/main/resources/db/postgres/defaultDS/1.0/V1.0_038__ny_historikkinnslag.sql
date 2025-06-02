@@ -14,6 +14,7 @@ DROP sequence SEQ_HISTORIKKINNSLAG;
 create table HISTORIKKINNSLAG
 (
     ID                      bigint      not null primary key,
+    UUID                    UUID        not null,
     FAGSAK_ID               bigint                            not null references FAGSAK(ID),
     BEHANDLING_ID           bigint references BEHANDLING(ID),
     AKTOER                  varchar(100)                     not null,
@@ -27,6 +28,7 @@ create table HISTORIKKINNSLAG
 
 comment on table HISTORIKKINNSLAG is 'Historikk over hendelser i saken';
 comment on column HISTORIKKINNSLAG.ID is 'PK';
+comment on column HISTORIKKINNSLAG.UUID is 'Unik identifikator for ekstern bruk';
 comment on column HISTORIKKINNSLAG.FAGSAK_ID is 'FK fagsak';
 comment on column HISTORIKKINNSLAG.BEHANDLING_ID is 'FK behandling';
 comment on column HISTORIKKINNSLAG.AKTOER is 'Hvilken aktoer';

@@ -9,7 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 
 
-public record HistorikkinnslagDto(UUID behandlingUuid,
+public record HistorikkinnslagDto(UUID historikkinnslagUuid,
+                                  UUID behandlingUuid,
                                   HistorikkAktørDto aktør,
                                   SkjermlenkeType skjermlenke,
                                   LocalDateTime opprettetTidspunkt,

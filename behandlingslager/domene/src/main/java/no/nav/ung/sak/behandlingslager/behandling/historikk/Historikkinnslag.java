@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import org.hibernate.annotations.NaturalId;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 
 @Entity(name = "Historikkinnslag")
@@ -19,6 +21,13 @@ public class Historikkinnslag extends BaseEntitet {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_HISTORIKKINNSLAG")
     private Long id;
+
+    /**
+     * UUID for å kunne identifisere historikkinnslaget unikt i frontend
+     */
+    @NaturalId
+    @Column(name = "uuid")
+    private UUID uuid;
 
     @Column(name = "fagsak_id", nullable = false)
     private Long fagsakId;
@@ -44,6 +53,10 @@ public class Historikkinnslag extends BaseEntitet {
     private String tittel;
 
     protected Historikkinnslag() {
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 
     public Long getFagsakId() {
@@ -176,6 +189,8 @@ public class Historikkinnslag extends BaseEntitet {
                 kladd.linjer.add(linje);
                 linje.setHistorikkinnslag(kladd);
             }
+
+            kladd.uuid = UUID.randomUUID();
 
             var t = kladd;
             kladd = null;

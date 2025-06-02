@@ -27,14 +27,14 @@ public class HistorikkInnslagKonverter {
 
     public HistorikkinnslagDto map(Historikkinnslag h, List<JournalpostId> journalPosterForSak) {
         var behandlingId = h.getBehandlingId();
-        var uuid = behandlingId == null ? null : behandlingRepository.hentBehandling(behandlingId).getUuid();
+        var behandlingUuid = behandlingId == null ? null : behandlingRepository.hentBehandling(behandlingId).getUuid();
         List<HistorikkInnslagDokumentLinkDto> dokumenter = tilDokumentlenker(h.getDokumentLinker(), journalPosterForSak);
         var linjer = h.getLinjer()
             .stream()
             .sorted(Comparator.comparing(HistorikkinnslagLinje::getSekvensNr))
             .map(t -> t.getType() == HistorikkinnslagLinjeType.TEKST ? HistorikkinnslagDto.Linje.tekstlinje(t.getTekst()) : HistorikkinnslagDto.Linje.linjeskift())
             .toList();
-        return new HistorikkinnslagDto(uuid, HistorikkinnslagDto.HistorikkAktørDto.fra(h.getAktør(), h.getOpprettetAv()), h.getSkjermlenke(),
+        return new HistorikkinnslagDto(h.getUuid(), behandlingUuid, HistorikkinnslagDto.HistorikkAktørDto.fra(h.getAktør(), h.getOpprettetAv()), h.getSkjermlenke(),
             h.getOpprettetTidspunkt(), dokumenter, h.getTittel(), linjer);
     }
 
