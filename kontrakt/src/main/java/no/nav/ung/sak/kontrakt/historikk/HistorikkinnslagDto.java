@@ -15,9 +15,10 @@ public record HistorikkinnslagDto(UUID behandlingUuid,
                                   LocalDateTime opprettetTidspunkt,
                                   List<HistorikkInnslagDokumentLinkDto> dokumenter,
                                   String tittel,
-                                  List<Linje> linjer) {
+                                  List<Linje> linjer) implements Comparable<HistorikkinnslagDto> {
 
     public record HistorikkAktørDto(HistorikkAktør type, String ident) {
+
         public static HistorikkAktørDto fra(HistorikkAktør aktør, String opprettetAv) {
             if (Set.of(HistorikkAktør.SAKSBEHANDLER, HistorikkAktør.BESLUTTER).contains(aktør)) {
                 return new HistorikkAktørDto(aktør, opprettetAv);
@@ -26,7 +27,13 @@ public record HistorikkinnslagDto(UUID behandlingUuid,
         }
     }
 
+    @Override
+    public int compareTo(HistorikkinnslagDto o) {
+        return this.opprettetTidspunkt.compareTo(o.opprettetTidspunkt);
+    }
+
     public record Linje(Type type, String tekst) {
+
         public static Linje tekstlinje(String tekst) {
             return new Linje(Type.TEKST, tekst);
         }
@@ -35,9 +42,10 @@ public record HistorikkinnslagDto(UUID behandlingUuid,
             return new Linje(Type.LINJESKIFT, null);
         }
 
+
         public enum Type {
             TEKST,
-            LINJESKIFT
+            LINJESKIFT;
         }
     }
 }
