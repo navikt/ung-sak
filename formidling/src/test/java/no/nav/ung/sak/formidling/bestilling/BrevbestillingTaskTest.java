@@ -158,7 +158,7 @@ class BrevbestillingTaskTest {
         var sak = request.sak();
         assertThat(sak.sakstype()).isEqualTo("FAGSAK");
         assertThat(sak.fagsakId()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
-        assertThat(sak.fagsaksystem()).isEqualTo("UNG-SAK");
+        assertThat(sak.fagsaksystem()).isEqualTo("UNG_SAK");
 
         // Verify Dokumenter
         assertThat(request.dokumenter()).hasSize(1);
