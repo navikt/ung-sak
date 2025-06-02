@@ -31,7 +31,7 @@ public enum Avslagsårsak implements Kodeverdi {
 
     OPPHØRT_UNGDOMSPROGRAM("2001", "Opphørt ungdomsprogram",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskriften for ungomsprogram")),
-    ENDRET_STARTDATO_UNGDOMSPROGRAM("2002", "Ikke tilstrekkelig opptjening",
+    ENDRET_STARTDATO_UNGDOMSPROGRAM("2002", "Endret start av ungdomsprogram",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Endret startdato for ungdomsprogram")),
 
     UDEFINERT("-", "Ikke definert",
