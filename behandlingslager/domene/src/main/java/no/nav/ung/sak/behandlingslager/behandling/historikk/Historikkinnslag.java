@@ -76,7 +76,7 @@ public class Historikkinnslag extends BaseEntitet {
     private LocalDateTime historikkTid;
 
     @Column(name = "opprettet_i_system", updatable = false)
-    private String opprettetISystem = Fagsystem.K9SAK.getKode();  // FIXME: Bytt til UNG_SAK når det er støttet
+    private String opprettetISystem = Fagsystem.UNG_SAK.getKode();
 
     public Historikkinnslag() {
         this.uuid = UUID.randomUUID();

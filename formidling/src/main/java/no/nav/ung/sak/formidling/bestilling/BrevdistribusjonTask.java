@@ -65,7 +65,7 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
 
         var response = dokDistRestKlient.distribuer(new DistribuerJournalpostRequest(
             bestilling.getJournalpostId(),
-            Fagsystem.K9SAK.getOffisiellKode(),
+            Fagsystem.UNG_SAK.getOffisiellKode(),
             "UNG_SAK",
             DistribusjonsType.valueOf(distribusjonstype),
             "KJERNETID"

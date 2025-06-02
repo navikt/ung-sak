@@ -104,7 +104,7 @@ public record OpprettJournalpostRequest(
 
         public static Sak forSaksnummer(String saksnummer) {
             return new Sak(Sakstyper.FAGSAK.name(), saksnummer,
-                    Fagsystem.K9SAK.getOffisiellKode()); //TODO endre til ung
+                    Fagsystem.UNG_SAK.getOffisiellKode());
         }
 
         private enum Sakstyper {

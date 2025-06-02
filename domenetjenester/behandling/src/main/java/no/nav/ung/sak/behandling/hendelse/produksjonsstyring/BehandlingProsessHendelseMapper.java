@@ -78,7 +78,7 @@ public class BehandlingProsessHendelseMapper {
             .medEksternId(behandling.getUuid())
             .medEventTid(eventTid)
             .medVedtaksdato(vedtaksdato)
-            .medFagsystem(Fagsystem.K9SAK)  // FIXME: Bytt til UNG_SAK når det er støttet
+            .medFagsystem(Fagsystem.UNG_SAK)
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
             .medAktørId(behandling.getAktørId().getId())
             .getBehandlingstidFrist(behandling.getBehandlingstidFrist())
