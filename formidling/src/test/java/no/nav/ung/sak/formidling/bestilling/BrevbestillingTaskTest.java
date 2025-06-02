@@ -130,7 +130,7 @@ class BrevbestillingTaskTest {
         // Verify main request fields
         assertThat(request.journalpostType()).isEqualTo("UTGAAENDE");
         assertThat(request.tema()).isEqualTo("UNG");
-        assertThat(request.behandlingstema()).isEqualTo("ab0271");
+        assertThat(request.behandlingstema()).isNull();
         assertThat(request.tittel()).isEqualTo(innvilgelseTittel);
         assertThat(request.kanal()).isNull();
         assertThat(request.journalfoerendeEnhet()).isEqualTo("9999");
