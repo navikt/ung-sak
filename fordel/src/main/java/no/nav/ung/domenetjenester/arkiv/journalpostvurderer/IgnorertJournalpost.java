@@ -24,7 +24,6 @@ public class IgnorertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(IgnorertJournalpost.class);
 
-    // TODO: Bruk tema UNG her
     private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.UNG);
 
     @Override
