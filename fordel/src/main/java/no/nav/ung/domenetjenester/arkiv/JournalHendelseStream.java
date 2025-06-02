@@ -16,6 +16,7 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,6 @@ public class JournalHendelseStream implements KafkaIntegration {
 
         final StreamsBuilder builder = new StreamsBuilder();
         builder.stream(topic.getTopic(), consumed)
-            // TODO: Bytt til tema UNG før lansering av ungdomsytelsen
             .filter((key, value) -> TEMA_UNG.equals(value.getTemaNytt()))
             .filter((key, value) -> hendelseSkalHåndteres(value))
             .foreach(journalføringHendelseHåndterer::handleMessage);
@@ -92,9 +92,10 @@ public class JournalHendelseStream implements KafkaIntegration {
                 stop();
             }
         });
-        stream.setUncaughtExceptionHandler((t, e) -> {
+        stream.setUncaughtExceptionHandler(e -> {
             LOG.error("{} :: Caught exception in stream, exiting", getTopicName(), e);
             stop();
+            return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
         });
     }
 
