@@ -203,7 +203,7 @@ public class ForeslåVedtakTjenesteTest {
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
             .lagre(repositoryProvider);
         Behandling revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING).medManueltOpprettet(true))
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).medManueltOpprettet(true))
             .build();
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
@@ -238,7 +238,7 @@ public class ForeslåVedtakTjenesteTest {
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
             .lagre(repositoryProvider);
         Behandling revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING).medManueltOpprettet(true))
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).medManueltOpprettet(true))
             .build();
         revurdering.setToTrinnsBehandling();
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
