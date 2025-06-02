@@ -60,7 +60,7 @@ class BrevdistribusjonTaskTest {
         assertThat(dokDistKlient.getRequests()).hasSize(1);
         DistribuerJournalpostRequest req = dokDistKlient.getRequests().getFirst();
         assertThat(req.journalpostId()).isEqualTo(bestilling.getJournalpostId());
-        assertThat(req.bestillendeFagsystem()).isEqualTo(Fagsystem.K9SAK.getOffisiellKode());
+        assertThat(req.bestillendeFagsystem()).isEqualTo(Fagsystem.UNG_SAK.getOffisiellKode());
         assertThat(req.distribusjonstidspunkt()).isEqualTo("KJERNETID");
         assertThat(req.distribusjonstype()).isEqualTo(DistribusjonsType.VEDTAK);
         assertThat(req.dokumentProdApp()).isEqualTo("UNG_SAK");

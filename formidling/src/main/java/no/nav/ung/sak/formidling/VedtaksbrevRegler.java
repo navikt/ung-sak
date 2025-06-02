@@ -5,9 +5,11 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.*;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
@@ -23,19 +25,23 @@ import java.util.stream.Collectors;
 @Dependent
 public class VedtaksbrevRegler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
+
     private final BehandlingRepository behandlingRepository;
     private final Instance<VedtaksbrevInnholdBygger> innholdByggere;
     private final DetaljertResultatUtleder detaljertResultatUtleder;
-    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
+    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
     public VedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         @Any Instance<VedtaksbrevInnholdBygger> innholdByggere,
-        DetaljertResultatUtleder detaljertResultatUtleder) {
+        DetaljertResultatUtleder detaljertResultatUtleder,
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     public VedtaksbrevRegelResulat kjør(Long id) {
@@ -67,16 +73,39 @@ public class VedtaksbrevRegler {
         }
 
         if (resultater
-            .utenom(DetaljertResultatType.UENDRET_INNVILGET)
-            .innholderBare(DetaljertResultatType.OPPHØR)) {
-            String forklaring = "Automatisk brev ved opphør. " + redigerRegelResultat.forklaring();
+            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
+            .innholderBare(DetaljertResultatType.ENDRING_SLUTTDATO)) {
+            if (erFørsteOpphør(behandling)) {
+                String forklaring = "Automatisk brev ved opphør. " + redigerRegelResultat.forklaring();
+                return VedtaksbrevRegelResulat.automatiskBrev(
+                    innholdByggere.select(OpphørInnholdBygger.class).get(),
+                    detaljertResultat,
+                    forklaring,
+                    redigerRegelResultat.kanRedigere()
+                );
+            }
+
+            String forklaring = "Automatisk brev ved endring av sluttdato. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(OpphørInnholdBygger.class).get(),
+                innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
                 detaljertResultat,
                 forklaring,
                 redigerRegelResultat.kanRedigere()
             );
         }
+
+        if (resultater
+            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
+            .innholderBare(DetaljertResultatType.ENDRING_STARTDATO)) {
+            String forklaring = "Automatisk brev ved endring av startdato. " + redigerRegelResultat.forklaring();
+            return VedtaksbrevRegelResulat.automatiskBrev(
+                innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
+                detaljertResultat,
+                forklaring,
+                redigerRegelResultat.kanRedigere()
+            );
+        }
+
 
         if (resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
             String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();
@@ -122,6 +151,14 @@ public class VedtaksbrevRegler {
         return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, forklaring);
     }
 
+    private boolean erFørsteOpphør(Behandling behandling) {
+        var forrigeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getOriginalBehandlingId().orElseThrow(
+            () -> new IllegalStateException("Må ha original behandling ved opphør")
+        )).orElseThrow(() -> new IllegalStateException("Mangler grunnlag for forrige behandling"));
+        return forrigeGrunnlag.getUngdomsprogramPerioder().getPerioder().stream()
+            .anyMatch(it -> Tid.TIDENES_ENDE.equals(it.getPeriode().getTomDato()));
+    }
+
     private static RedigerRegelResultat harUtførteManuelleAksjonspunkterMedToTrinn(Behandling behandling) {
         var lukkedeApMedToTrinn = behandling.getAksjonspunkterMedTotrinnskontroll().stream()
             .filter(Aksjonspunkt::erUtført).toList();
@@ -136,7 +173,8 @@ public class VedtaksbrevRegler {
     }
 
 
-    private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {}
+    private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {
+    }
 
     private static class ResultatHelper {
         private final Set<DetaljertResultatInfo> resultatInfo;

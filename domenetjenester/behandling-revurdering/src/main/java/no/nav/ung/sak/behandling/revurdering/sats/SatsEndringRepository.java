@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 
 import java.sql.Date;
@@ -36,7 +37,7 @@ public class SatsEndringRepository {
 
         String periodeMedHøySats = "(SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
             "       INNER JOIN UNG_SATS_PERIODE satsperiode ON ungdomsgrunnlag.ung_sats_perioder_id = satsperiode.ung_sats_perioder_id " +
-            "       WHERE sats_type = 'HOY' AND ungdomsgrunnlag.behandling_id = b.id)";
+            "       WHERE sats_type = '"+ UngdomsytelseSatsType.HØY.getKode() +"' AND ungdomsgrunnlag.behandling_id = b.id)";
 
         String reTriggerBeregningHøySats = "(SELECT 1 FROM BEHANDLING_ARSAK behandling_årsak WHERE behandling_årsak.behandling_id = b.id AND behandling_årsak.behandling_arsak_type = 'RE_TRIGGER_BEREGNING_HØY_SATS')";
 
