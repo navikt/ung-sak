@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.ung.kodeverk.LegacyKodeverdiSomObjektSerializer;
 import no.nav.ung.kodeverk.KodeverdiSomStringSerializer;
-import no.nav.ung.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 
@@ -26,10 +26,16 @@ public class ObjectMapperFactory {
         final SimpleModule module = new SimpleModule("KodeverdiSerialisering", new Version(1, 0, 0, null, null, null));
 
         if(sakKodeverkOverstyringSerialisering == SakKodeverkOverstyringSerialisering.KODE_STRING) {
-            // Legger til overstyring av serialisering av k9.kodeverk.api.Kodeverdi, til å bli kode string istadenfor
+            // Legger til overstyring av serialisering av Kodeverdi, til å bli kode string istadenfor
             // objekt som annotasjonane på disse pr no tilseier.
             // Denne kan fjernast når alle Kodeverdi typane sine annotasjoner er oppdatert slik at serialisering som standard blir ein rein string.
             module.addSerializer(new KodeverdiSomStringSerializer());
+
+        } else if(sakKodeverkOverstyringSerialisering == SakKodeverkOverstyringSerialisering.LEGACY_OBJEKT) {
+            // Legger til overstyring av serialisering av Kodeverdi enums til å serialisere til objekt uavhengig av annotasjon
+            // (bortsett frå @LegacyKodeverdiJsonValue), slik at dei serialiserer til objekt sjølv om vi fjerner @JsonFormat(shape = object)
+            // annotasjon på dei. Dette gjere det mulig å fjerne @JsonFormat som del av omskriving til @JsonValue på alle enums.
+            module.addSerializer(new LegacyKodeverdiSomObjektSerializer());
         }
         return module;
     }

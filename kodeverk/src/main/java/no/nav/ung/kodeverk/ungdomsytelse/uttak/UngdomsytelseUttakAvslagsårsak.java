@@ -3,8 +3,11 @@ package no.nav.ung.kodeverk.ungdomsytelse.uttak;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
+@LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public enum UngdomsytelseUttakAvslagsårsak implements Kodeverdi {
 
     IKKE_NOK_DAGER("IKKE_NOK_DAGER", "Ikke nok dager"),
@@ -42,6 +45,7 @@ public enum UngdomsytelseUttakAvslagsårsak implements Kodeverdi {
 
 
     @Override
+    @JsonValue
     public String getKode() {
         return kode;
     }

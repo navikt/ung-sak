@@ -9,7 +9,6 @@ import no.nav.openapi.spec.utils.jackson.OpenapiCompatObjectMapperModifier;
 public class ObjectMapperResolver extends DynamicObjectMapperResolver {
 
     private final String JSON_SERIALIZER_ALLTID_SOM_STRING = "kodeverdi-string";
-    private final String JSON_SERIALIZER_KALKULUS_SOM_STRING = "kodeverdi-kalkulus-string";
 
     private static ObjectMapper baseObjectMapper;
 
@@ -24,7 +23,7 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
     // Bruker samme logikk som har vore pr no. Det vil seie overstyring av Kalkulus Kodeverdi serialisering til objekt, så lenge ikkje feature flagg for string serialisering er aktivt.
     // Når alle klienter kan handtere at Kalkulus Kodeverdi kjem som string kan denne sannsynlegvis settast lik baseObjektMapper.
     private static ObjectMapper createDefaultObjectMapper() {
-        return getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN));
+        return getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.LEGACY_OBJEKT));
     }
 
     /**
@@ -34,8 +33,6 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
         super(createDefaultObjectMapper());
         final var overstyrKodeverdiAlltidSomStringMapper = getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING));
         super.addObjectMapper(JSON_SERIALIZER_ALLTID_SOM_STRING, overstyrKodeverdiAlltidSomStringMapper);
-        final var overstyrKalkulusKodeverdiSomStringMapper = getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN));
-        super.addObjectMapper(JSON_SERIALIZER_KALKULUS_SOM_STRING, overstyrKalkulusKodeverdiSomStringMapper);
         // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
         final var openapiObjektMapper = OpenapiCompatObjectMapperModifier.withDefaultModifications().modify(getBaseObjectMapperCopy());
         super.addObjectMapper(JSON_SERIALIZER_OPENAPI, openapiObjektMapper);

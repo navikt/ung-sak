@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.TempAvledeKode;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
@@ -24,6 +25,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
  */
 @JsonFormat(shape = Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+@LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public class Brevkode implements Kodeverdi {
 
     public static final Comparator<? super Brevkode> COMP_REKKEFØLGE = Comparator.comparing(Brevkode::getRangering, Comparator.nullsLast(Comparator.naturalOrder()));

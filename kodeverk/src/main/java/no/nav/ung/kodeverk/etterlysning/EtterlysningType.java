@@ -1,11 +1,13 @@
 package no.nav.ung.kodeverk.etterlysning;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public enum EtterlysningType implements Kodeverdi {
 
     UTTALELSE_KONTROLL_INNTEKT("UTTALELSE_KONTROLL_INNTEKT", "Uttalelse kontroll av inntekt"),
