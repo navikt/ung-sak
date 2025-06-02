@@ -204,7 +204,7 @@ public class DokumentArkivTjenesteImplTest {
         journalpost.setKanal(Kanal.ALTINN);
         journalpost.setTema(Tema.AAP);
         journalpost.setBehandlingstema("behandlingstema");
-        journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, LocalDateTime.now(), "fagsakId", "fagsaksystem", Sakstype.FAGSAK, Tema.OMS));
+        journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, LocalDateTime.now(), "fagsakId", "fagsaksystem", Sakstype.FAGSAK, Tema.UNG));
         journalpost.setBruker(new Bruker("id", BrukerIdType.AKTOERID));
         journalpost.setAvsenderMottaker(new AvsenderMottaker("fnr", AvsenderMottakerIdType.FNR, "Navn", "Land", true));
         journalpost.setJournalfoerendeEnhet("journalstatus");

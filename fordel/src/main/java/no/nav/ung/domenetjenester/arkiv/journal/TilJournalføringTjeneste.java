@@ -5,6 +5,7 @@ import static no.nav.ung.domenetjenester.arkiv.JournalpostProjectionBuilder.bygg
 
 import java.util.Optional;
 
+import no.nav.ung.kodeverk.Fagsystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +26,6 @@ import no.nav.ung.sak.typer.JournalpostId;
 @Dependent
 public class TilJournalføringTjeneste {
 
-    // TODO: Endre til UNG når dette støttes
-    private static final String ARKIV_SAK_SYSTEM = "K9";
     private static final Logger LOG = LoggerFactory.getLogger(TilJournalføringTjeneste.class);
     private DokTjeneste dokTjeneste;
     private SafTjeneste safTjeneste;
@@ -79,7 +78,7 @@ public class TilJournalføringTjeneste {
         oppdaterJournalpostRequest.setBruker(bruker);
         oppdaterJournalpostRequest.setTema(tema.getOffisiellKode());
 
-        Sak sak = new Sak(ARKIV_SAK_SYSTEM, sakId.orElseThrow(), no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype.FAGSAK);
+        Sak sak = new Sak(Fagsystem.UNG_SAK.getOffisiellKode(), sakId.orElseThrow(), no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype.FAGSAK);
         oppdaterJournalpostRequest.setSak(sak);
 
         dokTjeneste.oppdaterJournalpost(journalpostId, oppdaterJournalpostRequest);

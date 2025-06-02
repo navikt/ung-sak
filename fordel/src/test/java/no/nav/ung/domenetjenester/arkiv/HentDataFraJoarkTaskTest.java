@@ -153,7 +153,6 @@ public class HentDataFraJoarkTaskTest {
         journalpostInfo.setStrukturertPayload(melding.getPayloadAsString().orElse(null));
         journalpostInfo.setForsendelseTidspunkt(melding.getForsendelseMottattTidspunkt().orElseThrow());
         journalpostInfo.setBrevkode(Optional.ofNullable(melding.getBrevkode()).orElse(EN_BREVKODE));
-        // TODO: no.nav.k9.felles.integrasjon.saf.Tema trenger å støtte UNG
         journalpostInfo.setTema(no.nav.k9.felles.integrasjon.saf.Tema.valueOf(melding.getTema().getKode()));
         journalpostInfo.setJournalstatus(journalstatus);
         return journalpostInfo;
