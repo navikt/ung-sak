@@ -167,7 +167,6 @@ public class BrevbestillingTask extends BehandlingProsessTask {
             .avsenderMottaker(avsenderMottaker)
             .bruker(bruker)
             .tema(OmrådeTema.UNG.getKode())
-            .behandlingstema("ab0271")
             .tittel(tittel)
             .kanal(null)
             .journalfoerendeEnhet("9999")
