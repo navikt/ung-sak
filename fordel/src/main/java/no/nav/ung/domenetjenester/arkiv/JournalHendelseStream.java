@@ -33,7 +33,6 @@ public class JournalHendelseStream implements KafkaIntegration {
     private static final Logger LOG = LoggerFactory.getLogger(JournalHendelseStream.class);
     private static final String HENDELSE_MOTTATT = "JournalpostMottatt";
     private static final String HENDELSE_ENDRET = "TemaEndret";
-    private static final String TEMA_OMS = OmrådeTema.OMS.getOffisiellKode();
     private static final String TEMA_UNG = OmrådeTema.UNG.getOffisiellKode();
     private final boolean isDeployment = ENV.isProd() || ENV.isDev();
 
@@ -70,7 +69,7 @@ public class JournalHendelseStream implements KafkaIntegration {
         final StreamsBuilder builder = new StreamsBuilder();
         builder.stream(topic.getTopic(), consumed)
             // TODO: Bytt til tema UNG før lansering av ungdomsytelsen
-            .filter((key, value) -> TEMA_OMS.equals(value.getTemaNytt()))
+            .filter((key, value) -> TEMA_UNG.equals(value.getTemaNytt()))
             .filter((key, value) -> hendelseSkalHåndteres(value))
             .foreach(journalføringHendelseHåndterer::handleMessage);
 

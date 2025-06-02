@@ -40,7 +40,7 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 public class OppgaveTjenesteTest {
 
     private static final Oppgave OPPGAVE = new Oppgave(99L, null, null, null, null,
-        "OMS", null, null, null, 1, "4806",
+        "UNG", null, null, null, 1, "4806",
         LocalDate.now().plusDays(1), LocalDate.now(), Prioritet.NORM, Oppgavestatus.AAPNET);
 
 

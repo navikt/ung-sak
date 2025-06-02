@@ -129,7 +129,7 @@ class BrevbestillingTaskTest {
         var innvilgelseTittel = "Ungdomsytelse Innvilgelse";
         // Verify main request fields
         assertThat(request.journalpostType()).isEqualTo("UTGAAENDE");
-        assertThat(request.tema()).isEqualTo("OMS");
+        assertThat(request.tema()).isEqualTo("UNG");
         assertThat(request.behandlingstema()).isEqualTo("ab0271");
         assertThat(request.tittel()).isEqualTo(innvilgelseTittel);
         assertThat(request.kanal()).isNull();

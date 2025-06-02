@@ -7,6 +7,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -165,7 +166,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
             .journalpostType("UTGAAENDE")
             .avsenderMottaker(avsenderMottaker)
             .bruker(bruker)
-            .tema("OMS") //TODO endre for ung
+            .tema(OmrådeTema.UNG.getKode())
             .behandlingstema("ab0271")
             .tittel(tittel)
             .kanal(null)
