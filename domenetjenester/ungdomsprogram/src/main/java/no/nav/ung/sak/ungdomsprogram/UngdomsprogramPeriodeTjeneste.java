@@ -1,5 +1,7 @@
 package no.nav.ung.sak.ungdomsprogram;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,6 +69,54 @@ public class UngdomsprogramPeriodeTjeneste {
             .filterValue(v -> v);
     }
 
+    public List<EndretDato> finnEndretStartdatoer(UUID tidligereReferanse, UUID sisteReferanse) {
+        var sisteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(sisteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + sisteReferanse));
+        var tidligereGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(tidligereReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + tidligereReferanse));
+        var sistePerioder = sisteGrunnlag.getUngdomsprogramPerioder().getPerioder();
+
+        if (sistePerioder.size() > 1) {
+            throw new IllegalStateException("Støtter ikke å finne endring i startdato for flere perioder");
+        }
+
+        var tidligerePerioder = tidligereGrunnlag.getUngdomsprogramPerioder().getPerioder();
+        if (sistePerioder.isEmpty() || tidligerePerioder.isEmpty()) {
+            return List.of();
+        }
+
+        var startdato = sistePerioder.iterator().next().getPeriode().getFomDato();
+        var tidligereStartdato = tidligerePerioder.iterator().next().getPeriode().getFomDato();
+
+        if (startdato.equals(tidligereStartdato)) {
+            return List.of();
+        }
+
+        return List.of(new EndretDato(startdato, tidligereStartdato));
+    }
+
+    public List<EndretDato> finnEndretSluttdatoer(UUID tidligereReferanse, UUID sisteReferanse) {
+        var sisteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(sisteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + sisteReferanse));
+        var tidligereGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(tidligereReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + tidligereReferanse));
+        var sistePerioder = sisteGrunnlag.getUngdomsprogramPerioder().getPerioder();
+
+        if (sistePerioder.size() > 1) {
+            throw new IllegalStateException("Støtter ikke å finne endring i startdato for flere perioder");
+        }
+
+        var tidligerePerioder = tidligereGrunnlag.getUngdomsprogramPerioder().getPerioder();
+        if (sistePerioder.isEmpty() || tidligerePerioder.isEmpty()) {
+            return List.of();
+        }
+
+        var sluttdato = sistePerioder.iterator().next().getPeriode().getTomDato();
+        var tidligereSluttdato = tidligerePerioder.iterator().next().getPeriode().getTomDato();
+
+        if (sluttdato.equals(tidligereSluttdato)) {
+            return List.of();
+        }
+
+        return List.of(new EndretDato(sluttdato, tidligereSluttdato));
+    }
+
 
     /**
      * Lager tidslinje for perioder der bruker deltar i ungdomsprogram basert på verdier fra et oppgitt periodegrunnlag
@@ -92,5 +142,9 @@ public class UngdomsprogramPeriodeTjeneste {
     private LocalDateTimeline<Boolean> komprimer(LocalDateTimeline<Boolean> t) {
         return t.compress((d1, d2) -> KANT_I_KANT_VURDERER.erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
     }
+
+
+    public record EndretDato(LocalDate nyDato, LocalDate forrigeDato) {}
+
 
 }

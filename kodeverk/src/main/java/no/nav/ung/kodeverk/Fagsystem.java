@@ -23,7 +23,7 @@ public enum Fagsystem implements Kodeverdi {
     FPSAK("FPSAK", "Vedtaksløsning Foreldrepenger", "FS36"),
     TPS("TPS", "TPS", "FS03"),
     VLSP("VLSP", "Vedtaksløsning Sykepenger", "VLSP"),
-    JOARK("JOARK", "Joark", "AS36"),
+    JOARK("JARK", "Joark", "AS36"),
     INFOTRYGD("INFOTRYGD", "Infotrygd", "IT01"),
     ARENA("ARENA", "Arena", "AO01"),
     INNTEKT("INNTEKT", "INNTEKT", "FS28"),

@@ -30,7 +30,7 @@ public class VurderStrukturertDokumentTask extends WrappedProsessTaskHandler {
     public MottattMelding doTask(MottattMelding dataWrapper) {
         final String payload = dataWrapper.getPayloadAsString().orElseThrow(() -> new IllegalArgumentException("Må ha payload for å vurdere strukturert dokument"));
         if (erOppgaveBekreftelse(dataWrapper)) {
-            return new VurderStrukturertOppgavebekreftelse().håndtertOppgavebekreftelse(dataWrapper, payload);
+            return new VurderStrukturertOppgavebekreftelse().håndtertOppgavebekreftelse(dataWrapper);
         }
         return new VurderStrukturertSøknad().håndtertSøknad(dataWrapper, payload);
 

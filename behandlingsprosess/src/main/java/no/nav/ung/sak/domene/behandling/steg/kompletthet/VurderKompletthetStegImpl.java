@@ -144,7 +144,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
             }
-            case UTTALELSE_ENDRET_PROGRAMPERIODE -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO -> {
                 return AUTO_SATT_PÅ_VENT_REVURDERING;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);
@@ -156,7 +156,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE;
             }
-            case UTTALELSE_ENDRET_PROGRAMPERIODE -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO -> {
                 return Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);
