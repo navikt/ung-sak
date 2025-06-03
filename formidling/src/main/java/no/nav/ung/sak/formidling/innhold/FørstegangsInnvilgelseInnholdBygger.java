@@ -21,6 +21,7 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.SatsOgBeregn
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
+import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
@@ -41,16 +42,19 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final boolean ignoreIkkeStøttedeBrev;
+    private final SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
 
     @Inject
     public FørstegangsInnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
+        SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
         @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ignoreIkkeStøttedeBrev = ignoreFeil;
+        this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
     }
 
 

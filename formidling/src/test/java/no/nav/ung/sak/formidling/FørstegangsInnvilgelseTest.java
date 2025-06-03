@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling;
 
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
+    private SimuleringIntegrasjonTjenesteFake simuleringIntegrasjonTjeneste = new SimuleringIntegrasjonTjenesteFake();
 
     FørstegangsInnvilgelseTest() {
         super(2, "Du får ungdomsprogramytelse");
@@ -231,12 +233,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
-    @DisplayName("Innvilgelsesbrev med alle kombinasjoner: barnefødsel, barnedødsfall, overgang 25 år. Sjekker om alt kommer i riktig rekkefølge")
+    @DisplayName("Innvilgelsesbrev med alle kombinasjoner: barnefødsel, barnedødsfall, overgang 25 år, etterbetaling. Sjekker om alt kommer i riktig rekkefølge")
     @Test
     void medAlleKombinasjoner() {
         var ungTestGrunnlag = BrevScenarioer.innvilget24MedAlleKombinasjonerFom21April2025();
 
         var behandling = lagScenario(ungTestGrunnlag);
+        simuleringIntegrasjonTjeneste.leggTilResultat(behandling, new SimuleringResultatDto(0L, 0L, 14000L, false));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
@@ -251,7 +254,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fordi du mistet barn 10. mai 2025, får du ikke barnetillegg på 37 kroner fra denne datoen. Da får du 686 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fylte 25 år 12. mai 2025, får du mer penger fra denne datoen. Da får du 1 011 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
-                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Den første utbetalingen får du innen en uke. \
                 Pengene du får, blir det trukket skatt av. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
@@ -317,6 +320,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         return  new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
+            simuleringIntegrasjonTjeneste,
             false);
     }
 
