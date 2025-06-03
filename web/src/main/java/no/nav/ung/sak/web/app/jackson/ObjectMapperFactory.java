@@ -8,8 +8,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.openapi.spec.utils.jackson.JsonParserPreProcessingDeserializerModifier;
+import no.nav.openapi.spec.utils.jackson.ObjectToPropertyPreProcessor;
 import no.nav.ung.kodeverk.LegacyKodeverdiSomObjektSerializer;
 import no.nav.ung.kodeverk.KodeverdiSomStringSerializer;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 
@@ -37,6 +40,10 @@ public class ObjectMapperFactory {
             // annotasjon på dei. Dette gjere det mulig å fjerne @JsonFormat som del av omskriving til @JsonValue på alle enums.
             module.addSerializer(new LegacyKodeverdiSomObjektSerializer());
         }
+        // Støtter deserialisering frå Kodeverdi serialisert som json objekt uten at typen i seg sjølv støtter det.
+        // Slik at vi kan skrive om Kodeverdi enums til å ha i utgangspunktet ha ein enkel @JsonValue basert deserialisering.
+        final var kodeverdiDeserializerModifier = new JsonParserPreProcessingDeserializerModifier(new ObjectToPropertyPreProcessor(Kodeverdi.class, "kode"));
+        module.setDeserializerModifier(kodeverdiDeserializerModifier);
         return module;
     }
 
