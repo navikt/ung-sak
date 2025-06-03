@@ -73,7 +73,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         final var gjeldendePeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
 
         // Finner etterlysninger som skal opprettes og avbrytes for endring av programperiode
-        final var resultatEndretProgramperiode = finnEndretProgramperiodeResultat(gjeldendePeriodeGrunnlag, behandlingÅrsakerTyper, behandlingId, fagsakId);
+        final var resultatEndretProgramperiode = finnEndretProgramperiodeResultat(gjeldendePeriodeGrunnlag, behandlingÅrsakerTyper, behandlingReferanse);
 
         final var prosessTaskGruppe = new ProsessTaskGruppe();
 
@@ -96,7 +96,9 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
 
-    private Resultat finnEndretProgramperiodeResultat(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, List<BehandlingÅrsakType> behandlingÅrsakerTyper, Long behandlingId, Long fagsakId) {
+    private Resultat finnEndretProgramperiodeResultat(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
+                                                      List<BehandlingÅrsakType> behandlingÅrsakerTyper,
+                                                      BehandlingReferanse behandlingReferanse) {
         final var programperioder = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder();
         if (programperioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke flere programperioder");
@@ -106,57 +108,58 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         }
         Resultat resultat = Resultat.tomtResultat();
         if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
-            resultat.leggTil(håndterTriggerForEndretStartdato(gjeldendePeriodeGrunnlag, behandlingId, fagsakId));
+            resultat.leggTil(håndterTriggerForEndretStartdato(gjeldendePeriodeGrunnlag, behandlingReferanse));
         }
         if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
-            resultat.leggTil(håndterTriggerForEndretSluttdato(gjeldendePeriodeGrunnlag, behandlingId, fagsakId));
+            resultat.leggTil(håndterTriggerForEndretSluttdato(gjeldendePeriodeGrunnlag, behandlingReferanse));
         }
         return resultat;
     }
 
-    private Resultat håndterTriggerForEndretStartdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, Long fagsakId) {
-        return håndterForType(gjeldendePeriodeGrunnlag, behandlingId, fagsakId, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+    private Resultat håndterTriggerForEndretStartdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, BehandlingReferanse behandlingReferanse) {
+        return håndterForType(gjeldendePeriodeGrunnlag, behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
     }
 
-    private Resultat håndterForType(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, Long fagsakId, EtterlysningType etterlysningType) {
-        final var gjeldendeEtterlysning = finnGjeldendeEtterlysning(behandlingId, fagsakId, etterlysningType);
+    private Resultat håndterForType(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
+        final var gjeldendeEtterlysning = finnGjeldendeEtterlysning(behandlingReferanse, etterlysningType);
         if (gjeldendeEtterlysning.isPresent()) {
             if (VENTER_STATUSER.contains(gjeldendeEtterlysning.get().getStatus())) {
                 return erstattDersomEndret(
-                    behandlingId,
+                    behandlingReferanse,
                     gjeldendePeriodeGrunnlag,
                     gjeldendeEtterlysning.get()
                 );
             } else if (gjeldendeEtterlysning.get().getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
                 if (!erSisteMottatteGyldig(gjeldendePeriodeGrunnlag, gjeldendeEtterlysning.get())) {
-                    return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId, etterlysningType);
+                    return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
                 }
             }
         } else {
-            return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId, etterlysningType);
+            return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
         }
         return Resultat.tomtResultat();
     }
 
-    private Resultat håndterTriggerForEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, Long fagsakId) {
-        return håndterForType(gjeldendePeriodeGrunnlag, behandlingId, fagsakId, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
+    private Resultat håndterTriggerForEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, BehandlingReferanse behandlingReferanse) {
+        return håndterForType(gjeldendePeriodeGrunnlag, behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
     }
 
 
-    private Optional<Etterlysning> finnGjeldendeEtterlysning(Long behandlingId, Long fagsakId, EtterlysningType etterlysningType) {
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingId, fagsakId, etterlysningType);
+    private Optional<Etterlysning> finnGjeldendeEtterlysning(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), etterlysningType);
         if (gjeldendeEtterlysninger.size() > 1) {
-            throw new IllegalStateException("Forventet å finne maksimalt en etterlysning for endret programperiode, fant " + gjeldendeEtterlysninger.size());
+            throw new IllegalStateException("Forventet å finne maksimalt en etterlysning for type " +  etterlysningType + " , fant " + gjeldendeEtterlysninger.size());
         }
         return gjeldendeEtterlysninger.isEmpty() ? Optional.empty() : Optional.of(gjeldendeEtterlysninger.get(0));
     }
 
     private static Resultat lagResultatForNyEtterlysningUtenAvbrutt(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, EtterlysningType etterlysningType) {
+        var gjeldendePeriode = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode();
         final var nyEtterlysning = Etterlysning.opprettForType(
             behandlingId,
             gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),
             UUID.randomUUID(),
-            finnPeriode(gjeldendePeriodeGrunnlag, etterlysningType), // Bruker endringsdatoen som periode (fom og tom)
+            gjeldendePeriode,
             etterlysningType
         );
         return new Resultat(null, List.of(nyEtterlysning));
@@ -169,7 +172,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             DatoIntervallEntitet.fraOgMedTilOgMed(periode.getTomDato(), periode.getTomDato());
     }
 
-    private Resultat erstattDersomEndret(Long behandlingId,
+    private Resultat erstattDersomEndret(BehandlingReferanse behandlingReferanse,
                                          UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
                                          Etterlysning ventendeEtterlysning) {
         var etterlysningType = ventendeEtterlysning.getType();
@@ -180,13 +183,12 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             if (endretDatoer.size() > 1) {
                 throw new IllegalStateException("Forventet å finne maksimalt en endring i datoer, fant " + endretDatoer.size());
             }
-            // Bruker endringsdatoen som periode (fom og tom)
-            var aktuellPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(endretDatoer.getFirst().nyDato(), endretDatoer.getFirst().nyDato());
+            var gjeldendePeriode = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode();
             final var skalOpprettes = Etterlysning.opprettForType(
-                behandlingId,
+                behandlingReferanse.getBehandlingId(),
                 gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),
                 UUID.randomUUID(),
-                aktuellPeriode,
+                gjeldendePeriode,
                 etterlysningType
             );
             ventendeEtterlysning.skalAvbrytes();

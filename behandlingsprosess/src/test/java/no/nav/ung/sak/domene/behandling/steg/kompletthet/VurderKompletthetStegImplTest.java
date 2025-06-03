@@ -161,12 +161,12 @@ class VurderKompletthetStegImplTest {
     }
 
     @Test
-    void skal_returnere_autopunkt_for_inntektuttalelse_og_bekreftelse_av_ungdomsprogram() {
+    void skal_returnere_autopunkt_for_inntektuttalelse_og_bekreftelse_av_startdato() {
         // Arrange
         final var etterlysning1 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         etterlysningRepository.lagre(etterlysning1);
 
-        final var etterlysning2 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var etterlysning2 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysningRepository.lagre(etterlysning2);
 
         // Act
