@@ -4655,7 +4655,7 @@
         "type" : "object"
       },
       "VilkårResultatDtoAvslagsårsak" : {
-        "enum" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ],
+        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "-" ],
         "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ],
         "type" : "string"
       },
