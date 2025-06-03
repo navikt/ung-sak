@@ -23,10 +23,7 @@ import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -107,7 +104,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         if (programperioder.isEmpty()) {
             throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
         }
-        Resultat resultat = Resultat.tom();
+        Resultat resultat = Resultat.tomtResultat();
         if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
             resultat.leggTil(håndterTriggerForEndretStartdato(gjeldendePeriodeGrunnlag, behandlingId, fagsakId));
         }
@@ -138,7 +135,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         } else {
             return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingId, etterlysningType);
         }
-        return Resultat.tom();
+        return Resultat.tomtResultat();
     }
 
     private Resultat håndterTriggerForEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, Long fagsakId) {
@@ -159,10 +156,17 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             behandlingId,
             gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),
             UUID.randomUUID(),
-            gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode(),
+            finnPeriode(gjeldendePeriodeGrunnlag, etterlysningType), // Bruker endringsdatoen som periode (fom og tom)
             etterlysningType
         );
         return new Resultat(null, List.of(nyEtterlysning));
+    }
+
+    private static DatoIntervallEntitet finnPeriode(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, EtterlysningType etterlysningType) {
+        var periode = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode();
+        return etterlysningType == EtterlysningType.UTTALELSE_ENDRET_STARTDATO ?
+            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getFomDato()) :
+            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getTomDato(), periode.getTomDato());
     }
 
     private Resultat erstattDersomEndret(Long behandlingId,
@@ -176,11 +180,13 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             if (endretDatoer.size() > 1) {
                 throw new IllegalStateException("Forventet å finne maksimalt en endring i datoer, fant " + endretDatoer.size());
             }
+            // Bruker endringsdatoen som periode (fom og tom)
+            var aktuellPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(endretDatoer.getFirst().nyDato(), endretDatoer.getFirst().nyDato());
             final var skalOpprettes = Etterlysning.opprettForType(
                 behandlingId,
                 gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),
                 UUID.randomUUID(),
-                mapTilPeriode(endretDatoer.getFirst()),
+                aktuellPeriode,
                 etterlysningType
             );
             ventendeEtterlysning.skalAvbrytes();
@@ -189,12 +195,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
                 List.of(skalOpprettes)
             );
         }
-        return Resultat.tom();
-    }
-
-    private DatoIntervallEntitet mapTilPeriode(UngdomsprogramPeriodeTjeneste.EndretDato endretDato) {
-        return endretDato.nyDato().isBefore(endretDato.forrigeDato()) ? DatoIntervallEntitet.fraOgMedTilOgMed(endretDato.nyDato(), endretDato.forrigeDato().minusDays(1)) :
-            DatoIntervallEntitet.fraOgMedTilOgMed(endretDato.forrigeDato(), endretDato.nyDato().minusDays(1));
+        return Resultat.tomtResultat();
     }
 
     private boolean erSisteMottatteGyldig(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
@@ -220,10 +221,17 @@ public class ProgramperiodeendringEtterlysningTjeneste {
 
     record Resultat(List<Etterlysning> etterlysningSomSkalAvbrytes,
                     List<Etterlysning> etterlysningSomSkalOpprettes) {
-        static Resultat tom() {
-            return new Resultat(List.of(), List.of());
+
+        Resultat(List<Etterlysning> etterlysningSomSkalAvbrytes, List<Etterlysning> etterlysningSomSkalOpprettes) {
+            this.etterlysningSomSkalAvbrytes = etterlysningSomSkalAvbrytes == null ? new ArrayList<>() :
+                new ArrayList<>(etterlysningSomSkalAvbrytes);
+            this.etterlysningSomSkalOpprettes = etterlysningSomSkalOpprettes == null ? new ArrayList<>() :
+                new ArrayList<>(etterlysningSomSkalOpprettes);
         }
 
+        static Resultat tomtResultat() {
+            return new Resultat(new ArrayList<>(), new ArrayList<>());
+        }
 
         void leggTil(Resultat resultat) {
             this.etterlysningSomSkalAvbrytes.addAll(resultat.etterlysningSomSkalAvbrytes);
