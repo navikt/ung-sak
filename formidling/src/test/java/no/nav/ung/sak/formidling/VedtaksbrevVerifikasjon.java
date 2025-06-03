@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class VedtaksbrevVerifikasjon {
 
-    private static String STANDARD_HEADER_FOOTER = """
+    private static final String STANDARD_HEADER_FOOTER = """
         Brev for ungdomsytelsen %s \
         Til: %s \
         Fødselsnummer: %s \
