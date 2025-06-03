@@ -30,7 +30,6 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilFaktor;
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
 @Dependent
@@ -150,7 +149,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var kunHøySats = Set.of(UngdomsytelseSatsType.HØY).equals(satser);
 
-        var beregning = mapTilBeregningDto(satsSegments.first().getValue());
+        var beregning = mapTilBeregningDto(satsSegments.first());
 
         var nyesteSegment = satsSegments.last();
         var nyesteSats = nyesteSegment.getValue();
@@ -179,14 +178,16 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         if (nyesteSats.satsType() != UngdomsytelseSatsType.HØY) {
             brevfeilHåndterer.registrerFeilmelding("Forventet at nyeste sats skulle være høy når det er flere satser, men var %s for periode %s".formatted(nyesteSats.satsType(), nyesteSegment.getLocalDateInterval()));
         }
-        return mapTilBeregningDto(nyesteSats);
+        return mapTilBeregningDto(nyesteSegment);
     }
 
-    private static BeregningDto mapTilBeregningDto(UngdomsytelseSatser sats) {
+    private static BeregningDto mapTilBeregningDto(LocalDateSegment<UngdomsytelseSatser> satssegment) {
+        var sats = satssegment.getValue();
+
         return new BeregningDto(
-            tilFaktor(sats.grunnbeløpFaktor()),
-            tilHeltall(sats.grunnbeløp().multiply(sats.grunnbeløpFaktor())),
-            tilHeltall(sats.dagsats()));
+            Satsberegner.lagGrunnbeløpFaktorTekst(satssegment), tilHeltall(sats.grunnbeløp().multiply(sats.grunnbeløpFaktor())),
+            tilHeltall(sats.dagsats())
+        );
     }
 
 }

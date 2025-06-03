@@ -49,7 +49,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
                 Nå er grunnbeløpet på 124 028 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
@@ -163,7 +163,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
                 Nå er grunnbeløpet på 124 028 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
@@ -213,7 +213,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
                 Nå er grunnbeløpet på 124 028 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
@@ -259,7 +259,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
                 Nå er grunnbeløpet på 124 028 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 1,361. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det vil si 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \

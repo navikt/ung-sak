@@ -20,13 +20,6 @@ public interface VedtaksbrevInnholdBygger {
 
 
     /**
-     * Standard desimal avrunding for brev
-     */
-    static BigDecimal tilFaktor(BigDecimal faktor) {
-        return faktor.setScale(3, RoundingMode.HALF_UP);
-    }
-
-    /**
      * Standard heltall avrunding for brev
      */
     static long tilHeltall(BigDecimal faktor) {

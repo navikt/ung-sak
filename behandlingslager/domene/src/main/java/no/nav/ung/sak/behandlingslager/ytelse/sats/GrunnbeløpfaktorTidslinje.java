@@ -1,5 +1,6 @@
 package no.nav.ung.sak.behandlingslager.ytelse.sats;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
@@ -30,5 +31,14 @@ public class GrunnbeløpfaktorTidslinje {
                     .mapValue(grunnbeløpFaktor -> new SatsOgGrunnbeløpfaktor(segment.getValue().getSatsType(), grunnbeløpFaktor));
             })
             .reduce(LocalDateTimeline::crossJoin).orElse(LocalDateTimeline.empty());
+    }
+
+    public static BigDecimal finnStandardGrunnbeløpFaktorFor(LocalDateInterval periode){
+        var gFaktorer = HØY_GRUNNBELØPFAKTOR_TIDSLINJE.toSegments().stream().filter(it -> periode.overlaps(it.getLocalDateInterval())).toList();
+        if (gFaktorer.size() > 1) {
+            throw new IllegalStateException("Kan ikke ha flere enn 1 grunnbeløpfaktor for samme periode: " + periode + ", fant: " + gFaktorer);
+        }
+
+        return gFaktorer.getFirst().getValue();
     }
 }
