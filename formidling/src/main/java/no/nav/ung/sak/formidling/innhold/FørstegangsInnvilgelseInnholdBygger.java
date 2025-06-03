@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
@@ -79,9 +80,13 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments(), brevfeilSamler);
 
+        Long etterbetaling = simuleringIntegrasjonTjeneste.hentResultat(behandling).map(SimuleringResultatDto::getSumEtterbetaling).orElse(null);
+
         if (brevfeilSamler.harFeil()) {
             LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
         }
+
+
 
         return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
             new InnvilgelseDto(
@@ -90,7 +95,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 dagsatsFom,
                 satsEndringHendelseDtos,
                 satsOgBeregningDto,
-                brevfeilSamler.samletFeiltekst()));
+                brevfeilSamler.samletFeiltekst(),
+                etterbetaling));
     }
 
     private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId, BrevfeilHåndterer brevfeilSamler) {

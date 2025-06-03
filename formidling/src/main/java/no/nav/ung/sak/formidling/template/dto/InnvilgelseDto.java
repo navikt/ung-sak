@@ -15,8 +15,8 @@ public record InnvilgelseDto(
     long dagsats,
     List<SatsEndringHendelseDto> satsEndringer,
     SatsOgBeregningDto satsOgBeregning,
-    String ikkeStøttetBrevTekst
-)
+    String ikkeStøttetBrevTekst,
+    Long etterbetaling)
     implements TemplateInnholdDto {
 
 }
