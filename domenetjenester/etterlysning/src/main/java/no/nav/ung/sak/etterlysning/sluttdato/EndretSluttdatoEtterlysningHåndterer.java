@@ -8,10 +8,8 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningHåndterer;
@@ -22,8 +20,6 @@ import no.nav.ung.sak.typer.PersonIdent;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
@@ -57,29 +53,20 @@ public class EndretSluttdatoEtterlysningHåndterer implements EtterlysningHåndt
         final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, etterlysningType);
         AktørId aktørId = behandling.getAktørId();
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
-        final var originalePerioder = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).stream().map(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramPerioder)
-            .map(UngdomsprogramPerioder::getPerioder)
-            .flatMap(Collection::stream)
-            .map(UngdomsprogramPeriode::getPeriode)
-            .toList();
+        final var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         etterlysninger.forEach(e -> e.vent(getFrist()));
         final var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> new EndretSluttdatoOppgaveDTO(
                 deltakerIdent.getIdent(),
                 etterlysning.getEksternReferanse(),
                 etterlysning.getFrist(),
                 hentSluttdato(etterlysning),
-                finnOriginalSluttdato(originalePerioder)
+                originalPeriode.map(DatoIntervallEntitet::getTomDato).filter(d -> !d.equals(TIDENES_ENDE)).orElse(null)
             )
         ).toList();
 
         oppgaveDtoer.forEach(ungOppgaveKlient::opprettEndretSluttdatoOppgave);
 
         etterlysningRepository.lagre(etterlysninger);
-    }
-
-    private static LocalDate finnOriginalSluttdato(List<DatoIntervallEntitet> originalePerioder) {
-        var originalSluttdato = originalePerioder.iterator().next().getTomDato();
-        return originalSluttdato.equals(TIDENES_ENDE) ? null : originalSluttdato;
     }
 
     private LocalDate hentSluttdato(Etterlysning etterlysning) {

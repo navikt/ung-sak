@@ -15,7 +15,6 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
@@ -99,6 +98,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     private Resultat finnEndretProgramperiodeResultat(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
                                                       List<BehandlingÅrsakType> behandlingÅrsakerTyper,
                                                       BehandlingReferanse behandlingReferanse) {
+        // Ekstra validering for å sjekke at det kun er én programperiode i grunnlaget.
         final var programperioder = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder();
         if (programperioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke flere programperioder");
@@ -154,7 +154,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
     private static Resultat lagResultatForNyEtterlysningUtenAvbrutt(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, EtterlysningType etterlysningType) {
-        var gjeldendePeriode = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode();
+        var gjeldendePeriode = gjeldendePeriodeGrunnlag.hentForEksaktEnPeriode();
         final var nyEtterlysning = Etterlysning.opprettForType(
             behandlingId,
             gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),
@@ -163,13 +163,6 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             etterlysningType
         );
         return new Resultat(null, List.of(nyEtterlysning));
-    }
-
-    private static DatoIntervallEntitet finnPeriode(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, EtterlysningType etterlysningType) {
-        var periode = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode();
-        return etterlysningType == EtterlysningType.UTTALELSE_ENDRET_STARTDATO ?
-            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getFomDato()) :
-            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getTomDato(), periode.getTomDato());
     }
 
     private Resultat erstattDersomEndret(BehandlingReferanse behandlingReferanse,
@@ -183,7 +176,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             if (endretDatoer.size() > 1) {
                 throw new IllegalStateException("Forventet å finne maksimalt en endring i datoer, fant " + endretDatoer.size());
             }
-            var gjeldendePeriode = gjeldendePeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode();
+            var gjeldendePeriode = gjeldendePeriodeGrunnlag.hentForEksaktEnPeriode();
             final var skalOpprettes = Etterlysning.opprettForType(
                 behandlingReferanse.getBehandlingId(),
                 gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),

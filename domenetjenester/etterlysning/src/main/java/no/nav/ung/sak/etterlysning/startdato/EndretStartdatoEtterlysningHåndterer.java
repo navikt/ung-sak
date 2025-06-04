@@ -8,11 +8,10 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningHåndterer;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
@@ -21,7 +20,6 @@ import no.nav.ung.sak.typer.PersonIdent;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
 
 @Dependent
 public class EndretStartdatoEtterlysningHåndterer implements EtterlysningHåndterer {
@@ -53,18 +51,14 @@ public class EndretStartdatoEtterlysningHåndterer implements EtterlysningHåndt
         final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         AktørId aktørId = behandling.getAktørId();
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
-        final var originalePerioder = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).stream().map(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramPerioder)
-            .map(UngdomsprogramPerioder::getPerioder)
-            .flatMap(Collection::stream)
-            .map(UngdomsprogramPeriode::getPeriode)
-            .toList();
+        final var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         etterlysninger.forEach(e -> e.vent(getFrist()));
         final var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> new EndretStartdatoOppgaveDTO(
                 deltakerIdent.getIdent(),
                 etterlysning.getEksternReferanse(),
                 etterlysning.getFrist(),
-            hentStartdato(etterlysning),
-            originalePerioder.iterator().next().getTomDato()
+                hentStartdato(etterlysning),
+                originalPeriode.map(DatoIntervallEntitet::getFomDato).orElseThrow((() -> new IllegalStateException("Forventer å finne original startdato")))
             )
         ).toList();
 
