@@ -162,7 +162,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             gjeldendePeriode,
             etterlysningType
         );
-        return new Resultat(null, List.of(nyEtterlysning));
+        return new Resultat(List.of(), List.of(nyEtterlysning));
     }
 
     private Resultat erstattDersomEndret(BehandlingReferanse behandlingReferanse,
@@ -218,10 +218,10 @@ public class ProgramperiodeendringEtterlysningTjeneste {
                     List<Etterlysning> etterlysningSomSkalOpprettes) {
 
         Resultat(List<Etterlysning> etterlysningSomSkalAvbrytes, List<Etterlysning> etterlysningSomSkalOpprettes) {
-            this.etterlysningSomSkalAvbrytes = etterlysningSomSkalAvbrytes == null ? new ArrayList<>() :
-                new ArrayList<>(etterlysningSomSkalAvbrytes);
-            this.etterlysningSomSkalOpprettes = etterlysningSomSkalOpprettes == null ? new ArrayList<>() :
-                new ArrayList<>(etterlysningSomSkalOpprettes);
+            Objects.requireNonNull(etterlysningSomSkalAvbrytes);
+            Objects.requireNonNull(etterlysningSomSkalOpprettes);
+            this.etterlysningSomSkalAvbrytes = new ArrayList<>(etterlysningSomSkalAvbrytes);
+            this.etterlysningSomSkalOpprettes = new ArrayList<>(etterlysningSomSkalOpprettes);
         }
 
         static Resultat tomtResultat() {
