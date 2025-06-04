@@ -1,10 +1,5 @@
 package no.nav.ung.sak.ungdomsprogram;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -21,6 +16,11 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Dependent
 public class UngdomsprogramPeriodeTjeneste {
@@ -69,62 +69,36 @@ public class UngdomsprogramPeriodeTjeneste {
             .filterValue(v -> v);
     }
 
-    public List<EndretDato> finnEndretStartdatoer(UUID tidligereReferanse, UUID sisteReferanse) {
-        var sisteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(sisteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + sisteReferanse));
-        var tidligereGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(tidligereReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + tidligereReferanse));
-        var sistePerioder = sisteGrunnlag.getUngdomsprogramPerioder().getPerioder();
+    public List<EndretDato> finnEndretStartdatoer(UUID førsteReferanse, UUID andreReferanse) {
+        var andreGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(andreReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + andreReferanse));
+        var førsteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(førsteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + førsteReferanse));
+        // Støtter kun en periode her foreløpig
+        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
+        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
+        var andreStartdato = andrePeriode.getFomDato();
+        var førsteStartdato = førstePeriode.getFomDato();
 
-        if (sistePerioder.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
-        }
-
-        var tidligerePerioder = tidligereGrunnlag.getUngdomsprogramPerioder().getPerioder();
-
-        if (tidligerePerioder.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
-        }
-
-        if (sistePerioder.isEmpty() || tidligerePerioder.isEmpty()) {
+        if (andreStartdato.equals(førsteStartdato)) {
             return List.of();
         }
 
-        var startdato = sistePerioder.iterator().next().getPeriode().getFomDato();
-        var tidligereStartdato = tidligerePerioder.iterator().next().getPeriode().getFomDato();
-
-        if (startdato.equals(tidligereStartdato)) {
-            return List.of();
-        }
-
-        return List.of(new EndretDato(startdato, tidligereStartdato));
+        return List.of(new EndretDato(andreStartdato, førsteStartdato));
     }
 
-    public List<EndretDato> finnEndretSluttdatoer(UUID tidligereReferanse, UUID sisteReferanse) {
-        var sisteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(sisteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + sisteReferanse));
-        var tidligereGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(tidligereReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + tidligereReferanse));
-        var sistePerioder = sisteGrunnlag.getUngdomsprogramPerioder().getPerioder();
+    public List<EndretDato> finnEndretSluttdatoer(UUID førsteReferanse, UUID andreReferanse) {
+        var andreGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(andreReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + andreReferanse));
+        var førsteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(førsteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + førsteReferanse));
+        // Støtter kun en periode her foreløpig
+        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
+        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
+        var andreSluttdato = andrePeriode.getTomDato();
+        var førsteSluttdato = førstePeriode.getTomDato();
 
-        if (sistePerioder.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
-        }
-
-        var tidligerePerioder = tidligereGrunnlag.getUngdomsprogramPerioder().getPerioder();
-
-        if (tidligerePerioder.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
-        }
-
-        if (sistePerioder.isEmpty() || tidligerePerioder.isEmpty()) {
+        if (andreSluttdato.equals(førsteSluttdato)) {
             return List.of();
         }
 
-        var sluttdato = sistePerioder.iterator().next().getPeriode().getTomDato();
-        var tidligereSluttdato = tidligerePerioder.iterator().next().getPeriode().getTomDato();
-
-        if (sluttdato.equals(tidligereSluttdato)) {
-            return List.of();
-        }
-
-        return List.of(new EndretDato(sluttdato, tidligereSluttdato));
+        return List.of(new EndretDato(andreSluttdato, førsteSluttdato));
     }
 
 
@@ -154,7 +128,8 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
 
-    public record EndretDato(LocalDate nyDato, LocalDate forrigeDato) {}
+    public record EndretDato(LocalDate nyDato, LocalDate forrigeDato) {
+    }
 
 
 }
