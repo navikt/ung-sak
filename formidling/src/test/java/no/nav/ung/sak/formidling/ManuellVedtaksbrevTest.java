@@ -56,7 +56,7 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
                 "<p>Du får mer informasjon om dette i nærmeste fremtid.</p>"
         ));
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
             "Du får ungdomsprogramytelse " +
                 "Du skal få penger, men du har tjent for mye og vi vil derfor kreve tilbake et beløp. " +
                 "Du får mer informasjon om dette i nærmeste fremtid. "

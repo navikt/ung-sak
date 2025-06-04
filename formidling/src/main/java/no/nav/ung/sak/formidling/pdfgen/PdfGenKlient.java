@@ -2,7 +2,6 @@ package no.nav.ung.sak.formidling.pdfgen;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.jknack.handlebars.Helper;
 import com.openhtmltopdf.slf4j.Slf4jLogger;
 import com.openhtmltopdf.util.XRLog;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
@@ -25,7 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Objects;
 
 @ApplicationScoped
@@ -44,7 +43,7 @@ public class PdfGenKlient {
         VeraGreenfieldFoundryProvider.initialise();
         XRLog.setLoggerImpl(new Slf4jLogger());
         Environment initialEnvironment = new Environment(
-            Map.of("currency_no_3_dec", currency_no_3_dec()),
+            Collections.emptyMap(),
             new PDFGenResource(getResource("templates/")),
             new PDFGenResource(getResource("resources/")),
             new PDFGenResource(getResource("fonts/")),
@@ -100,31 +99,6 @@ public class PdfGenKlient {
         );
         log.info("Tid pdfgenerering: {} ms", Duration.between(pdfStartInstant, Instant.now()).toMillis());
         return new PdfGenDokument(pdfa, html);
-    }
-
-
-    public static Helper<Object> currency_no_3_dec()  {
-        return (context, options) -> {
-            if (context == null) {
-                return "";
-            }
-
-            String[] splitNumber = context.toString().split("\\.");
-
-            // Legger på non-breaking-space etter hver 3. siffer før desimaltegn
-            StringBuilder formattedNumber = new StringBuilder(
-                new StringBuilder(splitNumber[0])
-                    .reverse()
-                    .toString()
-                    .replaceAll("(.{3})", "$1\u00A0")
-                    .trim()
-            ).reverse();
-
-            String decimals = splitNumber.length > 1
-                ? (splitNumber[1] + "0").substring(0, 3) // Tar med 3 desimaler
-                : "00";
-            return formattedNumber + "," + decimals;
-        };
     }
 
 }

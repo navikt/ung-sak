@@ -1,9 +1,7 @@
 package no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning;
 
-import java.math.BigDecimal;
-
 public record BeregningDto(
-    BigDecimal faktor,
+    String faktor,
     long årsbeløp,
     long grunnsats
 ) {

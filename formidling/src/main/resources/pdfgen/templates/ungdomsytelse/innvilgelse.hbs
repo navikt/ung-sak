@@ -55,7 +55,7 @@
             </p>
 
             <p>
-                Når du er {{#if kunHøySats}}over{{else}}under{{/if}} {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{currency_no_3_dec beregning.faktor}}.
+                Når du er {{#if kunHøySats}}over{{else}}under{{/if}} {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{beregning.faktor}}.
                 Det vil si {{> felles/beløp beregning.årsbeløp}} i året.
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
             </p>
@@ -63,7 +63,7 @@
             {{#with overgangTilHøySats}}
                 <p>
                     Når du er over {{satsOgBeregning.aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
-                    ganger {{currency_no_3_dec faktor}} som blir {{> felles/beløp årsbeløp}} i året.
+                    ganger {{faktor}} som blir {{> felles/beløp årsbeløp}} i året.
                 </p>
                 <p>Det vil si at du har rett på {{> felles/beløp grunnsats}} per dag.</p>
             {{/with}}

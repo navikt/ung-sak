@@ -1,9 +1,14 @@
 package no.nav.ung.sak.formidling.innhold;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
@@ -20,5 +25,18 @@ class Satsberegner {
         }
          return tilHeltall(BigDecimal.valueOf(satser.dagsatsBarnetillegg())
              .divide(BigDecimal.valueOf(satser.antallBarn()), RoundingMode.HALF_UP));
+    }
+
+    static String lagGrunnbeløpFaktorTekst(LocalDateSegment<UngdomsytelseSatser> satssegment) {
+        BigDecimal faktor = GrunnbeløpfaktorTidslinje
+            .finnStandardGrunnbeløpFaktorFor(satssegment.getLocalDateInterval())
+            .setScale(3, RoundingMode.HALF_UP);
+        String norskFaktor = NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
+            .format(faktor);
+
+        if (satssegment.getValue().satsType() == UngdomsytelseSatsType.LAV) {
+            return "2/3 av " + norskFaktor;
+        }
+        return norskFaktor;
     }
 }
