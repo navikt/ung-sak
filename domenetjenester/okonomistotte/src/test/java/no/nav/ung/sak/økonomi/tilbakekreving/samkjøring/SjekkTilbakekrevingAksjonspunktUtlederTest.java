@@ -1,23 +1,23 @@
 package no.nav.ung.sak.økonomi.tilbakekreving.samkjøring;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
-import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjenesteImpl;
-import no.nav.ung.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
+import no.nav.ung.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 
 class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
@@ -35,7 +35,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
     public SjekkTilbakekrevingAksjonspunktUtlederTest() {
         sjekkEndringUtbetalingTilBrukerTjeneste = Mockito.mock(SjekkEndringUtbetalingTilBrukerTjeneste.class);
         k9TilbakeRestKlient = Mockito.mock(K9TilbakeRestKlient.class);
-        simuleringIntegrasjonTjeneste = Mockito.mock(SimuleringIntegrasjonTjenesteImpl.class);
+        simuleringIntegrasjonTjeneste = Mockito.mock(SimuleringIntegrasjonTjeneste.class);
         utleder = new SjekkTilbakekrevingAksjonspunktUtleder(sjekkEndringUtbetalingTilBrukerTjeneste, k9TilbakeRestKlient, simuleringIntegrasjonTjeneste);
     }
 
