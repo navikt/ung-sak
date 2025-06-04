@@ -108,6 +108,7 @@ public class BrevScenarioer {
 
     /**
      * Scenario med alle kombinasjoner:
+     * Innvilget fom lenge før dagens dato
      * 24 år ungdom blir 25 år i mai. 2 barn født etter startdato der ene dør. Overgang av G-beløp i tillegg
      * Søker i mai slutten av mai med startdato 20 april. Får hele mai og april
      * Får 2 barn så dør ene barnet så overgang til 25 år.
@@ -182,10 +183,11 @@ public class BrevScenarioer {
     }
 
     /**
-     * 29 år ungdom med ungdomsprogramperiode fram til 29 år, ingen inntektsgradering og ingen barn, høy sats
+     * 28 år ungdom med ungdomsprogramperiode fram til 29 år,
+     * ingen inntektsgradering og ingen barn, høy sats
      */
     public static UngTestScenario innvilget29År(LocalDate fom, LocalDate fødselsdato) {
-        var p = new LocalDateInterval(fom, fødselsdato.plusYears(29).with(TemporalAdjusters.lastDayOfMonth()));
+        var p = new LocalDateInterval(fom, fødselsdato.plusYears(29));
 
         var satser = new LocalDateTimeline<>(p, høySatsBuilder(fom).build());
 
@@ -206,25 +208,26 @@ public class BrevScenarioer {
 
     /**
      * Søker bakover i tid med startdato lik første i måneden fylte 25 år.
+     * Blir 25 etter 15 dager i programmet
      * Søker måneden etter fylte 25 år.
      * Så er 24 år ved startdato.
      * Får både lav og høy sats i førstegangsbehandlingen
      * ingen inntektsgradering og ingen barn
      */
-    public static UngTestScenario innvilget25årBle25årførsteMåned(LocalDate fødselsdato) {
-        LocalDate tjuvefemårsdag = fødselsdato.plusYears(25);
+    public static UngTestScenario innvilget24årBle25årførsteMåned(LocalDate fom) {
+        LocalDate tjuvefemårsdag = fom.plusDays(15);
+        LocalDate fødselsdato = tjuvefemårsdag.minusYears(25);
         LocalDate tom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
-        LocalDate fom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth());
-        var p = new LocalDateInterval(fom25årmnd, fom25årmnd.plusWeeks(52).minusDays(1));
+        var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
         var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom25årmnd, tjuvefemårsdag.minusDays(1), lavSatsBuilder(p.getFomDato()).build()),
+            new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), lavSatsBuilder(p.getFomDato()).build()),
             new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), høySatsBuilder(tjuvefemårsdag).build())
         ));
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom25årmnd, tom25årmnd);
+        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, tom25årmnd);
         return new UngTestScenario(
             DEFAULT_NAVN,
             programPerioder,

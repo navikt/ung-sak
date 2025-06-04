@@ -1,6 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -19,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-    private SimuleringIntegrasjonTjenesteFake simuleringIntegrasjonTjeneste = new SimuleringIntegrasjonTjenesteFake();
+    private final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
 
     FørstegangsInnvilgelseTest() {
         super(2, "Du får ungdomsprogramytelse");
@@ -28,7 +27,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @DisplayName("Innvilgelse med riktig fom dato, maks antall dager, lav sats, grunnbeløp, hjemmel")
     @Test
     void standardInnvilgelse() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
+        LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19år(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -41,7 +40,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. desember 2024 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -72,7 +71,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Test
     void høySats() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
+        LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget27år(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -84,7 +83,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. desember 2024 får du ungdomsprogramytelse på 974 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 974 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -109,14 +108,14 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @DisplayName("blir 29 i løpet av programmet og får mindre enn maks antall dager")
     @Test
     void høySatsMaksAlder6MndIProgrammet() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var fødselsdato = LocalDate.of(1996, 5, 15); //Blir 29 etter 6 mnd/130 dager i programmet
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        var fødselsdato = LocalDate.of(1997, 2, 15); //Blir 29 etter 6 mnd/130 dager i programmet
         var ungTestGrunnlag = BrevScenarioer.innvilget29År(fom, fødselsdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. desember 2024 til 31. mai 2025 får du ungdomsprogramytelse på 974 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 til 15. februar 2026 får du ungdomsprogramytelse på 974 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -149,13 +148,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Test
     void lavOgHøySats() {
-        var fødselsdato = LocalDate.of(2000, 5, 15); //Blir 25 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget25årBle25årførsteMåned(fødselsdato);
+        var fom = LocalDate.of(2025, 8, 1);
+        var ungTestGrunnlag = BrevScenarioer.innvilget24årBle25årførsteMåned(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. mai 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
-                Fordi du fylte 25 år 15. mai 2025, får du mer penger fra denne datoen. Da får du 974 kroner per dag, utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
+                Fordi du fylte 25 år 16. august 2025, får du mer penger fra denne datoen. Da får du 974 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -191,7 +190,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @DisplayName("Innvilgelse med barnetillegg")
     @Test
     void barnetillegg() {
-        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedBarn15DagerEtterStartdato(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -204,8 +203,8 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. januar 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
-                Fordi du fikk barn 16. januar 2025, får du 37 kroner mer fra denne datoen. Da får du 686 kroner per dag, utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
+                Fordi du fikk barn 16. august 2025, får du 37 kroner mer fra denne datoen. Da får du 686 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. \
@@ -239,7 +238,6 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var ungTestGrunnlag = BrevScenarioer.innvilget24MedAlleKombinasjonerFom21April2025();
 
         var behandling = lagScenario(ungTestGrunnlag);
-        simuleringIntegrasjonTjeneste.leggTilResultat(behandling, new SimuleringResultatDto(0L, 0L, 14000L, false));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
@@ -320,8 +318,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         return  new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
-            simuleringIntegrasjonTjeneste,
-            false);
+            ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
     }
 
     @Override

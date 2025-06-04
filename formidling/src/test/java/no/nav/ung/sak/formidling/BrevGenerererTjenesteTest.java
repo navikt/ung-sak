@@ -56,9 +56,8 @@ class BrevGenerererTjenesteTest {
 
         FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
-            new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository()),
-            new SimuleringIntegrasjonTjenesteFake()
-            ,false );
+            new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository())
+            , ungTestRepositories.tilkjentYtelseRepository(), false, null);
         BrevGenerererTjeneste brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),

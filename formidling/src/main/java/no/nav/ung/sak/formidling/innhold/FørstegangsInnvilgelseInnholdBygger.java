@@ -5,12 +5,13 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
@@ -22,7 +23,6 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.SatsOgBeregn
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
-import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
@@ -43,19 +43,22 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final boolean ignoreIkkeStøttedeBrev;
-    private final SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
+    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
     public FørstegangsInnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-        SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
-        @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil) {
+        TilkjentYtelseRepository tilkjentYtelseRepository,
+        @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil,
+        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", defaultVerdi = "false") LocalDate overrideDagensDatoForTest) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ignoreIkkeStøttedeBrev = ignoreFeil;
-        this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
@@ -80,13 +83,11 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments(), brevfeilSamler);
 
-        Long etterbetaling = simuleringIntegrasjonTjeneste.hentResultat(behandling).map(SimuleringResultatDto::getSumEtterbetaling).orElse(null);
+        var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje, brevfeilSamler);
 
         if (brevfeilSamler.harFeil()) {
             LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
         }
-
-
 
         return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
             new InnvilgelseDto(
@@ -96,7 +97,18 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 satsEndringHendelseDtos,
                 satsOgBeregningDto,
                 brevfeilSamler.samletFeiltekst(),
-                etterbetaling));
+                erEtterbetaling));
+    }
+
+    private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, BrevfeilHåndterer brevfeilSamler) {
+        var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
+        if (tilkjentYtelseTimeline.isEmpty()) {
+            brevfeilSamler.registrerFeilmelding("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
+        }
+        var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
+        var dagensDato = Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
+
+        return førsteTilkjentMåned.isBefore(dagensDato.withDayOfMonth(1));
     }
 
     private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId, BrevfeilHåndterer brevfeilSamler) {
@@ -170,9 +182,9 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var barnetillegg = nyesteSats.antallBarn() > 0
             ? new BarnetilleggDto(
-                nyesteSats.antallBarn(),
-                Satsberegner.beregnBarnetilleggSats(nyesteSats),
-                Satsberegner.beregnDagsatsInklBarnetillegg(nyesteSats))
+            nyesteSats.antallBarn(),
+            Satsberegner.beregnBarnetilleggSats(nyesteSats),
+            Satsberegner.beregnDagsatsInklBarnetillegg(nyesteSats))
             : null;
 
         return new SatsOgBeregningDto(
