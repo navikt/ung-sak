@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 
@@ -22,7 +24,10 @@ public class SettEtterlysningerForBehandlingTilUtløptTask extends UnderBehandli
 
 
     @Inject
-    public SettEtterlysningerForBehandlingTilUtløptTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+    public SettEtterlysningerForBehandlingTilUtløptTask(BehandlingRepository behandlingRepository,
+                                                        BehandlingLåsRepository behandlingLåsRepository,
+                                                        EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+        super(behandlingRepository, behandlingLåsRepository);
         this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
     }
 

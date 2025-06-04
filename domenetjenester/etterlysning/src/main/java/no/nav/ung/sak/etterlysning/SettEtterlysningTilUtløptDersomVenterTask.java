@@ -6,6 +6,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -19,7 +20,7 @@ import java.util.Set;
 
 @ApplicationScoped
 @ProsessTask(value = SettEtterlysningTilUtløptDersomVenterTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class SettEtterlysningTilUtløptDersomVenterTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "etterlysning.planlagt.settUtlopt";
@@ -36,7 +37,8 @@ public class SettEtterlysningTilUtløptDersomVenterTask extends BehandlingProses
     }
 
     @Inject
-    public SettEtterlysningTilUtløptDersomVenterTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste, BehandlingRepository behandlingRepository, EtterlysningRepository etterlysningRepository) {
+    public SettEtterlysningTilUtløptDersomVenterTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste, BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, EtterlysningRepository etterlysningRepository) {
+        super(behandlingLåsRepository);
         this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;

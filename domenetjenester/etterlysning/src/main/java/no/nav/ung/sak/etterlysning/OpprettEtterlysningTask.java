@@ -7,6 +7,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 
@@ -26,7 +28,10 @@ public class OpprettEtterlysningTask extends UnderBehandlingProsessTask {
     }
 
     @Inject
-    public OpprettEtterlysningTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+    public OpprettEtterlysningTask(BehandlingRepository behandlingRepository,
+                                   BehandlingLåsRepository behandlingLåsRepository,
+                                   EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+        super(behandlingRepository, behandlingLåsRepository);
         this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
     }
 
