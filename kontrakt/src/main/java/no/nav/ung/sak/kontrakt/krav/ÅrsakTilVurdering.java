@@ -11,12 +11,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@LegacyKodeverdiJsonValue() // <- Denne Kodeverdi har alltid blitt serialisert til kode string
 public enum ÅrsakTilVurdering implements Kodeverdi {
 
     ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER", "Endring fra søknad/Punsj"),

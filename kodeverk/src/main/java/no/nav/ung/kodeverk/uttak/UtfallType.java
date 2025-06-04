@@ -12,10 +12,12 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+@LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public enum UtfallType implements Kodeverdi {
 
     INNVILGET("INNVILGET", "Innvilget"),

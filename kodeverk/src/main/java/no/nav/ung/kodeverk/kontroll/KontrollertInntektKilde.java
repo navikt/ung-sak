@@ -1,10 +1,13 @@
 package no.nav.ung.kodeverk.kontroll;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public enum KontrollertInntektKilde implements Kodeverdi {
 
     BRUKER("BRUKER", "Bruker"),
@@ -43,6 +46,7 @@ public enum KontrollertInntektKilde implements Kodeverdi {
 
 
     @Override
+    @JsonValue
     public String getKode() {
         return kode;
     }
