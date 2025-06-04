@@ -1,17 +1,11 @@
 package no.nav.ung.kodeverk.vilkår;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 import java.util.*;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum VilkårType implements Kodeverdi {
     ALDERSVILKÅR("UNG_VK_1",
         "Aldersvilkåret",
@@ -61,11 +55,8 @@ public enum VilkårType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private Map<FagsakYtelseType, String> lovReferanser = Map.of();
-    @JsonIgnore
     private String navn;
-    @JsonIgnore
     private Set<Avslagsårsak> avslagsårsaker;
     private String kode;
 
@@ -84,15 +75,13 @@ public enum VilkårType implements Kodeverdi {
 
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static VilkårType fraKode(Object node) {
-        if (node == null) {
+    public static VilkårType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(VilkårType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent VilkårType: for input " + node);
+            throw new IllegalArgumentException("Ukjent VilkårType: for input " + kode);
         }
         return ad;
     }
@@ -129,13 +118,12 @@ public enum VilkårType implements Kodeverdi {
         return avslagsårsaker;
     }
 
-    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty(value = "kode")
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
