@@ -1550,8 +1550,8 @@
         "type" : "string"
       },
       "EtterlysningType" : {
-        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_PROGRAMPERIODE" ],
-        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_PROGRAMPERIODE" ],
+        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
+        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
         "type" : "string"
       },
       "FagsakDto" : {

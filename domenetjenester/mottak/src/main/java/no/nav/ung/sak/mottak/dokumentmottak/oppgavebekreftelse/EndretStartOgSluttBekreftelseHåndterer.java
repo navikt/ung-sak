@@ -3,7 +3,7 @@ package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.oppgave.bekreftelse.Bekreftelse;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretProgramperiodeBekreftelse;
+import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretStartdatoBekreftelse;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
@@ -18,23 +18,22 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Dependent
-@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PROGRAMPERIODE)
-public class ProgramperiodeEndringBekreftelseHåndterer implements BekreftelseHåndterer {
+@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_STARTDATO)
+@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_SLUTTDATO)
+public class EndretStartOgSluttBekreftelseHåndterer implements BekreftelseHåndterer {
 
     private final MottatteDokumentRepository mottatteDokumentRepository;
     private final EtterlysningRepository etterlysningRepository;
 
     @Inject
-    public ProgramperiodeEndringBekreftelseHåndterer(MottatteDokumentRepository mottatteDokumentRepository, EtterlysningRepository etterlysningRepository) {
+    public EndretStartOgSluttBekreftelseHåndterer(MottatteDokumentRepository mottatteDokumentRepository, EtterlysningRepository etterlysningRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.etterlysningRepository = etterlysningRepository;
     }
 
     @Override
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelse) {
-        EndretProgramperiodeBekreftelse bekreftelse = oppgaveBekreftelse.oppgaveBekreftelse().getBekreftelse();
-
-
+        Bekreftelse bekreftelse = oppgaveBekreftelse.oppgaveBekreftelse().getBekreftelse();
         Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(bekreftelse.getOppgaveReferanse());
 
         if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
