@@ -28,9 +28,6 @@ public class LegacyKodeverdiSomObjektSerializer extends StdSerializer<Kodeverdi>
         } else {
             gen.writeStartObject();
             gen.writeStringField("kode", value.getKode());
-            if (value.getNavn() != null) {
-                gen.writeStringField("navn", value.getNavn());
-            }
             gen.writeStringField("kodeverk", value.getKodeverk());
             gen.writeEndObject();
         }
