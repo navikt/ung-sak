@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(name = "HISTORIKKINNSLAG")
 public class Historikkinnslag extends BaseEntitet {
 
-    public static final String BOLD_MARKØR = "__";
+    public static final String BOLD_MARKØR = "**";
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_HISTORIKKINNSLAG")

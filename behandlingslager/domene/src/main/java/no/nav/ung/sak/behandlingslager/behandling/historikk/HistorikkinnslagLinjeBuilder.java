@@ -47,7 +47,6 @@ public class HistorikkinnslagLinjeBuilder {
         if (t.isEmpty()) {
             throw new IllegalArgumentException("Tekst kan ikke være tom");
         }
-        stringBuilder.append(" ").append(t.replaceAll("_{3,}", "---")); //Saksbehandler bruker ofte ___ som for å lage skillelinje i begrunnelsen når de løser AP. Kræsjer litt med vår __ bold syntaks
         return this;
     }
 
@@ -165,7 +164,8 @@ public class HistorikkinnslagLinjeBuilder {
             case null -> null;
             case String tekst -> tekst;
             case LocalDate localDate -> DATE_FORMATTER.format(localDate);
-            case LocalDateInterval interval -> DATE_FORMATTER.format(interval.getFomDato()) + " - " + DATE_FORMATTER.format(interval.getTomDato());
+            case LocalDateInterval interval ->
+                DATE_FORMATTER.format(interval.getFomDato()) + " - " + DATE_FORMATTER.format(interval.getTomDato());
             case BigDecimal bd -> bd.toString();
             case Number n -> n.toString();
             case Boolean b -> b ? "Ja" : "Nei";
