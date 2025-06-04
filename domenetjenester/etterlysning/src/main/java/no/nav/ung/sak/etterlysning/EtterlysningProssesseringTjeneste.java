@@ -5,20 +5,14 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.etterlysning.kontroll.InntektkontrollEtterlysningHåndterer;
-import no.nav.ung.sak.etterlysning.sluttdato.EndretSluttdatoEtterlysningHåndterer;
-import no.nav.ung.sak.etterlysning.startdato.EndretStartdatoEtterlysningHåndterer;
 
 import java.util.List;
-import java.util.Objects;
 
 @ApplicationScoped
 public class EtterlysningProssesseringTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
-    private InntektkontrollEtterlysningHåndterer inntektkontrollEtterlysningHåndterer;
-    private EndretStartdatoEtterlysningHåndterer endretStartdatoEtterlysningHåndterer;
-    private EndretSluttdatoEtterlysningHåndterer endretSluttdatoEtterlysningHåndterer;
+    private OpprettOppgaveTjeneste opprettOppgaveTjeneste;
 
     private UngOppgaveKlient oppgaveKlient;
 
@@ -28,15 +22,11 @@ public class EtterlysningProssesseringTjeneste {
 
     @Inject
     public EtterlysningProssesseringTjeneste(EtterlysningRepository etterlysningRepository,
-                                             InntektkontrollEtterlysningHåndterer inntektkontrollEtterlysningHåndterer,
-                                             UngOppgaveKlient oppgaveKlient,
-                                             EndretStartdatoEtterlysningHåndterer endretStartdatoEtterlysningHåndterer,
-                                             EndretSluttdatoEtterlysningHåndterer endretSluttdatoEtterlysningHåndterer) {
+                                             OpprettOppgaveTjeneste opprettOppgaveTjeneste,
+                                             UngOppgaveKlient oppgaveKlient) {
         this.etterlysningRepository = etterlysningRepository;
-        this.inntektkontrollEtterlysningHåndterer = inntektkontrollEtterlysningHåndterer;
+        this.opprettOppgaveTjeneste = opprettOppgaveTjeneste;
         this.oppgaveKlient = oppgaveKlient;
-        this.endretStartdatoEtterlysningHåndterer = endretStartdatoEtterlysningHåndterer;
-        this.endretSluttdatoEtterlysningHåndterer = endretSluttdatoEtterlysningHåndterer;
     }
 
     public void settTilUtløpt(Long behandlingId) {
@@ -66,14 +56,6 @@ public class EtterlysningProssesseringTjeneste {
     }
 
     public void opprett(Long behandlingId, EtterlysningType etterlysningType) {
-        switch (Objects.requireNonNull(etterlysningType)) {
-            case UTTALELSE_KONTROLL_INNTEKT ->
-                inntektkontrollEtterlysningHåndterer.håndterOpprettelse(behandlingId, etterlysningType);
-            case UTTALELSE_ENDRET_STARTDATO ->
-                endretStartdatoEtterlysningHåndterer.håndterOpprettelse(behandlingId, etterlysningType);
-            case UTTALELSE_ENDRET_SLUTTDATO ->
-                endretSluttdatoEtterlysningHåndterer.håndterOpprettelse(behandlingId, etterlysningType);
-            default -> throw new IllegalArgumentException("Uhåndtert etterlysningstype: " + etterlysningType);
-        }
+        opprettOppgaveTjeneste.opprett(behandlingId, etterlysningType);
     }
 }
