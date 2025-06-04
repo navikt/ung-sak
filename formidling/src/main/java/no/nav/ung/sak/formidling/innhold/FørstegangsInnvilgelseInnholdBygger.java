@@ -52,7 +52,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
         TilkjentYtelseRepository tilkjentYtelseRepository,
         @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil,
-        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", defaultVerdi = "false") LocalDate overrideDagensDatoForTest) {
+        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
