@@ -75,10 +75,15 @@ public class UngdomsprogramPeriodeTjeneste {
         var sistePerioder = sisteGrunnlag.getUngdomsprogramPerioder().getPerioder();
 
         if (sistePerioder.size() > 1) {
-            throw new IllegalStateException("Støtter ikke å finne endring i startdato for flere perioder");
+            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
         }
 
         var tidligerePerioder = tidligereGrunnlag.getUngdomsprogramPerioder().getPerioder();
+
+        if (tidligerePerioder.size() > 1) {
+            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
+        }
+
         if (sistePerioder.isEmpty() || tidligerePerioder.isEmpty()) {
             return List.of();
         }
@@ -99,10 +104,15 @@ public class UngdomsprogramPeriodeTjeneste {
         var sistePerioder = sisteGrunnlag.getUngdomsprogramPerioder().getPerioder();
 
         if (sistePerioder.size() > 1) {
-            throw new IllegalStateException("Støtter ikke å finne endring i startdato for flere perioder");
+            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
         }
 
         var tidligerePerioder = tidligereGrunnlag.getUngdomsprogramPerioder().getPerioder();
+
+        if (tidligerePerioder.size() > 1) {
+            throw new UnsupportedOperationException("Støtter ikke å finne endring i startdato for flere perioder");
+        }
+
         if (sistePerioder.isEmpty() || tidligerePerioder.isEmpty()) {
             return List.of();
         }
