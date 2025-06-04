@@ -7,8 +7,9 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.periodeendring.EndretProgamperiodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,7 +24,8 @@ public class UngOppgaveKlient {
     private final URI utløpForTypeOgPeriodeURI;
     private final URI avbrytURI;
     private final URI utløptURI;
-    private final URI opprettEndretProgramperiodeURI;
+    private final URI opprettEndretSluttdatoURI;
+    private final URI opprettEndretStartdatoURI;
 
 
     @Inject
@@ -32,7 +34,8 @@ public class UngOppgaveKlient {
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
-        this.opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endre/programperiode");
+        this.opprettEndretStartdatoURI = tilUri(url, "oppgave/opprett/endret-startdato");
+        this.opprettEndretSluttdatoURI = tilUri(url, "oppgave/opprett/endret-sluttdato");
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
@@ -82,13 +85,22 @@ public class UngOppgaveKlient {
     }
 
 
-    public void opprettEndretSluttdatoOppgave(EndretProgamperiodeOppgaveDTO endretPeriodeOppgaveDTO) {
+    public void opprettEndretSluttdatoOppgave(EndretSluttdatoOppgaveDTO endretSluttdatoOppgaveDTO) {
         try {
-            restClient.post(opprettEndretProgramperiodeURI, endretPeriodeOppgaveDTO);
+            restClient.post(opprettEndretSluttdatoURI, endretSluttdatoOppgaveDTO);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
     }
+
+    public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO endretStartdatoOppgaveDTO) {
+        try {
+            restClient.post(opprettEndretStartdatoURI, endretStartdatoOppgaveDTO);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
 
 
     private static URI tilUri(String baseUrl, String path) {

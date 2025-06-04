@@ -35,6 +35,14 @@ public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<Ungdo
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
+
+    @Override
+    public Fagsak finnEksisterendeFagsak(FagsakYtelseType ytelseType,
+                                         AktørId søkerAktørId) {
+        return fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            .orElseThrow(() -> new IllegalStateException("Finner ikke fagsak for ytelseType: " + ytelseType + " og aktørId: " + søkerAktørId)); // OK logging, maskeres delvis og vi må vite aktørid her
+    }
+
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType,
                                          AktørId søkerAktørId,

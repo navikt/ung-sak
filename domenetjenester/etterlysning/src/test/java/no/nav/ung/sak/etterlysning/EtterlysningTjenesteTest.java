@@ -56,7 +56,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
@@ -73,7 +73,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(List.of(etterlysning1, etterlysning2));
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(2);
@@ -91,7 +91,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning2);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
@@ -114,7 +114,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning3);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
@@ -137,7 +137,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning3);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(2);
@@ -165,7 +165,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning3);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
@@ -197,7 +197,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning3);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
@@ -217,7 +217,7 @@ class EtterlysningTjenesteTest {
     private Etterlysning lagEtterlysningPåVent(DatoIntervallEntitet periode) {
         final var etterlysning = Etterlysning.opprettForType(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(),
             periode,
-            EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+            EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysning.vent(LocalDateTime.now());
         return etterlysning;
     }
@@ -225,7 +225,7 @@ class EtterlysningTjenesteTest {
     private Etterlysning lagUtløptEtterlysning(DatoIntervallEntitet periode) {
         final var etterlysning = Etterlysning.opprettForType(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(),
             periode,
-            EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+            EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysning.vent(LocalDateTime.now());
         etterlysning.utløpt();
         return etterlysning;
@@ -234,7 +234,7 @@ class EtterlysningTjenesteTest {
     private Etterlysning lagEtterlysningMedSvar(DatoIntervallEntitet periode, JournalpostId svarJournalpostId) {
         final var etterlysning = Etterlysning.opprettForType(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(),
             periode,
-            EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+            EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysning.vent(LocalDateTime.now());
         etterlysning.mottattUttalelse(svarJournalpostId, false, "Uttalelse");
         return etterlysning;
