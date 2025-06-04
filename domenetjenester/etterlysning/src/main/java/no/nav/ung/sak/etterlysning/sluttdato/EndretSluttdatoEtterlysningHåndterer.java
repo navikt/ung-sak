@@ -51,8 +51,7 @@ public class EndretSluttdatoEtterlysningHåndterer implements EtterlysningHåndt
     public void håndterOpprettelse(long behandlingId, EtterlysningType etterlysningType) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
         final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, etterlysningType);
-        AktørId aktørId = behandling.getAktørId();
-        PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
+        PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId()).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         final var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         etterlysninger.forEach(e -> e.vent(getFrist()));
         final var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> new EndretSluttdatoOppgaveDTO(
