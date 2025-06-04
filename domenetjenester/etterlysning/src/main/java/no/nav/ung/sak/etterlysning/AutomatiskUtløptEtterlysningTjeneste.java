@@ -41,7 +41,7 @@ public class AutomatiskUtløptEtterlysningTjeneste {
     }
 
     private void opprettProsessTask(Behandling behandling) {
-        var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptTask.class);
+        var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningerForBehandlingTilUtløptTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
         prosessTaskTjeneste.lagre(prosessTaskData);
     }
