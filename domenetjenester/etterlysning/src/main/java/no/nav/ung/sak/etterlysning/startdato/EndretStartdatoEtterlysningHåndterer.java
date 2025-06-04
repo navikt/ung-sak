@@ -48,7 +48,7 @@ public class EndretStartdatoEtterlysningHåndterer implements EtterlysningHåndt
     @Override
     public void håndterOpprettelse(long behandlingId, EtterlysningType etterlysningType) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+        final var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, etterlysningType);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId()).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         final var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         etterlysninger.forEach(e -> e.vent(getFrist()));
