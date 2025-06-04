@@ -1550,8 +1550,8 @@
         "type" : "string"
       },
       "EtterlysningType" : {
-        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_PROGRAMPERIODE", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
-        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_PROGRAMPERIODE", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
+        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
+        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
         "type" : "string"
       },
       "FagsakDto" : {
@@ -2624,7 +2624,7 @@
         "type" : "object"
       },
       "KodeverkWebFagsystem" : {
-        "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
+        "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
         "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ],
         "type" : "string"
       },
