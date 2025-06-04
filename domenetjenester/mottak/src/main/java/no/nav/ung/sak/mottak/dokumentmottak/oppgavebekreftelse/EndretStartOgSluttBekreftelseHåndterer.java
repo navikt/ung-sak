@@ -19,22 +19,21 @@ import java.util.UUID;
 
 @Dependent
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_STARTDATO)
-public class EndretStartdatoBekreftelseHåndterer implements BekreftelseHåndterer {
+@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_SLUTTDATO)
+public class EndretStartOgSluttBekreftelseHåndterer implements BekreftelseHåndterer {
 
     private final MottatteDokumentRepository mottatteDokumentRepository;
     private final EtterlysningRepository etterlysningRepository;
 
     @Inject
-    public EndretStartdatoBekreftelseHåndterer(MottatteDokumentRepository mottatteDokumentRepository, EtterlysningRepository etterlysningRepository) {
+    public EndretStartOgSluttBekreftelseHåndterer(MottatteDokumentRepository mottatteDokumentRepository, EtterlysningRepository etterlysningRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.etterlysningRepository = etterlysningRepository;
     }
 
     @Override
     public void håndter(OppgaveBekreftelseInnhold oppgaveBekreftelse) {
-        EndretStartdatoBekreftelse bekreftelse = oppgaveBekreftelse.oppgaveBekreftelse().getBekreftelse();
-
-
+        Bekreftelse bekreftelse = oppgaveBekreftelse.oppgaveBekreftelse().getBekreftelse();
         Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(bekreftelse.getOppgaveReferanse());
 
         if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
