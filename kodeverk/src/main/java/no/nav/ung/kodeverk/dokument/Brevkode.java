@@ -1,5 +1,6 @@
 package no.nav.ung.kodeverk.dokument;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
@@ -130,6 +131,7 @@ public class Brevkode implements Kodeverdi {
         this.kode = Objects.requireNonNull(kode, "kode");
     }
 
+    @JsonCreator
     public static Brevkode fraKode(final String kode) {
         if (kode == null) {
             return null;

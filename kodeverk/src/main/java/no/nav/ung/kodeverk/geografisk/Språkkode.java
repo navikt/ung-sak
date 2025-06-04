@@ -1,5 +1,6 @@
 package no.nav.ung.kodeverk.geografisk;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
@@ -66,6 +67,7 @@ public class Språkkode implements Kodeverdi {
         return Objects.hash(kode);
     }
 
+    @JsonCreator
     public static Språkkode fraKode(final String kode) {
         if (kode == null) {
             return null;
