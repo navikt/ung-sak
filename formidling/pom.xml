@@ -23,10 +23,6 @@
 			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>domenetjenester-bom</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>okonomistotte</artifactId>
-        </dependency>
         <!-- PDFGEN -->
         <dependency>
             <groupId>no.nav.pdfgen</groupId>
