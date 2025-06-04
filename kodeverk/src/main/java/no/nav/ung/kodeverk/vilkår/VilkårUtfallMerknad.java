@@ -1,23 +1,12 @@
 package no.nav.ung.kodeverk.vilkår;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum VilkårUtfallMerknad implements Kodeverdi {
 
     VM_1001("1001", "Søknad er sendt før 26. svangerskapsuke er passert og barnet er ikke født"),
@@ -91,7 +80,6 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
 
     public static final String KODEVERK = "VILKAR_UTFALL_MERKNAD";
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -105,15 +93,13 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static VilkårUtfallMerknad fraKode(Object node) {
-        if (node == null) {
+    public static VilkårUtfallMerknad fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(VilkårUtfallMerknad.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent VilkårUtfallMerknad: for input " + node);
+            throw new IllegalArgumentException("Ukjent VilkårUtfallMerknad: for input " + kode);
         }
         return ad;
     }
@@ -131,13 +117,12 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
         System.out.println(KODER.keySet());
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
