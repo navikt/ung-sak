@@ -88,19 +88,10 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         var perioder = utledPerioder(prosessTaskData);
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-            if (sisteVedtak.map(Behandling::erUnderIverksettelse).orElse(false)) {
-                var blokkererMinstEnTask = prosessTaskTjeneste.finnAlle(ProsessTaskStatus.VETO).stream().anyMatch(it -> Objects.equals(it.getBlokkertAvProsessTaskId(), prosessTaskData.getId()));
-                // Dersom denne tasken blokkerer en annen task, utsetter vi kjøring av denne tasken i håp om at original behandling blir iverksatt
-                if (blokkererMinstEnTask) {
-                    // Utsetter kjøring
-                    var uferdigForGruppe = prosessTaskTjeneste.finnUferdigForGruppe(prosessTaskData.getGruppe());
-                    if (uferdigForGruppe.size() > 1) {
-                        throw new IllegalStateException("Fant flere uferdige tasks for gruppe " + prosessTaskData.getGruppe() + ". Kunne ikke utsette kjøring av task.");
-                    }
-                    log.info("Siste vedtatte behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", sisteVedtak.get());
-                    prosessTaskTjeneste.lagre(prosessTaskData);
-                    return;
-                }
+            if (sisteVedtak.isPresent() && skalUtsetteKjøring(prosessTaskData, sisteVedtak)) {
+                log.info("Siste vedtatte behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", sisteVedtak.get());
+                prosessTaskTjeneste.lagre(prosessTaskData);
+                return;
             }
 
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
@@ -134,6 +125,22 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                 prosessTriggereRepository.leggTil(behandling.getId(), perioder.stream().map(it -> new Trigger(behandlingÅrsakType, it)).collect(Collectors.toSet()));
             }
         }
+    }
+
+    private boolean skalUtsetteKjøring(ProsessTaskData prosessTaskData, Optional<Behandling> sisteVedtak) {
+        if (sisteVedtak.map(Behandling::erUnderIverksettelse).orElse(false)) {
+            var blokkererMinstEnTask = prosessTaskTjeneste.finnAlle(ProsessTaskStatus.VETO).stream().anyMatch(it -> Objects.equals(it.getBlokkertAvProsessTaskId(), prosessTaskData.getId()));
+            // Dersom denne tasken blokkerer en annen task, utsetter vi kjøring av denne tasken i håp om at original behandling blir iverksatt
+            if (blokkererMinstEnTask) {
+                // Utsetter kjøring
+                var uferdigForGruppe = prosessTaskTjeneste.finnUferdigForGruppe(prosessTaskData.getGruppe());
+                if (uferdigForGruppe.size() > 1) {
+                    throw new IllegalStateException("Fant flere uferdige tasks for gruppe " + prosessTaskData.getGruppe() + ". Kunne ikke utsette kjøring av task. Og vi kan ikke revurdere behandling som er under iverksettelse.");
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private Set<DatoIntervallEntitet> utledPerioder(ProsessTaskData prosessTaskData) {
