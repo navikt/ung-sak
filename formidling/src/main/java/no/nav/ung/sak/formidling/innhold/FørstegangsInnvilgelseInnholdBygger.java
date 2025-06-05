@@ -5,11 +5,13 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
@@ -40,16 +42,22 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final boolean ignoreIkkeStøttedeBrev;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
+    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
     public FørstegangsInnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-        @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil) {
+        TilkjentYtelseRepository tilkjentYtelseRepository,
+        @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil,
+        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ignoreIkkeStøttedeBrev = ignoreFeil;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
@@ -74,6 +82,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments(), brevfeilSamler);
 
+        var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje, brevfeilSamler);
+
         if (brevfeilSamler.harFeil()) {
             LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
         }
@@ -85,7 +95,19 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 dagsatsFom,
                 satsEndringHendelseDtos,
                 satsOgBeregningDto,
-                brevfeilSamler.samletFeiltekst()));
+                brevfeilSamler.samletFeiltekst(),
+                erEtterbetaling));
+    }
+
+    private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, BrevfeilHåndterer brevfeilSamler) {
+        var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
+        if (tilkjentYtelseTimeline.isEmpty()) {
+            brevfeilSamler.registrerFeilmelding("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
+        }
+        var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
+        var dagensDato = Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
+
+        return førsteTilkjentMåned.isBefore(dagensDato.withDayOfMonth(1));
     }
 
     private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId, BrevfeilHåndterer brevfeilSamler) {
@@ -159,9 +181,9 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var barnetillegg = nyesteSats.antallBarn() > 0
             ? new BarnetilleggDto(
-                nyesteSats.antallBarn(),
-                Satsberegner.beregnBarnetilleggSats(nyesteSats),
-                Satsberegner.beregnDagsatsInklBarnetillegg(nyesteSats))
+            nyesteSats.antallBarn(),
+            Satsberegner.beregnBarnetilleggSats(nyesteSats),
+            Satsberegner.beregnDagsatsInklBarnetillegg(nyesteSats))
             : null;
 
         return new SatsOgBeregningDto(

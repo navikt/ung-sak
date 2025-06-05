@@ -16,7 +16,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
-import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
+import no.nav.ung.sak.etterlysning.SettEtterlysningerForBehandlingTilUtløptTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +115,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
         if (harUtløpteEtterlysninger) {
             // Dersom vi har utløpte etterlysninger ønsker vi å oppdatere status på disse
-            var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptTask.class);
+            var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningerForBehandlingTilUtløptTask.class);
             prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
             prosessTaskTjeneste.lagre(prosessTaskData);
         }

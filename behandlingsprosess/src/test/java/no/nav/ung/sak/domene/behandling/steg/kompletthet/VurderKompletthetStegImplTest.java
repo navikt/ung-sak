@@ -21,7 +21,7 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptTask;
+import no.nav.ung.sak.etterlysning.SettEtterlysningerForBehandlingTilUtløptTask;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,7 +118,7 @@ class VurderKompletthetStegImplTest {
         // Assert
         assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(0);
 
-        final var prosessTaskData = prosessTaskRepository.finnAlle(SettEtterlysningTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        final var prosessTaskData = prosessTaskRepository.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(prosessTaskData.size()).isEqualTo(1);
     }
 
