@@ -61,7 +61,6 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
 
         taskData.addNesteParallell(parallelle);
         taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));
-        manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId()).ifPresent(taskData::addNesteSekvensiell);
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
         taskData.setCallIdFraEksisterende();
@@ -69,6 +68,9 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
         var fagsakId = behandling.getFagsakId();
         var behandlingId = behandling.getId();
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), taskData);
+
+        manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(behandling.getId()).ifPresent(fagsakProsessTaskRepository::lagreNyGruppe);
+
 
         stønadstatistikkService.publiserHendelse(behandling);
     }
