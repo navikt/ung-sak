@@ -27,5 +27,13 @@ class HistorikkinnslagLinjeBuilderTest {
         assertEquals("Dette er en \\_\\_\\_test\\_\\_\\_ med \\_\\_\\_trippel\\_\\_\\_ \\_\\_\\_underscore\\_\\_\\_", tekst);
     }
 
+    @Test
+    void skal_escape_escaped_underscore() {
+        var tekst = HistorikkinnslagLinjeBuilder.plainTekstLinje("Dette er en \\_test\\_ med \\_escaped\\_ \\_underscore\\_").tilTekst();
+
+        assertEquals("Dette er en \\\\_test\\\\_ med \\\\_escaped\\\\_ \\\\_underscore\\\\_", tekst);
+    }
+
+
 
 }
