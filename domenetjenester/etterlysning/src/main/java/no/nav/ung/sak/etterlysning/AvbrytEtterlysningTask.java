@@ -5,12 +5,16 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 
 @ApplicationScoped
 @ProsessTask(value = AvbrytEtterlysningTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
-public class AvbrytEtterlysningTask implements ProsessTaskHandler {
+public class AvbrytEtterlysningTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "etterlysning.avbryt";
     private EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste;
@@ -20,13 +24,18 @@ public class AvbrytEtterlysningTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public AvbrytEtterlysningTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+    public AvbrytEtterlysningTask(BehandlingRepository behandlingRepository,
+                                  BehandlingLåsRepository behandlingLåsRepository,
+                                  EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste) {
+        super(behandlingRepository, behandlingLåsRepository);
         this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
-        etterlysningProssesseringTjeneste.settTilAvbrutt(Long.parseLong(prosessTaskData.getBehandlingId()));
+    protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
+        etterlysningProssesseringTjeneste.settTilAvbrutt(behandling.getId());
+
     }
+
 
 }

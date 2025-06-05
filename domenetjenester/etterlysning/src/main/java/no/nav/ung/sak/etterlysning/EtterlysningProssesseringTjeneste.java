@@ -2,7 +2,10 @@ package no.nav.ung.sak.etterlysning;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 
@@ -15,6 +18,7 @@ public class EtterlysningProssesseringTjeneste {
     private OpprettOppgaveTjeneste opprettOppgaveTjeneste;
 
     private UngOppgaveKlient oppgaveKlient;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public EtterlysningProssesseringTjeneste() {
         // CDI
@@ -23,10 +27,11 @@ public class EtterlysningProssesseringTjeneste {
     @Inject
     public EtterlysningProssesseringTjeneste(EtterlysningRepository etterlysningRepository,
                                              OpprettOppgaveTjeneste opprettOppgaveTjeneste,
-                                             UngOppgaveKlient oppgaveKlient) {
+                                             UngOppgaveKlient oppgaveKlient, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.opprettOppgaveTjeneste = opprettOppgaveTjeneste;
         this.oppgaveKlient = oppgaveKlient;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     public void settTilUtløpt(Long behandlingId) {
@@ -55,7 +60,14 @@ public class EtterlysningProssesseringTjeneste {
         etterlysningRepository.lagre(etterlysninger);
     }
 
-    public void opprett(Long behandlingId, EtterlysningType etterlysningType) {
-        opprettOppgaveTjeneste.opprett(behandlingId, etterlysningType);
+    public void opprett(Behandling behandling, EtterlysningType etterlysningType) {
+        var opprettet = opprettOppgaveTjeneste.opprett(behandling, etterlysningType);
+        opprettet.forEach(e -> {
+            var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptDersomVenterTask.class);
+            prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
+            prosessTaskData.setProperty(SettEtterlysningTilUtløptDersomVenterTask.ETTERLYSNING_ID, e.getId().toString());
+            prosessTaskData.setNesteKjøringEtter(e.getFrist());
+            prosessTaskTjeneste.lagre(prosessTaskData);
+        });
     }
 }

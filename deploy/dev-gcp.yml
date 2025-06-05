@@ -284,3 +284,6 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"
+
+    - name: PIP_APPS
+      value: "dev-gcp:k9saksbehandling:sif-abac-pdp,dev-fss:teamdokumenthandtering:saf"
