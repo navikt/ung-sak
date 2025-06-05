@@ -55,12 +55,13 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void medBarnetillegg() {
         LocalDate fødselsdato = LocalDate.of(2000, 3, 25);
-        var ungTestGrunnlag = BrevScenarioer.endring25ÅrMedBarn(fødselsdato);
+        var ungTestGrunnlag = BrevScenarioer.endring25ÅrMedToBarn(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
                 Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller 25 år 25. mars 2025. \
-                Fra og med denne datoen får du 1 011 kroner per dag, utenom lørdag og søndag. \
+                Fra og med denne datoen får du 1 048 kroner per dag, utenom lørdag og søndag. \
+                Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
                 """);
 
