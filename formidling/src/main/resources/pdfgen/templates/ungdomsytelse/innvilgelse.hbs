@@ -29,7 +29,11 @@
 
         <p>
             Pengene får du utbetalt én gang i måneden før den 10. i måneden.
-            Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet.
+            {{#if etterbetaling}}
+                Den første utbetalingen får du innen en uke.
+            {{else}}
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet.
+            {{/if}}
             Pengene du får, blir det trukket skatt av.
         </p>
 
