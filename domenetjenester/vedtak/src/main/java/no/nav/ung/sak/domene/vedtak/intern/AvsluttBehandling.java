@@ -88,11 +88,11 @@ public class AvsluttBehandling {
             opprettTaskForProsesserBehandling(ventendeBehandling);
         });
 
-        settPlanlagteFagsakProsesstaskerTilFerdig();
+        settPlanlagteFagsakProsesstaskerForBehandlingTilFerdig();
 
     }
 
-    private void settPlanlagteFagsakProsesstaskerTilFerdig() {
+    private void settPlanlagteFagsakProsesstaskerForBehandlingTilFerdig() {
         var taskSomSkalSettesTilFerdig = taskTjeneste.finnAlle(SettEtterlysningTilUtløptDersomVenterTask.TASKTYPE, ProsessTaskStatus.KLAR);
         taskSomSkalSettesTilFerdig.forEach(pt -> taskTjeneste.setProsessTaskFerdig(pt.getId(), ProsessTaskStatus.KLAR));
     }
