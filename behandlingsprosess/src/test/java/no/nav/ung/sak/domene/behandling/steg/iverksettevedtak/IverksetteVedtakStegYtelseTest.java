@@ -5,17 +5,14 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -64,7 +61,7 @@ public class IverksetteVedtakStegYtelseTest {
 
     private Repository repository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkRepository;
 
     @Mock
     private VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse;
@@ -90,7 +87,7 @@ public class IverksetteVedtakStegYtelseTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         repository = new Repository(entityManager);
         behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-        historikkRepository = repositoryProvider.getHistorikkRepository();
+        historikkRepository = repositoryProvider.getHistorikkinnslagRepository();
 
 
         opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new UngdomsytelseOpprettProsessTaskIverksett(prosessTaskRepository, stønadstatistikkService, manglendeKontrollperioderTjeneste));
@@ -112,12 +109,9 @@ public class IverksetteVedtakStegYtelseTest {
         // Assert
         assertThat(resultat.getTransisjon()).isEqualTo(FellesTransisjoner.STARTET);
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        Historikkinnslag historikkinnslag = historikkRepository.hentHistorikk(behandling.getId()).get(0);
-        assertThat(historikkinnslag.getHistorikkinnslagDeler()).hasSize(1);
-        HistorikkinnslagDel del1 = historikkinnslag.getHistorikkinnslagDeler().get(0);
-        assertThat(del1.getHendelse())
-            .hasValueSatisfying(hendelse -> assertThat(hendelse.getNavn()).as("navn").isEqualTo(HistorikkinnslagType.IVERKSETTELSE_VENT.getKode()));
-        assertThat(del1.getAarsak().get()).isEqualTo(Venteårsak.VENT_TIDLIGERE_BEHANDLING.getKode());
+        Historikkinnslag historikkinnslag = historikkRepository.hent(behandling.getId()).get(0);
+        assertThat(historikkinnslag.getLinjer()).hasSize(1);
+        assertThat(historikkinnslag.getTittel()).isEqualTo("Behandlingen venter på iverksettelse");
     }
 
     @Test
