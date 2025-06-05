@@ -114,6 +114,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             var behandling = behandlingRepository.hentBehandling(behandlingId);
 
             if (behandling.erUnderIverksettelse()) {
+                log.info("Åpen behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", behandling);
                 prosessTaskTjeneste.lagre(prosessTaskData);
                 return;
             }
