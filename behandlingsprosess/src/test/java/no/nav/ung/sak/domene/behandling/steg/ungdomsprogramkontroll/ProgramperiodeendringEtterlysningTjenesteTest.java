@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -88,11 +89,28 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
 
 
     @Test
-    void skal_opprette_etterlysning_for_endret_startdato() {
+    void skal_ikke_opprette_etterlysning_for_endret_startdato_uten_endring() {
 
         final var fom = LocalDate.now();
         final var tom = fom.plusDays(1);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
+
+        // act
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
+
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        assertThat(etterlysninger.size()).isEqualTo(0);
+    }
+
+    @Test
+    void skal_opprette_etterlysning_for_endret_startdato_endring() {
+        final var fom = LocalDate.now();
+        final var tom = fom.plusDays(1);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
+
+
+        final var nyFom = LocalDate.now().plusDays(1);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(nyFom, tom)));
         final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
 
         // act
@@ -101,7 +119,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
         assertThat(etterlysninger.size()).isEqualTo(1);
         final var etterlysning = etterlysninger.get(0);
-        assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+        assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, tom));
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
         assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
@@ -113,6 +131,10 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         behandling = scenario.medBehandlingÅrsak(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM).lagre(entityManager);
 
         final var fom = LocalDate.now();
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
+
+
+
         final var tom = fom.plusDays(1);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
         final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
