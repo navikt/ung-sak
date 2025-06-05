@@ -4,6 +4,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.IVERKSETT_VEDTAK
 
 import java.util.Optional;
 
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
@@ -22,7 +22,6 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -30,7 +29,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.ung.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
-import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
 
 @BehandlingStegRef(value = IVERKSETT_VEDTAK)
 @BehandlingTypeRef
@@ -40,7 +38,7 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(IverksetteVedtakSteg.class);
     private Instance<OpprettProsessTaskIverksett> opprettProsessTaskIverksett;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private VurderBehandlingerUnderIverksettelse tidligereBehandlingUnderIverksettelse;
 
     private BehandlingRepository behandlingRepository;
@@ -57,7 +55,7 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.opprettProsessTaskIverksett = opprettProsessTaskIverksett;
-        this.historikkRepository = repositoryProvider.getHistorikkRepository();
+        this.historikkinnslagRepository = repositoryProvider.getHistorikkinnslagRepository();
         this.tidligereBehandlingUnderIverksettelse = tidligereBehandlingUnderIverksettelse;
     }
 
@@ -102,19 +100,20 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
         return Optional.empty();
     }
 
-    private void opprettHistorikkinnslagNårIverksettelsePåVent(Behandling behandling) {
-        HistorikkInnslagTekstBuilder delBuilder = new HistorikkInnslagTekstBuilder();
-        delBuilder.medHendelse(HistorikkinnslagType.IVERKSETTELSE_VENT);
-        delBuilder.medÅrsak(Venteårsak.VENT_TIDLIGERE_BEHANDLING);
 
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setType(HistorikkinnslagType.IVERKSETTELSE_VENT);
-        historikkinnslag.setBehandlingId(behandling.getId());
-        historikkinnslag.setFagsakId(behandling.getFagsakId());
-        historikkinnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        delBuilder.build(historikkinnslag);
-        historikkRepository.lagre(historikkinnslag);
+    private void opprettHistorikkinnslagNårIverksettelsePåVent(Behandling behandling) {
+        var historikkinnslag = new Historikkinnslag.Builder()
+            .medFagsakId(behandling.getFagsakId())
+            .medBehandlingId(behandling.getId())
+            .medTittel("Behandlingen venter på iverksettelse")
+            .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN)
+            .addLinje("Venter på iverksettelse av en tidligere behandling i denne saken")
+            .build();
+        historikkinnslagRepository.lagre(historikkinnslag);
     }
+
+
+
 
 
     private void iverksetter(Behandling behandling) {

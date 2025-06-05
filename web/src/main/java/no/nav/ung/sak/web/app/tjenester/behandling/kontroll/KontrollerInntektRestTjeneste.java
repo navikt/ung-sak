@@ -83,10 +83,6 @@ public class KontrollerInntektRestTjeneste {
             .flatMap(it -> it.getPerioder().stream())
             .toList();
 
-        if (kontrollertInntektPerioder.isEmpty()) {
-            return new KontrollerInntektDto(Collections.emptyList());
-        }
-
         final var perioderTilKontroll = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId())
             .filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
