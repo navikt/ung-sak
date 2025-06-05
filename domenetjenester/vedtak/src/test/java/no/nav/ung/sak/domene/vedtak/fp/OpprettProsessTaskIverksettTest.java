@@ -20,7 +20,6 @@ import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 import no.nav.ung.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,9 +61,6 @@ public class OpprettProsessTaskIverksettTest {
     @Mock
     private StønadstatistikkService stønadstatistikkService;
 
-    @Mock
-    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
-
     private Behandling behandling;
     private OpprettProsessTaskIverksett opprettProsessTaskIverksett;
 
@@ -75,7 +71,7 @@ public class OpprettProsessTaskIverksettTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new UngdomsytelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService, manglendeKontrollperioderTjeneste);
+        opprettProsessTaskIverksett = new UngdomsytelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService);
     }
 
     @Test

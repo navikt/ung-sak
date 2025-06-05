@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
+import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +52,9 @@ public class VedtakFattetEventObserverTest {
     @Mock
     private BehandlingVedtakRepository vedtakRepository;
 
+    @Mock
+    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
+
     @Captor
     ArgumentCaptor<ProsessTaskGruppe> prosessTaskGruppeCaptorCaptor;
 
@@ -58,7 +62,7 @@ public class VedtakFattetEventObserverTest {
 
     @BeforeEach
     public void setup() {
-        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository);
+        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository, manglendeKontrollperioderTjeneste);
     }
 
     @Test
