@@ -12,6 +12,9 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 @Dependent
 public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
 
@@ -24,12 +27,17 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
+        var opphørsDato = resultatTidslinje.filterValue(it -> it.resultatInfo().stream()
+                .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.ENDRING_SLUTTDATO))
+            .getMinLocalDate();
+
+        var utbetalingsMånedÅr = opphørsDato.withDayOfMonth(1).plusMonths(1)
+            .format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("no-NO")));
+
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.OPPHØR,
             new OpphørDto(
-                resultatTidslinje
-                    .filterValue(it -> it.resultatInfo().stream()
-                        .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.ENDRING_SLUTTDATO))
-                    .getMinLocalDate()
+                opphørsDato,
+                utbetalingsMånedÅr
             ));
     }
 

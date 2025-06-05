@@ -43,7 +43,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fra 1. august 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.  \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
@@ -86,7 +86,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fra 1. august 2025 får du ungdomsprogramytelse på 974 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.  \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
@@ -118,7 +118,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fra 1. august 2025 til 15. februar 2026 får du ungdomsprogramytelse på 974 kroner per dag utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.  \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
@@ -157,7 +157,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fordi du fylte 25 år 16. august 2025, får du mer penger fra denne datoen. Da får du 974 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.  \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
@@ -207,7 +207,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fordi du fikk barn 16. august 2025, får du 37 kroner mer fra denne datoen. Da får du 686 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.  \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
@@ -253,7 +253,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fordi du fylte 25 år 12. mai 2025, får du mer penger fra denne datoen. Da får du 1 011 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du innen en uke. \
-                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.  \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
                 Hvordan regner vi oss fram til hvor mye penger du har rett på? \
