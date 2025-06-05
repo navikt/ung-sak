@@ -33,7 +33,6 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
                 Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller 25 år 25. mars 2025. \
                 Fra og med denne datoen får du 974 kroner per dag, utenom lørdag og søndag. \
-                Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
                 """);
 
@@ -48,8 +47,7 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får mer i ungdomsprogramytelse fordi du fyller 25 år</h1>",
-                "<a href=\"https://www.nav.no/ungdomsprogramytelse/beregning\">Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år.</a>"
+                "<h1>Du får mer i ungdomsprogramytelse fordi du fyller 25 år</h1>"
             );
 
     }
@@ -63,7 +61,6 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
                 Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller 25 år 25. mars 2025. \
                 Fra og med denne datoen får du 1 011 kroner per dag, utenom lørdag og søndag. \
-                Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
                 """);
 
