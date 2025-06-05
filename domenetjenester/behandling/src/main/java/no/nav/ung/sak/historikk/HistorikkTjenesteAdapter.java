@@ -2,6 +2,7 @@ package no.nav.ung.sak.historikk;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,18 +11,18 @@ import jakarta.inject.Inject;
 
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagDto;
+import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 
 /** RequestScoped fordi HistorikkInnslagTekstBuilder inneholder state og denne deles på tvers av AksjonspunktOppdaterere. */
 @RequestScoped
 public class HistorikkTjenesteAdapter {
-    private HistorikkRepository historikkRepository;
-    private HistorikkInnslagTekstBuilder builder;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private HistorikkInnslagKonverter historikkinnslagKonverter;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
@@ -30,70 +31,28 @@ public class HistorikkTjenesteAdapter {
     }
 
     @Inject
-    public HistorikkTjenesteAdapter(HistorikkRepository historikkRepository,
+    public HistorikkTjenesteAdapter(HistorikkinnslagRepository historikkinnslagRepository,
                                     HistorikkInnslagKonverter historikkinnslagKonverter,
                                     DokumentArkivTjeneste dokumentArkivTjeneste) {
-        this.historikkRepository = historikkRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
         this.historikkinnslagKonverter = historikkinnslagKonverter;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
-        this.builder = new HistorikkInnslagTekstBuilder();
     }
 
     public List<HistorikkinnslagDto> mapTilDto(List<Historikkinnslag> historikkinnslagList, Saksnummer saksnummer) {
 
-        List<ArkivJournalPost> journalPosterForSak;
-        journalPosterForSak = dokumentArkivTjeneste.hentAlleJournalposterForSak(saksnummer);
+        var journalPosterForSak = dokumentArkivTjeneste.hentAlleJournalposterForSak(saksnummer).stream().map(ArkivJournalPost::getJournalpostId).toList();
 
         return historikkinnslagList.stream()
-            .map(historikkinnslag -> historikkinnslagKonverter.mapFra(historikkinnslag, journalPosterForSak))
+            .map(historikkinnslag -> historikkinnslagKonverter.map(historikkinnslag, journalPosterForSak))
             .sorted()
             .collect(Collectors.toList());
     }
 
     public List<Historikkinnslag> finnHistorikkInnslag(Saksnummer saksnummer){
-        var liste = new ArrayList<>(historikkRepository.hentHistorikkForSaksnummer(saksnummer));
-        Collections.sort(liste, Historikkinnslag.COMP_REKKEFØLGE);
+        var liste = new ArrayList<>(historikkinnslagRepository.hent(saksnummer));
+        Collections.sort(liste, Comparator.comparing(Historikkinnslag::getOpprettetTidspunkt));
         return liste;
     }
 
-    /**
-     * IKKE BRUK DENNE.
-     * Kall på tekstBuilder() for å få HistorikkInnslagTekstBuilder.  Deretter opprettHistorikkInslag når ferdig
-     * @param historikkinnslag
-     */
-    @Deprecated
-    public void lagInnslag(Historikkinnslag historikkinnslag) {
-        historikkRepository.lagre(historikkinnslag);
-    }
-
-    public HistorikkInnslagTekstBuilder tekstBuilder() {
-        return builder;
-    }
-
-
-    public void opprettHistorikkInnslag(Long behandlingId, HistorikkinnslagType hisType) {
-        opprettHistorikkInnslag(behandlingId, hisType, HistorikkAktør.SAKSBEHANDLER);
-    }
-
-    public void opprettHistorikkInnslag(Long behandlingId, HistorikkinnslagType hisType, HistorikkAktør historikkAktør) {
-        if (!builder.getHistorikkinnslagDeler().isEmpty() || builder.antallEndredeFelter() > 0 ||
-            builder.getErBegrunnelseEndret() || builder.getErGjeldendeFraSatt()) {
-
-            Historikkinnslag innslag = new Historikkinnslag();
-
-            builder.medHendelse(hisType);
-            innslag.setAktør(historikkAktør);
-            innslag.setType(hisType);
-            innslag.setBehandlingId(behandlingId);
-            builder.build(innslag);
-
-            resetBuilder();
-
-            lagInnslag(innslag);
-        }
-    }
-
-    private void resetBuilder() {
-        builder = new HistorikkInnslagTekstBuilder();
-    }
 }

@@ -31,7 +31,6 @@ import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRes
 import no.nav.ung.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.microsoftgraph.ForvaltningTestRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.notat.NotatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
@@ -76,7 +75,6 @@ public class RestImplementationClasses {
         classes.add(AktørRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);
-        classes.add(LosRestTjeneste.class);
 
         classes.add(UngdomsytelseRestTjeneste.class);
         classes.add(KontrollerInntektRestTjeneste.class);

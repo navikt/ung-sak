@@ -1,23 +1,13 @@
 package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
@@ -26,8 +16,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.ung.sak.typer.AktørId;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Dependent
 public class BehandlendeEnhetTjeneste {
@@ -35,7 +27,7 @@ public class BehandlendeEnhetTjeneste {
     private EnhetsTjeneste enhetsTjeneste;
     private BehandlingEnhetEventPubliserer eventPubliserer;
     private BehandlingRepository behandlingRepository;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private PersonopplysningRepository personopplysningRepository;
 
     public BehandlendeEnhetTjeneste() {
@@ -49,7 +41,7 @@ public class BehandlendeEnhetTjeneste {
         this.enhetsTjeneste = enhetsTjeneste;
         this.eventPubliserer = eventPubliserer;
         this.behandlingRepository = provider.getBehandlingRepository();
-        this.historikkRepository = provider.getHistorikkRepository();
+        this.historikkinnslagRepository = provider.getHistorikkinnslagRepository();
         this.personopplysningRepository = provider.getPersonopplysningRepository();
     }
 
@@ -130,18 +122,13 @@ public class BehandlendeEnhetTjeneste {
     private void lagHistorikkInnslagForByttBehandlendeEnhet(Behandling behandling, OrganisasjonsEnhet nyEnhet, String begrunnelse, HistorikkAktør aktør) {
         OrganisasjonsEnhet eksisterende = behandling.getBehandlendeOrganisasjonsEnhet();
         String fraMessage = eksisterende != null ? eksisterende.getEnhetId() + " " + eksisterende.getEnhetNavn() : "ukjent";
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.BYTT_ENHET)
-            .medEndretFelt(HistorikkEndretFeltType.BEHANDLENDE_ENHET,
-                fraMessage,
-                nyEnhet.getEnhetId() + " " + nyEnhet.getEnhetNavn())
-            .medBegrunnelse(begrunnelse);
-
-        Historikkinnslag innslag = new Historikkinnslag();
-        innslag.setAktør(aktør);
-        innslag.setType(HistorikkinnslagType.BYTT_ENHET);
-        innslag.setBehandlingId(behandling.getId());
-        builder.build(innslag);
-        historikkRepository.lagre(innslag);
+        var innslagBuilder = new Historikkinnslag.Builder();
+        innslagBuilder.medAktør(aktør);
+        innslagBuilder.medTittel("Behandlende enhet er endret");
+        innslagBuilder.addLinje("Behandlende enhet er endret fra " + fraMessage + " til " + nyEnhet.getEnhetId() + " " + nyEnhet.getEnhetNavn());
+        innslagBuilder.addLinje(begrunnelse);
+        innslagBuilder.medBehandlingId(behandling.getId());
+        innslagBuilder.medFagsakId(behandling.getFagsakId());
+        historikkinnslagRepository.lagre(innslagBuilder.build());
     }
 }
