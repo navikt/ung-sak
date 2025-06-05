@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     private ProsessTriggereRepository prosessTriggereRepository;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     OpprettRevurderingEllerOpprettDiffTask() {
         // for CDI proxy
@@ -68,13 +70,14 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                                                   ProsessTriggereRepository prosessTriggereRepository,
                                                   FagsakLåsRepository fagsakLåsRepository,
                                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
-                                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
+                                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
         super(fagsakLåsRepository, behandlingLåsRepository);
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @Override
@@ -109,6 +112,12 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, behandlingÅrsakType);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
+
+            if (behandling.erUnderIverksettelse()) {
+                prosessTaskTjeneste.lagre(prosessTaskData);
+                return;
+            }
+
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
             var skalTvingeRegisterinnhenting = REGISTERINNHENTING_ÅRSAKER.contains(behandlingÅrsakType);
