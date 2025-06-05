@@ -102,7 +102,7 @@ public class UngdomsprogramPeriodeRepository {
             "SELECT gr " +
                 "FROM UngdomsprogramPeriodeGrunnlag gr " +
                 "WHERE gr.behandlingId = :behandlingId " +
-                "ORDER BY gr.opprettetTidspunkt, gr.id", UngdomsprogramPeriodeGrunnlag.class);
+                "ORDER BY gr.opprettetTidspunkt, gr.id LIMIT 1", UngdomsprogramPeriodeGrunnlag.class);
 
         query.setParameter("behandlingId", behandlingId);
 
