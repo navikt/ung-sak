@@ -1,13 +1,11 @@
 package no.nav.ung.sak.behandling.revurdering;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.k9.prosesstask.api.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +88,20 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         var perioder = utledPerioder(prosessTaskData);
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            if (sisteVedtak.map(Behandling::erUnderIverksettelse).orElse(false)) {
+                var blokkererMinstEnTask = prosessTaskTjeneste.finnAlle(ProsessTaskStatus.VETO).stream().anyMatch(it -> Objects.equals(it.getBlokkertAvProsessTaskId(), prosessTaskData.getId()));
+                // Dersom denne tasken blokkerer en annen task, utsetter vi kjøring av denne tasken i håp om at original behandling blir iverksatt
+                if (blokkererMinstEnTask) {
+                    // Utsetter kjøring
+                    var uferdigForGruppe = prosessTaskTjeneste.finnUferdigForGruppe(prosessTaskData.getGruppe());
+                    if (uferdigForGruppe.size() > 1) {
+                        throw new IllegalStateException("Fant flere uferdige tasks for gruppe " + prosessTaskData.getGruppe() + ". Kunne ikke utsette kjøring av task.");
+                    }
+                    log.info("Siste vedtatte behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", sisteVedtak.get());
+                    prosessTaskTjeneste.lagre(prosessTaskData);
+                    return;
+                }
+            }
 
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
@@ -111,18 +123,6 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, behandlingÅrsakType);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
-
-            if (behandling.erUnderIverksettelse()) {
-                // Utsetter kjøring
-                var uferdigForGruppe = prosessTaskTjeneste.finnUferdigForGruppe(prosessTaskData.getGruppe());
-                if (uferdigForGruppe.size() > 1) {
-                    throw new IllegalStateException("Fant flere uferdige tasks for gruppe " + prosessTaskData.getGruppe() + ". Kunne ikke utsette kjøring av task.");
-                }
-                log.info("Åpen behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", behandling);
-                prosessTaskTjeneste.lagre(prosessTaskData);
-                return;
-            }
-
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
             var skalTvingeRegisterinnhenting = REGISTERINNHENTING_ÅRSAKER.contains(behandlingÅrsakType);
