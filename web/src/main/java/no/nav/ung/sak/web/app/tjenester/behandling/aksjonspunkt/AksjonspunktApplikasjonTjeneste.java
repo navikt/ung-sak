@@ -21,7 +21,6 @@ import no.nav.k9.felles.log.trace.OpentelemetrySpanWrapper;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandling.Skjæringstidspunkt;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -40,7 +39,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
@@ -67,7 +65,6 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private AksjonspunktRepository aksjonspunktRepository;
     private AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste;
-    private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
 
@@ -84,14 +81,12 @@ public class AksjonspunktApplikasjonTjeneste {
                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                            AksjonspunktRepository aksjonspunktRepository, AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste,
                                            BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
-                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                           HistorikkTjenesteAdapter historikkTjenesteAdapter) {
+                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
 
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.aksjonspunktSporingTjeneste = aksjonspunktSporingTjeneste;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -128,7 +123,6 @@ public class AksjonspunktApplikasjonTjeneste {
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
 
         AksjonspunktProsessResultat aksjonspunktProsessResultat = bekreftAksjonspunkter(kontekst, bekreftedeAksjonspunktDtoer, behandling, skjæringstidspunkter);
-        historikkTjenesteAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET);
         return aksjonspunktProsessResultat;
     }
 
@@ -242,8 +236,6 @@ public class AksjonspunktApplikasjonTjeneste {
             boolean endretBegrunnelse = begrunnelseErEndret(aksjonspunktBegrunnelse, dto.getBegrunnelse());
             overstyringshåndterer.håndterAksjonspunktForOverstyringHistorikk(dto, behandling, endretBegrunnelse);
         });
-
-        historikkTjenesteAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.OVERSTYRT);
 
         boolean totrinn = aksjonspunktProsessResultat.finnTotrinn();
         aksjonspunktProsessResultat.finnEkstraAksjonspunktResultat().forEach(res -> håndterEkstraAksjonspunktResultat(kontekst, behandling, totrinn, res.getElement1(), res.getElement2()));

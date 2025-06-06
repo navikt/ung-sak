@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import no.nav.ung.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -49,7 +50,7 @@ public class VurderFeilutbetalingOppdaterer implements AksjonspunktOppdaterer<Vu
         TilbakekrevingValg valg = TilbakekrevingValg.utenMulighetForInntrekk(dto.getVidereBehandling(), dto.getVarseltekst());
         repository.lagre(behandling, valg);
 
-        historikkInnslagBygger.byggHistorikkinnslag(behandlingId, forrigeValg, valg, dto.getBegrunnelse());
+        historikkInnslagBygger.byggHistorikkinnslag(BehandlingReferanse.fra(behandling), forrigeValg, valg, dto.getBegrunnelse());
 
         return OppdateringResultat.nyttResultat();
     }

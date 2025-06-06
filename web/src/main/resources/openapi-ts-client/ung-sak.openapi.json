@@ -904,32 +904,6 @@
         "required" : [ "behandlinger" ],
         "type" : "object"
       },
-      "BehandlingMedFagsakDto" : {
-        "properties" : {
-          "behandlingResultatType" : {
-            "$ref" : "#/components/schemas/BehandlingMedFagsakDtoBehandlingResultatType"
-          },
-          "eldsteDatoMedEndringFraSøker" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
-          "sakstype" : {
-            "$ref" : "#/components/schemas/BehandlingMedFagsakDtoSakstype"
-          }
-        },
-        "required" : [ "eldsteDatoMedEndringFraSøker", "sakstype" ],
-        "type" : "object"
-      },
-      "BehandlingMedFagsakDtoBehandlingResultatType" : {
-        "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "type" : "string"
-      },
-      "BehandlingMedFagsakDtoSakstype" : {
-        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
-      },
       "BehandlingOperasjonerDto" : {
         "properties" : {
           "behandlingFraBeslutter" : {
@@ -2807,14 +2781,6 @@
         },
         "type" : "object"
       },
-      "LosOpplysningerSomManglerIKlageDto" : {
-        "properties" : {
-          "utenlandstilsnitt" : {
-            "type" : "boolean"
-          }
-        },
-        "type" : "object"
-      },
       "MatchFagsak" : {
         "properties" : {
           "bruker" : {
@@ -2833,60 +2799,6 @@
       "MatchFagsakYtelseType" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
-      },
-      "MerknadDto" : {
-        "properties" : {
-          "fritekst" : {
-            "type" : "string"
-          },
-          "merknadKoder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/MerknadDtoMerknadKoder"
-            },
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
-      "MerknadDtoMerknadKoder" : {
-        "enum" : [ "HASTESAK" ],
-        "x-enum-varnames" : [ "HASTESAK" ],
-        "type" : "string"
-      },
-      "MerknadEndretDto" : {
-        "properties" : {
-          "behandlingUuid" : {
-            "format" : "uuid",
-            "type" : "string"
-          },
-          "fritekst" : {
-            "maxLength" : 500,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-            "type" : "string"
-          },
-          "merknadKoder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/MerknadEndretDtoMerknadKoder"
-            },
-            "maxItems" : 10,
-            "minItems" : 0,
-            "type" : "array"
-          },
-          "saksbehandlerIdent" : {
-            "maxLength" : 50,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}-]+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "behandlingUuid" ],
-        "type" : "object"
-      },
-      "MerknadEndretDtoMerknadKoder" : {
-        "enum" : [ "HASTESAK" ],
-        "x-enum-varnames" : [ "HASTESAK" ],
         "type" : "string"
       },
       "NotatDto" : {
@@ -7088,119 +7000,6 @@
             "description" : "default response"
           }
         }
-      }
-    },
-    "/api/los/behandling" : {
-      "get" : {
-        "description" : "Hent behandling gitt id",
-        "operationId" : "hentBehandlingData_2",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/BehandlingMedFagsakDto"
-                }
-              }
-            },
-            "description" : "Returnerer Behandling"
-          }
-        },
-        "summary" : "Returnerer behandlingen som er tilknyttet id.",
-        "tags" : [ "los" ]
-      }
-    },
-    "/api/los/klage/berik" : {
-      "get" : {
-        "operationId" : "hentLosdataForKlage",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/LosOpplysningerSomManglerIKlageDto"
-                }
-              }
-            },
-            "description" : "Returnerer opplysninger los trenger for å fylle ut klageoppgaver"
-          }
-        },
-        "tags" : [ "los" ]
-      }
-    },
-    "/api/los/merknad" : {
-      "get" : {
-        "description" : "Henter merknad på behandling",
-        "operationId" : "getMerknad",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/MerknadDto"
-                }
-              }
-            },
-            "description" : "Returnerer merknader"
-          },
-          "204" : {
-            "description" : "Var ingen merknader"
-          }
-        },
-        "tags" : [ "los" ]
-      },
-      "post" : {
-        "description" : "Lagrer merknad på behandling",
-        "operationId" : "postMerknad",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/MerknadEndretDto"
-              }
-            }
-          },
-          "description" : "behandlingUUID"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : { }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "los" ]
       }
     },
     "/api/nav-ansatt" : {

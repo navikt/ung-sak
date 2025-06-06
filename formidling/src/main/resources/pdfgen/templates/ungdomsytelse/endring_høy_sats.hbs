@@ -3,9 +3,12 @@
     {{#> felles/seksjon/hoved }}
         <h1>Du får mer i ungdomsprogramytelse fordi du fyller {{aldersgrense}} år</h1>
 
-        <p>Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller {{aldersgrense}} år {{fom}}. Fra og med denne datoen får du {{> felles/beløp nyDagsats}} per dag, utenom lørdag og søndag.</p>
-        <p>
-            <a href="https://www.nav.no/ungdomsprogramytelse/beregning">Se eksempel i Ungdomsportalen på hvordan vi regner ut ungdomsprogramytelsen når du er over 25 år.</a>
+        <p>Du får mer penger gjennom ungdomsprogramytelsen fordi du fyller {{aldersgrense}} år {{fom}}. Fra og med denne
+            datoen får du {{> felles/beløp nyDagsats}} per dag, utenom lørdag og søndag.
+            {{#if barnetilleggSats}}
+                Når du har barn, får du et barnetillegg på {{> felles/beløp barnetilleggSats}} per dag for hvert barn du
+                har.
+            {{/if}}
         </p>
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.</p>
     {{/felles/seksjon/hoved}}

@@ -35,6 +35,7 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får ikke lenger ungdomsprogramytelse \
                 Fra 15. august 2025 får du ikke lenger penger gjennom ungdomsytelsen. \
                 Det er fordi du ikke lenger er med i ungdomsprogrammet. \
+                Den siste utbetalingen får du i september 2025, før den 10. i måneden. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
                 """);
 

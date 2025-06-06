@@ -9,17 +9,15 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
@@ -29,7 +27,7 @@ public class RevurderingTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
     private Instance<GrunnlagKopierer> grunnlagKopierere;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
 
     public RevurderingTjeneste() {
         // for CDI proxy
@@ -39,11 +37,11 @@ public class RevurderingTjeneste {
     public RevurderingTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                RevurderingTjenesteFelles revurderingTjenesteFelles,
                                @Any Instance<GrunnlagKopierer> grunnlagKopierere,
-                               HistorikkRepository historikkRepository) {
+                               HistorikkinnslagRepository historikkinnslagRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.grunnlagKopierere = grunnlagKopierere;
-        this.historikkRepository = historikkRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
@@ -106,16 +104,14 @@ public class RevurderingTjeneste {
     public void opprettHistorikkinnslag(Behandling behandling, BehandlingÅrsakType revurderingÅrsak, boolean manueltOpprettet) {
         HistorikkAktør historikkAktør = manueltOpprettet ? HistorikkAktør.SAKSBEHANDLER : HistorikkAktør.VEDTAKSLØSNINGEN;
 
-        Historikkinnslag revurderingsInnslag = new Historikkinnslag();
-        revurderingsInnslag.setBehandling(behandling);
-        revurderingsInnslag.setType(HistorikkinnslagType.REVURD_OPPR);
-        revurderingsInnslag.setAktør(historikkAktør);
-        HistorikkInnslagTekstBuilder historiebygger = new HistorikkInnslagTekstBuilder()
-            .medHendelse(HistorikkinnslagType.REVURD_OPPR)
-            .medBegrunnelse(revurderingÅrsak);
-        historiebygger.build(revurderingsInnslag);
+        var historikkBuilder = new Historikkinnslag.Builder();
+        historikkBuilder.medTittel("Revurdering opprettet")
+            .medBehandlingId(behandling.getId())
+            .addLinje(revurderingÅrsak.getNavn())
+            .medFagsakId(behandling.getFagsakId())
+            .medAktør(historikkAktør);
 
-        historikkRepository.lagre(revurderingsInnslag);
+        historikkinnslagRepository.lagre(historikkBuilder.build());
     }
 
 }
