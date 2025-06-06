@@ -140,7 +140,7 @@ class VedtaksbrevReglerTest {
         var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
             new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(),
                 new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(),
-                    new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository()),
+                    new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository()),
                     behandlingRepository)),
             ungTestRepositories.tilkjentYtelseRepository(),
             repositoryProvider.getVilkårResultatRepository());

@@ -5,6 +5,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class FagsakperiodeUtlederTest {
     @BeforeEach
     void setUp() {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager));
         fagsakperiodeUtleder = new FagsakperiodeUtleder(ungdomsprogramPeriodeTjeneste);
     }
 

@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -13,6 +14,8 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
@@ -108,19 +111,39 @@ public class ProgramperiodeendringEtterlysningTjeneste {
                     gjeldendePeriodeGrunnlag,
                     gjeldendeEtterlysning.get()
                 );
-            } else if (gjeldendeEtterlysning.get().getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
+            } else if (gjeldendeEtterlysning.get().getStatus() == EtterlysningStatus.MOTTATT_SVAR) {
                 if (!erSisteMottatteGyldig(gjeldendePeriodeGrunnlag, gjeldendeEtterlysning.get())) {
                     return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
                 }
             }
-        } else if (harEndretPeriodeSidenInitiell(gjeldendePeriodeGrunnlag, behandlingReferanse, etterlysningType)){
+        } else if (harEndretPeriodeSidenInitiell(gjeldendePeriodeGrunnlag, behandlingReferanse, etterlysningType)) {
             return lagResultatForNyEtterlysningUtenAvbrutt(gjeldendePeriodeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
         }
         return Resultat.tomtResultat();
     }
 
     private boolean harEndretPeriodeSidenInitiell(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
-        return !finnEndretDatoer(etterlysningType, ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell periode")).getGrunnlagsreferanse(), gjeldendePeriodeGrunnlag.getGrunnlagsreferanse()).isEmpty();
+        var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType, ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId())
+            .orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell periode")).getGrunnlagsreferanse(), gjeldendePeriodeGrunnlag.getGrunnlagsreferanse()).isEmpty();
+
+        if (erEndringSidenInitiell) {
+            return true;
+        }
+
+        if (behandlingReferanse.getBehandlingType() == BehandlingType.FØRSTEGANGSSØKNAD) {
+            // Dersom det er førstegangssøknad må vi også sjekke om det er endringer i start dato fra det som ble oppgitt da bruker sendte inn søknaden.
+            if (etterlysningType == EtterlysningType.UTTALELSE_ENDRET_STARTDATO) {
+                var endringFraOppgitt = ungdomsprogramPeriodeTjeneste.finnEndretStartdatoFraOppgitteStartdatoer(behandlingReferanse.getBehandlingId());
+                var harEndretStartdato = !endringFraOppgitt.isEmpty();
+                return harEndretStartdato;
+            } else if (etterlysningType == EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO) {
+                // For å hindre at sluttdato kan endres uten at bruker får varsel oppretter vi alltid en etterlysning for endret sluttdato dersom den er satt i førstegangssøknad.
+                var gjeldendeSluttdato = gjeldendePeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato();
+                var harSattSluttdato = gjeldendeSluttdato != null && !gjeldendeSluttdato.equals(AbstractLocalDateInterval.TIDENES_ENDE);
+                return harSattSluttdato;
+            }
+        }
+        return false;
     }
 
     private Resultat håndterTriggerForEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, BehandlingReferanse behandlingReferanse) {

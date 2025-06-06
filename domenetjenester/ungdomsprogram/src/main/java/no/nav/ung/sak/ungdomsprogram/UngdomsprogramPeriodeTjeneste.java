@@ -8,6 +8,9 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -20,17 +23,20 @@ import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Dependent
 public class UngdomsprogramPeriodeTjeneste {
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private final UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private static final KantIKantVurderer KANT_I_KANT_VURDERER = new DefaultKantIKantVurderer();
 
     @Inject
-    public UngdomsprogramPeriodeTjeneste(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public UngdomsprogramPeriodeTjeneste(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
     }
 
 
@@ -83,6 +89,22 @@ public class UngdomsprogramPeriodeTjeneste {
         }
 
         return List.of(new EndretDato(andreStartdato, førsteStartdato));
+    }
+
+    public List<EndretDato> finnEndretStartdatoFraOppgitteStartdatoer(long behandlingId) {
+        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for behandlingid: " + behandlingId));
+        var ungdomsytelseStartdatoGrunnlag = ungdomsytelseStartdatoRepository.hentGrunnlag(behandlingId);
+        // Støtter kun en periode her foreløpig
+        var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
+        var gjeldendeDato = gjelendePeriode.getFomDato();
+        var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer).map(UngdomsytelseStartdatoer::getStartdatoer)
+            .orElse(Set.of())
+            .iterator().next().getStartdato();
+        if (oppgittStartdato.equals(gjeldendeDato)) {
+            return List.of();
+        }
+
+        return List.of(new EndretDato(gjeldendeDato, oppgittStartdato));
     }
 
     public List<EndretDato> finnEndretSluttdatoer(UUID førsteReferanse, UUID andreReferanse) {
