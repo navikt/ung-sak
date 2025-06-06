@@ -7,7 +7,6 @@ import java.util.Map;
 
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -51,7 +50,7 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false, true);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
@@ -65,11 +64,23 @@ class SatsEndringRepositoryTest {
     }
 
     @Test
+    void forventer_ingen_fagsak_der_bruker_er_over_25_aar_fra_dato_og_ikke_har_beregnet_sats_i_siste_behandling() {
+        Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
+        LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
+
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false, false);
+
+        Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
+
+        assertThat(fagsakerTilRevurdering.size()).isEqualTo(0);
+    }
+
+    @Test
     void forventer_ingen_fagsaker_der_bruker_er_under_25_aar_fra_dato() {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(20).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false, true);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
@@ -82,7 +93,7 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.parse("2024-12-01"), LocalDate.parse("2024-12-31"));
         LocalDate fødselsdato = LocalDate.parse("1999-12-30"); // 25 år og 1 uke gammel
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, false, true);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(dagensDato);
 
@@ -94,7 +105,7 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, true, false);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, true, false, true);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
@@ -106,14 +117,14 @@ class SatsEndringRepositoryTest {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 
-        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, true);
+        klargjørDatagrunnlag(fagsakPeriode, fagsakPeriode, fødselsdato, false, true, true);
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
         assertThat(fagsakerTilRevurdering.size()).isEqualTo(0);
     }
 
-    private void klargjørDatagrunnlag(Periode fagsakPeriode, Periode ungdomsprogramPeriode, LocalDate fødselsdato, boolean fagsakObselete, boolean harHøySatsFraFør) {
+    private void klargjørDatagrunnlag(Periode fagsakPeriode, Periode ungdomsprogramPeriode, LocalDate fødselsdato, boolean fagsakObselete, boolean harHøySatsFraFør, boolean harLavSatsFraFør) {
         Map.of(
             "fagsakPeriode", fagsakPeriode,
             "ungdomsprogramPeriode", fagsakPeriode,
@@ -130,16 +141,18 @@ class SatsEndringRepositoryTest {
         opprettUngdomsprogramPeriodeGrunnlag(behandling, ungdomsprogramPeriode);
 
         if (harHøySatsFraFør) {
-            opprettSatsPeriode(behandling);
+            opprettSatsPeriode(behandling, UngdomsytelseSatsType.HØY);
+        } else if (harLavSatsFraFør) {
+            opprettSatsPeriode(behandling, UngdomsytelseSatsType.LAV);
         }
     }
 
-    private void opprettSatsPeriode(Behandling behandling) {
+    private void opprettSatsPeriode(Behandling behandling, UngdomsytelseSatsType satstype) {
         int satsPerioderId = entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODER (id, regel_input, regel_sporing) VALUES (1, lo_from_bytea(0, 'regelinput'::bytea), lo_from_bytea(0, 'regelsporing'::bytea))")
 
             .executeUpdate();
 
-        entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODE (id, ung_sats_perioder_id, periode, dagsats, grunnbeløp, grunnbeløp_faktor, sats_type, antall_barn, dagsats_barnetillegg) VALUES (1, :satsPerioderId, '[2021-01-01,2021-12-31]', 1000, 1000, 1, '"+ UngdomsytelseSatsType.HØY.getKode() +"', 0, 0)")
+        entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODE (id, ung_sats_perioder_id, periode, dagsats, grunnbeløp, grunnbeløp_faktor, sats_type, antall_barn, dagsats_barnetillegg) VALUES (1, :satsPerioderId, '[2021-01-01,2021-12-31]', 1000, 1000, 1, '"+ satstype.getKode() +"', 0, 0)")
             .setParameter("satsPerioderId", satsPerioderId)
             .executeUpdate();
 
