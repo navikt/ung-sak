@@ -72,7 +72,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungTestRepositories.ungdomsytelseStartdatoRepository());
 
         BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
