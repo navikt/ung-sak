@@ -1,5 +1,7 @@
 package no.nav.ung.kodeverk.behandling;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
@@ -41,6 +43,7 @@ public enum FagsakStatus implements Kodeverdi {
         this.navn = navn;
     }
 
+    @JsonCreator
     public static FagsakStatus fraKode(final String kode) {
         if (kode == null) {
             return null;
@@ -51,6 +54,13 @@ public enum FagsakStatus implements Kodeverdi {
         }
         return ad;
     }
+
+    // JsonCreator kompatibilitet for deserialisering frå objekt er beholdt her fordi denne er brukt i sif-abac-pdp
+    @JsonCreator
+    public static FagsakStatus fraObjektProp(@JsonProperty("kode") final String kode) {
+        return fraKode(kode);
+    }
+
 
     public static Map<String, FagsakStatus> kodeMap() {
         return Collections.unmodifiableMap(KODER);
