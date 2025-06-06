@@ -9,6 +9,7 @@ import no.nav.openapi.spec.utils.jackson.OpenapiCompatObjectMapperModifier;
 public class ObjectMapperResolver extends DynamicObjectMapperResolver {
 
     private final String JSON_SERIALIZER_ALLTID_SOM_STRING = "kodeverdi-string";
+    private final String JSON_SERIALIZER_KODEVERDI_OBJEKT = "kodeverdi-legacy-objekt";
 
     private static ObjectMapper baseObjectMapper;
 
@@ -33,6 +34,8 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
         super(createDefaultObjectMapper());
         final var overstyrKodeverdiAlltidSomStringMapper = getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING));
         super.addObjectMapper(JSON_SERIALIZER_ALLTID_SOM_STRING, overstyrKodeverdiAlltidSomStringMapper);
+        final var overstyrKodeverdiLegacySomObjekt = getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.LEGACY_OBJEKT));
+        super.addObjectMapper(JSON_SERIALIZER_KODEVERDI_OBJEKT, overstyrKodeverdiLegacySomObjekt);
         // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
         final var openapiObjektMapper = OpenapiCompatObjectMapperModifier.withDefaultModifications().modify(getBaseObjectMapperCopy());
         super.addObjectMapper(JSON_SERIALIZER_OPENAPI, openapiObjektMapper);
@@ -44,6 +47,9 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
     }
     public final ObjectMapper getOverstyrKodeverdiAlltidSomStringMapper() {
         return super.getObjectMapperCopy(JSON_SERIALIZER_ALLTID_SOM_STRING).orElseThrow();
+    }
+    public final ObjectMapper getOverstyrKodeverdiLegacyObjektMapper() {
+        return super.getObjectMapperCopy(JSON_SERIALIZER_KODEVERDI_OBJEKT).orElseThrow();
     }
     public final ObjectMapper getOpenapiObjektMapper() {
         return super.getObjectMapperCopy(DynamicObjectMapperResolver.JSON_SERIALIZER_OPENAPI).orElseThrow();
