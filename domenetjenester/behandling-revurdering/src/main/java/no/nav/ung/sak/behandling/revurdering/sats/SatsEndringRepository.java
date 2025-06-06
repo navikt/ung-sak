@@ -39,6 +39,10 @@ public class SatsEndringRepository {
             "       INNER JOIN UNG_SATS_PERIODE satsperiode ON ungdomsgrunnlag.ung_sats_perioder_id = satsperiode.ung_sats_perioder_id " +
             "       WHERE sats_type = '"+ UngdomsytelseSatsType.HØY.getKode() +"' AND ungdomsgrunnlag.behandling_id = b.id)";
 
+        String periodeMedLavSats = "(SELECT 1 FROM UNG_GR ungdomsgrunnlag " +
+            "       INNER JOIN UNG_SATS_PERIODE satsperiode ON ungdomsgrunnlag.ung_sats_perioder_id = satsperiode.ung_sats_perioder_id " +
+            "       WHERE sats_type = '"+ UngdomsytelseSatsType.LAV.getKode() +"' AND ungdomsgrunnlag.behandling_id = b.id)";
+
         String reTriggerBeregningHøySats = "(SELECT 1 FROM BEHANDLING_ARSAK behandling_årsak WHERE behandling_årsak.behandling_id = b.id AND behandling_årsak.behandling_arsak_type = 'RE_TRIGGER_BEREGNING_HØY_SATS')";
 
         Query query = entityManager
@@ -58,6 +62,7 @@ public class SatsEndringRepository {
                     "   AND programperiode.tom >= date_trunc('month', foedselsdato + interval '301 months') " + // Første dagen i måneden etter 25 års dagen.
                     "   AND f.periode @> date_trunc('month', foedselsdato + interval '301 months')::date" + // Fagsakperioden inneholder endringsdatoen
                     "   AND NOT exists " + periodeMedHøySats + // Idempotens sjekk at vi ikke allerede har beregnet høy sats.
+                    "   AND exists " + periodeMedLavSats + // Revurderer kun saker som har passert beregning og har lav sats.
                     "   AND NOT exists " + reTriggerBeregningHøySats, // Idempotens sjekk at vi ikke allerede har trigget beregning av høy sats.
                 Tuple.class)
             .setParameter("tjuefem_aar_foer_dato", tjuefemÅrFørDato); // NOSONAR //$NON-NLS-1$
