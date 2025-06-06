@@ -1,23 +1,14 @@
 package no.nav.ung.kodeverk.behandling;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum FagsakStatus implements Kodeverdi {
 
     OPPRETTET("OPPR", "Opprettet"),
@@ -39,7 +30,6 @@ public enum FagsakStatus implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -53,28 +43,24 @@ public enum FagsakStatus implements Kodeverdi {
         this.navn = navn;
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static FagsakStatus fraKode(Object node) {
-        if (node == null) {
+    @JsonCreator
+    public static FagsakStatus fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(FagsakStatus.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent FagsakStatus: for input " + node);
+            throw new IllegalArgumentException("Ukjent FagsakStatus: for input " + kode);
         }
         return ad;
     }
+
+    // JsonCreator kompatibilitet for deserialisering frå objekt er beholdt her fordi denne er brukt i sif-abac-pdp
+    @JsonCreator
+    public static FagsakStatus fraObjektProp(@JsonProperty("kode") final String kode) {
+        return fraKode(kode);
+    }
+
 
     public static Map<String, FagsakStatus> kodeMap() {
         return Collections.unmodifiableMap(KODER);
@@ -85,7 +71,7 @@ public enum FagsakStatus implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -96,7 +82,6 @@ public enum FagsakStatus implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

@@ -1,19 +1,11 @@
 package no.nav.ung.kodeverk.hendelser;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum HendelseType implements Kodeverdi {
 
     PDL_DØDFØDSEL("PDL_DØDFØDSEL"),
@@ -39,8 +31,7 @@ public enum HendelseType implements Kodeverdi {
         this.kode = kode;
     }
 
-    @JsonCreator
-    public static HendelseType fraKode(@JsonProperty("kode") String kode) {
+    public static HendelseType fraKode(final String kode) {
         if (kode == null) {
             return null;
         }
@@ -56,7 +47,6 @@ public enum HendelseType implements Kodeverdi {
         System.out.println(KODER.keySet());
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;
@@ -67,7 +57,7 @@ public enum HendelseType implements Kodeverdi {
         return null;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

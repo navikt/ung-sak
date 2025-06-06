@@ -1,22 +1,13 @@
 package no.nav.ung.kodeverk.uttak;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
-
-import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public enum UtfallType implements Kodeverdi {
 
@@ -38,7 +29,6 @@ public enum UtfallType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
     @JsonValue
@@ -53,8 +43,7 @@ public enum UtfallType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static UtfallType fraKode(String kode) {
+    public static UtfallType fraKode(final String kode) {
         if (kode == null) {
             return null;
         }

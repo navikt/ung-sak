@@ -1,25 +1,15 @@
 package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum SkjermlenkeType implements Kodeverdi {
     // FIXME K9 rydd vekk overflødig
     BEREGNING("BEREGNING", "Beregning"),
@@ -77,7 +67,6 @@ public enum SkjermlenkeType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -91,22 +80,10 @@ public enum SkjermlenkeType implements Kodeverdi {
         this.navn = navn;
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static SkjermlenkeType fraKode(Object node) {
-        if (node == null) {
+    public static SkjermlenkeType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(SkjermlenkeType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent SkjermlenkeType: " + kode);
@@ -118,13 +95,12 @@ public enum SkjermlenkeType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    @JsonProperty
     @Override
     public String getNavn() {
         return navn;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -135,7 +111,6 @@ public enum SkjermlenkeType implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;

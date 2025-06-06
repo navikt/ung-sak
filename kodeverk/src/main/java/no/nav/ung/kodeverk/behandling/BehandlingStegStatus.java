@@ -1,24 +1,9 @@
 package no.nav.ung.kodeverk.behandling;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
+
+import java.util.*;
 
 /**
  * Kodefor status i intern håndtering av flyt på et steg
@@ -26,10 +11,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
  * Kommer kun til anvendelse dersom det oppstår aksjonspunkter eller noe må legges på vent i et steg. Hvis ikke
  * flyter et rett igjennom til UTFØRT.
  */
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingStegStatus implements Kodeverdi {
-
 
     /** midlertidig intern tilstand når steget startes (etter inngang). */
     STARTET("STARTET", "Steget er startet"),
@@ -53,7 +35,6 @@ public enum BehandlingStegStatus implements Kodeverdi {
 
     public static final String KODEVERK = "BEHANDLING_STEG_STATUS"; //$NON-NLS-1$
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -77,15 +58,13 @@ public enum BehandlingStegStatus implements Kodeverdi {
         return this.getKode();
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingStegStatus fraKode(Object node) {
-        if (node == null) {
+    public static BehandlingStegStatus fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(BehandlingStegStatus.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingStegStatus: for input " + node);
+            throw new IllegalArgumentException("Ukjent BehandlingStegStatus: for input " + kode);
         }
         return ad;
     }
@@ -123,13 +102,12 @@ public enum BehandlingStegStatus implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

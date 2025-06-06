@@ -15,27 +15,12 @@ package no.nav.ung.kodeverk.arbeidsforhold;
  * <li></li>
  * </ul>
  */
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+import java.util.*;
+
 public enum ArbeidType implements Kodeverdi {
 
     ETTERLØNN_SLUTTPAKKE("ETTERLØNN_SLUTTPAKKE", "Etterlønn eller sluttpakke", null, true),
@@ -74,10 +59,8 @@ public enum ArbeidType implements Kodeverdi {
 
     private String kode;
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private String offisiellKode;
 
     private boolean visGui;
@@ -97,22 +80,10 @@ public enum ArbeidType implements Kodeverdi {
         return List.of(values()).stream().filter(k -> Objects.equals(k.offisiellKode, offisiellDokumentType)).findFirst().orElse(UDEFINERT);
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static ArbeidType fraKode(Object node) {
-        if (node == null) {
+    public static ArbeidType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(ArbeidType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent ArbeidType: " + kode);
@@ -128,13 +99,12 @@ public enum ArbeidType implements Kodeverdi {
         return visGui;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

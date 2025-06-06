@@ -1,10 +1,6 @@
 package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
@@ -21,8 +17,6 @@ import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.*;
  * Definerer mulige Aksjonspunkter inkludert hvilket Vurderingspunkt de må løses i.
  * Inkluderer også konstanter for å enklere kunne referere til dem i eksisterende logikk.
  */
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     // Gruppe : 5xxx
@@ -133,53 +127,40 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private AksjonspunktType aksjonspunktType = AksjonspunktType.UDEFINERT;
 
     /**
      * Definerer hvorvidt Aksjonspunktet default krever totrinnsbehandling. Dvs. Beslutter må godkjenne hva
      * Saksbehandler har utført.
      */
-    @JsonIgnore
     private boolean defaultTotrinnBehandling = false;
 
-    @JsonIgnore
     private boolean kanOverstyreTotrinnEtterLukking = false;
 
     /**
      * Hvorvidt aksjonspunktet har en frist før det må være løst. Brukes i forbindelse med når Behandling er lagt til
      * Vent.
      */
-    @JsonIgnore
     private String fristPeriode;
 
-    @JsonIgnore
     private VilkårType vilkårType;
 
-    @JsonIgnore
     private SkjermlenkeType skjermlenkeType;
 
-    @JsonIgnore
     private boolean tilbakehoppVedGjenopptakelse;
 
-    @JsonIgnore
     private BehandlingStegType behandlingStegType;
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private boolean erUtgått = false;
 
     private String kode;
 
-    @JsonIgnore
     private Set<BehandlingStatus> behandlingStatus;
 
-    @JsonIgnore
     private boolean skalAvbrytesVedTilbakeføring = true;
 
-    @JsonIgnore
     private Ventekategori defaultVentekategori;
 
     AksjonspunktDefinisjon() {
@@ -317,12 +298,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.defaultVentekategori = defaultVentekategori;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static AksjonspunktDefinisjon fraKode(Object node) {
-        if (node == null) {
+    public static AksjonspunktDefinisjon fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(AksjonspunktDefinisjon.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent AksjonspunktDefinisjon: " + kode);
@@ -430,7 +409,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
             && Objects.equals(aksjonspunktStatus, AksjonspunktStatus.OPPRETTET);
     }
 
-    @JsonProperty(value = "kode")
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -452,7 +431,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return kanOverstyreTotrinnEtterLukking;
     }
 
-    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
@@ -463,16 +441,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
      */
     public boolean erUtgått() {
         return erUtgått;
-    }
-
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
     }
 
 }

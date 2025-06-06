@@ -1,12 +1,8 @@
 package no.nav.ung.kodeverk.notat;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum NotatGjelderType implements Kodeverdi {
     FAGSAK("FAGSAK", "Fagsak");
 
@@ -20,6 +16,7 @@ public enum NotatGjelderType implements Kodeverdi {
         this.navn = navn;
     }
 
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

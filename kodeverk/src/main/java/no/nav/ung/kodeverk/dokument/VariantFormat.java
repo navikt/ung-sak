@@ -1,24 +1,10 @@
 package no.nav.ung.kodeverk.dokument;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+import java.util.*;
+
 public enum VariantFormat implements Kodeverdi {
 
     SLADDET("SLADD", "Sladdet format", "SLADDET"),
@@ -37,10 +23,8 @@ public enum VariantFormat implements Kodeverdi {
 
     private static final Map<String, VariantFormat> KODER = new LinkedHashMap<>();
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private String offisiellKode;
 
     private String kode;
@@ -51,12 +35,10 @@ public enum VariantFormat implements Kodeverdi {
         this.offisiellKode = offisiellKode;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static VariantFormat  fraKode(Object node)  {
-        if (node == null) {
+    public static VariantFormat  fraKode(final String kode)  {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(VariantFormat.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent VariantFormat: " + kode);
@@ -77,13 +59,12 @@ public enum VariantFormat implements Kodeverdi {
         System.out.println(KODER.keySet());
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

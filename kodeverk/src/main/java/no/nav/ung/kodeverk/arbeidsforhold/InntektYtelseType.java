@@ -1,15 +1,9 @@
 package no.nav.ung.kodeverk.arbeidsforhold;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum InntektYtelseType implements Kodeverdi {
 
     // Ytelse utbetalt til person som er arbeidstaker/frilanser/ytelsesmottaker
@@ -55,27 +49,14 @@ public enum InntektYtelseType implements Kodeverdi {
 
     public static final String KODEVERK = "INNTEKT_YTELSE_TYPE";
 
-    @JsonIgnore
     private final String navn;
-    @JsonIgnore
     private final FagsakYtelseType ytelseType;
-    @JsonIgnore
     private final Kategori kategori;
 
     InntektYtelseType(String navn, Kategori kategori, FagsakYtelseType ytelseType) {
         this.navn = navn;
         this.kategori = kategori;
         this.ytelseType = ytelseType;
-    }
-
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
     }
 
     public static InntektYtelseType fraKode(String kode) {
@@ -88,13 +69,12 @@ public enum InntektYtelseType implements Kodeverdi {
     }
 
     @Override
-    @JsonProperty
     public String getKodeverk() {
         return KODEVERK;
     }
 
     @Override
-    @JsonProperty
+    @JsonValue
     public String getKode() {
         return name();
     }

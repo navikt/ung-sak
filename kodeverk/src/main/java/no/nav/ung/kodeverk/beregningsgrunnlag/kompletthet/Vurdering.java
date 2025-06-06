@@ -1,18 +1,12 @@
 package no.nav.ung.kodeverk.beregningsgrunnlag.kompletthet;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum Vurdering implements Kodeverdi {
 
     UDEFINERT("-", "Udefinert"),
@@ -39,12 +33,10 @@ public enum Vurdering implements Kodeverdi {
         this.beskrivelse = beskrivelse;
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
-    public static Vurdering fraKode(Object node) {
-        if (node == null) {
+    public static Vurdering fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(Vurdering.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent Venteårsak: " + kode);
@@ -56,6 +48,7 @@ public enum Vurdering implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
+    @JsonValue
     public String getKode() {
         return kode;
     }

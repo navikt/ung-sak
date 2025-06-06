@@ -1,10 +1,6 @@
 package no.nav.ung.kodeverk.behandling;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
@@ -16,8 +12,6 @@ import java.util.Map;
 import static no.nav.ung.kodeverk.behandling.BehandlingStatus.IVERKSETTER_VEDTAK;
 import static no.nav.ung.kodeverk.behandling.BehandlingStatus.UTREDES;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingStegType implements Kodeverdi {
 
     BEREGN_YTELSE("BERYT", "Beregn ytelse", UTREDES),
@@ -60,12 +54,10 @@ public enum BehandlingStegType implements Kodeverdi {
     /**
      * Definisjon av hvilken status behandlingen skal rapporteres som når dette steget er aktivt.
      */
-    @JsonIgnore
     private BehandlingStatus definertBehandlingStatus;
 
     private String kode;
 
-    @JsonIgnore
     private String navn;
 
     private BehandlingStegType(String kode) {
@@ -78,15 +70,13 @@ public enum BehandlingStegType implements Kodeverdi {
         this.definertBehandlingStatus = definertBehandlingStatus;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingStegType fraKode(Object node) {
-        if (node == null) {
+    public static BehandlingStegType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(BehandlingStegType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingStegType: for input " + node);
+            throw new IllegalArgumentException("Ukjent BehandlingStegType: for input " + kode);
         }
         return ad;
     }
@@ -107,13 +97,12 @@ public enum BehandlingStegType implements Kodeverdi {
         return definertBehandlingStatus;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

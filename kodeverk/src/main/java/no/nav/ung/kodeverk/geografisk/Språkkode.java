@@ -1,27 +1,11 @@
 package no.nav.ung.kodeverk.geografisk;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+import java.util.*;
+
 public class Språkkode implements Kodeverdi {
     private static final String KODEVERK = "SPRAAK_KODE";
 
@@ -34,10 +18,9 @@ public class Språkkode implements Kodeverdi {
 
     public static final Språkkode UDEFINERT = fraKode("-"); //$NON-NLS-1$
 
-    @JsonProperty(value = "kode")
+    @JsonValue
     private String kode;
 
-    @JsonIgnore
     private String offisielIso2Kode;
 
     Språkkode() {
@@ -53,7 +36,6 @@ public class Språkkode implements Kodeverdi {
         return offisielIso2Kode;
     }
 
-    @JsonIgnore
     @Override
     public String getNavn() {
         return kode;
@@ -64,7 +46,6 @@ public class Språkkode implements Kodeverdi {
         return kode;
     }
 
-    @JsonProperty(value = "kodeverk", access = Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
@@ -86,18 +67,8 @@ public class Språkkode implements Kodeverdi {
         return Objects.hash(kode);
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
     @JsonCreator
-    public static Språkkode fraKode(String kode) {
+    public static Språkkode fraKode(final String kode) {
         if (kode == null) {
             return null;
         }
@@ -106,18 +77,6 @@ public class Språkkode implements Kodeverdi {
             throw new IllegalArgumentException("Ukjent Språkkode: " + kode);
         }
         return ad;
-    }
-
-    @JsonCreator
-    public static Språkkode fraObjektProp(@JsonProperty("kode") String kode) {
-        return Språkkode.fraKode(kode);
-    }
-
-    public static Optional<Språkkode> fraKodeOptional(@JsonProperty("kode") String kode) {
-        if (kode == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(KODER.get(kode));
     }
 
     private static Map<String, Språkkode> initSpråkkoder() {

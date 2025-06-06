@@ -1,16 +1,11 @@
 package no.nav.ung.kodeverk.produksjonsstyring;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum UtvidetSøknadÅrsak implements Kodeverdi {
     ARBEIDSGIVER_KONKURS("ARBEIDSGIVER_KONKURS", "Arbeidsgiver er konkurs"),
     NYOPPSTARTET_HOS_ARBEIDSGIVER("NYOPPSTARTET_HOS_ARBEIDSGIVER", "Har startet hos ny arbeidsgiver"),
@@ -49,6 +44,7 @@ public enum UtvidetSøknadÅrsak implements Kodeverdi {
         return KODEVERK;
     }
 
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -59,8 +55,7 @@ public enum UtvidetSøknadÅrsak implements Kodeverdi {
         return this.getKode();
     }
 
-    @JsonCreator
-    public static UtvidetSøknadÅrsak fraKode(String kode) {
+    public static UtvidetSøknadÅrsak fraKode(final String kode) {
         if (kode == null) {
             return null;
         }

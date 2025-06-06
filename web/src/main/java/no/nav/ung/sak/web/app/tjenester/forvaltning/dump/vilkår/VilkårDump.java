@@ -81,7 +81,7 @@ public class VilkårDump implements DebugDumpFagsak {
         for (TupleElement<?> kolonne : results.getFirst().getElements()) {
             valueMapper.put(Optional.ofNullable(kolonne.getAlias()).orElse("col-" + kolonne), t -> t.get(kolonne));
             if (kolonne.getAlias().equals("vilkar_type_kode")) {
-                valueMapper.put("vilkar_type", t -> VilkårType.fraKode(t.get(kolonne)).name());
+                valueMapper.put("vilkar_type", t -> VilkårType.fraKode(t.get(kolonne).toString()).name());
             }
         }
         return valueMapper;
