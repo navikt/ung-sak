@@ -9,7 +9,7 @@ import no.nav.openapi.spec.utils.jackson.OpenapiCompatObjectMapperModifier;
 public class ObjectMapperResolver extends DynamicObjectMapperResolver {
 
     private final String JSON_SERIALIZER_ALLTID_SOM_STRING = "kodeverdi-string";
-    private final String JSON_SERIALIZER_KODEVERDI_OBJEKT = "kodeverdi-legacy-objekt";
+    private final String JSON_SERIALIZER_KODEVERDI_OBJEKT = "kodeverdi-objekt";
 
     private static ObjectMapper baseObjectMapper;
 
