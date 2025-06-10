@@ -18,7 +18,7 @@ public class ObjectMapperResolverTest {
     public void testSpråkkodeDeSer() throws JsonProcessingException {
         final Språkkode original = Språkkode.en;
         final String defaultSerialized = defaultMapper.writeValueAsString(original);
-        assertThat(defaultSerialized).isEqualToIgnoringWhitespace("{\"kode\":\"EN\", \"kodeverk\":\"SPRAAK_KODE\"}");
+        assertThat(defaultSerialized).isEqualToIgnoringWhitespace("\"EN\"");
         final String openapiSerialized = openapiMapper.writeValueAsString(original);
         assertThat(openapiSerialized).isEqualToIgnoringWhitespace("\"EN\"");
         final Språkkode defaultDeserialized = defaultMapper.readValue(defaultSerialized, Språkkode.class);
@@ -31,7 +31,7 @@ public class ObjectMapperResolverTest {
     public void testBehandlingTypeDeSer() throws JsonProcessingException {
         final BehandlingType original = BehandlingType.REVURDERING;
         final String defaultSerialized = defaultMapper.writeValueAsString(original);
-        assertThat(defaultSerialized).isEqualToIgnoringWhitespace("{\"kode\":\"BT-004\",\"kodeverk\":\"BEHANDLING_TYPE\"}");
+        assertThat(defaultSerialized).isEqualToIgnoringWhitespace("\"BT-004\"");
         final String openapiSerialized = openapiMapper.writeValueAsString(original);
         assertThat(openapiSerialized).isEqualToIgnoringWhitespace("\"BT-004\"");
         final BehandlingType defaultDeserialized = defaultMapper.readValue(defaultSerialized, BehandlingType.class);
