@@ -41,14 +41,14 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class FormidlingTjenesteTest {
+class VedtaksbrevTjenesteTest {
 
 
     private BrevGenerererTjeneste brevGenerererTjeneste;
     private VedtaksbrevRegler vedtaksbrevRegler;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private UngTestRepositories ungTestRepositories;
-    private FormidlingTjeneste formidlingTjeneste;
+    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
 
@@ -60,7 +60,7 @@ class FormidlingTjenesteTest {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         lagBrevgenererOgVedtaksbrevRegler();
         vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
-        formidlingTjeneste = new FormidlingTjeneste(
+        vedtaksbrevTjeneste = new VedtaksbrevTjeneste(
             brevGenerererTjeneste, vedtaksbrevRegler, vedtaksbrevValgRepository,
             ungTestRepositories.repositoryProvider().getBehandlingRepository());
 
@@ -97,7 +97,7 @@ class FormidlingTjenesteTest {
         var behandling = lagScenarioMedRedigerbarBrev();
 
         //Initielle valg - kun automatisk brev
-        var valg = formidlingTjeneste.vedtaksbrevValg(behandling.getId());
+        var valg = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valg.harBrev()).isTrue();
         assertThat(valg.enableRediger()).isTrue();
         assertThat(valg.redigert()).isFalse();
@@ -123,7 +123,7 @@ class FormidlingTjenesteTest {
 
         //Lager redigert tekst
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
-        formidlingTjeneste.lagreVedtaksbrev(
+        vedtaksbrevTjeneste.lagreVedtaksbrev(
             new VedtaksbrevValgRequestDto(
                 behandling.getId(),
                 false,
@@ -132,7 +132,7 @@ class FormidlingTjenesteTest {
             )
         );
 
-        var valgEtterRedigering1 = formidlingTjeneste.vedtaksbrevValg(behandling.getId());
+        var valgEtterRedigering1 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valgEtterRedigering1.harBrev()).isTrue();
         assertThat(valgEtterRedigering1.enableRediger()).isTrue();
         assertThat(valgEtterRedigering1.redigert()).isTrue();
@@ -157,7 +157,7 @@ class FormidlingTjenesteTest {
 
         //Lager redigert tekst
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
-        formidlingTjeneste.lagreVedtaksbrev(
+        vedtaksbrevTjeneste.lagreVedtaksbrev(
             new VedtaksbrevValgRequestDto(
                 behandling.getId(),
                 false,
@@ -170,7 +170,7 @@ class FormidlingTjenesteTest {
         assertThat(forhåndsvis(behandling, null)).contains(redigertHtml);
 
         //Tilbakestiller manuell brev
-        formidlingTjeneste.lagreVedtaksbrev(
+        vedtaksbrevTjeneste.lagreVedtaksbrev(
             new VedtaksbrevValgRequestDto(
                 behandling.getId(),
                 false,
@@ -179,7 +179,7 @@ class FormidlingTjenesteTest {
             )
         );
 
-        var valgEtterRedigering2 = formidlingTjeneste.vedtaksbrevValg(behandling.getId());
+        var valgEtterRedigering2 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valgEtterRedigering2.harBrev()).isTrue();
         assertThat(valgEtterRedigering2.enableRediger()).isTrue();
         assertThat(valgEtterRedigering2.redigert()).isFalse();
@@ -205,7 +205,7 @@ class FormidlingTjenesteTest {
         String automatiskBrevHtmlSnippet = "<h1>";
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
 
-        formidlingTjeneste.lagreVedtaksbrev(
+        vedtaksbrevTjeneste.lagreVedtaksbrev(
             new VedtaksbrevValgRequestDto(
                 behandling.getId(),
                 false,
@@ -215,8 +215,8 @@ class FormidlingTjenesteTest {
         );
 
         //Tilbakestiller
-        formidlingTjeneste.ryddVedTilbakeHopp(behandling.getId());
-        var valgEtterRedigering3 = formidlingTjeneste.vedtaksbrevValg(behandling.getId());
+        vedtaksbrevTjeneste.ryddVedTilbakeHopp(behandling.getId());
+        var valgEtterRedigering3 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valgEtterRedigering3.harBrev()).isTrue();
         assertThat(valgEtterRedigering3.enableRediger()).isTrue();
         assertThat(valgEtterRedigering3.redigert()).isFalse();
@@ -239,7 +239,7 @@ class FormidlingTjenesteTest {
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
 
         //Lagerer hindret valget
-        formidlingTjeneste.lagreVedtaksbrev(
+        vedtaksbrevTjeneste.lagreVedtaksbrev(
             new VedtaksbrevValgRequestDto(
                 behandling.getId(),
                 true,
@@ -248,7 +248,7 @@ class FormidlingTjenesteTest {
             )
         );
 
-        var valgEtterRedigering1 = formidlingTjeneste.vedtaksbrevValg(behandling.getId());
+        var valgEtterRedigering1 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valgEtterRedigering1.harBrev()).isTrue();
         assertThat(valgEtterRedigering1.enableHindre()).isTrue();
         assertThat(valgEtterRedigering1.hindret()).isTrue();
@@ -284,7 +284,7 @@ class FormidlingTjenesteTest {
     }
 
     private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
-        GenerertBrev generertBrev = formidlingTjeneste.forhåndsvisVedtaksbrev(
+        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvisVedtaksbrev(
             new VedtaksbrevForhåndsvisDto(behandling.getId(), redigertVersjon, true)
         );
         return Optional.ofNullable(generertBrev).map(it -> it.dokument().html()).orElse(null);

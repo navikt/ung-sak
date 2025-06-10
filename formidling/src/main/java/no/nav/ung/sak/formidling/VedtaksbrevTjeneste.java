@@ -6,24 +6,27 @@ import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+
 @Dependent
-public class FormidlingTjeneste {
+public class VedtaksbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
     private final BrevGenerererTjeneste brevGenerererTjeneste;
     private final VedtaksbrevRegler vedtaksbrevRegler;
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
-    private static final Logger LOG = LoggerFactory.getLogger(FormidlingTjeneste.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
 
     @Inject
-    public FormidlingTjeneste(
+    public VedtaksbrevTjeneste(
         BrevGenerererTjeneste brevGenerererTjeneste,
         VedtaksbrevRegler vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
@@ -114,6 +117,10 @@ public class FormidlingTjeneste {
         vedtaksbrevValgEntitet.tilbakestillVedTilbakehopp();
         vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
+    }
+
+    public InformasjonsbrevValgResponseDto informasjonsbrevValg(Long behandlingId) {
+        return new InformasjonsbrevValgResponseDto(Collections.emptyList());
     }
 }
 

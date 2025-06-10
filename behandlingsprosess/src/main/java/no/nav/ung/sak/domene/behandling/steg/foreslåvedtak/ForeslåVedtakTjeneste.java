@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.formidling.FormidlingTjeneste;
+import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ class ForeslåVedtakTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
-    private FormidlingTjeneste formidlingTjeneste;
+    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -40,11 +40,11 @@ class ForeslåVedtakTjeneste {
     ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
-                          FormidlingTjeneste formidlingTjeneste) {
+                          VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
-        this.formidlingTjeneste = formidlingTjeneste;
+        this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -96,7 +96,7 @@ class ForeslåVedtakTjeneste {
     }
 
     private boolean skalOppretteForeslåVedtakManuelt(Behandling behandling) {
-        if (formidlingTjeneste.måSkriveBrev(behandling.getId())) {
+        if (vedtaksbrevTjeneste.måSkriveBrev(behandling.getId())) {
             return true;
         }
         return finnForeslåVedtakManueltUtleder(behandling).skalOppretteForeslåVedtakManuelt(behandling);
