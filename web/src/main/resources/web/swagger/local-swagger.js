@@ -1,5 +1,5 @@
 const defaultValue = "default";
-const optionValues = [defaultValue, "openapi-compat", "kodeverdi-string"]
+const optionValues = [defaultValue, "openapi-compat", "kodeverdi-string", "kodeverdi-objekt"]
 
 // JsonSerializerOptionPlugin adds a select input for choosing a value for the X-Json-Serializer-Option header value to be used for subsequent requests
 // from the swagger ui, and state to keep the selected value.
