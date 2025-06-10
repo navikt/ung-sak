@@ -1757,6 +1757,69 @@
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
         "type" : "string"
       },
+      "InformasjonsbrevMottakerDto" : {
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "idType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDtoIdType"
+          },
+          "utilgjengeligÅrsak" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDtoUtilgjengeligÅrsak"
+          }
+        },
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerDtoIdType" : {
+        "enum" : [ "ORGNR", "AKTØRID" ],
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevMottakerDtoUtilgjengeligÅrsak" : {
+        "enum" : [ "PERSON_DØD" ],
+        "x-enum-varnames" : [ "PERSON_DØD" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevValgDto" : {
+        "properties" : {
+          "malType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevValgDtoMalType"
+          },
+          "mottakere" : {
+            "items" : {
+              "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
+            },
+            "type" : "array"
+          },
+          "støtterFritekst" : {
+            "type" : "boolean"
+          },
+          "støtterTittelOgFritekst" : {
+            "type" : "boolean"
+          },
+          "støtterTredjepartsMottaker" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "InformasjonsbrevValgDtoMalType" : {
+        "enum" : [ "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "GENERELT_FRITEKSTBREV" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevValgResponseDto" : {
+        "properties" : {
+          "informasjonbrevValg" : {
+            "items" : {
+              "$ref" : "#/components/schemas/InformasjonsbrevValgDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "InitLinksDto" : {
         "properties" : {
           "links" : {
@@ -6828,6 +6891,33 @@
         },
         "summary" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
         "tags" : [ "fordel" ]
+      }
+    },
+    "/api/formidling/informasjonsbrev/maler" : {
+      "get" : {
+        "description" : "Maler for informasjon og støttebrev",
+        "operationId" : "informasjonsbrev",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InformasjonsbrevValgResponseDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
       }
     },
     "/api/formidling/vedtaksbrev" : {
