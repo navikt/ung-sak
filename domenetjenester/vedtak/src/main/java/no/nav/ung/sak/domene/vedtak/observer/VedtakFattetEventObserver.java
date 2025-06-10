@@ -36,9 +36,6 @@ public class VedtakFattetEventObserver {
                 gruppe.addNesteSekvensiell(opprettTaskForPubliseringAvVedtakMedYtelse(event));
             }
 
-            manglendeKontrollperioderTjeneste.lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(event.getBehandlingId())
-                .ifPresent(gruppe::addNesteParallell);
-
             taskTjeneste.lagre(gruppe);
         }
     }

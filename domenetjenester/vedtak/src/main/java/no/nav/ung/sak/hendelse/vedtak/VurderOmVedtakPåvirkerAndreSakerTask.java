@@ -1,19 +1,14 @@
 package no.nav.ung.sak.hendelse.vedtak;
 
-import java.util.NavigableSet;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
+import no.nav.abakus.vedtak.ytelse.Ytelser;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -21,6 +16,11 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.NavigableSet;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @ProsessTask(VurderOmVedtakPåvirkerAndreSakerTask.TASKNAME)
@@ -84,19 +84,9 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     }
 
     static FagsakYtelseType mapYtelse(Ytelse vedtak) {
-        if (vedtak.getYtelse() == null) {
-            return FagsakYtelseType.UDEFINERT;
+        if (vedtak.getYtelse() == Ytelser.UNGDOMSYTELSE) {
+            return FagsakYtelseType.UNGDOMSYTELSE;
         }
-        return switch (vedtak.getYtelse()) {
-            case PLEIEPENGER_NÆRSTÅENDE -> FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-            case PLEIEPENGER_SYKT_BARN -> FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-            case OMSORGSPENGER -> FagsakYtelseType.OMSORGSPENGER;
-            case OPPLÆRINGSPENGER -> FagsakYtelseType.OPPLÆRINGSPENGER;
-            case FRISINN -> FagsakYtelseType.FRISINN;
-            case ENGANGSTØNAD -> FagsakYtelseType.ENGANGSTØNAD;
-            case FORELDREPENGER -> FagsakYtelseType.FORELDREPENGER;
-            case SVANGERSKAPSPENGER -> FagsakYtelseType.SVANGERSKAPSPENGER;
-            case UNGDOMSYTELSE -> FagsakYtelseType.UNGDOMSYTELSE;
-        };
+        throw new IllegalArgumentException("Kunne ikke håndtere vedtak for ytelse: " + vedtak.getYtelse());
     }
 }

@@ -49,6 +49,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
     private BehandlingRepository behandlingRepository;
     private VedtattYtelseTjeneste vedtakTjeneste;
+    private boolean skalPublisereTilFamilieVedtakFattet;
     private GenerellKafkaProducer producer;
     private Validator validator;
 
@@ -70,12 +71,14 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
-        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+        @KonfigVerdi(value = "PUBLISER_VEDTAK_FAMILIE", required = false) boolean skalPublisereTilFamilieVedtakFattet
     ) {
         this.taskTjeneste = taskTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
+        this.skalPublisereTilFamilieVedtakFattet = skalPublisereTilFamilieVedtakFattet;
 
         boolean kjørerIMiljø = Environment.current().isProd() || Environment.current().isDev();
         if (kjørerIMiljø) {
@@ -113,11 +116,6 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandingIdString = prosessTaskData.getBehandlingId();
 
-        // FIXME: Fjerne dette når man har avklart om man skal bruke familie-vedtakfattet-v1 eller lage ny.
-        if (true) {
-            return;
-        }
-
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
             long behandlingId = Long.parseLong(behandingIdString);
 
@@ -143,8 +141,11 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
                     taskTjeneste.lagre(taskData);
                 }
                 String key = behandling.getFagsak().getSaksnummer().getVerdi();
-                RecordMetadata recordMetadata = producer.sendJsonMedNøkkel(key, payload);
-                log.info("Sendte melding til  {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+                if (skalPublisereTilFamilieVedtakFattet) {
+                    RecordMetadata recordMetadata = producer.sendJsonMedNøkkel(key, payload);
+                    log.info("Sendte melding til  {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+
+                }
             }
         }
     }
