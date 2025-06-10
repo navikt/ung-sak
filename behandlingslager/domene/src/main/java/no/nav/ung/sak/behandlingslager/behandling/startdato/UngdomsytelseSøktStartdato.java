@@ -46,10 +46,6 @@ public class UngdomsytelseSøktStartdato extends BaseEntitet implements SøktPer
         this.journalpostId = journalpostId;
     }
 
-    public UngdomsytelseSøktStartdato(LocalDate startdato) {
-        this.startdato = startdato;
-    }
-
     public UngdomsytelseSøktStartdato(UngdomsytelseSøktStartdato it) {
         this.journalpostId = it.getJournalpostId();
         this.startdato = it.getStartdato();

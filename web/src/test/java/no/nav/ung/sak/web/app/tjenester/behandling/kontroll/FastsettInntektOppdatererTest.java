@@ -84,11 +84,12 @@ class FastsettInntektOppdatererTest {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         prosesstriggerRepo = new ProsessTriggereRepository(entityManager);
+        var ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
         final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository),
             behandlingRepository);
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosesstriggerRepo,
-            new UngdomsytelseSøknadsperiodeTjeneste(new UngdomsytelseStartdatoRepository(entityManager), new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), behandlingRepository));
+            new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository), behandlingRepository));
         kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, månedsvisTidslinjeUtleder, prosessTriggerPeriodeUtleder);
         final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, månedsvisTidslinjeUtleder);
         oppdaterer = new FastsettInntektOppdaterer(

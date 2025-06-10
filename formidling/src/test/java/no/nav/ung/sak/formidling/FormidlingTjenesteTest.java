@@ -70,7 +70,7 @@ class FormidlingTjenesteTest {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
         var tilkjentYtelseRepository = ungTestRepositories.tilkjentYtelseRepository();
 
-        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository());
+        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
 
         var endringInnholdBygger = new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository);
 
