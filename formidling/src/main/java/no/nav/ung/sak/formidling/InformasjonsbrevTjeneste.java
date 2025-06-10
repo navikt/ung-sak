@@ -53,7 +53,10 @@ public class InformasjonsbrevTjeneste {
     }
 
     public GenerertBrev forhåndsvis(InformasjonsbrevForhåndsvisDto dto) {
-
+        var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
+        if (erDødsfall(behandling)) {
+            throw new IllegalStateException("Støtter ikke generelt brev der mottaker er død");
+        }
 
         return null;
     }
