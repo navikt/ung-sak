@@ -88,7 +88,7 @@ class HendelsemottakTjenesteTest {
         var task = åpneTasker.get(0);
         assertThat(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM)).isEqualTo(opphørsdato.toString());
         assertThat(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM)).isEqualTo(FAGSAK_TOM.toString());
-        assertThat(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK)).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM.toString());
+        assertThat(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK)).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM.getKode());
     }
 
 }

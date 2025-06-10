@@ -267,7 +267,7 @@ spec:
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1M"
     - name: VENTEFRIST_UTTALELSE
-      value: "PT15M"
+      value: "P1D"
     - name: RAPPORTERINGSFRIST_DAG_I_MAANED
       value: "5"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL

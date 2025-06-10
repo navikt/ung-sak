@@ -1,28 +1,19 @@
 package no.nav.ung.kodeverk.behandling;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
 /**
  * NB: Pass på! Ikke legg koder vilkårlig her
  * Denne definerer etablerte behandlingstatuser ihht. modell angitt av FFA (Forretning og Fag).
  */
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingStatus implements Kodeverdi {
 
     AVSLUTTET("AVSLU", "Avsluttet"),
@@ -39,7 +30,6 @@ public enum BehandlingStatus implements Kodeverdi {
 
     private static final Set<BehandlingStatus> FERDIGBEHANDLET_STATUS = Set.of(AVSLUTTET, IVERKSETTER_VEDTAK);
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -53,27 +43,23 @@ public enum BehandlingStatus implements Kodeverdi {
         this.navn = navn;
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingStatus fraKode(Object node) {
-        if (node == null) {
+    @JsonCreator
+    public static BehandlingStatus fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(BehandlingStatus.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingStatus: for input " + node);
+            throw new IllegalArgumentException("Ukjent BehandlingStatus: for input " + kode);
         }
         return ad;
+    }
+
+    // JsonCreator kompatibilitet for deserialisering frå objekt er beholdt her fordi denne er brukt i sif-abac-pdp
+    @JsonCreator
+    public static BehandlingStatus fraObjektProp(@JsonProperty("kode") final String kode) {
+        return fraKode(kode);
     }
 
     public static Map<String, BehandlingStatus> kodeMap() {
@@ -93,13 +79,12 @@ public enum BehandlingStatus implements Kodeverdi {
         return FERDIGBEHANDLET_STATUS.contains(this);
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

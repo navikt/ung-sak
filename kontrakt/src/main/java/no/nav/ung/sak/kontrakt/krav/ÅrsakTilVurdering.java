@@ -1,23 +1,15 @@
 package no.nav.ung.sak.kontrakt.krav;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonValue;
-
-import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @LegacyKodeverdiJsonValue() // <- Denne Kodeverdi har alltid blitt serialisert til kode string
 public enum ÅrsakTilVurdering implements Kodeverdi {
 
@@ -59,7 +51,6 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
     public static ÅrsakTilVurdering fraKode(String kode) {
         return KODER.get(kode);
     }
