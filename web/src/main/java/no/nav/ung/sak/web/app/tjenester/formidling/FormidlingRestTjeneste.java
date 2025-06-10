@@ -18,6 +18,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.formidling.InformasjonsbrevTjeneste;
 import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
@@ -41,13 +42,15 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 public class FormidlingRestTjeneste {
 
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
+    private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
 
     @Inject
-    public FormidlingRestTjeneste(VedtaksbrevTjeneste vedtaksbrevTjeneste) {
+    public FormidlingRestTjeneste(VedtaksbrevTjeneste vedtaksbrevTjeneste, InformasjonsbrevTjeneste informasjonsbrevTjeneste) {
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
+        this.informasjonsbrevTjeneste = informasjonsbrevTjeneste;
     }
 
     FormidlingRestTjeneste() {
@@ -133,7 +136,7 @@ public class FormidlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public InformasjonsbrevValgResponseDto informasjonsbrev(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
-        return vedtaksbrevTjeneste.informasjonsbrevValg(dto.getBehandlingId());
+        return informasjonsbrevTjeneste.informasjonsbrevValg(dto.getBehandlingId());
     }
 
 

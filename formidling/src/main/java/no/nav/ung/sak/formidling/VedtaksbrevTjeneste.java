@@ -6,14 +6,11 @@ import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
 
 @Dependent
 public class VedtaksbrevTjeneste {
@@ -119,8 +116,6 @@ public class VedtaksbrevTjeneste {
 
     }
 
-    public InformasjonsbrevValgResponseDto informasjonsbrevValg(Long behandlingId) {
-        return new InformasjonsbrevValgResponseDto(Collections.emptyList());
-    }
+
 }
 

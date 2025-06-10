@@ -186,6 +186,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
             case OPPHØR_DOK -> "Opphør";
             case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";
+            case GENERELT_FRITEKSTBREV -> "Fritekst generelt brev";
         };
         return prefix + fraMal;
     }
