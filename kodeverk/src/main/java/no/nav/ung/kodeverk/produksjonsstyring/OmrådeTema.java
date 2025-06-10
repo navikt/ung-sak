@@ -1,20 +1,11 @@
 package no.nav.ung.kodeverk.produksjonsstyring;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum OmrådeTema implements Kodeverdi {
 
     UNG("UNG", "UNG", "Ungdomsytelse"), // Ungdomsytelse
@@ -37,11 +28,9 @@ public enum OmrådeTema implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
     private String kode;
 
-    @JsonIgnore
     private String offisiellKode;
 
     private OmrådeTema(String kode, String offisiellKode, String navn) {
@@ -50,8 +39,7 @@ public enum OmrådeTema implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static OmrådeTema fraKode(@JsonProperty("kode") String kode) {
+    public static OmrådeTema fraKode(final String kode) {
         if (kode == null) {
             return null;
         }
@@ -62,7 +50,7 @@ public enum OmrådeTema implements Kodeverdi {
         return ad;
     }
 
-    public static OmrådeTema fraKodeDefaultUdefinert(@JsonProperty("kode") String kode) {
+    public static OmrådeTema fraKodeDefaultUdefinert(final String kode) {
         if (kode == null) {
             return UDEFINERT;
         }
@@ -76,7 +64,6 @@ public enum OmrådeTema implements Kodeverdi {
         return OFFISIELLE_KODER.getOrDefault(kode, UDEFINERT);
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;
@@ -87,7 +74,7 @@ public enum OmrådeTema implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

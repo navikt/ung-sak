@@ -55,7 +55,7 @@ public class VilkårSporingDump implements DebugDumpFagsak {
         Stream<Tuple> stream = query.getResultStream();
         stream.forEachOrdered(result -> {
             var behandlingId = result.get(1);
-            var vilkarTypeKode = result.get(2);
+            var vilkarTypeKode = result.get(2).toString();
             VilkårType vilkårType = VilkårType.fraKode(vilkarTypeKode);
             var fom = result.get(3);
             var tom = result.get(4);

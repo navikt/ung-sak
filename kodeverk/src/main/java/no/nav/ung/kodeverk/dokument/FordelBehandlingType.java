@@ -1,20 +1,11 @@
 package no.nav.ung.kodeverk.dokument;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum FordelBehandlingType implements Kodeverdi {
 
     DIGITAL_SØKNAD("DIGITAL_SØKNAD","ae0227", "Digital søknad"),
@@ -44,10 +35,8 @@ public enum FordelBehandlingType implements Kodeverdi {
 
     private String kode;
 
-    @JsonIgnore
     private String offisiellKode;
 
-    @JsonIgnore
     private String navn;
 
     private FordelBehandlingType(String kode, String offisiellKode, String navn) {
@@ -56,8 +45,7 @@ public enum FordelBehandlingType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator
-    public static FordelBehandlingType fraKode(@JsonProperty("kode") String kode) {
+    public static FordelBehandlingType fraKode(final String kode) {
         if (kode == null) {
             return null;
         }
@@ -68,7 +56,7 @@ public enum FordelBehandlingType implements Kodeverdi {
         return ad;
     }
 
-    public static FordelBehandlingType fraKodeDefaultUdefinert(@JsonProperty("kode") String kode) {
+    public static FordelBehandlingType fraKodeDefaultUdefinert(final String kode) {
         if (kode == null) {
             return UDEFINERT;
         }
@@ -89,13 +77,12 @@ public enum FordelBehandlingType implements Kodeverdi {
         return ALLE_TERMNAVN.getOrDefault(termnavn, UDEFINERT);
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

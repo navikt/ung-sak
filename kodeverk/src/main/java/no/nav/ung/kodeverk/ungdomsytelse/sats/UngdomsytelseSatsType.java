@@ -4,8 +4,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
+@LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public enum UngdomsytelseSatsType implements Kodeverdi {
 
     LAV("LAV", "Lav"),
