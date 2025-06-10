@@ -4,7 +4,7 @@ import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 
 import java.util.List;
 
-public record InformasjonbrevValgDto(
+public record InformasjonsbrevValgDto(
     InformasjonsbrevMalType malType,
     List<InformasjonsbrevMottakerDto> mottakere,
     boolean støtterFritekst,

@@ -136,7 +136,7 @@ public class FormidlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public InformasjonsbrevValgResponseDto informasjonsbrev(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
-        return informasjonsbrevTjeneste.informasjonsbrevValg(dto.getBehandlingId());
+        return new InformasjonsbrevValgResponseDto(informasjonsbrevTjeneste.informasjonsbrevValg(dto.getBehandlingId()));
     }
 
 
