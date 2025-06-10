@@ -1,6 +1,8 @@
 package no.nav.ung.sak.behandlingslager.ytelse.uttak;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.hjemmel.Hjemmel;
+import no.nav.ung.kodeverk.hjemmel.HjemmelKodeverdiConverter;
 import no.nav.ung.kodeverk.ungdomsytelse.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
 import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
@@ -26,6 +28,10 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
     @Convert(converter = UngdomsytelseUttakAvslagsårsakKodeverdiConverter.class)
     @Column(name = "avslag_aarsak")
     private UngdomsytelseUttakAvslagsårsak avslagsårsak;
+
+    @Convert(converter = HjemmelKodeverdiConverter.class)
+    @Column(name = "hjemmel")
+    private Hjemmel hjemmel = Hjemmel.UNG_FORSKRIFT_PARAGRAF_6;
 
     public UngdomsytelseUttakPeriode() {
     }

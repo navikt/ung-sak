@@ -3,6 +3,8 @@ package no.nav.ung.sak.behandlingslager.ytelse.sats;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import no.nav.ung.kodeverk.hjemmel.Hjemmel;
+import no.nav.ung.kodeverk.hjemmel.HjemmelKodeverdiConverter;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.Column;
@@ -47,6 +49,10 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
     @Convert(converter = UngdomsytelseSatsTypeKodeverdiConverter.class)
     @Column(name = "sats_type", nullable = false)
     private UngdomsytelseSatsType satsType;
+
+    @Convert(converter = HjemmelKodeverdiConverter.class)
+    @Column(name = "hjemmel", nullable = false)
+    private Hjemmel hjemmel = Hjemmel.UNG_FORSKRIFT_PARAGRAF_9;
 
     @Column(name = "antall_barn", nullable = false)
     private int antallBarn;
