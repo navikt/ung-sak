@@ -72,7 +72,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
-        @KonfigVerdi(value = "PUBLISER_VEDTAK_FAMILIE", required = false) boolean skalPublisereTilFamilieVedtakFattet
+        @KonfigVerdi(value = "PUBLISER_VEDTAK_FAMILIE", defaultVerdi = "false") boolean skalPublisereTilFamilieVedtakFattet
     ) {
         this.taskTjeneste = taskTjeneste;
         this.informasjonselementer = informasjonselementer;
