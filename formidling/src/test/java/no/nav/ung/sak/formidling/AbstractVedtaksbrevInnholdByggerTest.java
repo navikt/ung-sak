@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for brevtekster. Bruker html for å validere.
- * For manuell verifikasjon av pdf kan env variabel LAGRE_PDF brukes.
+ * For manuell verifikasjon av pdf/html kan env variabel LAGRE settes til PDF eller HTML .
  */
 
 @ExtendWith(CdiAwareExtension.class)
@@ -135,14 +135,27 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        if (System.getenv("LAGRE_PDF") != null) {
-            var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
-            BrevTestUtils.lagrePdf(generertBrev, testInfo);
-            return generertBrev;
+        String lagre = System.getenv("LAGRE");
+        if (lagre == null) {
+            return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
         }
 
-        return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, !lagre.equals("PDF"));
+
+        switch (lagre) {
+            case "PDF":
+                BrevTestUtils.lagrePdf(generertBrev, testInfo);
+                break;
+            case "HTML":
+                BrevTestUtils.lagreHtml(generertBrev, testInfo);
+                break;
+            default:
+                throw new IllegalArgumentException("Ugyldig verdi for LAGRE: " + lagre + ". Forventet 'PDF' eller 'HTML'.");
+        }
+
+        return generertBrev;
     }
+
 
     /**
      * Brukes for å lage BrevGenerererTjeneste
