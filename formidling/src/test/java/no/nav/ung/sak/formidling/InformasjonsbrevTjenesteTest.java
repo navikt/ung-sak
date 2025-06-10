@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
+import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
@@ -15,7 +16,6 @@ import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -38,23 +38,13 @@ class InformasjonsbrevTjenesteTest {
     @BeforeEach
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        informasjonsbrevTjeneste = new InformasjonsbrevTjeneste();
+        informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(ungTestRepositories.repositoryProvider().getBehandlingRepository(), ungTestRepositories.repositoryProvider().getPersonopplysningRepository());
     }
 
     @Test
-    @DisplayName("Skal verifisere at innvilget BrevScenario gir InformasjonsbrevValg med generelt fritekst")
-    void skal_få_generelt_fritekstbrev() {
+    void skal_få_generelt_fritekstbrev_med_riktige_valg() {
         // Given
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
-
-        Behandling behandling = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
-            .medUngTestGrunnlag(scenario)
-            .buildOgLagreMedUng(ungTestRepositories);
-
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
+        Behandling behandling = lagStandardBehandling();
 
         // When
         List<InformasjonsbrevValgDto> informasjonsbrevValg = informasjonsbrevTjeneste.informasjonsbrevValg(behandling.getId());
@@ -72,6 +62,57 @@ class InformasjonsbrevTjenesteTest {
         assertThat(first.støtterFritekst()).isFalse();
         assertThat(first.støtterTittelOgFritekst()).isTrue();
         assertThat(first.støtterTredjepartsMottaker()).isFalse();
+    }
+
+
+    @Test
+    void skal_få_generelt_fritekstbrev_på_avsluttet_behandling() {
+        // Given
+        Behandling behandling = lagStandardBehandling();
+
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+
+        // When
+        List<InformasjonsbrevValgDto> informasjonsbrevValg = informasjonsbrevTjeneste.informasjonsbrevValg(behandling.getId());
+
+        // Then
+        assertThat(informasjonsbrevValg.size()).isEqualTo(1);
+        InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
+        assertThat(first.malType()).isEqualTo(InformasjonsbrevMalType.GENERELT_FRITEKSTBREV);
+    }
+
+    @Test
+    void skal_få_utilgjegelig_mottaker_hvis_død() {
+        // Given
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        UngTestScenario scenario = BrevScenarioer.død19år(fom);
+
+        Behandling behandling = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
+            .medUngTestGrunnlag(scenario)
+            .buildOgLagreMedUng(ungTestRepositories);
+
+        // When
+        List<InformasjonsbrevValgDto> informasjonsbrevValg = informasjonsbrevTjeneste.informasjonsbrevValg(behandling.getId());
+
+        // Then
+        assertThat(informasjonsbrevValg.size()).isEqualTo(1);
+        InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
+        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerDto(
+            behandling.getFagsak().getAktørId().getId(),
+            IdType.AKTØRID, UtilgjengeligÅrsak.PERSON_DØD))
+        );
+    }
+
+    private Behandling lagStandardBehandling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
+
+        return TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
+            .medUngTestGrunnlag(scenario)
+            .buildOgLagreMedUng(ungTestRepositories);
     }
 
 }

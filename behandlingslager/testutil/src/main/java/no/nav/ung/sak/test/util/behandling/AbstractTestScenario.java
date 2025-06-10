@@ -421,7 +421,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             var ungdom = getDefaultBrukerAktørId();
             Personas ungdomPersonas = opprettBuilderForRegisteropplysninger()
                 .medPersonas()
-                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn());
+                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn(), ungTestscenario.dødsdato());
 
             ungTestscenario.barn().forEach(it -> {
                 opprettBuilderForRegisteropplysninger().leggTilPersonopplysning(it.getPersonopplysninger().getFirst());
