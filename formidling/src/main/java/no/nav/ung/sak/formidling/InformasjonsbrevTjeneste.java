@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
 
@@ -38,13 +39,22 @@ public class InformasjonsbrevTjeneste {
     }
 
     private List<InformasjonsbrevMottakerDto> mapMottakere(Behandling behandling) {
-        var personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandling.getId());
-
-        boolean dødsfall = personopplysningGrunnlag.getGjeldendeVersjon().getPersonopplysninger().stream()
-            .anyMatch(it -> it.getDødsdato() != null);
+        boolean dødsfall = erDødsfall(behandling);
 
         String aktørid = behandling.getFagsak().getAktørId().getId();
         return List.of(new InformasjonsbrevMottakerDto(aktørid, IdType.AKTØRID,
             dødsfall ? UtilgjengeligÅrsak.PERSON_DØD : null));
+    }
+
+    private boolean erDødsfall(Behandling behandling) {
+        var personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandling.getId());
+        return personopplysningGrunnlag.getGjeldendeVersjon().getPersonopplysninger().stream()
+            .anyMatch(it -> it.getDødsdato() != null);
+    }
+
+    public GenerertBrev forhåndsvis(InformasjonsbrevForhåndsvisDto dto) {
+
+
+        return null;
     }
 }

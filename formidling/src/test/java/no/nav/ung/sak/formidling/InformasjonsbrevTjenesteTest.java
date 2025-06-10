@@ -5,11 +5,15 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
+import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -22,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.util.List;
 
+import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -44,7 +49,8 @@ class InformasjonsbrevTjenesteTest {
     @Test
     void skal_få_generelt_fritekstbrev_med_riktige_valg() {
         // Given
-        Behandling behandling = lagStandardBehandling();
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        Behandling behandling = lagStandardBehandling(BrevScenarioer.innvilget19år(fom));
 
         // When
         List<InformasjonsbrevValgDto> informasjonsbrevValg = informasjonsbrevTjeneste.informasjonsbrevValg(behandling.getId());
@@ -68,7 +74,8 @@ class InformasjonsbrevTjenesteTest {
     @Test
     void skal_få_generelt_fritekstbrev_på_avsluttet_behandling() {
         // Given
-        Behandling behandling = lagStandardBehandling();
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        Behandling behandling = lagStandardBehandling(BrevScenarioer.innvilget19år(fom));
 
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
@@ -105,9 +112,41 @@ class InformasjonsbrevTjenesteTest {
         );
     }
 
-    private Behandling lagStandardBehandling() {
+    @Test
+    void skal_forhåndsvise_informasjonsbrev() {
+        // Given
         LocalDate fom = LocalDate.of(2024, 12, 1);
         UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
+        Behandling behandling = lagStandardBehandling(scenario);
+
+        // When
+        GenerertBrev generertBrev = informasjonsbrevTjeneste.forhåndsvis(
+            new InformasjonsbrevForhåndsvisDto(
+                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
+                new GenereltFritekstBrevDto(
+                    "Dette er en test for forhåndsvisning av informasjonsbrev",
+                    "Test brødtekst"),
+                true
+                )
+            );
+
+        // Then
+        var mottaker = generertBrev.mottaker();
+        assertThat(mottaker.navn()).isEqualTo(scenario.navn());
+        assertThat(mottaker.aktørId().getAktørId()).isEqualTo(behandling.getAktørId().getAktørId());
+        assertThat(generertBrev.gjelder()).isEqualTo(mottaker);
+        assertThat(generertBrev.malType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.GENERELT_FRITEKSTBREV);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Dette er en test for forhåndsvisning av informasjonsbrev</h1>",
+                "<p>Test brødtekst</p>"
+            );
+
+    }
+
+    private Behandling lagStandardBehandling(UngTestScenario scenario) {
 
         return TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)

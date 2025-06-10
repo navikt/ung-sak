@@ -1,8 +1,5 @@
 package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -11,14 +8,15 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
+/**
+ * DTO for forhåndsvisning av vedtaksbrev.
+ *
+ * @param behandlingId    Behandlingid.
+ * @param redigertVersjon Angir om automatisk vedtaksbrev (false) eller lagret redigert brev skal forhåndsvises (true), default er false.
+ *                        For fritekstbrev vil den alltid bruke redigert versjon.
+ * @param htmlVersjon     Angir om html versjon skal hentes. False eller null henter PDF.
+ */
 public record VedtaksbrevForhåndsvisDto(
-
-    /**
-     * Behandlingid
-     */
     @JsonProperty(value = BehandlingIdDto.NAME, required = true)
     @NotNull
     @Valid
@@ -27,19 +25,12 @@ public record VedtaksbrevForhåndsvisDto(
     @Max(Long.MAX_VALUE)
     Long behandlingId,
 
-    /**
-     * Angir om automatisk vedtaksbrev (false) eller lagret redigert brev skal forhåndsvises (true), default er false. For fritekstbrev vil den alltid bruke redigert versjon
-     */
     @JsonProperty("redigertVersjon")
     @Valid
     Boolean redigertVersjon,
 
-    /**
-     * Angir om html versjon skal hentes. False eller null henter PDF.
-     */
     @JsonProperty("htmlVersjon")
     @Valid
     Boolean htmlVersjon
-
 ) {
 }
