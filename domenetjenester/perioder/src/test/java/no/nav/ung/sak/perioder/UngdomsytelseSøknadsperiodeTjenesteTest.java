@@ -47,7 +47,7 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
         søknadsperiodeRepository = new UngdomsytelseStartdatoRepository(em);
         behandlingRepository = new BehandlingRepository(em);
         ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(søknadsperiodeRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(em)),
             behandlingRepository
             );
 

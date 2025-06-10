@@ -1,10 +1,6 @@
 package no.nav.ung.kodeverk.behandling;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.Collections;
@@ -12,8 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingÅrsakType implements Kodeverdi {
 
     NY_SØKT_PROGRAM_PERIODE("RE-END-FRA-BRUKER", "Endring fra bruker"),
@@ -54,7 +48,6 @@ public enum BehandlingÅrsakType implements Kodeverdi {
 
     private static final Map<String, BehandlingÅrsakType> KODER = new LinkedHashMap<>();
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -68,25 +61,13 @@ public enum BehandlingÅrsakType implements Kodeverdi {
         this.navn = navn;
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingÅrsakType fraKode(Object node) {
-        if (node == null) {
+    public static BehandlingÅrsakType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(BehandlingÅrsakType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingÅrsakType: for input " + node);
+            throw new IllegalArgumentException("Ukjent BehandlingÅrsakType: for input " + kode);
         }
         return ad;
     }
@@ -104,13 +85,12 @@ public enum BehandlingÅrsakType implements Kodeverdi {
         System.out.println(KODER.keySet());
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

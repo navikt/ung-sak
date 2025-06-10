@@ -1,10 +1,5 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -13,7 +8,11 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
-import no.nav.ung.sak.trigger.ProsessTriggere;
+
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Dependent
 public class UngdomsprogramPeriodeRepository {
@@ -64,14 +63,14 @@ public class UngdomsprogramPeriodeRepository {
         entityManager.flush();
     }
 
-    private Optional<UngdomsprogramPeriodeGrunnlag> hentEksisterendeGrunnlag(Long id) {
+    private Optional<UngdomsprogramPeriodeGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
             "SELECT gr " +
                 "FROM UngdomsprogramPeriodeGrunnlag gr " +
                 "WHERE gr.behandlingId = :behandlingId " +
                 "AND gr.aktiv = true", UngdomsprogramPeriodeGrunnlag.class);
 
-        query.setParameter("behandlingId", id);
+        query.setParameter("behandlingId", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
@@ -97,6 +96,19 @@ public class UngdomsprogramPeriodeRepository {
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
+
+    public Optional<UngdomsprogramPeriodeGrunnlag> hentInitiell(Long behandlingId) {
+        var query = entityManager.createQuery(
+            "SELECT gr " +
+                "FROM UngdomsprogramPeriodeGrunnlag gr " +
+                "WHERE gr.behandlingId = :behandlingId " +
+                "ORDER BY gr.opprettetTidspunkt, gr.id LIMIT 1", UngdomsprogramPeriodeGrunnlag.class);
+
+        query.setParameter("behandlingId", behandlingId);
+
+        return query.getResultStream().findFirst();
+    }
+
 
     public DiffResult diffResultat(EndringsresultatDiff idEndring, boolean kunSporedeEndringer) {
         var grunnlagId1 = (Long) idEndring.getGrunnlagId1();

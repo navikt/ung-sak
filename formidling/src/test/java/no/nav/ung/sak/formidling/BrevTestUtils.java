@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,21 +36,31 @@ public class BrevTestUtils {
 
     public static void lagrePdf(GenerertBrev generertBrev, TestInfo testInfo) {
         byte[] pdf = generertBrev.dokument().pdf();
-        String filnavn = "%s-%s"
+        String filnavn = bestemFilnavn(generertBrev, testInfo);
+        lagre(pdf, filnavn, "pdf");
+    }
+
+    public static void lagreHtml(GenerertBrev generertBrev, TestInfo testInfo) {
+        String html = generertBrev.dokument().html();
+        String filnavn = bestemFilnavn(generertBrev, testInfo);
+        lagre(html.getBytes(StandardCharsets.UTF_8), filnavn, "html");
+    }
+
+    private static String bestemFilnavn(GenerertBrev generertBrev, TestInfo testInfo) {
+        return "%s-%s"
             .formatted(
                 generertBrev.templateType().name(),
                 testInfo.getTestMethod().map(Method::getName).orElse("ukjentMetode"));
-        lagrePdf(pdf, filnavn);
     }
 
-    private static void lagrePdf(byte[] data, String filename) {
+    private static void lagre(byte[] data, String filename, String filtype) {
         Path directory;
         try {
             directory = Files.createDirectories(Paths.get("pdfresultater"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        File file = directory.resolve(filename + ".pdf").toFile();
+        File file = directory.resolve(filename + "." + filtype).toFile();
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(data);

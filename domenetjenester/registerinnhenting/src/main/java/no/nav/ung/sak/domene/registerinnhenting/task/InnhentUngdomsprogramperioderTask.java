@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.registerinnhenting.task;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -11,8 +10,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
-import no.nav.ung.sak.domene.registerinnhenting.RegisterdataInnhenter;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
@@ -27,7 +24,6 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
     public static final String TASKTYPE = "innhentsaksopplysninger.ungdomsprogramperioder";
     private static final Logger LOGGER = LoggerFactory.getLogger(InnhentUngdomsprogramperioderTask.class);
     private UngdomsprogramTjeneste ungdomsprogramTjeneste;
-    private FagsakperiodeUtleder fagsakperiodeUtleder;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private FagsakRepository fagsakRepository;
 
@@ -39,10 +35,9 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
     public InnhentUngdomsprogramperioderTask(BehandlingRepositoryProvider repositoryProvider,
                                              BehandlingLåsRepository behandlingLåsRepository,
                                              UngdomsprogramTjeneste ungdomsprogramTjeneste,
-                                             FagsakperiodeUtleder fagsakperiodeUtleder, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, FagsakRepository fagsakRepository) {
+                                             UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, FagsakRepository fagsakRepository) {
         super(repositoryProvider.getBehandlingRepository(), behandlingLåsRepository);
         this.ungdomsprogramTjeneste = ungdomsprogramTjeneste;
-        this.fagsakperiodeUtleder = fagsakperiodeUtleder;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.fagsakRepository = fagsakRepository;
     }
