@@ -407,15 +407,15 @@ public class BrevScenarioer {
     /**
      * 24 år blir 25 år etter 3 mnd i progrmmet og får overgang til høy sats. Har barn fra før av
      */
-    public static UngTestScenario endring25ÅrMedBarn(LocalDate fødselsdato) {
+    public static UngTestScenario endring25ÅrMedToBarn(LocalDate fødselsdato) {
         var tjuvefemårsdag = fødselsdato.plusYears(25);
         var fom = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
 
         var programPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
         var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(programPeriode.getFomDato(), tjuvefemårsdag.minusDays(1), lavSatsMedBarnBuilder(fom, 1).build()),
-            new LocalDateSegment<>(tjuvefemårsdag, programPeriode.getTomDato(), høySatsBuilderMedBarn(tjuvefemårsdag, 1).build())
+            new LocalDateSegment<>(programPeriode.getFomDato(), tjuvefemårsdag.minusDays(1), lavSatsMedBarnBuilder(fom, 2).build()),
+            new LocalDateSegment<>(tjuvefemårsdag, programPeriode.getTomDato(), høySatsBuilderMedBarn(tjuvefemårsdag, 2).build())
         ));
 
         var programPerioder = List.of(new UngdomsprogramPeriode(programPeriode.getFomDato(), programPeriode.getTomDato()));

@@ -5,6 +5,6 @@ import java.time.LocalDate;
 public record EndringHøySatsDto(
     LocalDate fom,
     long nyDagsats,
-    int aldersgrense
-) implements TemplateInnholdDto {
+    int aldersgrense,
+    Long barnetilleggSats) implements TemplateInnholdDto {
 }

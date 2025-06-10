@@ -145,6 +145,8 @@ spec:
       value: omsorgspenger.k9-rapid-v2
     - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
       value: k9saksbehandling.k9-infotrygd-feed-hendelse
+    - name: KAFKA_JOURNAL_TOPIC
+      value: teamdokumenthandtering.aapen-dok-journalfoering
 
     - name: LOADBALANCER_URL
       value: https://ung.intern.nav.no

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +54,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     void setUp() {
         var fagsakRepository = new FagsakRepository(entityManager);
         this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
-            new BehandlingRepository(entityManager), new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
+            new BehandlingRepository(entityManager), new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)), new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
     }
