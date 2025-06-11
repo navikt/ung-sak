@@ -16,7 +16,6 @@ public class VedtakFattetEventObserver {
 
     public static final String BREVBESTILLING_TASKTYPE = "formidling.brevbestilling";
     private ProsessTaskTjeneste taskTjeneste;
-    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
 
     public VedtakFattetEventObserver() {
     }
@@ -24,7 +23,6 @@ public class VedtakFattetEventObserver {
     @Inject
     public VedtakFattetEventObserver(ProsessTaskTjeneste taskTjeneste, ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste) {
         this.taskTjeneste = taskTjeneste;
-        this.manglendeKontrollperioderTjeneste = manglendeKontrollperioderTjeneste;
     }
 
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
