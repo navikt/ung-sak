@@ -138,8 +138,7 @@ public class EnhetsTjeneste {
     private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType) {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getOppgavetema())
-            .medTemagruppe("FMLI") // fra Temagruppe offisielt kodeverk. Dekker: "Venter barn, barnetrygd, kontantstøtte, sykdom i familien, grunn- og hjelpestønad, ytelser ved dødsfall"
+            .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema())
             .medOppgavetype("BEH_SAK_VL") // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)
