@@ -25,5 +25,5 @@ public record GenereltFritekstBrevDto(
     @Size(max = 100000)
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty("brødtekst")
-    String brødtekst) {
+    String brødtekst) implements InformasjonsbrevInnholdDto {
 }

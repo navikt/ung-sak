@@ -14,7 +14,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  *
  * @param behandlingId Behandlingid.
  * @param informasjonsbrevMalType Angir malen som ønskes forhåndsvist eller bestilt.
- * @param fritekstbrev Kun satt for Generelt fritekstbrev.
+ * @param innhold Kun satt for Generelt fritekstbrev.
  */
 public record InformasjonsbrevBestillingDto(
     @JsonProperty(value = BehandlingIdDto.NAME, required = true)
@@ -32,8 +32,8 @@ public record InformasjonsbrevBestillingDto(
     @Valid
     InformasjonsbrevMottakerDto mottakerDto,
 
-    @JsonProperty("fritekstbrev")
+    @JsonProperty("innhold")
     @Valid
-    GenereltFritekstBrevDto fritekstbrev
+    InformasjonsbrevInnholdDto innhold
 ) {
 }

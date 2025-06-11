@@ -3,17 +3,19 @@ package no.nav.ung.sak.formidling.informasjonsbrev;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdBygger;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdByggerTypeRef;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
-import no.nav.ung.sak.formidling.template.dto.GenerellFritekstbrevDto;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
@@ -28,16 +30,19 @@ public class InformasjonsbrevGenerererTjeneste {
     private BehandlingRepository behandlingRepository;
     private PdfGenKlient pdfGen;
     private BrevMottakerTjeneste brevMottakerTjeneste;
+    private Instance<InformasjonsbrevInnholdBygger> informasjonsbrevInnholdByggere;
 
     @Inject
     public InformasjonsbrevGenerererTjeneste(
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
-        BrevMottakerTjeneste brevMottakerTjeneste) {
+        BrevMottakerTjeneste brevMottakerTjeneste,
+        Instance<InformasjonsbrevInnholdBygger> informasjonsbrevInnholdByggere) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
+        this.informasjonsbrevInnholdByggere = informasjonsbrevInnholdByggere;
     }
 
     public InformasjonsbrevGenerererTjeneste() {
@@ -53,16 +58,14 @@ public class InformasjonsbrevGenerererTjeneste {
         var behandling = behandlingRepository.hentBehandling(informasjonsbrevRequest.behandlingId());
 
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
+        var bygger = bestemBygger(informasjonsbrevRequest);
+        var innhold = bygger.bygg(behandling, informasjonsbrevRequest.getTypedInnhold());
 
-        var input = new TemplateInput(TemplateType.GENERELT_FRITEKSTBREV,
+        var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
                 FellesDto.manuell(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
-                new GenerellFritekstbrevDto(
-                    informasjonsbrevRequest.fritekstbrev().overskrift(),
-                    informasjonsbrevRequest.fritekstbrev().brødtekst())
-
-            )
-        );
+                innhold.templateInnholdDto()
+            ));
 
         PdfGenDokument dokument = pdfGen.lagDokument(input, informasjonsbrevRequest.kunHtml());
         return new GenerertBrev(
@@ -72,6 +75,12 @@ public class InformasjonsbrevGenerererTjeneste {
             DokumentMalType.GENERELT_FRITEKSTBREV,
             TemplateType.GENERELT_FRITEKSTBREV
         );
+    }
+
+    private InformasjonsbrevInnholdBygger<?> bestemBygger(InformasjonsbrevRequest informasjonsbrevRequest) {
+        return informasjonsbrevInnholdByggere
+            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(informasjonsbrevRequest.informasjonsbrevMalType()))
+            .get();
     }
 
 

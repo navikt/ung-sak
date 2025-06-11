@@ -55,7 +55,8 @@ class InformasjonsbrevTjenesteValgTest {
                 ungTestRepositories.repositoryProvider().getBehandlingRepository(),
                 new PdfGenKlient(),
                 new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository())),
+                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
+                null),
             null
         );
     }

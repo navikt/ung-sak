@@ -21,11 +21,13 @@ import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.PdlKlientFake;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingTjeneste;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.GenereltFritekstbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingDto;
 import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +69,9 @@ class InformasjonsbrevTjenesteBrevTest {
                 ungTestRepositories.repositoryProvider().getBehandlingRepository(),
                 new PdfGenKlient(),
                 new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository())),
+                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
+                new UnitTestLookupInstanceImpl<>(new GenereltFritekstbrevInnholdBygger())
+            ),
             brevbestillingTjeneste
         );
     }

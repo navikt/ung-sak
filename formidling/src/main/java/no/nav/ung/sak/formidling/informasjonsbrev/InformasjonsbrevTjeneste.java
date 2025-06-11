@@ -64,19 +64,19 @@ public class InformasjonsbrevTjeneste {
         return validerOgGenererBrev(behandling, dto, kunHtml);
     }
 
+    public BrevbestillingResultat bestill(InformasjonsbrevBestillingDto dto) {
+        var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
+        GenerertBrev generertBrev = validerOgGenererBrev(behandling, dto, false);
+        return brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+    }
+
     private GenerertBrev validerOgGenererBrev(Behandling behandling, InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
         if (erDødsfall(behandling)) {
             throw new IllegalStateException("Støtter ikke generelt brev der mottaker er død");
         }
 
         return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(
-            new InformasjonsbrevRequest(dto.behandlingId(), dto.informasjonsbrevMalType(), dto.fritekstbrev(), kunHtml));
-    }
-
-    public BrevbestillingResultat bestill(InformasjonsbrevBestillingDto dto) {
-        var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
-        GenerertBrev generertBrev = validerOgGenererBrev(behandling, dto, false);
-        return brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+            new InformasjonsbrevRequest(dto.behandlingId(), dto.informasjonsbrevMalType(), dto.innhold(), kunHtml));
     }
 
 }
