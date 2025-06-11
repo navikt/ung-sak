@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private VurderManglendeKontrollAvPeriode vurderManglendeKontrollAvPeriode;
 
     VurderOmVedtakPåvirkerAndreSakerTask() {
     }
@@ -41,10 +43,12 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     @Inject
     public VurderOmVedtakPåvirkerAndreSakerTask(BehandlingRepository behandlingRepository,
                                                 FagsakRepository fagsakRepository,
-                                                FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+                                                FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                                VurderManglendeKontrollAvPeriode vurderManglendeKontrollAvPeriode) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.vurderManglendeKontrollAvPeriode = vurderManglendeKontrollAvPeriode;
     }
 
     @Override
@@ -54,10 +58,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         LOG_CONTEXT.add("ytelseType", fagsakYtelseType);
         LOG_CONTEXT.add("saksnummer", vedtakHendelse.getSaksnummer());
 
-        var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste
-            .finnTjeneste(fagsakYtelseType);
-        var kandidaterTilRevurdering = vurderOmVedtakPåvirkerSakerTjeneste
-            .utledSakerMedPerioderSomErKanVærePåvirket(vedtakHendelse);
+        var kandidaterTilRevurdering = vurderManglendeKontrollAvPeriode.utledSakerMedPerioderSomErKanVærePåvirket(vedtakHendelse);
 
         log.info("Etter '{}' vedtak på saksnummer='{}', skal følgende saker '{}' som skal revurderes som følge av vedtak.",
             fagsakYtelseType, vedtakHendelse.getSaksnummer(), kandidaterTilRevurdering);

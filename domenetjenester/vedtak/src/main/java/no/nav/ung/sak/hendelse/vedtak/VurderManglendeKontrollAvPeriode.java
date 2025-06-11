@@ -1,13 +1,10 @@
 package no.nav.ung.sak.hendelse.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -17,7 +14,6 @@ import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import java.util.List;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public class VurderManglendeKontrollAvPeriode implements VurderOmVedtakPåvirkerSakerTjeneste {
 
     private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
