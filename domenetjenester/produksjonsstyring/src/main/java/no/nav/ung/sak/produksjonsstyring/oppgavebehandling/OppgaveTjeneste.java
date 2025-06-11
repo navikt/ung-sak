@@ -227,22 +227,6 @@ public class OppgaveTjeneste {
         opprettTaskAvsluttOppgave(behandling);
     }
 
-    /*
-     * Spesielle oppgavetyper - flytting til Infotrygd og behandling i NØS
-     */
-    public String opprettOppgaveSakSkalTilInfotrygd(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var fagsak = behandling.getFagsak();
-
-        var request = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), SAK_MÅ_FLYTTES_TIL_INFOTRYGD,
-            Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER, mapYtelseTypeTilTema(fagsak.getYtelseType()))
-                .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
-                .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK_IT.getKode());
-        var oppgave = restKlient.opprettetOppgave(request.build());
-        logger.info("GOSYS opprettet BEH/IT oppgave {}", oppgave);
-        return oppgave.getId().toString();
-    }
-
     public String opprettOppgaveStopUtbetalingAvARENAYtelse(long behandlingId, LocalDate førsteUttaksdato) {
         final String BESKRIVELSE = "Samordning arenaytelse. Vedtak i K9 (Omsorgspenger, Pleiepenger og opplæringspenger) fra %s";
         var beskrivelse = String.format(BESKRIVELSE, førsteUttaksdato);
