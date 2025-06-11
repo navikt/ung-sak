@@ -7,7 +7,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -33,19 +32,16 @@ public class ManglendeKontrollperioderTjeneste {
     private final int rapporteringsfristIMåned;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private BehandlingRepository behandlingRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public ManglendeKontrollperioderTjeneste(BehandlingRepository behandlingRepository,
-                                             MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+    public ManglendeKontrollperioderTjeneste(MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                              ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                              @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristIMåned,
                                              TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapporteringsfristIMåned = rapporteringsfristIMåned;
-        this.behandlingRepository = behandlingRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
