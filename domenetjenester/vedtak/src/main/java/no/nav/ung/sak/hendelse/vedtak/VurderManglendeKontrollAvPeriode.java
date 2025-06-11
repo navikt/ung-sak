@@ -44,7 +44,7 @@ public class VurderManglendeKontrollAvPeriode implements VurderOmVedtakPåvirker
             return List.of(new SakMedPeriode(
                 saksnummer,
                 fagsak.getYtelseType(),
-                perioderMedManglendeKontroll.stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new)),
+                perioderMedManglendeKontroll,
                 BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
         }
 
