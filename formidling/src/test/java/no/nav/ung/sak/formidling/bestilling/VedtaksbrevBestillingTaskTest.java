@@ -19,8 +19,8 @@ import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntit
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
-import no.nav.ung.sak.formidling.BrevGenerererTjenesteFake;
+import no.nav.ung.sak.formidling.VedtaksbrevGenerererTjeneste;
+import no.nav.ung.sak.formidling.VedtaksbrevGenerererTjenesteFake;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
@@ -37,13 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevbestillingTaskTest {
+class VedtaksbrevBestillingTaskTest {
 
     @Inject
     private EntityManager entityManager;
     private BehandlingRepository behandlingRepository;
     private BehandlingRepositoryProvider repositoryProvider;
-    private BrevGenerererTjeneste brevGenerererTjeneste;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private DokArkivKlientFake dokArkivKlient;
     private BrevbestillingRepository brevbestillingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
@@ -56,7 +56,7 @@ class BrevbestillingTaskTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         fnr = new FiktiveFnr().nesteFnr();
-        brevGenerererTjeneste = new BrevGenerererTjenesteFake(fnr);
+        vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteFake(fnr);
 
         dokArkivKlient = new DokArkivKlientFake();
 
@@ -71,7 +71,7 @@ class BrevbestillingTaskTest {
         var behandling = scenarioBuilder.getBehandling();
         behandling.avsluttBehandling();
 
-        BrevbestillingTask brevBestillingTask = new BrevbestillingTask(behandlingRepository, brevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
+        VedtaksbrevBestillingTask brevBestillingTask = new VedtaksbrevBestillingTask(behandlingRepository, vedtaksbrevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
         brevBestillingTask.doTask(lagTask(behandling));
 
         BehandlingBrevbestillingEntitet behandlingBestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
@@ -175,7 +175,7 @@ class BrevbestillingTaskTest {
     }
 
     private static ProsessTaskData lagTask(Behandling behandling) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(BrevbestillingTask.class);
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
         return prosessTaskData;
     }

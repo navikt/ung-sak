@@ -46,7 +46,10 @@ class InformasjonsbrevTjenesteTest {
     @BeforeEach
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(ungTestRepositories.repositoryProvider().getBehandlingRepository(), ungTestRepositories.repositoryProvider().getPersonopplysningRepository());
+        informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
+            ungTestRepositories.repositoryProvider().getBehandlingRepository(),
+            ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
+        );
     }
 
     @Test

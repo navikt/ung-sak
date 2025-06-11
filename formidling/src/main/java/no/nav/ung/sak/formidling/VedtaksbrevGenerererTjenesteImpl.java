@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 
 @ApplicationScoped
-public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
+public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BrevGenerererTjenesteImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevGenerererTjenesteImpl.class);
 
     private BehandlingRepository behandlingRepository;
     private AktørTjeneste aktørTjeneste;
@@ -41,7 +41,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
     private VedtaksbrevRegler vedtaksbrevRegler;
 
     @Inject
-    public BrevGenerererTjenesteImpl(
+    public VedtaksbrevGenerererTjenesteImpl(
         BehandlingRepository behandlingRepository,
         AktørTjeneste aktørTjeneste,
         PdfGenKlient pdfGen,
@@ -59,7 +59,7 @@ public class BrevGenerererTjenesteImpl implements BrevGenerererTjeneste {
         this.manuellVedtaksbrevInnholdBygger = manuellVedtaksbrevInnholdBygger;
     }
 
-    public BrevGenerererTjenesteImpl() {
+    public VedtaksbrevGenerererTjenesteImpl() {
     }
 
     /**

@@ -44,7 +44,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 class VedtaksbrevTjenesteTest {
 
 
-    private BrevGenerererTjeneste brevGenerererTjeneste;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private VedtaksbrevRegler vedtaksbrevRegler;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private UngTestRepositories ungTestRepositories;
@@ -61,7 +61,7 @@ class VedtaksbrevTjenesteTest {
         lagBrevgenererOgVedtaksbrevRegler();
         vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
         vedtaksbrevTjeneste = new VedtaksbrevTjeneste(
-            brevGenerererTjeneste, vedtaksbrevRegler, vedtaksbrevValgRepository,
+                vedtaksbrevGenerererTjeneste, vedtaksbrevRegler, vedtaksbrevValgRepository,
             ungTestRepositories.repositoryProvider().getBehandlingRepository());
 
     }
@@ -82,7 +82,7 @@ class VedtaksbrevTjenesteTest {
 
         vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder, ungTestRepositories.ungdomsprogramPeriodeRepository());
 
-        brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
+        vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),

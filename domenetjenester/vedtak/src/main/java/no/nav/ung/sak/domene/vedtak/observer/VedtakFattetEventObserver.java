@@ -8,7 +8,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
-import no.nav.ung.sak.formidling.bestilling.BrevbestillingTask;
+import no.nav.ung.sak.formidling.bestilling.VedtaksbrevBestillingTask;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {
@@ -38,7 +38,7 @@ public class VedtakFattetEventObserver {
     }
 
     private static ProsessTaskData opprettTaskForBrevbestilling(BehandlingVedtakEvent event) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(BrevbestillingTask.class
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class
         );
         prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId());
         return prosessTaskData;

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class VedtaksbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
-    private final BrevGenerererTjeneste brevGenerererTjeneste;
+    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private final VedtaksbrevRegler vedtaksbrevRegler;
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
@@ -24,11 +24,11 @@ public class VedtaksbrevTjeneste {
 
     @Inject
     public VedtaksbrevTjeneste(
-        BrevGenerererTjeneste brevGenerererTjeneste,
+        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         VedtaksbrevRegler vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {
-        this.brevGenerererTjeneste = brevGenerererTjeneste;
+        this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingRepository = behandlingRepository;
@@ -96,13 +96,13 @@ public class VedtaksbrevTjeneste {
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
 
         if (dto.redigertVersjon() == null) {
-            return brevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
+            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
         }
         if (dto.redigertVersjon()) {
-            return brevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
+            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
         }
 
-        return brevGenerererTjeneste.genererAutomatiskVedtaksbrev(dto.behandlingId(), kunHtml);
+        return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(dto.behandlingId(), kunHtml);
     }
 
     public void ryddVedTilbakeHopp(Long behandlingId) {

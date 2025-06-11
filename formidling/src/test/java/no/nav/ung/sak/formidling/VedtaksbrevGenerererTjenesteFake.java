@@ -5,11 +5,11 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.typer.AktørId;
 
-public class BrevGenerererTjenesteFake implements BrevGenerererTjeneste {
+public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTjeneste {
 
     private final GenerertBrev resultat;
 
-    public BrevGenerererTjenesteFake(String fnr) {
+    public VedtaksbrevGenerererTjenesteFake(String fnr) {
         this.resultat = new GenerertBrev(
             new PdfGenDokument(new byte[0], ""),
             new PdlPerson(fnr, new AktørId(123L), "Nordmann"),

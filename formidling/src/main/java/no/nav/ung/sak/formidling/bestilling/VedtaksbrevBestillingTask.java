@@ -17,8 +17,8 @@ import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.formidling.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
@@ -39,35 +39,35 @@ import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBEST
  * <a href="https://dokarkiv-q2.dev.intern.nav.no/swagger-ui/index.html#/">dokarkiv-q2.dev swagger</a>
  */
 @ApplicationScoped
-@ProsessTask(value = BrevbestillingTask.TASKTYPE)
+@ProsessTask(value = VedtaksbrevBestillingTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class BrevbestillingTask extends BehandlingProsessTask {
+public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
-    public static final String TASKTYPE = "formidling.brevbestilling";
+    public static final String TASKTYPE = "formidling.vedtak.brevbestilling";
 
-    private static final Logger LOG = LoggerFactory.getLogger(BrevbestillingTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
 
     private BehandlingRepository behandlingRepository;
-    private BrevGenerererTjeneste brevGenerererTjeneste;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private BrevbestillingRepository brevbestillingRepository;
     private DokArkivKlient dokArkivKlient;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     @Inject
-    public BrevbestillingTask(
+    public VedtaksbrevBestillingTask(
             BehandlingRepository behandlingRepository,
-            BrevGenerererTjeneste brevGenerererTjeneste,
+            VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
             BrevbestillingRepository brevbestillingRepository,
             DokArkivKlient dokArkivKlient,
             ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.brevGenerererTjeneste = brevGenerererTjeneste;
+        this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.brevbestillingRepository = brevbestillingRepository;
         this.dokArkivKlient = dokArkivKlient;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    BrevbestillingTask() {
+    VedtaksbrevBestillingTask() {
     }
 
 
@@ -76,7 +76,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         validerBrevbestillingForespørsel(behandling);
 
-        var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        var generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
         if (generertBrev == null) {
             LOG.info("Ingen brev generert.");
             return;

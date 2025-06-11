@@ -31,7 +31,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevGenerererTjenesteTest {
+class VedtaksbrevGenerererTjenesteTest {
 
     private UngTestRepositories ungTestRepositories;
 
@@ -58,7 +58,7 @@ class BrevGenerererTjenesteTest {
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository()),
             ungTestRepositories.tilkjentYtelseRepository(), false, null);
-        BrevGenerererTjeneste brevGenerererTjeneste = new BrevGenerererTjenesteImpl(
+        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
@@ -72,7 +72,7 @@ class BrevGenerererTjenesteTest {
             ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
 
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
 
         assertThat(erPdf(generertBrev.dokument().pdf())).isTrue();
