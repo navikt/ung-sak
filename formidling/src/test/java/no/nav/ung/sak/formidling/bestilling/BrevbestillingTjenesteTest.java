@@ -12,24 +12,25 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.formidling.VedtaksbrevGenerererTjeneste;
-import no.nav.ung.sak.formidling.VedtaksbrevGenerererTjenesteFake;
+import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
-import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
+import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
+import no.nav.ung.sak.formidling.mottaker.PdlPerson;
+import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,45 +38,50 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class VedtaksbrevBestillingTaskTest {
+class BrevbestillingTjenesteTest {
+
 
     @Inject
     private EntityManager entityManager;
-    private BehandlingRepository behandlingRepository;
-    private BehandlingRepositoryProvider repositoryProvider;
-    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
+
     private DokArkivKlientFake dokArkivKlient;
     private BrevbestillingRepository brevbestillingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private BrevbestillingTjeneste brevbestillingTjeneste;
+    private BehandlingRepositoryProvider repositoryProvider;
 
-    private String fnr;
+    private String fnr = new FiktiveFnr().nesteFnr();
 
     @BeforeEach
     void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        behandlingRepository = repositoryProvider.getBehandlingRepository();
+
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
-        fnr = new FiktiveFnr().nesteFnr();
-        vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteFake(fnr);
-
         dokArkivKlient = new DokArkivKlientFake();
-
         brevbestillingRepository = new BrevbestillingRepository(entityManager);
-
+        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
     }
 
     @Test
-    void skalLagreBestillingLagePdfJournalføreOgLageDistribusjonstask() {
+    void skalLagreBestillingJournalføreOgLageDistribusjonstask() {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
         scenarioBuilder.lagre(repositoryProvider);
         var behandling = scenarioBuilder.getBehandling();
         behandling.avsluttBehandling();
 
-        VedtaksbrevBestillingTask brevBestillingTask = new VedtaksbrevBestillingTask(
-            behandlingRepository, vedtaksbrevGenerererTjeneste, brevbestillingRepository, new BrevbestillingTjeneste(
-                brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste
-        ));
-        brevBestillingTask.doTask(lagTask(behandling));
+        var dokument = "et dokument";
+
+        PdlPerson testBruker = new PdlPerson(fnr, behandling.getAktørId(), "Test Bruker");
+        var generertBrev = new GenerertBrev(
+            new PdfGenDokument(dokument.getBytes(StandardCharsets.UTF_8), dokument),
+            testBruker,
+            testBruker,
+            DokumentMalType.INNVILGELSE_DOK,
+            TemplateType.INNVILGELSE
+        );
+
+        brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+
 
         BehandlingBrevbestillingEntitet behandlingBestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
         assertThat(behandlingBestilling.getBehandlingId()).isEqualTo(behandling.getId());
@@ -93,7 +99,7 @@ class VedtaksbrevBestillingTaskTest {
         assertThat(distTasker).hasSize(1);
         var disttask = distTasker.getFirst();
         assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_ID_PARAM)).isEqualTo(bestilling.getId().toString());
-        assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE)).isEqualTo(DistribusjonsType.VEDTAK.name());
+        assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE)).isEqualTo(DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name());
 
     }
 
@@ -107,24 +113,6 @@ class VedtaksbrevBestillingTaskTest {
         assertThat(bestilling.getDokdistBestillingId()).isNull();
         assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
         assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
-    }
-
-
-
-
-    @Test
-    void skalIkkeLagreBestillingHvisJournalføringFeiler() {
-        //TODO
-    }
-
-    @Test
-    void skalFeileHvisBehandlingIFeilTilstand() {
-        //TODO
-    }
-
-    @Test
-    void skalTillateMaksEttVedtaksbrevForBehandling() {
-        //TODO
     }
 
 
@@ -176,11 +164,4 @@ class VedtaksbrevBestillingTaskTest {
         assertThat(variant.fysiskDokument()).isNotNull();
         assertThat(variant.filtype()).isEqualTo("PDFA");
     }
-
-    private static ProsessTaskData lagTask(Behandling behandling) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
-        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
-        return prosessTaskData;
-    }
-
 }
