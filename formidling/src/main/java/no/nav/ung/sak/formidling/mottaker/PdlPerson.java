@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.mottaker;
 
 import no.nav.ung.sak.typer.AktørId;
 

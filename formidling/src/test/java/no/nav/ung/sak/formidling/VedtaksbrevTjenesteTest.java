@@ -18,6 +18,7 @@ import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
@@ -84,12 +85,11 @@ class VedtaksbrevTjenesteTest {
 
         vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
-            new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
-            repositoryProvider.getPersonopplysningRepository(),
             vedtaksbrevRegler,
             ungTestRepositories.vedtaksbrevValgRepository(),
-            new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
+            new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 
     @Test

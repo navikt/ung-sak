@@ -13,6 +13,7 @@ import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevForhåndsvisDto;
@@ -53,10 +54,9 @@ class InformasjonsbrevTjenesteTest {
             ungTestRepositories.repositoryProvider().getPersonopplysningRepository(),
             new InformasjonsbrevGenerererTjeneste(
                 ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-                new AktørTjeneste(pdlKlient),
                 new PdfGenKlient(),
-                ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
-            )
+                new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
+                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository()))
         );
     }
 

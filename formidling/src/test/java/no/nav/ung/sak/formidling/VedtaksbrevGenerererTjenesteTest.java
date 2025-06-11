@@ -9,6 +9,8 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
+import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
@@ -60,16 +62,15 @@ class VedtaksbrevGenerererTjenesteTest {
             ungTestRepositories.tilkjentYtelseRepository(), false, null);
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
-            new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
-            repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(),
                 new UnitTestLookupInstanceImpl<>(førstegangsInnvilgelseInnholdBygger),
                 new DetaljertResultatUtlederFake(
                     ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet()))),
                 ungTestRepositories.ungdomsprogramPeriodeRepository()),
-            ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
+            ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
 
 
         GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);

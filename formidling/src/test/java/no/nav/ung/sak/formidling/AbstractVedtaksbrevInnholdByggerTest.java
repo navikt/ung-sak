@@ -11,6 +11,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -84,16 +85,15 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
         return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
-            new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
-            repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                     behandlingRepository,
                     innholdByggere,
                     detaljertResultatUtleder,
                     ungdomsprogramPeriodeRepository),
                 ungTestRepositories.vedtaksbrevValgRepository(),
-                new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
+                new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 
     @Test
