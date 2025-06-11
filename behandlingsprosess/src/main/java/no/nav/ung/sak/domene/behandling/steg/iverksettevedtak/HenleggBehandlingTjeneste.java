@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -25,7 +24,6 @@ import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.kontrakt.dokument.BestillBrevDtoGammel;
-import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveSendTilInfotrygdTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,13 +158,6 @@ public class HenleggBehandlingTjeneste {
         }
 
         doHenleggBehandling(behandlingId, årsakKode, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
-    }
-
-    private void opprettOppgaveTilInfotrygd(Behandling behandling) {
-        ProsessTaskData data = ProsessTaskData.forProsessTask(OpprettOppgaveSendTilInfotrygdTask.class);
-        data.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        data.setCallIdFraEksisterende();
-        prosessTaskRepository.lagre(data);
     }
 
     private void sendHenleggelsesbrev(long behandlingId, HistorikkAktør aktør) {

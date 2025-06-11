@@ -11,7 +11,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandling.revurdering.ytelse.RevurderingBehandlingsresultatutleder;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -24,8 +23,6 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(ForeslåBehandlingsresultatTjeneste.class);
 
-    private RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder;
-
     private VilkårResultatRepository vilkårResultatRepository;
 
     private BehandlingRepository behandlingRepository;
@@ -34,9 +31,7 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         // for proxy
     }
 
-    public ForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                              RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
-        this.revurderingBehandlingsresultatutleder = revurderingBehandlingsresultatutleder;
+    public ForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
     }
@@ -57,10 +52,6 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         } else {
             behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
             log.info("Behandling {} innvilget", ref.getBehandlingId());
-        }
-
-        if (ref.erRevurdering()) {
-            revurderingBehandlingsresultatutleder.bestemBehandlingsresultatForRevurdering(ref);
         }
 
         log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={}", ref.getBehandlingId(), behandling.getBehandlingResultatType());
