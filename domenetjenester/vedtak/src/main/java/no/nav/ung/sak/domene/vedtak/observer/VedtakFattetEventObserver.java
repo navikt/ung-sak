@@ -13,7 +13,7 @@ import no.nav.ung.sak.formidling.bestilling.VedtaksbrevBestillingTask;
 @ApplicationScoped
 public class VedtakFattetEventObserver {
 
-    public static final String BREVBESTILLING_TASKTYPE = "formidling.brevbestilling";
+    public static final String BREVBESTILLING_TASKTYPE = "formidling.vedtak.brevbestilling";
     private ProsessTaskTjeneste taskTjeneste;
 
     public VedtakFattetEventObserver() {
