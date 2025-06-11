@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "iverksetteVedtak.vurderRevurderingAndreSøknader";
+    public static final String TASKNAME = "iverksetteVedtak.vurderRevurderingEtterVedtak";
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
     private static final Logger log = LoggerFactory.getLogger(VurderOmVedtakPåvirkerAndreSakerTask.class);
 
