@@ -6,7 +6,7 @@ import java.util.List;
 
 public record InformasjonsbrevValgDto(
     InformasjonsbrevMalType malType,
-    List<InformasjonsbrevMottakerDto> mottakere,
+    List<InformasjonsbrevMottakerValgDto> mottakere,
     boolean støtterFritekst,
     boolean støtterTittelOgFritekst,
     boolean støtterTredjepartsMottaker

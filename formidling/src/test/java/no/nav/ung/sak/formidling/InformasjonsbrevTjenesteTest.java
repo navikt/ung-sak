@@ -3,6 +3,8 @@ package no.nav.ung.sak.formidling;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
@@ -11,13 +13,19 @@ import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.ung.sak.formidling.bestilling.BrevbestillingTjeneste;
+import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
+import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevGenerererTjeneste;
+import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -44,11 +52,17 @@ class InformasjonsbrevTjenesteTest {
 
     private UngTestRepositories ungTestRepositories;
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
+    private BrevbestillingRepository brevbestillingRepository;
 
 
     @BeforeEach
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
+        brevbestillingRepository = new BrevbestillingRepository(entityManager);
+        var brevbestillingTjeneste = new BrevbestillingTjeneste(
+            brevbestillingRepository,
+            new DokArkivKlientFake(),
+            new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null)));
         informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
             ungTestRepositories.repositoryProvider().getBehandlingRepository(),
             ungTestRepositories.repositoryProvider().getPersonopplysningRepository(),
@@ -56,7 +70,8 @@ class InformasjonsbrevTjenesteTest {
                 ungTestRepositories.repositoryProvider().getBehandlingRepository(),
                 new PdfGenKlient(),
                 new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository()))
+                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository())),
+            brevbestillingTjeneste
         );
     }
 
@@ -74,7 +89,7 @@ class InformasjonsbrevTjenesteTest {
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
         assertThat(first.malType()).isEqualTo(InformasjonsbrevMalType.GENERELT_FRITEKSTBREV);
 
-        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerDto(
+        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgDto(
             behandling.getFagsak().getAktørId().getId(),
             IdType.AKTØRID, null))
         );
@@ -120,7 +135,7 @@ class InformasjonsbrevTjenesteTest {
         // Then
         assertThat(informasjonsbrevValg.size()).isEqualTo(1);
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
-        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerDto(
+        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgDto(
             behandling.getFagsak().getAktørId().getId(),
             IdType.AKTØRID, UtilgjengeligÅrsak.PERSON_DØD))
         );
@@ -137,11 +152,11 @@ class InformasjonsbrevTjenesteTest {
         String overskrift = "Dette er en test for forhåndsvisning av informasjonsbrev";
         String brødtekst = "Test brødtekst.";
         GenerertBrev generertBrev = informasjonsbrevTjeneste.forhåndsvis(
-            new InformasjonsbrevForhåndsvisDto(
-                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
-                new GenereltFritekstBrevDto(overskrift, brødtekst),
-                true
-                )
+            new InformasjonsbrevBestillingDto(
+                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV, null,
+                new GenereltFritekstBrevDto(overskrift, brødtekst)
+                ),
+            true
             );
 
         // Then
@@ -165,6 +180,44 @@ class InformasjonsbrevTjenesteTest {
 
     }
 
+
+    @Test
+    void skal_bestille_informasjonsbrev() {
+        // Given
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
+        Behandling behandling = lagStandardBehandling(scenario);
+
+        // When
+        String overskrift = "Dette er en test for forhåndsvisning av informasjonsbrev";
+        String brødtekst = "Test brødtekst.";
+        informasjonsbrevTjeneste.bestill(
+            new InformasjonsbrevBestillingDto(
+                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV, null,
+                new GenereltFritekstBrevDto(overskrift, brødtekst)
+            )
+        );
+
+        // Then
+        var behandlingBrevbestillingEntitets = brevbestillingRepository.hentForBehandling(behandling.getId());
+        assertThat(behandlingBrevbestillingEntitets).hasSize(1);
+
+        var behandlingBestilling = behandlingBrevbestillingEntitets.getFirst();
+        assertThat(behandlingBestilling.getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(behandlingBestilling.isVedtaksbrev()).isFalse();
+
+        var bestilling = behandlingBestilling.getBestilling();
+        assertThat(bestilling.getBrevbestillingUuid()).isNotNull();
+        assertThat(bestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
+        assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
+        assertThat(bestilling.getTemplateType()).isEqualTo(TemplateType.GENERELT_FRITEKSTBREV);
+        assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.JOURNALFØRT);
+        assertThat(bestilling.getDokumentData()).isNull();
+        assertThat(bestilling.getDokdistBestillingId()).isNull();
+        assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
+        assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
+
+    }
     private Behandling lagStandardBehandling(UngTestScenario scenario) {
 
         return TestScenarioBuilder.builderMedSøknad()

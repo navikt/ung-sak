@@ -70,6 +70,10 @@ public enum DokumentMalType implements Kodeverdi {
         return navn;
     }
 
+    public boolean isVedtaksbrevmal() {
+        return vedtaksbrevmal;
+    }
+
     public static DokumentMalType fraKode(final String kode) {
         var ad = Optional.ofNullable(KODER.get(kode));
         if (ad.isEmpty()) {

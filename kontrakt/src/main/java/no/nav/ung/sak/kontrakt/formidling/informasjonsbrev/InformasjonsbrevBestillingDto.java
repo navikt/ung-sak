@@ -10,14 +10,13 @@ import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
- * DTO for forhåndsvisning av informasjonsbrev.
+ * DTO for bestilling av informasjonsbrev.
  *
  * @param behandlingId Behandlingid.
- * @param informasjonsbrevMalType Angir malen som ønskes å forhåndsvises.
+ * @param informasjonsbrevMalType Angir malen som ønskes forhåndsvist eller bestilt.
  * @param fritekstbrev Kun satt for Generelt fritekstbrev.
- * @param htmlVersjon Angir om html versjon skal hentes. False eller null henter PDF.
  */
-public record InformasjonsbrevForhåndsvisDto(
+public record InformasjonsbrevBestillingDto(
     @JsonProperty(value = BehandlingIdDto.NAME, required = true)
     @NotNull
     @Valid
@@ -30,11 +29,11 @@ public record InformasjonsbrevForhåndsvisDto(
     @Valid
     InformasjonsbrevMalType informasjonsbrevMalType,
 
-    @JsonProperty("fritekstbrev")
-    GenereltFritekstBrevDto fritekstbrev,
-
-    @JsonProperty("htmlVersjon")
     @Valid
-    Boolean htmlVersjon
+    InformasjonsbrevMottakerDto mottakerDto,
+
+    @JsonProperty("fritekstbrev")
+    @Valid
+    GenereltFritekstBrevDto fritekstbrev
 ) {
 }

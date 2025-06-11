@@ -43,18 +43,18 @@ public class BrevbestillingTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public void bestillBrev(Behandling behandling, GenerertBrev generertBrev) {
+    public BrevbestillingResultat bestillBrev(Behandling behandling, GenerertBrev generertBrev) {
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer().getVerdi();
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
             saksnummer,
             generertBrev.malType(),
-            new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
+            new BrevMottaker(generertBrev.mottaker().aktørId().getAktørId(), IdType.AKTØRID));
 
         var behandlingBestilling = new BehandlingBrevbestillingEntitet(
             behandling.getId(),
-            true,
+            generertBrev.malType().isVedtaksbrevmal(),
             bestilling
         );
 
@@ -78,6 +78,7 @@ public class BrevbestillingTjeneste {
         distTask.setCallIdFraEksisterende();
 
         LOG.info("Brevbestilling journalført med journalpostId={}", bestilling.getJournalpostId());
+        return new BrevbestillingResultat(bestilling.getJournalpostId());
     }
 
     private OpprettJournalpostRequest opprettJournalpostRequest(UUID brevbestillingUuid, GenerertBrev generertBrev, Behandling behandling) {

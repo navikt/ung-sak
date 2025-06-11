@@ -19,10 +19,11 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.sak.formidling.InformasjonsbrevTjeneste;
 import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
+import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
+import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevForhåndsvisDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
@@ -147,10 +148,11 @@ public class FormidlingRestTjeneste {
     )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisInformasjonsbrev(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevForhåndsvisDto dto,
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingDto dto,
+        @Valid @QueryParam("kunHtml") Boolean kunHtml,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = informasjonsbrevTjeneste.forhåndsvis(dto);
+        var generertBrev = informasjonsbrevTjeneste.forhåndsvis(dto, kunHtml);
 
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
 
@@ -174,6 +176,21 @@ public class FormidlingRestTjeneste {
         }
 
         return Response.ok(resultat).type(responseMediaType).build();
+    }
+
+    @POST
+    @Path("/formidling/informasjonsbrev/bestill")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Bestill informasjonsbrev for en behandling. ", tags = "formidling")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    public Response bestillInformasjonsbrev(
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingDto dto
+    ) {
+        BrevbestillingResultat resultat = informasjonsbrevTjeneste.bestill(dto);
+
+        return Response.ok(resultat.journalpostId()).build();
+
     }
 
 }
