@@ -19,11 +19,13 @@ public class InformasjonsbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
     private final PersonopplysningRepository personopplysningRepository;
+    private final InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste;
 
     @Inject
-    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, PersonopplysningRepository personopplysningRepository) {
+    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, PersonopplysningRepository personopplysningRepository, InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.personopplysningRepository = personopplysningRepository;
+        this.informasjonsbrevGenerererTjeneste = informasjonsbrevGenerererTjeneste;
     }
 
     public List<InformasjonsbrevValgDto> informasjonsbrevValg(Long behandlingId) {
@@ -58,6 +60,6 @@ public class InformasjonsbrevTjeneste {
             throw new IllegalStateException("Støtter ikke generelt brev der mottaker er død");
         }
 
-        return null;
+        return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(dto);
     }
 }

@@ -1,0 +1,104 @@
+package no.nav.ung.sak.formidling;
+
+
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
+import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
+import no.nav.ung.sak.formidling.template.TemplateInput;
+import no.nav.ung.sak.formidling.template.dto.GenerellFritekstbrevDto;
+import no.nav.ung.sak.formidling.template.dto.TemplateDto;
+import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
+import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevForhåndsvisDto;
+import no.nav.ung.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+
+@ApplicationScoped
+public class InformasjonsbrevGenerererTjeneste {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InformasjonsbrevGenerererTjeneste.class);
+
+    private BehandlingRepository behandlingRepository;
+    private AktørTjeneste aktørTjeneste;
+    private PdfGenKlient pdfGen;
+    private PersonopplysningRepository personopplysningRepository;
+
+    @Inject
+    public InformasjonsbrevGenerererTjeneste(
+        BehandlingRepository behandlingRepository,
+        AktørTjeneste aktørTjeneste,
+        PdfGenKlient pdfGen,
+        PersonopplysningRepository personopplysningRepository) {
+
+        this.behandlingRepository = behandlingRepository;
+        this.aktørTjeneste = aktørTjeneste;
+        this.pdfGen = pdfGen;
+        this.personopplysningRepository = personopplysningRepository;
+    }
+
+    public InformasjonsbrevGenerererTjeneste() {
+    }
+
+    /**
+     * Lager brev for behandling basert på valg gjort av saksbehandler
+     */
+    @WithSpan
+    public GenerertBrev genererInformasjonsbrev(InformasjonsbrevForhåndsvisDto informasjonsbrevDto) {
+        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererInformasjonsbrev(informasjonsbrevDto));
+    }
+
+    @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
+    private GenerertBrev doGenererInformasjonsbrev(InformasjonsbrevForhåndsvisDto informasjonsbrevDto) {
+        var behandling = behandlingRepository.hentBehandling(informasjonsbrevDto.behandlingId());
+
+        var pdlMottaker = hentMottaker(behandling);
+        var input = new TemplateInput(TemplateType.GENERELT_FRITEKSTBREV,
+            new TemplateDto(
+                FellesDto.manuell(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
+                new GenerellFritekstbrevDto(informasjonsbrevDto.fritekstbrev().overskrift(), informasjonsbrevDto.fritekstbrev().brødtekst())
+
+            )
+        );
+
+        PdfGenDokument dokument = pdfGen.lagDokument(input, informasjonsbrevDto.htmlVersjon());
+        return new GenerertBrev(
+            dokument,
+            pdlMottaker,
+            pdlMottaker,
+            DokumentMalType.GENERELT_FRITEKSTBREV,
+            TemplateType.GENERELT_FRITEKSTBREV
+        );
+    }
+
+    private PdlPerson hentMottaker(Behandling behandling) {
+        PersonopplysningGrunnlagEntitet personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandling.getId());
+        PersonopplysningEntitet personopplysning = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getPersonopplysning(behandling.getAktørId());
+
+        String navn = personopplysning.getNavn();
+
+        AktørId aktørId = behandling.getFagsak().getAktørId();
+        var personIdent = aktørTjeneste.hentPersonIdentForAktørId(aktørId)
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke person med aktørid"));
+
+        String fnr = personIdent.getIdent();
+        Objects.requireNonNull(fnr);
+
+        return new PdlPerson(fnr, aktørId, navn);
+    }
+
+
+}
+

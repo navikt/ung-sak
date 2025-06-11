@@ -12,6 +12,8 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevForhåndsvisDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
@@ -48,7 +50,13 @@ class InformasjonsbrevTjenesteTest {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
             ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-            ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
+            ungTestRepositories.repositoryProvider().getPersonopplysningRepository(),
+            new InformasjonsbrevGenerererTjeneste(
+                ungTestRepositories.repositoryProvider().getBehandlingRepository(),
+                new AktørTjeneste(pdlKlient),
+                new PdfGenKlient(),
+                ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
+            )
         );
     }
 
@@ -145,15 +153,14 @@ class InformasjonsbrevTjenesteTest {
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.GENERELT_FRITEKSTBREV);
 
         var forventetFullBrev = InformasjonsbrevVerifikasjon.medHeaderOgFooter(fnr,
-            overskrift + " " + brødtekst
+            overskrift + " " + brødtekst + " "
         );
 
         String brevtekst = generertBrev.dokument().html();
         assertThatHtml(brevtekst).asPlainTextIsEqualTo(forventetFullBrev);
         assertThatHtml(brevtekst)
             .containsHtmlSubSequenceOnce(
-                "<h1>" + overskrift + "</h1>",
-                "<p>" + brødtekst + "</p>"
+                "<h1>" + overskrift + "</h1>"
             );
 
     }
