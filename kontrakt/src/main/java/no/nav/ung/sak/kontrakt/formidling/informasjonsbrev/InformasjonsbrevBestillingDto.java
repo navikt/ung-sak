@@ -32,6 +32,7 @@ public record InformasjonsbrevBestillingDto(
     @Valid
     InformasjonsbrevMottakerDto mottakerDto,
 
+
     @JsonProperty("innhold")
     @Valid
     InformasjonsbrevInnholdDto innhold
