@@ -1634,6 +1634,24 @@
         "required" : [ "barnIdent", "fødselsdato", "hendelseInfo" ],
         "type" : "object"
       },
+      "GenereltFritekstBrevDto" : {
+        "properties" : {
+          "brødtekst" : {
+            "maxLength" : 100000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          },
+          "overskrift" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "brødtekst", "overskrift" ],
+        "type" : "object"
+      },
       "GjenopptaBehandlingDto" : {
         "properties" : {
           "behandlingId" : {
@@ -1757,26 +1775,73 @@
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
         "type" : "string"
       },
+      "InformasjonsbrevBestillingDto" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "fritekstbrev" : {
+            "$ref" : "#/components/schemas/GenereltFritekstBrevDto"
+          },
+          "informasjonsbrevMalType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevBestillingDtoInformasjonsbrevMalType"
+          },
+          "mottakerDto" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
+      "InformasjonsbrevBestillingDtoInformasjonsbrevMalType" : {
+        "enum" : [ "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "GENERELT_FRITEKSTBREV" ],
+        "type" : "string"
+      },
       "InformasjonsbrevMottakerDto" : {
+        "properties" : {
+          "id" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDtoType"
+          }
+        },
+        "required" : [ "id", "type" ],
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerDtoType" : {
+        "enum" : [ "ORGNR", "AKTØRID" ],
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
+        "pattern" : "^[\\p{L}\\p{N}]+$",
+        "type" : "string"
+      },
+      "InformasjonsbrevMottakerValgDto" : {
         "properties" : {
           "id" : {
             "type" : "string"
           },
           "idType" : {
-            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDtoIdType"
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDtoIdType"
           },
           "utilgjengeligÅrsak" : {
-            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDtoUtilgjengeligÅrsak"
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDtoUtilgjengeligÅrsak"
           }
         },
         "type" : "object"
       },
-      "InformasjonsbrevMottakerDtoIdType" : {
+      "InformasjonsbrevMottakerValgDtoIdType" : {
         "enum" : [ "ORGNR", "AKTØRID" ],
         "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
         "type" : "string"
       },
-      "InformasjonsbrevMottakerDtoUtilgjengeligÅrsak" : {
+      "InformasjonsbrevMottakerValgDtoUtilgjengeligÅrsak" : {
         "enum" : [ "PERSON_DØD" ],
         "x-enum-varnames" : [ "PERSON_DØD" ],
         "type" : "string"
@@ -1788,7 +1853,7 @@
           },
           "mottakere" : {
             "items" : {
-              "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
+              "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDto"
             },
             "type" : "array"
           },
@@ -6893,10 +6958,83 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/api/formidling/informasjonsbrev/bestill" : {
+      "post" : {
+        "description" : "Bestill informasjonsbrev for en behandling. ",
+        "operationId" : "bestillInformasjonsbrev",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/informasjonsbrev/forhaandsvis" : {
+      "post" : {
+        "description" : "Forhåndsvise inforasjonsbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
+        "operationId" : "forhåndsvisInformasjonsbrev",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "kunHtml",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "pdf"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
     "/api/formidling/informasjonsbrev/maler" : {
       "get" : {
         "description" : "Maler for informasjon og støttebrev",
-        "operationId" : "informasjonsbrev",
+        "operationId" : "informasjonsbrevValg",
         "parameters" : [ {
           "in" : "query",
           "name" : "behandlingId",
