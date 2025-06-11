@@ -71,7 +71,10 @@ class VedtaksbrevBestillingTaskTest {
         var behandling = scenarioBuilder.getBehandling();
         behandling.avsluttBehandling();
 
-        VedtaksbrevBestillingTask brevBestillingTask = new VedtaksbrevBestillingTask(behandlingRepository, vedtaksbrevGenerererTjeneste, brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
+        VedtaksbrevBestillingTask brevBestillingTask = new VedtaksbrevBestillingTask(
+            behandlingRepository, vedtaksbrevGenerererTjeneste, brevbestillingRepository, new BrevbestillingTjeneste(
+                brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste
+        ));
         brevBestillingTask.doTask(lagTask(behandling));
 
         BehandlingBrevbestillingEntitet behandlingBestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
