@@ -6,7 +6,7 @@
 	   version="3.0">
 	<alternatives>
 		<class>no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
-		<class>no.nav.ung.sak.behandling.revurdering.ytelse.GrunnlagKopiererPleiepengerMock</class>
+		<class>no.nav.ung.sak.behandling.revurdering.ytelse.GrunnlagKopiererUngdomsytelseMock</class>
 	</alternatives>
 </beans>
 

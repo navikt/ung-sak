@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandling.revurdering.ytelse;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
@@ -11,11 +11,11 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 @RequestScoped
 @Alternative
-@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-public class GrunnlagKopiererPleiepengerMock implements GrunnlagKopierer {
+@FagsakYtelseTypeRef(UNGDOMSYTELSE)
+public class GrunnlagKopiererUngdomsytelseMock implements GrunnlagKopierer {
 
 
-    public GrunnlagKopiererPleiepengerMock() {
+    public GrunnlagKopiererUngdomsytelseMock() {
         // for CDI proxy
     }
 

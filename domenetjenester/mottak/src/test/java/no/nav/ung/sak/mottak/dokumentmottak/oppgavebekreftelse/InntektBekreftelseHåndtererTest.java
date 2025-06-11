@@ -78,7 +78,7 @@ class InntektBekreftelseHåndtererTest {
             null));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, mottatteDokumentRepository);
+        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
@@ -122,7 +122,7 @@ class InntektBekreftelseHåndtererTest {
             "en uttalelse"));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, mottatteDokumentRepository);
+        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
