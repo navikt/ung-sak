@@ -36,6 +36,9 @@ class InformasjonsbrevTjenesteTest {
     @Inject
     private EntityManager entityManager;
 
+    private final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    protected String fnr = pdlKlient.fnr();
+
     private UngTestRepositories ungTestRepositories;
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
 
@@ -120,12 +123,12 @@ class InformasjonsbrevTjenesteTest {
         Behandling behandling = lagStandardBehandling(scenario);
 
         // When
+        String overskrift = "Dette er en test for forhåndsvisning av informasjonsbrev";
+        String brødtekst = "Test brødtekst.";
         GenerertBrev generertBrev = informasjonsbrevTjeneste.forhåndsvis(
             new InformasjonsbrevForhåndsvisDto(
                 behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
-                new GenereltFritekstBrevDto(
-                    "Dette er en test for forhåndsvisning av informasjonsbrev",
-                    "Test brødtekst"),
+                new GenereltFritekstBrevDto(overskrift, brødtekst),
                 true
                 )
             );
@@ -138,10 +141,16 @@ class InformasjonsbrevTjenesteTest {
         assertThat(generertBrev.malType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.GENERELT_FRITEKSTBREV);
 
-        assertThatHtml(generertBrev.dokument().html())
+        var forventetFullBrev = InformasjonsbrevVerifikasjon.medHeaderOgFooter(fnr,
+            overskrift + " " + brødtekst
+        );
+
+        String brevtekst = generertBrev.dokument().html();
+        assertThatHtml(brevtekst).asPlainTextIsEqualTo(forventetFullBrev);
+        assertThatHtml(brevtekst)
             .containsHtmlSubSequenceOnce(
-                "<h1>Dette er en test for forhåndsvisning av informasjonsbrev</h1>",
-                "<p>Test brødtekst</p>"
+                "<h1>" + overskrift + "</h1>",
+                "<p>" + brødtekst + "</p>"
             );
 
     }

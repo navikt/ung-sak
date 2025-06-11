@@ -92,7 +92,7 @@ public class VedtaksbrevTjeneste {
 
     }
 
-    public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto) {
+    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisDto dto) {
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
 
         if (dto.redigertVersjon() == null) {

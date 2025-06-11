@@ -108,7 +108,7 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = vedtaksbrevTjeneste.forhåndsvisVedtaksbrev(dto);
+        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto);
 
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
 

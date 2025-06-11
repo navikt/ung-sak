@@ -284,7 +284,7 @@ class VedtaksbrevTjenesteTest {
     }
 
     private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
-        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvisVedtaksbrev(
+        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(
             new VedtaksbrevForhåndsvisDto(behandling.getId(), redigertVersjon, true)
         );
         return Optional.ofNullable(generertBrev).map(it -> it.dokument().html()).orElse(null);
