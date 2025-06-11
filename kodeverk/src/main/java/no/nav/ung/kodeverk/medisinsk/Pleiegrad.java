@@ -1,20 +1,11 @@
 package no.nav.ung.kodeverk.medisinsk;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public enum Pleiegrad implements Kodeverdi {
     /**
      * Alle kodeverk må ha en verdi, det kan ikke være null i databasen. Denne koden gjør samme nytten.
@@ -41,9 +32,7 @@ public enum Pleiegrad implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
-    @JsonIgnore
     private String offisiellKode;
     private String kode;
 
@@ -64,12 +53,10 @@ public enum Pleiegrad implements Kodeverdi {
         this.prosent = prosent;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static Pleiegrad  fraKode(Object node)  {
-        if (node == null) {
+    public static Pleiegrad  fraKode(final String kode)  {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(Pleiegrad.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent Pleiegrad: " + kode);
@@ -77,7 +64,7 @@ public enum Pleiegrad implements Kodeverdi {
         return ad;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -92,7 +79,6 @@ public enum Pleiegrad implements Kodeverdi {
         return offisiellKode;
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;

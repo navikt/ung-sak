@@ -1,6 +1,8 @@
 package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.hjemmel.Hjemmel;
+import no.nav.ung.kodeverk.hjemmel.HjemmelKodeverdiConverter;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKildeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
@@ -30,6 +32,10 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Convert(converter = KontrollertInntektKildeKodeverdiConverter.class)
     @Column(name = "kilde", nullable = false)
     private KontrollertInntektKilde kilde;
+
+    @Convert(converter = HjemmelKodeverdiConverter.class)
+    @Column(name = "hjemmel", nullable = false)
+    private Hjemmel hjemmel = Hjemmel.UNG_FORSKRIFT_PARAGRAF_11;
 
     @Column(name = "er_manuelt_vurdert", nullable = false)
     private boolean erManueltVurdert;

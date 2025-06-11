@@ -1,14 +1,11 @@
 package no.nav.ung.kodeverk.dokument;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
 
 public enum DokumentMalType implements Kodeverdi {
     HENLEGG_BEHANDLING_DOK("HENLEG", "Behandling henlagt", false),
@@ -35,10 +32,8 @@ public enum DokumentMalType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private final boolean vedtaksbrevmal;
 
     private String kode;
@@ -51,7 +46,7 @@ public enum DokumentMalType implements Kodeverdi {
         this.vedtaksbrevmal = vedtaksbrevmal;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -62,7 +57,6 @@ public enum DokumentMalType implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return "DOKUMENT_MAL_TYPE";
@@ -73,8 +67,7 @@ public enum DokumentMalType implements Kodeverdi {
         return navn;
     }
 
-    @JsonCreator
-    public static DokumentMalType fraKode(String kode) {
+    public static DokumentMalType fraKode(final String kode) {
         var ad = Optional.ofNullable(KODER.get(kode));
         if (ad.isEmpty()) {
             throw new IllegalArgumentException("Ukjent DokumentMalType: " + kode);

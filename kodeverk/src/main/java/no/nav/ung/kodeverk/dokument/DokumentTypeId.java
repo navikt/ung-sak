@@ -1,29 +1,14 @@
 package no.nav.ung.kodeverk.dokument;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
+
+import java.util.*;
 
 /**
  * DokumentTypeId er et kodeverk som forvaltes av Kodeverkforvaltning. Det er et subsett av kodeverket DokumentType, mer spesifikt alle
  * inngående dokumenttyper.
  */
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum DokumentTypeId implements Kodeverdi {
 
     LEGEERKLÆRING("LEGEERKLÆRING", "I000023", DokumentGruppe.VEDLEGG, Brevkode.LEGEERKLÆRING),
@@ -44,18 +29,14 @@ public enum DokumentTypeId implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private String offisiellKode;
 
     private String kode;
 
-    @JsonIgnore
     private DokumentGruppe dokumentGruppe;
 
-    @JsonIgnore
     private Brevkode brevkode;
 
     private DokumentTypeId(String kode, String offisiellKode, DokumentGruppe dokumentGruppe, Brevkode brevkode) {
@@ -66,12 +47,10 @@ public enum DokumentTypeId implements Kodeverdi {
 
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static DokumentTypeId  fraKode(Object node)  {
-        if (node == null) {
+    public static DokumentTypeId  fraKode(final String kode)  {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(DokumentTypeId.class, node, "kode");
         var ad = KODER.get(kode);
 
         if (ad == null) {
@@ -110,13 +89,12 @@ public enum DokumentTypeId implements Kodeverdi {
         return dokumentGruppe;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

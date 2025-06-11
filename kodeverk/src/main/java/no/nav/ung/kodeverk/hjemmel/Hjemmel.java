@@ -1,19 +1,21 @@
-package no.nav.ung.kodeverk.ungdomsytelse.sats;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+package no.nav.ung.kodeverk.hjemmel;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
-public enum UngdomsytelseSatsType implements Kodeverdi {
+public enum Hjemmel implements Kodeverdi {
 
-    LAV("LAV", "Lav"),
-    HØY("HØY", "Høy");
+    UNG_FORSKRIFT_PARAGRAF_11("UNG_FRSKRFT_11", "Forskrift om ungdomsprogram og ungdomsprogramytelse § 11"),
+    UNG_FORSKRIFT_PARAGRAF_9("UNG_FRSKRFT_9", "Forskrift om ungdomsprogram og ungdomsprogramytelse § 9"),
+    UNG_FORSKRIFT_PARAGRAF_6("UNG_FRSKRFT_6", "Forskrift om ungdomsprogram og ungdomsprogramytelse § 6");
 
-    private static final Map<String, UngdomsytelseSatsType> KODER = new LinkedHashMap<>();
+
+    private static final Map<String, Hjemmel> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -26,18 +28,18 @@ public enum UngdomsytelseSatsType implements Kodeverdi {
     private String kode;
     private String navn;
 
-    UngdomsytelseSatsType(String kode, String navn) {
+    Hjemmel(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
-    public static UngdomsytelseSatsType fraKode(String kode) {
+    public static Hjemmel fraKode(String kode) {
         if (kode == null) {
             return null;
         }
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent UngdomsytelseSatsType: " + kode);
+            throw new IllegalArgumentException("Ukjent Hjemmel: " + kode);
         }
         return ad;
     }
@@ -56,7 +58,7 @@ public enum UngdomsytelseSatsType implements Kodeverdi {
 
     @Override
     public String getKodeverk() {
-        return "UNG_SATSTYPE";
+        return "UNG_HJEMMEL";
     }
 
     @Override

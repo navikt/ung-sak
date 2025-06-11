@@ -90,7 +90,7 @@
         "type" : "string"
       },
       "AksjonspunktDtoDefinisjon" : {
-        "enum" : [ "5015", "5016", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "6006", "6100", "7001", "7003", "7005", "7014", "7040", "8000", null ],
+        "enum" : [ "5015", "5016", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "6006", "6100", "7001", "7003", "7005", "7014", "7040", "8000", "UNDEFINED" ],
         "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "UNDEFINED" ],
         "type" : "string"
       },
@@ -813,10 +813,10 @@
             "$ref" : "#/components/schemas/BehandlingDtoSakstype"
           },
           "sprakkode" : {
-            "$ref" : "#/components/schemas/Språkkode"
+            "type" : "string"
           },
           "språkkode" : {
-            "$ref" : "#/components/schemas/Språkkode"
+            "type" : "string"
           },
           "status" : {
             "$ref" : "#/components/schemas/BehandlingDtoStatus"
@@ -3025,7 +3025,7 @@
         "type" : "object"
       },
       "PeriodeMedUtfallUtfall" : {
-        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
+        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
         "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
         "type" : "string"
       },
@@ -3626,18 +3626,6 @@
         "required" : [ "notatId", "saksnummer", "skjul", "versjon" ],
         "type" : "object"
       },
-      "Språkkode" : {
-        "properties" : {
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "readOnly" : true,
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
       "StatusFilterDto" : {
         "properties" : {
           "prosessTaskStatuser" : {
@@ -3790,7 +3778,7 @@
             "type" : "string"
           },
           "spraakkode" : {
-            "$ref" : "#/components/schemas/Språkkode"
+            "type" : "string"
           },
           "søknadsperiode" : {
             "$ref" : "#/components/schemas/Periode"
@@ -3818,7 +3806,7 @@
         "type" : "object"
       },
       "SøknadsfristPeriodeDtoStatus" : {
-        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
+        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
         "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
         "type" : "string"
       },
@@ -3867,7 +3855,7 @@
         "type" : "object"
       },
       "TilbakekrevingValgDtoVidereBehandling" : {
-        "enum" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ],
+        "enum" : [ "-", "TILBAKEKR_OPPRETT", "TILBAKEKR_IGNORER", "TILBAKEKR_INNTREKK", "TILBAKEKR_OPPDATER" ],
         "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ],
         "type" : "string"
       },
@@ -4078,7 +4066,7 @@
         "type" : "object"
       },
       "TotrinnsBeregningDtoFaktaOmBeregningTilfeller" : {
-        "enum" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "UDEFINERT" ],
+        "enum" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "-" ],
         "x-enum-varnames" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "UDEFINERT" ],
         "type" : "string"
       },
@@ -4534,12 +4522,12 @@
         "type" : "object"
       },
       "VilkårPeriodeDtoMerknad" : {
-        "enum" : [ "VM_1001", "VM_1002", "VM_1003", "VM_1004", "VM_1005", "VM_1006", "VM_1007", "VM_1019", "VM_1020", "VM_1021", "VM_1022", "VM_1023", "VM_1024", "VM_1025", "VM_1026", "VM_1027", "VM_1028", "VM_1029", "VM_1099", "VM_1035", "VM_1041", "VM_1042", "VM_1043", "VM_1051", "VM_1067", "VM_1068", "VM_1069", "VM_1071", "VM_1080", "VM_1081", "VM_1101", "VM_1102", "VM_5007", "VM_7001", "VM_7002", "VM_7003", "VM_7004", "VM_7006", "VM_7847_A", "VM_7847_B", "VM_8000", "VM_8001", "VM_8002", "VM_9002", "VM_9013", "VM_9015", "UDEFINERT" ],
+        "enum" : [ "1001", "1002", "1003", "1004", "1005", "1006", "1007", "1019", "1020", "1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029", "1099", "1035", "1041", "1042", "1043", "1051", "1067", "1068", "1069", "1071", "1080", "1081", "1101", "1102", "5007", "7001", "7002", "7003", "7004", "7006", "7847A", "7847B", "8000", "8001", "8002", "9002", "9013", "9015", "-" ],
         "x-enum-varnames" : [ "VM_1001", "VM_1002", "VM_1003", "VM_1004", "VM_1005", "VM_1006", "VM_1007", "VM_1019", "VM_1020", "VM_1021", "VM_1022", "VM_1023", "VM_1024", "VM_1025", "VM_1026", "VM_1027", "VM_1028", "VM_1029", "VM_1099", "VM_1035", "VM_1041", "VM_1042", "VM_1043", "VM_1051", "VM_1067", "VM_1068", "VM_1069", "VM_1071", "VM_1080", "VM_1081", "VM_1101", "VM_1102", "VM_5007", "VM_7001", "VM_7002", "VM_7003", "VM_7004", "VM_7006", "VM_7847_A", "VM_7847_B", "VM_8000", "VM_8001", "VM_8002", "VM_9002", "VM_9013", "VM_9015", "UDEFINERT" ],
         "type" : "string"
       },
       "VilkårPeriodeDtoVilkarStatus" : {
-        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
+        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
         "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
         "type" : "string"
       },
@@ -4572,7 +4560,7 @@
         "type" : "string"
       },
       "VilkårResultatDtoUtfall" : {
-        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
+        "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
         "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
         "type" : "string"
       },

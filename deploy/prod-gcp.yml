@@ -260,6 +260,8 @@ spec:
       value: "5"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "100"
+    - name: VENTEFRIST_UTTALELSE
+      value: "P14D"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
