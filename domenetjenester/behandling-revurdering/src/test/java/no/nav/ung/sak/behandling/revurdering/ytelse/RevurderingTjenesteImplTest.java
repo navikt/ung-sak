@@ -53,10 +53,6 @@ public class RevurderingTjenesteImplTest {
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
-    @FagsakYtelseTypeRef
-    private RevurderingEndring revurderingEndring;
-
-    @Inject
     @Any
     private Instance<GrunnlagKopierer> grunnlagKopierer;
 
@@ -69,7 +65,7 @@ public class RevurderingTjenesteImplTest {
     @Test
     public void skal_opprette_revurdering() {
         // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE);
         scenario.medBehandlingVedtak()
             .medVedtakstidspunkt(LocalDateTime.now())
             .medVedtakResultatType(VedtakResultatType.INNVILGET);
