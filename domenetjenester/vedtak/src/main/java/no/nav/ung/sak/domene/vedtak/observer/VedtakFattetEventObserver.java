@@ -9,7 +9,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingTask;
-import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {
@@ -21,7 +20,7 @@ public class VedtakFattetEventObserver {
     }
 
     @Inject
-    public VedtakFattetEventObserver(ProsessTaskTjeneste taskTjeneste, ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste) {
+    public VedtakFattetEventObserver(ProsessTaskTjeneste taskTjeneste) {
         this.taskTjeneste = taskTjeneste;
     }
 

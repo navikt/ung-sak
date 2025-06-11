@@ -52,9 +52,6 @@ public class VedtakFattetEventObserverTest {
     @Mock
     private BehandlingVedtakRepository vedtakRepository;
 
-    @Mock
-    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
-
     @Captor
     ArgumentCaptor<ProsessTaskGruppe> prosessTaskGruppeCaptorCaptor;
 
@@ -62,7 +59,7 @@ public class VedtakFattetEventObserverTest {
 
     @BeforeEach
     public void setup() {
-        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository, manglendeKontrollperioderTjeneste);
+        vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository);
     }
 
     @Test
