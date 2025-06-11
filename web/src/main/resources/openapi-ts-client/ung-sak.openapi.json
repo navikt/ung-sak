@@ -1635,20 +1635,25 @@
         "type" : "object"
       },
       "GenereltFritekstBrevDto" : {
-        "properties" : {
-          "brødtekst" : {
-            "maxLength" : 100000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-            "type" : "string"
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
+        }, {
+          "properties" : {
+            "brødtekst" : {
+              "maxLength" : 100000,
+              "minLength" : 0,
+              "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+              "type" : "string"
+            },
+            "overskrift" : {
+              "maxLength" : 200,
+              "minLength" : 0,
+              "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+              "type" : "string"
+            }
           },
-          "overskrift" : {
-            "maxLength" : 200,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-            "type" : "string"
-          }
-        },
+          "type" : "object"
+        } ],
         "required" : [ "brødtekst", "overskrift" ],
         "type" : "object"
       },
@@ -1783,11 +1788,11 @@
             "minimum" : 0,
             "type" : "integer"
           },
-          "fritekstbrev" : {
-            "$ref" : "#/components/schemas/GenereltFritekstBrevDto"
-          },
           "informasjonsbrevMalType" : {
             "$ref" : "#/components/schemas/InformasjonsbrevBestillingDtoInformasjonsbrevMalType"
+          },
+          "innhold" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
           },
           "mottakerDto" : {
             "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
@@ -1800,6 +1805,18 @@
         "enum" : [ "GENERELT_FRITEKSTBREV" ],
         "x-enum-varnames" : [ "GENERELT_FRITEKSTBREV" ],
         "type" : "string"
+      },
+      "InformasjonsbrevInnholdDto" : {
+        "discriminator" : {
+          "propertyName" : "informasjonsbrevMalType"
+        },
+        "properties" : {
+          "informasjonsbrevMalType" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "informasjonsbrevMalType" ],
+        "type" : "object"
       },
       "InformasjonsbrevMottakerDto" : {
         "properties" : {
