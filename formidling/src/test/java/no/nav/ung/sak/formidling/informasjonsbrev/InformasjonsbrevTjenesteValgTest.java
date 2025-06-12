@@ -76,14 +76,13 @@ class InformasjonsbrevTjenesteValgTest {
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
         assertThat(first.malType()).isEqualTo(InformasjonsbrevMalType.GENERELT_FRITEKSTBREV);
 
-        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgDto(
-            behandling.getFagsak().getAktørId().getId(),
-            IdType.AKTØRID,
-            BrevScenarioer.DEFAULT_NAVN,
-            fnr,
-            null
-            ))
-        );
+        assertThat(first.mottakere()).hasSize(1);
+        InformasjonsbrevMottakerValgDto mottaker = first.mottakere().getFirst();
+        assertThat(mottaker.id()).isEqualTo(behandling.getFagsak().getAktørId().getId());
+        assertThat(mottaker.idType()).isEqualTo(IdType.AKTØRID);
+        assertThat(mottaker.navn()).isEqualTo(BrevScenarioer.DEFAULT_NAVN);
+        assertThat(mottaker.fnr()).isEqualTo(fnr);
+        assertThat(mottaker.utilgjengeligÅrsak()).isNull();
 
         assertThat(first.støtterFritekst()).isFalse();
         assertThat(first.støtterTittelOgFritekst()).isTrue();
