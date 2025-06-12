@@ -288,11 +288,6 @@ public class VilkårTjeneste {
         return behandlingRepository.hentBehandling(behandlingId);
     }
 
-    @WithSpan
-    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, @SpanAttribute("vilkarType") VilkårType vilkårType) {
-        return utledPerioderTilVurderingUfiltrert(ref, vilkårType);
-    }
-
     public TreeSet<DatoIntervallEntitet> utledPerioderSomIkkeVurderes(BehandlingReferanse ref, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {
         var vilkår = hentVilkårResultat(ref.getBehandlingId()).getVilkår(vilkårType);
         var perioder = vilkår.stream().flatMap(v -> v.getPerioder().stream())
@@ -303,45 +298,8 @@ public class VilkårTjeneste {
                 .noneMatch(tilVurdering -> tilVurdering.inkluderer(vilkårsperiode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref, VilkårType vilkårType) {
-        var perioderTilVurderingTjeneste = getVilkårsPerioderTilVurderingTjeneste(ref.getFagsakYtelseType(), ref.getBehandlingType());
-        var perioder = new TreeSet<>(perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), vilkårType));
-        var utvidetTilVUrdering = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(ref);
-        if (!utvidetTilVUrdering.isEmpty()) {
-            perioder.addAll(utvidetTilVUrdering);
-        }
-        return perioder;
-    }
-
     public Optional<Vilkårene> hentHvisEksisterer(Long behandlingId) {
         return vilkårResultatRepository.hentHvisEksisterer(behandlingId);
-    }
-
-    public boolean erNoenVilkårHeltAvslått(Long behandlingId, VilkårType vilkårType, LocalDate fom, LocalDate tom) {
-        var vilkårene = hentVilkårResultat(behandlingId);
-        if (vilkårene.getHarAvslåtteVilkårsPerioder()) {
-            boolean heltAvslått = true;
-            var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-            for (var v : vilkårene.getVilkårTidslinjer(periode).entrySet()) {
-                var timeline = v.getValue();
-                if (timeline.isEmpty()) {
-                    continue;
-                }
-                if (v.getKey() == vilkårType) {
-                    // skip oss selv
-                    continue;
-                }
-                var altAvslått = timeline.toSegments().stream().allMatch(vp -> vp.getValue().getUtfall() == Utfall.IKKE_OPPFYLT);
-                if (altAvslått) {
-                    log.info("Alle perioder avslått for vilkår {}, maksPeriode={}", v.getKey(), periode);
-                    return true;
-                }
-
-                heltAvslått = false;
-            }
-            return heltAvslått;
-        }
-        return false;
     }
 
     public LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat(Long behandlingId) {
