@@ -82,7 +82,6 @@ class InformasjonsbrevTjenesteValgTest {
 
         assertThat(first.støtterFritekst()).isFalse();
         assertThat(first.støtterTittelOgFritekst()).isTrue();
-        assertThat(first.støtterTredjepartsMottaker()).isFalse();
     }
 
 

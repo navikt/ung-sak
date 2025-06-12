@@ -40,12 +40,12 @@ public class InformasjonsbrevTjeneste {
             InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
             mapMottakere(behandling),
             false,
-            true,
-            false
+            true
         ));
     }
 
     private List<InformasjonsbrevMottakerValgDto> mapMottakere(Behandling behandling) {
+        //Kan ikke sende brev til død mottaker, men ønsker å vise det til klient.
         boolean dødsfall = erDødsfall(behandling);
 
         String aktørid = behandling.getFagsak().getAktørId().getId();
@@ -60,23 +60,40 @@ public class InformasjonsbrevTjeneste {
     }
 
     public GenerertBrev forhåndsvis(InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
-        var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
-        return validerOgGenererBrev(behandling, dto, kunHtml);
+        return validerOgGenererBrev(dto, kunHtml);
     }
 
     public BrevbestillingResultat bestill(InformasjonsbrevBestillingDto dto) {
+        GenerertBrev generertBrev = validerOgGenererBrev(dto, false);
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
-        GenerertBrev generertBrev = validerOgGenererBrev(behandling, dto, false);
         return brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
     }
 
-    private GenerertBrev validerOgGenererBrev(Behandling behandling, InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
-        if (erDødsfall(behandling)) {
-            throw new IllegalStateException("Støtter ikke generelt brev der mottaker er død");
+    private GenerertBrev validerOgGenererBrev(InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
+        var informasjonsbrevValgDtos = informasjonsbrevValg(dto.behandlingId());
+        if (informasjonsbrevValgDtos.isEmpty()) {
+            throw new IllegalArgumentException("Ingen informasjonsbrevvalg funnet for behandlingen");
+        }
+
+        var valg = informasjonsbrevValgDtos.stream().filter(it -> it.malType().equals(dto.informasjonsbrevMalType())).findFirst();
+        if (valg.isEmpty()) {
+            throw new IllegalArgumentException(("Støtter ikke maltype: " + dto.informasjonsbrevMalType()
+                + ". Støtter kun: " + informasjonsbrevValgDtos.stream()
+                .map(InformasjonsbrevValgDto::malType)
+                .toList()));
+        }
+
+        boolean valgtMottakerErDød = valg.get().mottakere().stream().anyMatch(
+            mottaker -> mottaker.idType().equals(dto.mottakerDto().type())
+                && mottaker.id().equals(dto.mottakerDto().id())
+                && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
+
+        if (valgtMottakerErDød) {
+            throw new IllegalArgumentException(("Støtter ikke brev der mottaker er død"));
         }
 
         return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(
-            new InformasjonsbrevRequest(dto.behandlingId(), dto.informasjonsbrevMalType(), dto.innhold(), kunHtml));
+            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.informasjonsbrevMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
     }
 
 }

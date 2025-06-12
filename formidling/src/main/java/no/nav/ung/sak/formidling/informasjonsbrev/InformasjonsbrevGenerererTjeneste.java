@@ -3,6 +3,7 @@ package no.nav.ung.sak.formidling.informasjonsbrev;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
@@ -30,14 +31,14 @@ public class InformasjonsbrevGenerererTjeneste {
     private BehandlingRepository behandlingRepository;
     private PdfGenKlient pdfGen;
     private BrevMottakerTjeneste brevMottakerTjeneste;
-    private Instance<InformasjonsbrevInnholdBygger> informasjonsbrevInnholdByggere;
+    private Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere;
 
     @Inject
     public InformasjonsbrevGenerererTjeneste(
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
         BrevMottakerTjeneste brevMottakerTjeneste,
-        Instance<InformasjonsbrevInnholdBygger> informasjonsbrevInnholdByggere) {
+        @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
@@ -49,17 +50,17 @@ public class InformasjonsbrevGenerererTjeneste {
     }
 
     @WithSpan
-    public GenerertBrev genererInformasjonsbrev(InformasjonsbrevRequest informasjonsbrevRequest) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererInformasjonsbrev(informasjonsbrevRequest));
+    public GenerertBrev genererInformasjonsbrev(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererInformasjonsbrev(informasjonsbrevBestillingInput));
     }
 
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
-    private GenerertBrev doGenererInformasjonsbrev(InformasjonsbrevRequest informasjonsbrevRequest) {
-        var behandling = behandlingRepository.hentBehandling(informasjonsbrevRequest.behandlingId());
+    private GenerertBrev doGenererInformasjonsbrev(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
+        var behandling = behandlingRepository.hentBehandling(informasjonsbrevBestillingInput.behandlingId());
 
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
-        var bygger = bestemBygger(informasjonsbrevRequest);
-        var innhold = bygger.bygg(behandling, informasjonsbrevRequest.getTypedInnhold());
+        var bygger = bestemBygger(informasjonsbrevBestillingInput);
+        var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
@@ -67,7 +68,7 @@ public class InformasjonsbrevGenerererTjeneste {
                 innhold.templateInnholdDto()
             ));
 
-        PdfGenDokument dokument = pdfGen.lagDokument(input, informasjonsbrevRequest.kunHtml());
+        PdfGenDokument dokument = pdfGen.lagDokument(input, informasjonsbrevBestillingInput.kunHtml());
         return new GenerertBrev(
             dokument,
             pdlMottaker,
@@ -77,9 +78,9 @@ public class InformasjonsbrevGenerererTjeneste {
         );
     }
 
-    private InformasjonsbrevInnholdBygger<?> bestemBygger(InformasjonsbrevRequest informasjonsbrevRequest) {
+    private InformasjonsbrevInnholdBygger<?> bestemBygger(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
         return informasjonsbrevInnholdByggere
-            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(informasjonsbrevRequest.informasjonsbrevMalType()))
+            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(informasjonsbrevBestillingInput.informasjonsbrevMalType()))
             .get();
     }
 

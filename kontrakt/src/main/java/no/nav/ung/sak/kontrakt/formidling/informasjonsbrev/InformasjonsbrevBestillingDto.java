@@ -1,6 +1,7 @@
 package no.nav.ung.sak.kontrakt.formidling.informasjonsbrev;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -29,12 +30,14 @@ public record InformasjonsbrevBestillingDto(
     @Valid
     InformasjonsbrevMalType informasjonsbrevMalType,
 
-    @Valid
     InformasjonsbrevMottakerDto mottakerDto,
-
 
     @JsonProperty("innhold")
     @Valid
+    @JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
+        property = "informasjonsbrevMalType")
     InformasjonsbrevInnholdDto innhold
 ) {
 }

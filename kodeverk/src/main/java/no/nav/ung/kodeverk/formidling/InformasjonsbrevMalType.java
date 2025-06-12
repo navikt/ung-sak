@@ -12,35 +12,30 @@ import java.util.Optional;
  * Informasjon og støttebrev som kan bestilles.
  */
 public enum InformasjonsbrevMalType implements Kodeverdi {
-    GENERELT_FRITEKSTBREV(DokumentMalType.GENERELT_FRITEKSTBREV.getKode(), DokumentMalType.GENERELT_FRITEKSTBREV.getNavn()),
-    ;
 
+    GENERELT_FRITEKSTBREV(DokumentMalType.GENERELT_FRITEKSTBREV)
+
+    ;
     private static final Map<String, InformasjonsbrevMalType> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
-            if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
+            if (KODER.putIfAbsent(v.getKode(), v) != null) {
+                throw new IllegalArgumentException("Duplikat : " + v.getKode());
             }
         }
     }
 
-    private String navn;
-    private String kode;
-    /**
-     * Tilhørende DokumentMalType
-     */
-    private DokumentMalType dokumentMalType;
+    private final DokumentMalType dokumentMalType;
 
-    InformasjonsbrevMalType(String kode, String navn) {
-        this.kode = kode;
-        this.navn = navn;
+    InformasjonsbrevMalType(DokumentMalType dokumentMalType) {
+        this.dokumentMalType = dokumentMalType;
     }
 
     @JsonValue
     @Override
     public String getKode() {
-        return kode;
+        return dokumentMalType.getKode();
     }
 
     @Override
@@ -55,7 +50,7 @@ public enum InformasjonsbrevMalType implements Kodeverdi {
 
     @Override
     public String getNavn() {
-        return navn;
+        return dokumentMalType.getNavn();
     }
 
     public static InformasjonsbrevMalType fraKode(final String kode) {

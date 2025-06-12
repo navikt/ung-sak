@@ -1,15 +1,17 @@
 package no.nav.ung.sak.formidling.informasjonsbrev.innhold;
 
 
+import jakarta.enterprise.context.Dependent;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
-import no.nav.ung.sak.formidling.template.dto.GenerellFritekstbrevDto;
+import no.nav.ung.sak.formidling.template.dto.GenereltFritekstBrevTemplateDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 
 @InformasjonsbrevInnholdByggerTypeRef(InformasjonsbrevMalType.GENERELT_FRITEKSTBREV)
+@Dependent
 public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnholdBygger<GenereltFritekstBrevDto> {
 
     @Override
@@ -20,7 +22,7 @@ public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnhol
         return new TemplateInnholdResultat(
             DokumentMalType.GENERELT_FRITEKSTBREV,
             TemplateType.GENERELT_FRITEKSTBREV,
-            new GenerellFritekstbrevDto(
+            new GenereltFritekstBrevTemplateDto(
                 innhold.overskrift(),
                 innhold.brødtekst()
             ));

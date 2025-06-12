@@ -26,6 +26,7 @@ import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -88,7 +89,8 @@ class InformasjonsbrevTjenesteBrevTest {
         String brødtekst = "Test brødtekst.";
         GenerertBrev generertBrev = informasjonsbrevTjeneste.forhåndsvis(
             new InformasjonsbrevBestillingDto(
-                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV, null,
+                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
+                new InformasjonsbrevMottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID),
                 new GenereltFritekstBrevDto(overskrift, brødtekst)
                 ),
             true
@@ -128,7 +130,8 @@ class InformasjonsbrevTjenesteBrevTest {
         String brødtekst = "Test brødtekst.";
         informasjonsbrevTjeneste.bestill(
             new InformasjonsbrevBestillingDto(
-                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV, null,
+                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
+                new InformasjonsbrevMottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID),
                 new GenereltFritekstBrevDto(overskrift, brødtekst)
             )
         );

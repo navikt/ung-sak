@@ -35,13 +35,9 @@ public enum DokumentMalType implements Kodeverdi {
         }
     }
 
-    private String navn;
-
+    private final String navn;
     private final boolean vedtaksbrevmal;
-
-    private String kode;
-
-
+    private final String kode;
 
     DokumentMalType(String kode, String navn, boolean vedtaksbrevmal) {
         this.kode = kode;

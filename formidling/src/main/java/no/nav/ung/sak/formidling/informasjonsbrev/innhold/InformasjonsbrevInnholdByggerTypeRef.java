@@ -9,6 +9,8 @@ import java.util.Objects;
 
 /**
  * Marker type som implementerer interface {@link InformasjonsbrevInnholdByggerTypeRef}.
+ * Brukes til å velge riktig bygger basert på enum {@link InformasjonsbrevMalType}.
+ * For informasjonsbrev så er det 1-1 mellom enum og bygger (for vedtaksbrev så må det utledes fra ett sett med regler)
  */
 @Repeatable(InformasjonsbrevInnholdByggerTypeRef.ContainerOfInformasjonsbrevInnholdByggerTypeRef.class)
 @Qualifier
