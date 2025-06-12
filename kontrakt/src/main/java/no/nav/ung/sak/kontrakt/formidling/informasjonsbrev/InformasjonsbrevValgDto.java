@@ -1,5 +1,6 @@
 package no.nav.ung.sak.kontrakt.formidling.informasjonsbrev;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 
 import java.util.List;
@@ -12,9 +13,16 @@ import java.util.List;
  * @param støtterTittelOgFritekst
  */
 public record InformasjonsbrevValgDto(
+    @JsonProperty("malType")
     InformasjonsbrevMalType malType,
+
+    @JsonProperty("mottakere")
     List<InformasjonsbrevMottakerValgDto> mottakere,
+
+    @JsonProperty("støtterFritekst")
     boolean støtterFritekst,
+
+    @JsonProperty("støtterTittelOgFritekst")
     boolean støtterTittelOgFritekst
 ) {
 }

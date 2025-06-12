@@ -30,7 +30,9 @@ public record InformasjonsbrevBestillingDto(
     @Valid
     InformasjonsbrevMalType informasjonsbrevMalType,
 
-    InformasjonsbrevMottakerDto mottakerDto,
+    @JsonProperty("mottaker")
+    @Valid
+    InformasjonsbrevMottakerDto mottaker,
 
     @JsonProperty("innhold")
     @Valid

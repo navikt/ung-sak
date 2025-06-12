@@ -36,7 +36,7 @@ public class BrevMottakerTjeneste {
         String fnr = personIdent.getIdent();
         Objects.requireNonNull(fnr);
 
-        return new PdlPerson(fnr, aktørId, navn);
+        return new PdlPerson(fnr, aktørId, navn, personopplysning.getDødsdato());
     }
 
 }

@@ -6,31 +6,33 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingTjeneste;
+import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
+import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
 
 import java.util.List;
+import java.util.Locale;
 
 @Dependent
 public class InformasjonsbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
-    private final PersonopplysningRepository personopplysningRepository;
     private final InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste;
     private final BrevbestillingTjeneste brevbestillingTjeneste;
+    private final BrevMottakerTjeneste brevMottakerTjeneste;
 
     @Inject
-    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, PersonopplysningRepository personopplysningRepository, InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste, BrevbestillingTjeneste brevbestillingTjeneste) {
+    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste, BrevbestillingTjeneste brevbestillingTjeneste, BrevMottakerTjeneste brevMottakerTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.personopplysningRepository = personopplysningRepository;
         this.informasjonsbrevGenerererTjeneste = informasjonsbrevGenerererTjeneste;
         this.brevbestillingTjeneste = brevbestillingTjeneste;
+        this.brevMottakerTjeneste = brevMottakerTjeneste;
     }
 
     public List<InformasjonsbrevValgDto> informasjonsbrevValg(Long behandlingId) {
@@ -45,18 +47,37 @@ public class InformasjonsbrevTjeneste {
     }
 
     private List<InformasjonsbrevMottakerValgDto> mapMottakere(Behandling behandling) {
-        //Kan ikke sende brev til død mottaker, men ønsker å vise det til klient.
-        boolean dødsfall = erDødsfall(behandling);
+        PdlPerson pdlPerson = brevMottakerTjeneste.hentMottaker(behandling);
 
-        String aktørid = behandling.getFagsak().getAktørId().getId();
-        return List.of(new InformasjonsbrevMottakerValgDto(aktørid, IdType.AKTØRID,
-            dødsfall ? UtilgjengeligÅrsak.PERSON_DØD : null));
+        return List.of(
+            new InformasjonsbrevMottakerValgDto(
+                pdlPerson.aktørId().getId(),
+                IdType.AKTØRID,
+                formaterMedStoreOgSmåBokstaver(pdlPerson.navn()),
+                pdlPerson.fnr(),
+                //Kan ikke sende brev til død mottaker, men ønsker å vise det til klient.
+                pdlPerson.dødsdato() != null ? UtilgjengeligÅrsak.PERSON_DØD : null));
+
     }
 
-    private boolean erDødsfall(Behandling behandling) {
-        var personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandling.getId());
-        return personopplysningGrunnlag.getGjeldendeVersjon().getPersonopplysninger().stream()
-            .anyMatch(it -> it.getDødsdato() != null);
+    /**
+     * Kopi fra PersonopplysningDtoTjeneste
+     */
+    private static String formaterMedStoreOgSmåBokstaver(String tekst) {
+        if (tekst == null || (tekst = tekst.trim()).isEmpty()) { // NOSONAR
+            return null;
+        }
+        String skilletegnPattern = "(\\s|[()\\-_.,/])";
+        char[] tegn = tekst.toLowerCase(Locale.getDefault()).toCharArray();
+        boolean nesteSkalHaStorBokstav = true;
+        for (int i = 0; i < tegn.length; i++) {
+            boolean erSkilletegn = String.valueOf(tegn[i]).matches(skilletegnPattern);
+            if (!erSkilletegn && nesteSkalHaStorBokstav) {
+                tegn[i] = Character.toTitleCase(tegn[i]);
+            }
+            nesteSkalHaStorBokstav = erSkilletegn;
+        }
+        return new String(tegn);
     }
 
     public GenerertBrev forhåndsvis(InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
@@ -84,8 +105,8 @@ public class InformasjonsbrevTjeneste {
         }
 
         boolean valgtMottakerErDød = valg.get().mottakere().stream().anyMatch(
-            mottaker -> mottaker.idType().equals(dto.mottakerDto().type())
-                && mottaker.id().equals(dto.mottakerDto().id())
+            mottaker -> mottaker.idType().equals(dto.mottaker().type())
+                && mottaker.id().equals(dto.mottaker().id())
                 && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
 
         if (valgtMottakerErDød) {

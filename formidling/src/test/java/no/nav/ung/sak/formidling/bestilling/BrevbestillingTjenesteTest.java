@@ -71,7 +71,7 @@ class BrevbestillingTjenesteTest {
 
         var dokument = "et dokument";
 
-        PdlPerson testBruker = new PdlPerson(fnr, behandling.getAktørId(), "Test Bruker");
+        PdlPerson testBruker = new PdlPerson(fnr, behandling.getAktørId(), "Test Bruker", null);
         var generertBrev = new GenerertBrev(
             new PdfGenDokument(dokument.getBytes(StandardCharsets.UTF_8), dokument),
             testBruker,

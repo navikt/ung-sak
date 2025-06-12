@@ -7,6 +7,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.formidling.IdType;
 
+/**
+ * Request dto for å angi mottaker
+ * @param id
+ * @param type
+ */
 public record InformasjonsbrevMottakerDto(
         @Valid
         @NotNull
@@ -16,9 +21,7 @@ public record InformasjonsbrevMottakerDto(
         @JsonProperty("id")
         String id,
 
-        @Valid
         @NotNull
-        @Pattern(regexp = "^[\\p{L}\\p{N}]+$")
         @JsonProperty("type")
         IdType type
 

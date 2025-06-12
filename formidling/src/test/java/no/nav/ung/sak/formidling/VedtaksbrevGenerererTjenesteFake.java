@@ -13,8 +13,8 @@ public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTje
     public VedtaksbrevGenerererTjenesteFake(String fnr) {
         this.resultat = new GenerertBrev(
             new PdfGenDokument(new byte[0], ""),
-            new PdlPerson(fnr, new AktørId(123L), "Nordmann"),
-            new PdlPerson(fnr, new AktørId(123L), "Nordmann"),
+            new PdlPerson(fnr, new AktørId(123L), "Nordmann", null),
+            new PdlPerson(fnr, new AktørId(123L), "Nordmann", null),
             DokumentMalType.INNVILGELSE_DOK,
             TemplateType.INNVILGELSE
         );

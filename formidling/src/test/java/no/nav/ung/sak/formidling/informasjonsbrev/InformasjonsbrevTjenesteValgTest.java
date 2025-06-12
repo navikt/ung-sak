@@ -50,14 +50,15 @@ class InformasjonsbrevTjenesteValgTest {
 
         informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
             ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-            ungTestRepositories.repositoryProvider().getPersonopplysningRepository(),
             new InformasjonsbrevGenerererTjeneste(
                 ungTestRepositories.repositoryProvider().getBehandlingRepository(),
                 new PdfGenKlient(),
                 new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
                     ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
                 null),
-            null
+            null,
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
+                ungTestRepositories.repositoryProvider().getPersonopplysningRepository())
         );
     }
 
@@ -77,7 +78,11 @@ class InformasjonsbrevTjenesteValgTest {
 
         assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgDto(
             behandling.getFagsak().getAktørId().getId(),
-            IdType.AKTØRID, null))
+            IdType.AKTØRID,
+            BrevScenarioer.DEFAULT_NAVN,
+            fnr,
+            null
+            ))
         );
 
         assertThat(first.støtterFritekst()).isFalse();
@@ -122,7 +127,10 @@ class InformasjonsbrevTjenesteValgTest {
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
         assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgDto(
             behandling.getFagsak().getAktørId().getId(),
-            IdType.AKTØRID, UtilgjengeligÅrsak.PERSON_DØD))
+            IdType.AKTØRID,
+            BrevScenarioer.DEFAULT_NAVN,
+            fnr,
+            UtilgjengeligÅrsak.PERSON_DØD))
         );
     }
 

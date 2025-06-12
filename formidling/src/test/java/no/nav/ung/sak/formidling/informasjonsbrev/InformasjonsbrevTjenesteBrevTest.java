@@ -65,7 +65,6 @@ class InformasjonsbrevTjenesteBrevTest {
             new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null)));
         informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
             ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-            ungTestRepositories.repositoryProvider().getPersonopplysningRepository(),
             new InformasjonsbrevGenerererTjeneste(
                 ungTestRepositories.repositoryProvider().getBehandlingRepository(),
                 new PdfGenKlient(),
@@ -73,7 +72,9 @@ class InformasjonsbrevTjenesteBrevTest {
                     ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
                 new UnitTestLookupInstanceImpl<>(new GenereltFritekstbrevInnholdBygger())
             ),
-            brevbestillingTjeneste
+            brevbestillingTjeneste,
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
+                ungTestRepositories.repositoryProvider().getPersonopplysningRepository())
         );
     }
 
