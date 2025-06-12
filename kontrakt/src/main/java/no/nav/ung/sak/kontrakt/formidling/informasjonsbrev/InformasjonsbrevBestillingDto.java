@@ -11,11 +11,12 @@ import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
- * DTO for bestilling av informasjonsbrev.
+ * Request DTO for bestilling av informasjonsbrev.
  *
  * @param behandlingId Behandlingid.
  * @param informasjonsbrevMalType Angir malen som ønskes forhåndsvist eller bestilt.
  * @param innhold Kun satt for Generelt fritekstbrev.
+ * @param mottaker Mottaker av informasjonsbrevet.
  */
 public record InformasjonsbrevBestillingDto(
     @JsonProperty(value = BehandlingIdDto.NAME, required = true)
