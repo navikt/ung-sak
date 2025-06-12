@@ -9,14 +9,6 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 public interface VurderOmVedtakPåvirkerSakerTjeneste {
 
-    static VurderOmVedtakPåvirkerSakerTjeneste finnTjeneste(FagsakYtelseType ytelseType) {
-        return FagsakYtelseTypeRef.Lookup.find(VurderOmVedtakPåvirkerSakerTjeneste.class, ytelseType)
-            .orElseThrow(() -> new IllegalStateException("Har ikke VurderOmVedtakPåvirkerSakerTjeneste for ytelseType=" + ytelseType));
-    }
-
-    static Optional<VurderOmVedtakPåvirkerSakerTjeneste> finnTjenesteHvisStøttet(FagsakYtelseType ytelseType) {
-        return FagsakYtelseTypeRef.Lookup.find(VurderOmVedtakPåvirkerSakerTjeneste.class, ytelseType);
-    }
-
     List<SakMedPeriode> utledSakerMedPerioderSomErKanVærePåvirket(Ytelse vedtakHendelse);
+
 }
