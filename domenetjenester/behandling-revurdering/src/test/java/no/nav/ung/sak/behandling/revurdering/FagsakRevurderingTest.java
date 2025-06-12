@@ -91,19 +91,6 @@ public class FagsakRevurderingTest {
     }
 
     @Test
-    public void kanIkkeOppretteRevurderingNårOrigBehandlingErUnntaksbehandling() {
-        var unntaksbehandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.UNNTAKSBEHANDLING).build();
-
-        when(behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(fagsakSaksnummer))
-            .thenReturn(singletonList(unntaksbehandling));
-
-        FagsakRevurdering tjeneste = new FagsakRevurdering(behandlingRepository);
-        Boolean kanRevurderingOpprettes = tjeneste.kanRevurderingOpprettes(fagsak);
-
-        assertThat(kanRevurderingOpprettes).isFalse();
-    }
-
-    @Test
     public void behandlingerSkalSorteresSynkendePåAvsluttetDato(){
         Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).build();
         LocalDateTime now = LocalDateTime.now();

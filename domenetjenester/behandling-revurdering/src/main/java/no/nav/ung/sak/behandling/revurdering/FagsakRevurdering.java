@@ -29,8 +29,7 @@ class FagsakRevurdering {
 
     private boolean kanRevurderingOpprettes(List<Behandling> behandlinger) {
         Optional<Behandling> gjeldendeBehandling = hentBehandlingMedVedtak(behandlinger);
-        return gjeldendeBehandling.isPresent()
-            && gjeldendeBehandling.get().getType() != BehandlingType.UNNTAKSBEHANDLING;
+        return gjeldendeBehandling.isPresent();
     }
 
     private Optional<Behandling> hentBehandlingMedVedtak(List<Behandling> behandlinger) {

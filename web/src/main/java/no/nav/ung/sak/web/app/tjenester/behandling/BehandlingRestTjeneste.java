@@ -1,18 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.ung.abac.BeskyttetRessursKoder.VENTEFRIST;
-import static no.nav.k9.felles.feil.LogLevel.ERROR;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
-
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -25,13 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -46,12 +27,12 @@ import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -59,21 +40,21 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingOperasjonerDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
-import no.nav.ung.sak.kontrakt.behandling.GjenopptaBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.HenleggBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.NyBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.ReåpneBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
+import no.nav.ung.sak.kontrakt.behandling.*;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
+import static no.nav.k9.felles.feil.LogLevel.ERROR;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.*;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.VENTEFRIST;
 
 @ApplicationScoped
 @Transactional
@@ -84,13 +65,10 @@ public class BehandlingRestTjeneste {
     public static final String BEHANDLING_PATH = "/behandling";
     public static final String BEHANDLINGER_ALLE = "/behandlinger/alle";
     public static final String BEHANDLINGER_PATH = "/behandlinger";
-    public static final String REVURDER_PERIODE_FRA_STEG_PATH = "/behandlinger/revurder-periode-fra-steg";
-    public static final String BEHANDLINGER_UNNTAK_PATH = "/behandlinger/unntak";
     public static final String BEHANDLINGER_STATUS = "/behandlinger/status";
     public static final String FAGSAK_BEHANDLING_PATH = "/fagsak/behandling";
     public static final String REVURDERING_ORGINAL_PATH = "/behandling/revurdering-original";
     public static final String STATUS_PATH = "/behandling/status";
-    public static final String DIREKTE_OVERGANG_PATH = "/behandling/direkte-overgang";
     static public final String BYTT_ENHET_PATH = "/behandlinger/bytt-enhet";
     static public final String GJENOPPTA_PATH = "/behandlinger/gjenoppta";
     static public final String HENLEGG_PATH = "/behandlinger/henlegg";
@@ -370,38 +348,6 @@ public class BehandlingRestTjeneste {
             // return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
         } else {
             throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + behandlingType);
-        }
-
-    }
-
-    @PUT
-    @Path(BEHANDLINGER_UNNTAK_PATH)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Opprette ny unntaksbehandling", tags = "behandlinger", responses = {
-        @ApiResponse(responseCode = "202", description = "Opprett ny unntaksbehandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
-    })
-    @PollTaskAfterTransaction
-    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response opprettNyUnntaksbehandling(@Context HttpServletRequest request,
-                                               @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyBehandlingDto dto)
-        throws URISyntaxException {
-        Saksnummer saksnummer = dto.getSaksnummer();
-        Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
-        BehandlingType kode = BehandlingType.fraKode(dto.getBehandlingType().getKode());
-
-        if (funnetFagsak.isEmpty()) {
-            throw BehandlingRestTjenesteFeil.FACTORY.fantIkkeFagsak(saksnummer).toException();
-        }
-        Fagsak fagsak = funnetFagsak.get();
-        if (BehandlingType.UNNTAKSBEHANDLING.getKode().equals(kode.getKode())) {
-            BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
-            Behandling behandling = behandlingsoppretterTjeneste.opprettUnntaksbehandling(fagsak, behandlingÅrsakType);
-            String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
-            return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
-
-        } else {
-            throw new IllegalArgumentException("Støtter ikke opprette ny unntaksbehandling for behandlingType:" + kode);
         }
 
     }
