@@ -3,6 +3,7 @@ package no.nav.ung.sak.perioder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
@@ -77,7 +78,10 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
                 .stream()
                 .flatMap(Collection::stream)
                 .map(VilkårPeriode::getPeriode)
-                .filter(p -> perioder.stream().anyMatch(p::overlapper))
+                .filter(p -> perioder.stream().anyMatch(endringPeriode ->
+                    endringPeriode.overlapper(p) ||
+                    p.inkluderer(endringPeriode.getFomDato().minusDays(1)) ||
+                    p.inkluderer(endringPeriode.getTomDato().plusDays(1)))) // Vurderer perioder som grenser til endringsperiode for å håndtere scenario der vi splitter aldersvilkåret pga endring i ungdomsprogramperiode
                 .collect(Collectors.toCollection(TreeSet::new));
         }
         return TidslinjeUtil.tilDatoIntervallEntiteter(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId));
