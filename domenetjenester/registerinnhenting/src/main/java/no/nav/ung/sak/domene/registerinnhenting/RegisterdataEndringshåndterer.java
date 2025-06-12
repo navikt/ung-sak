@@ -6,10 +6,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -140,7 +138,18 @@ public class RegisterdataEndringshåndterer {
             historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD);
             return;
         }
-        // TODO: Lag egnet historikkinnslag for endret programperiode og kontroll av inntekt
+        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+            return;
+        }
+        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+            return;
+        }
+        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING)) {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING);
+            return;
+        }
         historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
     }
 
