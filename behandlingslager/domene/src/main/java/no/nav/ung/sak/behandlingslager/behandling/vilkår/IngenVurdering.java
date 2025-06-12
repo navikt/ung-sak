@@ -13,10 +13,5 @@ public class IngenVurdering implements KantIKantVurderer {
     public boolean erKantIKant(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
         return false;
     }
-
-    @Override
-    public boolean erKomprimerbar() {
-        return false;
-    }
 }
 
