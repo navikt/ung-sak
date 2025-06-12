@@ -116,7 +116,7 @@ public class FormidlingRestTjeneste {
     }
 
     @GET
-    @Path("/formidling/informasjonsbrev/maler")
+    @Path("/formidling/informasjonsbrev")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Maler for informasjon og støttebrev", tags = "formidling")
