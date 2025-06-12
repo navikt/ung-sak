@@ -673,8 +673,8 @@
         "type" : "string"
       },
       "BehandlingAksjonspunktDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingAksjonspunktDtoFagsakStatus" : {
@@ -881,8 +881,8 @@
         "type" : "string"
       },
       "BehandlingDtoType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingDtoVenteårsak" : {
@@ -951,8 +951,8 @@
         "type" : "object"
       },
       "BehandlingOpprettingDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingStegTilstandDto" : {
@@ -2511,8 +2511,8 @@
         "type" : "string"
       },
       "KodeverkBehandlingBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverkBehandlingBehandlingÅrsakType" : {
@@ -2882,8 +2882,8 @@
         "type" : "string"
       },
       "NyBehandlingDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "OppdaterAktørIdDto" : {
@@ -6019,33 +6019,6 @@
           }
         },
         "summary" : "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /behandlinger dersom asynkrone operasjoner er ferdig.",
-        "tags" : [ "behandlinger" ]
-      }
-    },
-    "/api/behandlinger/unntak" : {
-      "put" : {
-        "description" : "Opprette ny unntaksbehandling",
-        "operationId" : "opprettNyUnntaksbehandling",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/NyBehandlingDto"
-              }
-            }
-          },
-          "description" : "Saksnummer"
-        },
-        "responses" : {
-          "202" : {
-            "description" : "Opprett ny unntaksbehandling pågår",
-            "headers" : {
-              "Location" : {
-                "style" : "simple"
-              }
-            }
-          }
-        },
         "tags" : [ "behandlinger" ]
       }
     },
