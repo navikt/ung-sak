@@ -38,11 +38,13 @@ public class InformasjonsbrevTjeneste {
     public List<InformasjonsbrevValgDto> informasjonsbrevValg(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        boolean støtterFritekst = false;
+        boolean støtterTittelOgFritekst = true;
         return List.of(new InformasjonsbrevValgDto(
             InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
             mapMottakere(behandling),
-            false,
-            true
+            støtterFritekst,
+            støtterTittelOgFritekst
         ));
     }
 
@@ -61,23 +63,24 @@ public class InformasjonsbrevTjeneste {
     }
 
     /**
-     * Kopi fra PersonopplysningDtoTjeneste
+     * Kopi fra PersonopplysningDtoTjeneste med en annen implementasjon men samme funksjonalitet
      */
-    private static String formaterMedStoreOgSmåBokstaver(String tekst) {
-        if (tekst == null || (tekst = tekst.trim()).isEmpty()) { // NOSONAR
+    private static String formaterMedStoreOgSmåBokstaver(String text) {
+        if (text == null || (text = text.trim()).isEmpty()) {
             return null;
         }
-        String skilletegnPattern = "(\\s|[()\\-_.,/])";
-        char[] tegn = tekst.toLowerCase(Locale.getDefault()).toCharArray();
-        boolean nesteSkalHaStorBokstav = true;
-        for (int i = 0; i < tegn.length; i++) {
-            boolean erSkilletegn = String.valueOf(tegn[i]).matches(skilletegnPattern);
-            if (!erSkilletegn && nesteSkalHaStorBokstav) {
-                tegn[i] = Character.toTitleCase(tegn[i]);
+        String delimiters = " ()-_. ,/"; // All characters to treat as word boundaries
+        char[] chars = text.toLowerCase(Locale.getDefault()).toCharArray();
+        boolean capitalizeNext = true;
+        for (int i = 0; i < chars.length; i++) {
+            if (delimiters.indexOf(chars[i]) >= 0) {
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                chars[i] = Character.toTitleCase(chars[i]);
+                capitalizeNext = false;
             }
-            nesteSkalHaStorBokstav = erSkilletegn;
         }
-        return new String(tegn);
+        return new String(chars);
     }
 
     public GenerertBrev forhåndsvis(InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
@@ -96,7 +99,9 @@ public class InformasjonsbrevTjeneste {
             throw new IllegalArgumentException("Ingen informasjonsbrevvalg funnet for behandlingen");
         }
 
-        var valg = informasjonsbrevValgDtos.stream().filter(it -> it.malType().equals(dto.informasjonsbrevMalType())).findFirst();
+        var valg = informasjonsbrevValgDtos.stream().
+            filter(it -> it.malType() == dto.informasjonsbrevMalType())
+            .findFirst();
         if (valg.isEmpty()) {
             throw new IllegalArgumentException(("Støtter ikke maltype: " + dto.informasjonsbrevMalType()
                 + ". Støtter kun: " + informasjonsbrevValgDtos.stream()
@@ -105,7 +110,7 @@ public class InformasjonsbrevTjeneste {
         }
 
         boolean valgtMottakerErDød = valg.get().mottakere().stream().anyMatch(
-            mottaker -> mottaker.idType().equals(dto.mottaker().type())
+            mottaker -> mottaker.idType() == dto.mottaker().type()
                 && mottaker.id().equals(dto.mottaker().id())
                 && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
 
