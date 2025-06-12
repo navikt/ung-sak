@@ -1,22 +1,5 @@
 package no.nav.ung.sak.vilkår;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-
-import io.opentelemetry.instrumentation.annotations.SpanAttribute;
-import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -35,16 +18,16 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.*;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet.VilkårUtfall;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import org.slf4j.Logger;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Dependent
 public class VilkårTjeneste {
