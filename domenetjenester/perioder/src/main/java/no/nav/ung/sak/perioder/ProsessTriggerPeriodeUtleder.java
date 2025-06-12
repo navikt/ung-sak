@@ -11,6 +11,7 @@ import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Set;
 
 @Dependent
@@ -46,11 +47,12 @@ public class ProsessTriggerPeriodeUtleder {
 
     private LocalDateInterval finnPeriodeForBehandlingsårsak(Long behandligId, Trigger p, BehandlingÅrsakType årsak) {
         // For nye søknader så vil triggerperioden være uendelig fordi vi ikke vet sluttdato ved oppretting av trigger,
-        // så vi begresenser det her til søknadsperide
+        // så vi begresenser det her til programperiode
         if (årsak == BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE) {
             return ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandligId).stream()
-                .filter(it -> it.inkluderer(p.getPeriode().getFomDato())).findFirst()
-                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke overlappet med søknadsperiode"))
+                .filter(it -> it.getTomDato().isAfter(p.getPeriode().getFomDato()))
+                .min(Comparator.naturalOrder())
+                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode"))
                 .toLocalDateInterval();
 
         }

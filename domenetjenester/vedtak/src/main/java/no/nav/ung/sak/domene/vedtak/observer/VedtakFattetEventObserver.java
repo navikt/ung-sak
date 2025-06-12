@@ -32,6 +32,7 @@ public class VedtakFattetEventObserver {
             if (erBehandlingAvRettTypeForAbakus(event)) {
                 gruppe.addNesteSekvensiell(opprettTaskForPubliseringAvVedtakMedYtelse(event));
             }
+
             taskTjeneste.lagre(gruppe);
         }
     }

@@ -28,7 +28,6 @@ import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,9 +74,6 @@ public class IverksetteVedtakStegYtelseTest {
     @Mock
     private StønadstatistikkService stønadstatistikkService;
 
-    @Mock
-    private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
-
     private IverksetteVedtakSteg iverksetteVedtakSteg;
 
     @BeforeEach
@@ -90,7 +86,7 @@ public class IverksetteVedtakStegYtelseTest {
         historikkRepository = repositoryProvider.getHistorikkinnslagRepository();
 
 
-        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new UngdomsytelseOpprettProsessTaskIverksett(prosessTaskRepository, stønadstatistikkService, manglendeKontrollperioderTjeneste));
+        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new UngdomsytelseOpprettProsessTaskIverksett(prosessTaskRepository, stønadstatistikkService));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse);
