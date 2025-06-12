@@ -1634,29 +1634,6 @@
         "required" : [ "barnIdent", "fødselsdato", "hendelseInfo" ],
         "type" : "object"
       },
-      "GenereltFritekstBrevDto" : {
-        "allOf" : [ {
-          "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
-        }, {
-          "properties" : {
-            "brødtekst" : {
-              "maxLength" : 100000,
-              "minLength" : 0,
-              "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-              "type" : "string"
-            },
-            "overskrift" : {
-              "maxLength" : 200,
-              "minLength" : 0,
-              "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-              "type" : "string"
-            }
-          },
-          "type" : "object"
-        } ],
-        "required" : [ "brødtekst", "overskrift" ],
-        "type" : "object"
-      },
       "GjenopptaBehandlingDto" : {
         "properties" : {
           "behandlingId" : {
@@ -1794,7 +1771,7 @@
           "innhold" : {
             "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
           },
-          "mottakerDto" : {
+          "mottaker" : {
             "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
           }
         },
@@ -1807,15 +1784,6 @@
         "type" : "string"
       },
       "InformasjonsbrevInnholdDto" : {
-        "discriminator" : {
-          "propertyName" : "informasjonsbrevMalType"
-        },
-        "properties" : {
-          "informasjonsbrevMalType" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "informasjonsbrevMalType" ],
         "type" : "object"
       },
       "InformasjonsbrevMottakerDto" : {
@@ -1836,16 +1804,21 @@
       "InformasjonsbrevMottakerDtoType" : {
         "enum" : [ "ORGNR", "AKTØRID" ],
         "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
-        "pattern" : "^[\\p{L}\\p{N}]+$",
         "type" : "string"
       },
       "InformasjonsbrevMottakerValgDto" : {
         "properties" : {
+          "fnr" : {
+            "type" : "string"
+          },
           "id" : {
             "type" : "string"
           },
           "idType" : {
             "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDtoIdType"
+          },
+          "navn" : {
+            "type" : "string"
           },
           "utilgjengeligÅrsak" : {
             "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDtoUtilgjengeligÅrsak"
@@ -1878,9 +1851,6 @@
             "type" : "boolean"
           },
           "støtterTittelOgFritekst" : {
-            "type" : "boolean"
-          },
-          "støtterTredjepartsMottaker" : {
             "type" : "boolean"
           }
         },
@@ -6975,6 +6945,33 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/api/formidling/informasjonsbrev" : {
+      "get" : {
+        "description" : "Maler for informasjon og støttebrev",
+        "operationId" : "informasjonsbrevValg",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InformasjonsbrevValgResponseDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
     "/api/formidling/informasjonsbrev/bestill" : {
       "post" : {
         "description" : "Bestill informasjonsbrev for en behandling. ",
@@ -7043,33 +7040,6 @@
               }
             },
             "description" : "pdf"
-          }
-        },
-        "tags" : [ "formidling" ]
-      }
-    },
-    "/api/formidling/informasjonsbrev/maler" : {
-      "get" : {
-        "description" : "Maler for informasjon og støttebrev",
-        "operationId" : "informasjonsbrevValg",
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "behandlingId",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InformasjonsbrevValgResponseDto"
-                }
-              }
-            },
-            "description" : "default response"
           }
         },
         "tags" : [ "formidling" ]
