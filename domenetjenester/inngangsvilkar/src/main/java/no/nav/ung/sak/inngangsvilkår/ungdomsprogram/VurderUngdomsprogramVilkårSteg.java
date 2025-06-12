@@ -1,10 +1,5 @@
 package no.nav.ung.sak.inngangsvilkår.ungdomsprogram;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR;
-
-import java.util.List;
-import java.util.NavigableSet;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -16,12 +11,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -32,16 +22,24 @@ import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
+import java.util.List;
+import java.util.NavigableSet;
+import java.util.Set;
+
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR;
+
 @BehandlingStegRef(value = VURDER_UNGDOMSPROGRAMVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @ApplicationScoped
 public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
 
+    public static final Set<VilkårType> AVHENGIGE_VILKÅR = Set.of(VilkårType.ALDERSVILKÅR);
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private AvhengigeVilkårJusterer avhengigeVilkårJusterer;
 
     public VurderUngdomsprogramVilkårSteg() {
     }
@@ -50,11 +48,13 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
     public VurderUngdomsprogramVilkårSteg(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                           BehandlingRepository behandlingRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
-                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
+                                          AvhengigeVilkårJusterer avhengigeVilkårJusterer) {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.avhengigeVilkårJusterer = avhengigeVilkårJusterer;
     }
 
 
@@ -70,7 +70,10 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
         var builders = vurderPerioder(ungdomsprogramTidslinje, perioderTilVurdering, vilkårBuilder);
         builders.forEach(vilkårBuilder::leggTil);
         resultatBuilder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
+        var resultat = resultatBuilder.build();
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultat);
+        // Justerer perioder for andre vilkår
+        avhengigeVilkårJusterer.fjernAvslåttePerioderForAvhengigeVilkår(kontekst.getBehandlingId(), perioderTilVurdering, AVHENGIGE_VILKÅR, VilkårType.UNGDOMSPROGRAMVILKÅRET);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
