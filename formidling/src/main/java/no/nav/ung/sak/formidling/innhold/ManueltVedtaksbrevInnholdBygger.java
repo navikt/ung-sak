@@ -11,12 +11,12 @@ import no.nav.ung.sak.formidling.template.dto.ManuellVedtaksbrevDto;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 
 @Dependent
-public class ManuellVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger {
+public class ManueltVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     @Inject
-    public ManuellVedtaksbrevInnholdBygger(VedtaksbrevValgRepository vedtaksbrevValgRepository) {
+    public ManueltVedtaksbrevInnholdBygger(VedtaksbrevValgRepository vedtaksbrevValgRepository) {
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
     }
 
@@ -34,7 +34,7 @@ public class ManuellVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger
 
         return new TemplateInnholdResultat(
             DokumentMalType.MANUELT_VEDTAK_DOK,
-            TemplateType.MANUELL_VEDTAKSBREV,
+            TemplateType.MANUELT_VEDTAKSBREV,
             new ManuellVedtaksbrevDto(tekst)
         );
     }

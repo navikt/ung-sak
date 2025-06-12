@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
+import no.nav.ung.sak.formidling.BrevHistorikkinnslagTjeneste;
 import no.nav.ung.sak.formidling.dokdist.DokDistRestKlient;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
@@ -34,11 +35,13 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
     static final String BREVBESTILLING_DISTRIBUSJONSTYPE = "brevbestilling.distribusjonstype";
     private BrevbestillingRepository brevbestillingRepository;
     private DokDistRestKlient dokDistRestKlient;
+    private BrevHistorikkinnslagTjeneste brevHistorikkinnslagTjeneste;
 
     @Inject
-    public BrevdistribusjonTask(BrevbestillingRepository brevbestillingRepository, DokDistRestKlient dokDistRestKlient) {
+    public BrevdistribusjonTask(BrevbestillingRepository brevbestillingRepository, DokDistRestKlient dokDistRestKlient, BrevHistorikkinnslagTjeneste brevHistorikkinnslagTjeneste) {
         this.brevbestillingRepository = brevbestillingRepository;
         this.dokDistRestKlient = dokDistRestKlient;
+        this.brevHistorikkinnslagTjeneste = brevHistorikkinnslagTjeneste;
     }
 
     public BrevdistribusjonTask() {
@@ -55,13 +58,7 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
 
         BrevbestillingEntitet bestilling = brevbestillingRepository.hent(Long.valueOf(bestillingId));
 
-        if (bestilling.getStatus() != BrevbestillingStatusType.JOURNALFØRT) {
-            throw new IllegalStateException("Krever at bestillingen har status JOURNALFØRT. Brevbestilling: " + bestilling);
-        }
-
-        if (bestilling.getJournalpostId() == null) {
-            throw new IllegalStateException("Krever at bestillingen har journalpostId. Brevbestilling: " + bestilling);
-        }
+        valider(bestilling);
 
         var response = dokDistRestKlient.distribuer(new DistribuerJournalpostRequest(
             bestilling.getJournalpostId(),
@@ -73,7 +70,22 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
         ));
         bestilling.fullført(response.bestillingsId());
         brevbestillingRepository.lagre(bestilling);
-
+/*
+        brevHistorikkinnslagTjeneste.opprett(
+            bestilling.getDokumentMalType().isVedtaksbrevmal() ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER,
+            bestilling.getSaksnummer()
+        );
+*/
         LOG.info("Brevbestilling OK {}", bestilling);
+    }
+
+    private static void valider(BrevbestillingEntitet bestilling) {
+        if (bestilling.getStatus() != BrevbestillingStatusType.JOURNALFØRT) {
+            throw new IllegalStateException("Krever at bestillingen har status JOURNALFØRT. Brevbestilling: " + bestilling);
+        }
+
+        if (bestilling.getJournalpostId() == null) {
+            throw new IllegalStateException("Krever at bestillingen har journalpostId. Brevbestilling: " + bestilling);
+        }
     }
 }

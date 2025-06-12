@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -69,7 +69,7 @@ class VedtaksbrevGenerererTjenesteTest {
                 new DetaljertResultatUtlederFake(
                     ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet()))),
                 ungTestRepositories.ungdomsprogramPeriodeRepository()),
-            ungTestRepositories.vedtaksbrevValgRepository(), new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+            ungTestRepositories.vedtaksbrevValgRepository(), new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
 
 

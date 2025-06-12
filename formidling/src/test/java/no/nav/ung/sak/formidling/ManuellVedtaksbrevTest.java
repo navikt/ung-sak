@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -64,7 +64,7 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.MANUELL_VEDTAKSBREV);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.MANUELT_VEDTAKSBREV);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -100,7 +100,7 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        return new ManuellVedtaksbrevInnholdBygger(vedtaksbrevValgRepository);
+        return new ManueltVedtaksbrevInnholdBygger(vedtaksbrevValgRepository);
     }
 
     @Override

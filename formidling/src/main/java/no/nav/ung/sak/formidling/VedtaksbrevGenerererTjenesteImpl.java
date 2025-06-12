@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
@@ -27,7 +27,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private BehandlingRepository behandlingRepository;
     private PdfGenKlient pdfGen;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
-    private ManuellVedtaksbrevInnholdBygger manuellVedtaksbrevInnholdBygger;
+    private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
 
     private VedtaksbrevRegler vedtaksbrevRegler;
@@ -38,13 +38,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         PdfGenKlient pdfGen,
         VedtaksbrevRegler vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        ManuellVedtaksbrevInnholdBygger manuellVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste) {
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
-        this.manuellVedtaksbrevInnholdBygger = manuellVedtaksbrevInnholdBygger;
+        this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
     }
 
@@ -131,7 +131,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     @WithSpan
     private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var resultat = manuellVedtaksbrevInnholdBygger.bygg(behandling, null);
+        var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, null);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
