@@ -88,11 +88,13 @@ class InformasjonsbrevTjenesteBrevTest {
         // When
         String overskrift = "Dette er en test for forhåndsvisning av informasjonsbrev";
         String brødtekst = "Test brødtekst.";
+        String brødtekstMedMarkdown = "### " + brødtekst;
+
         GenerertBrev generertBrev = informasjonsbrevTjeneste.forhåndsvis(
             new InformasjonsbrevBestillingDto(
                 behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
                 new InformasjonsbrevMottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID),
-                new GenereltFritekstBrevDto(overskrift, brødtekst)
+                new GenereltFritekstBrevDto(overskrift, brødtekstMedMarkdown)
                 ),
             true
             );
@@ -113,7 +115,8 @@ class InformasjonsbrevTjenesteBrevTest {
         assertThatHtml(brevtekst).asPlainTextIsEqualTo(forventetFullBrev);
         assertThatHtml(brevtekst)
             .containsHtmlSubSequenceOnce(
-                "<h1>" + overskrift + "</h1>"
+                "<h1>" + overskrift + "</h1>",
+                "<h3>" + brødtekst + "</h3>"
             );
 
     }

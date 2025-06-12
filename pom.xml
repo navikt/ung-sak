@@ -52,6 +52,8 @@
         <validation-model-jakarta.version>1.28.1</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.28</openhtmltopdf.version>
         <jsoup.version>1.20.1</jsoup.version>
+        <commonmark.version>0.24.0</commonmark.version>
+
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -629,8 +631,14 @@
                 <artifactId>jsoup</artifactId>
                 <version>${jsoup.version}</version>
             </dependency>
-
+            <!-- For markdown støtte i informasjonsbrev -->
+            <dependency>
+                <groupId>org.commonmark</groupId>
+                <artifactId>commonmark</artifactId>
+                <version>${commonmark.version}</version>
+            </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <dependencies>

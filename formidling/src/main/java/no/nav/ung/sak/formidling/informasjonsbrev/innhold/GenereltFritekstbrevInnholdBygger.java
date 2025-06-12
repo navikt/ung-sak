@@ -17,14 +17,12 @@ public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnhol
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, GenereltFritekstBrevDto innhold) {
 
-        //TODO sanitize html!
-
         return new TemplateInnholdResultat(
             DokumentMalType.GENERELT_FRITEKSTBREV,
             TemplateType.GENERELT_FRITEKSTBREV,
             new GenereltFritekstBrevTemplateDto(
                 innhold.overskrift(),
-                innhold.brødtekst()
+                MarkdownParser.markdownTilHtml(innhold.brødtekst())
             ));
     }
 }
