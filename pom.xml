@@ -47,7 +47,7 @@
         <pdfgen-core.version>1.1.50</pdfgen-core.version>
         <confluent.platform.version>7.9.1</confluent.platform.version>
         <mockito.version>5.17.0</mockito.version>
-        <ung-deltakelse-opplyser.version>2.0.1</ung-deltakelse-opplyser.version>
+        <ung-deltakelse-opplyser.version>2.2.0</ung-deltakelse-opplyser.version>
         <handlebars.version>4.4.0</handlebars.version>
         <validation-model-jakarta.version>1.28.1</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.28</openhtmltopdf.version>
