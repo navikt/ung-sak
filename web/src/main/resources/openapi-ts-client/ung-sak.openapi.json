@@ -4297,7 +4297,7 @@
             "items" : {
               "$ref" : "#/components/schemas/TilkjentYtelsePeriodeV1"
             },
-            "maxItems" : 700,
+            "maxItems" : 800,
             "minItems" : 0,
             "type" : "array"
           }
@@ -4338,7 +4338,7 @@
           },
           "satsBeloep" : {
             "format" : "int64",
-            "maximum" : 3440,
+            "maximum" : 3610,
             "minimum" : 1,
             "type" : "integer"
           },
