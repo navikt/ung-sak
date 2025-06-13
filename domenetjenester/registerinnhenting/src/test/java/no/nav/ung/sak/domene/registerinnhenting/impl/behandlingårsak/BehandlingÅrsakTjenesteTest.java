@@ -98,7 +98,7 @@ public class BehandlingÅrsakTjenesteTest {
     }
 
     private BehandlingReferanse lagRef(Behandling behandling) {
-        return BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        return BehandlingReferanse.fra(behandling);
     }
 
     private PersonopplysningGrunnlagEntitet opprettPersonopplysningGrunnlag(LocalDate dødsdato) {

@@ -46,8 +46,7 @@ class OppgittOpptjeningMapperTest {
         BEHANDLING_UUID,
         Optional.of(5L),
         BehandlingStatus.UTREDES,
-        null,
-        DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now())
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now())
     );
 
     @Test
