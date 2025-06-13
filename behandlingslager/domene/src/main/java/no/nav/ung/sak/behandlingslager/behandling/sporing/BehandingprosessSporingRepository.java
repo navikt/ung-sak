@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManager;
 
 import java.util.List;
 
+/**
+ * Lagrer input og resultat fra en generell prosess på en behandling for å fasilitere feilsøking.
+ */
 @ApplicationScoped
 public class BehandingprosessSporingRepository {
 
