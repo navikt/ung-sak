@@ -122,7 +122,7 @@ public class DokumentDto {
 
     void genererLenke() {
         if (journalpostId != null && journalpostId.getVerdi() != null && dokumentId != null) {
-            this.href = String.format(basePath, journalpostId.getVerdi(), dokumentId);
+            this.href = String.format("%s", basePath, journalpostId.getVerdi(), dokumentId);
         }
 
     }
