@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -92,7 +92,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
                     detaljertResultatUtleder,
                     ungdomsprogramPeriodeRepository),
                 ungTestRepositories.vedtaksbrevValgRepository(),
-                new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+                new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 

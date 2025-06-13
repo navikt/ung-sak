@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -117,12 +117,12 @@ class VedtaksbrevReglerTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.KONTROLLER_INNTEKT); // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
 
-        var vedtaksbrevRegler = lagVedtaksbrevRegler(ManuellVedtaksbrevInnholdBygger.class);
+        var vedtaksbrevRegler = lagVedtaksbrevRegler(ManueltVedtaksbrevInnholdBygger.class);
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isInstanceOf(ManuellVedtaksbrevInnholdBygger.class);
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isInstanceOf(ManueltVedtaksbrevInnholdBygger.class);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isTrue();

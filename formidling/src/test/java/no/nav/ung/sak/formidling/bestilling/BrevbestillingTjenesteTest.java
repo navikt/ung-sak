@@ -13,7 +13,6 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
@@ -63,7 +62,7 @@ class BrevbestillingTjenesteTest {
     }
 
     @Test
-    void skalLagreBestillingJournalføreOgLageDistribusjonstask() {
+    void skalLagreBestillingJournalføreOgLageDistribusjonstask_vedtaksbrev() {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
         scenarioBuilder.lagre(repositoryProvider);
         var behandling = scenarioBuilder.getBehandling();
@@ -83,11 +82,7 @@ class BrevbestillingTjenesteTest {
         brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
 
 
-        BehandlingBrevbestillingEntitet behandlingBestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
-        assertThat(behandlingBestilling.getBehandlingId()).isEqualTo(behandling.getId());
-        assertThat(behandlingBestilling.isVedtaksbrev()).isTrue();
-
-        var bestilling = behandlingBestilling.getBestilling();
+        var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
         assertBrevbestilling(bestilling, behandling);
 
         assertThat(dokArkivKlient.getRequests()).hasSize(1);
@@ -103,16 +98,63 @@ class BrevbestillingTjenesteTest {
 
     }
 
+    @Test
+    void skalLagreBestillingJournalføreOgLageDistribusjonstask_informasjonsbrev() {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
+        scenarioBuilder.lagre(repositoryProvider);
+        var behandling = scenarioBuilder.getBehandling();
+
+        var dokument = "et dokument";
+
+        PdlPerson testBruker = new PdlPerson(fnr, behandling.getAktørId(), "Test Bruker", null);
+        var generertBrev = new GenerertBrev(
+            new PdfGenDokument(dokument.getBytes(StandardCharsets.UTF_8), dokument),
+            testBruker,
+            testBruker,
+            DokumentMalType.GENERELT_FRITEKSTBREV,
+            TemplateType.GENERELT_FRITEKSTBREV
+        );
+
+        brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+
+
+        var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
+        assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
+        assertThat(bestilling.getTemplateType()).isEqualTo(TemplateType.GENERELT_FRITEKSTBREV);
+        assertThat(bestilling.isVedtaksbrev()).isFalse();
+
+        assertThat(dokArkivKlient.getRequests()).hasSize(1);
+        var request = dokArkivKlient.getRequests().getFirst();
+        UUID dokumentBestillingId = bestilling.getBrevbestillingUuid();
+        var tittel = "Ungdomsytelse Fritekst generelt brev";
+        assertThat(request.behandlingstema()).isNull();
+        assertThat(request.tittel()).isEqualTo(tittel);
+
+        // Verify Dokumenter
+        assertThat(request.dokumenter()).hasSize(1);
+        var dokument1 = request.dokumenter().getFirst();
+        assertThat(dokument1.tittel()).isEqualTo(tittel);
+        assertThat(dokument1.brevkode()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV.getKode());
+
+        List<ProsessTaskData> distTasker = prosessTaskTjeneste.finnAlle(BrevdistribusjonTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        assertThat(distTasker).hasSize(1);
+        var disttask = distTasker.getFirst();
+        assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_ID_PARAM)).isEqualTo(bestilling.getId().toString());
+        assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE)).isEqualTo(DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
+
+    }
+
     private static void assertBrevbestilling(BrevbestillingEntitet bestilling, Behandling behandling) {
         assertThat(bestilling.getBrevbestillingUuid()).isNotNull();
-        assertThat(bestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
+        assertThat(bestilling.getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(bestilling.getFagsakId()).isEqualTo(behandling.getFagsakId());
         assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
         assertThat(bestilling.getTemplateType()).isEqualTo(TemplateType.INNVILGELSE);
         assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.JOURNALFØRT);
-        assertThat(bestilling.getDokumentData()).isNull();
         assertThat(bestilling.getDokdistBestillingId()).isNull();
         assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
         assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
+        assertThat(bestilling.isVedtaksbrev()).isTrue();
     }
 
 

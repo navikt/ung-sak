@@ -4,20 +4,22 @@ package no.nav.ung.kodeverk.formidling;
  * Pdfgen mal filer
  */
 public enum TemplateType {
-    INNVILGELSE("innvilgelse"),
-    ENDRING_INNTEKT("endring_inntekt"),
-    ENDRING_HØY_SATS("endring_høy_sats"),
-    ENDRING_BARNETILLEGG("endring_barnetillegg"),
-    MANUELL_VEDTAKSBREV("manuell_vedtaksbrev"),
-    OPPHØR("opphør"),
-    ENDRING_PROGRAMPERIODE("endring_programperiode"),
-    GENERELT_FRITEKSTBREV("generelt_fritekstbrev");
+    INNVILGELSE("innvilgelse", "Førstegangsinnvilgelse"),
+    ENDRING_INNTEKT("endring_inntekt", "Endring av inntekt"),
+    ENDRING_HØY_SATS("endring_høy_sats", "Endring til høy sats"),
+    ENDRING_BARNETILLEGG("endring_barnetillegg", "Endring pga barnetillegg"),
+    MANUELT_VEDTAKSBREV("manuelt_vedtaksbrev", "Manuelt vedtaksbrev"),
+    OPPHØR("opphør", "Opphør av ungdomsytelse"),
+    ENDRING_PROGRAMPERIODE("endring_programperiode", "Endring av programperiode"),
+    GENERELT_FRITEKSTBREV("generelt_fritekstbrev", "Generelt fritekstbrev"),;
 
     final String path;
     final String dir = "ungdomsytelse";
+    final String beskrivelse;
 
-    TemplateType(String path) {
+    TemplateType(String path, String beskrivelse) {
         this.path = path;
+        this.beskrivelse = beskrivelse;
     }
 
     public String getPath() {
@@ -26,5 +28,9 @@ public enum TemplateType {
 
     public String getDir() {
         return dir;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 }

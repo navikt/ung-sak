@@ -7,7 +7,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.VedtaksbrevGenerererTjeneste;
@@ -72,10 +72,10 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         }
 
         var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
-        var tidligereVedtaksbrev= tidligereBestillinger.stream().filter(BehandlingBrevbestillingEntitet::isVedtaksbrev).toList();
+        var tidligereVedtaksbrev= tidligereBestillinger.stream().filter(BrevbestillingEntitet::isVedtaksbrev).toList();
         if (!tidligereVedtaksbrev.isEmpty()) {
             String collect = tidligereVedtaksbrev.stream()
-                    .map(BehandlingBrevbestillingEntitet::toString)
+                    .map(BrevbestillingEntitet::toString)
                     .collect(Collectors.joining(", "));
             throw new IllegalStateException("Det finnes allerede en bestilling for vedtaksbrev for behandling: " + collect);
         }

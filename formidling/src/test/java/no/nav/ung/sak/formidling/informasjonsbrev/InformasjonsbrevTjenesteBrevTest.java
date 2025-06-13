@@ -143,20 +143,17 @@ class InformasjonsbrevTjenesteBrevTest {
         var behandlingBrevbestillingEntitets = brevbestillingRepository.hentForBehandling(behandling.getId());
         assertThat(behandlingBrevbestillingEntitets).hasSize(1);
 
-        var behandlingBestilling = behandlingBrevbestillingEntitets.getFirst();
-        assertThat(behandlingBestilling.getBehandlingId()).isEqualTo(behandling.getId());
-        assertThat(behandlingBestilling.isVedtaksbrev()).isFalse();
-
-        var bestilling = behandlingBestilling.getBestilling();
+        var bestilling = behandlingBrevbestillingEntitets.getFirst();
         assertThat(bestilling.getBrevbestillingUuid()).isNotNull();
-        assertThat(bestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
+        assertThat(bestilling.getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(bestilling.getFagsakId()).isEqualTo(behandling.getFagsakId());
         assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
         assertThat(bestilling.getTemplateType()).isEqualTo(TemplateType.GENERELT_FRITEKSTBREV);
         assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.JOURNALFØRT);
-        assertThat(bestilling.getDokumentData()).isNull();
         assertThat(bestilling.getDokdistBestillingId()).isNull();
         assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
         assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
+        assertThat(bestilling.isVedtaksbrev()).isFalse();
 
     }
     private Behandling lagStandardBehandling(UngTestScenario scenario) {
