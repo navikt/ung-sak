@@ -11,7 +11,6 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @BehandlingStegRef(value = FORESLÅ_BEHANDLINGSRESULTAT)
 @FagsakYtelseTypeRef
@@ -25,9 +24,8 @@ public class ForeslåBehandlingsresultatStegRevurdering extends ForeslåBehandli
 
     @Inject
     public ForeslåBehandlingsresultatStegRevurdering(BehandlingRepositoryProvider repositoryProvider,
-                                                     @Any Instance<ForeslåBehandlingsresultatTjeneste> foreslåBehandlingsresultatTjeneste,
-                                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
-        super(repositoryProvider, foreslåBehandlingsresultatTjeneste, skjæringstidspunktTjeneste);
+                                                     @Any Instance<ForeslåBehandlingsresultatTjeneste> foreslåBehandlingsresultatTjeneste) {
+        super(repositoryProvider, foreslåBehandlingsresultatTjeneste);
     }
 
 }

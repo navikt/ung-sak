@@ -1,16 +1,10 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåresultat;
 
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
@@ -18,20 +12,22 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåBehandlingsresultatSteg {
 
     private BehandlingRepository behandlingRepository;
     private Instance<ForeslåBehandlingsresultatTjeneste> foreslåBehandlingsresultatTjeneste;
 
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     protected ForeslåBehandlingsresultatStegFelles() {
@@ -39,9 +35,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
     }
 
     public ForeslåBehandlingsresultatStegFelles(BehandlingRepositoryProvider repositoryProvider,
-                                                @Any Instance<ForeslåBehandlingsresultatTjeneste> foreslåBehandlingsresultatTjeneste,
-                                                SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+                                                @Any Instance<ForeslåBehandlingsresultatTjeneste> foreslåBehandlingsresultatTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.foreslåBehandlingsresultatTjeneste = foreslåBehandlingsresultatTjeneste;
@@ -54,9 +48,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         precondition(behandling);
-
-        var skjæringstidspunkt = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        var ref = BehandlingReferanse.fra(behandling);
 
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(foreslåBehandlingsresultatTjeneste, ref.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
