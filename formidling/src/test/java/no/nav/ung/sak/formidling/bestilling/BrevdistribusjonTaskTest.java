@@ -116,15 +116,11 @@ class BrevdistribusjonTaskTest {
         assertThat(historikkinnslag.getTittel()).isEqualTo("Brev bestilt");
 
         var linjer = historikkinnslag.getLinjer();
-        assertThat(linjer).hasSize(2);
+        assertThat(linjer).hasSize(1);
 
         HistorikkinnslagLinje førsteLinje = linjer.getFirst();
         assertThat(førsteLinje.getType()).isEqualTo(HistorikkinnslagLinjeType.TEKST);
-        assertThat(førsteLinje.getTekst()).isEqualTo(TemplateType.INNVILGELSE.getBeskrivelse()+".");
-
-        HistorikkinnslagLinje andreLinje = linjer.get(1);
-        assertThat(andreLinje.getType()).isEqualTo(HistorikkinnslagLinjeType.TEKST);
-        assertThat(andreLinje.getTekst()).isEqualTo("Distribusjonskanal: nav.no.");
+        assertThat(førsteLinje.getTekst()).isEqualTo(TemplateType.INNVILGELSE.getBeskrivelse()+" (nav.no).");
     }
 
 

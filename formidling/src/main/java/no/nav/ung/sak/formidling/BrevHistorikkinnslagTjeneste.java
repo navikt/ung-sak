@@ -49,7 +49,7 @@ public class BrevHistorikkinnslagTjeneste {
             var hoveddokumentJournalMetadata = journalpost.getDokumenter().getFirst();
             builder.medDokumenter(List.of(byggDokumentLink(hoveddokumentJournalMetadata, journalpost)));
             if (journalpost.getKanalnavn() != null) {
-                linje += "(" + journalpost.getKanalnavn() + ")";
+                linje += " (" + journalpost.getKanalnavn() + ")";
             }
         } else {
             log.warn("Ingen dokumenter funnet for journalpostId: {} ved generering av historikkinnslag. Dropper å nevne dokumentet", journalpostId);
