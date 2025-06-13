@@ -9,6 +9,9 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 
+import java.util.List;
+import java.util.Set;
+
 @Dependent
 public class RegisterinnhentingHistorikkinnslagTjeneste {
 
@@ -43,13 +46,13 @@ public class RegisterinnhentingHistorikkinnslagTjeneste {
         historikkinnslagRepository.lagre(nyeRegisteropplysningerInnslagBuilder.build());
     }
 
-    public void opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(Behandling behandling, BehandlingÅrsakType behandlingÅrsakType) {
+    public void opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(Behandling behandling, Set<BehandlingÅrsakType> behandlingÅrsakType) {
         var nyeRegisteropplysningerInnslagBuilder = new Historikkinnslag.Builder();
         nyeRegisteropplysningerInnslagBuilder.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
         nyeRegisteropplysningerInnslagBuilder.medTittel("Behandlingen oppdatert med nye opplysninger");
         nyeRegisteropplysningerInnslagBuilder.medBehandlingId(behandling.getId());
         nyeRegisteropplysningerInnslagBuilder.medFagsakId(behandling.getFagsakId());
-        nyeRegisteropplysningerInnslagBuilder.addLinje(behandlingÅrsakType.getNavn());
+        behandlingÅrsakType.stream().map(BehandlingÅrsakType::getNavn).forEach(nyeRegisteropplysningerInnslagBuilder::addLinje);
         historikkinnslagRepository.lagre(nyeRegisteropplysningerInnslagBuilder.build());
     }
 }

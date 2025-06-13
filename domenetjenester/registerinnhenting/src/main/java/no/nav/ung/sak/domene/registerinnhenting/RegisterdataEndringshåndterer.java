@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +31,12 @@ import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
  */
 @Dependent
 public class RegisterdataEndringshåndterer {
+
+    public static final Set<BehandlingÅrsakType> REGISTEROPPLYSNING_BEHANDLINGÅRSAKER = Set.of(
+        BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD,
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING);
 
     private TemporalAmount oppdatereRegisterdataTidspunkt;
     private BehandlingRepository behandlingRepository;
@@ -136,12 +141,13 @@ public class RegisterdataEndringshåndterer {
         if (behandlingÅrsakTyper.isEmpty()) {
             return;
         }
-        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD)) {
-            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD);
-            return;
+        var registeropplysningårsaker = behandlingÅrsakTyper.stream().filter(REGISTEROPPLYSNING_BEHANDLINGÅRSAKER::contains).collect(Collectors.toSet());
+        if (!registeropplysningårsaker.isEmpty()) {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, registeropplysningårsaker);
+        } else {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
         }
-        // TODO: Lag egnet historikkinnslag for endret programperiode og kontroll av inntekt
-        historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
+
     }
 
 }

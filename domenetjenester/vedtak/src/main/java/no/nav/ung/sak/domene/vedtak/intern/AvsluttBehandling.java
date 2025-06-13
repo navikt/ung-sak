@@ -2,6 +2,8 @@ package no.nav.ung.sak.domene.vedtak.intern;
 
 import java.util.Optional;
 
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +87,14 @@ public class AvsluttBehandling {
             log.info("Fortsetter iverksetting av ventende behandling: {}", ventendeBehandling.getId()); //$NON-NLS-1$
             opprettTaskForProsesserBehandling(ventendeBehandling);
         });
+
+        settPlanlagteFagsakProsesstaskerForBehandlingTilFerdig();
+
+    }
+
+    private void settPlanlagteFagsakProsesstaskerForBehandlingTilFerdig() {
+        var taskSomSkalSettesTilFerdig = taskTjeneste.finnAlle(SettEtterlysningTilUtløptDersomVenterTask.TASKTYPE, ProsessTaskStatus.KLAR);
+        taskSomSkalSettesTilFerdig.forEach(pt -> taskTjeneste.setProsessTaskFerdig(pt.getId(), ProsessTaskStatus.KLAR));
     }
 
     private void opprettTaskForProsesserBehandling(Behandling behandling) {

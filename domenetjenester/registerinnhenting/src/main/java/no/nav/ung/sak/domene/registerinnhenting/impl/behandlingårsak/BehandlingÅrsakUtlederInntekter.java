@@ -14,6 +14,6 @@ class BehandlingÅrsakUtlederInntekter {
     }
 
     BehandlingÅrsakType utledBehandlingÅrsak() {
-        return BehandlingÅrsakType.RE_REGISTEROPPLYSNING;
+        return BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING;
     }
 }

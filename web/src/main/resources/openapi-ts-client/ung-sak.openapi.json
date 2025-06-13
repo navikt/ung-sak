@@ -673,8 +673,8 @@
         "type" : "string"
       },
       "BehandlingAksjonspunktDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingAksjonspunktDtoFagsakStatus" : {
@@ -881,8 +881,8 @@
         "type" : "string"
       },
       "BehandlingDtoType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingDtoVenteårsak" : {
@@ -951,8 +951,8 @@
         "type" : "object"
       },
       "BehandlingOpprettingDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingStegTilstandDto" : {
@@ -1027,8 +1027,8 @@
         "type" : "object"
       },
       "BehandlingÅrsakDtoBehandlingArsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
         "type" : "string"
       },
       "BekreftedeAksjonspunkterDto" : {
@@ -2511,13 +2511,13 @@
         "type" : "string"
       },
       "KodeverkBehandlingBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverkBehandlingBehandlingÅrsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverkBehandlingRevurderingVarslingÅrsak" : {
@@ -2877,13 +2877,13 @@
         "type" : "object"
       },
       "NyBehandlingDtoBehandlingArsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
         "type" : "string"
       },
       "NyBehandlingDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "OppdaterAktørIdDto" : {
@@ -6019,33 +6019,6 @@
           }
         },
         "summary" : "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /behandlinger dersom asynkrone operasjoner er ferdig.",
-        "tags" : [ "behandlinger" ]
-      }
-    },
-    "/api/behandlinger/unntak" : {
-      "put" : {
-        "description" : "Opprette ny unntaksbehandling",
-        "operationId" : "opprettNyUnntaksbehandling",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/NyBehandlingDto"
-              }
-            }
-          },
-          "description" : "Saksnummer"
-        },
-        "responses" : {
-          "202" : {
-            "description" : "Opprett ny unntaksbehandling pågår",
-            "headers" : {
-              "Location" : {
-                "style" : "simple"
-              }
-            }
-          }
-        },
         "tags" : [ "behandlinger" ]
       }
     },
