@@ -80,7 +80,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VEDTAK.name());
 
-        var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, repositoryProvider.getBehandlingRepository(), safTjeneste);
+        var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
         var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
 
         task.doTask(pd);
@@ -147,7 +147,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VIKTIG.name());
 
-        var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, repositoryProvider.getBehandlingRepository(), safTjeneste);
+        var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
         var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
 
         task.doTask(pd);

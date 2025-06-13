@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.slf4j.Logger;
@@ -21,24 +20,21 @@ public class BrevHistorikkinnslagTjeneste {
     Logger log = LoggerFactory.getLogger(BrevHistorikkinnslagTjeneste.class);
 
     private final HistorikkinnslagRepository historikkRepository;
-    private final BehandlingRepository behandlingRepository;
     private final Saf safTjeneste;
 
 
     @Inject
-    public BrevHistorikkinnslagTjeneste(HistorikkinnslagRepository historikkRepository, BehandlingRepository behandlingRepository, Saf safTjeneste) {
+    public BrevHistorikkinnslagTjeneste(HistorikkinnslagRepository historikkRepository, Saf safTjeneste) {
         this.historikkRepository = historikkRepository;
-        this.behandlingRepository = behandlingRepository;
         this.safTjeneste = safTjeneste;
     }
 
     public void opprett(BrevbestillingEntitet bestilling) {
-        var behandling = behandlingRepository.hentBehandling(bestilling.getBehandlingId());
 
         var linje = bestilling.getTemplateType().getBeskrivelse();
         var builder = new Historikkinnslag.Builder()
-            .medFagsakId(behandling.getFagsakId())
-            .medBehandlingId(behandling.getId())
+            .medFagsakId(bestilling.getFagsakId())
+            .medBehandlingId(bestilling.getBehandlingId())
             .medAktør(bestilling.isVedtaksbrev() ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER)
             .medTittel(bestilling.isVedtaksbrev() ? "Vedtaksbrev bestilt" : "Brev bestilt");
 
