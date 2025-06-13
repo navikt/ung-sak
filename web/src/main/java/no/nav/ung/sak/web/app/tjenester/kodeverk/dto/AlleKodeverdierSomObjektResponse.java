@@ -4,12 +4,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.Fagsystem;
+
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.arbeidsforhold.*;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.ung.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.ung.kodeverk.dokument.DokumentTypeId;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.historikk.*;
@@ -45,7 +45,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<AktivitetStatus>> aktivitetStatuser,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Arbeidskategori>> arbeidskategorier,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Fagsystem>> fagsystemer,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<FaktaOmBeregningTilfelle>> faktaOmBeregningTilfeller,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<SkjermlenkeType>> skjermlenkeTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<HistorikkOpplysningType>> historikkOpplysningTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<HistorikkEndretFeltType>> historikkEndretFeltTyper,
@@ -58,7 +57,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<MedlemskapDekningType>> medlemskapDekningTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<MedlemskapType>> medlemskapTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Avslagsårsak>> avslagsårsaker,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KonsekvensForYtelsen>> konsekvenserForYtelsen,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VilkårType>> vilkårTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VurderArbeidsforholdHistorikkinnslag>> vurderArbeidsforholdHistorikkinnslag,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<TilbakekrevingVidereBehandling>> tilbakekrevingVidereBehandlinger,
