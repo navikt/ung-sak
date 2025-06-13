@@ -21,8 +21,8 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -124,7 +124,7 @@ class VedtaksbrevTjenesteTest {
         //Lager redigert tekst
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
         vedtaksbrevTjeneste.lagreVedtaksbrev(
-            new VedtaksbrevValgRequestDto(
+            new VedtaksbrevValgRequest(
                 behandling.getId(),
                 false,
                 true,
@@ -158,7 +158,7 @@ class VedtaksbrevTjenesteTest {
         //Lager redigert tekst
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
         vedtaksbrevTjeneste.lagreVedtaksbrev(
-            new VedtaksbrevValgRequestDto(
+            new VedtaksbrevValgRequest(
                 behandling.getId(),
                 false,
                 true,
@@ -171,7 +171,7 @@ class VedtaksbrevTjenesteTest {
 
         //Tilbakestiller manuell brev
         vedtaksbrevTjeneste.lagreVedtaksbrev(
-            new VedtaksbrevValgRequestDto(
+            new VedtaksbrevValgRequest(
                 behandling.getId(),
                 false,
                 false,
@@ -206,7 +206,7 @@ class VedtaksbrevTjenesteTest {
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
 
         vedtaksbrevTjeneste.lagreVedtaksbrev(
-            new VedtaksbrevValgRequestDto(
+            new VedtaksbrevValgRequest(
                 behandling.getId(),
                 false,
                 true,
@@ -240,7 +240,7 @@ class VedtaksbrevTjenesteTest {
 
         //Lagerer hindret valget
         vedtaksbrevTjeneste.lagreVedtaksbrev(
-            new VedtaksbrevValgRequestDto(
+            new VedtaksbrevValgRequest(
                 behandling.getId(),
                 true,
                 true,
@@ -285,7 +285,7 @@ class VedtaksbrevTjenesteTest {
 
     private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
         GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(
-            new VedtaksbrevForhåndsvisDto(behandling.getId(), redigertVersjon, true)
+            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true)
         );
         return Optional.ofNullable(generertBrev).map(it -> it.dokument().html()).orElse(null);
     }

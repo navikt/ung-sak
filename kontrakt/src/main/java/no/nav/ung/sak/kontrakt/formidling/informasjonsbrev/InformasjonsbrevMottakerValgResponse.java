@@ -11,7 +11,7 @@ import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
  * @param fnr - hvis idType = aktørId så følger med fnr for visning
  * @param utilgjengeligÅrsak
  */
-public record InformasjonsbrevMottakerValgDto(
+public record InformasjonsbrevMottakerValgResponse(
     String id,
     IdType idType,
     String navn,

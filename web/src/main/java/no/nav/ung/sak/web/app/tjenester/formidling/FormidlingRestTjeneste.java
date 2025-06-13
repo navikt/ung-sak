@@ -23,11 +23,11 @@ import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +66,7 @@ public class FormidlingRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Operasjoner som er mulig for vedtaksbrev", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    public VedtaksbrevValgDto vedtaksbrevValg(
+    public VedtaksbrevValgResponse vedtaksbrevValg(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
         return vedtaksbrevTjeneste.vedtaksbrevValg(dto.getBehandlingId());
     }
@@ -80,7 +80,7 @@ public class FormidlingRestTjeneste {
     )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response lagreVedtaksbrevValg(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequestDto dto) {
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequest dto) {
         vedtaksbrevTjeneste.lagreVedtaksbrev(dto);
         return Response.ok().build();
     }
@@ -106,7 +106,7 @@ public class FormidlingRestTjeneste {
     )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisVedtaksbrev(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisDto dto,
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisRequest dto,
         @Context HttpServletRequest request
     ) {
         var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto);
@@ -148,7 +148,7 @@ public class FormidlingRestTjeneste {
     )
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response forhåndsvisInformasjonsbrev(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingDto dto,
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingRequest dto,
         @Valid @QueryParam("kunHtml") Boolean kunHtml,
         @Context HttpServletRequest request
     ) {
@@ -185,7 +185,7 @@ public class FormidlingRestTjeneste {
     @Operation(description = "Bestill informasjonsbrev for en behandling. ", tags = "formidling")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response bestillInformasjonsbrev(
-        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingDto dto
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingRequest dto
     ) {
         BrevbestillingResultat resultat = informasjonsbrevTjeneste.bestill(dto);
 

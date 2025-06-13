@@ -13,8 +13,8 @@ import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingTjeneste;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.mottaker.PdlPerson;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingDto;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
 
 import java.util.List;
@@ -49,11 +49,11 @@ public class InformasjonsbrevTjeneste {
         ));
     }
 
-    private List<InformasjonsbrevMottakerValgDto> mapMottakere(Behandling behandling) {
+    private List<InformasjonsbrevMottakerValgResponse> mapMottakere(Behandling behandling) {
         PdlPerson pdlPerson = brevMottakerTjeneste.hentMottaker(behandling);
 
         return List.of(
-                new InformasjonsbrevMottakerValgDto(
+                new InformasjonsbrevMottakerValgResponse(
                         pdlPerson.aktørId().getId(),
                         IdType.AKTØRID,
                         formaterMedStoreOgSmåBokstaver(pdlPerson.navn()),
@@ -84,17 +84,17 @@ public class InformasjonsbrevTjeneste {
         return new String(chars);
     }
 
-    public GenerertBrev forhåndsvis(InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
+    public GenerertBrev forhåndsvis(InformasjonsbrevBestillingRequest dto, Boolean kunHtml) {
         return validerOgGenererBrev(dto, kunHtml);
     }
 
-    public BrevbestillingResultat bestill(InformasjonsbrevBestillingDto dto) {
+    public BrevbestillingResultat bestill(InformasjonsbrevBestillingRequest dto) {
         GenerertBrev generertBrev = validerOgGenererBrev(dto, false);
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         return brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
     }
 
-    private GenerertBrev validerOgGenererBrev(InformasjonsbrevBestillingDto dto, Boolean kunHtml) {
+    private GenerertBrev validerOgGenererBrev(InformasjonsbrevBestillingRequest dto, Boolean kunHtml) {
         var informasjonsbrevValgDtos = informasjonsbrevValg(dto.behandlingId());
         if (informasjonsbrevValgDtos.isEmpty()) {
             throw new IllegalArgumentException("Ingen informasjonsbrevvalg funnet for behandlingen");

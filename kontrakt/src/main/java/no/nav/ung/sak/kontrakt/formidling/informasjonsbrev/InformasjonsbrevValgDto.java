@@ -14,7 +14,7 @@ import java.util.List;
  */
 public record InformasjonsbrevValgDto(
     KodeverdiSomObjekt<DokumentMalType> malType,
-    List<InformasjonsbrevMottakerValgDto> mottakere,
+    List<InformasjonsbrevMottakerValgResponse> mottakere,
     boolean støtterFritekst,
     boolean støtterTittelOgFritekst
 ) {

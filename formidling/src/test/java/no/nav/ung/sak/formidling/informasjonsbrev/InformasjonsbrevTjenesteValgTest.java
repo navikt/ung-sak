@@ -16,7 +16,7 @@ import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.PdlKlientFake;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgDto;
+import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -77,7 +77,7 @@ class InformasjonsbrevTjenesteValgTest {
         assertThat(first.malType().getKilde()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
 
         assertThat(first.mottakere()).hasSize(1);
-        InformasjonsbrevMottakerValgDto mottaker = first.mottakere().getFirst();
+        InformasjonsbrevMottakerValgResponse mottaker = first.mottakere().getFirst();
         assertThat(mottaker.id()).isEqualTo(behandling.getFagsak().getAktørId().getId());
         assertThat(mottaker.idType()).isEqualTo(IdType.AKTØRID);
         assertThat(mottaker.navn()).isEqualTo(BrevScenarioer.DEFAULT_NAVN);
@@ -124,7 +124,7 @@ class InformasjonsbrevTjenesteValgTest {
         // Then
         assertThat(informasjonsbrevValg.size()).isEqualTo(1);
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
-        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgDto(
+        assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgResponse(
             behandling.getFagsak().getAktørId().getId(),
             IdType.AKTØRID,
             BrevScenarioer.DEFAULT_NAVN,

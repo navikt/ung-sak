@@ -6,9 +6,9 @@ import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class VedtaksbrevTjeneste {
     }
 
 
-    public VedtaksbrevValgDto vedtaksbrevValg(Long behandlingId) {
+    public VedtaksbrevValgResponse vedtaksbrevValg(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var erAvsluttet = behandling.erAvsluttet();
 
@@ -46,7 +46,7 @@ public class VedtaksbrevTjeneste {
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
 
-        return new VedtaksbrevValgDto(
+        return new VedtaksbrevValgResponse(
             egenskaper.harBrev(),
             egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
@@ -64,7 +64,7 @@ public class VedtaksbrevTjeneste {
         return regelResulat.harBrev() && regelResulat.kanRedigere() && !regelResulat.kanOverstyreRediger();
     }
 
-    public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequestDto dto) {
+    public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
             throw new BadRequestException("Kan ikke endre vedtaksbrev på avsluttet behandling");
@@ -92,7 +92,7 @@ public class VedtaksbrevTjeneste {
 
     }
 
-    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisDto dto) {
+    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
 
         if (dto.redigertVersjon() == null) {

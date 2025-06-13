@@ -17,7 +17,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  * @param innhold Kun satt for Generelt fritekstbrev.
  * @param mottaker Mottaker av informasjonsbrevet.
  */
-public record InformasjonsbrevBestillingDto(
+public record InformasjonsbrevBestillingRequest(
     @NotNull
     @Valid
     @AbacAttributt(BehandlingIdDto.NAME)

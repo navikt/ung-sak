@@ -15,7 +15,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  *                        For fritekstbrev vil den alltid bruke redigert versjon.
  * @param htmlVersjon     Angir om html versjon skal hentes. False eller null henter PDF.
  */
-public record VedtaksbrevForhåndsvisDto(
+public record VedtaksbrevForhåndsvisRequest(
     @NotNull
     @Valid
     @AbacAttributt(BehandlingIdDto.NAME)
