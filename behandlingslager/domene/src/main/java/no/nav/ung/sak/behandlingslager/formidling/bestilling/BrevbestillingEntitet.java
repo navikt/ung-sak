@@ -52,7 +52,7 @@ public class BrevbestillingEntitet extends BaseEntitet {
      * template data som ikke er utledet, f.eks. fritekst
      */
     @Column(name = "dokumentdata", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON) //TODO endre til å bruke json subtypes?
+    @JdbcTypeCode(SqlTypes.JSON) //TODO endre til å bruke json subtypes? Eller bare droppe det? Trengs det ifm etterlevelse?
     private JsonNode dokumentdata;
 
     /**

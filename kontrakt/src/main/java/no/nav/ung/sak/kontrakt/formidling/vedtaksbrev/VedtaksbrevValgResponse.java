@@ -18,7 +18,7 @@ package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
  * @param forklaring                en forklaring av resultatet
  * @param redigertBrevHtml
  */
-public record VedtaksbrevValgDto(
+public record VedtaksbrevValgResponse(
     boolean harBrev,
     boolean enableHindre,
     boolean hindret,

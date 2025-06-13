@@ -11,6 +11,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -53,7 +54,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     protected String fnr = pdlKlient.fnr();
     protected UngTestRepositories ungTestRepositories;
-    protected BrevGenerererTjeneste brevGenerererTjeneste;
+    protected VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
 
     AbstractVedtaksbrevInnholdByggerTest(int forventetAntallPdfSider, String forventetPdfHovedoverskrift) {
         this.forventetAntallPdfSider = forventetAntallPdfSider;
@@ -65,10 +66,10 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        brevGenerererTjeneste = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
+        vedtaksbrevGenerererTjeneste = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
     }
 
-    private BrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
+    private VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
@@ -82,18 +83,17 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(vedtaksbrevInnholdBygger);
 
-        return new BrevGenerererTjenesteImpl(
+        return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
-            new AktørTjeneste(pdlKlient),
             new PdfGenKlient(),
-            repositoryProvider.getPersonopplysningRepository(),
             new VedtaksbrevRegler(
                     behandlingRepository,
                     innholdByggere,
                     detaljertResultatUtleder,
                     ungdomsprogramPeriodeRepository),
                 ungTestRepositories.vedtaksbrevValgRepository(),
-                new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
+                new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 
     @Test
@@ -102,7 +102,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
         var behandling = lagScenarioForFellesTester();
 
         Long behandlingId = (behandling.getId());
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -118,7 +118,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -137,10 +137,10 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
         String lagre = System.getenv("LAGRE");
         if (lagre == null) {
-            return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
         }
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, !lagre.equals("PDF"));
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, !lagre.equals("PDF"));
 
         switch (lagre) {
             case "PDF":
