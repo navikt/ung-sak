@@ -1,99 +1,61 @@
 package no.nav.ung.sak.formidling.bestilling;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
-import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.formidling.BrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
-import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
+import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
 import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
 
-/**
- * <a href="https://confluence.adeo.no/pages/viewpage.action?pageId=377701645">dokarkiv doc</a>
- * <p>
- * <a href="https://dokarkiv-q2.dev.intern.nav.no/swagger-ui/index.html#/">dokarkiv-q2.dev swagger</a>
- */
-@ApplicationScoped
-@ProsessTask(value = BrevbestillingTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class BrevbestillingTask extends BehandlingProsessTask {
+@Dependent
+public class BrevbestillingTjeneste {
 
-    public static final String TASKTYPE = "formidling.brevbestilling";
+    private static final Logger LOG = LoggerFactory.getLogger(BrevbestillingTjeneste.class);
 
-    private static final Logger LOG = LoggerFactory.getLogger(BrevbestillingTask.class);
-
-    private BehandlingRepository behandlingRepository;
-    private BrevGenerererTjeneste brevGenerererTjeneste;
-    private BrevbestillingRepository brevbestillingRepository;
-    private DokArkivKlient dokArkivKlient;
-    private ProsessTaskTjeneste prosessTaskTjeneste;
+    private final BrevbestillingRepository brevbestillingRepository;
+    private final DokArkivKlient dokArkivKlient;
+    private final ProsessTaskTjeneste prosessTaskTjeneste;
 
     @Inject
-    public BrevbestillingTask(
-            BehandlingRepository behandlingRepository,
-            BrevGenerererTjeneste brevGenerererTjeneste,
-            BrevbestillingRepository brevbestillingRepository,
-            DokArkivKlient dokArkivKlient,
-            ProsessTaskTjeneste prosessTaskTjeneste) {
-        this.behandlingRepository = behandlingRepository;
-        this.brevGenerererTjeneste = brevGenerererTjeneste;
+    public BrevbestillingTjeneste(BrevbestillingRepository brevbestillingRepository, DokArkivKlient dokArkivKlient, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.brevbestillingRepository = brevbestillingRepository;
         this.dokArkivKlient = dokArkivKlient;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    BrevbestillingTask() {
-    }
-
-
-    @Override
-    protected void prosesser(ProsessTaskData prosessTaskData)  {
-        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
-        validerBrevbestillingForespørsel(behandling);
-
-        var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
-        if (generertBrev == null) {
-            LOG.info("Ingen brev generert.");
-            return;
-        }
-
+    public BrevbestillingResultat bestillBrev(Behandling behandling, GenerertBrev generertBrev) {
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer().getVerdi();
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-                saksnummer,
-                generertBrev.malType(),
-                new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
+            saksnummer,
+            generertBrev.malType(),
+            new BrevMottaker(generertBrev.mottaker().aktørId().getAktørId(), IdType.AKTØRID));
 
         var behandlingBestilling = new BehandlingBrevbestillingEntitet(
-                behandling.getId(),
-                true,
-                bestilling
+            behandling.getId(),
+            generertBrev.malType().isVedtaksbrevmal(),
+            bestilling
         );
 
         LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
@@ -111,29 +73,13 @@ public class BrevbestillingTask extends BehandlingProsessTask {
         distTask.setSaksnummer(fagsak.getSaksnummer().getVerdi());
         distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, behandlingBestilling.isVedtaksbrev() ?
-            DistribusjonsType.VEDTAK.name() : DistribusjonsType.VIKTIG.name());
+            DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name() : DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
         prosessTaskTjeneste.lagre(distTask);
         distTask.setCallIdFraEksisterende();
 
         LOG.info("Brevbestilling journalført med journalpostId={}", bestilling.getJournalpostId());
-
+        return new BrevbestillingResultat(bestilling.getJournalpostId());
     }
-
-    private void validerBrevbestillingForespørsel(Behandling behandling) {
-        if (!behandling.erAvsluttet()) {
-            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
-        }
-
-        var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
-        var tidligereVedtaksbrev= tidligereBestillinger.stream().filter(BehandlingBrevbestillingEntitet::isVedtaksbrev).toList();
-        if (!tidligereVedtaksbrev.isEmpty()) {
-            String collect = tidligereVedtaksbrev.stream()
-                    .map(BehandlingBrevbestillingEntitet::toString)
-                    .collect(Collectors.joining(", "));
-            throw new IllegalStateException("Det finnes allerede en bestilling for vedtaksbrev for behandling: " + collect);
-        }
-    }
-
 
     private OpprettJournalpostRequest opprettJournalpostRequest(UUID brevbestillingUuid, GenerertBrev generertBrev, Behandling behandling) {
         String tittel = utledTittel(generertBrev.malType());
@@ -186,6 +132,7 @@ public class BrevbestillingTask extends BehandlingProsessTask {
             case OPPHØR_DOK -> "Opphør";
             case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";
+            case GENERELT_FRITEKSTBREV -> "Fritekst generelt brev";
         };
         return prefix + fraMal;
     }

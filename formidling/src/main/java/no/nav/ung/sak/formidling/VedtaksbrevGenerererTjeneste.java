@@ -2,7 +2,7 @@ package no.nav.ung.sak.formidling;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 
-public interface BrevGenerererTjeneste {
+public interface VedtaksbrevGenerererTjeneste {
     @WithSpan
     GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml);
     @WithSpan

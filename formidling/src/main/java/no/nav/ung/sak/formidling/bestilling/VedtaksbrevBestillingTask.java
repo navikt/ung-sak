@@ -1,0 +1,84 @@
+package no.nav.ung.sak.formidling.bestilling;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
+import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.VedtaksbrevGenerererTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.stream.Collectors;
+
+/**
+ * <a href="https://confluence.adeo.no/pages/viewpage.action?pageId=377701645">dokarkiv doc</a>
+ * <p>
+ * <a href="https://dokarkiv-q2.dev.intern.nav.no/swagger-ui/index.html#/">dokarkiv-q2.dev swagger</a>
+ */
+@ApplicationScoped
+@ProsessTask(value = VedtaksbrevBestillingTask.TASKTYPE)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
+public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
+
+    public static final String TASKTYPE = "formidling.vedtak.brevbestilling";
+
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
+
+    private BehandlingRepository behandlingRepository;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
+    private BrevbestillingRepository brevbestillingRepository;
+    private BrevbestillingTjeneste brevbestillingTjeneste;
+
+    @Inject
+    public VedtaksbrevBestillingTask(
+        BehandlingRepository behandlingRepository,
+        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
+        BrevbestillingRepository brevbestillingRepository,
+        BrevbestillingTjeneste brevbestillingTjeneste) {
+        this.behandlingRepository = behandlingRepository;
+        this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
+        this.brevbestillingRepository = brevbestillingRepository;
+        this.brevbestillingTjeneste = brevbestillingTjeneste;
+    }
+
+    VedtaksbrevBestillingTask() {
+    }
+
+
+    @Override
+    protected void prosesser(ProsessTaskData prosessTaskData)  {
+        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+        validerBrevbestillingForespørsel(behandling);
+
+        var generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        if (generertBrev == null) {
+            LOG.info("Ingen brev generert.");
+            return;
+        }
+
+       brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+
+    }
+
+    private void validerBrevbestillingForespørsel(Behandling behandling) {
+        if (!behandling.erAvsluttet()) {
+            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+        }
+
+        var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
+        var tidligereVedtaksbrev= tidligereBestillinger.stream().filter(BehandlingBrevbestillingEntitet::isVedtaksbrev).toList();
+        if (!tidligereVedtaksbrev.isEmpty()) {
+            String collect = tidligereVedtaksbrev.stream()
+                    .map(BehandlingBrevbestillingEntitet::toString)
+                    .collect(Collectors.joining(", "));
+            throw new IllegalStateException("Det finnes allerede en bestilling for vedtaksbrev for behandling: " + collect);
+        }
+    }
+
+}

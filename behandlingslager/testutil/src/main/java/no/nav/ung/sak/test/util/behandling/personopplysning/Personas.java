@@ -36,10 +36,10 @@ public class Personas {
 
 
     public Personas ungdom(AktørId aktørId, LocalDate fødselsdato) {
-        return ungdom(aktørId, fødselsdato, "Test Testesen");
+        return ungdom(aktørId, fødselsdato, "Test Testesen", null);
     }
 
-    public Personas ungdom(AktørId aktørId, LocalDate fødselsdato, String navn) {
+    public Personas ungdom(AktørId aktørId, LocalDate fødselsdato, String navn, LocalDate dødsdato) {
         if (this.aktørId == null) {
             this.aktørId = aktørId;
             this.fødselsdato = fødselsdato;
@@ -50,6 +50,7 @@ public class Personas {
             .aktørId(aktørId)
             .brukerKjønn(NavBrukerKjønn.MANN)
             .fødselsdato(fødselsdato)
+            .dødsdato(dødsdato)
             .navn(navn));
 
         return this;

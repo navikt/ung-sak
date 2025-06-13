@@ -1,10 +1,12 @@
-package no.nav.ung.sak.web.app.tjenester.kodeverk.dto;
+package no.nav.ung.kodeverk;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Blir brukt til å returnere full objektinfo om Kodeverdi enum type som ellers blir returnert som string med verdi lik kode.

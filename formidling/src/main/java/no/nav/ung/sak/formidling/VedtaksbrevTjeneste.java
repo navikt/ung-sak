@@ -6,36 +6,36 @@ import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgDto;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequestDto;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Dependent
-public class FormidlingTjeneste {
+public class VedtaksbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
-    private final BrevGenerererTjeneste brevGenerererTjeneste;
+    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private final VedtaksbrevRegler vedtaksbrevRegler;
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
-    private static final Logger LOG = LoggerFactory.getLogger(FormidlingTjeneste.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
 
     @Inject
-    public FormidlingTjeneste(
-        BrevGenerererTjeneste brevGenerererTjeneste,
+    public VedtaksbrevTjeneste(
+        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         VedtaksbrevRegler vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {
-        this.brevGenerererTjeneste = brevGenerererTjeneste;
+        this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingRepository = behandlingRepository;
     }
 
 
-    public VedtaksbrevValgDto vedtaksbrevValg(Long behandlingId) {
+    public VedtaksbrevValgResponse vedtaksbrevValg(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var erAvsluttet = behandling.erAvsluttet();
 
@@ -46,7 +46,7 @@ public class FormidlingTjeneste {
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
 
-        return new VedtaksbrevValgDto(
+        return new VedtaksbrevValgResponse(
             egenskaper.harBrev(),
             egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
@@ -64,7 +64,7 @@ public class FormidlingTjeneste {
         return regelResulat.harBrev() && regelResulat.kanRedigere() && !regelResulat.kanOverstyreRediger();
     }
 
-    public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequestDto dto) {
+    public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
             throw new BadRequestException("Kan ikke endre vedtaksbrev på avsluttet behandling");
@@ -92,17 +92,17 @@ public class FormidlingTjeneste {
 
     }
 
-    public GenerertBrev forhåndsvisVedtaksbrev(VedtaksbrevForhåndsvisDto dto) {
+    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
 
         if (dto.redigertVersjon() == null) {
-            return brevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
+            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
         }
         if (dto.redigertVersjon()) {
-            return brevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
+            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
         }
 
-        return brevGenerererTjeneste.genererAutomatiskVedtaksbrev(dto.behandlingId(), kunHtml);
+        return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(dto.behandlingId(), kunHtml);
     }
 
     public void ryddVedTilbakeHopp(Long behandlingId) {
@@ -115,5 +115,7 @@ public class FormidlingTjeneste {
         vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }
+
+
 }
 
