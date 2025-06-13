@@ -1,16 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAmount;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -24,7 +13,16 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.domene.registerinnhenting.impl.Endringskontroller;
 import no.nav.ung.sak.domene.registerinnhenting.impl.RegisterinnhentingHistorikkinnslagTjeneste;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAmount;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Oppdaterer registeropplysninger for engangsstønader og skrur behandlingsprosessen tilbake
@@ -33,14 +31,18 @@ import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 @Dependent
 public class RegisterdataEndringshåndterer {
 
+    public static final Set<BehandlingÅrsakType> REGISTEROPPLYSNING_BEHANDLINGÅRSAKER = Set.of(
+        BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD,
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING);
+
     private TemporalAmount oppdatereRegisterdataTidspunkt;
     private BehandlingRepository behandlingRepository;
     private Endringskontroller endringskontroller;
     private EndringsresultatSjekker endringsresultatSjekker;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste;
     private BehandlingÅrsakTjeneste behandlingÅrsakTjeneste;
-
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
 
     RegisterdataEndringshåndterer() {
         // for CDI proxy
@@ -56,10 +58,8 @@ public class RegisterdataEndringshåndterer {
                                           Endringskontroller endringskontroller,
                                           EndringsresultatSjekker endringsresultatSjekker,
                                           RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
-                                          BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
-                                          SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                          BehandlingÅrsakTjeneste behandlingÅrsakTjeneste) {
 
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.endringskontroller = endringskontroller;
         this.endringsresultatSjekker = endringsresultatSjekker;
@@ -121,7 +121,7 @@ public class RegisterdataEndringshåndterer {
     }
 
     private void lagBehandlingÅrsakerOgHistorikk(Behandling behandling, EndringsresultatDiff endringsresultat) {
-        var ref = BehandlingReferanse.fra(behandling, this.skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
+        var ref = BehandlingReferanse.fra(behandling);
         Set<BehandlingÅrsakType> behandlingÅrsakTyper = new HashSet<>(behandlingÅrsakTjeneste.utledBehandlingÅrsakerBasertPåDiff(ref, endringsresultat));
         leggTilBehandlingsårsaker(behandling, behandlingÅrsakTyper);
         lagHistorikkinnslag(behandling, behandlingÅrsakTyper);
@@ -136,12 +136,13 @@ public class RegisterdataEndringshåndterer {
         if (behandlingÅrsakTyper.isEmpty()) {
             return;
         }
-        if (behandlingÅrsakTyper.contains(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD)) {
-            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD);
-            return;
+        var registeropplysningårsaker = behandlingÅrsakTyper.stream().filter(REGISTEROPPLYSNING_BEHANDLINGÅRSAKER::contains).collect(Collectors.toSet());
+        if (!registeropplysningårsaker.isEmpty()) {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForBehandlingMedNyeOpplysninger(behandling, registeropplysningårsaker);
+        } else {
+            historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
         }
-        // TODO: Lag egnet historikkinnslag for endret programperiode og kontroll av inntekt
-        historikkinnslagTjeneste.opprettHistorikkinnslagForNyeRegisteropplysninger(behandling);
+
     }
 
 }

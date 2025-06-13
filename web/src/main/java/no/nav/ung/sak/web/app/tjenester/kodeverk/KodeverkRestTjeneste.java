@@ -1,35 +1,17 @@
 package no.nav.ung.sak.web.app.tjenester.kodeverk;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
-
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -38,11 +20,17 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
-import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.KodeverdiSomObjekt;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.LegacyVenteårsakSomObjekt;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.VenteårsakSomObjekt;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 
 @Path("/kodeverk")
 @ApplicationScoped
@@ -206,7 +194,7 @@ public class KodeverkRestTjeneste {
                 .filter(kv -> kv != null && !"-".equals(kv.getKode())) // Gammalt endepunkt returnerer ikkje "-" verdiane
                 .map(kv -> {
                     if (kv instanceof VenteårsakSomObjekt) {
-                        return new LegacyVenteårsakSomObjekt(((VenteårsakSomObjekt) kv).getMadeFrom());
+                        return new LegacyVenteårsakSomObjekt(((VenteårsakSomObjekt) kv).getKilde());
                     } else {
                         return kv;
                     }

@@ -10,7 +10,8 @@ public enum TemplateType {
     ENDRING_BARNETILLEGG("endring_barnetillegg"),
     MANUELL_VEDTAKSBREV("manuell_vedtaksbrev"),
     OPPHØR("opphør"),
-    ENDRING_PROGRAMPERIODE("endring_programperiode"),;
+    ENDRING_PROGRAMPERIODE("endring_programperiode"),
+    GENERELT_FRITEKSTBREV("generelt_fritekstbrev");
 
     final String path;
     final String dir = "ungdomsytelse";

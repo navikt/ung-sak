@@ -673,8 +673,8 @@
         "type" : "string"
       },
       "BehandlingAksjonspunktDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingAksjonspunktDtoFagsakStatus" : {
@@ -881,8 +881,8 @@
         "type" : "string"
       },
       "BehandlingDtoType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingDtoVenteårsak" : {
@@ -951,8 +951,8 @@
         "type" : "object"
       },
       "BehandlingOpprettingDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "BehandlingStegTilstandDto" : {
@@ -1027,8 +1027,8 @@
         "type" : "object"
       },
       "BehandlingÅrsakDtoBehandlingArsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
         "type" : "string"
       },
       "BekreftedeAksjonspunkterDto" : {
@@ -1757,6 +1757,116 @@
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
         "type" : "string"
       },
+      "InformasjonsbrevBestillingRequest" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "dokumentMalType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequestDokumentMalType"
+          },
+          "innhold" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
+          },
+          "mottaker" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
+      "InformasjonsbrevBestillingRequestDokumentMalType" : {
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevInnholdDto" : {
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerDto" : {
+        "properties" : {
+          "id" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDtoType"
+          }
+        },
+        "required" : [ "id", "type" ],
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerDtoType" : {
+        "enum" : [ "ORGNR", "AKTØRID" ],
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevMottakerValgResponse" : {
+        "properties" : {
+          "fnr" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "idType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponseIdType"
+          },
+          "navn" : {
+            "type" : "string"
+          },
+          "utilgjengeligÅrsak" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponseUtilgjengeligÅrsak"
+          }
+        },
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerValgResponseIdType" : {
+        "enum" : [ "ORGNR", "AKTØRID" ],
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevMottakerValgResponseUtilgjengeligÅrsak" : {
+        "enum" : [ "PERSON_DØD" ],
+        "x-enum-varnames" : [ "PERSON_DØD" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevValgDto" : {
+        "properties" : {
+          "malType" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektDokumentMalType"
+          },
+          "mottakere" : {
+            "items" : {
+              "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponse"
+            },
+            "type" : "array"
+          },
+          "støtterFritekst" : {
+            "type" : "boolean"
+          },
+          "støtterTittelOgFritekst" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "InformasjonsbrevValgResponseDto" : {
+        "properties" : {
+          "informasjonbrevValg" : {
+            "items" : {
+              "$ref" : "#/components/schemas/InformasjonsbrevValgDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "InitLinksDto" : {
         "properties" : {
           "links" : {
@@ -1856,6 +1966,9 @@
       },
       "KodeverdiSomObjektAktivitetStatus" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektAktivitetStatusKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1866,11 +1979,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektAktivitetStatusKilde" : {
+        "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
+        "x-enum-varnames" : [ "MIDLERTIDIG_INAKTIV", "ARBEIDSAVKLARINGSPENGER", "ARBEIDSTAKER", "DAGPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "FRILANSER", "MILITÆR_ELLER_SIVIL", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINERT_AT_FL", "KOMBINERT_AT_SN", "KOMBINERT_FL_SN", "KOMBINERT_AT_FL_SN", "BRUKERS_ANDEL", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TTLSTØTENDE_YTELSE", "VENTELØNN_VARTPENGER", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektArbeidType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1881,11 +2002,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektArbeidTypeKilde" : {
+        "enum" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "NÆRING", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "-" ],
+        "x-enum-varnames" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER_MED_MER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "SELVSTENDIG_NÆRINGSDRIVENDE", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektArbeidskategori" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidskategoriKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1896,11 +2025,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektArbeidskategoriKilde" : {
+        "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
+        "x-enum-varnames" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektAvslagsårsak" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektAvslagsårsakKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1911,11 +2048,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektAvslagsårsakKilde" : {
+        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "-" ],
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektBehandlingResultatType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingResultatTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1926,11 +2071,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingResultatTypeKilde" : {
+        "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
+        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektBehandlingStatus" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingStatusKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1941,11 +2094,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingStatusKilde" : {
+        "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
+        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektBehandlingType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1956,11 +2117,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingTypeKilde" : {
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektBehandlingÅrsakType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingÅrsakTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1971,11 +2140,42 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingÅrsakTypeKilde" : {
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "type" : "string"
+      },
+      "KodeverdiSomObjektDokumentMalType" : {
+        "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektDokumentMalTypeKilde"
+          },
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektDokumentMalTypeKilde" : {
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektDokumentTypeId" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektDokumentTypeIdKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -1986,11 +2186,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektDokumentTypeIdKilde" : {
+        "enum" : [ "LEGEERKLÆRING", "-" ],
+        "x-enum-varnames" : [ "LEGEERKLÆRING", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektFagsakStatus" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektFagsakStatusKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2001,11 +2209,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektFagsakStatusKilde" : {
+        "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
+        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektFagsakYtelseType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektFagsakYtelseTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2016,11 +2232,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektFagsakYtelseTypeKilde" : {
+        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektFagsystem" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektFagsystemKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2031,11 +2255,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektFagsystemKilde" : {
+        "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
+        "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektFaktaOmBeregningTilfelle" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektFaktaOmBeregningTilfelleKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2046,11 +2278,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektFaktaOmBeregningTilfelleKilde" : {
+        "enum" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "-" ],
+        "x-enum-varnames" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkAktør" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkAktørKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2061,11 +2301,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkAktørKilde" : {
+        "enum" : [ "BESL", "SBH", "SOKER", "ARBEIDSGIVER", "VL", "-" ],
+        "x-enum-varnames" : [ "BESLUTTER", "SAKSBEHANDLER", "SØKER", "ARBEIDSGIVER", "VEDTAKSLØSNINGEN", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2076,11 +2324,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeTypeKilde" : {
+        "enum" : [ "-" ],
+        "x-enum-varnames" : [ "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkBegrunnelseType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkBegrunnelseTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2091,11 +2347,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkBegrunnelseTypeKilde" : {
+        "enum" : [ "-", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
+        "x-enum-varnames" : [ "UDEFINIERT", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkEndretFeltType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkEndretFeltTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2106,11 +2370,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkEndretFeltTypeKilde" : {
+        "enum" : [ "AKTIVITET", "AKTIVITET_PERIODE", "OPPTJENINGSVILKARET", "ARBEIDSFORHOLD", "DAGPENGER_INNTEKT", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "AVKLARSAKSOPPLYSNINGER", "BEHANDLENDE_ENHET", "BEHANDLING", "OVERSTYRT_VURDERING", "SOKERSOPPLYSNINGSPLIKT", "SOKNADSFRISTVILKARET", "ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "FRILANSVIRKSOMHET", "FRILANS_INNTEKT", "INNTEKTSKATEGORI", "INNTEKT_FRA_ARBEIDSFORHOLD", "LØNNSENDRING_I_PERIODEN", "MILITÆR_ELLER_SIVIL", "MOTTAR_YTELSE_ARBEID", "MOTTAR_YTELSE_FRILANS", "SELVSTENDIG_NAERINGSDRIVENDE", "VURDER_ETTERLØNN_SLUTTPAKKE", "ENDRING_NAERING", "BRUTTO_NAERINGSINNTEKT", "KOMPLETTHET", "NY_STARTDATO_REFUSJON", "VURDER_NYTT_INNTEKTSFORHOLD", "BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "DELVIS_REFUSJON_FØR_STARTDATO", "PERIODE_TOM", "ER_SOKER_BOSATT_I_NORGE", "GYLDIG_MEDLEM_FOLKETRYGDEN", "OPPHOLDSRETT_EOS", "OPPHOLDSRETT_IKKE_EOS", "UTLAND", "UTTAK_OVERSTYRT_PERIODE", "UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "UTTAK_OVERSTYRT_UTBETALINGSGRAD", "OVST_UTTAK_FJERNET", "TILKJENT_YTELSE", "ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "FASTSETT_VIDERE_BEHANDLING", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "TILBAKETREKK", "OMSORG_FOR", "FARESIGNALER", "NYTT_REFUSJONSKRAV", "NY_REFUSJONSFRIST", "OPPHOER_REFUSJON", "UTVIDETRETT", "ALENE_OM_OMSORG", "MIDLERTIDIG_ALENE", "ALDERSVILKAR_BARN", "VALG", "-" ],
+        "x-enum-varnames" : [ "AKTIVITET", "AKTIVITET_PERIODE", "OPPTJENINGSVILKARET", "ARBEIDSFORHOLD", "DAGPENGER_INNTEKT", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "AVKLARSAKSOPPLYSNINGER", "BEHANDLENDE_ENHET", "BEHANDLING", "OVERSTYRT_VURDERING", "SOKERSOPPLYSNINGSPLIKT", "SOKNADSFRISTVILKARET", "ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "FRILANSVIRKSOMHET", "FRILANS_INNTEKT", "INNTEKTSKATEGORI", "INNTEKT_FRA_ARBEIDSFORHOLD", "LØNNSENDRING_I_PERIODEN", "MILITÆR_ELLER_SIVIL", "MOTTAR_YTELSE_ARBEID", "MOTTAR_YTELSE_FRILANS", "SELVSTENDIG_NÆRINGSDRIVENDE", "VURDER_ETTERLØNN_SLUTTPAKKE", "ENDRING_NÆRING", "BRUTTO_NAERINGSINNTEKT", "KOMPLETTHET", "NY_STARTDATO_REFUSJON", "VURDER_NYTT_INNTEKTSFORHOLD", "BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "DELVIS_REFUSJON_FØR_STARTDATO", "PERIODE_TOM", "ER_SOKER_BOSATT_I_NORGE", "GYLDIG_MEDLEM_FOLKETRYGDEN", "OPPHOLDSRETT_EOS", "OPPHOLDSRETT_IKKE_EOS", "UTLAND", "UTTAK_OVERSTYRT_PERIODE", "UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "UTTAK_OVERSTYRT_UTBETALINGSGRAD", "OVST_UTTAK_FJERNET", "TILKJENT_YTELSE", "ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "FASTSETT_VIDERE_BEHANDLING", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "TILBAKETREKK", "OMSORG_FOR", "FARESIGNALER", "NYTT_REFUSJONSKRAV", "NY_REFUSJONSFRIST", "OPPHØR_REFUSJON", "UTVIDETRETT", "ALENE_OM_OMSORG", "MIDLERTIDIG_ALENE", "ALDERSVILKÅR_BARN", "VALG", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkEndretFeltVerdiType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkEndretFeltVerdiTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2121,11 +2393,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkEndretFeltVerdiTypeKilde" : {
+        "enum" : [ "BOSATT_I_NORGE", "BOSATT_UTLAND", "EØS_BOSATT_NORGE", "IKKE_BOSATT_I_NORGE", "IKKE_LOVLIG_OPPHOLD", "IKKE_OPPHOLDSRETT", "LOVLIG_OPPHOLD", "OPPHOLDSRETT", "NASJONAL", "FORTSETT_BEHANDLING", "HENLEGG_BEHANDLING", "HINDRE_TILBAKETREKK", "UTFØR_TILBAKETREKK", "IKKE_NY_I_ARBEIDSLIVET", "IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "NY_I_ARBEIDSLIVET", "TIDSBEGRENSET_ARBEIDSFORHOLD", "VARIG_ENDRET_NAERING", "INGEN_VARIG_ENDRING_NAERING", "NYOPPSTARTET", "IKKE_NYOPPSTARTET", "BENYTT", "IKKE_BENYTT", "VILKAR_IKKE_OPPFYLT", "VILKAR_OPPFYLT", "IKKE_OPPFYLT", "OPPFYLT", "OPPFYLT_8_47_A", "OPPFYLT_8_47_B", "INGEN_INNVIRKNING", "INNVIRKNING", "-" ],
+        "x-enum-varnames" : [ "BOSATT_I_NORGE", "BOSATT_UTLAND", "EØS_BOSATT_NORGE", "IKKE_BOSATT_I_NORGE", "IKKE_LOVLIG_OPPHOLD", "IKKE_OPPHOLDSRETT", "LOVLIG_OPPHOLD", "OPPHOLDSRETT", "NASJONAL", "FORTSETT_BEHANDLING", "HENLEGG_BEHANDLING", "HINDRE_TILBAKETREKK", "UTFØR_TILBAKETREKK", "IKKE_NY_I_ARBEIDSLIVET", "IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "NY_I_ARBEIDSLIVET", "TIDSBEGRENSET_ARBEIDSFORHOLD", "VARIG_ENDRET_NAERING", "INGEN_VARIG_ENDRING_NAERING", "NYOPPSTARTET", "IKKE_NYOPPSTARTET", "BENYTT", "IKKE_BENYTT", "VILKAR_IKKE_OPPFYLT", "VILKAR_OPPFYLT", "IKKE_OPPFYLT", "OPPFYLT", "OPPFYLT_8_47_A", "OPPFYLT_8_47_B", "INGEN_INNVIRKNING", "INNVIRKNING", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkOpplysningType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkOpplysningTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2136,11 +2416,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkOpplysningTypeKilde" : {
+        "enum" : [ "-" ],
+        "x-enum-varnames" : [ "UDEFINIERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkResultatType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkResultatTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2151,11 +2439,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkResultatTypeKilde" : {
+        "enum" : [ "-" ],
+        "x-enum-varnames" : [ "UDEFINIERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektHistorikkinnslagType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkinnslagTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2166,11 +2462,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkinnslagTypeKilde" : {
+        "enum" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKR_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNE", "OVST_UTTAK_OPPDATERE", "-" ],
+        "x-enum-varnames" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKREVING_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNET", "OVST_UTTAK_OPPDATERT", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektInntektskategori" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektInntektskategoriKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2181,11 +2485,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektInntektskategoriKilde" : {
+        "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
+        "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektKonsekvensForYtelsen" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektKonsekvensForYtelsenKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2196,11 +2508,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektKonsekvensForYtelsenKilde" : {
+        "enum" : [ "YTELSE_OPPHØRER", "ENDRING_I_BEREGNING", "INGEN_ENDRING", "-" ],
+        "x-enum-varnames" : [ "YTELSE_OPPHØRER", "ENDRING_I_BEREGNING", "INGEN_ENDRING", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektMedlemskapDekningType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapDekningTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2211,11 +2531,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektMedlemskapDekningTypeKilde" : {
+        "enum" : [ "FTL_2_6", "FTL_2_7_a", "FTL_2_7_b", "FTL_2_9_1_a", "FTL_2_9_1_b", "FTL_2_9_1_c", "FTL_2_9_2_a", "FTL_2_9_2_c", "FULL", "IHT_AVTALE", "OPPHOR", "UNNTATT", "-" ],
+        "x-enum-varnames" : [ "FTL_2_6", "FTL_2_7_a", "FTL_2_7_b", "FTL_2_9_1_a", "FTL_2_9_1_b", "FTL_2_9_1_c", "FTL_2_9_2_a", "FTL_2_9_2_c", "FULL", "IHT_AVTALE", "OPPHOR", "UNNTATT", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektMedlemskapManuellVurderingType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapManuellVurderingTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2226,11 +2554,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektMedlemskapManuellVurderingTypeKilde" : {
+        "enum" : [ "-", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "OPPHOR_PGA_ENDRING_I_TPS" ],
+        "x-enum-varnames" : [ "UDEFINERT", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektMedlemskapType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2241,11 +2577,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektMedlemskapTypeKilde" : {
+        "enum" : [ "ENDELIG", "FORELOPIG", "AVKLARES", "-" ],
+        "x-enum-varnames" : [ "ENDELIG", "FORELOPIG", "UNDER_AVKLARING", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektOppgaveÅrsak" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektOppgaveÅrsakKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2256,11 +2600,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektOppgaveÅrsakKilde" : {
+        "enum" : [ "BEH_SAK_VL", "RV_VL", "GOD_VED_VL", "REG_SOK_VL", "VUR_KONS_YTE", "VUR", "FEILUTBET", "INNH_DOK", "SETTVENT", "BEH_SAK", "-" ],
+        "x-enum-varnames" : [ "BEHANDLE_SAK_VL", "REVURDER_VL", "GODKJENN_VEDTAK_VL", "REG_SOKNAD_VL", "VURDER_KONSEKVENS_YTELSE", "VURDER_DOKUMENT", "FEILUTBETALING", "INNHENT_DOK", "SETTVENT", "BEHANDLE_SAK_IT", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektOpptjeningAktivitetType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektOpptjeningAktivitetTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2271,11 +2623,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektOpptjeningAktivitetTypeKilde" : {
+        "enum" : [ "AAP", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "-" ],
+        "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektRelatertYtelseTilstand" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektRelatertYtelseTilstandKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2286,11 +2646,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektRelatertYtelseTilstandKilde" : {
+        "enum" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKESTARTET" ],
+        "x-enum-varnames" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKE_STARTET" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektRevurderingVarslingÅrsak" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektRevurderingVarslingÅrsakKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2301,11 +2669,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektRevurderingVarslingÅrsakKilde" : {
+        "enum" : [ "BARNIKKEREG", "JOBBFULLTID", "IKKEOPPTJENT", "UTVANDRET", "JOBBUTLAND", "IKKEOPPHOLD", "JOBB6MND", "AKTIVITET", "ANNET" ],
+        "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektSkjermlenkeType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektSkjermlenkeTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2316,11 +2692,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektSkjermlenkeTypeKilde" : {
+        "enum" : [ "BEREGNING", "FAKTA_FOR_OPPTJENING", "FAKTA_OM_ARBEIDSFORHOLD", "FAKTA_OM_BEREGNING", "INFOTRYGD_MIGRERING", "OVERSTYR_INPUT_BEREGNING", "FAKTA_OM_FORDELING", "FAKTA_OM_MEDLEMSKAP", "FAKTA_OM_MEDISINSK", "FAKTA_OM_ÅRSKVANTUM", "FAKTA_OM_ALDERSVILKÅR_BARN", "FAKTA_OM_UTVIDETRETT", "FAKTA_OM_OMSORGEN_FOR", "FAKTA_OM_OPPTJENING", "FAKTA_OM_INNTEKTSMELDING", "FAKTA_OM_SIMULERING", "FAKTA_OM_UTTAK", "FAKTA_OM_VERGE", "KONTROLL_AV_SAKSOPPLYSNINGER", "OPPLYSNINGSPLIKT", "PUNKT_FOR_MEDLEMSKAP", "PUNKT_FOR_MEDISINSK", "PUNKT_FOR_OMSORGEN_FOR", "PUNKT_FOR_MEDLEMSKAP_LØPENDE", "PUNKT_FOR_OPPTJENING", "PUNKT_FOR_MAN_VILKÅRSVURDERING", "PUNKT_FOR_UTVIDETRETT", "SOEKNADSFRIST", "TILKJENT_YTELSE", "-", "UTLAND", "UTTAK", "VEDTAK", "VURDER_FARESIGNALER", "VURDER_NATTEVÅK", "VURDER_BEREDSKAP", "VURDER_RETT_ETTER_PLEIETRENGENDES_DØD" ],
+        "x-enum-varnames" : [ "BEREGNING", "FAKTA_FOR_OPPTJENING", "FAKTA_OM_ARBEIDSFORHOLD", "FAKTA_OM_BEREGNING", "INFOTRYGD_MIGRERING", "OVERSTYR_INPUT_BEREGNING", "FAKTA_OM_FORDELING", "FAKTA_OM_MEDLEMSKAP", "FAKTA_OM_MEDISINSK", "FAKTA_OM_ÅRSKVANTUM", "PUNKT_FOR_ALDERSVILKÅR_BARN", "FAKTA_OM_UTVIDETRETT", "FAKTA_OM_OMSORGENFOR", "FAKTA_OM_OPPTJENING", "FAKTA_OM_INNTEKTSMELDING", "FAKTA_OM_SIMULERING", "FAKTA_OM_UTTAK", "FAKTA_OM_VERGE", "KONTROLL_AV_SAKSOPPLYSNINGER", "OPPLYSNINGSPLIKT", "PUNKT_FOR_MEDLEMSKAP", "PUNKT_FOR_MEDISINSK", "PUNKT_FOR_OMSORGEN_FOR", "PUNKT_FOR_MEDLEMSKAP_LØPENDE", "PUNKT_FOR_OPPTJENING", "PUNKT_FOR_MAN_VILKÅRSVURDERING", "PUNKT_FOR_UTVIDETRETT", "SOEKNADSFRIST", "TILKJENT_YTELSE", "UDEFINERT", "UTLAND", "UTTAK", "VEDTAK", "VURDER_FARESIGNALER", "VURDER_NATTEVÅK", "VURDER_BEREDSKAP", "VURDER_RETT_ETTER_PLEIETRENGENDES_DØD" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektSpråkkode" : {
         "properties" : {
+          "kilde" : {
+            "type" : "string"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2331,11 +2715,14 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
       "KodeverdiSomObjektTilbakekrevingVidereBehandling" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektTilbakekrevingVidereBehandlingKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2346,11 +2733,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektTilbakekrevingVidereBehandlingKilde" : {
+        "enum" : [ "-", "TILBAKEKR_OPPRETT", "TILBAKEKR_IGNORER", "TILBAKEKR_INNTREKK", "TILBAKEKR_OPPDATER" ],
+        "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektVedtakResultatType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektVedtakResultatTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2361,11 +2756,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektVedtakResultatTypeKilde" : {
+        "enum" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "-" ],
+        "x-enum-varnames" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektVilkårType" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektVilkårTypeKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2376,11 +2779,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektVilkårTypeKilde" : {
+        "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "-" ],
+        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslag" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslagKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2391,11 +2802,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslagKilde" : {
+        "enum" : [ "-", "MANGLENDE_OPPLYSNINGER", "LAGT_TIL_AV_SAKSBEHANDLER" ],
+        "x-enum-varnames" : [ "UDEFINERT", "MANGLENDE_OPPLYSNINGER", "LAGT_TIL_AV_SAKSBEHANDLER" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektVurderÅrsak" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektVurderÅrsakKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2406,11 +2825,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektVurderÅrsakKilde" : {
+        "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
+        "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ],
+        "type" : "string"
       },
       "KodeverdiSomObjektÅrsakTilVurdering" : {
         "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektÅrsakTilVurderingKilde"
+          },
           "kode" : {
             "type" : "string"
           },
@@ -2421,8 +2848,13 @@
             "type" : "string"
           }
         },
-        "required" : [ "kode", "kodeverk", "navn" ],
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "KodeverdiSomObjektÅrsakTilVurderingKilde" : {
+        "enum" : [ "ENDRING_FRA_BRUKER", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "OPPHØR_UNGDOMSPROGRAM", "G_REGULERING", "REVURDERER_BEREGNING", "FØRSTEGANGSVURDERING" ],
+        "x-enum-varnames" : [ "ENDRING_FRA_BRUKER", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "OPPHØR_UNGDOMSPROGRAM", "G_REGULERING", "REVURDERER_BEREGNING", "FØRSTEGANGSVURDERING" ],
+        "type" : "string"
       },
       "KodeverkArbeidsforhold" : {
         "properties" : {
@@ -2511,13 +2943,13 @@
         "type" : "string"
       },
       "KodeverkBehandlingBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverkBehandlingBehandlingÅrsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverkBehandlingRevurderingVarslingÅrsak" : {
@@ -2877,13 +3309,13 @@
         "type" : "object"
       },
       "NyBehandlingDtoBehandlingArsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
         "type" : "string"
       },
       "NyBehandlingDtoBehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UNNTAKSBEHANDLING", "UDEFINERT" ],
+        "enum" : [ "BT-002", "BT-004", "-" ],
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
         "type" : "string"
       },
       "OppdaterAktørIdDto" : {
@@ -4348,7 +4780,7 @@
         "required" : [ "varseltekst" ],
         "type" : "object"
       },
-      "VedtaksbrevForhåndsvisDto" : {
+      "VedtaksbrevForhåndsvisRequest" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
@@ -4366,7 +4798,35 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
-      "VedtaksbrevValgDto" : {
+      "VedtaksbrevValgRequest" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "emptyRedigertTekstAndRedigertTrue" : {
+            "type" : "boolean"
+          },
+          "hindret" : {
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "redigertHtml" : {
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          },
+          "redigertTextAndRedigertFalse" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
+      "VedtaksbrevValgResponse" : {
         "properties" : {
           "enableHindre" : {
             "type" : "boolean"
@@ -4398,38 +4858,13 @@
         },
         "type" : "object"
       },
-      "VedtaksbrevValgRequestDto" : {
-        "properties" : {
-          "behandlingId" : {
-            "format" : "int64",
-            "maximum" : 9223372036854775807,
-            "minimum" : 0,
-            "type" : "integer"
-          },
-          "emptyRedigertTekstAndRedigertTrue" : {
-            "type" : "boolean"
-          },
-          "hindret" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          },
-          "redigertHtml" : {
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-            "type" : "string"
-          },
-          "redigertTextAndRedigertFalse" : {
-            "type" : "boolean"
-          }
-        },
-        "required" : [ "behandlingId" ],
-        "type" : "object"
-      },
       "VenteårsakSomObjekt" : {
         "properties" : {
           "kanVelges" : {
             "type" : "boolean"
+          },
+          "kilde" : {
+            "$ref" : "#/components/schemas/VenteårsakSomObjektKilde"
           },
           "kode" : {
             "type" : "string"
@@ -4441,8 +4876,13 @@
             "type" : "string"
           }
         },
-        "required" : [ "kanVelges", "kode", "kodeverk", "navn" ],
+        "required" : [ "kanVelges", "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
+      },
+      "VenteårsakSomObjektKilde" : {
+        "enum" : [ "-", "ANKE_OVERSENDT_TIL_TRYGDERETTEN", "ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "AVV_DOK", "AVV_IM_MOT_AAREG", "AVV_IM_MOT_SØKNAD_AT", "AVV_SØKNADSPERIODER", "AVV_FODSEL", "AVV_RESPONS_REVURDERING", "FOR_TIDLIG_SOKNAD", "GRADERING_FLERE_ARBEIDSFORHOLD", "REFUSJON_3_MÅNEDER", "SCANN", "UTV_FRIST", "VENT_FEIL_ENDRINGSSØKNAD", "VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG", "VENT_INFOTRYGD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_MILITÆR_OG_BG_UNDER_3G", "VENT_OPDT_INNTEKTSMELDING", "VENT_OPPTJENING_OPPLYSNINGER", "VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID", "VENT_REGISTERINNHENTING", "VENT_PÅ_SISTE_AAP_MELDEKORT", "VENT_SØKNAD_SENDT_INFORMASJONSBREV", "VENT_TIDLIGERE_BEHANDLING", "VENT_ÅPEN_BEHANDLING", "VENT_MANGL_FUNKSJ_SAKSBEHANDLER", "VENTER_SVAR_PORTEN", "VENTER_SVAR_TEAMS", "ANDRE_INNTEKTSOPPLYSNINGER", "INNTEKTSMELDING", "LEGEERKLÆRING", "MEDISINSKE_OPPLYSNINGER", "ANNET", "VENTER_ETTERLYS_IM", "VENTER_ETTERLYS_IM_VARSEL", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "OPPD_ÅPEN_BEH", "VENT_DEKGRAD_REGEL", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER", "VENT_BEREGNING_TILBAKE_I_TID", "BRUKER_70ÅR_VED_REFUSJON", "VENT_LOVENDRING_8_41", "INGEN_PERIODE_UTEN_YTELSE", "PERIODE_MED_AVSLAG", "MANGLENDE_FUNKSJONALITET", "KORTVARIG_ARBEID", "FRISINN_ATFL_SAMME_ORG", "FRISINN_VARIANT_SN_MED_FL_INNTEKT", "FRISINN_VARIANT_FL_MED_SN_INNTEKT", "FRISINN_VARIANT_NY_FL", "FRISINN_VARIANT_NY_SN_2019", "FRISINN_VARIANT_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT", "FRISINN_VARIANT_KOMBINERT_NY_FL", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_SN_2020", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "AVV_SOKN_IT_PERIODER", "AVV_SOKN_NAERING", "AVV_SOKN_FRILANS", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP", "AAP_DP_SISTE_10_MND_SVP", "FL_SN_IKKE_STOTTET_FOR_SVP" ],
+        "x-enum-varnames" : [ "UDEFINERT", "ANKE_OVERSENDT_TIL_TRYGDERETTEN", "ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "AVV_DOK", "AVV_IM_MOT_AAREG", "AVV_IM_MOT_SØKNAD_AT", "AVV_SØKNADSPERIODER", "AVV_FODSEL", "AVV_RESPONS_REVURDERING", "FOR_TIDLIG_SOKNAD", "GRADERING_FLERE_ARBEIDSFORHOLD", "REFUSJON_3_MÅNEDER", "SCANN", "UTV_FRIST", "VENT_FEIL_ENDRINGSSØKNAD", "VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG", "VENT_INFOTRYGD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_MILITÆR_BG_UNDER_3G", "VENT_OPDT_INNTEKTSMELDING", "VENT_OPPTJENING_OPPLYSNINGER", "VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID", "VENT_REGISTERINNHENTING", "VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT", "VENT_SØKNAD_SENDT_INFORMASJONSBREV", "VENT_TIDLIGERE_BEHANDLING", "VENT_ÅPEN_BEHANDLING", "VENT_MANGL_FUNKSJ_SAKSBEHANDLER", "VENTER_SVAR_PORTEN", "VENTER_SVAR_TEAMS", "ANDRE_INNTEKTSOPPLYSNINGER", "INNTEKTSMELDING", "LEGEERKLÆRING", "MEDISINSKE_OPPLYSNINGER", "ANNET", "VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER", "VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "OPPD_ÅPEN_BEH", "VENT_DEKGRAD_REGEL", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER", "VENT_BEREGNING_TILBAKE_I_TID", "BRUKER_70ÅR_VED_REFUSJON", "VENT_LOVENDRING_8_41", "INGEN_PERIODE_UTEN_YTELSE", "PERIODE_MED_AVSLAG", "MANGLENDE_FUNKSJONALITET", "KORTVARIG_ARBEID", "FRISINN_ATFL_SAMME_ORG", "FRISINN_VARIANT_SN_MED_FL_INNTEKT", "FRISINN_VARIANT_FL_MED_SN_INNTEKT", "FRISINN_VARIANT_NY_FL", "FRISINN_VARIANT_NY_SN_2019", "FRISINN_VARIANT_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT", "FRISINN_VARIANT_KOMBINERT_NY_FL", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_SN_2020", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD", "MANGLER_SØKNADOPPLYSNING_NÆRING", "MANGLER_SØKNADOPPLYSNING_FRILANS", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE", "DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP", "AAP_DP_SISTE_10_MND_SVP", "FL_SN_IKKE_STOTTET_FOR_SVP" ],
+        "type" : "string"
       },
       "VilkårMedPerioderDto" : {
         "properties" : {
@@ -6022,33 +6462,6 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/api/behandlinger/unntak" : {
-      "put" : {
-        "description" : "Opprette ny unntaksbehandling",
-        "operationId" : "opprettNyUnntaksbehandling",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/NyBehandlingDto"
-              }
-            }
-          },
-          "description" : "Saksnummer"
-        },
-        "responses" : {
-          "202" : {
-            "description" : "Opprett ny unntaksbehandling pågår",
-            "headers" : {
-              "Location" : {
-                "style" : "simple"
-              }
-            }
-          }
-        },
-        "tags" : [ "behandlinger" ]
-      }
-    },
     "/api/diagnostikk/sak" : {
       "post" : {
         "description" : "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak",
@@ -6550,6 +6963,106 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/api/formidling/informasjonsbrev" : {
+      "get" : {
+        "description" : "Maler for informasjon og støttebrev",
+        "operationId" : "informasjonsbrevValg",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InformasjonsbrevValgResponseDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/informasjonsbrev/bestill" : {
+      "post" : {
+        "description" : "Bestill informasjonsbrev for en behandling. ",
+        "operationId" : "bestillInformasjonsbrev",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/informasjonsbrev/forhaandsvis" : {
+      "post" : {
+        "description" : "Forhåndsvise inforasjonsbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
+        "operationId" : "forhåndsvisInformasjonsbrev",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "kunHtml",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "pdf"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
     "/api/formidling/vedtaksbrev" : {
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
@@ -6567,7 +7080,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VedtaksbrevValgDto"
+                  "$ref" : "#/components/schemas/VedtaksbrevValgResponse"
                 }
               }
             },
@@ -6583,7 +7096,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/VedtaksbrevValgRequestDto"
+                "$ref" : "#/components/schemas/VedtaksbrevValgRequest"
               }
             }
           },
@@ -6605,7 +7118,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisDto"
+                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisRequest"
               }
             }
           },

@@ -10,7 +10,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandling.Skjæringstidspunkt;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -20,7 +19,6 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,6 @@ public class Endringskontroller {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private OppgaveTjeneste oppgaveTjeneste;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private Instance<EndringStartpunktTjeneste> startpunktTjenester;
 
     Endringskontroller() {
@@ -48,10 +45,8 @@ public class Endringskontroller {
     public Endringskontroller(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                               @Any Instance<EndringStartpunktTjeneste> startpunktTjenester,
                               OppgaveTjeneste oppgaveTjeneste,
-                              RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
-                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                              RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.startpunktTjenester = startpunktTjenester;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
@@ -62,9 +57,7 @@ public class Endringskontroller {
     }
 
     public void spolTilStartpunkt(Behandling behandling, EndringsresultatDiff endringsresultat) {
-        Long behandlingId = behandling.getId();
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
         if (behandling.getFagsakYtelseType() == FagsakYtelseType.FRISINN) {
             //kun FRISINN som bruker gosys for produksjonsstyring, de andre ytelsene håndteres i k9-los

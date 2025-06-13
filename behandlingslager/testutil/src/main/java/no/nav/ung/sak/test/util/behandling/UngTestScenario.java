@@ -27,6 +27,7 @@ import java.util.Set;
  * @param behandlingTriggere
  * @param abakusInntekt
  * @param barn
+ * @param dødsdato
  */
 public record UngTestScenario(
     String navn,
@@ -41,7 +42,7 @@ public record UngTestScenario(
     Set<Trigger> behandlingTriggere,
     @Deprecated // Inntekt hentes nå fra tilkjent ytelse i brev istedenfor abakus.
     OppgittOpptjeningBuilder abakusInntekt,
-    List<PersonInformasjon> barn) {
+    List<PersonInformasjon> barn, LocalDate dødsdato) {
 }
 
 
