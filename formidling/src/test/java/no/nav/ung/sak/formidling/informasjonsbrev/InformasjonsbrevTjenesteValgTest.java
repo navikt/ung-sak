@@ -74,7 +74,7 @@ class InformasjonsbrevTjenesteValgTest {
         // Then
         assertThat(informasjonsbrevValg.size()).isEqualTo(1);
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
-        assertThat(first.malType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
+        assertThat(first.malType().getKilde()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
 
         assertThat(first.mottakere()).hasSize(1);
         InformasjonsbrevMottakerValgDto mottaker = first.mottakere().getFirst();
@@ -104,7 +104,7 @@ class InformasjonsbrevTjenesteValgTest {
         // Then
         assertThat(informasjonsbrevValg.size()).isEqualTo(1);
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
-        assertThat(first.malType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
+        assertThat(first.malType().getKilde()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
     }
 
     @Test
