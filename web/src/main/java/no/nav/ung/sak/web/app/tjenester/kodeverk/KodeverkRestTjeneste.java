@@ -206,7 +206,7 @@ public class KodeverkRestTjeneste {
                 .filter(kv -> kv != null && !"-".equals(kv.getKode())) // Gammalt endepunkt returnerer ikkje "-" verdiane
                 .map(kv -> {
                     if (kv instanceof VenteårsakSomObjekt) {
-                        return new LegacyVenteårsakSomObjekt(((VenteårsakSomObjekt) kv).getMadeFrom());
+                        return new LegacyVenteårsakSomObjekt(((VenteårsakSomObjekt) kv).getKilde());
                     } else {
                         return kv;
                     }

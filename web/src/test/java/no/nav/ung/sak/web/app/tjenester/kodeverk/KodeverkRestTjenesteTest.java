@@ -31,7 +31,7 @@ public class KodeverkRestTjenesteTest {
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     private static <K extends Kodeverdi> void checkResponseSet(final SortedSet<KodeverdiSomObjekt<K>> responseSet, final java.util.Set<K> statiskSet) {
-        assertThat(responseSet.stream().map(ko -> ko.getMadeFrom()).toList()).containsExactlyInAnyOrderElementsOf(statiskSet);
+        assertThat(responseSet.stream().map(ko -> ko.getKilde()).toList()).containsExactlyInAnyOrderElementsOf(statiskSet);
     }
 
     private static List<LinkedHashMap<String, String>> getKodelisteMap(final Map<String, Object> gruppertKodelisteMap, final String kodelisteNavn) {
@@ -83,7 +83,7 @@ public class KodeverkRestTjenesteTest {
         checkResponseSet(response.avslagårsakerPrVilkårTypeKode().get(vilkårtype.getKode()), k9Vk3Avslagsårsaker);
 
         // Venteårsak er også litt spesiell
-        final List<Venteårsak> got = response.venteårsaker().stream().map(ko -> ko.getMadeFrom()).toList();
+        final List<Venteårsak> got = response.venteårsaker().stream().map(ko -> ko.getKilde()).toList();
         final List<Venteårsak> expected = statiske.venteårsaker().stream().toList();
         assertThat(got).containsExactlyInAnyOrderElementsOf(expected);
     }

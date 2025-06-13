@@ -1,9 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.vedtak;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -11,7 +9,6 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandling.Skjæringstidspunkt;
 import no.nav.ung.sak.behandling.hendelse.FinnAnsvarligSaksbehandler;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -20,14 +17,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 
 @ApplicationScoped
 public class BehandlingVedtakTjeneste {
 
     private BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BehandlingRepository behandlingRepository;
 
     BehandlingVedtakTjeneste() {
@@ -36,28 +31,18 @@ public class BehandlingVedtakTjeneste {
 
     @Inject
     public BehandlingVedtakTjeneste(BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer,
-                                    BehandlingRepositoryProvider repositoryProvider,
-                                    SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                    BehandlingRepositoryProvider repositoryProvider) {
         this.behandlingVedtakEventPubliserer = behandlingVedtakEventPubliserer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
     }
 
     public void opprettBehandlingVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
         Long behandlingId = behandling.getId();
 
         VedtakResultatType vedtakResultatType;
-        Optional<LocalDate> opphørsdato = Optional.empty();
-        Optional<LocalDate> skjæringstidspunkt = Optional.empty();
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-
-        if (behandling.erRevurdering()) {
-            opphørsdato = skjæringstidspunktTjeneste.getOpphørsdato(ref);
-            skjæringstidspunkt = skjæringstidspunkter.getSkjæringstidspunktHvisUtledet();
-        }
-        vedtakResultatType = utledVedtakResultatType(behandling, opphørsdato, skjæringstidspunkt);
+        var ref = BehandlingReferanse.fra(behandling);
+        vedtakResultatType = utledVedtakResultatType(behandling);
         String ansvarligSaksbehandler = FinnAnsvarligSaksbehandler.finn(behandling);
         LocalDateTime vedtakstidspunkt = LocalDateTime.now();
 
@@ -73,7 +58,7 @@ public class BehandlingVedtakTjeneste {
         behandlingVedtakEventPubliserer.fireEvent(behandlingVedtak, behandling);
     }
 
-    VedtakResultatType utledVedtakResultatType(Behandling behandling, Optional<LocalDate> opphørsdato, Optional<LocalDate> skjæringstidspunkt) {
+    VedtakResultatType utledVedtakResultatType(Behandling behandling) {
         Objects.requireNonNull(behandling, "behandling");
         var behandlingResultatType = behandling.getBehandlingResultatType();
 
@@ -90,12 +75,7 @@ public class BehandlingVedtakTjeneste {
             var originalBehandlingId = behandling.getOriginalBehandlingId()
                 .orElseThrow(() -> new IllegalStateException("Kan ikke ha resultat INGEN ENDRING uten å ha en original behandling"));
             var originalBehandling = this.behandlingRepository.hentBehandling(originalBehandlingId);
-            return utledVedtakResultatType(originalBehandling, Optional.empty(), skjæringstidspunkt);
-        }
-        if (BehandlingResultatType.OPPHØR.equals(behandlingResultatType)) {
-            if (opphørsdato.isPresent() && skjæringstidspunkt.isPresent() && opphørsdato.get().isAfter(skjæringstidspunkt.get())) {
-                return VedtakResultatType.INNVILGET;
-            }
+            return utledVedtakResultatType(originalBehandling);
         }
         return VedtakResultatType.AVSLAG;
     }

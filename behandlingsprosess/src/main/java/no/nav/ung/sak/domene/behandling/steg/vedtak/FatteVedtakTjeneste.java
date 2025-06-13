@@ -81,7 +81,6 @@ public class FatteVedtakTjeneste {
 
 
         // Her har vi enten ikke totrinnskontroll eller gjennomført og godkjent totrinnskontroll
-
         behandlingVedtakTjeneste.opprettBehandlingVedtak(kontekst, behandling);
 
         opprettLagretVedtak(behandling);

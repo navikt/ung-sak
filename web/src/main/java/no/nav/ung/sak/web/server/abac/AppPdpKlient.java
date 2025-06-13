@@ -24,9 +24,9 @@ public class AppPdpKlient implements PdpKlient {
     @Override
     public Tilgangsbeslutning forespørTilgang(PdpRequest pdpRequest) {
         SaksinformasjonOgPersonerTilgangskontrollInputDto tilgangskontrollInput = PdpRequestMapper.map(pdpRequest);
-        Decision decision = sifAbacPdpRestKlient.sjekkTilgangForInnloggetBruker(tilgangskontrollInput);
+        no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning resultat = sifAbacPdpRestKlient.sjekkTilgangForInnloggetBruker(tilgangskontrollInput);
         return new Tilgangsbeslutning(
-            decision == Decision.Permit,
+            resultat.harTilgang(),
             Set.of(),
             pdpRequest,
             TilgangType.INTERNBRUKER // TODO: Bruker riktig tilgangstype?
