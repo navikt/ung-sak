@@ -127,4 +127,5 @@ class BrevdistribusjonTaskTest {
         assertThat(andreLinje.getTekst()).isEqualTo("Distribusjonskanal: nav.no.");
     }
 
+
 }
