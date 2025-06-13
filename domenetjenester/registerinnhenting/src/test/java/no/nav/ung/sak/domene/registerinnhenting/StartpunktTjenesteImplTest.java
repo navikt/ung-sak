@@ -54,7 +54,7 @@ public class StartpunktTjenesteImplTest {
         // To forskjellige id-er indikerer endring på grunnlag
         long grunnlagId1 = 1L, grunnlagId2 = 2L;
         var endringsresultat = opprettEndringsresultat(grunnlagId1, grunnlagId2);
-        var behRef = BehandlingReferanse.fra(behandling, LocalDate.now());
+        var behRef = BehandlingReferanse.fra(behandling);
 
         // Act/Assert
         assertThat(tjeneste.utledStartpunktForDiffBehandlingsgrunnlag(behRef, endringsresultat)).isEqualTo(StartpunktType.INIT_PERIODER);

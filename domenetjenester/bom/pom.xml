@@ -18,10 +18,6 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>dokumentarkiv</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>skjaeringstidspunkt</artifactId>
-        </dependency>
 		 <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>arbeidsforhold</artifactId>
