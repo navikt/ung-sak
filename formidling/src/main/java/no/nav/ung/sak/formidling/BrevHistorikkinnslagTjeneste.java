@@ -35,12 +35,12 @@ public class BrevHistorikkinnslagTjeneste {
     public void opprett(BrevbestillingEntitet bestilling) {
         var behandling = behandlingRepository.hentBehandling(bestilling.getBehandlingId());
 
+        var linje = bestilling.getTemplateType().getBeskrivelse();
         var builder = new Historikkinnslag.Builder()
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
             .medAktør(bestilling.isVedtaksbrev() ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER)
-            .medTittel("Brev bestilt")
-            .addLinje(bestilling.getTemplateType().getBeskrivelse());
+            .medTittel("Brev bestilt");
 
         var journalpostId = bestilling.getJournalpostId();
         Journalpost journalpost = hentJournalpost(journalpostId);
@@ -48,10 +48,14 @@ public class BrevHistorikkinnslagTjeneste {
         if (journalpost != null && !journalpost.getDokumenter().isEmpty()) {
             var hoveddokumentJournalMetadata = journalpost.getDokumenter().getFirst();
             builder.medDokumenter(List.of(byggDokumentLink(hoveddokumentJournalMetadata, journalpost)));
-            builder.addLinje("Distribusjonskanal: " + journalpost.getKanalnavn());
+            if (journalpost.getKanalnavn() != null) {
+                linje += "(" + journalpost.getKanalnavn() + ")";
+            }
         } else {
             log.warn("Ingen dokumenter funnet for journalpostId: {} ved generering av historikkinnslag. Dropper å nevne dokumentet", journalpostId);
         }
+
+        builder.addLinje(linje);
 
         historikkRepository.lagre(builder.build());
     }
