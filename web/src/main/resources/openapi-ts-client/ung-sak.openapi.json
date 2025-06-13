@@ -1765,8 +1765,8 @@
             "minimum" : 0,
             "type" : "integer"
           },
-          "informasjonsbrevMalType" : {
-            "$ref" : "#/components/schemas/InformasjonsbrevBestillingDtoInformasjonsbrevMalType"
+          "dokumentMalType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevBestillingDtoDokumentMalType"
           },
           "innhold" : {
             "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
@@ -1778,9 +1778,9 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
-      "InformasjonsbrevBestillingDtoInformasjonsbrevMalType" : {
-        "enum" : [ "GENERELT_FRITEKSTBREV" ],
-        "x-enum-varnames" : [ "GENERELT_FRITEKSTBREV" ],
+      "InformasjonsbrevBestillingDtoDokumentMalType" : {
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
         "type" : "string"
       },
       "InformasjonsbrevInnholdDto" : {
@@ -1857,8 +1857,8 @@
         "type" : "object"
       },
       "InformasjonsbrevValgDtoMalType" : {
-        "enum" : [ "GENERELT_FRITEKSTBREV" ],
-        "x-enum-varnames" : [ "GENERELT_FRITEKSTBREV" ],
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
         "type" : "string"
       },
       "InformasjonsbrevValgResponseDto" : {
