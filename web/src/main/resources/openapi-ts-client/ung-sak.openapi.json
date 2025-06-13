@@ -1757,7 +1757,7 @@
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
         "type" : "string"
       },
-      "InformasjonsbrevBestillingDto" : {
+      "InformasjonsbrevBestillingRequest" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
@@ -1766,7 +1766,7 @@
             "type" : "integer"
           },
           "dokumentMalType" : {
-            "$ref" : "#/components/schemas/InformasjonsbrevBestillingDtoDokumentMalType"
+            "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequestDokumentMalType"
           },
           "innhold" : {
             "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
@@ -1778,7 +1778,7 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
-      "InformasjonsbrevBestillingDtoDokumentMalType" : {
+      "InformasjonsbrevBestillingRequestDokumentMalType" : {
         "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
         "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
         "type" : "string"
@@ -1806,7 +1806,7 @@
         "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
         "type" : "string"
       },
-      "InformasjonsbrevMottakerValgDto" : {
+      "InformasjonsbrevMottakerValgResponse" : {
         "properties" : {
           "fnr" : {
             "type" : "string"
@@ -1815,23 +1815,23 @@
             "type" : "string"
           },
           "idType" : {
-            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDtoIdType"
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponseIdType"
           },
           "navn" : {
             "type" : "string"
           },
           "utilgjengeligÅrsak" : {
-            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDtoUtilgjengeligÅrsak"
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponseUtilgjengeligÅrsak"
           }
         },
         "type" : "object"
       },
-      "InformasjonsbrevMottakerValgDtoIdType" : {
+      "InformasjonsbrevMottakerValgResponseIdType" : {
         "enum" : [ "ORGNR", "AKTØRID" ],
         "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
         "type" : "string"
       },
-      "InformasjonsbrevMottakerValgDtoUtilgjengeligÅrsak" : {
+      "InformasjonsbrevMottakerValgResponseUtilgjengeligÅrsak" : {
         "enum" : [ "PERSON_DØD" ],
         "x-enum-varnames" : [ "PERSON_DØD" ],
         "type" : "string"
@@ -1843,7 +1843,7 @@
           },
           "mottakere" : {
             "items" : {
-              "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgDto"
+              "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponse"
             },
             "type" : "array"
           },
@@ -4780,7 +4780,7 @@
         "required" : [ "varseltekst" ],
         "type" : "object"
       },
-      "VedtaksbrevForhåndsvisDto" : {
+      "VedtaksbrevForhåndsvisRequest" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
@@ -4798,7 +4798,35 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
-      "VedtaksbrevValgDto" : {
+      "VedtaksbrevValgRequest" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "emptyRedigertTekstAndRedigertTrue" : {
+            "type" : "boolean"
+          },
+          "hindret" : {
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "redigertHtml" : {
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          },
+          "redigertTextAndRedigertFalse" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
+      "VedtaksbrevValgResponse" : {
         "properties" : {
           "enableHindre" : {
             "type" : "boolean"
@@ -4828,34 +4856,6 @@
             "type" : "string"
           }
         },
-        "type" : "object"
-      },
-      "VedtaksbrevValgRequestDto" : {
-        "properties" : {
-          "behandlingId" : {
-            "format" : "int64",
-            "maximum" : 9223372036854775807,
-            "minimum" : 0,
-            "type" : "integer"
-          },
-          "emptyRedigertTekstAndRedigertTrue" : {
-            "type" : "boolean"
-          },
-          "hindret" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          },
-          "redigertHtml" : {
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-            "type" : "string"
-          },
-          "redigertTextAndRedigertFalse" : {
-            "type" : "boolean"
-          }
-        },
-        "required" : [ "behandlingId" ],
         "type" : "object"
       },
       "VenteårsakSomObjekt" : {
@@ -6998,7 +6998,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/InformasjonsbrevBestillingDto"
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequest"
               }
             }
           },
@@ -7030,7 +7030,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/InformasjonsbrevBestillingDto"
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequest"
               }
             }
           },
@@ -7080,7 +7080,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VedtaksbrevValgDto"
+                  "$ref" : "#/components/schemas/VedtaksbrevValgResponse"
                 }
               }
             },
@@ -7096,7 +7096,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/VedtaksbrevValgRequestDto"
+                "$ref" : "#/components/schemas/VedtaksbrevValgRequest"
               }
             }
           },
@@ -7118,7 +7118,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisDto"
+                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisRequest"
               }
             }
           },
