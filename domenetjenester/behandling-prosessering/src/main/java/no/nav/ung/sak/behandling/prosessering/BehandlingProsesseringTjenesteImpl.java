@@ -308,7 +308,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
             var tasks = taskTyper.stream()
                 .map(TaskType::new)
                 .map(it -> mapTilTask(it, behandling))
-                .collect(Collectors.toList());
+                .toList();
 
             if (tasks.isEmpty()) {
                 throw new UnsupportedOperationException("Utvikler-feil: Håpet på å hente inn noe registerdata for ytelseType=" + behandling.getFagsakYtelseType());
