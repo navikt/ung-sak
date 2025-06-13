@@ -2,8 +2,8 @@ package no.nav.ung.sak.formidling.informasjonsbrev;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
-import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -41,7 +41,7 @@ public class InformasjonsbrevTjeneste {
         boolean støtterFritekst = false;
         boolean støtterTittelOgFritekst = true;
         return List.of(new InformasjonsbrevValgDto(
-            InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
+            DokumentMalType.GENERELT_FRITEKSTBREV,
             mapMottakere(behandling),
             støtterFritekst,
             støtterTittelOgFritekst
@@ -100,10 +100,10 @@ public class InformasjonsbrevTjeneste {
         }
 
         var valg = informasjonsbrevValgDtos.stream().
-            filter(it -> it.malType() == dto.informasjonsbrevMalType())
+            filter(it -> it.malType() == dto.dokumentMalType())
             .findFirst();
         if (valg.isEmpty()) {
-            throw new IllegalArgumentException(("Støtter ikke maltype: " + dto.informasjonsbrevMalType()
+            throw new IllegalArgumentException(("Støtter ikke maltype: " + dto.dokumentMalType()
                 + ". Støtter kun: " + informasjonsbrevValgDtos.stream()
                 .map(InformasjonsbrevValgDto::malType)
                 .toList()));
@@ -119,7 +119,7 @@ public class InformasjonsbrevTjeneste {
         }
 
         return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(
-            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.informasjonsbrevMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
+            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
     }
 
 }

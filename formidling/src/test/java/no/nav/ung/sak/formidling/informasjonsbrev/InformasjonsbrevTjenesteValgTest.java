@@ -5,8 +5,8 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
-import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -74,7 +74,7 @@ class InformasjonsbrevTjenesteValgTest {
         // Then
         assertThat(informasjonsbrevValg.size()).isEqualTo(1);
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
-        assertThat(first.malType()).isEqualTo(InformasjonsbrevMalType.GENERELT_FRITEKSTBREV);
+        assertThat(first.malType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
 
         assertThat(first.mottakere()).hasSize(1);
         InformasjonsbrevMottakerValgDto mottaker = first.mottakere().getFirst();
@@ -104,7 +104,7 @@ class InformasjonsbrevTjenesteValgTest {
         // Then
         assertThat(informasjonsbrevValg.size()).isEqualTo(1);
         InformasjonsbrevValgDto first = informasjonsbrevValg.getFirst();
-        assertThat(first.malType()).isEqualTo(InformasjonsbrevMalType.GENERELT_FRITEKSTBREV);
+        assertThat(first.malType()).isEqualTo(DokumentMalType.GENERELT_FRITEKSTBREV);
     }
 
     @Test

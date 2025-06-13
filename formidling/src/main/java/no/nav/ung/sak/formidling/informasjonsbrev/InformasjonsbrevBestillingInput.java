@@ -1,11 +1,11 @@
 package no.nav.ung.sak.formidling.informasjonsbrev;
 
-import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevInnholdDto;
 
 public record InformasjonsbrevBestillingInput(
     Long behandlingId,
-    InformasjonsbrevMalType informasjonsbrevMalType,
+    DokumentMalType dokumentMalType,
     InformasjonsbrevInnholdDto innhold,
     boolean kunHtml
 ) {

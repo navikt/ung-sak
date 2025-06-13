@@ -1,7 +1,7 @@
 package no.nav.ung.sak.kontrakt.formidling.informasjonsbrev;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
  */
 public record InformasjonsbrevValgDto(
     @JsonProperty("malType")
-    InformasjonsbrevMalType malType,
+    DokumentMalType malType,
 
     @JsonProperty("mottakere")
     List<InformasjonsbrevMottakerValgDto> mottakere,

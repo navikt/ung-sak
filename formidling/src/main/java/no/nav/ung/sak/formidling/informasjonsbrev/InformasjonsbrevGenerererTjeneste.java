@@ -80,7 +80,7 @@ public class InformasjonsbrevGenerererTjeneste {
 
     private InformasjonsbrevInnholdBygger<?> bestemBygger(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
         return informasjonsbrevInnholdByggere
-            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(informasjonsbrevBestillingInput.informasjonsbrevMalType()))
+            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(informasjonsbrevBestillingInput.dokumentMalType()))
             .get();
     }
 

@@ -2,14 +2,14 @@ package no.nav.ung.sak.formidling.informasjonsbrev.innhold;
 
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 
 import java.lang.annotation.*;
 import java.util.Objects;
 
 /**
  * Marker type som implementerer interface {@link InformasjonsbrevInnholdByggerTypeRef}.
- * Brukes til å velge riktig bygger basert på enum {@link InformasjonsbrevMalType}.
+ * Brukes til å velge riktig bygger basert på enum {@link DokumentMalType}.
  * For informasjonsbrev så er det 1-1 mellom enum og bygger (for vedtaksbrev så må det utledes fra ett sett med regler)
  */
 @Repeatable(InformasjonsbrevInnholdByggerTypeRef.ContainerOfInformasjonsbrevInnholdByggerTypeRef.class)
@@ -21,9 +21,9 @@ import java.util.Objects;
 public @interface InformasjonsbrevInnholdByggerTypeRef {
 
     /**
-     * {@link InformasjonsbrevMalType}
+     * {@link DokumentMalType}
      */
-    InformasjonsbrevMalType value();
+    DokumentMalType value();
 
 
     /**
@@ -41,14 +41,14 @@ public @interface InformasjonsbrevInnholdByggerTypeRef {
 
     class InformasjonsbrevInnholdByggerTypeRefLiteral extends AnnotationLiteral<InformasjonsbrevInnholdByggerTypeRef> implements InformasjonsbrevInnholdByggerTypeRef {
 
-        private final InformasjonsbrevMalType type;
+        private final DokumentMalType type;
 
-        public InformasjonsbrevInnholdByggerTypeRefLiteral(InformasjonsbrevMalType type) {
+        public InformasjonsbrevInnholdByggerTypeRefLiteral(DokumentMalType type) {
             this.type = Objects.requireNonNull(type, "Type");
         }
 
         @Override
-        public InformasjonsbrevMalType value() {
+        public DokumentMalType value() {
             return type;
         }
     }

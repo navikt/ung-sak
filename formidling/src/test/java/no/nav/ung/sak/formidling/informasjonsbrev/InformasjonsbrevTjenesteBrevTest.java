@@ -8,7 +8,6 @@ import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
-import no.nav.ung.kodeverk.formidling.InformasjonsbrevMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
@@ -92,7 +91,7 @@ class InformasjonsbrevTjenesteBrevTest {
 
         GenerertBrev generertBrev = informasjonsbrevTjeneste.forhåndsvis(
             new InformasjonsbrevBestillingDto(
-                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
+                behandling.getId(), DokumentMalType.GENERELT_FRITEKSTBREV,
                 new InformasjonsbrevMottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID),
                 new GenereltFritekstBrevDto(overskrift, brødtekstMedMarkdown)
                 ),
@@ -134,7 +133,7 @@ class InformasjonsbrevTjenesteBrevTest {
         String brødtekst = "Test brødtekst.";
         informasjonsbrevTjeneste.bestill(
             new InformasjonsbrevBestillingDto(
-                behandling.getId(), InformasjonsbrevMalType.GENERELT_FRITEKSTBREV,
+                behandling.getId(), DokumentMalType.GENERELT_FRITEKSTBREV,
                 new InformasjonsbrevMottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID),
                 new GenereltFritekstBrevDto(overskrift, brødtekst)
             )
