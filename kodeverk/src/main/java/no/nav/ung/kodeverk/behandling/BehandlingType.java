@@ -16,11 +16,10 @@ public enum BehandlingType implements Kodeverdi {
      */
     FØRSTEGANGSSØKNAD("BT-002", "Førstegangsbehandling", "ae0034", 6, true),
     REVURDERING("BT-004", "Revurdering", "ae0028", 6, false),
-    UNNTAKSBEHANDLING("BT-010", "Unntaksbehandling", "N/A", 6, false),
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;
 
-    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING, UNNTAKSBEHANDLING);
+    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING);
 
     public static final String KODEVERK = "BEHANDLING_TYPE";
     private static final Map<String, BehandlingType> KODER = new LinkedHashMap<>();
