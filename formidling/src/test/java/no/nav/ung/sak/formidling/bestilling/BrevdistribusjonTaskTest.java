@@ -12,14 +12,16 @@ import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeType;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
-import no.nav.ung.sak.behandlingslager.formidling.bestilling.*;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevHistorikkinnslagTjeneste;
 import no.nav.ung.sak.formidling.SafFake;
 import no.nav.ung.sak.formidling.dokdist.DokDistRestKlientFake;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
-import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,21 +54,17 @@ class BrevdistribusjonTaskTest {
     void skalDistribuere() {
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-            "ABC",
-            DokumentMalType.INNVILGELSE_DOK,
-            new BrevMottaker("123", IdType.AKTØRID));
-
-        var behandlingBrevbestilling = new BehandlingBrevbestillingEntitet(
             123L,
-            true,
-            bestilling
-        );
+            456L,
+            DokumentMalType.INNVILGELSE_DOK,
+            TemplateType.INNVILGELSE,
+            new BrevMottaker("123", IdType.AKTØRID));
 
         String jpId = "jp123";
         String dokumentId = "567";
         safTjeneste.leggTilJournalpost(new SafFake.JournalpostFake(jpId, dokumentId, DokumentMalType.INNVILGELSE_DOK));
 
-        bestilling.generertOgJournalført(TemplateType.INNVILGELSE, jpId);
+        bestilling.journalført(jpId);
         brevbestillingRepository.lagre(bestilling);
 
         var pd = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
@@ -89,11 +87,11 @@ class BrevdistribusjonTaskTest {
         assertThat(oppdatertBestilling.getDokdistBestillingId()).isEqualTo(dokDistKlient.getResponses().getFirst().bestillingsId());
         assertThat(oppdatertBestilling.getStatus()).isEqualTo(BrevbestillingStatusType.FULLFØRT);
 
-        List<Historikkinnslag> historikkinnslags = historikkinnslagRepository.hent(new Saksnummer(bestilling.getSaksnummer()));
+        List<Historikkinnslag> historikkinnslags = historikkinnslagRepository.hent(bestilling.getBehandlingId());
         assertThat(historikkinnslags.size()).isEqualTo(1);
         Historikkinnslag historikkinnslag = historikkinnslags.getFirst();
         assertThat(historikkinnslag.getAktør()).isEqualTo(HistorikkAktør.VEDTAKSLØSNINGEN);
-        assertThat(historikkinnslag.getBehandlingId()).isEqualTo(behandlingBrevbestilling.getBehandlingId());
+        assertThat(historikkinnslag.getBehandlingId()).isEqualTo(bestilling.getBehandlingId());
 
         var dokumentLinker = historikkinnslag.getDokumentLinker();
         assertThat(dokumentLinker).hasSize(1);

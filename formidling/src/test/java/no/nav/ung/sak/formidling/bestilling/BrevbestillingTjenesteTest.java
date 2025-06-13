@@ -13,7 +13,6 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
@@ -83,11 +82,7 @@ class BrevbestillingTjenesteTest {
         brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
 
 
-        BehandlingBrevbestillingEntitet behandlingBestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
-        assertThat(behandlingBestilling.getBehandlingId()).isEqualTo(behandling.getId());
-        assertThat(behandlingBestilling.isVedtaksbrev()).isTrue();
-
-        var bestilling = behandlingBestilling.getBestilling();
+        var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
         assertBrevbestilling(bestilling, behandling);
 
         assertThat(dokArkivKlient.getRequests()).hasSize(1);
@@ -105,14 +100,15 @@ class BrevbestillingTjenesteTest {
 
     private static void assertBrevbestilling(BrevbestillingEntitet bestilling, Behandling behandling) {
         assertThat(bestilling.getBrevbestillingUuid()).isNotNull();
-        assertThat(bestilling.getSaksnummer()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
+        assertThat(bestilling.getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(bestilling.getFagsakId()).isEqualTo(behandling.getFagsakId());
         assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
         assertThat(bestilling.getTemplateType()).isEqualTo(TemplateType.INNVILGELSE);
         assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.JOURNALFØRT);
-        assertThat(bestilling.getDokumentData()).isNull();
         assertThat(bestilling.getDokdistBestillingId()).isNull();
         assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
         assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
+        assertThat(bestilling.isVedtaksbrev()).isTrue();
     }
 
 
