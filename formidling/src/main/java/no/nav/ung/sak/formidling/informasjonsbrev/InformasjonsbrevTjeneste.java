@@ -2,6 +2,7 @@ package no.nav.ung.sak.formidling.informasjonsbrev;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
@@ -41,10 +42,10 @@ public class InformasjonsbrevTjeneste {
         boolean støtterFritekst = false;
         boolean støtterTittelOgFritekst = true;
         return List.of(new InformasjonsbrevValgDto(
-            DokumentMalType.GENERELT_FRITEKSTBREV,
-            mapMottakere(behandling),
-            støtterFritekst,
-            støtterTittelOgFritekst
+                new KodeverdiSomObjekt<>(DokumentMalType.GENERELT_FRITEKSTBREV),
+                mapMottakere(behandling),
+                støtterFritekst,
+                støtterTittelOgFritekst
         ));
     }
 
@@ -52,13 +53,13 @@ public class InformasjonsbrevTjeneste {
         PdlPerson pdlPerson = brevMottakerTjeneste.hentMottaker(behandling);
 
         return List.of(
-            new InformasjonsbrevMottakerValgDto(
-                pdlPerson.aktørId().getId(),
-                IdType.AKTØRID,
-                formaterMedStoreOgSmåBokstaver(pdlPerson.navn()),
-                pdlPerson.fnr(),
-                //Kan ikke sende brev til død mottaker, men ønsker å vise det til klient.
-                pdlPerson.dødsdato() != null ? UtilgjengeligÅrsak.PERSON_DØD : null));
+                new InformasjonsbrevMottakerValgDto(
+                        pdlPerson.aktørId().getId(),
+                        IdType.AKTØRID,
+                        formaterMedStoreOgSmåBokstaver(pdlPerson.navn()),
+                        pdlPerson.fnr(),
+                        //Kan ikke sende brev til død mottaker, men ønsker å vise det til klient.
+                        pdlPerson.dødsdato() != null ? UtilgjengeligÅrsak.PERSON_DØD : null));
 
     }
 
@@ -100,26 +101,26 @@ public class InformasjonsbrevTjeneste {
         }
 
         var valg = informasjonsbrevValgDtos.stream().
-            filter(it -> it.malType() == dto.dokumentMalType())
-            .findFirst();
+                filter(it -> it.malType().getKilde() == dto.dokumentMalType())
+                .findFirst();
         if (valg.isEmpty()) {
             throw new IllegalArgumentException(("Støtter ikke maltype: " + dto.dokumentMalType()
-                + ". Støtter kun: " + informasjonsbrevValgDtos.stream()
-                .map(InformasjonsbrevValgDto::malType)
-                .toList()));
+                    + ". Støtter kun: " + informasjonsbrevValgDtos.stream()
+                    .map(InformasjonsbrevValgDto::malType)
+                    .toList()));
         }
 
         boolean valgtMottakerErDød = valg.get().mottakere().stream().anyMatch(
-            mottaker -> mottaker.idType() == dto.mottaker().type()
-                && mottaker.id().equals(dto.mottaker().id())
-                && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
+                mottaker -> mottaker.idType() == dto.mottaker().type()
+                        && mottaker.id().equals(dto.mottaker().id())
+                        && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
 
         if (valgtMottakerErDød) {
             throw new IllegalArgumentException(("Støtter ikke brev der mottaker er død"));
         }
 
         return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(
-            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
+                new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
     }
 
 }
