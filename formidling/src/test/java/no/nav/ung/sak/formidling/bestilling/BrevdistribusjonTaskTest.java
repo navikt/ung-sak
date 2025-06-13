@@ -56,7 +56,7 @@ class BrevdistribusjonTaskTest {
     }
 
     @Test
-    void skalDistribuere() {
+    void skalDistribuere_vedtaksbrev() {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
         scenarioBuilder.lagre(repositoryProvider);
         var behandling = scenarioBuilder.getBehandling();
@@ -113,7 +113,7 @@ class BrevdistribusjonTaskTest {
         assertThat(dokumentLinker.getFirst().getJournalpostId().getVerdi()).isEqualTo(jpId);
         assertThat(dokumentLinker.getFirst().getLinkTekst()).isEqualTo("Brev");
 
-        assertThat(historikkinnslag.getTittel()).isEqualTo("Brev bestilt");
+        assertThat(historikkinnslag.getTittel()).isEqualTo("Vedtaksbrev bestilt");
 
         var linjer = historikkinnslag.getLinjer();
         assertThat(linjer).hasSize(1);
@@ -121,6 +121,59 @@ class BrevdistribusjonTaskTest {
         HistorikkinnslagLinje førsteLinje = linjer.getFirst();
         assertThat(førsteLinje.getType()).isEqualTo(HistorikkinnslagLinjeType.TEKST);
         assertThat(førsteLinje.getTekst()).isEqualTo(TemplateType.INNVILGELSE.getBeskrivelse()+" (nav.no).");
+    }
+
+    @Test
+    void skalDistribuere_informasjonsbrev() {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
+        scenarioBuilder.lagre(repositoryProvider);
+        var behandling = scenarioBuilder.getBehandling();
+
+        var bestilling = BrevbestillingEntitet.nyBrevbestilling(
+            behandling.getFagsakId(),
+            behandling.getId(),
+            DokumentMalType.GENERELT_FRITEKSTBREV,
+            TemplateType.GENERELT_FRITEKSTBREV,
+            new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
+
+        String jpId = "jp123";
+        String dokumentId = "567";
+        safTjeneste.leggTilJournalpost(new SafFake.JournalpostFake(jpId, dokumentId, DokumentMalType.GENERELT_FRITEKSTBREV));
+
+        bestilling.journalført(jpId);
+        brevbestillingRepository.lagre(bestilling);
+
+        var pd = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
+        pd.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
+        pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VIKTIG.name());
+
+        var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, repositoryProvider.getBehandlingRepository(), safTjeneste);
+        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
+
+        task.doTask(pd);
+
+        assertThat(dokDistKlient.getRequests()).hasSize(1);
+        DistribuerJournalpostRequest req = dokDistKlient.getRequests().getFirst();
+        assertThat(req.distribusjonstype()).isEqualTo(DistribusjonsType.VIKTIG);
+
+        List<Historikkinnslag> historikkinnslags = historikkinnslagRepository.hent(bestilling.getBehandlingId());
+        assertThat(historikkinnslags.size()).isEqualTo(1);
+        Historikkinnslag historikkinnslag = historikkinnslags.getFirst();
+        assertThat(historikkinnslag.getAktør()).isEqualTo(HistorikkAktør.SAKSBEHANDLER);
+        assertThat(historikkinnslag.getBehandlingId()).isEqualTo(bestilling.getBehandlingId());
+
+        var dokumentLinker = historikkinnslag.getDokumentLinker();
+        assertThat(dokumentLinker).hasSize(1);
+        assertThat(dokumentLinker.getFirst().getLinkTekst()).isEqualTo("Brev");
+
+        assertThat(historikkinnslag.getTittel()).isEqualTo("Brev bestilt");
+
+        var linjer = historikkinnslag.getLinjer();
+        assertThat(linjer).hasSize(1);
+
+        HistorikkinnslagLinje førsteLinje = linjer.getFirst();
+        assertThat(førsteLinje.getType()).isEqualTo(HistorikkinnslagLinjeType.TEKST);
+        assertThat(førsteLinje.getTekst()).isEqualTo(TemplateType.GENERELT_FRITEKSTBREV.getBeskrivelse()+" (nav.no).");
     }
 
 

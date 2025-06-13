@@ -40,7 +40,7 @@ public class BrevHistorikkinnslagTjeneste {
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
             .medAktør(bestilling.isVedtaksbrev() ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER)
-            .medTittel("Brev bestilt");
+            .medTittel(bestilling.isVedtaksbrev() ? "Vedtaksbrev bestilt" : "Brev bestilt");
 
         var journalpostId = bestilling.getJournalpostId();
         Journalpost journalpost = hentJournalpost(journalpostId);
