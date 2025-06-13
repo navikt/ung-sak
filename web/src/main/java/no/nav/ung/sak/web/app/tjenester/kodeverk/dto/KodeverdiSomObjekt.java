@@ -20,22 +20,21 @@ public class KodeverdiSomObjekt<K extends Kodeverdi> {
     private final String navn;
 
     @NotNull
-    @JsonIgnore
-    private final K madeFrom;
+    private final K kilde;
 
     public KodeverdiSomObjekt(final K from) {
         this.kode = from.getKode();
         this.kodeverk = from.getKodeverk();
         this.navn = from.getNavn();
-        this.madeFrom = from;
+        this.kilde = from;
     }
 
-    public K getMadeFrom() {
-        return this.madeFrom;
+    public K getKilde() {
+        return this.kilde;
     }
 
     public String madeFromClassName() {
-        return this.getMadeFrom().getClass().getSimpleName();
+        return this.getKilde().getClass().getSimpleName();
     }
 
     public static <KV extends Kodeverdi> SortedSet<KodeverdiSomObjekt<KV>> sorterte(Set<KV> verdier) {
