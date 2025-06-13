@@ -53,7 +53,8 @@ public class SafFake implements Saf {
         journalpost.setTittel("tittel");
         journalpost.setJournalposttype(Journalposttype.U);
         journalpost.setJournalstatus(Journalstatus.FERDIGSTILT);
-        journalpost.setKanal(Kanal.ALTINN);
+        journalpost.setKanal(Kanal.NAV_NO);
+        journalpost.setKanalnavn("nav.no");
         journalpost.setTema(Tema.AAP);
         journalpost.setBehandlingstema("behandlingstema");
         journalpost.setSak(new Sak("arkivsaksystem", Arkivsaksystem.GSAK, LocalDateTime.now(), "fagsakId", "fagsaksystem", Sakstype.FAGSAK, Tema.UNG));

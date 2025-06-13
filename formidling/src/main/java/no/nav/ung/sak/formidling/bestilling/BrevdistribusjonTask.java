@@ -49,7 +49,6 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        //TODO set logcontext
         var bestillingId = Objects.requireNonNull(
             prosessTaskData.getPropertyValue(BREVBESTILLING_ID_PARAM), "Mangler brevbestilling");
 
@@ -70,12 +69,9 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
         ));
         bestilling.fullført(response.bestillingsId());
         brevbestillingRepository.lagre(bestilling);
-/*
-        brevHistorikkinnslagTjeneste.opprett(
-            bestilling.getDokumentMalType().isVedtaksbrevmal() ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER,
-            bestilling.getSaksnummer()
-        );
-*/
+
+        brevHistorikkinnslagTjeneste.opprett(bestilling);
+
         LOG.info("Brevbestilling OK {}", bestilling);
     }
 

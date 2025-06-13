@@ -17,6 +17,7 @@ import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
+import no.nav.ung.sak.typer.JournalpostId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,6 @@ public class BrevbestillingTjeneste {
         brevbestillingRepository.lagre(bestilling);
         var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
         distTask.setBehandling(fagsak.getId(), behandling.getId());
-        distTask.setSaksnummer(fagsak.getSaksnummer().getVerdi());
         distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, bestilling.isVedtaksbrev() ?
             DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name() : DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
@@ -71,7 +71,7 @@ public class BrevbestillingTjeneste {
         distTask.setCallIdFraEksisterende();
 
         LOG.info("Brevbestilling journalført med journalpostId={}", bestilling.getJournalpostId());
-        return new BrevbestillingResultat(bestilling.getJournalpostId());
+        return new BrevbestillingResultat(new JournalpostId(bestilling.getJournalpostId()));
     }
 
     private OpprettJournalpostRequest opprettJournalpostRequest(UUID brevbestillingUuid, GenerertBrev generertBrev, Behandling behandling) {

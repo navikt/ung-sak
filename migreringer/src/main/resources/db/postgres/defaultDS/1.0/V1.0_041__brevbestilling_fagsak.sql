@@ -37,4 +37,5 @@ create unique index uidx_brevbestilling_behandling_vedtak_mal
 
 create index idx_brevbestilling_aktiv on brevbestilling (aktiv);
 
-drop table brevbestilling_behandling
+drop table brevbestilling_behandling;
+drop sequence if exists seq_behandling_brevbestilling;

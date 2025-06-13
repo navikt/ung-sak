@@ -10,8 +10,10 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinje;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeType;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
@@ -22,6 +24,7 @@ import no.nav.ung.sak.formidling.SafFake;
 import no.nav.ung.sak.formidling.dokdist.DokDistRestKlientFake;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest.DistribusjonsType;
+import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,23 +45,29 @@ class BrevdistribusjonTaskTest {
     private BrevbestillingRepository brevbestillingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private final SafFake safTjeneste = new SafFake();
+    private BehandlingRepositoryProvider repositoryProvider;
 
     @BeforeEach
     void setUp() {
         dokDistKlient = new DokDistRestKlientFake();
         brevbestillingRepository = new BrevbestillingRepository(entityManager);
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
+        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
     }
 
     @Test
     void skalDistribuere() {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
+        scenarioBuilder.lagre(repositoryProvider);
+        var behandling = scenarioBuilder.getBehandling();
+        behandling.avsluttBehandling();
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-            123L,
-            456L,
+            behandling.getFagsakId(),
+            behandling.getId(),
             DokumentMalType.INNVILGELSE_DOK,
             TemplateType.INNVILGELSE,
-            new BrevMottaker("123", IdType.AKTØRID));
+            new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
 
         String jpId = "jp123";
         String dokumentId = "567";
@@ -71,8 +80,9 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VEDTAK.name());
 
-        var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
+        var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, repositoryProvider.getBehandlingRepository(), safTjeneste);
         var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
+
         task.doTask(pd);
 
         assertThat(dokDistKlient.getRequests()).hasSize(1);
@@ -87,6 +97,10 @@ class BrevdistribusjonTaskTest {
         assertThat(oppdatertBestilling.getDokdistBestillingId()).isEqualTo(dokDistKlient.getResponses().getFirst().bestillingsId());
         assertThat(oppdatertBestilling.getStatus()).isEqualTo(BrevbestillingStatusType.FULLFØRT);
 
+        assertHistorikkInnslag(bestilling, dokumentId, jpId);
+    }
+
+    private void assertHistorikkInnslag(BrevbestillingEntitet bestilling, String dokumentId, String jpId) {
         List<Historikkinnslag> historikkinnslags = historikkinnslagRepository.hent(bestilling.getBehandlingId());
         assertThat(historikkinnslags.size()).isEqualTo(1);
         Historikkinnslag historikkinnslag = historikkinnslags.getFirst();
@@ -102,13 +116,15 @@ class BrevdistribusjonTaskTest {
         assertThat(historikkinnslag.getTittel()).isEqualTo("Brev bestilt");
 
         var linjer = historikkinnslag.getLinjer();
-        assertThat(linjer).hasSize(1);
-        assertThat(linjer.getFirst().getType()).isEqualTo(HistorikkinnslagLinjeType.TEKST);
-        assertThat(linjer.getFirst().getTekst()).isEqualTo(TemplateType.INNVILGELSE.getBeskrivelse());
+        assertThat(linjer).hasSize(2);
+
+        HistorikkinnslagLinje førsteLinje = linjer.getFirst();
+        assertThat(førsteLinje.getType()).isEqualTo(HistorikkinnslagLinjeType.TEKST);
+        assertThat(førsteLinje.getTekst()).isEqualTo(TemplateType.INNVILGELSE.getBeskrivelse()+".");
+
+        HistorikkinnslagLinje andreLinje = linjer.get(1);
+        assertThat(andreLinje.getType()).isEqualTo(HistorikkinnslagLinjeType.TEKST);
+        assertThat(andreLinje.getTekst()).isEqualTo("Distribusjonskanal: nav.no.");
     }
 
-    @Test
-    void skalFeileHvisIkkeJournalførtStatus() {
-        //TODO
-    }
 }
