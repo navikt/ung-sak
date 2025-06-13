@@ -1,6 +1,5 @@
 package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -17,7 +16,6 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  * @param htmlVersjon     Angir om html versjon skal hentes. False eller null henter PDF.
  */
 public record VedtaksbrevForhåndsvisDto(
-    @JsonProperty(value = BehandlingIdDto.NAME, required = true)
     @NotNull
     @Valid
     @AbacAttributt(BehandlingIdDto.NAME)
@@ -25,11 +23,9 @@ public record VedtaksbrevForhåndsvisDto(
     @Max(Long.MAX_VALUE)
     Long behandlingId,
 
-    @JsonProperty("redigertVersjon")
     @Valid
     Boolean redigertVersjon,
 
-    @JsonProperty("htmlVersjon")
     @Valid
     Boolean htmlVersjon
 ) {

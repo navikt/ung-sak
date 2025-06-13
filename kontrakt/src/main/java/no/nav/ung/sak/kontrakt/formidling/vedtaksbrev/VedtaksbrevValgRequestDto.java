@@ -1,7 +1,6 @@
 package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import no.nav.ung.abac.AbacAttributt;
@@ -15,21 +14,15 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  * @param redigertHtml - html med tekst som skal overstyre
  */
 public record VedtaksbrevValgRequestDto(
-    @JsonProperty(value = BehandlingIdDto.NAME, required = true)
     @NotNull
     @Valid
     @AbacAttributt(BehandlingIdDto.NAME)
     @Min(0)
     @Max(Long.MAX_VALUE)
     Long behandlingId,
-
-    @JsonProperty("hindret")
     Boolean hindret,
-
-    @JsonProperty("redigert")
     Boolean redigert,
 
-    @JsonProperty("redigertHtml")
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     String redigertHtml
 ) {

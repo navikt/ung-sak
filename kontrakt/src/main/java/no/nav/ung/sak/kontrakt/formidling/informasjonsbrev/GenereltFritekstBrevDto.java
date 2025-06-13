@@ -1,6 +1,5 @@
 package no.nav.ung.sak.kontrakt.formidling.informasjonsbrev;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -19,13 +18,11 @@ public record GenereltFritekstBrevDto(
     @NotNull
     @Size(max = 200)
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    @JsonProperty("overskrift")
     String overskrift,
 
     @Valid
     @NotNull
     @Size(max = 100000)
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    @JsonProperty("brødtekst")
     String brødtekst) implements InformasjonsbrevInnholdDto {
 }

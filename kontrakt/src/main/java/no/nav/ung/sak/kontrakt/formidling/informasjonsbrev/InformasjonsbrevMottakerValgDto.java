@@ -1,6 +1,5 @@
 package no.nav.ung.sak.kontrakt.formidling.informasjonsbrev;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 
@@ -13,19 +12,10 @@ import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
  * @param utilgjengeligÅrsak
  */
 public record InformasjonsbrevMottakerValgDto(
-    @JsonProperty("id")
     String id,
-
-    @JsonProperty("idType")
     IdType idType,
-
-    @JsonProperty("navn")
     String navn,
-
-    @JsonProperty("fnr")
     String fnr,
-
-    @JsonProperty("utilgjengeligÅrsak")
     UtilgjengeligÅrsak utilgjengeligÅrsak
 ) {
 }

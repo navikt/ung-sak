@@ -1,6 +1,5 @@
 package no.nav.ung.sak.kontrakt.formidling.informasjonsbrev;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -18,11 +17,9 @@ public record InformasjonsbrevMottakerDto(
         @Size(max = 20)
         @Pattern(regexp = "^\\d+$", message = "'${validatedValue}' matcher ikke tillatt pattern '{regexp}'"
         )
-        @JsonProperty("id")
         String id,
 
         @NotNull
-        @JsonProperty("type")
         IdType type
 
 ) {
