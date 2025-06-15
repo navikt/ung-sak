@@ -59,16 +59,6 @@ public class TotrinnskontrollAksjonspunkterDto {
     private String aksjonspunktKode;
 
     @JsonInclude(value = Include.NON_EMPTY)
-    @JsonProperty(value = "beregningDto")
-    @Valid
-    private TotrinnsBeregningDto beregningDto;
-
-    @JsonInclude(value = Include.NON_EMPTY)
-    @JsonProperty(value = "beregningDtoer")
-    @Valid
-    private List<TotrinnsBeregningDto> beregningDtoer;
-
-    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "besluttersBegrunnelse")
     @Size(max = 4000)
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -90,17 +80,10 @@ public class TotrinnskontrollAksjonspunkterDto {
         return AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
     }
 
-    public TotrinnsBeregningDto getBeregningDto() {
-        return beregningDto;
-    }
-
     public String getBesluttersBegrunnelse() {
         return besluttersBegrunnelse;
     }
 
-    public List<TotrinnsBeregningDto> getBeregningDtoer() {
-        return beregningDtoer;
-    }
 
     public Boolean getTotrinnskontrollGodkjent() {
         return totrinnskontrollGodkjent;
@@ -112,10 +95,6 @@ public class TotrinnskontrollAksjonspunkterDto {
 
     public void setAksjonspunktKode(String aksjonspunktKode) {
         this.aksjonspunktKode = aksjonspunktKode;
-    }
-
-    public void setBeregningDto(TotrinnsBeregningDto beregningDto) {
-        this.beregningDto = beregningDto;
     }
 
     public void setBesluttersBegrunnelse(String besluttersBegrunnelse) {
