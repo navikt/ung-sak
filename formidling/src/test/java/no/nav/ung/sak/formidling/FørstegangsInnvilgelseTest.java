@@ -215,7 +215,6 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 Fordi du har ett barn, får du i tillegg 37 kroner per dag i barnetillegg. \
-                Det vil si at du til sammen får 718 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -263,7 +262,6 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 Fordi du har ett barn, får du i tillegg 37 kroner per dag i barnetillegg. \
-                Det vil si at du til sammen får 1 059 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 

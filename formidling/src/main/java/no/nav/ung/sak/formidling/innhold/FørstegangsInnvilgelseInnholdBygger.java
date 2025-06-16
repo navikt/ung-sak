@@ -96,7 +96,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 satsEndringHendelseDtos,
                 satsOgBeregningDto,
                 brevfeilSamler.samletFeiltekst(),
-                erEtterbetaling));
+                erEtterbetaling,
+                satsEndringHendelseDtos.isEmpty()));
     }
 
     private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, BrevfeilHåndterer brevfeilSamler) {
