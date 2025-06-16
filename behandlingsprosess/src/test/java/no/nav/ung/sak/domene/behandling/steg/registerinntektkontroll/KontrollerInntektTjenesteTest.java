@@ -95,7 +95,7 @@ class KontrollerInntektTjenesteTest {
     }
 
     @Test
-    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_ikke_har_uttalelse_om_ytelse_og_inntekt_fra_register() {
+    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_og_har_svart_uten_uttalelse_om_ytelse_og_inntekt_fra_register() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
         final var tom = LocalDate.now().plusDays(10);
@@ -116,7 +116,7 @@ class KontrollerInntektTjenesteTest {
     }
 
     @Test
-    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_tidligere_har_rapportert_inntekt_og_ikke_har_uttalelse_om_gjeldende_ytelse_og_inntekt_fra_register() {
+    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_tidligere_har_rapportert_inntekt_og_har_svart_uten_uttalelse_om_gjeldende_ytelse_og_inntekt_fra_register() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
         final var tom = LocalDate.now().plusDays(10);
