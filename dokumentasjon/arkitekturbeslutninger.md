@@ -45,7 +45,7 @@ Det ble besluttet å gjenbruke arkitektur og kode fra k9-sak, saksbehandlingssyt
     - Vedtak adskilt (*\*tbd*), benyttes som juridisk dokument for arkivering
 1. Bruk av Aggregater i modellering (Domain Driven Design)
     - Alle endring på aggregater lagres atomisk i relasjonsstruktur, og spores i helhetlig versjon (så tidligere versjoner av aggregater kan gjenopprettes)
-        - Eksempler:  Medlemskap, Personopplysninger, Opptjening, Beregningsgrunnlag, InntektArbeidYtelse Grunnlag, Tilsyn, Sykdomsdokumentasjon
+        - Eksempler:  Personopplysninger, Tilkjent ytelse, Satsberegning, InntektArbeidYtelse Grunnlag,
 
 ## Database og lagring
 1. Benytter Relasjonsdatabase (Postgresql) og normalisert datalagring
