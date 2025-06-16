@@ -40,7 +40,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. august 2025 får du ungdomsprogramytelse på 681 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 681 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
@@ -82,7 +82,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. august 2025 får du ungdomsprogramytelse på 1 022 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
@@ -113,7 +113,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. august 2025 til 15. februar 2026 får du ungdomsprogramytelse på 1 022 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 til 15. februar 2026 får du ungdomsprogramytelse på 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
@@ -150,7 +150,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. august 2025 får du ungdomsprogramytelse på 681 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 681 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fylte 25 år 16. august 2025, får du mer penger fra denne datoen. Da får du 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
@@ -199,7 +199,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
-                Fra 1. august 2025 får du ungdomsprogramytelse på 681 kroner per dag utenom lørdag og søndag. \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 681 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fikk barn 16. august 2025, får du 37 kroner mer fra denne datoen. Da får du 718 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
@@ -242,7 +242,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             //TODO G-verdi endrer seg i perioder som teksten omtaler, men endret G-verdi er ikke nevnt
             """
                 Du får ungdomsprogramytelse \
-                Fra 21. april 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
+                Fra 21. april 2025 får du ungdomsprogramytelse på 649 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fikk barn 6. mai 2025, får du 37 kroner mer for hvert barn fra denne datoen. Da får du 755 kroner per dag, utenom lørdag og søndag. \
                 Fordi du mistet barn 10. mai 2025, får du ikke barnetillegg på 37 kroner fra denne datoen. Da får du 718 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fylte 25 år 12. mai 2025, får du mer penger fra denne datoen. Da får du 1 059 kroner per dag, utenom lørdag og søndag. \
