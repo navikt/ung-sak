@@ -57,8 +57,7 @@ class InformasjonsbrevTjenesteValgTest {
                     ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
                 null),
             null,
-            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                ungTestRepositories.repositoryProvider().getPersonopplysningRepository())
+            ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
         );
     }
 
@@ -66,7 +65,8 @@ class InformasjonsbrevTjenesteValgTest {
     void skal_få_generelt_fritekstbrev_med_riktige_valg() {
         // Given
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        Behandling behandling = lagStandardBehandling(BrevScenarioer.innvilget19år(fom));
+        UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
+        Behandling behandling = lagStandardBehandling(scenario);
 
         // When
         List<InformasjonsbrevValgDto> informasjonsbrevValg = informasjonsbrevTjeneste.informasjonsbrevValg(behandling.getId());
@@ -81,7 +81,7 @@ class InformasjonsbrevTjenesteValgTest {
         assertThat(mottaker.id()).isEqualTo(behandling.getFagsak().getAktørId().getId());
         assertThat(mottaker.idType()).isEqualTo(IdType.AKTØRID);
         assertThat(mottaker.navn()).isEqualTo(BrevScenarioer.DEFAULT_NAVN);
-        assertThat(mottaker.fnr()).isEqualTo(fnr);
+        assertThat(mottaker.fødselsdato()).isEqualTo(scenario.fødselsdato());
         assertThat(mottaker.utilgjengeligÅrsak()).isNull();
 
         assertThat(first.støtterFritekst()).isFalse();
@@ -127,10 +127,8 @@ class InformasjonsbrevTjenesteValgTest {
         assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgResponse(
             behandling.getFagsak().getAktørId().getId(),
             IdType.AKTØRID,
-            BrevScenarioer.DEFAULT_NAVN,
-            fnr,
-            UtilgjengeligÅrsak.PERSON_DØD))
-        );
+            scenario.fødselsdato(), BrevScenarioer.DEFAULT_NAVN,
+            UtilgjengeligÅrsak.PERSON_DØD)));
     }
 
     private Behandling lagStandardBehandling(UngTestScenario scenario) {
