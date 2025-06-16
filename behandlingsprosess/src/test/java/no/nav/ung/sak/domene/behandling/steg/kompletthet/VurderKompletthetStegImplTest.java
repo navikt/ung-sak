@@ -2,9 +2,6 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
-import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
-import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -21,7 +18,6 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.SettEtterlysningerForBehandlingTilUtløptTask;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,8 +44,6 @@ class VurderKompletthetStegImplTest {
     private BehandlingRepository behandlingRepository;
     @Inject
     private EtterlysningRepository etterlysningRepository;
-    @Inject
-    private ProsessTaskRepositoryImpl prosessTaskRepository;
 
     private VurderKompletthetStegImpl vurderKompletthetSteg;
 
@@ -74,7 +68,7 @@ class VurderKompletthetStegImplTest {
 
         rapporteringsfristAutopunktUtleder = mock(RapporteringsfristAutopunktUtleder.class);
         when(rapporteringsfristAutopunktUtleder.utledAutopunktForRapporteringsfrist(any())).thenReturn(Optional.empty());
-        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, new ProsessTaskTjenesteImpl(prosessTaskRepository), behandlingRepository,
+        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, behandlingRepository,
             mock(KontrollerInntektEtterlysningOppretter.class),
             mock(ProgramperiodeendringEtterlysningTjeneste.class),
             rapporteringsfristAutopunktUtleder,
@@ -105,7 +99,7 @@ class VurderKompletthetStegImplTest {
     }
 
     @Test
-    void skal_ikke_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_der_frist_er_passert() {
+    void skal_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_der_frist_er_passert() {
         // Arrange
         final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         final var frist = LocalDateTime.now().minusMinutes(1);
@@ -116,10 +110,9 @@ class VurderKompletthetStegImplTest {
         final var resultat = vurderKompletthetSteg.utførSteg(new BehandlingskontrollKontekst(revurdering.getFagsakId(), aktørId, behandlingRepository.taSkriveLås(revurdering)));
 
         // Assert
-        assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(0);
-
-        final var prosessTaskData = prosessTaskRepository.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR);
-        assertThat(prosessTaskData.size()).isEqualTo(1);
+        assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(1);
+        assertThat(resultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE);
+        assertThat(resultat.getAksjonspunktResultater().get(0).getFrist()).isEqualTo(frist);
     }
 
     @Test
