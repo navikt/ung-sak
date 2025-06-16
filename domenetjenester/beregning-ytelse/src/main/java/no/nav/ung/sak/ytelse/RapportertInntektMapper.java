@@ -62,9 +62,8 @@ public class RapportertInntektMapper {
         Long behandlingId,
         List<EtterlysningsPeriode> etterlysningsperioder) {
 
-        var svarteEllerVentendeStatuser = Set.of(EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.OPPRETTET, EtterlysningStatus.VENTER, EtterlysningStatus.UTLØPT);
         return etterlysningsperioder.stream()
-            .filter(it -> svarteEllerVentendeStatuser.contains(it.etterlysningInfo().etterlysningStatus()))
+            .filter(it -> !it.etterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.AVBRUTT) && !it.etterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.SKAL_AVBRYTES))
             .map(it -> finnRegisterinntekterVurdertIUttalelse(behandlingId, it))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());

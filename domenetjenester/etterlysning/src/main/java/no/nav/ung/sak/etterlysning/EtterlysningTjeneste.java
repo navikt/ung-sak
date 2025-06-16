@@ -62,7 +62,7 @@ public class EtterlysningTjeneste {
         Long behandlingId,
         Long fagsakId,
         EtterlysningType type) {
-        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingId, type);
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingId, type).stream().filter(it -> !it.getStatus().equals(EtterlysningStatus.AVBRUTT) && !it.getStatus().equals(EtterlysningStatus.SKAL_AVBRYTES)).toList();
         log.info("Fant {} etterlysninger for behandlingId={} og fagsakId={} av type {}", etterlysninger.size(), behandlingId, fagsakId, type);
         final var journalpostIder = etterlysninger.stream().flatMap(it -> it.getUttalelse().stream().map(UttalelseEntitet::getSvarJournalpostId)).collect(Collectors.toSet());
         final var mottattDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder);

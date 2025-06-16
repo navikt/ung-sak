@@ -1,6 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -93,7 +92,7 @@ public class KontrollerInntektEtterlysningOppretter {
                 }
                 case NY_ETTERLYSNING_DERSOM_INGEN_FINNES -> {
                     log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
-                    if (!harEksisterendeEtterlysningPåVent(etterlysninger, kontrollSegment.getLocalDateInterval())) {
+                    if (!harEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval())) {
                         etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(behandlingReferanse.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                     }
                 }
@@ -139,9 +138,8 @@ public class KontrollerInntektEtterlysningOppretter {
     }
 
 
-    private static boolean harEksisterendeEtterlysningPåVent(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
-        return etterlysninger.stream().anyMatch(e -> e.getStatus().equals(EtterlysningStatus.VENTER) &&
-                e.getPeriode().toLocalDateInterval().overlaps(periode));
+    private static boolean harEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
+        return etterlysninger.stream().anyMatch(e -> e.getPeriode().toLocalDateInterval().overlaps(periode));
     }
 
     private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateInterval periode, UUID iayRef) {
