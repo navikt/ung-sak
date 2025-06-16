@@ -7,6 +7,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.person.pdl.leesah.Endringstype;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseUtils;
 import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
@@ -53,6 +54,10 @@ public class HåndterPdlHendelseTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData prosessTaskData) {
         final String payload = prosessTaskData.getPayloadAsString();
         Personhendelse personhendelse = PersonhendelseUtils.fraJson(payload);
+        if (personhendelse.getEndringstype().equals(Endringstype.ANNULLERT)) {
+            LOG.info("HendelseId={} er annullert, ignorerer hendelsen", personhendelse.getHendelseId());
+            return;
+        }
         final Hendelse oversattHendelse = pdlLeesahOversetter.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
 
         LOG.info("Håndterer hendelseId={}", oversattHendelse.getHendelseInfo().getHendelseId());
