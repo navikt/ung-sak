@@ -181,7 +181,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var barnetillegg = nyesteSats.antallBarn() > 0
             ? new BarnetilleggDto(
-            nyesteSats.antallBarn(),
+            Satsberegner.tallTilNorskHunkjønnTekst(nyesteSats.antallBarn()),
             Satsberegner.beregnBarnetilleggSats(nyesteSats),
             Satsberegner.beregnDagsatsInklBarnetillegg(nyesteSats))
             : null;
