@@ -33,7 +33,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, register, bruker);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false)));
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true)));
 
         // Act
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
@@ -92,7 +92,7 @@ class KontrollerInntektTjenesteTest {
     }
 
     @Test
-    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_har_godkjent_ytelse_og_inntekt_fra_register() {
+    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_ikke_har_uttalt_seg_om_ytelse_og_inntekt_fra_register() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
         final var tom = LocalDate.now().plusDays(10);
@@ -100,7 +100,7 @@ class KontrollerInntektTjenesteTest {
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1001, 0);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
             fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
         );
 
         // Act
@@ -111,7 +111,7 @@ class KontrollerInntektTjenesteTest {
     }
 
     @Test
-    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_tidligere_har_rapportert_inntekt_og_har_godkjent_gjeldende_ytelse_og_inntekt_fra_register() {
+    void skal_bruke_brukers_godkjente_inntekt_dersom_bruker_tidligere_har_rapportert_inntekt_og_ikke_har_uttalt_seg_om_gjeldende_ytelse_og_inntekt_fra_register() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
         final var tom = LocalDate.now().plusDays(10);
@@ -121,7 +121,7 @@ class KontrollerInntektTjenesteTest {
             fom, tom,
             new EtterlysningOgRegisterinntekt(Set.of(
                 new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000)),
-                new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
+                new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
         );
 
         // Act
