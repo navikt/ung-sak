@@ -123,8 +123,13 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
     private boolean harEndretPeriodeSidenInitiell(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
-        var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType, ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId())
-            .orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell periode")).getGrunnlagsreferanse(), gjeldendePeriodeGrunnlag.getGrunnlagsreferanse()).isEmpty();
+        var initiellReferanse = ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId())
+            .orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell periode")).getGrunnlagsreferanse();
+        if (initiellReferanse == null) {
+            // TODO: Fjern denne sjekken når vi ikke lenger har feilende tasker her
+            return false;
+        }
+        var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType, initiellReferanse, gjeldendePeriodeGrunnlag.getGrunnlagsreferanse()).isEmpty();
 
         if (erEndringSidenInitiell) {
             return true;
