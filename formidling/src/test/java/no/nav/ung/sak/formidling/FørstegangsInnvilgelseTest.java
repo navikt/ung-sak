@@ -249,7 +249,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             """
                 Du får ungdomsprogramytelse \
                 Fra 21. april 2025 får du ungdomsprogramytelse på 649 kroner per dag utenom lørdag og søndag. \
-                Fordi du fikk barn 6. mai 2025, får du 37 kroner mer per barn fra denne datoen. Da får du 755 kroner per dag, utenom lørdag og søndag. \
+                Fordi du fikk barn 6. mai 2025, får du 37 kroner mer for hvert barn fra denne datoen. Da får du 755 kroner per dag, utenom lørdag og søndag. \
                 Fordi du mistet barn 10. mai 2025, får du ikke barnetillegg på 37 kroner fra denne datoen. Da får du 718 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fylte 25 år 12. mai 2025, får du mer penger fra denne datoen. Da får du 1 059 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
