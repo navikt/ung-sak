@@ -62,7 +62,7 @@ public class RapportertInntektMapper {
         Long behandlingId,
         List<EtterlysningsPeriode> etterlysningsperioder) {
 
-        var svarteEllerVentendeStatuser = Set.of(EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.OPPRETTET, EtterlysningStatus.VENTER);
+        var svarteEllerVentendeStatuser = Set.of(EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.OPPRETTET, EtterlysningStatus.VENTER, EtterlysningStatus.UTLØPT);
         return etterlysningsperioder.stream()
             .filter(it -> svarteEllerVentendeStatuser.contains(it.etterlysningInfo().etterlysningStatus()))
             .map(it -> finnRegisterinntekterVurdertIUttalelse(behandlingId, it))
