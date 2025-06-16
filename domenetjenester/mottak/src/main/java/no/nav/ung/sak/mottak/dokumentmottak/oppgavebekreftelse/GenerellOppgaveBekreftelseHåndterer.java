@@ -40,9 +40,9 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
         Etterlysning etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(bekreftelse.getOppgaveReferanse());
 
 
-        if (!bekreftelse.harBrukerGodtattEndringen()) {
+        if (bekreftelse.harUttalelse()) {
             Objects.requireNonNull(bekreftelse.getUttalelseFraBruker(),
-                "Uttalelsestekst fra bruker må være satt når bruker ikke har godtatt endringen");
+                "Uttalelsestekst fra bruker må være satt når bruker har uttalelse");
         }
 
         if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
@@ -56,7 +56,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
         } else {
             etterlysning.mottattUttalelse(
                 oppgaveBekreftelse.mottattDokument().getJournalpostId(),
-                bekreftelse.harBrukerGodtattEndringen(),
+                bekreftelse.harUttalelse(),
                 bekreftelse.getUttalelseFraBruker()
             );
             etterlysningRepository.lagre(etterlysning);
