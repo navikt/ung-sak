@@ -5,16 +5,16 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 
 import java.util.Objects;
 
-public record EtterlysningInfo(EtterlysningStatus etterlysningStatus, Boolean erEndringenGodkjent) {
+public record EtterlysningInfo(EtterlysningStatus etterlysningStatus, Boolean harUttalelse) {
 
     public EtterlysningInfo {
         if (etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR) {
-            Objects.requireNonNull(erEndringenGodkjent);
+            Objects.requireNonNull(harUttalelse);
         }
     }
 
-    public boolean erBesvartOgIkkeGodkjent() {
-        return etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR && !erEndringenGodkjent();
+    public boolean erBesvartOgHarUttalelse() {
+        return etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR && harUttalelse();
     }
 
 }

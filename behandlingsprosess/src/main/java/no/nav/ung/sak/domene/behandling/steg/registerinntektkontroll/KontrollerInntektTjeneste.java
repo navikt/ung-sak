@@ -61,8 +61,8 @@ public class KontrollerInntektTjeneste {
     }
 
     private static LocalDateTimeline<Kontrollresultat> opprettAksjonspunktForIkkeGodkjentUttalelse(LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje, LocalDateTimeline<Boolean> relevantTidslinje) {
-        final var relevantIkkeGodkjentUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgIkkeGodkjent()).intersection(relevantTidslinje);
-        return relevantIkkeGodkjentUttalelse
+        final var relevantHarUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgHarUttalelse()).intersection(relevantTidslinje);
+        return relevantHarUttalelse
             .mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.OPPRETT_AKSJONSPUNKT));
     }
 
@@ -101,7 +101,7 @@ public class KontrollerInntektTjeneste {
     private static LocalDateTimeline<BrukersAvklarteInntekter> sammenstillInntekter(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
         final var godkjentRegisterinntektTidslinje = etterlysningTidslinje
             .intersection(relevantTidslinje)
-            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.TRUE.equals(etterlysning.etterlysning().erEndringenGodkjent()))
+            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.TRUE.equals(etterlysning.etterlysning().erBesvartOgHarUttalelse()))
             .mapValue(EtterlysningOgRegisterinntekt::registerInntekt);
 
         final var brukersRapporteInntekter = gjeldendeRapporterteInntekter
