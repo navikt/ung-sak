@@ -54,7 +54,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             log.warn("Forventet at status for etterlysning er VENTER, men var " + etterlysning.getStatus());
 
         } else {
-            etterlysning.mottattUttalelse(
+            etterlysning.mottaSvar(
                 oppgaveBekreftelse.mottattDokument().getJournalpostId(),
                 bekreftelse.harUttalelse(),
                 bekreftelse.getUttalelseFraBruker()
