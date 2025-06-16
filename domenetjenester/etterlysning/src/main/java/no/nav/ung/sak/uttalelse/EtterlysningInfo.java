@@ -13,8 +13,8 @@ public record EtterlysningInfo(EtterlysningStatus etterlysningStatus, Boolean ha
         }
     }
 
-    public boolean erBesvartOgHarUttalelse() {
-        return etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR && harUttalelse();
+    public boolean erBesvartOgIkkeHarUttalelse() {
+        return etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR && !harUttalelse();
     }
 
 }

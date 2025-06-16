@@ -61,8 +61,8 @@ public class KontrollerInntektTjeneste {
     }
 
     private static LocalDateTimeline<Kontrollresultat> opprettAksjonspunktForIkkeGodkjentUttalelse(LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje, LocalDateTimeline<Boolean> relevantTidslinje) {
-        final var relevantHarUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgHarUttalelse()).intersection(relevantTidslinje);
-        return relevantHarUttalelse
+        final var relevantUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgIkkeHarUttalelse()).intersection(relevantTidslinje);
+        return relevantUttalelse
             .mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.OPPRETT_AKSJONSPUNKT));
     }
 
@@ -99,16 +99,16 @@ public class KontrollerInntektTjeneste {
     }
 
     private static LocalDateTimeline<BrukersAvklarteInntekter> sammenstillInntekter(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
-        final var godkjentRegisterinntektTidslinje = etterlysningTidslinje
+        final var ingenUttalelseRegisterinntektTidslinje = etterlysningTidslinje
             .intersection(relevantTidslinje)
-            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.FALSE.equals(etterlysning.etterlysning().erBesvartOgHarUttalelse()))
+            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.TRUE.equals(etterlysning.etterlysning().erBesvartOgIkkeHarUttalelse()))
             .mapValue(EtterlysningOgRegisterinntekt::registerInntekt);
 
         final var brukersRapporteInntekter = gjeldendeRapporterteInntekter
             .intersection(relevantTidslinje)
             .mapValue(RapporterteInntekter::brukerRapporterteInntekter);
 
-        return godkjentRegisterinntektTidslinje.crossJoin(brukersRapporteInntekter,
+        return ingenUttalelseRegisterinntektTidslinje.crossJoin(brukersRapporteInntekter,
             (di, lhs, rhs) ->
                 new LocalDateSegment<>(di,
                     new BrukersAvklarteInntekter(
