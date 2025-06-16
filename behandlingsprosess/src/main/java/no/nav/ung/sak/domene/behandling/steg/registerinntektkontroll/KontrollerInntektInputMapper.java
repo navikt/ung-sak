@@ -50,7 +50,7 @@ public class KontrollerInntektInputMapper {
         var etterlysningsperioder = etterlysninger.stream()
             .map(it -> new EtterlysningsPeriode(
                 it.getPeriode().toLocalDateInterval(),
-                new EtterlysningInfo(it.getStatus(), it.getUttalelse().map(uttalelseEntitet -> !uttalelseEntitet.harUttalelse()).orElse(null)),
+                new EtterlysningInfo(it.getStatus(), it.getUttalelse().map(UttalelseEntitet::harUttalelse).orElse(null)),
                 it.getGrunnlagsreferanse())).toList();
         return rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingReferanse.getBehandlingId(), etterlysningsperioder);
     }
