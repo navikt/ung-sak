@@ -127,13 +127,11 @@ public class BehandlingRepositoryImplTest {
         Behandling behandling = opprettRevurderingsKandidat();
 
         Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).build();
 
         behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
-        List<Behandling> result = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(behandling.getFagsakId())
-                .stream().filter(b -> !Collections.disjoint(b.getBehandlingÅrsakerTyper(), BehandlingÅrsakType.årsakerForAutomatiskRevurdering()))
-                .collect(Collectors.toList());
+        List<Behandling> result = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(behandling.getFagsakId());
         assertThat(result).isNotEmpty();
     }
 
@@ -247,7 +245,7 @@ public class BehandlingRepositoryImplTest {
 
         // Arrange
         Behandling behandling1 = opprettBehandlingForAutomatiskGjenopptagelse();
-        opprettAksjonspunkt(behandling1, AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, igår);
+        opprettAksjonspunkt(behandling1, AksjonspunktDefinisjon.KONTROLLER_INNTEKT, igår);
         lagreBehandling(behandling1);
 
         // Act

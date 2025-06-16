@@ -1,23 +1,19 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
-
-import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
+
+import java.util.Optional;
+
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
 
 @BehandlingStegRef(value = FORESLÅ_VEDTAK)
 @BehandlingTypeRef
@@ -28,6 +24,7 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
     private Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak;
+    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     ForeslåVedtakStegImpl() {
         // for CDI proxy
@@ -35,11 +32,12 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
 
     @Inject
     ForeslåVedtakStegImpl(BehandlingRepository behandlingRepository,
-            ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-            @Any Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak) {
+                          ForeslåVedtakTjeneste foreslåVedtakTjeneste,
+                          @Any Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
         this.ytelsespesifikkForeslåVedtak = ytelsespesifikkForeslåVedtak;
+        this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
     }
 
     @Override
@@ -62,8 +60,7 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!FORESLÅ_VEDTAK.equals(tilSteg)) {
-            // TODO: Rydd brev
-//            formidlingDokumentdataTjeneste.ryddVedTilbakehopp(kontekst.getBehandlingId());
+            vedtaksbrevTjeneste.ryddVedTilbakeHopp(kontekst.getBehandlingId());
         }
     }
 }

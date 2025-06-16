@@ -32,44 +32,32 @@ import no.nav.ung.sak.typer.JournalpostId;
 @ExtendWith(JpaExtension.class)
 public class MottatteDokumentRepositoryTest {
 
-    private String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
-        "<melding xmlns=\"http://seres.no/xsd/NAV/Inntektsmelding_M/20181211\">" +
-        "<Skjemainnhold>" +
-        "<ytelse>Omsorgspenger</ytelse>" +
-        "<aarsakTilInnsending>Ny</aarsakTilInnsending>" +
-        "<arbeidsgiver>" +
-        "<virksomhetsnummer>896929119</virksomhetsnummer>" +
-        "<kontaktinformasjon>" +
-        "<kontaktinformasjonNavn>Dolly Dollesen</kontaktinformasjonNavn>" +
-        "<telefonnummer>99999999</telefonnummer>" +
-        "</kontaktinformasjon>" +
-        "</arbeidsgiver>" +
-        "<arbeidstakerFnr>03038112421</arbeidstakerFnr>" +
-        "<naerRelasjon>false</naerRelasjon>" +
-        "<arbeidsforhold>" +
-        "<beregnetInntekt>" +
-        "<beloep>15000.0</beloep>" +
-        "</beregnetInntekt>" +
-        "</arbeidsforhold>" +
-        "<refusjon>" +
-        "</refusjon>" +
-        "<avsendersystem>" +
-        "<systemnavn>Dolly</systemnavn>" +
-        "<systemversjon>2.0</systemversjon>" +
-        "<innsendingstidspunkt>2020-05-07T12:38:42</innsendingstidspunkt>" +
-        "</avsendersystem>" +
-        "<omsorgspenger>" +
-        "<harUtbetaltPliktigeDager>true</harUtbetaltPliktigeDager>" +
-        "<fravaersPerioder>" +
-        "<fravaerPeriode>" +
-        "<fom>2019-12-28</fom>" +
-        "<tom>2020-01-03</tom>" +
-        "</fravaerPeriode>" +
-        "</fravaersPerioder>" +
-        "<delvisFravaersListe/>" +
-        "</omsorgspenger>" +
-        "</Skjemainnhold>" +
-        "</melding>";
+    private String payload = """
+        {
+          "versjon": "1.0.0",
+          "søknadId": "123214",
+          "mottattDato": "2019-10-20T07:15:36.124Z",
+          "språk": "nb",
+          "ytelse": {
+            "søktFraDatoer": [],
+            "inntekter": {
+              "oppgittePeriodeinntekter": [
+                {
+                  "periode": "2021-01-21/2021-01-31",
+                  "arbeidstakerOgFrilansInntekt": 100,
+                  "næringsinntekt": null,
+                  "ytelse": null
+                }
+              ]
+            },
+            "type": "UNGDOMSYTELSE",
+            "søknadType": "RAPPORTERING_SØKNAD"
+          },
+          "søker": {
+            "norskIdentitetsnummer": "12345678901"
+          }
+        }
+        """;
 
     @Inject
     private EntityManager entityManager;
@@ -100,11 +88,11 @@ public class MottatteDokumentRepositoryTest {
         lagreBehandling(beh2);
 
         // Opprett og lagre MottateDokument
-        dokument1 = lagMottatteDokument(beh1, Brevkode.INNTEKTSMELDING, payload);
+        dokument1 = lagMottatteDokument(beh1, Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING, payload);
         mottatteDokumentRepository.lagre(dokument1, DokumentStatus.GYLDIG);
 
         // Dokument knyttet til annen behandling, men med samme fagsak som dokumentet over
-        dokument2 = lagMottatteDokument(beh2, Brevkode.INNTEKTSMELDING, payload);
+        dokument2 = lagMottatteDokument(beh2, Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING, payload);
         mottatteDokumentRepository.lagre(dokument2, DokumentStatus.GYLDIG);
     }
 

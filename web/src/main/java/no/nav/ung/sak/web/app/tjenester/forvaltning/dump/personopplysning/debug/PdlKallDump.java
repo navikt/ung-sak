@@ -21,10 +21,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.aktør.Adresseinfo;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
-import no.nav.ung.sak.behandlingslager.aktør.historikk.AdressePeriode;
-import no.nav.ung.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
@@ -105,8 +102,7 @@ public class PdlKallDump implements DebugDumpBehandling {
             .utledOpplysningsperiode(behandling.getId(), true);
         dumpinnhold.add(opplysningsperioden.toString());
 
-        Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(dumpinnhold, søkerPersonInfo.getAktørId(), opplysningsperioden);
-        mapInfoMedHistorikkTilEntitet(dumpinnhold, søkerPersonInfo, personhistorikkinfo, informasjonBuilder, behandling);
+        mapInfoMedHistorikkTilEntitet(dumpinnhold, søkerPersonInfo, informasjonBuilder, behandling);
 
         leggTilSøkersBarn(søkerPersonInfo, behandling, informasjonBuilder, opplysningsperioden, dumpinnhold);
         leggTilFosterbarn(behandling, informasjonBuilder, opplysningsperioden, dumpinnhold);
@@ -114,12 +110,10 @@ public class PdlKallDump implements DebugDumpBehandling {
         return informasjonBuilder;
     }
 
-    private void mapInfoMedHistorikkTilEntitet(List<String> dumpinnhold, Personinfo personinfo, Personhistorikkinfo personhistorikkinfo, PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
+    private void mapInfoMedHistorikkTilEntitet(List<String> dumpinnhold, Personinfo personinfo, PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
         if (harAktør(informasjonBuilder, personinfo)) {
             dumpinnhold.add("ignorerte info i mapping fordi det fantes fra før for " + personinfo.getAktørId().getAktørId());
-            return;
         }
-        mapAdresser(dumpinnhold, personhistorikkinfo.getAdressehistorikk(), informasjonBuilder, personinfo);
     }
 
 
@@ -127,8 +121,7 @@ public class PdlKallDump implements DebugDumpBehandling {
         List<Personinfo> barna = hentBarnRelatertTil(søkerPersonInfo, behandling, opplysningsperioden, dumpinnhold);
         barna.forEach(barn -> {
             if (hentHistorikkForRelatertePersoner(behandling)) {
-                Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(dumpinnhold, barn.getAktørId(), opplysningsperioden);
-                mapInfoMedHistorikkTilEntitet(dumpinnhold, barn, personhistorikkinfo, informasjonBuilder, behandling);
+                mapInfoMedHistorikkTilEntitet(dumpinnhold, barn, informasjonBuilder, behandling);
             } else {
                 mapInfoTilEntitet(dumpinnhold, barn, informasjonBuilder, behandling);
             }
@@ -155,8 +148,7 @@ public class PdlKallDump implements DebugDumpBehandling {
         List<Personinfo> barna = hentFosterbarn(behandling, dumpinnhold);
         barna.forEach(barn -> {
             if (hentHistorikkForRelatertePersoner(behandling)) {
-                Personhistorikkinfo personhistorikkinfo = personinfoAdapter.innhentPersonopplysningerHistorikk(dumpinnhold, barn.getAktørId(), opplysningsperioden);
-                mapInfoMedHistorikkTilEntitet(dumpinnhold, barn, personhistorikkinfo, informasjonBuilder, behandling);
+                mapInfoMedHistorikkTilEntitet(dumpinnhold, barn, informasjonBuilder, behandling);
             } else {
                 mapInfoTilEntitet(dumpinnhold, barn, informasjonBuilder, behandling);
             }
@@ -174,66 +166,7 @@ public class PdlKallDump implements DebugDumpBehandling {
     private void mapInfoTilEntitet(List<String> dumpinnhold, Personinfo personinfo, PersonInformasjonBuilder informasjonBuilder, Behandling behandling) {
         if (harAktør(informasjonBuilder, personinfo)) {
             dumpinnhold.add("ignorerte aktør fordi fantes fra før : " + personinfo.getAktørId());
-            return;
         }
-
-        //map opplysninger som kan være periodisert, men som ikke er hentet inn periodisert for denne saken
-        //setter da periode som angitt under
-        DatoIntervallEntitet periode = getPeriode(personinfo.getFødselsdato(), Tid.TIDENES_ENDE);
-        if (informasjonBuilder.harIkkeFåttStatsborgerskapHistorikk(personinfo.getAktørId())) {
-            PersonInformasjonBuilder.StatsborgerskapBuilder statsborgerskapBuilder = informasjonBuilder.getStatsborgerskapBuilder(personinfo.getAktørId(), periode, personinfo.getLandkode(), personinfo.getRegion());
-            informasjonBuilder.leggTil(statsborgerskapBuilder);
-        }
-
-        if (informasjonBuilder.harIkkeFåttAdresseHistorikk(personinfo.getAktørId())) {
-            dumpinnhold.add("Har ikke fått adressehistorikk for " + personinfo.getAktørId() + "legger til " + toJson(personinfo.getAdresseInfoList()) + " for periode " + periode);
-            for (Adresseinfo adresse : personinfo.getAdresseInfoList()) {
-                PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(personinfo.getAktørId(), periode, adresse.getGjeldendePostadresseType());
-                informasjonBuilder.leggTil(adresseBuilder
-                    .medAdresselinje1(adresse.getAdresselinje1())
-                    .medAdresselinje2(adresse.getAdresselinje2())
-                    .medAdresselinje3(adresse.getAdresselinje3())
-                    .medPostnummer(adresse.getPostNr())
-                    .medLand(adresse.getLand())
-                    .medAdresseType(adresse.getGjeldendePostadresseType())
-                    .medPeriode(periode));
-            }
-        }
-
-        if (informasjonBuilder.harIkkeFåttPersonstatusHistorikk(personinfo.getAktørId())) {
-            PersonInformasjonBuilder.PersonstatusBuilder personstatusBuilder = informasjonBuilder.getPersonstatusBuilder(personinfo.getAktørId(), periode)
-                .medPersonstatus(personinfo.getPersonstatus());
-            informasjonBuilder.leggTil(personstatusBuilder);
-        }
-    }
-
-    private void mapAdresser(List<String> dumpinnhold, List<AdressePeriode> adressehistorikk, PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
-        AktørId aktørId = personinfo.getAktørId();
-        for (AdressePeriode adresse : adressehistorikk) {
-            final DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(
-                brukFødselsdatoHvisEtter(adresse.getGyldighetsperiode().getFom(), personinfo.getFødselsdato()), adresse.getGyldighetsperiode().getTom());
-            final PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(aktørId, periode,
-                adresse.getAdresse().getAdresseType());
-
-            dumpinnhold.add("adressebuilder for " + aktørId + " oppdatering=" + adresseBuilder.getErOppdatering() + " periode=" + periode + " type=" + adresse.getAdresse().getAdresseType() + " adresse=" + adresse.getAdresse().getAdresselinje1());
-
-            adresseBuilder.medPeriode(periode)
-                .medAdresselinje1(adresse.getAdresse().getAdresselinje1())
-                .medAdresselinje2(adresse.getAdresse().getAdresselinje2())
-                .medAdresselinje3(adresse.getAdresse().getAdresselinje3())
-                .medAdresselinje4(adresse.getAdresse().getAdresselinje4())
-                .medLand(adresse.getAdresse().getLand())
-                .medPostnummer(adresse.getAdresse().getPostnummer());
-            informasjonBuilder.leggTil(adresseBuilder);
-        }
-        dumpinnhold.add("innhold i informasjonsbuilder: " + PdlKallDump.toJson(informasjonBuilder));
-    }
-
-    private LocalDate brukFødselsdatoHvisEtter(LocalDate dato, LocalDate fødseldato) {
-        if (dato.isBefore(fødseldato)) {
-            return fødseldato;
-        }
-        return dato;
     }
 
     private boolean harAktør(PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {

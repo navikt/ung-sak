@@ -1,27 +1,13 @@
 package no.nav.ung.kodeverk.opptjening;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum OpptjeningAktivitetType implements Kodeverdi {
 
     ARBEIDSAVKLARING("AAP", "Arbeidsavklaringspenger",
@@ -143,13 +129,10 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
 
     private String kode;
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private Set<ArbeidType> arbeidType;
 
-    @JsonIgnore
     private Set<FagsakYtelseType> relaterYtelseType;
 
     private OpptjeningAktivitetType(String kode, String navn, Set<ArbeidType> arbeidType, Set<FagsakYtelseType> relaterYtelseType) {
@@ -159,27 +142,15 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
         this.relaterYtelseType = relaterYtelseType;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static OpptjeningAktivitetType fraKode(Object node) {
-        if (node == null) {
+    public static OpptjeningAktivitetType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(OpptjeningAktivitetType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent OpptjeningAktivitetType: " + kode);
         }
         return ad;
-    }
-
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
     }
 
     public static Map<String, OpptjeningAktivitetType> kodeMap() {
@@ -213,13 +184,12 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

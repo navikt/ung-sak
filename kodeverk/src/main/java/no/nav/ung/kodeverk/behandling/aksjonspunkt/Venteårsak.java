@@ -1,31 +1,15 @@
 package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_ANNET;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_ANNET_IKKE_SAKSBEHANDLINGSTID;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_ARBEIDSGIVER;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_SAKSBEHANDLER;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_SØKER;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_TEKNISK_FEIL;
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.*;
 
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum Venteårsak implements Kodeverdi {
 
     UDEFINERT("-", "Ikke definert", false, null),
@@ -67,6 +51,9 @@ public enum Venteårsak implements Kodeverdi {
 
     VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER("VENTER_ETTERLYS_IM", "Venter på inntektsmeldinger etter etterlysning", false, AVVENTER_ARBEIDSGIVER),
     VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL("VENTER_ETTERLYS_IM_VARSEL", "Venter på inntektsmeldinger etter etterlysning med varsel om mulig avslag", false, AVVENTER_ARBEIDSGIVER),
+
+    VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE("VENTER_ETTERLYS_INNTEKT_UTTALELSE", "Venter på uttalelse fra bruker etter etterlysning", false, AVVENTER_SØKER),
+
 
     OPPD_ÅPEN_BEH("OPPD_ÅPEN_BEH", "Venter på oppdatering av åpen behandling", false, AVVENTER_ANNET), //TODO?
     VENT_DEKGRAD_REGEL("VENT_DEKGRAD_REGEL", "Venter på 80% dekningsgrad-regel", false, AVVENTER_TEKNISK_FEIL),
@@ -111,6 +98,8 @@ public enum Venteårsak implements Kodeverdi {
     MANGLER_SØKNADOPPLYSNING_NÆRING("AVV_SOKN_NAERING", "Avventer søknad for næring ved direkte overgang fra infotrygd. Må spesialhåndteres.", false, AVVENTER_SAKSBEHANDLER),
     MANGLER_SØKNADOPPLYSNING_FRILANS("AVV_SOKN_FRILANS", "Avventer søknad for frilans ved direkte overgang fra infotrygd. Må spesialhåndteres.", false, AVVENTER_SAKSBEHANDLER),
 
+    VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE("VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "Venter på at søker skal bekrefte endring i ungdomsprogramperiode", false, AVVENTER_SØKER),
+
     /*
      * Disse kodene kan ikke fjernes før vi eventuelt har ryddet vekk bruk av
      * kodene på eksisterende behandlinger i k9-sak.
@@ -130,7 +119,6 @@ public enum Venteårsak implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
     private boolean kanVelgesIGui;
@@ -150,22 +138,10 @@ public enum Venteårsak implements Kodeverdi {
         this.ventekategori = ventekategori;
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static Venteårsak fraKode(Object node) {
-        if (node == null) {
+    public static Venteårsak fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(Venteårsak.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent Venteårsak: " + kode);
@@ -190,7 +166,7 @@ public enum Venteårsak implements Kodeverdi {
         return this.kanVelgesIGui;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -201,7 +177,6 @@ public enum Venteårsak implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

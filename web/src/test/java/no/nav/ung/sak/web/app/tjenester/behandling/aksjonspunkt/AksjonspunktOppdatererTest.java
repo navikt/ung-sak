@@ -1,17 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -22,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
@@ -38,6 +27,17 @@ import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.FatterVed
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakAksjonspunktOppdaterer;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakOppdatererTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.OpprettToTrinnsgrunnlag;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -79,7 +79,7 @@ public class AksjonspunktOppdatererTest {
 
         var dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
         var vedtaksbrevHåndterer = new ForeslåVedtakOppdatererTjeneste(
-            mock(HistorikkTjenesteAdapter.class),
+            mock(HistorikkinnslagRepository.class),
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 
@@ -93,7 +93,7 @@ public class AksjonspunktOppdatererTest {
     public void oppdaterer_aksjonspunkt_med_beslutters_vurdering_ved_totrinnskontroll() {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();
@@ -101,7 +101,7 @@ public class AksjonspunktOppdatererTest {
         aksGodkjDto.setGodkjent(false);
         String besluttersBegrunnelse = "Må ha bedre dokumentasjon.";
         aksGodkjDto.setBegrunnelse(besluttersBegrunnelse);
-        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
+        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         var aksjonspunktDto = new FatterVedtakAksjonspunktDto("", Collections.singletonList(aksGodkjDto));
         new FatterVedtakAksjonspunktOppdaterer(fatterVedtakAksjonspunkt).oppdater(aksjonspunktDto,
@@ -121,12 +121,12 @@ public class AksjonspunktOppdatererTest {
     @Test
     public void oppdaterer_aksjonspunkt_med_godkjent_totrinnskontroll() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         var aksGodkjDto = new AksjonspunktGodkjenningDto();
         aksGodkjDto.setGodkjent(true);
-        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.VURDER_ARBEIDSFORHOLD);
+        aksGodkjDto.setAksjonspunktKode(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         var aksjonspunktDto = new FatterVedtakAksjonspunktDto("", Collections.singletonList(aksGodkjDto));
         new FatterVedtakAksjonspunktOppdaterer(fatterVedtakAksjonspunkt).oppdater(aksjonspunktDto,

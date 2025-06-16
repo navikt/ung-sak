@@ -1,20 +1,17 @@
 package no.nav.ung.sak.behandlingslager.aktør;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import no.nav.ung.kodeverk.geografisk.AdresseType;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 
 public class Familierelasjon {
     private final PersonIdent personIdent;
     private final RelasjonsRolleType relasjonsrolle;
+    private final RelasjonsRolleType minRelasjonsRolle;
 
-    public Familierelasjon(PersonIdent personIdent, RelasjonsRolleType relasjonsrolle) {
+    public Familierelasjon(PersonIdent personIdent, RelasjonsRolleType relasjonsrolle, RelasjonsRolleType minRelasjonsRolle) {
         this.personIdent = personIdent;
         this.relasjonsrolle = relasjonsrolle;
+        this.minRelasjonsRolle = minRelasjonsRolle;
     }
 
     public PersonIdent getPersonIdent() {
@@ -25,32 +22,8 @@ public class Familierelasjon {
         return relasjonsrolle;
     }
 
-    public Boolean getHarSammeBosted(Personinfo fra, Personinfo til) {
-        return utledSammeBosted(fra, til);
-    }
-
-    public List<Periode> getPerioderMedDeltBosted(Personinfo fra, Personinfo til) {
-        return utledDeltBostedPerioder(fra, til);
-    }
-
-    private List<Periode> utledDeltBostedPerioder(Personinfo fra, Personinfo til) {
-        var fraAdresser = fra.getAdresseInfoList().stream()
-            .filter(ad -> AdresseType.BOSTEDSADRESSE.equals(ad.getGjeldendePostadresseType()))
-            .collect(Collectors.toList());
-
-        return til.getDeltBostedList().stream()
-            .filter(adr1 -> fraAdresser.stream().anyMatch(adr2 -> Adresseinfo.likeAdresser(adr1.getAdresseinfo(), adr2)))
-            .map(DeltBosted::getPeriode)
-            .collect(Collectors.toList());
-    }
-
-    private boolean utledSammeBosted(Personinfo fra, Personinfo til) {
-        var tilAdresser = til.getAdresseInfoList().stream()
-            .filter(ad -> AdresseType.BOSTEDSADRESSE.equals(ad.getGjeldendePostadresseType()))
-            .collect(Collectors.toList());
-        return fra.getAdresseInfoList().stream()
-            .filter(a -> AdresseType.BOSTEDSADRESSE.equals(a.getGjeldendePostadresseType()))
-            .anyMatch(adr1 -> tilAdresser.stream().anyMatch(adr2 -> Adresseinfo.likeAdresser(adr1, adr2)));
+    public RelasjonsRolleType getMinRelasjonsRolle() {
+        return minRelasjonsRolle;
     }
 
     @Override
@@ -58,6 +31,7 @@ public class Familierelasjon {
         // tar ikke med personIdent i toString så det ikke lekkeri logger etc.
         return getClass().getSimpleName()
             + "<relasjon=" + relasjonsrolle //$NON-NLS-1$
+            + ", minRelasjonsRolle=" + minRelasjonsRolle //$NON-NLS-1$
             + ">"; //$NON-NLS-1$
     }
 }

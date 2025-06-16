@@ -1,12 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -17,20 +10,19 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandling.Skjæringstidspunkt;
-import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingskontroll.StartpunktRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
-import no.nav.ung.sak.domene.registerinnhenting.KontrollerFaktaAksjonspunktUtleder;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 /**
  * Denne klassen er en utvidelse av {@link BehandlingskontrollTjeneste} som håndterer oppdatering på åpen behandling.
@@ -43,8 +35,6 @@ public class Endringskontroller {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private OppgaveTjeneste oppgaveTjeneste;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste;
-    private Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenester;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private Instance<EndringStartpunktTjeneste> startpunktTjenester;
 
     Endringskontroller() {
@@ -55,15 +45,11 @@ public class Endringskontroller {
     public Endringskontroller(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                               @Any Instance<EndringStartpunktTjeneste> startpunktTjenester,
                               OppgaveTjeneste oppgaveTjeneste,
-                              RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
-                              @Any Instance<KontrollerFaktaAksjonspunktUtleder> kontrollerFaktaTjenester,
-                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                              RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.startpunktTjenester = startpunktTjenester;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
-        this.kontrollerFaktaTjenester = kontrollerFaktaTjenester;
     }
 
     public boolean erRegisterinnhentingPassert(Behandling behandling) {
@@ -71,9 +57,7 @@ public class Endringskontroller {
     }
 
     public void spolTilStartpunkt(Behandling behandling, EndringsresultatDiff endringsresultat) {
-        Long behandlingId = behandling.getId();
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
-        BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
         if (behandling.getFagsakYtelseType() == FagsakYtelseType.FRISINN) {
             //kun FRISINN som bruker gosys for produksjonsstyring, de andre ytelsene håndteres i k9-los
@@ -89,23 +73,16 @@ public class Endringskontroller {
             return; // Ingen detekterte endringer - ingen tilbakespoling
         }
 
-        doSpolTilStartpunkt(ref, behandling, startpunkt);
+        doSpolTilStartpunkt(behandling, startpunkt);
     }
 
-    private void doSpolTilStartpunkt(BehandlingReferanse ref, Behandling behandling, StartpunktType startpunktType) {
+    private void doSpolTilStartpunkt(Behandling behandling, StartpunktType startpunktType) {
         BehandlingStegType fraSteg = Optional.ofNullable(behandling.getAktivtBehandlingSteg()).orElse(behandling.getSisteBehandlingStegTilstand().map(BehandlingStegTilstand::getBehandlingSteg).orElseThrow());
         BehandlingStegType tilSteg = behandlingskontrollTjeneste.finnBehandlingSteg(startpunktType, behandling.getFagsakYtelseType(), behandling.getType());
 
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
         // Inkluderer tilbakeføring samme steg UTGANG->INNGANG
         boolean tilbakeføres = skalTilbakeføres(behandling, fraSteg, tilSteg);
-
-        // Gjør aksjonspunktutledning utenom steg kun hvis man har passert KOFAK og evt hopper tilbake. Dette pga KOARB.UT->INN
-        if (harUtførtKontrollerFakta(behandling)) {
-            BehandlingStegType funnetSteg = tilbakeføres ? tilSteg : fraSteg;
-            List<AksjonspunktResultat> aksjonspunktResultater = utledAksjonspunkterTilHøyreForStartpunkt(ref, startpunktType);
-            behandlingskontrollTjeneste.lagreAksjonspunktResultat(kontekst, funnetSteg, aksjonspunktResultater);
-        }
 
         if (tilbakeføres) {
             // Eventuelt ta behandling av vent
@@ -122,10 +99,6 @@ public class Endringskontroller {
         return (sammenlign == 0 && BehandlingStegStatus.UTGANG.equals(behandling.getBehandlingStegStatus())) || sammenlign > 0;
     }
 
-    private boolean harUtførtKontrollerFakta(Behandling behandling) {
-        return behandling.harSattStartpunkt();
-    }
-
     private void loggSpoleutfall(Behandling behandling, BehandlingStegType førSteg, BehandlingStegType etterSteg, boolean tilbakeført) {
         if (tilbakeført && !førSteg.equals(etterSteg)) {
             historikkinnslagTjeneste.opprettHistorikkinnslagForTilbakespoling(behandling, førSteg, etterSteg);
@@ -139,26 +112,9 @@ public class Endringskontroller {
 
     private void avsluttOppgaverIGsak(Behandling behandling, BehandlingStatus før) {
         boolean behandlingIFatteVedtak = BehandlingStatus.FATTER_VEDTAK.equals(før);
-        if (behandlingIFatteVedtak ) {
+        if (behandlingIFatteVedtak) {
             oppgaveTjeneste.avslutt(behandling.getId(), OppgaveÅrsak.GODKJENN_VEDTAK_VL);
         }
     }
 
-    // Orkestrerer aksjonspunktene for kontroll av fakta som utføres etter et startpunkt
-    // Dersom ingen spesifikk KontrollerFaktaTjeneste er angitt for startpunktet, så utføres generell kontroll av fakta
-    // (Det er forventet at protokoll for KontrollerFaktaTjeneste vil evolvere i senere leveranser)
-    private List<AksjonspunktResultat> utledAksjonspunkterTilHøyreForStartpunkt(BehandlingReferanse ref, StartpunktType startpunkt) {
-        List<AksjonspunktResultat> startpunktSpesfikkeApForKontrollAvFakta = StartpunktRef.Lookup.find(KontrollerFaktaAksjonspunktUtleder.class, kontrollerFaktaTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunkt)
-            .map(tjeneste -> tjeneste.utledAksjonspunkterTilHøyreForStartpunkt(ref, startpunkt))
-            .orElse(Collections.emptyList());
-        if (!startpunktSpesfikkeApForKontrollAvFakta.isEmpty()) {
-            // Disse må utføres før de generelle kontrollene
-            return startpunktSpesfikkeApForKontrollAvFakta;
-        }
-
-        List<AksjonspunktResultat> generelleApForKontrollAvFakta = StartpunktRef.Lookup.find(KontrollerFaktaAksjonspunktUtleder.class, kontrollerFaktaTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType(), null)
-            .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + ref.getFagsakYtelseType().getKode() + " behandlingtype: " + ref.getBehandlingType().getKode()))
-            .utledAksjonspunkterTilHøyreForStartpunkt(ref, startpunkt);
-        return generelleApForKontrollAvFakta;
-    }
 }

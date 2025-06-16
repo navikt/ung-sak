@@ -15,6 +15,8 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 @ApplicationScoped
 public class PubliserProduksjonsstyringHendelseProducer extends KafkaProducer {
 
+    private boolean skalPublisereHendelse;
+
     public PubliserProduksjonsstyringHendelseProducer() {
         // for CDI proxy
     }
@@ -29,7 +31,9 @@ public class PubliserProduksjonsstyringHendelseProducer extends KafkaProducer {
                                                       @KonfigVerdi(value = "NAIS_NAMESPACE", defaultVerdi = "k9saksbehandling") String appNamespace,
                                                       @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
                                                       @KonfigVerdi("systembruker.username") String username,
-                                                      @KonfigVerdi("systembruker.password") String password) {
+                                                      @KonfigVerdi("systembruker.password") String password,
+                                                      @KonfigVerdi(value = "PUBLISER_PRODUKSJONSSTYRING_HENDELSE", defaultVerdi = "false") boolean skalPublisereHendelse) {
+        this.skalPublisereHendelse = skalPublisereHendelse;
         Properties properties = new Properties();
 
         properties.put(CommonClientConfigs.CLIENT_ID_CONFIG, "KP-" + topic);
@@ -57,6 +61,9 @@ public class PubliserProduksjonsstyringHendelseProducer extends KafkaProducer {
     }
 
     public void sendJsonMedNøkkel(String nøkkel, String json) {
+        if (!skalPublisereHendelse) {
+            return;
+        }
         runProducerWithSingleJson(new ProducerRecord<>(topic, nøkkel, json));
     }
 }

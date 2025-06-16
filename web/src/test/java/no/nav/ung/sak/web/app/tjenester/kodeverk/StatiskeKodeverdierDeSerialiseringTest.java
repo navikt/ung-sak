@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.RecordComponent;
-import java.util.Arrays;
+import java.util.ServiceLoader;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 
 /**
@@ -27,28 +26,13 @@ import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 public class StatiskeKodeverdierDeSerialiseringTest {
 
     private final ObjectMapperResolver omr = new ObjectMapperResolver();
-    private final ObjectMapper defaultObjektMapper = omr.getDefaultObjektMapper();
+    private final ObjectMapper defaultObjektMapper = omr.getDefaultObjectMapper();
     private final ObjectMapper overstyrSomSstringMapper = omr.getOverstyrKodeverdiAlltidSomStringMapper();
     private final ObjectMapper openapiMapper = omr.getOpenapiObjektMapper();
 
-    // Disse er allereie som standard serialisert som rein kode string
-    private static final String[] notDefaultObjectSerialized = new String[]{
-        ÅrsakTilVurdering.ENDRING_FRA_BRUKER.getKodeverk(),
-    };
-
-    private boolean isDefaultObjectSerialized(final Kodeverdi kv) {
-        return Arrays.stream(notDefaultObjectSerialized).noneMatch(v -> kv.getKodeverk().equals(v));
-    }
-
     private <KV extends Kodeverdi> void checkDefaultObjectMapperKodeverdi(KV kv) throws JsonProcessingException {
         final String serialisert = defaultObjektMapper.writeValueAsString(kv);
-        if (isDefaultObjectSerialized(kv)) {
-            assertThat(serialisert).startsWith("{");
-            assertThat(serialisert).containsIgnoringWhitespaces("\"kode\": \"" + kv.getKode() + "\"");
-            assertThat(serialisert).endsWith("}");
-        } else {
-            assertThat(serialisert).isEqualToIgnoringWhitespace("\"" + kv.getKode() + "\"");
-        }
+        assertThat(serialisert).isEqualToIgnoringWhitespace("\"" + kv.getKode() + "\"");
         final Class<?> cls = kv.getClass().isAnonymousClass() ? kv.getClass().getSuperclass() : kv.getClass();
         assertThat(Kodeverdi.class.isAssignableFrom(cls)).isTrue();
         final Kodeverdi deserialisert = defaultObjektMapper.readValue(serialisert, (Class<? extends Kodeverdi>) cls);

@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -51,7 +50,7 @@ class UtledPeriodeTilVurderingFraUngdomsprogramTest {
 
     @Test
     void skal_ikke_finne_perioder() {
-        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(behandling.getId());
+        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnTidslinje(behandling.getId());
         assertThat(tidslinje.isEmpty()).isTrue();
     }
 
@@ -61,7 +60,7 @@ class UtledPeriodeTilVurderingFraUngdomsprogramTest {
         var tom = fom.plusDays(10);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))));
 
-        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(behandling.getId());
+        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnTidslinje(behandling.getId());
 
         assertThat(tidslinje.equals(new LocalDateTimeline<>(fom, tom, true))).isTrue();
     }
@@ -72,7 +71,7 @@ class UtledPeriodeTilVurderingFraUngdomsprogramTest {
         var tom = fom.plusDays(10);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))));
 
-        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(behandling.getId());
+        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnTidslinje(behandling.getId());
 
         assertThat(tidslinje.isEmpty()).isTrue();
     }
@@ -86,7 +85,7 @@ class UtledPeriodeTilVurderingFraUngdomsprogramTest {
             new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(fom.plusDays(2), tom))
             ));
 
-        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(behandling.getId());
+        var tidslinje = utledPeriodeTilVurderingFraUngdomsprogram.finnTidslinje(behandling.getId());
 
         assertThat(tidslinje.equals(new LocalDateTimeline<>(fom, tom, true))).isTrue();
     }

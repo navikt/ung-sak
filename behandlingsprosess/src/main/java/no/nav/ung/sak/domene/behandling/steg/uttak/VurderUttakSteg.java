@@ -8,8 +8,8 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.util.logging.Logger;
 
@@ -30,7 +30,10 @@ public class VurderUttakSteg implements BehandlingSteg {
     private PersonopplysningRepository personopplysningRepository;
 
     @Inject
-    public VurderUttakSteg(VilkårTjeneste vilkårTjeneste, UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, PersonopplysningRepository personopplysningRepository) {
+    public VurderUttakSteg(VilkårTjeneste vilkårTjeneste,
+                           UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+                           UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
+                           PersonopplysningRepository personopplysningRepository) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
@@ -65,8 +68,13 @@ public class VurderUttakSteg implements BehandlingSteg {
             .findFirst()
             .map(PersonopplysningEntitet::getDødsdato);
 
-        var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato);
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(
+            godkjentePerioder,
+            ungdomsprogramtidslinje,
+            søkersDødsdato
+        );
         ungdomsytelseUttakPerioder.ifPresent(it -> ungdomsytelseGrunnlagRepository.lagre(behandlingId, it));
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
+
 }

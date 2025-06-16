@@ -1,14 +1,5 @@
 package no.nav.ung.sak.domene.vedtak.observer;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -35,7 +26,14 @@ import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.hendelse.vedtak.VurderOmVedtakPåvirkerAndreSakerTask;
-import no.nav.ung.sak.hendelse.vedtak.VurderOmVedtakPåvirkerSakerTjeneste;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
 
 
 @Deprecated//TODO denne publiserer melding til eksterne om vedtak fattet. Vurder om nødvendig for UNG etterhvert som detaljene for samhandling er landet
@@ -49,6 +47,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
     private BehandlingRepository behandlingRepository;
     private VedtattYtelseTjeneste vedtakTjeneste;
+    private boolean skalPublisereTilFamilieVedtakFattet;
     private GenerellKafkaProducer producer;
     private Validator validator;
 
@@ -66,22 +65,23 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         ProsessTaskTjeneste taskTjeneste,
         @Any Instance<InformasjonselementerUtleder> informasjonselementer,
         @KonfigVerdi("kafka.fattevedtak.topic") String topic,
-        @KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServersAiven,
-        @KonfigVerdi("bootstrap.servers") String bootstrapServersOnPrem,
+        @KonfigVerdi(value = "KAFKA_BROKERS") String kafkaBrokers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
-        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+        @KonfigVerdi(value = "PUBLISER_VEDTAK_FAMILIE", defaultVerdi = "false") boolean skalPublisereTilFamilieVedtakFattet
     ) {
         this.taskTjeneste = taskTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
+        this.skalPublisereTilFamilieVedtakFattet = skalPublisereTilFamilieVedtakFattet;
 
         boolean kjørerIMiljø = Environment.current().isProd() || Environment.current().isDev();
         if (kjørerIMiljø) {
             var aivenPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(bootstrapServersAiven);
+                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
 
             Properties aivenProps = aivenPropsBuilder
                 .truststorePath(trustStorePath)
@@ -94,7 +94,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         } else {
             //konfigurasjon for bruk mot VTP
             var onPremPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(bootstrapServersOnPrem);
+                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
 
             Properties onPremProps = onPremPropsBuilder
                 .username("vtp")
@@ -114,11 +114,6 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandingIdString = prosessTaskData.getBehandlingId();
 
-        // FIXME: Fjerne dette når man har avklart om man skal bruke familie-vedtakfattet-v1 eller lage ny.
-        if (true) {
-            return;
-        }
-
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
             long behandlingId = Long.parseLong(behandingIdString);
 
@@ -136,18 +131,21 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
                 var fagsakYtelseType = behandling.getFagsakYtelseType();
                 log.info("Mottatt ytelse-vedtatt hendelse med ytelse='{}' saksnummer='{}', sjekker behovet for revurdering", fagsakYtelseType, behandling.getFagsak().getSaksnummer());
-                var vurderOmVedtakPåvirkerSakerTjeneste = VurderOmVedtakPåvirkerSakerTjeneste.finnTjenesteHvisStøttet(fagsakYtelseType);
-
-                if (vurderOmVedtakPåvirkerSakerTjeneste.isPresent()) {
-                    ProsessTaskData taskData = ProsessTaskData.forProsessTask(VurderOmVedtakPåvirkerAndreSakerTask.class);
-                    taskData.setPayload(payload);
-                    taskTjeneste.lagre(taskData);
-                }
+                opprettTaskForVurderingAvPåvirkedeSaker(payload);
                 String key = behandling.getFagsak().getSaksnummer().getVerdi();
-                RecordMetadata recordMetadata = producer.sendJsonMedNøkkel(key, payload);
-                log.info("Sendte melding til  {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+                if (skalPublisereTilFamilieVedtakFattet) {
+                    RecordMetadata recordMetadata = producer.sendJsonMedNøkkel(key, payload);
+                    log.info("Sendte melding til  {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
+
+                }
             }
         }
+    }
+
+    private void opprettTaskForVurderingAvPåvirkedeSaker(String payload) {
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(VurderOmVedtakPåvirkerAndreSakerTask.class);
+        taskData.setPayload(payload);
+        taskTjeneste.lagre(taskData);
     }
 
     private boolean erFagsakYtelseBasert(Behandling behandling) {

@@ -3,6 +3,7 @@ package no.nav.ung.sak.mottak.dokumentmottak;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,6 +16,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 
 @ApplicationScoped
@@ -48,7 +50,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
             }
             Ungdomsytelse ytelse = søknad.getYtelse();
             ungdomsytelseSøknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, Optional.of(ytelse.getSøknadsperiode()), dokument.getMottattDato());
-            ungdomsytelseSøknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiodeList(), dokument.getJournalpostId(), behandlingId);
+            ungdomsytelseSøknadPersisterer.lagreSøknadsperioder(ytelse.getStartdatoer(), dokument.getJournalpostId(), behandlingId);
             ungdomsytelseSøknadPersisterer.oppdaterFagsakperiode(ytelse.getSøknadsperiode().getFraOgMed(), behandling);
 
         }
@@ -56,8 +58,11 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
     }
 
     @Override
-    public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
-        return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
+    public List<Trigger> getTriggere(Collection<MottattDokument> mottattDokument) {
+        return mottattDokument.stream().map(it -> søknadParser.parseSøknad(it))
+            .map(it -> ((Ungdomsytelse) it.getYtelse()).getSøknadsperiode())
+            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE))
+            .toList();
     }
 
 }

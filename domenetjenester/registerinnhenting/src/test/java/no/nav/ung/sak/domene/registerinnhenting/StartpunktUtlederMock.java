@@ -12,6 +12,6 @@ class StartpunktUtlederMock implements EndringStartpunktUtleder {
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        return StartpunktType.KONTROLLER_FAKTA;
+        return StartpunktType.INIT_PERIODER;
     }
 }

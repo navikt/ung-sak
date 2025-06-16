@@ -39,7 +39,6 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     public static final String BREVKODER = "opptjening.brevkoder";
 
     private AbakusTjeneste abakusTjeneste;
-    private boolean k9abakusEnabled;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     AsyncAbakusLagreOpptjeningTask() {

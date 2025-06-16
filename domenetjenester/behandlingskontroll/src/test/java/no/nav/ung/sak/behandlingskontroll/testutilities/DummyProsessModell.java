@@ -25,13 +25,22 @@ public class DummyProsessModell {
     public BehandlingModell førstegangsbehandling() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         modellBuilder
-            .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
-            .medSteg(BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT)
-            .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR)
-
-            .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG, StartpunktType.BEREGNING)
-            .medSteg(BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
+            .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
+            .medSteg(BehandlingStegType.VURDER_SØKNADSFRIST)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
+            .medSteg(BehandlingStegType.ALDERSVILKÅRET)
+            .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
+            .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, StartpunktType.KONTROLLER_INNTEKT)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
         return modellBuilder.build();
     }

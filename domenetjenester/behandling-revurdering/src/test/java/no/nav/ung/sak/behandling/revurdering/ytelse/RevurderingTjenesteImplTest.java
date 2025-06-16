@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +30,6 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.ung.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -48,13 +48,9 @@ public class RevurderingTjenesteImplTest {
     private BehandlingskontrollServiceProvider serviceProvider;
 
     @Inject
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkRepository;
 
     private BehandlingRepositoryProvider repositoryProvider;
-
-    @Inject
-    @FagsakYtelseTypeRef
-    private RevurderingEndring revurderingEndring;
 
     @Inject
     @Any
@@ -69,12 +65,12 @@ public class RevurderingTjenesteImplTest {
     @Test
     public void skal_opprette_revurdering() {
         // Arrange
-        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE);
         scenario.medBehandlingVedtak()
             .medVedtakstidspunkt(LocalDateTime.now())
             .medVedtakResultatType(VedtakResultatType.INNVILGET);
 
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP, BehandlingStegType.KONTROLLER_FAKTA);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
         scenario.medBehandlingstidFrist(LocalDate.now().minusDays(5));
         Behandling behandlingSomSkalRevurderes = scenario.lagre(repositoryProvider);
 

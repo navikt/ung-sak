@@ -14,9 +14,9 @@
     <name>ung-sak :: Webapp</name>
 
     <properties>
-        <swagger-ui.version>5.18.2</swagger-ui.version>
-        <jetty.version>12.0.16</jetty.version>
-        <metrics.version>4.2.29</metrics.version>
+        <swagger-ui.version>5.24.1-1</swagger-ui.version>
+        <jetty.version>12.0.22</jetty.version>
+        <metrics.version>4.2.32</metrics.version>
     </properties>
 
 
@@ -39,7 +39,7 @@
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
-                <version>3.0.15</version>
+                <version>3.0.17</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -145,11 +145,14 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>fordel</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>tilgangskontroll</artifactId>
-        </dependency>
 
+
+
+        <!-- integrasjon-->
+        <dependency>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-microsoft-graph-klient</artifactId>
+        </dependency>
 
         <!-- Server Provided Libraries. Transitive avhengigheter som ikke burde
             vært her da de trekkes inn av server. -->
@@ -197,6 +200,11 @@
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.openapi.spec.utils</groupId>
+            <artifactId>openapi-spec-utils</artifactId>
+            <version>1.5.0</version>
         </dependency>
 
         <!-- CDI -->
@@ -315,6 +323,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>mottak</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.sif.abac</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -351,6 +363,9 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/target/lib/</outputDirectory>
                             <includeScope>runtime</includeScope>
+                            <prependGroupId>true</prependGroupId>
+                            <!-- ekskluderer rocksdbjni som er 50 + MB, inkluder fra kafka streams, men ikke brukes av applikasjonen -->
+                            <excludeArtifactIds>rocksdbjni</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
@@ -362,7 +377,8 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
+                            <classpathLayoutType>custom</classpathLayoutType>
+                            <customClasspathLayout>lib/$${artifact.groupId}.$${artifact.artifactId}-$${artifact.version}$${dashClassifier?}.$${artifact.extension}</customClasspathLayout>
                             <mainClass>no.nav.ung.sak.web.server.jetty.JettyServer</mainClass>
                         </manifest>
                     </archive>

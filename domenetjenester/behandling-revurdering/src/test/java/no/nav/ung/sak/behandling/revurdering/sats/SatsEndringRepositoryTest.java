@@ -5,6 +5,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import java.time.LocalDate;
 import java.util.Map;
 
+import no.nav.ung.kodeverk.hjemmel.Hjemmel;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -59,7 +61,7 @@ class SatsEndringRepositoryTest {
         assertThat(fagsakTilRevurdering.getKey().getPeriode().getFomDato()).isEqualTo(fagsakPeriode.getFom());
         assertThat(fagsakTilRevurdering.getKey().getPeriode().getTomDato()).isEqualTo(fagsakPeriode.getTom());
 
-        LocalDate endringsdato = fødselsdato.plusMonths(1).withDayOfMonth(1);
+        LocalDate endringsdato = fødselsdato.plusYears(25);
         assertThat(fagsakTilRevurdering.getValue()).isEqualTo(endringsdato);
     }
 
@@ -138,7 +140,7 @@ class SatsEndringRepositoryTest {
 
             .executeUpdate();
 
-        entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODE (id, ung_sats_perioder_id, periode, dagsats, grunnbeløp, grunnbeløp_faktor, sats_type, antall_barn, dagsats_barnetillegg) VALUES (1, :satsPerioderId, '[2021-01-01,2021-12-31]', 1000, 1000, 1, 'HOY', 0, 0)")
+        entityManager.createNativeQuery("INSERT INTO UNG_SATS_PERIODE (id, ung_sats_perioder_id, periode, dagsats, grunnbeløp, grunnbeløp_faktor, sats_type, antall_barn, dagsats_barnetillegg, hjemmel) VALUES (1, :satsPerioderId, '[2021-01-01,2021-12-31]', 1000, 1000, 1, '"+ UngdomsytelseSatsType.HØY.getKode() +"', 0, 0, '" + Hjemmel.UNG_FORSKRIFT_PARAGRAF_9.getKode() + "')")
             .setParameter("satsPerioderId", satsPerioderId)
             .executeUpdate();
 

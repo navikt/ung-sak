@@ -1,38 +1,20 @@
 package no.nav.ung.sak.domene.person.pdl;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Objects;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse;
-import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering;
-import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
-import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
-import no.nav.k9.felles.integrasjon.pdl.FoedselsdatoResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
-import no.nav.k9.felles.integrasjon.pdl.FolkeregisterpersonstatusResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.Kjoenn;
-import no.nav.k9.felles.integrasjon.pdl.KjoennResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.KjoennType;
-import no.nav.k9.felles.integrasjon.pdl.Navn;
-import no.nav.k9.felles.integrasjon.pdl.NavnResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
-import no.nav.k9.felles.integrasjon.pdl.Person;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Objects;
 
 @ApplicationScoped
 public class PersonBasisTjeneste {
@@ -60,11 +42,10 @@ public class PersonBasisTjeneste {
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
-            .folkeregisterpersonstatus(new FolkeregisterpersonstatusResponseProjection().status())
             .kjoenn(new KjoennResponseProjection().kjoenn())
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
 
-        var person = pdlKlient.hentPerson(query, projection);
+        var person = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
 
         var fødselsdato = person.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)
@@ -74,16 +55,13 @@ public class PersonBasisTjeneste {
             .map(Doedsfall::getDoedsdato)
             .filter(Objects::nonNull)
             .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
-        var pdlStatus = person.getFolkeregisterpersonstatus().stream()
-            .map(Folkeregisterpersonstatus::getStatus)
-            .findFirst().map(PersonstatusType::fraFregPersonstatus).orElse(PersonstatusType.UDEFINERT);
+
         return new PersoninfoBasis.Builder().medAktørId(aktørId).medPersonIdent(personIdent)
             .medNavn(person.getNavn().stream().map(PersonBasisTjeneste::mapNavn).filter(Objects::nonNull).findFirst().orElseGet(() -> isProd ? null : "Navnløs i Folkeregister"))
             .medFødselsdato(fødselsdato)
             .medDødsdato(dødsdato)
             .medDiskresjonsKode(getDiskresjonskode(person))
             .medNavBrukerKjønn(mapKjønn(person))
-            .medPersonstatusType(pdlStatus)
             .build();
     }
 
@@ -113,7 +91,7 @@ public class PersonBasisTjeneste {
         var projection = new PersonResponseProjection()
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato());
-        var personFraPDL = pdlKlient.hentPerson(query, projection);
+        var personFraPDL = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
 
         var fødselsdato = personFraPDL.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)

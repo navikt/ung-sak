@@ -12,21 +12,19 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.felles.util.LRUCache;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.saksbehandler.SaksbehandlerDto;
-import no.nav.ung.sak.web.app.tjenester.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +45,7 @@ public class SaksbehandlerRestTjeneste {
 
     private String systembruker;
 
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkRepository;
     private BehandlingRepository behandlingRepository;
 
     public SaksbehandlerRestTjeneste() {
@@ -57,7 +55,7 @@ public class SaksbehandlerRestTjeneste {
     @Inject
     public SaksbehandlerRestTjeneste(
         MicrosoftGraphTjeneste microsoftGraphTjeneste, @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
-        HistorikkRepository historikkRepository,
+        HistorikkinnslagRepository historikkRepository,
         BehandlingRepository behandlingRepository) {
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
         this.systembruker = systembruker;
@@ -82,7 +80,7 @@ public class SaksbehandlerRestTjeneste {
         BehandlingUuidDto behandlingUuid) {
 
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
+        List<Historikkinnslag> historikkinnslag = historikkRepository.hent(behandling.getFagsak().getSaksnummer());
 
         Set<String> unikeIdenter = historikkinnslag.stream()
             .map(BaseEntitet::getOpprettetAv)

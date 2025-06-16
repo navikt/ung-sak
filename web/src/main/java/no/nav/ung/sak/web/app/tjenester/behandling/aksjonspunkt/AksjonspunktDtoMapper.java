@@ -1,13 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -17,6 +9,9 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.ung.sak.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 class AksjonspunktDtoMapper {
 
@@ -89,23 +84,11 @@ class AksjonspunktDtoMapper {
             return false;
         }
         Optional<BehandlingStegType> aktivtBehandlingSteg = Optional.ofNullable(behandling.getAktivtBehandlingSteg());
-
-        // Midlertidig fiks til alle som har fått aksjonspunkt er over i nytt steg
-        if (AksjonspunktDefinisjon.VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE.equals(def)
-            || AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET.equals(def)) {
-            return aktivtBehandlingSteg
-                .map(steg -> steg.equals(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG) || steg.equals(BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG))
-                .orElse(false);
-        }
-
         return aktivtBehandlingSteg.map(steg -> skalLøsesIStegKode(def, behandling.getBehandlingStegStatus().getKode(), steg))
             .orElse(false);
     }
 
     private static Boolean skalLøsesIStegKode(AksjonspunktDefinisjon def, String stegKode, BehandlingStegType steg) {
-        if (BehandlingStegStatus.INNGANG.getKode().equals(stegKode)) {
-            return steg.getAksjonspunktDefinisjonerInngang().contains(def);
-        } else
-            return BehandlingStegStatus.UTGANG.getKode().equals(stegKode) && steg.getAksjonspunktDefinisjonerUtgang().contains(def);
+        return BehandlingStegStatus.UTGANG.getKode().equals(stegKode) && steg.getAksjonspunktDefinisjonerUtgang().contains(def);
     }
 }

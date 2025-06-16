@@ -1,12 +1,5 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -20,41 +13,42 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 class ForeslåVedtakTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(ForeslåVedtakTjeneste.class);
 
-    private SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste;
-    private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
+    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
     }
 
     @Inject
-    ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
-                          BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                          SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
+    ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
-        this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
-        this.fagsakRepository = fagsakRepository;
+                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
+                          VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
+        this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
-        aksjonspunktDefinisjoner.addAll(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
         // TODO: Fiks integrering mot k9-tilbake
 //        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
@@ -75,7 +69,7 @@ class ForeslåVedtakTjeneste {
         if (aksjonspunktDefinisjoner.isEmpty()
             && behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
             && behandling.erRevurdering()
-            && behandling.getBehandlingÅrsakerTyper().stream().allMatch(årsak -> årsak.equals(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))) {
+            && behandling.getBehandlingÅrsakerTyper().stream().allMatch(årsak -> årsak.equals(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE))) {
             logger.info("Foreslår vedtak uten aksjonspunkter");
         }
 
@@ -102,6 +96,9 @@ class ForeslåVedtakTjeneste {
     }
 
     private boolean skalOppretteForeslåVedtakManuelt(Behandling behandling) {
+        if (vedtaksbrevTjeneste.måSkriveBrev(behandling.getId())) {
+            return true;
+        }
         return finnForeslåVedtakManueltUtleder(behandling).skalOppretteForeslåVedtakManuelt(behandling);
     }
 
@@ -128,7 +125,10 @@ class ForeslåVedtakTjeneste {
         // Er det grunn til å tro at disse finnes når man er i FORVED-steg - de skal utledes i steget?
         List<Aksjonspunkt> skalAvbrytes = new ArrayList<>();
         behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FORESLÅ_VEDTAK).ifPresent(skalAvbrytes::add);
-        behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK).ifPresent(skalAvbrytes::add);
+        final var fatterVedtakAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK).filter(it -> !it.erAvbrutt());
+        if (fatterVedtakAksjonspunkt.isPresent()) {
+            throw new IllegalStateException("Hadde fatter vedtak aksjonspunkt som ikke allerede var avbrutt i foreslå vedtak uten totrinnsvurdering på behandling: "  + fatterVedtakAksjonspunkt.get());
+        }
         if (!skalAvbrytes.isEmpty()) {
             behandlingskontrollTjeneste.lagreAksjonspunkterAvbrutt(kontekst, behandling.getAktivtBehandlingSteg(), skalAvbrytes);
         }

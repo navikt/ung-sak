@@ -20,13 +20,13 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -47,7 +47,7 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
         søknadsperiodeRepository = new UngdomsytelseStartdatoRepository(em);
         behandlingRepository = new BehandlingRepository(em);
         ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(søknadsperiodeRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(em)),
             behandlingRepository
             );
 
@@ -73,22 +73,4 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
         assertThat(enestePeriode.getTomDato()).isEqualTo(fom.plusWeeks(64));
     }
 
-    @Test
-    void kun_returnere_sammenhengende_perioder_som_er_søkt_om() {
-        var fom = LocalDate.now();
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(
-            new UngdomsprogramPeriode(fom, fom.plusWeeks(2)),
-            new UngdomsprogramPeriode(fom.plusWeeks(2).plusDays(1), fom.plusWeeks(3)),
-            // Hull i perioder
-            new UngdomsprogramPeriode(fom.plusWeeks(4), fom.plusWeeks(5))));
-        var søknadsperioder = List.of(new UngdomsytelseSøktStartdato(fom, new JournalpostId(12455L)));
-        søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
-        søknadsperiodeRepository.lagreRelevanteSøknader(behandling.getId(), new UngdomsytelseStartdatoer(søknadsperioder));
-
-        var periode = ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandling.getId());
-
-        assertThat(periode.size()).isEqualTo(1);
-        var enestePeriode = periode.getFirst();
-        assertThat(enestePeriode.getTomDato()).isEqualTo(fom.plusWeeks(3));
-    }
 }

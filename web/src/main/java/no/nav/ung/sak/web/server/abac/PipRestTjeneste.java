@@ -1,13 +1,16 @@
 package no.nav.ung.sak.web.server.abac;
 
 import io.swagger.v3.oas.annotations.Operation;
+import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
+import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.kontrakt.abac.PipDto;
+import no.nav.ung.sak.kontrakt.abac.PipDtoV2;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.tilgangskontroll.api.AbacBehandlingStatus;
-import no.nav.ung.sak.tilgangskontroll.api.AbacFagsakStatus;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -70,6 +73,25 @@ public class PipRestTjeneste {
             pipDto.setFagsakStatus(AbacUtil.oversettFagstatus(pip.getFagsakStatus()).map(AbacFagsakStatus::getEksternKode).orElse(null));
         });
         return pipDto;
+    }
+
+    @GET
+    @Path("/pipdata-for-behandling-v2")
+    @Operation(description = "Henter aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling", tags = "pip")
+    @BeskyttetRessurs(action = READ, resource = PIP)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Optional<PipDtoV2> hentPipDataTilknyttetBehandlingV2(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+        Optional<PipBehandlingsData> pipDataOpt = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());
+        if (pipDataOpt.isPresent()) {
+            PipBehandlingsData pipData = pipDataOpt.get();
+            Set<AktørId> personer = hentAktørIder(pipData);
+            BehandlingStatus behandlingStatus = BehandlingStatus.fraKode(pipData.getBehandligStatus());
+            FagsakStatus fagsakStatus = FagsakStatus.fraKode(pipData.getFagsakStatus());
+            String ansvarligSaksbehandler = pipData.getAnsvarligSaksbehandler().orElse(null);
+            return Optional.of(new PipDtoV2(personer, behandlingStatus, fagsakStatus, ansvarligSaksbehandler));
+        } else {
+            return Optional.empty();
+        }
     }
 
     private Set<AktørId> hentAktørIder(PipBehandlingsData pipBehandlingsData) {

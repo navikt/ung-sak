@@ -1,24 +1,13 @@
 package no.nav.ung.kodeverk.behandling;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum BehandlingType implements Kodeverdi {
 
     /**
@@ -27,11 +16,10 @@ public enum BehandlingType implements Kodeverdi {
      */
     FØRSTEGANGSSØKNAD("BT-002", "Førstegangsbehandling", "ae0034", 6, true),
     REVURDERING("BT-004", "Revurdering", "ae0028", 6, false),
-    UNNTAKSBEHANDLING("BT-010", "Unntaksbehandling", "N/A", 6, false),
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;
 
-    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING, UNNTAKSBEHANDLING);
+    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING);
 
     public static final String KODEVERK = "BEHANDLING_TYPE";
     private static final Map<String, BehandlingType> KODER = new LinkedHashMap<>();
@@ -45,18 +33,13 @@ public enum BehandlingType implements Kodeverdi {
 
     }
 
-    @JsonIgnore
     private int behandlingstidFristUker;
-    @JsonIgnore
     private Boolean behandlingstidVarselbrev;
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private BehandlingType real;
 
-    @JsonIgnore
     private String offisiellKode;
 
     private String kode;
@@ -73,25 +56,13 @@ public enum BehandlingType implements Kodeverdi {
         this.behandlingstidVarselbrev = behandlingstidVarselbrev;
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingType fraKode(Object node) {
-        if (node == null) {
+    public static BehandlingType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(BehandlingType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingType: for input " + node);
+            throw new IllegalArgumentException("Ukjent BehandlingType: for input " + kode);
         }
         return ad;
     }
@@ -105,13 +76,12 @@ public enum BehandlingType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(value = "kode")
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
     }
 
-    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;

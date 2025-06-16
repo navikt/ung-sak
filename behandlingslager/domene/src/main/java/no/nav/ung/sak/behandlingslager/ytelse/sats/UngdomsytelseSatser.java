@@ -1,20 +1,16 @@
 package no.nav.ung.sak.behandlingslager.ytelse.sats;
 
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
+public record UngdomsytelseSatser(BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor,
+                                  UngdomsytelseSatsType satsType, int antallBarn, int dagsatsBarnetillegg) {
 
-public record UngdomsytelseSatser(BigDecimal dagsats,
-                                  BigDecimal grunnbeløp,
-                                  BigDecimal grunnbeløpFaktor,
-                                  UngdomsytelseSatsType satsType,
-                                  Integer antallBarn,
-                                  int dagsatsBarnetillegg) {
-
-    public static UngdomsytelseSatser.Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -28,7 +24,8 @@ public record UngdomsytelseSatser(BigDecimal dagsats,
         private Integer antallBarn;
         private int dagsatsBarnetillegg;
 
-        public Builder() {}
+        public Builder() {
+        }
 
         private Builder(Builder builder) {
             grunnbeløp = builder.grunnbeløp;
@@ -79,7 +76,6 @@ public record UngdomsytelseSatser(BigDecimal dagsats,
 
     }
 
-
     @Override
     public String toString() {
         return "UngdomsytelseSatser{" +
@@ -89,4 +85,5 @@ public record UngdomsytelseSatser(BigDecimal dagsats,
             ", satsType=" + satsType +
             '}';
     }
+
 }

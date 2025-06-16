@@ -1,10 +1,12 @@
-
-    <h2>Du har rett til å klage</h2>
-    <p>Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på <a
+<h2>Du har rett til å klage</h2>
+<p>Du kan klage innen 6 uker fra den datoen du mottok vedtaket. Du finner skjema og informasjon på <a
         title="klage" href="https://nav.no/klage">nav.no/klage</a>.</p>
 
-    <h2>Du har rett til innsyn</h2>
-    <p>Du kan se dokumentene i saken din ved å logge deg inn på <a title="nav hovedside" href="https://nav.no">nav.no</a>.</p>
+<h2>Du har rett til innsyn</h2>
+<p>Du kan se dokumentene i saken din ved å logge deg inn på <a title="nav hovedside" href="https://nav.no">nav.no</a>.
+</p>
 
 {{> felles/footer/footer}}
-
+{{#if felles.automatiskBehandlet}}
+    <p>Dette er et automatisk behandlet vedtak.</p>
+{{/if}}

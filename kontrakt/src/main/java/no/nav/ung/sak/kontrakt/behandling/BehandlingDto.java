@@ -37,6 +37,12 @@ import no.nav.ung.sak.kontrakt.ResourceLink;
 public class BehandlingDto {
 
     @JsonInclude(value = Include.NON_EMPTY)
+    @JsonProperty(value = "visningsnavn")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String visningsnavn;
+
+    @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "ansvarligSaksbehandler")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -63,10 +69,10 @@ public class BehandlingDto {
     @Valid
     private List<BehandlingÅrsakDto> behandlingÅrsaker = new ArrayList<>();
 
-    @JsonProperty("behandlingKoet")
+    @JsonProperty("behandlingKøet")
     private boolean behandlingKøet;
 
-    @JsonProperty("behandlingPaaVent")
+    @JsonProperty("behandlingPåVent")
     private boolean behandlingPåVent;
 
     @JsonInclude(value = Include.NON_NULL)
@@ -93,7 +99,7 @@ public class BehandlingDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String endretAvBrukernavn;
 
-    @JsonProperty(value = "erPaaVent")
+    @JsonProperty(value = "erPåVent")
     private boolean erPaaVent;
 
     @JsonInclude(value = Include.NON_NULL)
@@ -113,8 +119,7 @@ public class BehandlingDto {
     private BehandlingÅrsakDto førsteÅrsak;
 
     @JsonInclude(value = Include.NON_NULL)
-    @JsonAlias("fristBehandlingPåVent")
-    @JsonProperty("fristBehandlingPaaVent")
+    @JsonProperty("fristBehandlingPåVent")
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String fristBehandlingPåVent;
@@ -147,7 +152,7 @@ public class BehandlingDto {
     private LocalDate originalVedtaksDato;
 
     @JsonInclude(value = Include.NON_NULL)
-    @JsonProperty("sprakkode")
+    @JsonProperty("språkkode")
     @Valid
     private Språkkode språkkode;
 
@@ -180,8 +185,7 @@ public class BehandlingDto {
     /** @deprecated bruk #venteÅrsak */
     @Deprecated(forRemoval = true)
     @JsonInclude(value = Include.NON_NULL)
-    @JsonAlias("venteÅrsakKode")
-    @JsonProperty("venteArsakKode")
+    @JsonProperty("venteÅrsakKode")
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String venteÅrsakKode;
@@ -206,6 +210,14 @@ public class BehandlingDto {
     @Min(0L)
     @Max(Long.MAX_VALUE)
     private Long versjon;
+
+    public String getVisningsnavn() {
+        return visningsnavn;
+    }
+
+    public void setVisningsnavn(String visningsnavn) {
+        this.visningsnavn = visningsnavn;
+    }
 
     public String getAnsvarligSaksbehandler() {
         return ansvarligSaksbehandler;
@@ -259,6 +271,7 @@ public class BehandlingDto {
         return førsteÅrsak;
     }
 
+    @JsonProperty("fristBehandlingPaaVent")
     public String getFristBehandlingPåVent() {
         return fristBehandlingPåVent;
     }
@@ -279,6 +292,7 @@ public class BehandlingDto {
         return originalVedtaksDato;
     }
 
+    @JsonProperty(value = "sprakkode")
     public Språkkode getSpråkkode() {
         return språkkode;
     }
@@ -299,6 +313,7 @@ public class BehandlingDto {
         return uuid;
     }
 
+    @JsonProperty("venteArsakKode")
     public String getVenteÅrsakKode() {
         return venteÅrsakKode;
     }
@@ -307,14 +322,17 @@ public class BehandlingDto {
         return versjon;
     }
 
+    @JsonProperty("behandlingKoet")
     public boolean isBehandlingKøet() {
         return behandlingKøet;
     }
 
+    @JsonProperty("behandlingPaaVent")
     public boolean isBehandlingPåVent() {
         return behandlingPåVent;
     }
 
+    @JsonProperty(value = "erPaaVent")
     public boolean isErPaaVent() {
         return erPaaVent;
     }

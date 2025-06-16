@@ -1,13 +1,13 @@
 package no.nav.ung.sak.mottak.dokumentmottak;
 
-import java.util.Collection;
-import java.util.Objects;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.søknad.ytelse.ung.v1.UngdomsytelseSøknadValidator;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.k9.søknad.ytelse.ung.v1.UngdomsytelseSøknadValidator;
+
+import java.util.Collection;
+import java.util.Objects;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_SOKNAD_KODE)

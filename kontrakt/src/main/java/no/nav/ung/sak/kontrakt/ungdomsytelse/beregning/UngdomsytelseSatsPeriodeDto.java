@@ -15,14 +15,14 @@ import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record UngdomsytelseSatsPeriodeDto(
-    @JsonProperty(value = "fom", required = true) @NotNull LocalDate fom,
-    @JsonProperty(value = "tom", required = true) @NotNull LocalDate tom,
-    @JsonProperty(value = "dagsats", required = true) @NotNull BigDecimal dagsats,
-    @JsonProperty(value = "grunnbeløpFaktor", required = true) @NotNull BigDecimal grunnbeløpFaktor,
-    @JsonProperty(value = "grunnbeløp", required = true) @NotNull BigDecimal grunnbeløp,
-    @JsonProperty(value = "satsType", required = true) @NotNull UngdomsytelseSatsType satsType,
-    @JsonProperty(value = "antallBarn", required = true) int antallBarn,
-    @JsonProperty(value = "dagsatsBarnetillegg", required = true) @NotNull int dagsatsBarnetillegg
-
+    @NotNull LocalDate fom,
+    @NotNull LocalDate tom,
+    @NotNull BigDecimal dagsats,
+    @NotNull BigDecimal grunnbeløpFaktor,
+    @NotNull BigDecimal grunnbeløp,
+    @NotNull UngdomsytelseSatsType satsType,
+    int antallBarn,
+    @NotNull int dagsatsBarnetillegg,
+    @NotNull int antallDager
 ) {
 }

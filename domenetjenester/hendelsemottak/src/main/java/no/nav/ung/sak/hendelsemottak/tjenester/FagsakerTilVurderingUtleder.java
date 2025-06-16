@@ -9,5 +9,5 @@ import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 
 public interface FagsakerTilVurderingUtleder {
 
-    Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse);
+    Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse);
 }

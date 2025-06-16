@@ -9,6 +9,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
 import no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelsemottakTjeneste;
+import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class SendInnUngHendelseTask implements ProsessTaskHandler {
 
         // Siste hendelse antas å representere mest relevant informasjon sammenlignet med tidligere hendelser
         log.info("Oppdaterer med hendelseId={}, antall relaterte hendelser={}", inngåendeHendelseId, alleUhåndterteHendelser.size() - 1);
-        var hendelse = fraJson(sisteUhåndterte.getPayload());
+        Hendelse hendelse = fraJson(sisteUhåndterte.getPayload());
         hendelsemottakTjeneste.mottaHendelse(hendelse);
 
         // Alle anses som håndterte etter dette, og får status oppdatert som én gruppe

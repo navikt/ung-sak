@@ -6,7 +6,6 @@ import static no.nav.ung.kodeverk.person.NavBrukerKjønn.KVINNE;
 import java.time.LocalDate;
 
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -18,7 +17,6 @@ public class NavPersoninfoBuilder {
     private static final PersonIdent DEFAULT_FNR = PersonIdent.fra("13107221234");
     private static final LocalDate DEFAULT_FØDSELDATO = LocalDate.of(1972, OCTOBER, 13);
     private static final String DEFAULT_DISKRESJONSKODE = "6";
-    private static final PersonstatusType DEFAULT_PERSONSTATUSTYPE = PersonstatusType.BOSA;
     private NavBrukerKjønn kjønn = KVINNE;
 
     private AktørId aktørId;
@@ -27,7 +25,6 @@ public class NavPersoninfoBuilder {
     private LocalDate fødselsdato;
 
     private String diskresjonskode;
-    private PersonstatusType personstatusType;
     public NavPersoninfoBuilder() {
     }
 
@@ -47,22 +44,18 @@ public class NavPersoninfoBuilder {
         return this;
     }
 
-    public NavPersoninfoBuilder medFødselsdato(LocalDate fødselsdato) {
-        this.fødselsdato = fødselsdato;
-        return this;
-    }
-
     public NavPersoninfoBuilder medKjønn(NavBrukerKjønn kjønn) {
         this.kjønn = kjønn;
         return this;
     }
 
-    public NavPersoninfoBuilder medDiskresjonskode(String diskresjonskode) {
-        this.diskresjonskode = diskresjonskode;
+    public NavPersoninfoBuilder medFødselsdato(LocalDate fødselsdato) {
+        this.fødselsdato = fødselsdato;
         return this;
     }
-    public NavPersoninfoBuilder medPersonstatusType(PersonstatusType personstatusType) {
-        this.personstatusType = personstatusType;
+
+    public NavPersoninfoBuilder medDiskresjonskode(String diskresjonskode) {
+        this.diskresjonskode = diskresjonskode;
         return this;
     }
 
@@ -82,9 +75,7 @@ public class NavPersoninfoBuilder {
         if (diskresjonskode == null) {
             diskresjonskode = DEFAULT_DISKRESJONSKODE;
         }
-        if (personstatusType == null) {
-            personstatusType = DEFAULT_PERSONSTATUSTYPE;
-        }
+
         return new Personinfo.Builder()
             .medAktørId(aktørId)
             .medPersonIdent(personIdent)
@@ -92,7 +83,6 @@ public class NavPersoninfoBuilder {
             .medFødselsdato(fødselsdato)
             .medKjønn(kjønn)
             .medDiskresjonsKode(diskresjonskode)
-            .medPersonstatusType(personstatusType)
             .build();
     }
 }

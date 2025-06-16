@@ -29,23 +29,31 @@
 
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
 
-        <revision>4.0.0</revision>
+        <revision>1.0.0</revision>
         <sha1></sha1>
         <changelist>-SNAPSHOT</changelist>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>4.4.5</felles.version>
-        <swagger.version>2.2.28</swagger.version>
-        <junit.version>5.11.4</junit.version>
-        <k9format.version>9.8.0</k9format.version>
-        <jackson.version>2.18.2</jackson.version>
-        <asm.version>9.7.1</asm.version>
-        <kotlin-stdlib.version>2.1.0</kotlin-stdlib.version>
-        <jandex.version>3.2.3</jandex.version>
-        <flyway.version>11.2.0</flyway.version>
-        <pdfgen-core.version>1.1.39</pdfgen-core.version>
-        <confluent.platform.version>7.8.0</confluent.platform.version>
+        <felles.version>4.6.8</felles.version>
+        <swagger.version>2.2.33</swagger.version>
+        <junit.version>5.13.1</junit.version>
+        <k9format.version>12.3.0</k9format.version>
+        <jackson.version>2.19.0</jackson.version>
+        <asm.version>9.8</asm.version>
+        <kotlin-stdlib.version>2.1.21</kotlin-stdlib.version>
+        <jandex.version>3.3.1</jandex.version>
+        <flyway.version>11.9.1</flyway.version>
+        <pdfgen-core.version>1.1.51</pdfgen-core.version>
+        <confluent.platform.version>8.0.0</confluent.platform.version>
+        <mockito.version>5.18.0</mockito.version>
+        <ung-deltakelse-opplyser.version>2.2.0</ung-deltakelse-opplyser.version>
+        <handlebars.version>4.4.0</handlebars.version>
+        <validation-model-jakarta.version>1.28.1</validation-model-jakarta.version>
+        <openhtmltopdf.version>1.1.28</openhtmltopdf.version>
+        <jsoup.version>1.20.1</jsoup.version>
+        <commonmark.version>0.24.0</commonmark.version>
+
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -54,6 +62,13 @@
         det brukes. -->
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>no.nav.ung.deltakelseopplyser</groupId>
+                <artifactId>kontrakt</artifactId>
+                <version>${ung-deltakelse-opplyser.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
@@ -72,7 +87,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.tidsserie</groupId>
                 <artifactId>fpsak-tidsserie</artifactId>
-                <version>2.7.1</version>
+                <version>2.7.3</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
@@ -120,7 +135,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.7.4</version>
+                <version>2.7.15</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -128,18 +143,18 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>2.2.1</version>
+                <version>2.2.6</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.1.0</version>
+                <version>1.3.0</version>
             </dependency>
 
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>6.2.1</version>
+                <version>6.3.0</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
@@ -164,7 +179,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.11.0</version>
+                <version>2.16.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -212,11 +227,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>tilgangskontroll</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>inngangsvilkar</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -253,6 +263,11 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
+                <artifactId>etterlysning</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>produksjonsstyring</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -264,11 +279,6 @@
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>person</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>skjaeringstidspunkt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -289,6 +299,11 @@
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>arbeidsforhold</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>arbeidsforhold-domene</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -314,6 +329,11 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>no.nav.sif.abac</groupId>
+                <artifactId>kontrakt</artifactId>
+                <version>1.4.1</version>
+            </dependency>
 
             <dependency>
                 <groupId>no.nav.k9</groupId>
@@ -330,9 +350,9 @@
                 <artifactId>innsyn</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
-           <dependency>
+            <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>inntektsmelding-v1</artifactId>
+                <artifactId>oppgave-ungdomsytelse</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
@@ -350,12 +370,6 @@
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
                 <version>2.6.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.pdfgen</groupId>
-                <artifactId>pdfgen-core</artifactId>
-                <version>${pdfgen-core.version}</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
@@ -396,7 +410,7 @@
             <dependency>
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
-                <version>8.0</version>
+                <version>8.1</version>
             </dependency>
             <dependency>
                 <groupId>com.papertrailapp</groupId>
@@ -408,7 +422,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.13.0</version>
+                <version>2.14.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jasypt</groupId>
@@ -446,17 +460,12 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.15.2</version>
+                <version>${mockito.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
                 <version>3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.5</version>
             </dependency>
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
@@ -475,13 +484,13 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.18.0</version>
+                <version>2.19.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.17.2</version>
+                <version>1.18.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -555,7 +564,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.5</version>
+                <version>42.7.7</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
@@ -584,7 +593,47 @@
                 <artifactId>avro</artifactId>
                 <version>1.12.0</version>
             </dependency>
+
+            <!-- Brev/formidling -->
+            <dependency>
+                <groupId>no.nav.pdfgen</groupId>
+                <artifactId>pdfgen-core</artifactId>
+                <version>${pdfgen-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.jknack</groupId>
+                <artifactId>handlebars</artifactId>
+                <version>${handlebars.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.verapdf</groupId>
+                <artifactId>validation-model-jakarta</artifactId>
+                <version>${validation-model-jakarta.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openhtmltopdf</groupId>
+                <artifactId>openhtmltopdf-core</artifactId>
+                <version>${openhtmltopdf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openhtmltopdf</groupId>
+                <artifactId>openhtmltopdf-slf4j</artifactId>
+                <version>${openhtmltopdf.version}</version>
+            </dependency>
+            <!-- Brukes for å gjøre htmloperasjoner, f.eks. rense html for redigerte brev -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
+            </dependency>
+            <!-- For markdown støtte i informasjonsbrev -->
+            <dependency>
+                <groupId>org.commonmark</groupId>
+                <artifactId>commonmark</artifactId>
+                <version>${commonmark.version}</version>
+            </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <dependencies>
@@ -637,12 +686,12 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.5.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.12</version>
+                    <version>0.8.13</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -657,12 +706,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.14.0</version>
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
@@ -674,12 +723,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.3</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.3</version>
+                    <version>3.1.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -689,12 +738,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.5.3</version>
+                    <configuration>
+                        <argLine>
+                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                        </argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.5.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -704,7 +758,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
-                    <version>1.6.0</version>
+                    <version>1.7.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

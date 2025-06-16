@@ -1,16 +1,5 @@
 package no.nav.ung.sak.produksjonsstyring.behandlingenhet;
 
-import static java.util.Optional.ofNullable;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
@@ -26,6 +15,12 @@ import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @ApplicationScoped
 public class EnhetsTjeneste {
@@ -143,8 +138,7 @@ public class EnhetsTjeneste {
     private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType) {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(ytelseType.getOppgavetema())
-            .medTemagruppe("FMLI") // fra Temagruppe offisielt kodeverk. Dekker: "Venter barn, barnetrygd, kontantstøtte, sykdom i familien, grunn- og hjelpestønad, ytelser ved dødsfall"
+            .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema())
             .medOppgavetype("BEH_SAK_VL") // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)

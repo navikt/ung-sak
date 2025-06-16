@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingskontroll.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +10,13 @@ import java.util.Objects;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.k9.felles.exception.TekniskException;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +49,7 @@ public class BehandlingskontrollTjenesteImplTest {
     private BehandlingskontrollTjenesteImpl kontrollTjeneste;
     private Behandling behandling;
     private BehandlingskontrollKontekst kontekst;
+    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
 
     private BehandlingskontrollEventPublisererForTest eventPubliserer ;
     private BehandlingModellRepository behandlingModellRepository ;
@@ -54,14 +63,12 @@ public class BehandlingskontrollTjenesteImplTest {
 
     private BehandlingModell modell;
 
-    private String steg2InngangAksjonspunkt;
-
     private String steg2UtgangAksjonspunkt;
 
     @SuppressWarnings("resource")
     @BeforeEach
     public void setup() {
-
+        aksjonspunktKontrollRepository = new AksjonspunktKontrollRepository();
         eventPubliserer = new BehandlingskontrollEventPublisererForTest();
         behandlingModellRepository = new BehandlingModellRepository();
         serviceProvider = new BehandlingskontrollServiceProvider(entityManager, behandlingModellRepository, eventPubliserer);
@@ -71,14 +78,13 @@ public class BehandlingskontrollTjenesteImplTest {
         behandling = scenario.lagre(serviceProvider);
         modell = serviceProvider.getBehandlingModellRepository().getModell(behandling.getType(), behandling.getFagsakYtelseType());
 
-        steg2 = BehandlingStegType.KONTROLLER_FAKTA;
+        steg2 = BehandlingStegType.VURDER_SØKNADSFRIST;
         steg3 = modell.finnNesteSteg(steg2).getBehandlingStegType();
         steg4 = modell.finnNesteSteg(steg3).getBehandlingStegType();
         steg5 = modell.finnNesteSteg(steg4).getBehandlingStegType();
         manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, steg3);
 
-        steg2InngangAksjonspunkt = modell.finnAksjonspunktDefinisjonerInngang(steg2).iterator().next();
-        steg2UtgangAksjonspunkt = modell.finnAksjonspunktDefinisjonerUtgang(steg2).iterator().next();
+        steg2UtgangAksjonspunkt = modell.finnAksjonspunktDefinisjoner(steg2).iterator().next();
 
         initBehandlingskontrollTjeneste();
 
@@ -87,26 +93,6 @@ public class BehandlingskontrollTjenesteImplTest {
         Mockito.when(kontekst.getFagsakId()).thenReturn(behandling.getFagsakId());
     }
 
-    @Test
-    public void skal_rykke_tilbake_til_inngang_vurderingspunkt_av_steg() {
-
-        BehandlingStegType steg = steg2;
-        String inngangAksjonspunkt = steg2InngangAksjonspunkt;
-
-        kontrollTjeneste.behandlingTilbakeføringTilTidligsteAksjonspunkt(kontekst, List.of(inngangAksjonspunkt));
-
-        assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(steg);
-        assertThat(behandling.getStatus()).isEqualTo(BehandlingStatus.UTREDES);
-        assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
-        assertThat(behandling.getBehandlingStegTilstand()).isNotNull();
-        assertThat(getBehandlingStegTilstand(behandling)).hasSize(2);
-
-        sjekkBehandlingStegTilstandHistorikk(behandling, steg3,
-            BehandlingStegStatus.TILBAKEFØRT);
-        sjekkBehandlingStegTilstandHistorikk(behandling, steg2,
-            BehandlingStegStatus.INNGANG);
-
-    }
 
     @Test
     public void skal_rykke_tilbake_til_utgang_vurderingspunkt_av_steg() {
@@ -197,6 +183,58 @@ public class BehandlingskontrollTjenesteImplTest {
     }
 
     @Test
+    public void skal_ta_behandling_av_vent_dersom_flere_autopunkter_opprettet_i_samme_steg_og_alle_skal_hoppe_tilbake() {
+
+        // Arrange
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, BehandlingStegType.VURDER_KOMPLETTHET, BehandlingStegStatus.UTGANG, BehandlingStegStatus.UTFØRT);
+
+        final var aksjonspunkt1 = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, BehandlingStegType.VURDER_KOMPLETTHET);
+        final var fristTid = LocalDateTime.now().plusDays(1);
+        aksjonspunktKontrollRepository.setFrist(aksjonspunkt1, fristTid, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, null);
+
+        final var aksjonspunkt2 = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING, BehandlingStegType.VURDER_KOMPLETTHET);
+        aksjonspunktKontrollRepository.setFrist(aksjonspunkt2, fristTid, Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE, null);
+
+
+        final var behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
+        final var behandlingLås = behandlingLåsRepository.taLås(behandling.getId());
+        Mockito.when(kontekst.getSkriveLås()).thenReturn(behandlingLås);
+
+        // Act
+        kontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
+
+        // Assert
+        assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
+        assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(BehandlingStegType.VURDER_KOMPLETTHET);
+    }
+
+    @Test
+    public void skal_feile_dersom_behandling_på_vent_har_flere_autopunkter_med_ulike_steg_som_alle_skal_gi_tilbakehopp() {
+
+        // Arrange
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, BehandlingStegType.VURDER_KOMPLETTHET, BehandlingStegStatus.UTGANG, BehandlingStegStatus.UTFØRT);
+
+        final var aksjonspunkt1 = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
+        final var fristTid = LocalDateTime.now().plusDays(1);
+        aksjonspunktKontrollRepository.setFrist(aksjonspunkt1, fristTid, Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE, null);
+
+        final var aksjonspunkt2 = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING, BehandlingStegType.VURDER_KOMPLETTHET);
+        aksjonspunktKontrollRepository.setFrist(aksjonspunkt2, fristTid, Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE, null);
+
+
+        final var behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
+        final var behandlingLås = behandlingLåsRepository.taLås(behandling.getId());
+        Mockito.when(kontekst.getSkriveLås()).thenReturn(behandlingLås);
+
+        // Act
+        Assertions.assertThrows(TekniskException.class, () -> {
+            this.kontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
+        });
+    }
+
+
+
+    @Test
     public void skal_kaste_exception_dersom_tilbakeføring_til_senere_steg() {
         Assertions.assertThrows(IllegalStateException.class, () -> {
             kontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, steg4);
@@ -220,34 +258,6 @@ public class BehandlingskontrollTjenesteImplTest {
     }
 
     @Test
-    public void skal_rykke_tilbake_til_inngang_vurderingspunkt_av_samme_steg() {
-
-        // Arrange
-        var steg = steg2;
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, steg, BehandlingStegStatus.UTGANG, BehandlingStegStatus.AVBRUTT);
-
-        assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(steg);
-        assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.UTGANG);
-        assertThat(behandling.getStatus()).isEqualTo(BehandlingStatus.UTREDES);
-
-        // Act
-        kontrollTjeneste.behandlingTilbakeføringTilTidligsteAksjonspunkt(kontekst, List.of(steg2InngangAksjonspunkt));
-
-        // Assert
-        assertThat(behandling.getAktivtBehandlingSteg()).isEqualTo(steg);
-        assertThat(behandling.getStatus()).isEqualTo(BehandlingStatus.UTREDES);
-        assertThat(behandling.getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
-        assertThat(behandling.getBehandlingStegTilstand()).isNotNull();
-
-        assertThat(getBehandlingStegTilstand(behandling)).hasSize(2);
-
-        sjekkBehandlingStegTilstandHistorikk(behandling, steg, BehandlingStegStatus.INNGANG);
-
-        assertThat(behandling.getBehandlingStegTilstand(steg).get().getBehandlingStegStatus()).isEqualTo(BehandlingStegStatus.INNGANG);
-
-    }
-
-    @Test
     public void skal_ha_guard_mot_nøstet_behandlingskontroll_ved_prossesering_tilbakeføring_og_framføring() throws Exception {
 
         this.kontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider) {
@@ -264,19 +274,6 @@ public class BehandlingskontrollTjenesteImplTest {
         });
     }
 
-    @Test
-    public void skal_returnere_true_når_aksjonspunktet_skal_løses_i_angitt_steg() {
-        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), StartpunktType.KONTROLLER_FAKTA,
-            steg3.getAksjonspunktDefinisjonerUtgang().get(0)))
-                .isTrue();
-    }
-
-    @Test
-    public void skal_returnere_false_når_aksjonspunktet_skal_løses_før_angitt_steg() {
-        assertThat(kontrollTjeneste.skalAksjonspunktLøsesIEllerEtterSteg(behandling.getFagsakYtelseType(), behandling.getType(), StartpunktType.BEREGNING,
-            steg2.getAksjonspunktDefinisjonerUtgang().get(0)))
-                .isFalse();
-    }
 
     private void sjekkBehandlingStegTilstandHistorikk(Behandling behandling, BehandlingStegType stegType,
                                                       BehandlingStegStatus... stegStatuser) {

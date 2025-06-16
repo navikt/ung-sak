@@ -1,22 +1,21 @@
 package no.nav.ung.sak.behandling.hendelse;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.ung.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Observerer Aksjonspunkt*Events og registrerer HistorikkInnslag for enkelte hendelser (eks. gjenoppta og behandling på vent)
@@ -24,20 +23,20 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @ApplicationScoped
 public class HistorikkInnslagForAksjonspunktEventObserver {
 
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private String systembruker;
     private String appName;
 
     @Inject
     public HistorikkInnslagForAksjonspunktEventObserver(
-        HistorikkRepository historikkRepository,
+        HistorikkinnslagRepository historikkinnslagRepository,
         /*
          * FIXME property vil være satt i produksjon, men ikke i tester. Uansett er løsningen ikke er god. Kan
          * heller bruker IdentType når det fikses.
          */
         @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
         @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName) {
-        this.historikkRepository = historikkRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
         this.systembruker = systembruker;
         this.appName = appName;
     }
@@ -52,36 +51,37 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
                 LocalDateTime frist = aksjonspunkt.getFristTid();
                 Venteårsak venteårsak = aksjonspunkt.getVenteårsak();
                 opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(),
-                    HistorikkinnslagType.BEH_VENT, frist, venteårsak, aksjonspunkt.getVenteårsakVariant());
+                    "Behandlingen er satt på vent", frist, venteårsak, aksjonspunkt.getVenteårsakVariant());
             }
         }
     }
 
     private void opprettHistorikkinnslagForVenteFristRelaterteInnslag(Long behandlingId,
                                                                       Long fagsakId,
-                                                                      HistorikkinnslagType historikkinnslagType,
+                                                                      String tittel,
                                                                       LocalDateTime fristTid,
-                                                                      Venteårsak venteårsak, String venteårsakVariant) {
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder();
+                                                                      Venteårsak venteårsak,
+                                                                      String venteårsakVariant) {
+        var historikkinnslagBuilder = new Historikkinnslag.Builder();
         if (fristTid != null) {
-            builder.medHendelse(historikkinnslagType, fristTid.toLocalDate());
+            historikkinnslagBuilder.medTittel(tittel + " til " + HistorikkinnslagLinjeBuilder.format(fristTid.toLocalDate()));
         } else {
-            builder.medHendelse(historikkinnslagType);
+            historikkinnslagBuilder.medTittel(tittel);
         }
         if (venteårsak != null) {
-            builder.medÅrsak(venteårsak);
+            historikkinnslagBuilder.addLinje(venteårsak.getNavn());
         }
         if (venteårsakVariant != null) {
-            builder.medBegrunnelse(venteårsakVariant);
+            historikkinnslagBuilder.addLinje(venteårsakVariant);
         }
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(erSystembruker() ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER);
-        historikkinnslag.setType(historikkinnslagType);
-        historikkinnslag.setBehandlingId(behandlingId);
-        historikkinnslag.setFagsakId(fagsakId);
-        builder.build(historikkinnslag);
-        historikkRepository.lagre(historikkinnslag);
+        var erSystemBruker = erSystembruker();
+        historikkinnslagBuilder
+            .medAktør(erSystemBruker ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER)
+            .medBehandlingId(behandlingId)
+            .medFagsakId(fagsakId);
+        historikkinnslagRepository.lagre(historikkinnslagBuilder.build());
     }
+
 
     private boolean erSystembruker() {
         var innloggetBrukerId = SubjectHandler.getSubjectHandler().getUid();
@@ -92,7 +92,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
         for (Aksjonspunkt aksjonspunkt : aksjonspunkterFunnetEvent.getAksjonspunkter()) {
             BehandlingskontrollKontekst ktx = aksjonspunkterFunnetEvent.getKontekst();
             if (aksjonspunkt.erUtført() && aksjonspunkt.getFristTid() != null) {
-                opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(), HistorikkinnslagType.BEH_GJEN, null, null, null);
+                opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(), "Behandlingen er gjenopptatt", null, null, null);
             }
         }
     }

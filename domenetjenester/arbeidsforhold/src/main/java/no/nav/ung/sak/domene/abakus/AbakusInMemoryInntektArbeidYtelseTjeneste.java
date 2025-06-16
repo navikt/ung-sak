@@ -1,33 +1,15 @@
 package no.nav.ung.sak.domene.abakus;
 
-import java.lang.StackWalker.StackFrame;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
-import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdInformasjon;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYDiffsjekker;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningAggregat;
-import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.domene.iay.modell.VersjonType;
+import no.nav.ung.sak.domene.iay.modell.*;
+
+import java.lang.StackWalker.StackFrame;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager)
@@ -65,12 +47,6 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     @Override
     public Optional<InntektArbeidYtelseGrunnlag> finnGrunnlag(Long behandlingId) {
         return getAktivtInntektArbeidGrunnlag(behandlingId);
-    }
-
-
-    @Override
-    public InntektArbeidYtelseGrunnlag hentGrunnlag(Long behandlingId) {
-        return getAktivtInntektArbeidGrunnlag(behandlingId).orElseThrow();
     }
 
     @Override
@@ -169,34 +145,12 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
 
         var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
-        iayGrunnlag.medOppgittOpptjening(oppgittOpptjening);
-
-        lagreOgFlush(behandlingId, iayGrunnlag.build());
-    }
-
-    @Override
-    public void lagreOverstyrtOppgittOpptjening(Long behandlingId, OppgittOpptjeningBuilder oppgittOpptjening) {
-        if (oppgittOpptjening == null) {
-            return;
-        }
-        Optional<InntektArbeidYtelseGrunnlag> inntektArbeidAggregat = hentInntektArbeidYtelseGrunnlagForBehandling(behandlingId);
-
-        var iayGrunnlag = InMemoryInntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidAggregat);
-        iayGrunnlag.medOppgittOpptjening(oppgittOpptjening);
+        iayGrunnlag.medOppgittOpptjeningAggregat(List.of(oppgittOpptjening));
 
         lagreOgFlush(behandlingId, iayGrunnlag.build());
     }
 
 
-    @Override
-    public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
-        return finnGrunnlag(behandlingId).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
-    }
-
-    @Override
-    public InntektArbeidYtelseGrunnlag hentGrunnlag(UUID behandlingUUid) {
-        throw new UnsupportedOperationException("NOT IMPLEMENTED (mangler kobling til behandlingUUid): #" + getCallerMethod());
-    }
 
     private Optional<InntektArbeidYtelseGrunnlag> getAktivtInntektArbeidGrunnlag(@SuppressWarnings("unused") UUID behandlingId) {
         throw new UnsupportedOperationException("NOT IMPLEMENTED (mangler kobling til behandlingUUid): #" + getCallerMethod());

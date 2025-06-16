@@ -1,19 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.get;
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.getFraMap;
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.post;
-import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.setStandardfelter;
-
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -33,34 +19,30 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ResourceLink;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingOperasjonerDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingsresultatDto;
-import no.nav.ung.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
-import no.nav.ung.sak.kontrakt.behandling.GjenopptaBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.HenleggBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.ReåpneBehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
+import no.nav.ung.sak.kontrakt.behandling.*;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårResultatDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollerInntektRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
+import no.nav.ung.sak.web.app.ungdomsytelse.UngdomsytelseRestTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.*;
 
 /**
  * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
@@ -131,12 +113,9 @@ public class BehandlingDtoTjeneste {
     }
 
     private void leggTilStatusResultaterLinks(Behandling behandling, BehandlingDto dto) {
-        var idQueryParams = Map.of(BehandlingIdDto.NAME, behandling.getUuid().toString()); // legacy param name
         var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
 
-        if (BehandlingType.FØRSTEGANGSSØKNAD.equals(behandling.getType())) {
-            dto.leggTil(getFraMap(KontrollRestTjeneste.KONTROLLRESULTAT_V2_PATH, "kontrollresultat", idQueryParams));
-        } else if (BehandlingType.REVURDERING.equals(behandling.getType())) {
+        if (BehandlingType.REVURDERING.equals(behandling.getType())) {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", uuidQueryParams));
         }
         dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER, "behandling-perioder-årsak", uuidQueryParams));
@@ -267,6 +246,7 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(get(HistorikkRestTjeneste.PATH, "historikk", new SaksnummerDto(behandling.getFagsak().getSaksnummer())));
 
         dto.leggTil(getFraMap(AksjonspunktRestTjeneste.AKSJONSPUNKT_V2_PATH, "aksjonspunkter", uuidQueryParams));
+        dto.leggTil(getFraMap(EtterlysningRestTjeneste.ETTERLYSNINGER_PATH, "etterlysninger", uuidQueryParams));
         dto.leggTil(getFraMap(VilkårRestTjeneste.V3_PATH, "vilkar-v3", uuidQueryParams));
 
         dto.leggTil(getFraMap(SøknadRestTjeneste.SOKNAD_PATH, "soknad", uuidQueryParams));
@@ -277,7 +257,14 @@ public class BehandlingDtoTjeneste {
 
         leggTilBeregnetYtelseBaserteLinks(behandling, dto, uuidQueryParams);
 
-        lagLosLink(behandling).forEach(dto::leggTil);
+        leggTilUngdomsytelseSpesifikkeLinks(dto, uuidQueryParams);
+    }
+
+    private static void leggTilUngdomsytelseSpesifikkeLinks(BehandlingDto dto, Map<String, String> uuidQueryParams) {
+        dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.SATSER_PATH, "satser", uuidQueryParams));
+        dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.MÅNEDSVIS_SATS_OG_UTBETALING_PATH, "månedsvis-sats-og-utbetaling", uuidQueryParams));
+        dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.UTTAK_PATH, "uttak", uuidQueryParams));
+        dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.UNGDOMSPROGRAM_PATH, "ungdomsprogram-informasjon", uuidQueryParams));
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {
@@ -286,6 +273,7 @@ public class BehandlingDtoTjeneste {
         if (ytelseMedBeregning) {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
+            dto.leggTil(getFraMap(KontrollerInntektRestTjeneste.KONTROLL_PERIODER_PATH, "kontroller-inntekt-perioder", uuidQueryParams));
             lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
             lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
         }
@@ -320,15 +308,6 @@ public class BehandlingDtoTjeneste {
             links.add(getFraMap(TilbakekrevingRestTjeneste.VARSELTEKST_PATH, "tilbakekrevingsvarsel-fritekst", queryParams));
         }
 
-        return links;
-    }
-
-    private List<ResourceLink> lagLosLink(Behandling behandling) {
-        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
-
-        List<ResourceLink> links = new ArrayList<>();
-        links.add(getFraMap(LosRestTjeneste.MERKNAD_PATH, "los-hente-merknad", queryParams));
-        links.add(post(LosRestTjeneste.MERKNAD_PATH, "los-lagre-merknad", new BehandlingUuidDto(behandling.getUuid())));
         return links;
     }
 

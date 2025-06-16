@@ -16,11 +16,11 @@ public class UtledPeriodeTilVurderingFraUngdomsprogram {
     private final ProsessTriggereRepository prosessTriggereRepository;
 
     @Inject
-    UtledPeriodeTilVurderingFraUngdomsprogram(ProsessTriggereRepository prosessTriggereRepository) {
+    public UtledPeriodeTilVurderingFraUngdomsprogram(ProsessTriggereRepository prosessTriggereRepository) {
         this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
-    public LocalDateTimeline<Boolean> finnPerioderTilVurderingGrunnetOpphørtUngdomsprogram(Long behandlingId) {
+    public LocalDateTimeline<Boolean> finnTidslinje(Long behandlingId) {
         var tidslinjeFraOpphørshendelser = prosessTriggereRepository.hentGrunnlag(behandlingId)
             .stream()
             .map(ProsessTriggere::getTriggere)

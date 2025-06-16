@@ -1,19 +1,17 @@
 package no.nav.ung.sak.behandling.revurdering;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import no.nav.k9.prosesstask.api.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -45,11 +43,18 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     public static final String PERIODER = "perioder";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
+    public static final Set<BehandlingÅrsakType> REGISTERINNHENTING_ÅRSAKER = Set.of(
+        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+        BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
+        BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+        BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     OpprettRevurderingEllerOpprettDiffTask() {
         // for CDI proxy
@@ -62,13 +67,14 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                                                   ProsessTriggereRepository prosessTriggereRepository,
                                                   FagsakLåsRepository fagsakLåsRepository,
                                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
-                                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
+                                                  BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
         super(fagsakLåsRepository, behandlingLåsRepository);
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @Override
@@ -82,6 +88,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         var perioder = utledPerioder(prosessTaskData);
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            if (sisteVedtak.isPresent() && skalUtsetteKjøring(prosessTaskData, sisteVedtak)) {
+                log.info("Siste vedtatte behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", sisteVedtak.get());
+                prosessTaskTjeneste.lagre(prosessTaskData);
+                return;
+            }
 
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
@@ -105,7 +116,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             var behandling = behandlingRepository.hentBehandling(behandlingId);
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
-            var skalTvingeRegisterinnhenting = Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT).contains(behandlingÅrsakType);
+            var skalTvingeRegisterinnhenting = REGISTERINNHENTING_ÅRSAKER.contains(behandlingÅrsakType);
 
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false, skalTvingeRegisterinnhenting);
 
@@ -114,6 +125,22 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                 prosessTriggereRepository.leggTil(behandling.getId(), perioder.stream().map(it -> new Trigger(behandlingÅrsakType, it)).collect(Collectors.toSet()));
             }
         }
+    }
+
+    private boolean skalUtsetteKjøring(ProsessTaskData prosessTaskData, Optional<Behandling> sisteVedtak) {
+        if (sisteVedtak.map(Behandling::erUnderIverksettelse).orElse(false)) {
+            var blokkererMinstEnTask = prosessTaskTjeneste.finnAlle(ProsessTaskStatus.VETO).stream().anyMatch(it -> Objects.equals(it.getBlokkertAvProsessTaskId(), prosessTaskData.getId()));
+            // Dersom denne tasken blokkerer en annen task, utsetter vi kjøring av denne tasken i håp om at original behandling blir iverksatt
+            if (blokkererMinstEnTask) {
+                // Utsetter kjøring
+                var uferdigForGruppe = prosessTaskTjeneste.finnUferdigForGruppe(prosessTaskData.getGruppe());
+                if (uferdigForGruppe.size() > 1) {
+                    throw new IllegalStateException("Fant flere uferdige tasks for gruppe " + prosessTaskData.getGruppe() + ". Kunne ikke utsette kjøring av task. Og vi kan ikke revurdere behandling som er under iverksettelse.");
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private Set<DatoIntervallEntitet> utledPerioder(ProsessTaskData prosessTaskData) {

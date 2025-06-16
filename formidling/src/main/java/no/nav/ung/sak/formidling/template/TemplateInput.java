@@ -1,13 +1,12 @@
 package no.nav.ung.sak.formidling.template;
 
+import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.formidling.template.dto.TemplateDto;
+
 /**
  *
- * @param templateType malfilen for pdfgen
- * @param templateData dto for pdfgen
+ * @param templateType    malfilen for pdfgen
+ * @param templateDto     dto for pdfgen
  */
-public record TemplateInput(
-    TemplateType templateType,
-    TemplateData templateData
-
-) {
+public record TemplateInput(TemplateType templateType, TemplateDto templateDto) {
 }

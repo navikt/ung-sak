@@ -48,16 +48,6 @@ public interface VilkårsPerioderTilVurderingTjeneste {
 
     int maksMellomliggendePeriodeAvstand();
 
-    /**
-     * Utleder perioder som har trengs reberegnet pga revurdering i uttakssteget
-     *
-     * @param referanse behandlingen
-     * @return set med perioder
-     */
-    default NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
-        return new TreeSet<>();
-    }
-
     default KantIKantVurderer getKantIKantVurderer() {
         return new DefaultKantIKantVurderer();
     }
@@ -68,6 +58,6 @@ public interface VilkårsPerioderTilVurderingTjeneste {
      * @return vilkårene
      */
     default Set<VilkårType> definerendeVilkår() {
-        return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        return Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET);
     }
 }

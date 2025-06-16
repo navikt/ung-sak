@@ -7,7 +7,7 @@ import java.util.Properties;
 import org.apache.kafka.common.serialization.Serde;
 
 public interface KafkaSettings {
-    Properties toStreamPropertiesWith(String clientId, Serde<?> keySerde, Serde<?> valueSerde);
+    Properties toStreamPropertiesWith(String streamNavn, Serde<?> keySerde, Serde<?> valueSerde);
     Properties toProducerPropertiesWith(String navn);
     Properties toStreamPropertiesWith(String navn);
     String getSchemaRegistryUrl();

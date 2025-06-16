@@ -17,8 +17,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.historikk.HistorikkBegrunnelseType;
 import no.nav.ung.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.ung.kodeverk.person.PersonstatusType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 
@@ -109,16 +107,6 @@ public class KodeverkWeb {
          */
         @NotNull
         public VirksomhetType virksomhetType;
-    }
-
-    @NotNull
-    @Valid
-    public KodeverkPerson person;
-    public static class KodeverkPerson {
-        @NotNull
-        public PersonstatusType personstatusType;
-        @NotNull
-        public SivilstandType sivilstandType;
     }
 
     @NotNull

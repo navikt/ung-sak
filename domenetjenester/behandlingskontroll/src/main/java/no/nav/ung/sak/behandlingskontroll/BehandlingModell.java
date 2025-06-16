@@ -29,13 +29,9 @@ public interface BehandlingModell {
      * Gjelder kun steg ETTER angitt steg (inklusiv angitt steg). Dersom medInngangOgså tas også aksjonspunt som skal
      * være løst også ved Inngang med, ellers kun ved Utgang av steget
      */
-    Set<String> finnAksjonspunktDefinisjonerFraOgMed(BehandlingStegType steg, boolean medInngangOgså);
+    Set<String> finnAksjonspunktDefinisjonerFraOgMed(BehandlingStegType steg);
 
     Set<String> finnAksjonspunktDefinisjoner(BehandlingStegType stegType);
-
-    Set<String> finnAksjonspunktDefinisjonerInngang(BehandlingStegType steg);
-
-    Set<String> finnAksjonspunktDefinisjonerUtgang(BehandlingStegType steg);
 
     BehandlingStegModell finnForrigeSteg(BehandlingStegType stegType);
 

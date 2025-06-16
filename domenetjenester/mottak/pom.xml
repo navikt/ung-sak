@@ -42,25 +42,21 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>inntektsmelding-v1</artifactId>
+            <artifactId>soknad</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9</groupId>
             <artifactId>ettersendelse</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>oppgave-ungdomsytelse</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>innsyn</artifactId>
         </dependency>
-        <!-- JAXB for å parse Inntektsmelding -->
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-        </dependency>
+
 
         <!-- Test avhengigheter -->
         <dependency>

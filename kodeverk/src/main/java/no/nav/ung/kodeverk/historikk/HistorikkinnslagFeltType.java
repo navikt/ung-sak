@@ -1,22 +1,12 @@
 package no.nav.ung.kodeverk.historikk;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum HistorikkinnslagFeltType implements Kodeverdi {
 
     UDEFINIERT("-", "Ikke definert"),
@@ -47,7 +37,6 @@ public enum HistorikkinnslagFeltType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -61,12 +50,10 @@ public enum HistorikkinnslagFeltType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkinnslagFeltType  fraKode(Object node)  {
-        if (node == null) {
+    public static HistorikkinnslagFeltType  fraKode(final String kode)  {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(HistorikkinnslagFeltType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent HistorikkinnslagFeltType: " + kode);
@@ -83,13 +70,12 @@ public enum HistorikkinnslagFeltType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

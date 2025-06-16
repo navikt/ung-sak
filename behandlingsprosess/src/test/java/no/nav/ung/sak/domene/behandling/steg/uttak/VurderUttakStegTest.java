@@ -12,10 +12,11 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
-import domene.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +32,7 @@ class VurderUttakStegTest {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository = mock(UngdomsytelseGrunnlagRepository.class);
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
     private PersonopplysningRepository personopplysningRepository = mock(PersonopplysningRepository.class);
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = mock(InntektArbeidYtelseTjeneste.class);
 
     @Test
     void Forventer_ingen_timeline_empty_ved_ingen_godkjente_perioder() {
@@ -42,7 +44,9 @@ class VurderUttakStegTest {
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
 
-        VurderUttakSteg steg = new VurderUttakSteg(vilkårTjeneste, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeTjeneste, personopplysningRepository);
+        VurderUttakSteg steg = new VurderUttakSteg(vilkårTjeneste, ungdomsytelseGrunnlagRepository,
+            ungdomsprogramPeriodeTjeneste, personopplysningRepository
+        );
         LocalDate fom = LocalDate.parse("2024-01-01");
         LocalDate tom = LocalDate.parse("2024-01-31");
 

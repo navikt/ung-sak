@@ -26,8 +26,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.ung.kodeverk.dokument.DokumentTypeId;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
-import no.nav.ung.kodeverk.geografisk.Region;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
@@ -42,8 +40,6 @@ import no.nav.ung.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.ung.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.ung.kodeverk.medlem.MedlemskapType;
 import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.ung.kodeverk.person.PersonstatusType;
-import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -60,7 +56,6 @@ public record StatiskeKodeverdier(
     @NotNull Set<OppgaveÅrsak> oppgaveÅrsaker,
     @NotNull Set<MedlemskapManuellVurderingType> medlemskapManuellVurderingTyper,
     @NotNull Set<BehandlingResultatType> behandlingResultatTyper,
-    @NotNull Set<PersonstatusType> personstatusTyper,
     @NotNull Set<Venteårsak> venteårsaker,
     @NotNull Set<BehandlingType> behandlingTyper,
     @NotNull Set<ArbeidType> arbeidTyper,
@@ -70,7 +65,6 @@ public record StatiskeKodeverdier(
     @NotNull Set<AktivitetStatus> aktivitetStatuser,
     @NotNull Set<Arbeidskategori> arbeidskategorier,
     @NotNull Set<Fagsystem> fagsystemer,
-    @NotNull Set<SivilstandType> sivilstandTyper,
     @NotNull Set<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller,
     @NotNull Set<SkjermlenkeType> skjermlenkeTyper,
     @NotNull Set<HistorikkOpplysningType> historikkOpplysningTyper,
@@ -89,8 +83,6 @@ public record StatiskeKodeverdier(
     @NotNull Set<VurderArbeidsforholdHistorikkinnslag> vurderArbeidsforholdHistorikkinnslag,
     @NotNull Set<TilbakekrevingVidereBehandling> tilbakekrevingVidereBehandlinger,
     @NotNull Set<VurderÅrsak> vurderingsÅrsaker,
-    @NotNull Set<Region> regioner,
-    @NotNull Set<Landkoder> landkoder,
     @NotNull Set<Språkkode> språkkoder,
     @NotNull Set<VedtakResultatType> vedtakResultatTyper,
     @NotNull Set<DokumentTypeId> dokumentTypeIder,
@@ -114,7 +106,6 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(OppgaveÅrsak.class),
             alleEnumVerdier(MedlemskapManuellVurderingType.class).stream().filter(v -> v.visesPåKlient()).collect(Collectors.toSet()),
             alleEnumVerdier(BehandlingResultatType.class),
-            alleEnumVerdier(PersonstatusType.class),
             EnumSet.allOf(Venteårsak.class),
             alleEnumVerdier(BehandlingType.class),
             alleEnumVerdier(ArbeidType.class).stream().filter(v -> v.erAnnenOpptjening()).collect(Collectors.toSet()),
@@ -124,7 +115,6 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(AktivitetStatus.class),
             alleEnumVerdier(Arbeidskategori.class),
             alleEnumVerdier(Fagsystem.class),
-            alleEnumVerdier(SivilstandType.class),
             alleEnumVerdier(FaktaOmBeregningTilfelle.class),
             alleEnumVerdier(SkjermlenkeType.class),
             alleEnumVerdier(HistorikkOpplysningType.class),
@@ -143,8 +133,6 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(VurderArbeidsforholdHistorikkinnslag.class),
             alleEnumVerdier(TilbakekrevingVidereBehandling.class),
             alleEnumVerdier(VurderÅrsak.class),
-            alleEnumVerdier(Region.class),
-            new HashSet<>(Landkoder.kodeMap().values()),
             new HashSet<>(Språkkode.kodeMap().values()),
             alleEnumVerdier(VedtakResultatType.class),
             alleEnumVerdier(DokumentTypeId.class),

@@ -32,7 +32,7 @@ class PdfGenObjectMapperConfig {
 class NorskDatoSerialiserer extends StdSerializer<LocalDate> {
 
     private static final DateTimeFormatter NORSK_DATE_FORMATTER =
-        DateTimeFormatter.ofPattern("d. MMMM yyyy", new Locale("no", "NO"));
+        DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.of("no", "NO"));
 
     public NorskDatoSerialiserer() {
         super(LocalDate.class);
@@ -48,7 +48,7 @@ class NorskDatoSerialiserer extends StdSerializer<LocalDate> {
 class NorskTidspunktSerialiserer extends StdSerializer<LocalDateTime> {
 
     private static final DateTimeFormatter NORSK_DATETIME_FORMATTER =
-        DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH:mm", new Locale("no", "NO"));
+        DateTimeFormatter.ofPattern("d. MMMM yyyy 'kl.' HH:mm", Locale.of("no", "NO"));
 
     public NorskTidspunktSerialiserer() {
         super(LocalDateTime.class);

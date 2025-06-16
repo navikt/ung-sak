@@ -41,11 +41,6 @@
 			<artifactId>produksjonsstyring</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>no.nav.ung.sak</groupId>
-			<artifactId>skjaeringstidspunkt</artifactId>
-		</dependency>
-
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling-prosessering</artifactId>

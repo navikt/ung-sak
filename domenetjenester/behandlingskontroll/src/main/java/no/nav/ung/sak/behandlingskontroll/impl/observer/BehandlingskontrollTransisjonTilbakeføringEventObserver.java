@@ -60,7 +60,7 @@ public class BehandlingskontrollTransisjonTilbakeføringEventObserver {
 
         boolean medInngangFørsteSteg = førsteStegStatus.map(BehandlingStegStatus::erVedInngang).orElse(Boolean.TRUE);
 
-        Set<String> aksjonspunktDefinisjonerEtterFra = modell.finnAksjonspunktDefinisjonerFraOgMed(førsteSteg, medInngangFørsteSteg);
+        Set<String> aksjonspunktDefinisjonerEtterFra = modell.finnAksjonspunktDefinisjonerFraOgMed(førsteSteg);
 
         List<Aksjonspunkt> endredeAksjonspunkter = håndterAksjonspunkter(behandling, aksjonspunktDefinisjonerEtterFra, event, førsteSteg, modell, medInngangFørsteSteg);
 

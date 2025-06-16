@@ -5,7 +5,7 @@ import java.util.Objects;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -23,7 +23,7 @@ public class BehandlingRepositoryProvider {
     private BehandlingLåsRepository behandlingLåsRepository;
     private FagsakRepository fagsakRepository;
     private PersonopplysningRepository personopplysningRepository;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private SøknadRepository søknadRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private BehandlingRevurderingRepository behandlingRevurderingRepository;
@@ -57,7 +57,7 @@ public class BehandlingRepositoryProvider {
         this.vilkårResultatRepository = new VilkårResultatRepository(entityManager);
 
         // behandling støtte repositories
-        this.historikkRepository = new HistorikkRepository(entityManager);
+        this.historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
         this.behandlingVedtakRepository = new BehandlingVedtakRepository(entityManager, behandlingRepository);
         this.behandlingRevurderingRepository = new BehandlingRevurderingRepository(entityManager, behandlingRepository,
             behandlingLåsRepository);
@@ -92,8 +92,8 @@ public class BehandlingRepositoryProvider {
         return vilkårResultatRepository;
     }
 
-    public HistorikkRepository getHistorikkRepository() {
-        return historikkRepository;
+    public HistorikkinnslagRepository getHistorikkinnslagRepository() {
+        return historikkinnslagRepository;
     }
 
     public SøknadRepository getSøknadRepository() {

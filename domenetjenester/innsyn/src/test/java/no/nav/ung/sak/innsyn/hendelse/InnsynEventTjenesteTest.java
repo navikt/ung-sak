@@ -63,8 +63,8 @@ class InnsynEventTjenesteTest {
 
         behandlingRepository = testScenarioBuilder.mockBehandlingRepository();
         var behandling = testScenarioBuilder.lagMocked();
-        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
-        aksjonspunktTestSupport.setFrist(aksjonspunkt,  venteFrist, Venteårsak.MEDISINSKE_OPPLYSNINGER, null);
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING);
+        aksjonspunktTestSupport.setFrist(aksjonspunkt,  venteFrist, Venteårsak.FOR_TIDLIG_SOKNAD, null);
 
         no.nav.ung.sak.behandlingslager.fagsak.Fagsak fagsak = behandling.getFagsak();
 
@@ -110,7 +110,7 @@ class InnsynEventTjenesteTest {
         assertThat(aksjonspunkter).hasSize(1);
         assertThat(aksjonspunkter).allSatisfy(it -> {
             assertThat(it.tidsfrist()).isCloseTo(venteFrist.atZone(ZoneId.systemDefault()), within(1, ChronoUnit.MILLIS));
-            assertThat(it.venteårsak()).isEqualTo(no.nav.k9.innsyn.sak.Aksjonspunkt.Venteårsak.MEDISINSK_DOKUMENTASJON);
+            assertThat(it.venteårsak()).isEqualTo(no.nav.k9.innsyn.sak.Aksjonspunkt.Venteårsak.FOR_TIDLIG_SOKNAD);
         });
 
 

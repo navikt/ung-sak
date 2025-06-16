@@ -1,3 +1,4 @@
+
 package no.nav.ung.sak.behandlingslager.kodeverk;
 
 import jakarta.persistence.AttributeConverter;

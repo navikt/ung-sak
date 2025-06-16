@@ -1,23 +1,11 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.søknad;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadAngittPersonEntitet;
@@ -28,17 +16,20 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.søknad.AngittPersonDto;
 import no.nav.ung.sak.kontrakt.søknad.SøknadDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
 
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Dependent
 public class SøknadDtoTjeneste {
 
     private BehandlingRepositoryProvider repositoryProvider;
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
@@ -48,12 +39,10 @@ public class SøknadDtoTjeneste {
 
     @Inject
     public SøknadDtoTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                             SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                              PersoninfoAdapter personinfoAdapter,
                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
 
         this.repositoryProvider = repositoryProvider;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.personinfoAdapter = personinfoAdapter;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
@@ -62,7 +51,6 @@ public class SøknadDtoTjeneste {
         Optional<SøknadEntitet> søknadOpt = repositoryProvider.getSøknadRepository().hentSøknadHvisEksisterer(behandling.getId());
         if (søknadOpt.isPresent()) {
             SøknadEntitet søknad = søknadOpt.get();
-            var ref = BehandlingReferanse.fra(behandling, skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId()));
             return lagSoknadDto(søknad);
         }
         return Optional.empty();

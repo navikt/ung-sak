@@ -1,25 +1,8 @@
 package no.nav.ung.sak.hendelsemottak.tjenester;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
-import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
-import no.nav.k9.felles.integrasjon.pdl.Person;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
@@ -28,15 +11,22 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @ApplicationScoped
 @HendelseTypeRef("PDL_DØDSFALL")
 public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
 
-    private static final Logger logger = LoggerFactory.getLogger(PdlFødselFagsakTilVurderingUtleder.class);
+    private static final Logger logger = LoggerFactory.getLogger(PdlDødsfallFagsakTilVurderingUtleder.class);
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
@@ -62,32 +52,39 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
 
 
     @Override
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
-        var fagsakÅrsakMap = new HashMap<Fagsak, BehandlingÅrsakType>();
+        var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : aktører) {
 
             var personInfo = hentPersonInformasjon(aktør);
             var aktuellDato = finnAktuellDato(personInfo);
 
-            // Sjekker om det gjelder dødshendelse for søker
-            var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
-            if (fagsakForAktør.isPresent()) {
-                if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
-                    fagsakÅrsakMap.put(fagsakForAktør.get(), BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
-                    break;
-                }
-            }
-
-            // Sjekker om det gjelder dødshendelse for barn av søker
-            finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomBarnAvSøker(aktør, aktuellDato)
-                .stream()
-                .filter(f -> deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId))
-                .filter(f -> erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId))
-                .forEach(f -> fagsakÅrsakMap.put(f, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN));
+            fagsakÅrsakMap.putAll(finnPåvirketFagsak(aktør, aktuellDato, hendelseId));
         }
+
+        return fagsakÅrsakMap;
+    }
+
+    private HashMap<Fagsak, ÅrsakOgPeriode> finnPåvirketFagsak(AktørId aktør, LocalDate aktuellDato, String hendelseId) {
+        var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
+
+        // Sjekker om det gjelder dødshendelse for søker
+        var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
+        if (fagsakForAktør.isPresent()) {
+            if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
+                fagsakÅrsakMap.put(fagsakForAktør.get(), new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsakForAktør.get().getPeriode().getTomDato())));
+            }
+        }
+
+        // Sjekker om det gjelder dødshendelse for barn av søker
+        finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomBarnAvSøker(aktør, aktuellDato)
+            .stream()
+            .filter(f -> deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId))
+            .filter(f -> erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId))
+            .forEach(f -> fagsakÅrsakMap.put(f, new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, f.getPeriode().getTomDato()))));
 
         return fagsakÅrsakMap;
     }
@@ -98,9 +95,13 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
         query.setIdent(aktør.getAktørId());
         var projection = new PersonResponseProjection()
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
-            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsRolle()
-                .relatertPersonsIdent().minRolleForPerson());
-        return pdlKlient.hentPerson(query, projection);
+            .forelderBarnRelasjon(
+                new ForelderBarnRelasjonResponseProjection()
+                    .relatertPersonsRolle()
+                    .relatertPersonsIdent()
+                    .minRolleForPerson()
+            );
+        return pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
     }
 
     private boolean deltarIProgramPåHendelsedato(Fagsak fagsak, LocalDate relevantDato, String hendelseId) {

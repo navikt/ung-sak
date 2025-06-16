@@ -1,25 +1,26 @@
 package no.nav.ung.kodeverk.dokument;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
+/**
+ * Brevkoder for brev som kan bestilles. Brukes blant annet til journalføring.
+ */
 public enum DokumentMalType implements Kodeverdi {
     HENLEGG_BEHANDLING_DOK("HENLEG", "Behandling henlagt", false),
 
 //    UENDRETUTFALL_DOK("UENDRE", "Uendret utfall", true),
 //    FORLENGET_DOK("FORLEN", "Forlenget saksbehandlingstid", false),
     INNVILGELSE_DOK("INNVILGELSE", "Innvilgelsesbrev", true),
+    ENDRING_DOK("ENDRING", "Endring vedtaksbrev", true),
     OPPHØR_DOK("OPPHOR", "Opphør brev", true),
     AVSLAG__DOK("AVSLAG", "Avslagsbrev", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekst vedtaksbrev", true),
-//    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false),
+    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false),
 //    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst", false),
 
     ;
@@ -34,15 +35,9 @@ public enum DokumentMalType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
-    private String navn;
-
-    @JsonIgnore
+    private final String navn;
     private final boolean vedtaksbrevmal;
-
-    private String kode;
-
-
+    private final String kode;
 
     DokumentMalType(String kode, String navn, boolean vedtaksbrevmal) {
         this.kode = kode;
@@ -50,7 +45,7 @@ public enum DokumentMalType implements Kodeverdi {
         this.vedtaksbrevmal = vedtaksbrevmal;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -61,7 +56,6 @@ public enum DokumentMalType implements Kodeverdi {
         return getKode();
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return "DOKUMENT_MAL_TYPE";
@@ -72,8 +66,11 @@ public enum DokumentMalType implements Kodeverdi {
         return navn;
     }
 
-    @JsonCreator
-    public static DokumentMalType fraKode(String kode) {
+    public boolean isVedtaksbrevmal() {
+        return vedtaksbrevmal;
+    }
+
+    public static DokumentMalType fraKode(final String kode) {
         var ad = Optional.ofNullable(KODER.get(kode));
         if (ad.isEmpty()) {
             throw new IllegalArgumentException("Ukjent DokumentMalType: " + kode);

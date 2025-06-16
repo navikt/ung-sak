@@ -1,25 +1,10 @@
 package no.nav.ung.kodeverk.behandling;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+import java.util.*;
+
 public enum BehandlingTema implements Kodeverdi {
     PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN), // ny ordning fom 011017
     PLEIEPENGER_LIVETS_SLUTTFASE("PLEIE_PPN", "Pleiepenger i livets sluttfase", "ab0094", FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
@@ -47,15 +32,12 @@ public enum BehandlingTema implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
-    @JsonIgnore
     private String offisiellKode;
 
     private String kode;
 
-    @JsonIgnore
     private FagsakYtelseType fagsakYtelseType;
 
     private BehandlingTema(String kode) {
@@ -69,25 +51,13 @@ public enum BehandlingTema implements Kodeverdi {
         this.fagsakYtelseType = fagsakYtelseType;
     }
 
-    /**
-     * toString is set to output the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
-     * spec incorrectly specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
-    }
-
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingTema fraKode(Object node) {
-        if (node == null) {
+    public static BehandlingTema fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(BehandlingTema.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingTema: for input " + node);
+            throw new IllegalArgumentException("Ukjent BehandlingTema: for input " + kode);
         }
         return ad;
     }
@@ -120,13 +90,12 @@ public enum BehandlingTema implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty(value = "kode")
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

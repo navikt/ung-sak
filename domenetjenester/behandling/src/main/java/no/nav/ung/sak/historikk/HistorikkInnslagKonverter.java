@@ -1,226 +1,65 @@
 package no.nav.ung.sak.historikk;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
-import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.ung.kodeverk.historikk.HistorikkOpplysningType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagFelt;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;
-import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinje;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeType;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.historikk.HistorikkInnslagDokumentLinkDto;
-import no.nav.ung.sak.kontrakt.historikk.HistorikkInnslagTemaDto;
-import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagDelDto;
 import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagDto;
-import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagEndretFeltDto;
-import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagHendelseDto;
-import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagOpplysningDto;
-import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagSoeknadsperiodeDto;
-import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagTotrinnsVurderingDto;
 import no.nav.ung.sak.typer.JournalpostId;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 @Dependent
 public class HistorikkInnslagKonverter {
 
+    private BehandlingRepository behandlingRepository;
+
     @Inject
-    public HistorikkInnslagKonverter() {
+    public HistorikkInnslagKonverter(BehandlingRepository behandlingRepository) {
+        this.behandlingRepository = behandlingRepository;
     }
 
-    public HistorikkinnslagDto mapFra(Historikkinnslag historikkinnslag, List<ArkivJournalPost> journalPosterForSak) {
-        HistorikkinnslagDto dto = new HistorikkinnslagDto();
-        dto.setBehandlingId(historikkinnslag.getBehandlingId());
-        dto.setUuid(historikkinnslag.getUuid());
-        List<HistorikkinnslagDelDto> historikkinnslagDeler = mapFra(historikkinnslag.getHistorikkinnslagDeler());
-        dto.setHistorikkinnslagDeler(historikkinnslagDeler);
-        List<HistorikkInnslagDokumentLinkDto> dokumentLinks = mapLenker(historikkinnslag.getDokumentLinker(), journalPosterForSak);
-        dto.setDokumentLinks(dokumentLinks);
-        if (historikkinnslag.getOpprettetAv() != null) {
-            dto.setOpprettetAv(medStorBokstav(historikkinnslag.getOpprettetAv()));
+    public HistorikkinnslagDto map(Historikkinnslag h, List<JournalpostId> journalPosterForSak) {
+        var behandlingId = h.getBehandlingId();
+        var behandlingUuid = behandlingId == null ? null : behandlingRepository.hentBehandling(behandlingId).getUuid();
+        List<HistorikkInnslagDokumentLinkDto> dokumenter = tilDokumentlenker(h.getDokumentLinker(), journalPosterForSak);
+        var linjer = h.getLinjer()
+            .stream()
+            .sorted(Comparator.comparing(HistorikkinnslagLinje::getSekvensNr))
+            .map(t -> t.getType() == HistorikkinnslagLinjeType.TEKST ? HistorikkinnslagDto.Linje.tekstlinje(t.getTekst()) : HistorikkinnslagDto.Linje.linjeskift())
+            .toList();
+        return new HistorikkinnslagDto(h.getUuid(), behandlingUuid, HistorikkinnslagDto.HistorikkAktørDto.fra(h.getAktør(), h.getOpprettetAv()), h.getSkjermlenke(),
+            h.getOpprettetTidspunkt(), dokumenter, h.getTittel(), linjer);
+    }
+
+    private static List<HistorikkInnslagDokumentLinkDto> tilDokumentlenker(List<HistorikkinnslagDokumentLink> dokumentLinker,
+                                                                           List<JournalpostId> journalPosterForSak) {
+        if (dokumentLinker == null) {
+            return List.of();
         }
-        dto.setOpprettetTidspunkt(historikkinnslag.getOpprettetTidspunkt());
-        dto.setType(historikkinnslag.getType());
-        dto.setAktoer(historikkinnslag.getAktør());
-        return dto;
+        return dokumentLinker.stream().map(d -> tilDokumentlenke(d, journalPosterForSak)) //
+            .toList();
     }
 
-    private List<HistorikkInnslagDokumentLinkDto> mapLenker(List<HistorikkinnslagDokumentLink> lenker, List<ArkivJournalPost> journalPosterForSak) {
-        return lenker.stream().map(lenke -> map(lenke, journalPosterForSak)).collect(Collectors.toList());
-    }
-
-    private HistorikkInnslagDokumentLinkDto map(HistorikkinnslagDokumentLink lenke, List<ArkivJournalPost> journalPosterForSak) {
-        Optional<ArkivJournalPost> aktivJournalPost = aktivJournalPost(lenke.getJournalpostId(), journalPosterForSak);
-        HistorikkInnslagDokumentLinkDto dto = new HistorikkInnslagDokumentLinkDto();
-        dto.setTag(lenke.getLinkTekst());
-        dto.setUtgått(aktivJournalPost.isEmpty());
+    private static HistorikkInnslagDokumentLinkDto tilDokumentlenke(HistorikkinnslagDokumentLink lenke,
+                                                                    List<JournalpostId> journalPosterForSak) {
+        var erUtgått = aktivJournalPost(lenke.getJournalpostId(), journalPosterForSak);
+        var dto = new HistorikkInnslagDokumentLinkDto();
+        dto.setTag(erUtgått ? String.format("%s (utgått)", lenke.getLinkTekst()) : lenke.getLinkTekst());
+        dto.setUtgått(erUtgått);
         dto.setDokumentId(lenke.getDokumentId());
         dto.setJournalpostId(lenke.getJournalpostId().getVerdi());
         return dto;
     }
 
-    private Optional<ArkivJournalPost> aktivJournalPost(JournalpostId journalpostId, List<ArkivJournalPost> journalPosterForSak) {
-        return journalPosterForSak.stream().filter(ajp -> Objects.equals(ajp.getJournalpostId(), journalpostId)).findFirst();
+    private static boolean aktivJournalPost(JournalpostId journalpostId, List<JournalpostId> journalPosterForSak) {
+        return journalPosterForSak.stream().filter(ajp -> Objects.equals(ajp, journalpostId)).findFirst().isEmpty();
     }
-
-    private String medStorBokstav(String opprettetAv) {
-        return opprettetAv.substring(0, 1).toUpperCase() + opprettetAv.substring(1);
-    }
-
-    static List<HistorikkinnslagDelDto> mapFra(List<HistorikkinnslagDel> historikkinnslagDelList) {
-        List<HistorikkinnslagDelDto> historikkinnslagDelDtoList = new ArrayList<>();
-        for (var historikkinnslagDel : historikkinnslagDelList) {
-            historikkinnslagDelDtoList.add(mapFra(historikkinnslagDel));
-        }
-        return historikkinnslagDelDtoList;
-    }
-
-    private static HistorikkinnslagDelDto mapFra(HistorikkinnslagDel del) {
-        var dto = new HistorikkinnslagDelDto();
-        del.getBegrunnelseFelt().ifPresent(begrunnelse -> dto.setBegrunnelse(finnÅrsakKodeListe(begrunnelse).orElse(null)));
-        if (dto.getBegrunnelse() == null) {
-            del.getBegrunnelse().ifPresent(dto::setBegrunnelseFritekst);
-        }
-        del.getAarsakFelt().ifPresent(aarsak -> dto.setAarsak(finnÅrsakKodeListe(aarsak).orElse(null)));
-        del.getTema().ifPresent(felt -> dto.setTema(mapFra(felt)));
-        del.getGjeldendeFraFelt().ifPresent(felt -> {
-            if (felt.getNavn() != null && felt.getNavnVerdi() != null && felt.getTilVerdi() != null) {
-                dto.setGjeldendeFra(felt.getTilVerdi(), felt.getNavn(), felt.getNavnVerdi());
-            } else if (felt.getTilVerdi() != null) {
-                dto.setGjeldendeFra(felt.getTilVerdi());
-            }
-        });
-        del.getResultat().ifPresent(dto::setResultat);
-        del.getHendelse().ifPresent(hendelse -> {
-            dto.setHendelse(mapFraHendelse(hendelse));
-        });
-        del.getSkjermlenke().ifPresent(skjermlenke -> {
-            dto.setSkjermlenke(SkjermlenkeType.fraKode(skjermlenke));
-        });
-        if (!del.getTotrinnsvurderinger().isEmpty()) {
-            dto.setAksjonspunkter(mapFraTotrinn(del.getTotrinnsvurderinger()));
-        }
-        if (!del.getOpplysninger().isEmpty()) {
-            dto.setOpplysninger(mapFraOpplysning(del.getOpplysninger()));
-        }
-        if (!del.getEndredeFelt().isEmpty()) {
-            dto.setEndredeFelter(mapFraEndretFelt(del.getEndredeFelt()));
-        }
-        del.getAvklartSoeknadsperiode().ifPresent(soeknadsperiode -> {
-            dto.setSoeknadsperiode(mapFraSøknadsperiode(soeknadsperiode));
-        });
-        return dto;
-    }
-
-    private static Optional<Kodeverdi> finnÅrsakKodeListe(HistorikkinnslagFelt aarsak) {
-
-        String aarsakVerdi = aarsak.getTilVerdi();
-        if (Objects.equals("-", aarsakVerdi)) {
-            return Optional.empty();
-        }
-        if (aarsak.getKlTilVerdi() == null) {
-            return Optional.empty();
-        }
-
-        var kodeverdiMap = HistorikkInnslagTekstBuilder.KODEVERK_KODEVERDI_MAP.get(aarsak.getKlTilVerdi());
-        if (kodeverdiMap == null) {
-            throw new IllegalStateException("Har ikke støtte for HistorikkinnslagFelt#klTilVerdi=" + aarsak.getKlTilVerdi());
-        }
-        return Optional.ofNullable(kodeverdiMap.get(aarsakVerdi));
-    }
-
-    static HistorikkInnslagTemaDto mapFra(HistorikkinnslagFelt felt) {
-        HistorikkInnslagTemaDto dto = new HistorikkInnslagTemaDto();
-        HistorikkEndretFeltType endretFeltNavn = HistorikkEndretFeltType.fraKode(felt.getNavn());
-        dto.setEndretFeltNavn(endretFeltNavn);
-        dto.setNavnVerdi(felt.getNavnVerdi());
-        dto.setKlNavn(felt.getKlNavn());
-        return dto;
-    }
-
-
-    public static HistorikkinnslagHendelseDto mapFraHendelse(HistorikkinnslagFelt hendelse) {
-        return new HistorikkinnslagHendelseDto(HistorikkinnslagType.fraKode(hendelse.getNavn()), hendelse.getTilVerdi());
-    }
-
-    static List<HistorikkinnslagTotrinnsVurderingDto> mapFraTotrinn(List<HistorikkinnslagTotrinnsvurdering> aksjonspunkter) {
-        return aksjonspunkter.stream()
-            .map(HistorikkInnslagKonverter::mapFraTotrinn)
-            .collect(Collectors.toList());
-    }
-
-    private static HistorikkinnslagTotrinnsVurderingDto mapFraTotrinn(HistorikkinnslagTotrinnsvurdering totrinnsvurdering) {
-        HistorikkinnslagTotrinnsVurderingDto dto = new HistorikkinnslagTotrinnsVurderingDto();
-        dto.setAksjonspunktKode(totrinnsvurdering.getAksjonspunktDefinisjon().getKode());
-        dto.setBegrunnelse(totrinnsvurdering.getBegrunnelse());
-        dto.setGodkjent(totrinnsvurdering.erGodkjent());
-        return dto;
-    }
-
-    static List<HistorikkinnslagOpplysningDto> mapFraOpplysning(List<HistorikkinnslagFelt> opplysninger) {
-        return opplysninger.stream().map(o -> mapFraOpplysning(o)).collect(Collectors.toList());
-    }
-
-    private static HistorikkinnslagOpplysningDto mapFraOpplysning(HistorikkinnslagFelt opplysning) {
-        HistorikkinnslagOpplysningDto dto = new HistorikkinnslagOpplysningDto();
-        HistorikkOpplysningType opplysningType = HistorikkOpplysningType.fraKode(opplysning.getNavn());
-        dto.setOpplysningType(opplysningType);
-        dto.setTilVerdi(opplysning.getTilVerdi());
-        return dto;
-    }
-
-
-    static List<HistorikkinnslagEndretFeltDto> mapFraEndretFelt(List<HistorikkinnslagFelt> endretFeltList) {
-        List<HistorikkinnslagEndretFeltDto> dto = new ArrayList<>();
-        for (var felt : endretFeltList) {
-            dto.add(mapFraEndretFelt(felt));
-        }
-        return dto;
-    }
-
-    private static HistorikkinnslagEndretFeltDto mapFraEndretFelt(HistorikkinnslagFelt endretFelt) {
-        HistorikkinnslagEndretFeltDto dto = new HistorikkinnslagEndretFeltDto();
-        HistorikkEndretFeltType endretFeltNavn = HistorikkEndretFeltType.fraKode(endretFelt.getNavn());
-        dto.setEndretFeltNavn(endretFeltNavn);
-        dto.setNavnVerdi(endretFelt.getNavnVerdi());
-        dto.setKlNavn(endretFelt.getKlNavn());
-        dto.setFraVerdi(tilObject(endretFelt.getFraVerdi()));
-        dto.setTilVerdi(tilObject(endretFelt.getTilVerdi()));
-        dto.setKlFraVerdi(endretFelt.getKlFraVerdi());
-        dto.setKlTilVerdi(endretFelt.getKlTilVerdi());
-        return dto;
-    }
-
-    private static Object tilObject(String verdi) {
-        if ("true".equals(verdi)) {
-            return Boolean.TRUE;
-        }
-        if ("false".equals(verdi)) {
-            return Boolean.FALSE;
-        }
-        return verdi;
-    }
-
-
-    static HistorikkinnslagSoeknadsperiodeDto mapFraSøknadsperiode(HistorikkinnslagFelt soeknadsperiode) {
-        HistorikkinnslagSoeknadsperiodeDto dto = new HistorikkinnslagSoeknadsperiodeDto();
-        HistorikkAvklartSoeknadsperiodeType soeknadsperiodeType = HistorikkAvklartSoeknadsperiodeType.fraKode(soeknadsperiode.getNavn());
-        dto.setSoeknadsperiodeType(soeknadsperiodeType);
-        dto.setNavnVerdi(soeknadsperiode.getNavnVerdi());
-        dto.setTilVerdi(soeknadsperiode.getTilVerdi());
-        return dto;
-    }
-
 
 }

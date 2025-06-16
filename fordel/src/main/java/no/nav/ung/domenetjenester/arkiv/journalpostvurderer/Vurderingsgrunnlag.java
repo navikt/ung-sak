@@ -4,12 +4,11 @@ package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
 import no.nav.ung.fordel.handler.MottattMelding;
+import no.nav.ung.kodeverk.Fagsystem;
 
 record Vurderingsgrunnlag(
         MottattMelding melding,
         JournalpostInfo journalpostInfo) {
-    // TODO: Endre til UNG når dette støttes
-    private static final String FAGSAK_SYSTEM_UNG = "K9";
 
     boolean erEndeligJournalført() {
         return JournalføringHendelsetype.ENDELING_JOURNALFØRT == melding.getJournalføringHendelsetype().orElse(null);
@@ -20,7 +19,7 @@ record Vurderingsgrunnlag(
     }
 
     boolean tilhørerUng() {
-        return FAGSAK_SYSTEM_UNG.equals(journalpostInfo.getFagsakSystem().orElse(null)) &&
+        return Fagsystem.UNG_SAK.getOffisiellKode().equals(journalpostInfo.getFagsakSystem().orElse(null)) &&
                 journalpostInfo.getFagsakId().isPresent();
     }
 

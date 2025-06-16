@@ -55,15 +55,9 @@ public class IAYFraDtoMapper {
         if (register == null) return;
 
         var tidspunkt = register.getOpprettetTidspunkt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
-
         var registerBuilder = InntektArbeidYtelseAggregatBuilder.builderFor(Optional.empty(), register.getEksternReferanse(), tidspunkt, VersjonType.REGISTER);
-
-        var aktørInntekt = new MapAktørInntekt.MapFraDto(aktørId, registerBuilder).map(register.getInntekt());
-        var aktørYtelse = new MapAktørYtelse.MapFraDto(aktørId, registerBuilder).map(register.getYtelse());
-
-        aktørInntekt.forEach(registerBuilder::leggTilAktørInntekt);
-        aktørYtelse.forEach(registerBuilder::leggTilAktørYtelse);
-
+        var inntekter = new MapInntekter.MapFraDto(registerBuilder).map(register.getInntekt());
+        inntekter.forEach(registerBuilder::leggTilInntekter);
         builder.medRegister(registerBuilder);
     }
 

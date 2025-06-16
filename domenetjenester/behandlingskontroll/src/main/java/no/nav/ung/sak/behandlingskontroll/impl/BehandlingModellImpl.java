@@ -1,46 +1,25 @@
 package no.nav.ung.sak.behandlingskontroll.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
-import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
-import no.nav.ung.sak.behandlingskontroll.BehandlingModellVisitor;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegUtfall;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.StegProsesseringResultat;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.ung.sak.behandlingskontroll.impl.transisjoner.Transisjoner;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.StegTransisjon;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Modell av behandlingssteg, vurderingspunkter og aksjonspunkter som brukes i evaluering av en prosess for behandling.
@@ -298,28 +277,19 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
     public Set<String> finnAksjonspunktDefinisjonerEtter(BehandlingStegType steg) {
         Set<String> set = new LinkedHashSet<>();
         internHvertStegEtter(steg).forEach(s -> {
-            set.addAll(s.getInngangAksjonpunktKoder());
-            set.addAll(s.getUtgangAksjonpunktKoder());
+            set.addAll(s.getAksjonpunktKoder());
         });
         return Collections.unmodifiableSet(set);
     }
 
     @Override
-    public Set<String> finnAksjonspunktDefinisjonerFraOgMed(BehandlingStegType steg, boolean medInngangOgså) {
+    public Set<String> finnAksjonspunktDefinisjonerFraOgMed(BehandlingStegType steg) {
         if (steg == null) {
             return Collections.emptySet();
         }
-
         Set<String> set = new LinkedHashSet<>();
-
-        if (medInngangOgså) {
-            set.addAll(finnAksjonspunktDefinisjoner(steg));
-        } else {
-            set.addAll(finnAksjonspunktDefinisjonerUtgang(steg));
-        }
-
+        set.addAll(finnAksjonspunktDefinisjoner(steg));
         set.addAll(finnAksjonspunktDefinisjonerEtter(steg));
-
         return Collections.unmodifiableSet(set);
     }
 
@@ -327,19 +297,8 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
     public Set<String> finnAksjonspunktDefinisjoner(BehandlingStegType stegType) {
         Set<String> set = new LinkedHashSet<>();
         BehandlingStegModellImpl stegModell = internFinnSteg(stegType);
-        set.addAll(stegModell.getInngangAksjonpunktKoder());
-        set.addAll(stegModell.getUtgangAksjonpunktKoder());
+        set.addAll(stegModell.getAksjonpunktKoder());
         return set;
-    }
-
-    @Override
-    public Set<String> finnAksjonspunktDefinisjonerInngang(BehandlingStegType steg) {
-        return internFinnSteg(steg).getInngangAksjonpunktKoder();
-    }
-
-    @Override
-    public Set<String> finnAksjonspunktDefinisjonerUtgang(BehandlingStegType steg) {
-        return internFinnSteg(steg).getUtgangAksjonpunktKoder();
     }
 
     protected BehandlingStegModellImpl internFinnSteg(BehandlingStegType stegType) {
@@ -367,7 +326,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
      * Visit alle steg definert i denne modellen.
      *
      * @param førsteSteg - Kode for første steg vi starter fra. Hvis null, begynn fra begynnelsen.
-     * @param visitor - kalles for hvert steg definert
+     * @param visitor    - kalles for hvert steg definert
      * @return null hvis alle steg til slutt ble kalt. Eller siste stegType som ble forsøkt.
      */
     @Override
@@ -412,10 +371,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
     }
 
     protected void leggTilAksjonspunktDefinisjoner(BehandlingStegType stegType, BehandlingStegModellImpl entry) {
-        AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType, VurderingspunktType.INN)
-            .forEach(ad -> entry.leggTilAksjonspunktVurderingInngang(ad.getKode()));
-
-        AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType, VurderingspunktType.UT)
+        AksjonspunktDefinisjon.finnAksjonspunktDefinisjoner(stegType)
             .forEach(ad -> entry.leggTilAksjonspunktVurderingUtgang(ad.getKode()));
     }
 
@@ -423,14 +379,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
         Objects.requireNonNull(aksjonspunktKode, "aksjonspunktKode"); //$NON-NLS-1$
 
         for (BehandlingStegModellImpl bsm : this.steg) {
-            if (bsm.getInngangAksjonpunktKoder().contains(aksjonspunktKode)) {
-                throw new IllegalStateException("Aksjonpunktkode [" + aksjonspunktKode + "] allerede mappet til inngang av " + //$NON-NLS-1$ //$NON-NLS-2$
-                    bsm.getBehandlingStegType().getKode()
-                    + " [behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                // //
-                // NOSONAR
-            }
-            if (bsm.getUtgangAksjonpunktKoder().contains(aksjonspunktKode)) {
+            if (bsm.getAksjonpunktKoder().contains(aksjonspunktKode)) {
                 throw new IllegalStateException("Aksjonpunktkode [" + aksjonspunktKode + "] allerede mappet til utgang av " + //$NON-NLS-1$ //$NON-NLS-2$
                     bsm.getBehandlingStegType().getKode()
                     + " [behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -458,7 +407,7 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
             }
         }
         throw new IllegalArgumentException("Ukjent behandlingssteg: " + stegKode + ", [fagsakYtelseType=" + fagsakYtelseType + ",behandlingType=" + behandlingType + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-                                                                                                                                                                           // //
+        // //
         // NOSONAR
     }
 

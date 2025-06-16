@@ -1,22 +1,6 @@
 package no.nav.ung.kodeverk.behandling;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,13 +8,11 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import no.nav.ung.kodeverk.TempAvledeKode;
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.sak.typer.AktørId;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+import java.io.IOException;
+import java.util.*;
+
 public enum FagsakYtelseType implements Kodeverdi {
 
     /** Folketrygdloven K4 ytelser. */
@@ -64,7 +46,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     ENSLIG_FORSØRGER("EF", "Enslig forsørger", null, null),
 
     /** Folketrygdloven ?? ytelser. */
-    UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "OMS"){
+    UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "UNG"){
         @Override
         public boolean vurderÅpneOppgaverFørVedtak() {
             return false;
@@ -102,15 +84,12 @@ public enum FagsakYtelseType implements Kodeverdi {
     /** Ytelser som er relatert til søker, for samlet innhenting etc.. */
     public static final Set<FagsakYtelseType> RELATERT_YTELSE_TYPER_FOR_SØKER = Collections.unmodifiableSet(EnumSet.complementOf(EnumSet.of(OBSOLETE, UDEFINERT)));
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
 
-    @JsonIgnore
     private String infotrygdBehandlingstema;
 
-    @JsonIgnore
     private String oppgavetema;
 
     private FagsakYtelseType(String kode) {
@@ -124,15 +103,13 @@ public enum FagsakYtelseType implements Kodeverdi {
         this.oppgavetema = oppgavetema;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static FagsakYtelseType fraKode(Object node) {
-        if (node == null) {
+    public static FagsakYtelseType fraKode(final String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(FagsakYtelseType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent FagsakYtelseType: for input " + node);
+            throw new IllegalArgumentException("Ukjent FagsakYtelseType: for input " + kode);
         }
         return ad;
     }
@@ -141,13 +118,12 @@ public enum FagsakYtelseType implements Kodeverdi {
         return Collections.unmodifiableMap(KODER);
     }
 
-    @JsonProperty(value = "kode")
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
     }
 
-    @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
@@ -169,16 +145,6 @@ public enum FagsakYtelseType implements Kodeverdi {
 
     public String getOppgavetema() {
         return oppgavetema;
-    }
-
-    /**
-     * toString is set to match what fromString expects; the kode value of the enum instead of the default that is the enum name.
-     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated spec incorrectly
-     * specifies that it is the enum name string that should be used as input.
-     */
-    @Override
-    public String toString() {
-        return this.getKode();
     }
 
     public static FagsakYtelseType fromString(String kode) {
@@ -321,6 +287,9 @@ public enum FagsakYtelseType implements Kodeverdi {
         return OVERLAPPSJEKK_RELATERT_YTELSE_EKSTERN.getOrDefault(this, Set.of());
     }
 
+    // Kan igrunn fjernast viss dei typer som spesifiserer at denne skal brukast blir serialisert med openapi-compat, eller
+    // anna ObjectMapper som ikkje har overstyring av Kodeverdi til objekt serialisering, sidan annotasjoner på denne type no
+    // spesifiserer @JsonValue på kode property.
     public static final class PlainYtelseSerializer extends StdSerializer<FagsakYtelseType> {
         public PlainYtelseSerializer() {
             super(FagsakYtelseType.class);
@@ -332,6 +301,9 @@ public enum FagsakYtelseType implements Kodeverdi {
         }
     }
 
+    // Kan igrunn fjernast viss dei typer som spesifiserer at denne skal brukast blir deserialisert med openapi-compat, eller
+    // anna ObjectMapper som ikkje har overstyring av Kodeverdi til objekt serialisering, sidan annotasjoner på denne type no
+    // spesifiserer @JsonValue på kode property.
     public static final class PlainYtelseDeserializer extends StdDeserializer<FagsakYtelseType> {
 
         public PlainYtelseDeserializer() {

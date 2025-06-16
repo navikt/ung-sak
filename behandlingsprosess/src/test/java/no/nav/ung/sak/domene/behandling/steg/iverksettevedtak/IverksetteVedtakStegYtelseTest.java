@@ -1,36 +1,18 @@
 package no.nav.ung.sak.domene.behandling.steg.iverksettevedtak;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDateTime;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
-
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -40,12 +22,25 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
 import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksettImpl;
+import no.nav.ung.sak.domene.iverksett.UngdomsytelseOpprettProsessTaskIverksett;
 import no.nav.ung.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -65,7 +60,7 @@ public class IverksetteVedtakStegYtelseTest {
 
     private Repository repository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkRepository;
 
     @Mock
     private VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse;
@@ -88,10 +83,10 @@ public class IverksetteVedtakStegYtelseTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         repository = new Repository(entityManager);
         behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
-        historikkRepository = repositoryProvider.getHistorikkRepository();
+        historikkRepository = repositoryProvider.getHistorikkinnslagRepository();
 
 
-        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new OpprettProsessTaskIverksettImpl(prosessTaskRepository, oppgaveTjeneste, stønadstatistikkService));
+        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new UngdomsytelseOpprettProsessTaskIverksett(prosessTaskRepository, stønadstatistikkService));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse);
@@ -110,12 +105,9 @@ public class IverksetteVedtakStegYtelseTest {
         // Assert
         assertThat(resultat.getTransisjon()).isEqualTo(FellesTransisjoner.STARTET);
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        Historikkinnslag historikkinnslag = historikkRepository.hentHistorikk(behandling.getId()).get(0);
-        assertThat(historikkinnslag.getHistorikkinnslagDeler()).hasSize(1);
-        HistorikkinnslagDel del1 = historikkinnslag.getHistorikkinnslagDeler().get(0);
-        assertThat(del1.getHendelse())
-            .hasValueSatisfying(hendelse -> assertThat(hendelse.getNavn()).as("navn").isEqualTo(HistorikkinnslagType.IVERKSETTELSE_VENT.getKode()));
-        assertThat(del1.getAarsak().get()).isEqualTo(Venteårsak.VENT_TIDLIGERE_BEHANDLING.getKode());
+        Historikkinnslag historikkinnslag = historikkRepository.hent(behandling.getId()).get(0);
+        assertThat(historikkinnslag.getLinjer()).hasSize(1);
+        assertThat(historikkinnslag.getTittel()).isEqualTo("Behandlingen venter på iverksettelse");
     }
 
     @Test

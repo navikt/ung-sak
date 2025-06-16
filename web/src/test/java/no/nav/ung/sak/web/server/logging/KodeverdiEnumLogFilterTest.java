@@ -6,7 +6,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import org.antlr.v4.runtime.misc.OrderedHashSet;
@@ -44,18 +43,18 @@ public class KodeverdiEnumLogFilterTest {
 
     @Test
     public void testLoggKodeverdiEnumMedUlikNameOgKode() {
-        log.warn("{}", VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        log.warn("{}", VilkårType.UNGDOMSPROGRAMVILKÅRET);
         assertThat(appender.list)
             .extracting(ILoggingEvent::getFormattedMessage)
-            .containsExactly("%s(%s)".formatted(VilkårType.BEREGNINGSGRUNNLAGVILKÅR.name(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR.getKode()));
+            .containsExactly("%s(%s)".formatted(VilkårType.UNGDOMSPROGRAMVILKÅRET.name(), VilkårType.UNGDOMSPROGRAMVILKÅRET.getKode()));
     }
 
     @Test
     public void testLoggFlereKodeverdiEnumsMedUlikNameOgKode() {
-        log.warn("VilkårType: {}, {}", VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.OPPTJENINGSVILKÅRET);
+        log.warn("VilkårType: {}, {}", VilkårType.ALDERSVILKÅR, VilkårType.UNGDOMSPROGRAMVILKÅRET);
         assertThat(appender.list)
             .extracting(ILoggingEvent::getFormattedMessage)
-            .containsExactly("VilkårType: %s(%s), %s(%s)".formatted(VilkårType.BEREGNINGSGRUNNLAGVILKÅR.name(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR.getKode(), VilkårType.OPPTJENINGSVILKÅRET.name(), VilkårType.OPPTJENINGSVILKÅRET.getKode()));
+            .containsExactly("VilkårType: %s(%s), %s(%s)".formatted(VilkårType.ALDERSVILKÅR.name(), VilkårType.ALDERSVILKÅR.getKode(), VilkårType.UNGDOMSPROGRAMVILKÅRET.name(), VilkårType.UNGDOMSPROGRAMVILKÅRET.getKode()));
     }
 
     @Test
@@ -68,10 +67,10 @@ public class KodeverdiEnumLogFilterTest {
 
     @Test
     public void testLoggUlikeKodeverdiEnums() {
-        log.warn("VilkårType: {}, Avslagsårsak: {}, int: {}", VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, Avslagsårsak.MANGLENDE_DOKUMENTASJON, 123);
+        log.warn("VilkårType: {}, Avslagsårsak: {}, int: {}", VilkårType.UNGDOMSPROGRAMVILKÅRET, Avslagsårsak.MANGLENDE_DOKUMENTASJON, 123);
         assertThat(appender.list)
             .extracting(ILoggingEvent::getFormattedMessage)
-            .containsExactly("VilkårType: %s(%s), Avslagsårsak: %s(%s), int: 123".formatted(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.name(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.getKode(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.name(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.getKode()));
+            .containsExactly("VilkårType: %s(%s), Avslagsårsak: %s(%s), int: 123".formatted(VilkårType.UNGDOMSPROGRAMVILKÅRET.name(), VilkårType.UNGDOMSPROGRAMVILKÅRET.getKode(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.name(), Avslagsårsak.MANGLENDE_DOKUMENTASJON.getKode()));
     }
 
     @Test
@@ -99,8 +98,8 @@ public class KodeverdiEnumLogFilterTest {
     @Test
     public void testLoggingAvKodeverdiSet() {
         final Set<Kodeverdi> set = new OrderedHashSet<>();
-        final var enum1 = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
-        final var enum2 = VilkårType.MEDISINSKEVILKÅR_18_ÅR;
+        final var enum1 = VilkårType.ALDERSVILKÅR;
+        final var enum2 = VilkårType.UNGDOMSPROGRAMVILKÅRET;
         final var enum3 = DokumentStatus.MOTTATT;
         set.add(enum1);
         set.add(enum2);
@@ -114,13 +113,11 @@ public class KodeverdiEnumLogFilterTest {
     @Test
     public void testLoggingAvKodeverdiMap() {
         final Map<Kodeverdi, Kodeverdi> map = new HashMap<>();
-        final var enum1 = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
-        final var enum2 = VilkårType.MEDISINSKEVILKÅR_18_ÅR;
+        final var enum1 = VilkårType.UNGDOMSPROGRAMVILKÅRET;
+        final var enum2 = VilkårType.ALDERSVILKÅR;
         final var enum3 = DokumentStatus.MOTTATT;
-        final var landkode = Landkoder.SWE; // <- kodeverdi som ikkje er enum
         map.put(enum1, enum2);
         map.put(enum2, enum3);
-        map.put(enum3, landkode);
         log.info("{}", map);
         assertThat(appender.list).size().isEqualTo(1);
         final var event = appender.list.getFirst();
@@ -129,7 +126,6 @@ public class KodeverdiEnumLogFilterTest {
             .asString();
         extractedString.contains("%s(%s)=%s(%s)".formatted(enum1.name(), enum1.getKode(), enum2.name(), enum2.getKode()));
         extractedString.contains("%s(%s)=%s".formatted(enum2.name(), enum2.getKode(), enum3.getKode()));
-        extractedString.contains("%s=%s".formatted(enum3.name(), landkode));
     }
 
     @Test

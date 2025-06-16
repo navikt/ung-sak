@@ -6,6 +6,7 @@ import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
+import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
@@ -56,10 +57,10 @@ public class UngdomsytelseSøknadPersisterer {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    public void lagreSøknadsperioder(List<Periode> søknadsperioder, JournalpostId journalpostId, Long behandlingId) {
+    public void lagreSøknadsperioder(List<LocalDate> startDatoer, JournalpostId journalpostId, Long behandlingId) {
         final List<UngdomsytelseSøktStartdato> søknadsperiodeliste = new ArrayList<>();
-        søknadsperioder.stream()
-            .map(s -> new UngdomsytelseSøktStartdato(s.getFraOgMed(), journalpostId))
+        startDatoer.stream()
+            .map(it -> new UngdomsytelseSøktStartdato(it, journalpostId))
             .forEach(søknadsperiodeliste::add);
 
         ungdomsytelseStartdatoRepository.lagre(behandlingId, søknadsperiodeliste);

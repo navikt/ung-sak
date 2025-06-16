@@ -39,6 +39,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>arbeidsforhold</artifactId>
+        </dependency>
 
 
         <!-- NARE: Java regelmodell -->
@@ -62,12 +66,8 @@
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>grunnbelop</artifactId>
-            <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>grunnbelop</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>person</artifactId>
@@ -75,6 +75,15 @@
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>perioder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>etterlysning</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandling-revurdering</artifactId>
         </dependency>
     </dependencies>
 

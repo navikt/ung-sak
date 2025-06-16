@@ -1,20 +1,16 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
+
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
 
 @BehandlingStegRef(value = FORESLÅ_VEDTAK)
 @BehandlingTypeRef(BehandlingType.REVURDERING) //Revurdering
@@ -24,15 +20,17 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
+    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     ForeslåVedtakRevurderingStegImpl() {
     }
 
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                                     BehandlingRepositoryProvider repositoryProvider) {
+                                     BehandlingRepositoryProvider repositoryProvider, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
+        this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
     }
 
     @Override
@@ -46,8 +44,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!FORESLÅ_VEDTAK.equals(tilSteg)) {
-            // TODO: Rydd brev?
-//            formidlingDokumentdataTjeneste.ryddVedTilbakehopp(kontekst.getBehandlingId());
+            vedtaksbrevTjeneste.ryddVedTilbakeHopp(kontekst.getBehandlingId());
         }
     }
 }

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +19,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
-import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
@@ -73,7 +72,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         Long fagsakId = behandling.getFagsakId();
 
         Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).build();
         behandlingRepository.lagreOgClear(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
         revurderingsBehandling = behandlingRepository.hentBehandling(revurderingsBehandling.getId());
@@ -83,7 +82,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         revurderingsBehandling = behandlingRepository.hentBehandling(revurderingsBehandling.getId());
 
         Behandling nyRevurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)).build();
         behandlingRepository.lagreOgClear(nyRevurderingsBehandling, behandlingRepository.taSkriveLås(nyRevurderingsBehandling));
 
         nyRevurderingsBehandling = behandlingRepository.hentBehandling(nyRevurderingsBehandling.getId());
@@ -111,7 +110,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         Behandling revurderingsBehandling = opprettOgLagreRevurderingMedBehandlingÅrsak();
 
         Behandling nyRevurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)).build();
         behandlingRepository.lagreOgClear(nyRevurderingsBehandling, behandlingRepository.taSkriveLås(nyRevurderingsBehandling));
 
         nyRevurderingsBehandling = behandlingRepository.hentBehandling(nyRevurderingsBehandling.getId());
@@ -147,7 +146,7 @@ public class BehandlingRevurderingRepositoryImplTest {
 
     private Behandling opprettOgLagreRevurderingMedBehandlingÅrsak() {
         Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING)).build();
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).build();
         behandlingRepository.lagreOgClear(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
         revurderingsBehandling = behandlingRepository.hentBehandling(revurderingsBehandling.getId());
@@ -179,7 +178,7 @@ public class BehandlingRevurderingRepositoryImplTest {
     private void oppdaterMedBehandlingsresultatAvslagOgLagre(Behandling behandling) {
         final var resultatBuilder = Vilkårene.builder();
         final var vilkårBuilder = resultatBuilder
-            .hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
+            .hentBuilderFor(VilkårType.UNGDOMSPROGRAMVILKÅRET)
             .leggTil(new VilkårPeriodeBuilder().medPeriode(LocalDate.now(), LocalDate.now().plusDays(30)).medUtfall(Utfall.IKKE_OPPFYLT));
         final var vilkårResultat = resultatBuilder
             .leggTil(vilkårBuilder)
@@ -195,7 +194,6 @@ public class BehandlingRevurderingRepositoryImplTest {
             .medNavn("Navn navnesen")
             .medAktørId(AktørId.dummy())
             .medFødselsdato(LocalDate.now().minusYears(20))
-            .medLandkode(Landkoder.NOR)
             .medKjønn(NavBrukerKjønn.KVINNE)
             .medPersonIdent(new PersonIdent("12345678901"))
             .medForetrukketSpråk(Språkkode.nb)

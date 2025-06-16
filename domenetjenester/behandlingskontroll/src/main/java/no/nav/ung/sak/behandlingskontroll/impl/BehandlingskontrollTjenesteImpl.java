@@ -487,17 +487,18 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
             .filter(Aksjonspunkt::tilbakehoppVedGjenopptakelse)
             .collect(Collectors.toList());
 
-        if (aksjonspunkterSomMedførerTilbakehopp.size() > 1) {
-            throw BehandlingskontrollFeil.FACTORY.kanIkkeGjenopptaBehandlingFantFlereAksjonspunkterSomMedførerTilbakehopp(behandling.getId()).toException();
-        }
         if (erHenleggelse) {
             settAutopunkterTilAvbrutt(kontekst, behandling);
         } else {
             settAutopunkterTilUtført(kontekst, behandling);
         }
-        if (aksjonspunkterSomMedførerTilbakehopp.size() == 1) {
-            Aksjonspunkt ap = aksjonspunkterSomMedførerTilbakehopp.get(0);
-            BehandlingStegType behandlingStegFunnet = ap.getBehandlingStegFunnet();
+        if (!aksjonspunkterSomMedførerTilbakehopp.isEmpty()) {
+            final var unikeSteg = aksjonspunkterSomMedførerTilbakehopp.stream().map(Aksjonspunkt::getBehandlingStegFunnet)
+                .collect(Collectors.toSet());
+            if (unikeSteg.size() > 1) {
+                throw BehandlingskontrollFeil.FACTORY.kanIkkeTilbakeføreBehandlingTilFlereSteg(behandling.getId()).toException();
+            }
+            BehandlingStegType behandlingStegFunnet = unikeSteg.iterator().next();
             behandlingTilbakeføringTilTidligereBehandlingSteg(kontekst, behandlingStegFunnet);
             // I tilfelle tilbakehopp reåpner autopunkt - de skal reutledes av steget.
             settAutopunkterTilUtført(kontekst, behandling);
@@ -565,29 +566,13 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         eventPubliserer.fireEvent(event);
     }
 
-    @Override
-    public boolean skalAksjonspunktLøsesIEllerEtterSteg(FagsakYtelseType ytelseType, BehandlingType behandlingType,
-                                                        StartpunktType startpunkt, AksjonspunktDefinisjon apDef) {
 
-        BehandlingModell modell = getModell(behandlingType, ytelseType);
-        BehandlingStegType behandlingSteg = finnBehandlingSteg(startpunkt, ytelseType, behandlingType);
-        BehandlingStegType apLøsesteg = Optional.ofNullable(modell
-                .finnTidligsteStegForAksjonspunktDefinisjon(singletonList(apDef.getKode())))
-            .map(BehandlingStegModell::getBehandlingStegType)
-            .orElse(null);
-        if (apLøsesteg == null) {
-            // AksjonspunktDefinisjon finnes ikke på stegene til denne behandlingstypen. Ap kan derfor ikke løses.
-            return false;
-        }
-
-        return behandlingSteg.equals(apLøsesteg) || modell.erStegAFørStegB(behandlingSteg, apLøsesteg);
-    }
 
     // TODO: (PK-49128) Midlertidig løsning for å filtrere aksjonspunkter til høyre for steg i hendelsemodul
     @Override
-    public Set<String> finnAksjonspunktDefinisjonerFraOgMed(Behandling behandling, BehandlingStegType steg, boolean medInngangOgså) {
+    public Set<String> finnAksjonspunktDefinisjonerFraOgMed(Behandling behandling, BehandlingStegType steg) {
         BehandlingModell modell = getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return modell.finnAksjonspunktDefinisjonerFraOgMed(steg, medInngangOgså);
+        return modell.finnAksjonspunktDefinisjonerFraOgMed(steg);
     }
 
     protected BehandlingStegUtfall doProsesserBehandling(BehandlingskontrollKontekst kontekst, BehandlingModell modell, BehandlingModellVisitor visitor) {

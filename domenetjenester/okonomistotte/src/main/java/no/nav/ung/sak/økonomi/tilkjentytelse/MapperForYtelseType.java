@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
 

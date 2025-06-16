@@ -40,7 +40,7 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 public class OppgaveTjenesteTest {
 
     private static final Oppgave OPPGAVE = new Oppgave(99L, null, null, null, null,
-        "OMS", null, null, null, 1, "4806",
+        "UNG", null, null, null, 1, "4806",
         LocalDate.now().plusDays(1), LocalDate.now(), Prioritet.NORM, Oppgavestatus.AAPNET);
 
 
@@ -119,24 +119,6 @@ public class OppgaveTjenesteTest {
         OpprettOppgave request = captor.getValue();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
         assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.VURDER_KONSEKVENS_YTELSE.getKode());
-        assertThat(oppgaveId).isEqualTo(OPPGAVE.getId().toString());
-    }
-
-    @Test
-    public void skal_lage_request_som_inneholder_verdier_i_forbindelse_med_manglende_regler() {
-        // Arrange
-
-        ArgumentCaptor<OpprettOppgave> captor = ArgumentCaptor.forClass(OpprettOppgave.class);
-        when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
-
-        // Act
-        String oppgaveId = tjeneste.opprettOppgaveSakSkalTilInfotrygd(behandling.getId());
-
-        // Assert
-        OpprettOppgave request = captor.getValue();
-        assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
-        assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.BEHANDLE_SAK_IT.getKode());
-        assertThat((String) Whitebox.getInternalState(request, "beskrivelse")).isEqualTo("Sak må flyttes til Infotrygd");
         assertThat(oppgaveId).isEqualTo(OPPGAVE.getId().toString());
     }
 

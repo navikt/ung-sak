@@ -13,17 +13,14 @@ import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 
 /**
- * https://confluence.adeo.no/display/BOA/opprettJournalpost
+ * <a href="https://confluence.adeo.no/display/BOA/opprettJournalpost">opprettJournalpost</a>
  */
 @Dependent
 @ScopedRestIntegration(scopeKey = "DOKARKIV_SCOPE", defaultScope = "api://prod-fss.teamdokumenthandtering.dokarkiv/.default")
 public class DokArkivKlientImpl implements DokArkivKlient {
 
-    private OidcRestClient restClient;
-    private URI uriDokarkiv;
-
-    DokArkivKlientImpl() {
-    }
+    private final OidcRestClient restClient;
+    private final URI uriDokarkiv;
 
     @Inject
     public DokArkivKlientImpl(

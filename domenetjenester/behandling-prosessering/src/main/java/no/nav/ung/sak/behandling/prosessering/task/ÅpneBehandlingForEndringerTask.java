@@ -55,7 +55,7 @@ public class ÅpneBehandlingForEndringerTask extends UnderBehandlingProsessTask 
 
     private void reaktiverAksjonspunkter(BehandlingskontrollKontekst kontekst, Behandling behandling, BehandlingStegType steg) {
         Set<String> aksjonspunkterFraOgMedStartpunkt = behandlingskontrollTjeneste
-            .finnAksjonspunktDefinisjonerFraOgMed(behandling, steg, true);
+            .finnAksjonspunktDefinisjonerFraOgMed(behandling, steg);
 
         behandling.getAksjonspunkter().stream()
             .filter(ap -> aksjonspunkterFraOgMedStartpunkt.contains(ap.getAksjonspunktDefinisjon().getKode()))

@@ -11,7 +11,6 @@ import no.nav.k9.felles.sikkerhet.abac.AbacSporingslogg;
 import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
-import no.nav.ung.sak.tilgangskontroll.api.AbacAttributter;
 
 @Default
 @Alternative
@@ -26,8 +25,10 @@ public class AppPepImpl extends no.nav.k9.felles.sikkerhet.abac.PepImpl {
                       PdpRequestBuilder pdpRequestBuilder,
                       AbacSporingslogg sporingslogg,
                       @KonfigVerdi(value = "pip.users", required = false) String pipUsers,
-                      @KonfigVerdi(value = "AZURE_APP_PRE_AUTHORIZED_APPS",required = false) String preAuthorized) {
-        super(pdpKlient, pdpRequestBuilder, sporingslogg, pipUsers, preAuthorized);
+                      @KonfigVerdi(value = "AZURE_APP_PRE_AUTHORIZED_APPS",required = false) String preAuthorized,
+                      //Konfigureres av app, format, kommaseparert: <cluster>:<namespace>:<app>  eks dev-fss:k9saksbehandling:k9-sak
+                      @KonfigVerdi(value = "PIP_APPS", required = false) String pipAllowedApps) {
+        super(pdpKlient, pdpRequestBuilder, sporingslogg, pipUsers, preAuthorized, pipAllowedApps);
     }
 
     /**
@@ -35,6 +36,6 @@ public class AppPepImpl extends no.nav.k9.felles.sikkerhet.abac.PepImpl {
      */
     @Override
     protected int getAntallResources(PdpRequest pdpRequest) {
-        return pdpRequest.getAntall(AbacAttributter.RESOURCE_K9_SAK_AKSJONSPUNKT_TYPE);
+        return pdpRequest.getAntall(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE);
     }
 }

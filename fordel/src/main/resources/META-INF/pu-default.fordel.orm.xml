@@ -9,6 +9,6 @@
 	<entity class="no.nav.ung.fordel.repo.journalpost.JournalpostInnsendingEntitet" />
     <entity class="no.nav.ung.fordel.repo.journalpost.JournalpostMottattEntitet" />
 	<entity class="no.nav.ung.fordel.repo.ProduksjonsstyringOppgaveEntitet" />
-
+    <entity class="no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet" />
 
 </entity-mappings>

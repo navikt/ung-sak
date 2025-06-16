@@ -1,27 +1,17 @@
 package no.nav.ung.kodeverk.medlem;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.unmodifiableList;
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.kodeverk.TempAvledeKode;
-import no.nav.ung.kodeverk.api.Kodeverdi;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableList;
 
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum MedlemskapDekningType implements Kodeverdi {
 
     FTL_2_6("FTL_2_6", "Folketrygdloven § 2-6"),
@@ -84,7 +74,6 @@ public enum MedlemskapDekningType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -98,12 +87,10 @@ public enum MedlemskapDekningType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static MedlemskapDekningType  fraKode(Object node)  {
-        if (node == null) {
+    public static MedlemskapDekningType  fraKode(final String kode)  {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(MedlemskapDekningType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent MedlemskapDekningType: " + kode);
@@ -120,13 +107,12 @@ public enum MedlemskapDekningType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return kode;

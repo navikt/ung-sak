@@ -1,14 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Set;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -17,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
@@ -25,13 +15,19 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInforma
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
-import no.nav.ung.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.UUID;
 
 @Dependent
 public class EndringsresultatSjekker {
@@ -43,7 +39,7 @@ public class EndringsresultatSjekker {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     private ProsessTriggereRepository prosessTriggereRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
     private BehandlingRepository behandlingRepository;
 
@@ -60,26 +56,23 @@ public class EndringsresultatSjekker {
                                    @Any Instance<SøknadDokumentTjeneste> søknadsDokumentTjenester,
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    ProsessTriggereRepository prosessTriggereRepository,
-                                   BehandlingRepositoryProvider provider) {
+                                   UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                   BehandlingRepository behandlingRepository) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.startpunktUtledere = startpunktUtledere;
         this.søknadsDokumentTjenester = søknadsDokumentTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
-        this.vilkårResultatRepository = provider.getVilkårResultatRepository();
-        this.behandlingRepository = provider.getBehandlingRepository();
-    }
-
-    static Long mapFraLocalDateTimeTilLong(LocalDateTime ldt) {
-        ZonedDateTime zdt = ldt.atZone(ZoneId.of("Europe/Paris"));
-        return zdt.toInstant().toEpochMilli();
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public EndringsresultatSnapshot opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(Long behandlingId) {
         EndringsresultatSnapshot snapshot = EndringsresultatSnapshot.opprett();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        snapshot.leggTil(ungdomsprogramPeriodeRepository.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(personopplysningTjeneste.finnAktivGrunnlagId(behandlingId));
         snapshot.leggTil(prosessTriggereRepository.finnAktivGrunnlagId(behandlingId)); // annen part etc
 
@@ -130,10 +123,14 @@ public class EndringsresultatSjekker {
                 .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> personopplysningTjeneste.diffResultat(idEndring, kunSporedeEndringer)));
         });
 
-
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, ProsessTriggere.class, behandling.getFagsakYtelseType())
             .flatMap(u -> idDiff.hentDelresultat(ProsessTriggere.class))
             .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> prosessTriggereRepository.diffResultat(idEndring, kunSporedeEndringer)));
+
+        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
+            .flatMap(u -> idDiff.hentDelresultat(UngdomsprogramPeriodeGrunnlag.class))
+            .ifPresent(idEndring -> sporedeEndringerDiff.leggTilSporetEndring(idEndring, () -> ungdomsprogramPeriodeRepository.diffResultat(idEndring, kunSporedeEndringer)));
+
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
             if (inkludererBeregning(behandling)) {
@@ -153,38 +150,6 @@ public class EndringsresultatSjekker {
         utvidetBehandlingsgrunnlagTjeneste.ifPresent(diffUtvidetBehandlingsgrunnlagTjeneste -> diffUtvidetBehandlingsgrunnlagTjeneste.leggTilDiffResultat(BehandlingReferanse.fra(behandling), idDiff, sporedeEndringerDiff));
 
         return sporedeEndringerDiff;
-    }
-
-    public EndringsresultatSnapshot opprettEndringsresultatIdPåBehandlingSnapshot(Behandling behandling) {
-        Long behandlingId = behandling.getId();
-        EndringsresultatSnapshot snapshot = opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandlingId);
-
-
-        // Resultatstrukturene nedenfor støtter ikke paradigme med "aktivt" grunnlag som kan identifisere med id
-        // Aksepterer her at endringssjekk heller utledes av deres tidsstempel forutsatt at metoden ikke brukes i
-        // kritiske endringssjekker. Håp om at de i fremtiden vil støtte paradigme.
-        snapshot.leggTil(lagVilkårResultatIdSnapshotAvTidsstempel(behandling));
-
-        return snapshot;
-    }
-
-    public EndringsresultatDiff finnIdEndringerPåBehandling(Behandling behandling, EndringsresultatSnapshot idSnapshotFør) {
-        EndringsresultatSnapshot idSnapshotNå = opprettEndringsresultatIdPåBehandlingSnapshot(behandling);
-        return idSnapshotNå.minus(idSnapshotFør);
-    }
-
-    private EndringsresultatSnapshot lagVilkårResultatIdSnapshotAvTidsstempel(Behandling behandling) {
-        return vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
-            .map(vilkårResultat -> EndringsresultatSnapshot.medSnapshot(Vilkårene.class, hentLongVerdiAvEndretTid(vilkårResultat)))
-            .orElse(EndringsresultatSnapshot.utenSnapshot(Vilkårene.class));
-    }
-
-    private Long hentLongVerdiAvEndretTid(BaseEntitet entitet) {
-        LocalDateTime endretTidspunkt = entitet.getOpprettetTidspunkt();
-        if (entitet.getEndretTidspunkt() != null) {
-            endretTidspunkt = entitet.getEndretTidspunkt();
-        }
-        return mapFraLocalDateTimeTilLong(endretTidspunkt);
     }
 
     private InformasjonselementerUtleder finnTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

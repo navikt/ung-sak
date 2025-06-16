@@ -33,6 +33,10 @@ spec:
     enabled: true
     path: /ung/sak/internal/metrics/prometheus
   observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
     autoInstrumentation:
       enabled: true
       runtime: java
@@ -40,7 +44,7 @@ spec:
         - id: "grafana-lgtm"
   resources:
     limits:
-      cpu: "500m"
+      cpu: "4000m"
       memory: "2048Mi"
     requests:
       cpu: "200m"
@@ -58,61 +62,47 @@ spec:
       enabled: true
       replyURLs:
         - "https://ung.intern.dev.nav.no/ung/sak/cb"
-
-      # Tillater innlogging for alle brukere.
-      allowAllUsers: true
       claims:
-        # Kun de gruppene brukeren er medlem av vil bli lagt til i claims på tokenet.
         groups:
-          # 0000-GA-k9-beslutter
-          - id: f171716a-aaab-4e76-8869-047abaebb8f5
-          # 0000-GA-GOSYS_UTVIDET
-          - id: de44052d-b062-4497-89a2-0c85b935b808
-          # 0000-GA-Strengt_Fortrolig_Adresse
-          - id: 5ef775f2-61f8-4283-bf3d-8d03f428aa14
-          # 0000-GA-Fortrolig_Adresse
-          - id: ea930b6b-9397-44d9-b9e6-f4cf527a632a
-          # 0000-GA-k9-overstyrer
-          - id: 5c7003ff-b3ba-407c-9b58-7fea9bf7cb2e
-          # 0000-GA-k9-saksbehandler
-          - id: 93e8903d-5c3f-4cbe-929e-0afeb22dec73
-          # 0000-GA-k9-veileder
-          - id: 5bc5cae2-3ef9-4897-9828-766757299de8
-          # 0000-GA-k9-drift
-          - id: 0bc9661c-975c-4adb-86d1-a97172490662
+          # 0000-CA-ung-saksbehandler
+          - id: a20d759b-a32e-45d8-b283-6143702a70e4
+          # 0000-CA-ung-veileder
+          - id: dfb43624-edba-45de-9e91-68ec8e74b5d9
+          # 0000-CA-ung-drift
+          - id: 0d0da462-c300-43d9-8364-38a0a8cf2401
         extra:
           - "NAVident"
+          - "azp_name"
   accessPolicy:
     outbound:
+      rules:
+        - application: sif-abac-pdp
       external:
+        - host: "dokarkiv-q2.dev-fss-pub.nais.io"
         - host: "k9-abakus.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
         - host: "k9-tilbake.dev-fss-pub.nais.io"
-        - host: "k9-fordel.dev-fss-pub.nais.io"
+        - host: "norg2.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
-        - host: "norg2.dev-fss-pub.nais.io"
-        - host: "dokarkiv-q2.dev-fss-pub.nais.io"
     inbound:
       rules:
-        - application: ung-sak
-        - application: ung-sak-web
-        - application: ung-deltakelse-opplyser
-        - application: k9-los-api
-          namespace: k9saksbehandling
-          cluster: dev-fss
-        - application: k9-fordel
-          namespace: k9saksbehandling
-          cluster: dev-fss
-        - application: k9-tilbake
+        - application: k9-abakus
           namespace: k9saksbehandling
           cluster: dev-fss
         - application: k9-klage
           namespace: k9saksbehandling
           cluster: dev-fss
-        - application: k9-abakus
+        - application: k9-los-api
           namespace: k9saksbehandling
           cluster: dev-fss
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: sif-abac-pdp
+        - application: ung-sak
+        - application: ung-sak-web
+        - application: ung-deltakelse-opplyser
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -231,14 +221,12 @@ spec:
       value: https://ung-deltakelse-opplyser.intern.dev.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
-    - name : SKJERMET_PERSON_URL
-      value : https://skjermede-personer-pip.intern.dev.nav.no/skjermet
-    - name : SKJERMET_PERSON_SCOPE
-      value : api://dev-gcp.nom.skjermede-personer-pip/.default
-    - name : PDL_PIP_URL
-      value : https://pdl-pip-api.dev-fss-pub.nais.io/api/v1/person
-    - name : PDL_PIP_SCOPE
-      value : api://dev-fss.pdl.pdl-pip-api/.default
+    - name : SIF_ABAC_PDP_SCOPE
+      value : api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
+    - name : SIF_ABAC_PDP_URL
+      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
+    - name : NAV_ANSATT_URL
+      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
 
     # Saf
     - name: SAF_BASE_URL
@@ -270,46 +258,32 @@ spec:
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
+    - name: PUBLISER_PRODUKSJONSSTYRING_HENDELSE
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1M"
+    - name: VENTEFRIST_UTTALELSE
+      value: "P1D"
+    - name: RAPPORTERINGSFRIST_DAG_I_MAANED
+      value: "5"
+    - name: AKSEPTERT_DIFFERANSE_KONTROLL
+      value: "100"
+
 
       # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR
-      value: "k9"
+      value: "ung"
     - name: AUDITLOGGER_PRODUCT
       value: "ung-sak"
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"
 
-    # Gruppenavn for roller fra Active Directory
-    # 0000-GA-k9-beslutter
-    - name: BRUKER_GRUPPE_ID_BESLUTTER
-      value: f171716a-aaab-4e76-8869-047abaebb8f5
-    # 0000-GA-GOSYS_UTVIDET
-    - name: BRUKER_GRUPPE_ID_EGENANSATT
-      value: de44052d-b062-4497-89a2-0c85b935b808
-    # 0000-GA-Strengt_Fortrolig_Adresse
-    - name: BRUKER_GRUPPE_ID_KODE6
-      value: 5ef775f2-61f8-4283-bf3d-8d03f428aa14
-    # 0000-GA-Fortrolig_Adresse
-    - name: BRUKER_GRUPPE_ID_KODE7
-      value: ea930b6b-9397-44d9-b9e6-f4cf527a632a
-    # 0000-GA-k9-overstyrer
-    - name: BRUKER_GRUPPE_ID_OVERSTYRER
-      value: 5c7003ff-b3ba-407c-9b58-7fea9bf7cb2e
-    # 0000-GA-k9-saksbehandler
-    - name: BRUKER_GRUPPE_ID_SAKSBEHANDLER
-      value: 93e8903d-5c3f-4cbe-929e-0afeb22dec73
-    # 0000-GA-k9-veileder
-    - name: BRUKER_GRUPPE_ID_VEILEDER
-      value: 5bc5cae2-3ef9-4897-9828-766757299de8
-    # 0000-GA-k9-drift
-    - name: BRUKER_GRUPPE_ID_DRIFT
-      value: 0bc9661c-975c-4adb-86d1-a97172490662
+    - name: PIP_APPS
+      value: "dev-gcp:k9saksbehandling:sif-abac-pdp,dev-fss:teamdokumenthandtering:saf"

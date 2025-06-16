@@ -1,9 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
@@ -13,9 +9,8 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.OverlapendeYtelserRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollerInntektRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
@@ -24,17 +19,18 @@ import no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving.Tilbakekreving
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.formidling.FormidlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppgaveRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.microsoftgraph.ForvaltningTestRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.notat.NotatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
@@ -43,6 +39,10 @@ import no.nav.ung.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.ung.sak.web.app.ungdomsytelse.UngdomsytelseRestTjeneste;
 import no.nav.ung.sak.web.server.abac.PipRestTjeneste;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RestImplementationClasses {
 
@@ -73,14 +73,12 @@ public class RestImplementationClasses {
         classes.add(PipRestTjeneste.class);
         classes.add(TilbakekrevingRestTjeneste.class);
         classes.add(AktørRestTjeneste.class);
-        classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
-        classes.add(OverlapendeYtelserRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);
-        classes.add(LosRestTjeneste.class);
 
         classes.add(UngdomsytelseRestTjeneste.class);
-
+        classes.add(KontrollerInntektRestTjeneste.class);
+        classes.add(EtterlysningRestTjeneste.class);
         classes.add(OppdragProxyRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
@@ -88,6 +86,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningAksjonspunktSammendragRestTjeneste.class);
         classes.add(ForvaltningTestRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
+        classes.add(ForvaltningOppgaveRestTjeneste.class);
         classes.add(ForvaltningPersonRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);

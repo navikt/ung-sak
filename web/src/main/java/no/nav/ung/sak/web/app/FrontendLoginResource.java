@@ -1,14 +1,5 @@
 package no.nav.ung.sak.web.app;
 
-import static jakarta.ws.rs.core.NewCookie.DEFAULT_MAX_AGE;
-import static no.nav.k9.felles.sikkerhet.Constants.ID_TOKEN_COOKIE_NAME;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +18,15 @@ import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDProvider;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static jakarta.ws.rs.core.NewCookie.DEFAULT_MAX_AGE;
+import static no.nav.k9.felles.sikkerhet.Constants.ID_TOKEN_COOKIE_NAME;
 
 @Path("/login")
 @ApplicationScoped
@@ -99,8 +99,11 @@ public class FrontendLoginResource {
             var path = split[0].trim();
             var scope = split[1].trim();
 
-            if (!path.startsWith("/ung/") || Objects.equals("/ung/", path) || Objects.equals("/ung", path) || Objects.equals(cookiePath, path)) {
-                throw new IllegalStateException("Ugyldig path");
+            boolean pekerTilDenneAppen = Objects.equals(cookiePath, path);
+            boolean pekerTilEnAktuellApp = path.startsWith("/sif/") || path.startsWith("/k9/") || path.startsWith("/ung/");
+            boolean manglerApplikasjonsnavn = path.equals("/sif/") || path.equals("/k9/") || path.equals("/ung/");
+            if (pekerTilDenneAppen || manglerApplikasjonsnavn || !pekerTilEnAktuellApp) {
+                throw new IllegalStateException("Ugyldig path: " + path);
             }
 
             return new Tuple<>(path, scope);

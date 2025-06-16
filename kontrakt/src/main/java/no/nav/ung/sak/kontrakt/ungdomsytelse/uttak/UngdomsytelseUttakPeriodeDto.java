@@ -16,7 +16,6 @@ import java.time.LocalDate;
 public record UngdomsytelseUttakPeriodeDto(
     @JsonProperty(value = "fom", required = true) LocalDate fom,
     @JsonProperty(value = "tom", required = true) LocalDate tom,
-    @JsonProperty(value = "utbetalingsgrad", required = true) BigDecimal utbetalingsgrad,
     @JsonProperty(value = "avslagsårsak", required = false) UngdomsytelseUttakAvslagsårsak avslagsårsak
 ) {
 }

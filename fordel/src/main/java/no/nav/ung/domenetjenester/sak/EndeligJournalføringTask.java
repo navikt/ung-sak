@@ -1,20 +1,17 @@
 package no.nav.ung.domenetjenester.sak;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.ung.domenetjenester.arkiv.dok.DokarkivException;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
-import no.nav.ung.domenetjenester.oppgave.gosys.OpprettOppgaveTask;
 import no.nav.ung.fordel.handler.FordelProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
-import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.sak.typer.JournalpostId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandler {
@@ -85,21 +82,12 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
                 if (!e.getMessage().contains("Kan ikke ferdigstille journalpost, følgende felt(er) mangler")) {
                     throw e;
                 }
-
-                dataWrapper.setOppgaveFagsaksystem(GosysKonstanter.Fagsaksystem.K9);
-                dataWrapper.setOppgaveType(GosysKonstanter.OppgaveType.JOURNALFØRING);
-                dataWrapper.setBeskrivelse("Må manuelt journalføres siden det mangler data som er påkrevd for automatisk journalføring.");
-                dataWrapper.setJournalforingTilOppgave(false);
-
-                return dataWrapper.nesteSteg(OpprettOppgaveTask.TASKTYPE);
+                throw new IllegalStateException("Kan ikke ferdigstille journalpost. Vurder om løsningen skal utvides med opprettelse av oppgave i Gosys");
             }
         }
 
         if (dataWrapper.getEndeligJournalførteJournalPostIder().containsAll(journalpostIder)) {
             log.info("Ferdigstilt journalpost med id={} på sak={}", journalpostId, saksnummer.orElse("UNDEFINED"));
-            if (dataWrapper.isJournalforingTilOppgave()) {
-                return dataWrapper.nesteSteg(OpprettOppgaveTask.TASKTYPE);
-            }
             return dataWrapper.nesteSteg(sendtInnDokumentTask());
 
         } else {

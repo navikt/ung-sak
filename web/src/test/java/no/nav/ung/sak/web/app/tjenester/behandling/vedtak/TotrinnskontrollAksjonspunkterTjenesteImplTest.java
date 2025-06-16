@@ -1,21 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vedtak;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -31,10 +15,19 @@ import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
-    private static final BehandlingStegType STEG_KONTROLLER_FAKTA = BehandlingStegType.KONTROLLER_FAKTA;
+    private static final BehandlingStegType STEG_KONTROLLER_REGISTER_INNTEKT = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
     private static final BehandlingStegType STEG_FATTE_VEDTAK = BehandlingStegType.FATTE_VEDTAK;
 
     private TotrinnskontrollAksjonspunkterTjeneste totrinnskontrollAksjonspunkterTjeneste;
@@ -57,7 +50,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_tom_skjermlenkecontext_for_behandling_med_ikke_status_FATTER_VEDTAK_og_ingen_totrinnsvurdering_og_ingen_aksjonspunkter(){
         // Arrange
         opprettBehandlingFor(Optional.empty());
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_FAKTA);
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_REGISTER_INNTEKT);
         TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.empty(), Optional.empty());
         setFelleseMockMetoder(totrinnskontrollAksjonspunkterDto, Collections.emptyList());
         // Act
@@ -83,11 +76,11 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_tom_skjermlenkecontext_for_behandling_med_ikke_status_FATTER_VEDTAK_og_med_totrinnsvurdering_og_ingen_aksjonspunkter(){
 
         // Arrange
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         boolean ttvGodkjent = false;
 
         opprettBehandlingFor(Optional.empty());
-        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_FAKTA);
+        manipulerInternBehandling.forceOppdaterBehandlingSteg(behandling, STEG_KONTROLLER_REGISTER_INNTEKT);
 
         TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.empty(), Optional.empty());
         Totrinnsvurdering ttv = opprettTotrinnsvurdering(behandling, aksjonspunktDefinisjon, ttvGodkjent);
@@ -104,7 +97,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     @Test
     public void skal_hente_tom_skjermlenkecontext_for_behandling_med_status_FATTER_VEDTAK_og_med_totrinnsvurdering_og_ingen_aksjonspunkter(){
         // Arrange
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         boolean ttvGodkjent = false;
 
         opprettBehandlingFor(Optional.empty());
@@ -121,46 +114,13 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
         assertThat(context).isEmpty();
     }
 
-    @Test
-    public void skal_hente_en_skjermlenketype_og_ett_totrinnskontrollaksjonspunkt_for_behandling_med_en_totrinnsvurdering_og_ett_aksjonspunkt_som_ikke_omhandler_mottat_stotte_eller_omsorgsovertakelse(){
-
-        // Arrange
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        boolean ttvGodkjent = false;
-        boolean apAvbrutt = false;
-
-        opprettBehandlingFor(Optional.empty());
-
-        Totrinnsvurdering ttv = opprettTotrinnsvurdering(behandling, aksjonspunktDefinisjon, ttvGodkjent);
-        TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto = opprettTotrinnskontrollAksjonspunkterDto(Optional.of(aksjonspunktDefinisjon), Optional.of(ttv));
-        opprettAksjonspunkt(behandling, aksjonspunktDefinisjon, apAvbrutt);
-
-        setFelleseMockMetoder(totrinnskontrollAksjonspunkterDto, Collections.singletonList(ttv));
-
-        // Act
-        List<TotrinnskontrollSkjermlenkeContextDto> context = totrinnskontrollAksjonspunkterTjeneste.hentTotrinnsSkjermlenkeContext(behandling);
-
-        // Assert
-        assertThat(context).hasSize(1);
-
-        TotrinnskontrollSkjermlenkeContextDto totrinnskontrollSkjermlenkeContextDto = context.get(0);
-        assertThat(totrinnskontrollSkjermlenkeContextDto.getSkjermlenkeType()).isEqualTo(SkjermlenkeType.FAKTA_OM_MEDLEMSKAP.getKode());
-
-        List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter = totrinnskontrollSkjermlenkeContextDto.getTotrinnskontrollAksjonspunkter();
-        assertThat(totrinnskontrollAksjonspunkter).hasSize(1);
-
-        TotrinnskontrollAksjonspunkterDto enesteTotrinnskontrollAksjonspunkt = totrinnskontrollAksjonspunkter.get(0);
-        assertThat(enesteTotrinnskontrollAksjonspunkt.getAksjonspunktKode()).isEqualTo(aksjonspunktDefinisjon);
-        assertThat(enesteTotrinnskontrollAksjonspunkt.getTotrinnskontrollGodkjent()).isFalse();
-
-    }
 
     @Test
     public void skal_hente_en_skjermlenketype_og_ett_totrinnskontrollaksjonspunkt_for_behandling_med_en_totrinnsvurdering_og_ett_aksjonspunkt_som_omhandler_mottat_stotte(){
 
         // Arrange
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjons = new ArrayList<>();
-        aksjonspunktDefinisjons.add(AksjonspunktDefinisjon.AVKLAR_VERGE);
+        aksjonspunktDefinisjons.add(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
         boolean ttvGodkjent = false;
         boolean apAvbrutt = false;
 
@@ -202,7 +162,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_en_skjermlenketype_og_ett_totrinnskontrollaksjonspunkt_for_behandling_med_status_FATTE_VEDTAK_og_ingen_totrinnsvurdering_og_ett_aksjonspunkt(){
 
         // Arrange
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         boolean apAvbrutt = false;
 
         opprettBehandlingFor(Optional.empty());
@@ -219,18 +179,18 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
         // Assert
         assertThat(context).hasSize(1);
-        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.FAKTA_OM_MEDLEMSKAP.getKode());
+        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.BEREGNING.getKode());
         List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter = context.get(0).getTotrinnskontrollAksjonspunkter();
         assertThat(totrinnskontrollAksjonspunkter).hasSize(1);
-        assertThat(totrinnskontrollAksjonspunkter.get(0).getAksjonspunktKode()).isEqualTo(AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT);
+        assertThat(totrinnskontrollAksjonspunkter.get(0).getAksjonspunktKode()).isEqualTo(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
     }
 
     @Test
     public void skal_hente_en_skjermlenketype_og_ett_ikke_godkjent_totrinnskontrollaksjonspunkt_for_behandling_med_en_godkjent_totrinnsvurdering_og_ett_aksjonspunkt_som_ikke_har_samme_aksjonspunktdefinisjon(){
 
-        AksjonspunktDefinisjon adFraAksjonspunkt = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
-        AksjonspunktDefinisjon adFraTotrinnvurdering = AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE;
+        AksjonspunktDefinisjon adFraAksjonspunkt = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
+        AksjonspunktDefinisjon adFraTotrinnvurdering = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
         boolean ttvGodkjent = true;
         boolean apAvbrutt = false;
 
@@ -248,7 +208,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
         // Assert
         assertThat(context).hasSize(1);
-        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.FAKTA_OM_MEDLEMSKAP.getKode());
+        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.BEREGNING.getKode());
 
         List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter = context.get(0).getTotrinnskontrollAksjonspunkter();
         assertThat(totrinnskontrollAksjonspunkter).hasSize(1);
@@ -263,7 +223,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_en_tom_skjermlenkecontext_for_behandling_med_en_totrinnsvurdering_og_ett_avbrutt_aksjonspunkt(){
 
         // Arrange
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AVKLAR_OPPHOLDSRETT;
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.KONTROLLER_INNTEKT;
         boolean ttvGodkjent = false;
         boolean apAvbrutt = true;
 
@@ -287,7 +247,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
     public void skal_hente_en_tom_skjermlenkecontext_for_en_behandling_med_en_totrinnsvurdering_med_et_aksjonspunktdefinisjon_som_gir_en_undefinert_skjermlenketype(){
 
         // Arrange
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK;
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
         boolean ttvGodkjent = false;
 
         opprettBehandlingFor(Optional.empty());

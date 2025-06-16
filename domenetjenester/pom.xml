@@ -23,6 +23,7 @@
         <module>inngangsvilkar</module>
         <module>innsyn</module>
         <module>arbeidsforhold</module>
+        <module>arbeidsforhold-domene</module>
         <module>mottak</module>
         <module>okonomistotte</module>
         <module>person</module>
@@ -31,11 +32,10 @@
         <module>vedtak</module>
         <module>ungdomsprogram</module>
         <module>perioder</module>
-        <module>skjaeringstidspunkt</module>
         <module>bom</module>
         <module>grunnbelop</module>
         <module>behandlingskontroll</module>
-        <module>tilgangskontroll</module>
+        <module>etterlysning</module>
     </modules>
 
 </project>

@@ -1,16 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import static java.util.stream.Collectors.toList;
-import static no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonFeil.FACTORY;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import jakarta.enterprise.context.Dependent;
@@ -18,17 +7,11 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.trace.OpentelemetrySpanWrapper;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.ung.sak.behandling.Skjæringstidspunkt;
-import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
-import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
-import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktProsessResultat;
-import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
-import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandling.aksjonspunkt.Overstyringshåndterer;
+import no.nav.ung.sak.behandling.aksjonspunkt.*;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -40,15 +23,15 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunkt;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.*;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
+
+import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktApplikasjonFeil.FACTORY;
 
 @Dependent
 public class AksjonspunktApplikasjonTjeneste {
@@ -62,17 +45,10 @@ public class AksjonspunktApplikasjonTjeneste {
         AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
 
     private BehandlingRepository behandlingRepository;
-
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-
     private AksjonspunktRepository aksjonspunktRepository;
     private AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste;
-    private HistorikkTjenesteAdapter historikkTjenesteAdapter;
-
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
-
-
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     public AksjonspunktApplikasjonTjeneste() {
@@ -83,15 +59,11 @@ public class AksjonspunktApplikasjonTjeneste {
     public AksjonspunktApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                            AksjonspunktRepository aksjonspunktRepository, AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste,
-                                           BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
-                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
-                                           HistorikkTjenesteAdapter historikkTjenesteAdapter) {
+                                           BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste) {
 
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.aksjonspunktSporingTjeneste = aksjonspunktSporingTjeneste;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
-        this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
-        this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -123,12 +95,7 @@ public class AksjonspunktApplikasjonTjeneste {
                                                              BehandlingskontrollKontekst kontekst) {
         setAnsvarligSaksbehandler(bekreftedeAksjonspunktDtoer, behandling);
         spoolTilbakeTilTidligsteAksjonspunkt(behandling, bekreftedeAksjonspunktDtoer, kontekst);
-
-        // TODO: Fjern bruk av skjæringstidspunktTjeneste her
-        Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandling.getId());
-
-        AksjonspunktProsessResultat aksjonspunktProsessResultat = bekreftAksjonspunkter(kontekst, bekreftedeAksjonspunktDtoer, behandling, skjæringstidspunkter);
-        historikkTjenesteAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.FAKTA_ENDRET);
+        AksjonspunktProsessResultat aksjonspunktProsessResultat = bekreftAksjonspunkter(kontekst, bekreftedeAksjonspunktDtoer, behandling);
         return aksjonspunktProsessResultat;
     }
 
@@ -243,8 +210,6 @@ public class AksjonspunktApplikasjonTjeneste {
             overstyringshåndterer.håndterAksjonspunktForOverstyringHistorikk(dto, behandling, endretBegrunnelse);
         });
 
-        historikkTjenesteAdapter.opprettHistorikkInnslag(behandling.getId(), HistorikkinnslagType.OVERSTYRT);
-
         boolean totrinn = aksjonspunktProsessResultat.finnTotrinn();
         aksjonspunktProsessResultat.finnEkstraAksjonspunktResultat().forEach(res -> håndterEkstraAksjonspunktResultat(kontekst, behandling, totrinn, res.getElement1(), res.getElement2()));
 
@@ -301,8 +266,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
     private AksjonspunktProsessResultat bekreftAksjonspunkter(BehandlingskontrollKontekst kontekst,
                                                               Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer,
-                                                              Behandling behandling,
-                                                              Skjæringstidspunkt skjæringstidspunkter) {
+                                                              Behandling behandling) {
 
         AksjonspunktProsessResultat aksjonspunktProsessResultat = AksjonspunktProsessResultat.tomtResultat();
 
@@ -310,7 +274,7 @@ public class AksjonspunktApplikasjonTjeneste {
         VilkårResultatBuilder vilkårBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
 
         bekreftedeAksjonspunktDtoer
-            .forEach(dto -> SPAN_WRAPPER.span("AP bekreft " + dto.getKode(), aksjonspunktAttributter(dto, behandling), () -> bekreftAksjonspunkt(kontekst, behandling, skjæringstidspunkter, vilkårBuilder, aksjonspunktProsessResultat, dto)));
+            .forEach(dto -> SPAN_WRAPPER.span("AP bekreft " + dto.getKode(), aksjonspunktAttributter(dto, behandling), () -> bekreftAksjonspunkt(kontekst, behandling, vilkårBuilder, aksjonspunktProsessResultat, dto)));
 
         Vilkårene vilkårene = vilkårBuilder.build();
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
@@ -323,7 +287,6 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     private void bekreftAksjonspunkt(BehandlingskontrollKontekst kontekst, Behandling behandling,
-                                     Skjæringstidspunkt skjæringstidspunkter,
                                      VilkårResultatBuilder vilkårBuilder,
                                      AksjonspunktProsessResultat aksjonspunktProsessResultat,
                                      BekreftetAksjonspunktDto dto) {
@@ -334,7 +297,7 @@ public class AksjonspunktApplikasjonTjeneste {
         aksjonspunkt.setAnsvarligSaksbehandler(getCurrentUserId());
 
         AksjonspunktOppdaterer<BekreftetAksjonspunktDto> oppdaterer = finnAksjonspunktOppdaterer(dto.getClass(), dto.getKode());
-        AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, Optional.of(aksjonspunkt), skjæringstidspunkter, vilkårBuilder, dto);
+        AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, Optional.of(aksjonspunkt), vilkårBuilder, dto);
         OppdateringResultat delresultat = SPAN_WRAPPER.span("AP oppdater " + dto.getKode(), aksjonspunktAttributter(dto, behandling), () -> oppdaterer.oppdater(dto, param));
 
         if (aksjonspunkt.tilbakehoppVedGjenopptakelse()) {

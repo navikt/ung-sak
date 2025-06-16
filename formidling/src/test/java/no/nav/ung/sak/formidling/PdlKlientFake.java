@@ -1,83 +1,24 @@
 package no.nav.ung.sak.formidling;
 
-import java.util.Collections;
 import java.util.List;
 
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
+import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResult;
 
-import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
-import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
-import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
-import no.nav.k9.felles.integrasjon.pdl.GeografiskTilknytning;
-import no.nav.k9.felles.integrasjon.pdl.GeografiskTilknytningResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.HentGeografiskTilknytningQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkResult;
-import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkResultResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.HentIdenterQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.IdentGruppe;
-import no.nav.k9.felles.integrasjon.pdl.IdentInformasjon;
-import no.nav.k9.felles.integrasjon.pdl.Identliste;
-import no.nav.k9.felles.integrasjon.pdl.IdentlisteResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Kjoenn;
-import no.nav.k9.felles.integrasjon.pdl.KjoennType;
-import no.nav.k9.felles.integrasjon.pdl.Navn;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
-import no.nav.k9.felles.integrasjon.pdl.Person;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 
-//TODO flytt opprettelsen i TestScenarioBuilder?
-public class PdlKlientFake implements Pdl {
-    private final String fnr;
-    private final Person person;
+public record PdlKlientFake(String fnr) implements Pdl {
     private static final FiktiveFnr fiktiveFnr = new FiktiveFnr();
 
-    public PdlKlientFake(String fornavn, String etternavn, String fnr) {
-        this.fnr = fnr;
-        // Create a test instance of Person
-        person = lagPerson(fornavn, etternavn);
-
-    }
-
-    public static PdlKlientFake medDefaultPerson() {
-        return new PdlKlientFake("Test", "Testesen", gyldigFnr());
+    public static PdlKlientFake medTilfeldigFnr() {
+        return new PdlKlientFake(gyldigFnr());
     }
 
     public static String gyldigFnr() {
         return fiktiveFnr.nesteFnr();
-    }
-
-    public static Person lagPerson(String fornavn, String etternavn) {
-        var person = new Person();
-
-        // Set values using setters
-        Doedsfall doedsfall = new Doedsfall();
-        doedsfall.setDoedsdato("2024-12-01");
-        person.setDoedsfall(Collections.singletonList(doedsfall));
-
-        Foedselsdato foedselsdato = new Foedselsdato();
-        foedselsdato.setFoedselsdato("1990-01-01");
-        person.setFoedselsdato(Collections.singletonList(foedselsdato));
-
-        Folkeregisterpersonstatus folkeregisterpersonstatus = new Folkeregisterpersonstatus();
-        folkeregisterpersonstatus.setStatus("BOSATT");
-        person.setFolkeregisterpersonstatus(Collections.singletonList(folkeregisterpersonstatus));
-
-        Navn navn = new Navn();
-        navn.setFornavn(fornavn);
-        navn.setEtternavn(etternavn);
-        person.setNavn(Collections.singletonList(navn));
-
-        person.setAdressebeskyttelse(Collections.emptyList());
-        Kjoenn kjønn = new Kjoenn();
-        kjønn.setKjoenn(KjoennType.KVINNE);
-        person.setKjoenn(List.of(kjønn));
-
-        return person;
     }
 
 
@@ -93,16 +34,36 @@ public class PdlKlientFake implements Pdl {
 
     @Override
     public Person hentPerson(HentPersonQueryRequest q, PersonResponseProjection p) {
-        return person;
+        return null;
+    }
+
+    @Override
+    public Person hentPerson(HentPersonQueryRequest q, PersonResponseProjection p, List<Behandlingsnummer> behandlingsnummere) {
+        return null;
     }
 
     @Override
     public Person hentPerson(HentPersonQueryRequest q, PersonResponseProjection p, boolean ignoreNotFound) {
-        return person;
+        return null;
+    }
+
+    @Override
+    public Person hentPerson(HentPersonQueryRequest q, PersonResponseProjection p, boolean ignoreNotFound, List<Behandlingsnummer> behandlingsnummere) {
+        return null;
     }
 
     @Override
     public GeografiskTilknytning hentGT(HentGeografiskTilknytningQueryRequest q, GeografiskTilknytningResponseProjection p) {
+        return null;
+    }
+
+    @Override
+    public GeografiskTilknytning hentGT(HentGeografiskTilknytningQueryRequest q, GeografiskTilknytningResponseProjection p, List<Behandlingsnummer> behandlingsnummere) {
+        return null;
+    }
+
+    @Override
+    public <T extends GraphQLResult<?>> T query(GraphQLRequest req, Class<T> clazz, List<Behandlingsnummer> behandlingsnummer) {
         return null;
     }
 

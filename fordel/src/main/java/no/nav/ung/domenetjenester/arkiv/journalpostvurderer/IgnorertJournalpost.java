@@ -1,6 +1,7 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.StrukturertJournalpost.GODKJENTE_KODER;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
@@ -23,8 +24,7 @@ public class IgnorertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(IgnorertJournalpost.class);
 
-    // TODO: Bruk tema UNG her
-    private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.OMS);
+    private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.UNG);
 
     @Override
     public VurdertJournalpost gjørVurdering(Vurderingsgrunnlag vurderingsgrunnlag) {
@@ -63,6 +63,6 @@ public class IgnorertJournalpost implements Journalpostvurderer {
 
     private boolean ignorer(Vurderingsgrunnlag vurderingsgrunnlag) {
         var brevkode = vurderingsgrunnlag.journalpostInfo().getBrevkode();
-        return brevkode == null || !brevkode.equals(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode());
+        return brevkode == null || !GODKJENTE_KODER.contains(brevkode);
     }
 }

@@ -33,10 +33,7 @@ public class BehandlingÅrsakDto {
 
     @JsonGetter
     public Boolean getErAutomatiskRevurdering() {
-        if (behandlingÅrsakType == null) {
-            return false;
-        }
-        return BehandlingÅrsakType.årsakerForAutomatiskRevurdering().stream().anyMatch(årsak -> årsak.equals(this.behandlingÅrsakType));
+        return false; // Brukes kun av medlemskap og varsel revurdering i k9. Disse brukes ikke av ung
     }
 
     public boolean isManueltOpprettet() {

@@ -112,7 +112,7 @@ public class DokumentArkivTjeneste {
 
     public List<ArkivJournalPost> hentAlleJournalposterForSak(Saksnummer saksnummer) {
         var query = new DokumentoversiktFagsakQueryRequest();
-        query.setFagsak(new FagsakInput(saksnummer.getVerdi(), Fagsystem.K9SAK.getOffisiellKode()));  // FIXME: Bytt til UNG_SAK når det er støttet
+        query.setFagsak(new FagsakInput(saksnummer.getVerdi(), Fagsystem.UNG_SAK.getOffisiellKode()));
         query.setFoerste(1000);
         var projection = byggDokumentoversiktResponseProjection();
 

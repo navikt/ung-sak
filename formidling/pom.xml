@@ -34,17 +34,25 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- TODO flytt til parent eller hent transitativt -->
         <dependency>
             <groupId>com.github.jknack</groupId>
             <artifactId>handlebars</artifactId>
-            <version>4.4.0</version>
         </dependency>
-        <!-- TODO flytt til parent eller hent transitativt -->
         <dependency>
             <groupId>org.verapdf</groupId>
             <artifactId>validation-model-jakarta</artifactId>
-            <version>1.26.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
         </dependency>
 
 		<!-- Test avhengigheter -->
@@ -53,6 +61,11 @@
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
