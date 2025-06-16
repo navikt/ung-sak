@@ -46,15 +46,14 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
-                Det vil si 177 105 kroner i året. \
+                Det blir 177 105 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
-                Det er dette vi kaller dagsatsen. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -63,7 +62,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ungdomsprogramytelse</h1>",
                 "<h2>Hvorfor får du penger?</h2>",
-                "<h2>Hvordan regner vi oss fram til hvor mye penger du har rett på?</h2>",
+                "<h2>Hvordan regner vi oss fram til hvor mye penger du får?</h2>",
                 "<h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen</h2>"
             );
 
@@ -89,15 +88,14 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
-                Det vil si 265 657 kroner i året. \
+                Det blir 265 657 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                Det er dette vi kaller dagsatsen. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt());
 
         assertThatHtml(brevtekst)
@@ -121,15 +119,14 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
-                Det vil si 265 657 kroner i året. \
+                Det blir 265 657 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                Det er dette vi kaller dagsatsen. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -160,15 +157,14 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
-                Det vil si 177 105 kroner i året. \
+                Det blir 177 105 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
-                Det er dette vi kaller dagsatsen. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
@@ -210,15 +206,14 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
-                Det vil si 177 105 kroner i året. \
+                Det blir 177 105 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
-                Det er dette vi kaller dagsatsen. \
                 Fordi du har 1 barn, får du i tillegg 37 kroner per dag i barnetillegg. \
                 Det vil si at du til sammen får 718 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
@@ -257,15 +252,14 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du har rett på? \
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år. \
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
-                Det vil si 168 761 kroner i året. \
+                Det blir 168 761 kroner i året. \
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
-                Det er dette vi kaller dagsatsen. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 Fordi du har 1 barn, får du i tillegg 37 kroner per dag i barnetillegg. \

@@ -50,20 +50,20 @@
 
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx.</p>
 
-        <h2>Hvordan regner vi oss fram til hvor mye penger du har rett på?</h2>
+        <h2>Hvordan regner vi oss fram til hvor mye penger du får?</h2>
         {{#with satsOgBeregning}}
             <p>
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet.
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år.
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet.
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år.
                 Nå er grunnbeløpet på {{> felles/beløp grunnbeløp}}.
             </p>
 
             <p>
                 Når du er {{#if kunHøySats}}over{{else}}under{{/if}} {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{beregning.faktor}}.
-                Det vil si {{> felles/beløp beregning.årsbeløp}} i året.
+                Det blir {{> felles/beløp beregning.årsbeløp}} i året.
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
             </p>
-            <p>Det vil si at du har rett på {{> felles/beløp beregning.grunnsats}} per dag. Det er dette vi kaller dagsatsen.</p>
+            <p>Det vil si at du har rett på {{> felles/beløp beregning.grunnsats}} per dag.</p>
             {{#with overgangTilHøySats}}
                 <p>
                     Når du er over {{satsOgBeregning.aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
