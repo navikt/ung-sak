@@ -101,7 +101,7 @@ public class KontrollerInntektTjeneste {
     private static LocalDateTimeline<BrukersAvklarteInntekter> sammenstillInntekter(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
         final var godkjentRegisterinntektTidslinje = etterlysningTidslinje
             .intersection(relevantTidslinje)
-            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.TRUE.equals(etterlysning.etterlysning().erBesvartOgHarUttalelse()))
+            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.FALSE.equals(etterlysning.etterlysning().erBesvartOgHarUttalelse()))
             .mapValue(EtterlysningOgRegisterinntekt::registerInntekt);
 
         final var brukersRapporteInntekter = gjeldendeRapporterteInntekter
