@@ -26,9 +26,11 @@ public record InformasjonsbrevBestillingRequest(
     Long behandlingId,
 
     @Valid
+    @NotNull
     DokumentMalType dokumentMalType,
 
     @Valid
+    @NotNull
     InformasjonsbrevMottakerDto mottaker,
 
     @Valid
