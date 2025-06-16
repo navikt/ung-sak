@@ -38,13 +38,13 @@
         <felles.version>4.6.8</felles.version>
         <swagger.version>2.2.33</swagger.version>
         <junit.version>5.13.1</junit.version>
-        <k9format.version>12.3.0</k9format.version>
+        <k9format.version>12.3.1</k9format.version>
         <jackson.version>2.19.0</jackson.version>
         <asm.version>9.8</asm.version>
         <kotlin-stdlib.version>2.1.21</kotlin-stdlib.version>
         <jandex.version>3.3.1</jandex.version>
         <flyway.version>11.9.1</flyway.version>
-        <pdfgen-core.version>1.1.51</pdfgen-core.version>
+        <pdfgen-core.version>1.1.52</pdfgen-core.version>
         <confluent.platform.version>8.0.0</confluent.platform.version>
         <mockito.version>5.18.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.2.0</ung-deltakelse-opplyser.version>
@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.7.15</version>
+                <version>2.7.16</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
