@@ -62,7 +62,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ungdomsprogramytelse</h1>",
-                "<h2>Hvorfor får du ungdomsprogramytelsen?</h2>",
+                "<h2>Hvorfor får du penger?</h2>",
                 "<h2>Hvordan regner vi oss fram til hvor mye penger du har rett på?</h2>",
                 "<h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen</h2>"
             );
@@ -294,11 +294,11 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     private static String hvorforFårDuPleiepengerAvsnitt() {
         return """
-            Hvorfor får du ungdomsprogramytelsen? \
-            Du får ytelsen fordi du er med i ungdomsprogrammet. \
-            Ytelsen gir deg en inntekt mens du deltar i ungdomsprogrammet. \
-            Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i mer enn ett år. \
-            Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+            Hvorfor får du penger? \
+            Du får penger fordi du er med i ungdomsprogrammet. \
+            Pengene gir deg en inntekt mens du deltar i ungdomsprogrammet. \
+            Pengene får du så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få det i mer enn ett år. \
+            Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx. \
             """;
     }
 
