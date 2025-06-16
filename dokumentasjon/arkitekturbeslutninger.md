@@ -19,14 +19,20 @@ Det ble besluttet å gjenbruke arkitektur og kode fra k9-sak, saksbehandlingssyt
 
 ## Behandling og prosesskontroll
 1. Adaptiv saksbehandling (~ koordinerende og orkestrerende prosesskontroll)
-    - Hendelser oppstår utenfor kontroll av saksbehandlingssytemet (eks. ny inntektsmelding, flytting, dødsfall, innringing, nye opplysninger i registeret etc)
+    - Noen hendelser oppstår utenfor kontroll av saksbehandlingssytemet (eks. dødsfall, innringing, nye opplysninger i registeret etc)
+    - Andre hendelser oppstår som forventet tilbakemelding fra bruker på registeropplysninger som saksbehandlingssystemet har mottatt (eks. inntektsopplysninger, programperioder)
     - Behandlingskontroll sjekker hva som endres av datagrunnlag hver gang en behandling kjøres og tilpasser behandlingsprosess (eks. tilbakehopp i saksbehandling)
 1. Hovedflyt i saksbehandling går gjennom steg som vurderer datagrunnlag og produserer aggregater av data som benyttes i videre prosessering
 
 ## Revurdering
+1. Kilder/trigger til revurdering vil være:
+    - Hendelser (eks. dødsfall, fødsel, endring i programperioder)
+    - Månedtlig kontroll av inntektsopplysninger (trigges via batchtask)
+    - Endring av sats (f.eks at bruker går fra lav til høy sats ved 25 år)
+    - Justering av ytelse ved nytt g-beløp
+    - Manuelle igangsettinger (eks. feil på tidligere saker eller revurdering etter klage)
+1. Alle kilder oppretter en egen prosesstrigger med en definerende behandlingsårsak og periode som bestemmer hvilke deler av det opprinnelige vedtaket som skal endres og hva som skal vurderes
 1. Konseptuelt likt andre behandlinger, men tar utgangspunkt at det finnes minst ett tidligere behandling/vedtak. Gir et enhetlig konsept for saksbehandling uavhengig av trigger (hendelse, søknad, inntektsopplysninger, innsendt dokumntasjon, klage, g-regulering, manuelt igangsatt revurdering, håndtering av feil på tidligere saker, etterkontroll) og hva som er endret i datagrunnlag (oppgitte opplysninger, innhentende opplysninger, endring av vurderinger), kjente feil eller endring i regler.
-1. Endringer og forlengelser også likt revurderinger (sjekk for endringer i datagrunnlag skjer automatisk)
-1. Hendelser (eks. dødsfall) håndteres likt.
 1. Sjekker hva som er endret før vurderer saksbehandlingsløpet (eks. registergrunnlag, inntektsopplysninger, dokumentasjon/søknad/underlag fra bruker)
 
 ## Automatisering
