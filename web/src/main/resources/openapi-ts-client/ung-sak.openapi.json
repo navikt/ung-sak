@@ -1775,7 +1775,7 @@
             "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "behandlingId", "dokumentMalType", "mottaker" ],
         "type" : "object"
       },
       "InformasjonsbrevBestillingRequestDokumentMalType" : {
@@ -1808,7 +1808,8 @@
       },
       "InformasjonsbrevMottakerValgResponse" : {
         "properties" : {
-          "fnr" : {
+          "fødselsdato" : {
+            "format" : "date",
             "type" : "string"
           },
           "id" : {
