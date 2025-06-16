@@ -56,7 +56,6 @@ Det ble besluttet å gjenbruke arkitektur og kode fra k9-sak, saksbehandlingssyt
 
 # Integrasjon
 1. Asynk kommunikasjon mellom eksterne domener (når tilgjengelige), samt interne sub-domener med lav avhengighet (1-veis) og som er stateful, eller sub-domener der et er betydelig prosesseringstid (eksempel: abakus innhenting)
-1. Synk kommunikasjon mot interne sub-domener request/respons basert når kan forvente og krav til lav latenstid (eks. oppdatering, kalkulus)
 1. System-til-system kall gjøres idempotent og asynk internt gjennom ProsessTask biblioteket (håndtere retry, atLeastOnce, idempotente kall synkront)
 1. REST over HTTP med JSON foretrukket for skjemaer
 
