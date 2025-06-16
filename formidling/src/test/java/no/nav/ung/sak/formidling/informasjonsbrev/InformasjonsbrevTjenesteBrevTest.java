@@ -72,8 +72,7 @@ class InformasjonsbrevTjenesteBrevTest {
                 new UnitTestLookupInstanceImpl<>(new GenereltFritekstbrevInnholdBygger())
             ),
             brevbestillingTjeneste,
-            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                ungTestRepositories.repositoryProvider().getPersonopplysningRepository())
+            ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
         );
     }
 
