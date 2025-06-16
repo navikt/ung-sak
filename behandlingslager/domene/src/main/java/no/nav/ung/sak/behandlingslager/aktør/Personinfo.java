@@ -152,7 +152,7 @@ public class Personinfo {
             requireNonNull(personinfoMal.personIdent, "Navbruker må ha fødselsnummer"); //$NON-NLS-1$
             requireNonNull(personinfoMal.navn, "Navbruker må ha navn"); //$NON-NLS-1$
             requireNonNull(personinfoMal.fødselsdato, "Navbruker må ha fødselsdato"); //$NON-NLS-1$
-            throw new NullPointerException("");
+            return personinfoMal;
         }
 
     }
