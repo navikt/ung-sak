@@ -79,7 +79,7 @@ public class KontrollerInntektTjeneste {
         // Siden vi tillater et visst avvik her er det ikke sikkert at registerinntekten er nøyaktig lik 0
         var inntektFraBrukerTidslinje = gjeldendeRapporterteInntekter.filterValue(it -> !it.brukerRapporterteInntekter().isEmpty());
         return ingenAvvikTidslinje.disjoint(inntektFraBrukerTidslinje)
-            .mapValue(it -> new Kontrollresultat(KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER, new Inntektsresultat(BigDecimal.ZERO, KontrollertInntektKilde.BRUKER)));
+            .mapValue(it -> new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, new Inntektsresultat(BigDecimal.ZERO, KontrollertInntektKilde.BRUKER)));
     }
 
 
@@ -95,7 +95,7 @@ public class KontrollerInntektTjeneste {
 
         return brukersGodkjenteEllerRapporterteInntekter.intersection(relevantTidslinje)
             .mapValue(it -> new Inntektsresultat(summerInntekter(it), it.kilde()))
-            .mapValue(it -> new Kontrollresultat(KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER, it));
+            .mapValue(it -> new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, it));
     }
 
     private static LocalDateTimeline<BrukersAvklarteInntekter> sammenstillInntekter(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
