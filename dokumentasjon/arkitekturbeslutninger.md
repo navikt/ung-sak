@@ -1,17 +1,19 @@
 # Arkitekturbeslutninger
 
+## Gjenbruk fra k9
+Det ble besluttet å gjenbruke arkitektur og kode fra k9-sak, saksbehandlingssytemet for ytelser i folketrygdloven kapittel 9 (k9). Grunnen til dette er:
+1. K9-sak er et velfungerende system med en solid arkitektur som har vært i produksjon i flere år og som har vist seg å være robust og skalerbar
+2. K9-sak har en arkitektur som er godt dokumentert og forstått av teamet
+3. Ved å gjenbruke kode fra k9-sak kunne vi raskt komme i gang med utviklingen, noe som var viktig grunnet den korte fristen.
+4. Det ble videre besluttet å kopiere koden fra k9-sak til en ny kodebase. Dette ble gjort fordi de funksjonelle kravene var så forskjellige at å dele kodebasen ville i stor grad påvirke kompleksiteten og forvaltbarheten til k9-sak. Siden ungdomsytelsen er et prøveprosjekt som muligens har begrenset levetid, ble det ansett som mer hensiktsmessig å ha en egen kodebase.
 
 ## Modularisering og mikrotjenester
-1. [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html) tilnærming til domene for å gå opp grensegang.  Initielt pga usikkerhet rundt vilkårsvurdering vs. faktavurdering, uklare domenegrenser mellom opptjening, uttak og beregningsgrunnlag.  Ut fra dette har følgende moduler blitt skilt ut:
-    1. Mottak av dokumenter
-    1. Mottak av eksterne hendelser (eks. fødsel/dødsfall, inntektsopplysninger)
-    1. Abakus: Registeropplysninger for inntekt-arbeid-ytelse
-    1. Formidling og Dokgen: Aggreging av data og produksjon av brev til bruker
-    1. Uttak: Beregning av årskvantum, uttak av pleiepenger, opplæringspenger, frisinn)
-    1. Følgende er opprettet fra start som uavhengige moduler:
-        1. LOS (Ledelse og Oppgavestyring
-        1. Statistikk for datavarehus
-        1. Risk (*\*tbd*)
+1. K9-sak ble utviklet ved bruk av [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html) for å gå opp grensegang, og deretter delt opp i mikrotjenester. Av delene som ble delt ut ble noen av disse delene tatt inn igjen i monolitten (ung-sak) og noen står fortsatt utenfor. Dette er delene slik de ser ut i dag:
+    1. Mottak av dokumenter (modul i ung-sak)
+    1. Mottak av eksterne hendelser (del av ung-sak)
+    1. Abakus: Registeropplysninger for inntekt-arbeid-ytelse (Mikrotjeneste utenfor ung-sak)
+    1. Formidling og Dokgen: Aggreging av data og produksjon av brev til bruker (modul i ung-sak)
+    1. Registrering av programperioder fra veileder og oppgaver til bruker (ny funksjonalitet, mikrotjeneste utenfor ung-sak)
 1. Architecture Refactoring - for fornyelse og forbedring av grensegang mellom moduler og datamodeller
 1. Evergreen - kontinuerlig oppdatering av teknologistack og avhengigheter (biblioteker, container OS, rammeverk)
 
