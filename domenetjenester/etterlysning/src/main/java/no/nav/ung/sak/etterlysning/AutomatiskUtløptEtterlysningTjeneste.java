@@ -42,8 +42,8 @@ public class AutomatiskUtløptEtterlysningTjeneste {
     }
 
     private void opprettProsessTask(Behandling behandling) {
-        var harKlarTask = !prosessTaskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR).isEmpty();
-        var harVetoTask = !prosessTaskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.VETO).isEmpty();
+        var harKlarTask = prosessTaskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR).stream().anyMatch(it -> it.getBehandlingId().equals(behandling.getId().toString()));
+        var harVetoTask = prosessTaskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.VETO).stream().anyMatch(it -> it.getBehandlingId().equals(behandling.getId().toString()));
         if (harKlarTask || harVetoTask) {
             logger.info("Det finnes allerede en task for å sette etterlysninger til utløpt for behandling {}, hopper over opprettelse av ny task", behandling);
             return;

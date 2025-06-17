@@ -18,13 +18,12 @@ import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.etterlysning.EndreFristForEtterlysningDto;
+import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
 import no.nav.ung.sak.kontrakt.etterlysning.Etterlysning;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.rest.Redirect;
@@ -50,7 +49,6 @@ public class EtterlysningRestTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
@@ -59,10 +57,9 @@ public class EtterlysningRestTjeneste {
     }
 
     @Inject
-    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
@@ -91,12 +88,12 @@ public class EtterlysningRestTjeneste {
                                HttpServletRequest request,
                                @Parameter(description = "Liste over etterlysninger med ny frist.")
                                @Valid
-                               @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreFristForEtterlysningDto endreFristForEtterlysningDto) throws URISyntaxException {
+                               @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreFristRequest endreFristRequest) throws URISyntaxException {
 
-        final var behandlingId = endreFristForEtterlysningDto.getBehandlingId();
+        final var behandlingId = endreFristRequest.getBehandlingId();
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(behandlingId, endreFristForEtterlysningDto.getBehandlingVersjon());
-        endreFristForEtterlysningDto.getEndretFrister().forEach(it -> {
+        behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(behandlingId, endreFristRequest.getBehandlingVersjon());
+        endreFristRequest.getEndretFrister().forEach(it -> {
             final var etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(it.etterlysningEksternReferanse());
             if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
                 throw new IllegalArgumentException("Kan ikke endre frist for etterlysning dersom den ikke er i status VENTER. Status er " + etterlysning.getStatus());
@@ -109,17 +106,14 @@ public class EtterlysningRestTjeneste {
             etterlysning.setFrist(frist);
             // Det vil mest sannsynlig bare være en etterlysning her, så vi anser det som ok å lagre inne i loopen for lesbarhet
             etterlysningRepository.lagre(etterlysning);
-            opprettNySettUtløptTask(behandling, etterlysning, frist);
+            opprettNySettUtløptTask(behandling, frist);
         });
-        // Oppretter gjenoppta task for å oppdatere frist på aksjonspunkt (gjøres automatisk ved kjøring av kompletthetsteg)
-        behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }
 
-    private void opprettNySettUtløptTask(Behandling behandling, no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning etterlysning, LocalDateTime frist) {
+    private void opprettNySettUtløptTask(Behandling behandling, LocalDateTime frist) {
         var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptDersomVenterTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
-        prosessTaskData.setProperty(SettEtterlysningTilUtløptDersomVenterTask.ETTERLYSNING_ID, etterlysning.getId().toString());
         prosessTaskData.setNesteKjøringEtter(frist);
         prosessTaskTjeneste.lagre(prosessTaskData);
     }

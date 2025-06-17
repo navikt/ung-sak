@@ -1,6 +1,5 @@
 package no.nav.ung.sak.kontrakt.etterlysning;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -12,7 +11,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 import java.util.List;
 
-public class EndreFristForEtterlysningDto {
+public class EndreFristRequest {
 
     /**
      * Ekstern-referanse for etterlysning og ny frist
@@ -33,13 +32,13 @@ public class EndreFristForEtterlysningDto {
     @Max(Long.MAX_VALUE)
     private Long behandlingVersjon;
 
-    public EndreFristForEtterlysningDto(List<EndreFristDto> endretFrister, BehandlingIdDto behandlingId, Long behandlingVersjon) {
+    public EndreFristRequest(List<EndreFristDto> endretFrister, BehandlingIdDto behandlingId, Long behandlingVersjon) {
         this.endretFrister = endretFrister;
         this.behandlingId = behandlingId;
         this.behandlingVersjon = behandlingVersjon;
     }
 
-    protected EndreFristForEtterlysningDto() {
+    protected EndreFristRequest() {
         //
     }
 

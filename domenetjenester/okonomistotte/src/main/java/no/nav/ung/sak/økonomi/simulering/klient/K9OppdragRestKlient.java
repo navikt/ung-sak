@@ -15,6 +15,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
 import no.nav.k9.oppdrag.kontrakt.aktørbytte.ByttAktørRequest;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringDto;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.ung.sak.typer.AktørId;
@@ -31,8 +32,9 @@ public class K9OppdragRestKlient {
     private URI uriAktørBytte;
     private URI uriSimuleringDiagnostikk;
     private URI uriSimuleringResultat;
-    private URI uriKanseller;
     private URI uriAlleOppdragXmler;
+    private URI uriDetaljertSimuleringResultat;
+    private URI uriKansellerSimulering;
 
     public K9OppdragRestKlient() {
     }
@@ -46,9 +48,9 @@ public class K9OppdragRestKlient {
         this.uriAktørBytte = tilUri(urlK9Oppdrag, "forvaltning/oppdaterAktoerId");
         this.uriSimuleringDiagnostikk = tilUri(urlK9Oppdrag, "diagnostikk/simulering");
         this.uriSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/resultat");
-        this.uriKanseller = tilUri(urlK9Oppdrag, "simulering/kanseller");
-
         this.uriAlleOppdragXmler = tilUri(urlK9Oppdrag, "iverksett/forvaltning/hent-oppdrag-xmler");
+        this.uriDetaljertSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/detaljert-resultat");
+        this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/kanseller");
 
         //avviker fra @Inject av OidcRestClient fordi det trengs lenger timeout enn normalt mot k9-oppdrag pga simuleringer som tar lang tid (over 20 sekunder) når det er mange perioder
         restClient = new K9OppdragRestClientConfig().createOidcRestClient(tokenProvider, k9OppdragScope);
@@ -79,9 +81,14 @@ public class K9OppdragRestKlient {
         return restClient.postReturnsOptional(uriSimuleringResultat, behandlingreferanse, SimuleringResultatDto.class);
     }
 
+    public Optional<SimuleringDto> hentDetaljertSimuleringResultat(UUID behandlingUuid) {
+        BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
+        return restClient.postReturnsOptional(uriDetaljertSimuleringResultat, behandlingreferanse, SimuleringDto.class);
+    }
+
     public void kansellerSimulering(UUID behandlingUuid) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
-        restClient.post(uriKanseller, behandlingreferanse);
+        restClient.post(uriKansellerSimulering, behandlingreferanse);
     }
 
     public List<OppdragXmlDto> alleOppdragXmler(Saksnummer saksnummer){
