@@ -1453,7 +1453,7 @@
         "required" : [ "etterlysningEksternReferanse", "frist" ],
         "type" : "object"
       },
-      "EndreFristForEtterlysningDto" : {
+      "EndreFristRequest" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
@@ -5525,7 +5525,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/EndreFristForEtterlysningDto"
+                "$ref" : "#/components/schemas/EndreFristRequest"
               }
             }
           },
