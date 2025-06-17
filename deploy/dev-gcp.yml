@@ -84,6 +84,7 @@ spec:
         - host: "norg2.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
+        - host: "oppgave.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
@@ -158,9 +159,9 @@ spec:
     - name: ARBEIDSFORDELING_RS_URL
       value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
-      value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
+      value: https://oppgave.dev-fss-pub.nais.io/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
-      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
+      value: api://dev-fss.oppgavehandtering.oppgave/.default
     - name: PDL_BASE_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_SCOPE
