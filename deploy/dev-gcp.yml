@@ -138,14 +138,6 @@ spec:
     - name: KAFKA_JOURNAL_TOPIC
       value: teamdokumenthandtering.aapen-dok-journalfoering
 
-
-
-    # Baseurl
-    - name: SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais.preprod.local
-    - name: BOOTSTRAP_SERVERS
-      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
-
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://ung.intern.dev.nav.no
@@ -163,18 +155,12 @@ spec:
       value: https://ung-sak.intern.dev.nav.no/ung/sak/api/registerdata/iay/callback
     - name: ABAKUS_CALLBACK_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-sak/.default
-    - name: K9_OPPDRAG_PROXY_URL
-      value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
       value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
       value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
-    - name: MEDL2_RS_URL
-      value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
-    - name: MEDL2_RS_SCOPE
-      value: api://dev-fss.team-rocket.medlemskap-medl-api/.default
     - name: PDL_BASE_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_SCOPE
@@ -185,30 +171,20 @@ spec:
       value: https://k9-oppdrag.dev-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
-    - name: K9_TILBAKE_DIREKTE_URL
-      value: https://k9-tilbake.dev-fss-pub.nais.io/k9/tilbake/api
-    - name: K9_TILBAKE_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-tilbake/.default
-    - name: INFOTRYGD_BS_BASE_URI
-      value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
-    - name: K9_INFOTRYGD_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
+    - name: K9_OPPDRAG_PROXY_URL
+      value: /k9/oppdrag/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.preprod.local
-    - name: K9INNTEKTSMELDING_URL
-      value: https://k9-inntektsmelding.intern.dev.nav.no/k9/inntektsmelding
-    - name: K9INNTEKTSMELDING_SCOPE
-      value: api://dev-gcp.k9saksbehandling.k9-inntektsmelding/.default
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: https://ung-deltakelse-opplyser.intern.dev.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
-    - name : SIF_ABAC_PDP_SCOPE
-      value : api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
-    - name : SIF_ABAC_PDP_URL
-      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
-    - name : NAV_ANSATT_URL
-      value : http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
+    - name: SIF_ABAC_PDP_SCOPE
+      value: api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
+    - name: SIF_ABAC_PDP_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
+    - name: NAV_ANSATT_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
 
     # Saf
     - name: SAF_BASE_URL
@@ -248,15 +224,15 @@ spec:
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1M"
-    - name: VENTEFRIST_UTTALELSE
-      value: "P1D"
     - name: RAPPORTERINGSFRIST_DAG_I_MAANED
       value: "5"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "100"
+    - name: VENTEFRIST_UTTALELSE
+      value: "P1D"
 
 
-      # Audit logging
+    # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR
