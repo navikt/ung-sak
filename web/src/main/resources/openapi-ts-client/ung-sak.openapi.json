@@ -3343,17 +3343,6 @@
         "required" : [ "begrunnelse", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
         "type" : "object"
       },
-      "OppgaveIdDto" : {
-        "properties" : {
-          "verdi" : {
-            "maxLength" : 50,
-            "minLength" : 1,
-            "pattern" : "^[\\p{L}\\p{N}_\\.\\-/]+$",
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
       "OppgittTilknytningDto" : {
         "properties" : {
           "utlandsopphold" : {
@@ -5038,30 +5027,28 @@
   "paths" : {
     "/api" : {
       "get" : {
-        "description" : "redirect til oppgave",
-        "operationId" : "doRedirect",
+        "operationId" : "getLogin",
         "parameters" : [ {
           "in" : "query",
-          "name" : "oppgaveId",
+          "name" : "code",
           "schema" : {
-            "$ref" : "#/components/schemas/OppgaveIdDto"
+            "type" : "string"
           }
         }, {
           "in" : "query",
-          "name" : "sakId",
+          "name" : "state",
           "schema" : {
-            "$ref" : "#/components/schemas/SaksnummerDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
           "default" : {
             "content" : {
-              "*/*" : { }
+              "application/json" : { }
             },
             "description" : "default response"
           }
-        },
-        "tags" : [ "redirect" ]
+        }
       }
     },
     "/api/aksjonspunkt" : {
@@ -8430,8 +8417,5 @@
   "tags" : [ {
     "description" : "Håndtering av asynkrone oppgaver i form av prosesstask",
     "name" : "prosesstask"
-  }, {
-    "description" : "Oppgave redirect",
-    "name" : "redirect"
   } ]
 }
