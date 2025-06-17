@@ -90,9 +90,6 @@ spec:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: prod-fss
-        - application: k9-tilbake
-          namespace: k9saksbehandling
-          cluster: prod-fss
         - application: sif-abac-pdp
         - application: ung-sak
         - application: ung-sak-web
