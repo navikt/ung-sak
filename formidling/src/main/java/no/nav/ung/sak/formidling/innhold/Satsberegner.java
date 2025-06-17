@@ -27,13 +27,6 @@ class Satsberegner {
              .divide(BigDecimal.valueOf(satser.antallBarn()), RoundingMode.HALF_UP));
     }
 
-    static long beregnTotalBarnetilleggSats(UngdomsytelseSatser satser) {
-        if (satser.antallBarn() <= 0) {
-            return 0;
-        }
-        return satser.dagsatsBarnetillegg();
-    }
-
     static String lagGrunnbeløpFaktorTekst(LocalDateSegment<UngdomsytelseSatser> satssegment) {
         BigDecimal faktor = GrunnbeløpfaktorTidslinje
             .finnStandardGrunnbeløpFaktorFor(satssegment.getLocalDateInterval())
