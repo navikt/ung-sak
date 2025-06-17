@@ -2,6 +2,8 @@ package no.nav.ung.sak.økonomi.simulering.klient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -19,6 +21,8 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
+import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.økonomi.simulering.klient.dto.OppdragXmlDto;
 
 @Dependent
 public class K9OppdragRestKlient {
@@ -28,6 +32,7 @@ public class K9OppdragRestKlient {
     private URI uriAktørBytte;
     private URI uriSimuleringDiagnostikk;
     private URI uriSimuleringResultat;
+    private URI uriAlleOppdragXmler;
     private URI uriDetaljertSimuleringResultat;
     private URI uriKansellerSimulering;
 
@@ -43,6 +48,7 @@ public class K9OppdragRestKlient {
         this.uriAktørBytte = tilUri(urlK9Oppdrag, "forvaltning/oppdaterAktoerId");
         this.uriSimuleringDiagnostikk = tilUri(urlK9Oppdrag, "diagnostikk/simulering");
         this.uriSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/resultat");
+        this.uriAlleOppdragXmler = tilUri(urlK9Oppdrag, "iverksett/forvaltning/hent-oppdrag-xmler");
         this.uriDetaljertSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/detaljert-resultat");
         this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/kanseller");
 
@@ -83,6 +89,11 @@ public class K9OppdragRestKlient {
     public void kansellerSimulering(UUID behandlingUuid) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
         restClient.post(uriKansellerSimulering, behandlingreferanse);
+    }
+
+    public List<OppdragXmlDto> alleOppdragXmler(Saksnummer saksnummer){
+        OppdragXmlDto[] resultat = restClient.post(uriAlleOppdragXmler, new no.nav.k9.oppdrag.kontrakt.Saksnummer(saksnummer.getVerdi()), OppdragXmlDto[].class);
+        return resultat != null ? Arrays.asList(resultat) : null;
     }
 
     public Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId, Set<PersonIdent> utgåttPersonident) {
