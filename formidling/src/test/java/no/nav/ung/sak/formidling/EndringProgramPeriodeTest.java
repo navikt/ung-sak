@@ -28,14 +28,14 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
   @Test
   void flytteSluttdato_fremover() {
-      var nyOpphørsdatoStr = LocalDate.of(2025, 8, 22);
-      var opprinneligOpphørsdato = LocalDate.of(2025, 8, 15);
-      var behandling = lagScenarioForSluttdato(opprinneligOpphørsdato, nyOpphørsdatoStr);
+      var nySluttDato = LocalDate.of(2025, 8, 22);
+      var opprinneligSluttdato = LocalDate.of(2025, 8, 15);
+      var behandling = lagScenarioForSluttdato(opprinneligSluttdato, nySluttDato);
 
       var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
           """
               Vi har endret ungdomsprogramytelsen din \
-              Fra 25. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
+              Fra 25. august 2025 får du ikke penger fordi du ikke lenger er med i ungdomsprogrammet. \
               Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
               men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
               Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
@@ -55,9 +55,9 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
   @Test
   void flytteSluttdato_bakover() {
-      var nyOpphørsdatoStr = LocalDate.of(2025, 8, 4);
-      var opprinneligOpphørsdato = LocalDate.of(2025, 8, 15);
-      var behandling = lagScenarioForSluttdato(opprinneligOpphørsdato, nyOpphørsdatoStr);
+      var nySluttdato = LocalDate.of(2025, 8, 1);
+      var opprinneligSluttdato = LocalDate.of(2025, 8, 15);
+      var behandling = lagScenarioForSluttdato(opprinneligSluttdato, nySluttdato);
 
       var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
           """
@@ -80,11 +80,12 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
           );
   }
 
-    private Behandling lagScenarioForSluttdato(LocalDate opprinneligOpphørsdato, LocalDate nyOpphørsdato) {
+    private Behandling lagScenarioForSluttdato(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         LocalDate fomDato = LocalDate.of(2024, 12, 1);
 
-        var opphørGrunnlag = BrevScenarioer.endringOpphør(opprinneligOpphørsdato, new LocalDateInterval(fomDato, fomDato.plusWeeks(52)));
-        var endringGrunnlag = BrevScenarioer.endringSluttdato(nyOpphørsdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        LocalDateInterval opprinneligProgramPeriode = new LocalDateInterval(fomDato, fomDato.plusWeeks(52));
+        var opphørGrunnlag = BrevScenarioer.endringOpphør(opprinneligProgramPeriode, opprinneligSluttdato);
+        var endringGrunnlag = BrevScenarioer.endringSluttdato(nySluttdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
         return lagEndringScenario(endringGrunnlag, opphørGrunnlag);
     }
 
@@ -159,7 +160,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         LocalDate opprinnligOpphørsdato = LocalDate.of(2025, 8, 15);
         LocalDate nyOpphørsdato = LocalDate.of(2025, 8, 10);
 
-        var opphørGrunnlag = BrevScenarioer.endringOpphør(opprinnligOpphørsdato, new LocalDateInterval(fomDato, fomDato.plusWeeks(52)));
+        var opphørGrunnlag = BrevScenarioer.endringOpphør(new LocalDateInterval(fomDato, fomDato.plusWeeks(52)), opprinnligOpphørsdato);
         var endringGrunnlag = BrevScenarioer.endringSluttdato(nyOpphørsdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
         return lagEndringScenario(endringGrunnlag, opphørGrunnlag);
     }

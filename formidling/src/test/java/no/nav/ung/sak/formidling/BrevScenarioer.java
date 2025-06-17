@@ -439,12 +439,17 @@ public class BrevScenarioer {
 
 
     /**
-     * Opphør av programmet. OpprinneligProgramPeriode kan hentes fra et annet sceario
+     *
+     *  Opphør av programmet.
+     *
+     * @param opprinneligProgramPeriode - den perioden som opprinnelig ble innvilget
+     * @param sluttdato - sluttdato
+     * @return
      */
-    public static UngTestScenario endringOpphør(LocalDate opphørsdato, LocalDateInterval opprinneligProgramPeriode) {
+    public static UngTestScenario endringOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate sluttdato) {
         var fom = opprinneligProgramPeriode.getFomDato();
         var fagsakPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-        var nyProgramPeriode = new LocalDateInterval(fom, opphørsdato.minusDays(1));
+        var nyProgramPeriode = new LocalDateInterval(fom, sluttdato);
         var satser = new LocalDateTimeline<>(List.of(
            new LocalDateSegment<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), lavSatsBuilder(fom).build())
         ));
@@ -459,15 +464,15 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
             new LocalDateTimeline<>(List.of(
                 new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
-                new LocalDateSegment<>(opphørsdato, fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+                new LocalDateSegment<>(sluttdato.plusDays(1), fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
                 )
 
             ),
             fom.minusYears(19).plusDays(42),
             List.of(opprinneligProgramPeriode.getFomDato()),
             Set.of(
-                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), opphørsdato.minusDays(1))),
-                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(opphørsdato, fagsakPeriode.getTomDato()))
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), sluttdato)),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(sluttdato.plusDays(1), fagsakPeriode.getTomDato()))
             ),
             null,
             Collections.emptyList(),
@@ -486,7 +491,7 @@ public class BrevScenarioer {
 
         var fom = opprinneligProgramPeriode.getFomDato();
 
-        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato.minusDays(1));
+        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato);
         var satser = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), opprinneligProgramPeriode.getTomDato(), lavSatsBuilder(fom).build())
         ));
@@ -502,15 +507,15 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
             new LocalDateTimeline<>(List.of(
                 new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
-                new LocalDateSegment<>(nySluttdato, fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+                new LocalDateSegment<>(nySluttdato.plusDays(1), fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
             )),
             fom.minusYears(19).plusDays(42),
             List.of(opprinneligProgramPeriode.getFomDato()),
             Set.of(
-                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nySluttdato.minusDays(1))),
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nySluttdato)),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
                     flyttetBakover ?
-                        DatoIntervallEntitet.fra(nySluttdato, opprinneligProgramPeriode.getTomDato()) :
+                        DatoIntervallEntitet.fra(nySluttdato.plusDays(1), opprinneligProgramPeriode.getTomDato()) :
                         DatoIntervallEntitet.fra(opprinneligProgramPeriode.getTomDato().plusDays(1), nySluttdato))
             ),
             null,

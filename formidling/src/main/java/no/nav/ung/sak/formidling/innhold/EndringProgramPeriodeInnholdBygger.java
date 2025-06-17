@@ -9,7 +9,8 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.template.dto.EndringProgramPeriodeDto;
-import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretDatoDto;
+import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretSluttDato;
+import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretStartDato;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,18 +46,22 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
         var forrigeProgramperiode = forrigeProgramPerioder.toSegments().last();
 
         var endretStartdato = !denneProgramperiode.getFom().equals(forrigeProgramperiode.getFom()) ?
-            new EndretDatoDto(denneProgramperiode.getFom(), forrigeProgramperiode.getFom()) : null;
+            new EndretStartDato(denneProgramperiode.getFom(), forrigeProgramperiode.getFom()) : null;
 
         var endretSluttdato = !denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom()) ?
-            new EndretDatoDto(denneProgramperiode.getTom().plusDays(1), forrigeProgramperiode.getTom()) : null;
-
+            lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode) : null;
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_PROGRAMPERIODE,
             new EndringProgramPeriodeDto(
-                endretSluttdato,
-                endretStartdato,
+                endretStartdato, endretSluttdato,
                 false
             ));
+    }
+
+    private static EndretSluttDato lagEndretSluttdato(LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {
+        var opphørStartDato = PeriodeUtils.nesteUkedag(denneProgramperiode.getTom());
+        var harFlyttetBakover = denneProgramperiode.getTom().isBefore(forrigeProgramperiode.getTom());
+        return new EndretSluttDato(denneProgramperiode.getTom(), forrigeProgramperiode.getTom(), opphørStartDato, harFlyttetBakover);
     }
 
     private LocalDateTimeline<Boolean> hentProgramperiodeTidslinje(Long behandlingid) {
