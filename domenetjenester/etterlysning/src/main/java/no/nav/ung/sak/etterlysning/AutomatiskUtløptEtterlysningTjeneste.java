@@ -3,6 +3,7 @@ package no.nav.ung.sak.etterlysning;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingKandidaterRepository;
@@ -41,6 +42,12 @@ public class AutomatiskUtløptEtterlysningTjeneste {
     }
 
     private void opprettProsessTask(Behandling behandling) {
+        var harKlarTask = !prosessTaskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR).isEmpty();
+        var harVetoTask = !prosessTaskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.VETO).isEmpty();
+        if (harKlarTask || harVetoTask) {
+            logger.info("Det finnes allerede en task for å sette etterlysninger til utløpt for behandling {}, hopper over opprettelse av ny task", behandling);
+            return;
+        }
         var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningerForBehandlingTilUtløptTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
         prosessTaskTjeneste.lagre(prosessTaskData);
