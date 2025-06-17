@@ -152,8 +152,6 @@ spec:
       value: https://ung-sak.intern.nav.no/ung/sak/api/registerdata/iay/callback
     - name: ABAKUS_CALLBACK_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-sak/.default
-    - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
