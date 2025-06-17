@@ -6,13 +6,12 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import org.slf4j.Logger;
-
-import java.util.Set;
 
 @ApplicationScoped
 @ProsessTask(value = SettEtterlysningTilUtløptDersomVenterTask.TASKTYPE)
@@ -25,6 +24,8 @@ public class SettEtterlysningTilUtløptDersomVenterTask extends BehandlingProses
 
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste taskTjeneste;
+    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+
 
     public SettEtterlysningTilUtløptDersomVenterTask() {
         // CDI
@@ -33,10 +34,12 @@ public class SettEtterlysningTilUtløptDersomVenterTask extends BehandlingProses
     @Inject
     public SettEtterlysningTilUtløptDersomVenterTask(BehandlingRepository behandlingRepository,
                                                      BehandlingLåsRepository behandlingLåsRepository,
-                                                     ProsessTaskTjeneste taskTjeneste) {
+                                                     ProsessTaskTjeneste taskTjeneste,
+                                                     BehandlingProsesseringTjeneste behandlingProsesseringTjeneste) {
         super(behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
         this.taskTjeneste = taskTjeneste;
+        this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
     }
 
     @Override
@@ -56,6 +59,8 @@ public class SettEtterlysningTilUtløptDersomVenterTask extends BehandlingProses
         var nyTaskData = ProsessTaskData.forProsessTask(SettEtterlysningerForBehandlingTilUtløptTask.class);
         nyTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
         taskTjeneste.lagre(nyTaskData);
+
+        behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, true);
     }
 
 }
