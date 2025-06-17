@@ -1371,6 +1371,40 @@
         "x-enum-varnames" : [ "IAY" ],
         "type" : "string"
       },
+      "DetaljertSimuleringResultatDto" : {
+        "properties" : {
+          "ingenPerioderMedAvvik" : {
+            "type" : "boolean"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/Periode"
+          },
+          "periodeTom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "perioderPerMottaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringForMottakerDto"
+            },
+            "type" : "array"
+          },
+          "sumEtterbetaling" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sumFeilutbetaling" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sumInntrekk" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "periode" ],
+        "type" : "object"
+      },
       "DokumentDto" : {
         "properties" : {
           "behandlinger" : {
@@ -4019,25 +4053,109 @@
         "x-enum-varnames" : [ "UDEFINERT", "ANKE_OVERSENDT_TIL_TRYGDERETTEN", "ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "AVV_DOK", "AVV_IM_MOT_AAREG", "AVV_IM_MOT_SØKNAD_AT", "AVV_SØKNADSPERIODER", "AVV_FODSEL", "AVV_RESPONS_REVURDERING", "FOR_TIDLIG_SOKNAD", "GRADERING_FLERE_ARBEIDSFORHOLD", "REFUSJON_3_MÅNEDER", "SCANN", "UTV_FRIST", "VENT_FEIL_ENDRINGSSØKNAD", "VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG", "VENT_INFOTRYGD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_MILITÆR_BG_UNDER_3G", "VENT_OPDT_INNTEKTSMELDING", "VENT_OPPTJENING_OPPLYSNINGER", "VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID", "VENT_REGISTERINNHENTING", "VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT", "VENT_SØKNAD_SENDT_INFORMASJONSBREV", "VENT_TIDLIGERE_BEHANDLING", "VENT_ÅPEN_BEHANDLING", "VENT_MANGL_FUNKSJ_SAKSBEHANDLER", "VENTER_SVAR_PORTEN", "VENTER_SVAR_TEAMS", "ANDRE_INNTEKTSOPPLYSNINGER", "INNTEKTSMELDING", "LEGEERKLÆRING", "MEDISINSKE_OPPLYSNINGER", "ANNET", "VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER", "VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "OPPD_ÅPEN_BEH", "VENT_DEKGRAD_REGEL", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER", "VENT_BEREGNING_TILBAKE_I_TID", "BRUKER_70ÅR_VED_REFUSJON", "VENT_LOVENDRING_8_41", "INGEN_PERIODE_UTEN_YTELSE", "PERIODE_MED_AVSLAG", "MANGLENDE_FUNKSJONALITET", "KORTVARIG_ARBEID", "FRISINN_ATFL_SAMME_ORG", "FRISINN_VARIANT_SN_MED_FL_INNTEKT", "FRISINN_VARIANT_FL_MED_SN_INNTEKT", "FRISINN_VARIANT_NY_FL", "FRISINN_VARIANT_NY_SN_2019", "FRISINN_VARIANT_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT", "FRISINN_VARIANT_KOMBINERT_NY_FL", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_SN_2020", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD", "MANGLER_SØKNADOPPLYSNING_NÆRING", "MANGLER_SØKNADOPPLYSNING_FRILANS", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE", "DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP", "AAP_DP_SISTE_10_MND_SVP", "FL_SN_IKKE_STOTTET_FOR_SVP" ],
         "type" : "string"
       },
-      "SimuleringResultatDto" : {
+      "SimuleringDto" : {
         "properties" : {
+          "simuleringResultat" : {
+            "$ref" : "#/components/schemas/DetaljertSimuleringResultatDto"
+          },
+          "simuleringResultatUtenInntrekk" : {
+            "$ref" : "#/components/schemas/DetaljertSimuleringResultatDto"
+          },
           "slåttAvInntrekk" : {
             "type" : "boolean"
-          },
-          "sumEtterbetaling" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "sumFeilutbetaling" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "sumInntrekk" : {
-            "format" : "int64",
-            "type" : "integer"
           }
         },
+        "required" : [ "simuleringResultat", "simuleringResultatUtenInntrekk", "slåttAvInntrekk" ],
         "type" : "object"
+      },
+      "SimuleringForMottakerDto" : {
+        "properties" : {
+          "mottakerNavn" : {
+            "type" : "string"
+          },
+          "mottakerNummer" : {
+            "type" : "string"
+          },
+          "mottakerType" : {
+            "$ref" : "#/components/schemas/SimuleringForMottakerDtoMottakerType"
+          },
+          "nesteUtbPeriode" : {
+            "$ref" : "#/components/schemas/Periode"
+          },
+          "resultatOgMotregningRader" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatRadDto"
+            },
+            "type" : "array"
+          },
+          "resultatPerFagområde" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatPerFagområdeDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "mottakerType" ],
+        "type" : "object"
+      },
+      "SimuleringForMottakerDtoMottakerType" : {
+        "enum" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ],
+        "x-enum-varnames" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ],
+        "type" : "string"
+      },
+      "SimuleringResultatPerFagområdeDto" : {
+        "properties" : {
+          "fagOmrådeKode" : {
+            "$ref" : "#/components/schemas/SimuleringResultatPerFagområdeDtoFagOmrådeKode"
+          },
+          "rader" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatRadDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "fagOmrådeKode", "rader" ],
+        "type" : "object"
+      },
+      "SimuleringResultatPerFagområdeDtoFagOmrådeKode" : {
+        "enum" : [ "REFUTG", "FP", "FPREF", "SP", "SPREF", "SVP", "SVPREF", "PB", "PBREF", "PN", "PNREF", "OM", "OMREF", "OPP", "OPPREF", "OOP", "OOPREF", "FRISINN", "UNG", "-" ],
+        "x-enum-varnames" : [ "ENGANGSSTØNAD", "FORELDREPENGER", "FORELDREPENGER_ARBEIDSGIVER", "SYKEPENGER", "SYKEPENGER_ARBEIDSGIVER", "SVANGERSKAPSPENGER", "SVANGERSKAPSPENGER_ARBEIDSGIVER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_SYKT_BARN_ARBEIDSGIVER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_NÆRSTÅENDE_ARBEIDSGIVER", "OMSORGSPENGER", "OMSORGSPENGER_ARBEIDSGIVER", "OPPLÆRINGSPENGER", "OPPLÆRINGSPENGER_ARBEIDSGIVER", "PLEIEPENGER_V1", "PLEIEPENGER_V1_ARBEIDSGIVER", "FRISINN", "UNG", "UDEFINERT" ],
+        "type" : "string"
+      },
+      "SimuleringResultatPerMånedDto" : {
+        "properties" : {
+          "beløp" : {
+            "format" : "int64",
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/Periode"
+          }
+        },
+        "required" : [ "beløp", "periode" ],
+        "type" : "object"
+      },
+      "SimuleringResultatRadDto" : {
+        "properties" : {
+          "feltnavn" : {
+            "$ref" : "#/components/schemas/SimuleringResultatRadDtoFeltnavn"
+          },
+          "resultaterPerMåned" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatPerMånedDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "feltnavn" ],
+        "type" : "object"
+      },
+      "SimuleringResultatRadDtoFeltnavn" : {
+        "enum" : [ "nyttBeløp", "tidligereUtbetalt", "differanse", "resultatEtterMotregning", "inntrekkNesteMåned", "resultat" ],
+        "x-enum-varnames" : [ "NYTT_BELØP", "TIDLIGERE_UTBETALT", "DIFFERANSE", "RESULTAT_ETTER_MOTREGNING", "INNTREKK_NESTE_MÅNED", "RESULTAT" ],
+        "type" : "string"
       },
       "SkjulNotatDto" : {
         "properties" : {
@@ -8100,7 +8218,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SimuleringResultatDto"
+                  "$ref" : "#/components/schemas/SimuleringDto"
                 }
               }
             },
