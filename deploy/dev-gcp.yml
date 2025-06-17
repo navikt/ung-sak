@@ -90,9 +90,6 @@ spec:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: dev-fss
-        - application: k9-klage
-          namespace: k9saksbehandling
-          cluster: dev-fss
         - application: k9-los-api
           namespace: k9saksbehandling
           cluster: dev-fss
