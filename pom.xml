@@ -39,7 +39,7 @@
         <swagger.version>2.2.33</swagger.version>
         <junit.version>5.13.1</junit.version>
         <k9format.version>12.3.1</k9format.version>
-        <jackson.version>2.19.0</jackson.version>
+        <jackson.version>2.19.1</jackson.version>
         <asm.version>9.8</asm.version>
         <kotlin-stdlib.version>2.1.21</kotlin-stdlib.version>
         <jandex.version>3.3.1</jandex.version>
@@ -92,7 +92,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>8.0.2.Final</version>
+                <version>9.0.1.Final</version>
             </dependency>
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
