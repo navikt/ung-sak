@@ -1,13 +1,9 @@
-package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.simulering;
-
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.oppdrag.simulering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
@@ -17,10 +13,10 @@ import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+
 @ApplicationScoped
-@FagsakYtelseTypeRef(OMSORGSPENGER)
-@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(UNGDOMSYTELSE)
 public class SimuleringDump implements DebugDumpBehandling {
 
     private K9OppdragRestKlient restKlient;

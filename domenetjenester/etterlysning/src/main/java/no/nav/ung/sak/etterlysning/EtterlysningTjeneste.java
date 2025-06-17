@@ -43,7 +43,7 @@ public class EtterlysningTjeneste {
         EtterlysningType type) {
         final var gjeldendeEtterlysninger = hentGjeldendeEtterlysninger(behandlingId, fagsakId, type);
         return gjeldendeEtterlysninger.stream()
-            .map(hen -> new LocalDateTimeline<>(hen.getPeriode().toLocalDateInterval(), new EtterlysningData(hen.getStatus(), hen.getFrist(), hen.getGrunnlagsreferanse(), hen.getUttalelse().map(ut -> new UttalelseData(ut.harGodtattEndringen(), ut.getUttalelseBegrunnelse())).orElse(null))))
+            .map(hen -> new LocalDateTimeline<>(hen.getPeriode().toLocalDateInterval(), new EtterlysningData(hen.getStatus(), hen.getFrist(), hen.getGrunnlagsreferanse(), hen.getUttalelse().map(ut -> new UttalelseData(ut.harUttalelse(), ut.getUttalelseBegrunnelse())).orElse(null))))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
     }

@@ -179,12 +179,12 @@ public class Etterlysning extends BaseEntitet {
     }
 
 
-    public void mottattUttalelse(JournalpostId svarJournalpostId, boolean erEndringGodkjent, String uttalelse) {
+    public void mottaSvar(JournalpostId svarJournalpostId, boolean harUttalelse, String uttalelse) {
         if (status != EtterlysningStatus.VENTER) {
             throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
         }
         this.status = EtterlysningStatus.MOTTATT_SVAR;
-        this.uttalelse = new UttalelseEntitet(erEndringGodkjent, uttalelse, svarJournalpostId);
+        this.uttalelse = new UttalelseEntitet(harUttalelse, uttalelse, svarJournalpostId);
     }
 
     public Optional<UttalelseEntitet> getUttalelse() {
