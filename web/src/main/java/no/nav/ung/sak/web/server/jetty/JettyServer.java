@@ -6,10 +6,8 @@ import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
 import no.nav.ung.sak.web.app.ApplicationConfig;
 import no.nav.ung.sak.web.app.FrontendApiConfig;
-import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 import no.nav.ung.sak.web.server.InternalApplicationConfig;
 import no.nav.ung.sak.web.server.jetty.db.DatabaseScript;
-import no.nav.ung.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.ung.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.ung.sak.web.server.jetty.db.EnvironmentClass;
 import org.eclipse.jetty.ee9.security.ConstraintSecurityHandler;
@@ -27,7 +25,6 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,7 +212,6 @@ public class JettyServer {
             no.nav.k9.felles.oidc.OidcApplication.class,
             ApplicationConfig.class,
             InternalApplicationConfig.class,
-            OppgaveRedirectApplication.class,
             FrontendApiConfig.class
         };
     }

@@ -1,21 +1,17 @@
-package no.nav.ung.sak.kontrakt.produksjonsstyring;
-
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+package no.nav.ung.sak.kontrakt.fagsak;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY, isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SøkeSakEllerBrukerDto {
 
     @JsonProperty(value = "searchString", required = true)

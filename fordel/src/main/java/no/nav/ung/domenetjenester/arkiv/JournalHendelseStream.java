@@ -10,7 +10,7 @@ import no.nav.ung.fordel.kafka.AivenKafkaSettings;
 import no.nav.ung.fordel.kafka.KafkaIntegration;
 import no.nav.ung.fordel.kafka.Topic;
 import no.nav.ung.fordel.kafka.utils.KafkaUtils;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.OmrådeTema;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;

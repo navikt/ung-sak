@@ -1,4 +1,4 @@
-package no.nav.ung.kodeverk.produksjonsstyring;
+package no.nav.ung.kodeverk;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;

@@ -9,7 +9,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.OmrådeTema;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;

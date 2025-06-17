@@ -22,11 +22,6 @@ public class MeldingRepository {
         entityManager.flush();
     }
 
-    public void lagre(ProduksjonsstyringOppgaveEntitet oppgave) {
-        entityManager.persist(oppgave);
-        entityManager.flush();
-    }
-
     @SuppressWarnings("unchecked")
     public Optional<MottattMeldingEntitet> finnMottattMelding(String journalpostId) {
         return entityManager.createQuery("select mm from MottattMelding mm where mm.journalpostId=:journalpostId")

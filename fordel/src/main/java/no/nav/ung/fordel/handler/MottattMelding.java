@@ -6,7 +6,7 @@ import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.OmrådeTema;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
