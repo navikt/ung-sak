@@ -2,6 +2,8 @@ package no.nav.ung.sak.økonomi.simulering.klient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -18,6 +20,8 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
+import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.økonomi.simulering.klient.dto.OppdragXmlDto;
 
 @Dependent
 public class K9OppdragRestKlient {
@@ -27,7 +31,8 @@ public class K9OppdragRestKlient {
     private URI uriAktørBytte;
     private URI uriSimuleringDiagnostikk;
     private URI uriSimuleringResultat;
-    private URI uriKansellerSimulering;
+    private URI uriKanseller;
+    private URI uriAlleOppdragXmler;
 
     public K9OppdragRestKlient() {
     }
@@ -41,7 +46,9 @@ public class K9OppdragRestKlient {
         this.uriAktørBytte = tilUri(urlK9Oppdrag, "forvaltning/oppdaterAktoerId");
         this.uriSimuleringDiagnostikk = tilUri(urlK9Oppdrag, "diagnostikk/simulering");
         this.uriSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/resultat");
-        this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/kanseller");
+        this.uriKanseller = tilUri(urlK9Oppdrag, "simulering/kanseller");
+
+        this.uriAlleOppdragXmler = tilUri(urlK9Oppdrag, "iverksett/forvaltning/hent-oppdrag-xmler");
 
         //avviker fra @Inject av OidcRestClient fordi det trengs lenger timeout enn normalt mot k9-oppdrag pga simuleringer som tar lang tid (over 20 sekunder) når det er mange perioder
         restClient = new K9OppdragRestClientConfig().createOidcRestClient(tokenProvider, k9OppdragScope);
@@ -74,7 +81,12 @@ public class K9OppdragRestKlient {
 
     public void kansellerSimulering(UUID behandlingUuid) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
-        restClient.post(uriKansellerSimulering, behandlingreferanse);
+        restClient.post(uriKanseller, behandlingreferanse);
+    }
+
+    public List<OppdragXmlDto> alleOppdragXmler(Saksnummer saksnummer){
+        OppdragXmlDto[] resultat = restClient.post(uriAlleOppdragXmler, new no.nav.k9.oppdrag.kontrakt.Saksnummer(saksnummer.getVerdi()), OppdragXmlDto[].class);
+        return resultat != null ? Arrays.asList(resultat) : null;
     }
 
     public Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId, Set<PersonIdent> utgåttPersonident) {
