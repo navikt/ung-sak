@@ -109,17 +109,16 @@ public class EtterlysningRestTjeneste {
             etterlysning.setFrist(frist);
             // Det vil mest sannsynlig bare være en etterlysning her, så vi anser det som ok å lagre inne i loopen for lesbarhet
             etterlysningRepository.lagre(etterlysning);
-            opprettNySettUtløptTask(behandling, etterlysning, frist);
+            opprettNySettUtløptTask(behandling, frist);
         });
         // Oppretter gjenoppta task for å oppdatere frist på aksjonspunkt (gjøres automatisk ved kjøring av kompletthetsteg)
         behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }
 
-    private void opprettNySettUtløptTask(Behandling behandling, no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning etterlysning, LocalDateTime frist) {
+    private void opprettNySettUtløptTask(Behandling behandling, LocalDateTime frist) {
         var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptDersomVenterTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
-        prosessTaskData.setProperty(SettEtterlysningTilUtløptDersomVenterTask.ETTERLYSNING_ID, etterlysning.getId().toString());
         prosessTaskData.setNesteKjøringEtter(frist);
         prosessTaskTjeneste.lagre(prosessTaskData);
     }

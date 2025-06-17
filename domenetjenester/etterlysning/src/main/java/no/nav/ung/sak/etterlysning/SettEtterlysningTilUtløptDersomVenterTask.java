@@ -4,18 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import org.slf4j.Logger;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @ApplicationScoped
@@ -24,29 +20,23 @@ import java.util.Set;
 public class SettEtterlysningTilUtløptDersomVenterTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "etterlysning.planlagt.settUtlopt";
-    public static final String ETTERLYSNING_ID = "etterlysningId";
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SettEtterlysningTilUtløptDersomVenterTask.class);
 
-    private EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste;
     private BehandlingRepository behandlingRepository;
-    private EtterlysningRepository etterlysningRepository;
+    private ProsessTaskTjeneste taskTjeneste;
 
     public SettEtterlysningTilUtløptDersomVenterTask() {
         // CDI
     }
 
     @Inject
-    public SettEtterlysningTilUtløptDersomVenterTask(EtterlysningProssesseringTjeneste etterlysningProssesseringTjeneste, BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, EtterlysningRepository etterlysningRepository) {
+    public SettEtterlysningTilUtløptDersomVenterTask(BehandlingRepository behandlingRepository,
+                                                     BehandlingLåsRepository behandlingLåsRepository,
+                                                     ProsessTaskTjeneste taskTjeneste) {
         super(behandlingLåsRepository);
-        this.etterlysningProssesseringTjeneste = etterlysningProssesseringTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.etterlysningRepository = etterlysningRepository;
-    }
-
-    @Override
-    public Set<String> requiredProperties() {
-        return Set.of(ETTERLYSNING_ID);
+        this.taskTjeneste = taskTjeneste;
     }
 
     @Override
@@ -57,13 +47,15 @@ public class SettEtterlysningTilUtløptDersomVenterTask extends BehandlingProses
             LOG.info("Behandling var ferdigbehandlet, gjør ingenting");
             return;
         }
-        var etterlysningId = Long.parseLong(prosessTaskData.getPropertyValue(ETTERLYSNING_ID));
-        var etterlysning = etterlysningRepository.hentEtterlysning(etterlysningId);
-        if (etterlysning.getStatus().equals(EtterlysningStatus.VENTER) && etterlysning.getFrist().isBefore(LocalDateTime.now())) {
-            etterlysningProssesseringTjeneste.settEttelysningerUtløpt(List.of(etterlysning));
-        } else {
-            LOG.info("Etterlysning var ikke i VENTER status eller fristen var ikke utløpt, gjør ingenting");
+        var harKlarTask = taskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.KLAR).stream().anyMatch(it -> it.getBehandlingId().equals(behandlingId));
+        var harVetoTask = taskTjeneste.finnAlle(SettEtterlysningerForBehandlingTilUtløptTask.TASKTYPE, ProsessTaskStatus.VETO).stream().anyMatch(it -> it.getBehandlingId().equals(behandlingId));
+        if (harKlarTask || harVetoTask) {
+            LOG.info("Det finnes allerede en task for å sette etterlysninger til utløpt for behandling {}, hopper over opprettelse av ny task", behandling);
+            return;
         }
+        var nyTaskData = ProsessTaskData.forProsessTask(SettEtterlysningerForBehandlingTilUtløptTask.class);
+        nyTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
+        taskTjeneste.lagre(nyTaskData);
     }
 
 }
