@@ -81,7 +81,6 @@ spec:
         - host: "dokarkiv.prod-fss-pub.nais.io"
         - host: "k9-abakus.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
-        - host: "k9-tilbake.prod-fss-pub.nais.io"
         - host: "norg2.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
@@ -191,10 +190,6 @@ spec:
       value: https://k9-inntektsmelding.intern.nav.no/k9/inntektsmelding
     - name: K9INNTEKTSMELDING_SCOPE
       value: api://prod-gcp.k9saksbehandling.k9-inntektsmelding/.default
-    - name: K9FORDEL_URL
-      value: https://k9-fordel.prod-fss-pub.nais.io/k9/fordel/api
-    - name: K9FORDEL_SCOPE
-      value: api://prod-fss.k9saksbehandling.k9-fordel/.default
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: https://ung-deltakelse-opplyser.intern.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
@@ -261,6 +256,6 @@ spec:
       value: "ung-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus"
+      value: "srvPDP,srvsaf,srvk9-abakus"
     - name: PIP_APPS
       value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf"

@@ -201,10 +201,6 @@ spec:
       value: https://k9-inntektsmelding.intern.dev.nav.no/k9/inntektsmelding
     - name: K9INNTEKTSMELDING_SCOPE
       value: api://dev-gcp.k9saksbehandling.k9-inntektsmelding/.default
-    - name: K9FORDEL_URL
-      value: https://k9-fordel.dev-fss-pub.nais.io/k9/fordel/api
-    - name: K9FORDEL_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-fordel/.default
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: https://ung-deltakelse-opplyser.intern.dev.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
