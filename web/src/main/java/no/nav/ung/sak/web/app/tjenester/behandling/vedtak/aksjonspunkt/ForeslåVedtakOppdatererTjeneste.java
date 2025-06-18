@@ -14,19 +14,24 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.kontrakt.vedtak.VedtaksbrevOverstyringDto;
+import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
+
+import java.util.List;
 
 @Dependent
 public class ForeslåVedtakOppdatererTjeneste {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag;
+    private TotrinnTjeneste totrinnTjeneste;
     private VedtakTjeneste vedtakTjeneste;
 
     @Inject
     public ForeslåVedtakOppdatererTjeneste(HistorikkinnslagRepository historikkinnslagRepository,
-                                           OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
+                                           OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag, TotrinnTjeneste totrinnTjeneste,
                                            VedtakTjeneste vedtakTjeneste) {
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.opprettToTrinnsgrunnlag = opprettToTrinnsgrunnlag;
+        this.totrinnTjeneste = totrinnTjeneste;
         this.vedtakTjeneste = vedtakTjeneste;
     }
 
@@ -36,6 +41,7 @@ public class ForeslåVedtakOppdatererTjeneste {
 
         if (AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
+            totrinnTjeneste.settNyeTotrinnaksjonspunktvurderinger(behandling, List.of());
         }
         opprettHistorikkinnslag(behandling);
     }

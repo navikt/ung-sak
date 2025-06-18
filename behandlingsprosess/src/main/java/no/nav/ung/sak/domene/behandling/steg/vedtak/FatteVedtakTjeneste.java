@@ -57,7 +57,7 @@ public class FatteVedtakTjeneste {
             final var fatterVedtakAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK);
 
             // Dersom vi ikke har fatter vedtak aksjonspunkt eller allerede har opprettet aksjonspunkt og behandlingen er flagget som totrinnsbehandling returnerer vi med aksjonspunkt og går videre til steg-ut
-            if (fatterVedtakAksjonspunkt.isEmpty() || fatterVedtakAksjonspunkt.filter(Aksjonspunkt::erÅpentAksjonspunkt).isPresent()) {
+            if (fatterVedtakAksjonspunkt.filter(Aksjonspunkt::erUtført).isEmpty()) {
                 return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FATTER_VEDTAK));
             }
 
