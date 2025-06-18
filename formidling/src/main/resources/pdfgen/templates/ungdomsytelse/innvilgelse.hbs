@@ -9,7 +9,7 @@
 
         <p>
             Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du ungdomsprogramytelse
-            på {{> felles/beløp dagsats}} per dag utenom lørdag og søndag.
+            på {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.
         </p>
 
         {{#each satsEndringer}}
@@ -18,7 +18,7 @@
                     datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
             {{/if}}
             {{#if fødselBarn}}
-                <p>Fordi du fikk barn {{fom}}, får du {{> felles/beløp barnetilleggSats}} mer {{#if fikkFlereBarn}}per barn{{/if}} fra denne datoen. Da får
+                <p>Fordi du fikk barn {{fom}}, får du {{> felles/beløp barnetilleggSats}} mer {{#if fikkFlereBarn}}for hvert barn{{/if}} fra denne datoen. Da får
                     du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
             {{/if}}
             {{#if dødsfallBarn}}
@@ -42,28 +42,28 @@
             side på nav.no</a>.
         </p>
 
-        <h2>Hvorfor får du ungdomsprogramytelsen?</h2>
-        <p>Du får ytelsen fordi du er med i ungdomsprogrammet. Ytelsen gir deg en inntekt mens du deltar i
+        <h2>Hvorfor får du penger?</h2>
+        <p>Du får penger fordi du er med i ungdomsprogrammet. Pengene gir deg en inntekt mens du deltar i
             ungdomsprogrammet.</p>
-        <p>Du får penger gjennom ytelsen så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få penger i
+        <p>Pengene får du så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få det i
             mer enn ett år.</p>
 
-        <p>Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.</p>
+        <p>Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx.</p>
 
-        <h2>Hvordan regner vi oss fram til hvor mye penger du har rett på?</h2>
+        <h2>Hvordan regner vi oss fram til hvor mye penger du får?</h2>
         {{#with satsOgBeregning}}
             <p>
-                Når Nav regner ut hvor mye penger du kan ha rett på, bruker vi en bestemt sum som heter grunnbeløpet.
-                Grunnbeløpet er bestemt av Stortinget, og det endrer seg hvert år.
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet.
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år.
                 Nå er grunnbeløpet på {{> felles/beløp grunnbeløp}}.
             </p>
 
             <p>
                 Når du er {{#if kunHøySats}}over{{else}}under{{/if}} {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{beregning.faktor}}.
-                Det vil si {{> felles/beløp beregning.årsbeløp}} i året.
+                Det blir {{> felles/beløp beregning.årsbeløp}} i året.
                 Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
             </p>
-            <p>Det vil si at du har rett på {{> felles/beløp beregning.grunnsats}} per dag. Det er dette vi kaller dagsatsen.</p>
+            <p>Det vil si at du har rett på {{> felles/beløp beregning.grunnsats}} per dag.</p>
             {{#with overgangTilHøySats}}
                 <p>
                     Når du er over {{satsOgBeregning.aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
@@ -75,7 +75,10 @@
 
         {{#with satsOgBeregning.barnetillegg}}
             <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp grunnsats}} per dag i barnetillegg.
-                Det vil si at du til sammen får {{> felles/beløp grunnsatsTotal}} per dag.</p>
+                {{#if ../ingenSatsEndringHendelser}}
+                    Det vil si at du til sammen får {{> felles/beløp grunnsatsTotal}} per dag.
+                {{/if}}
+            </p>
         {{/with}}
 
         <h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen </h2>

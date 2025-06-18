@@ -96,7 +96,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 satsEndringHendelseDtos,
                 satsOgBeregningDto,
                 brevfeilSamler.samletFeiltekst(),
-                erEtterbetaling));
+                erEtterbetaling,
+                satsEndringHendelseDtos.isEmpty()));
     }
 
     private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, BrevfeilHåndterer brevfeilSamler) {
@@ -181,7 +182,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var barnetillegg = nyesteSats.antallBarn() > 0
             ? new BarnetilleggDto(
-            nyesteSats.antallBarn(),
+            Satsberegner.tallTilNorskHunkjønnTekst(nyesteSats.antallBarn()),
             Satsberegner.beregnBarnetilleggSats(nyesteSats),
             Satsberegner.beregnDagsatsInklBarnetillegg(nyesteSats))
             : null;

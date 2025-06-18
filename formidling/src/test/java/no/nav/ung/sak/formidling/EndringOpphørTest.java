@@ -27,13 +27,13 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
     @DisplayName("Opphørsbrev")
     @Test
     void standardOpphørsbrev() {
-        LocalDate opphørsdato = LocalDate.of(2025, 8, 15);
+        LocalDate sluttdato = LocalDate.of(2025, 8, 15);
         var forrigeBehandlingGrunnlag = BrevScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
-        var ungTestGrunnlag = BrevScenarioer.endringOpphør(opphørsdato, forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        var ungTestGrunnlag = BrevScenarioer.endringOpphør(forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval(), sluttdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ikke lenger ungdomsprogramytelse \
-                Fra 15. august 2025 får du ikke lenger penger gjennom ungdomsytelsen. \
+                Fra 16. august 2025 får du ikke lenger penger gjennom ungdomsytelsen. \
                 Det er fordi du ikke lenger er med i ungdomsprogrammet. \
                 Den siste utbetalingen får du i september 2025, før den 10. i måneden. \
                 Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
@@ -87,9 +87,9 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
-        LocalDate opphørsdato = LocalDate.of(2025, 8, 15);
+        LocalDate sluttdato = LocalDate.of(2025, 8, 15);
         var forrigeBehandlingGrunnlag = BrevScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
-        var ungTestGrunnlag = BrevScenarioer.endringOpphør(opphørsdato, forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        var ungTestGrunnlag = BrevScenarioer.endringOpphør(forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval(), sluttdato);
         return lagOpphørscenario(ungTestGrunnlag, forrigeBehandlingGrunnlag);
     }
 }

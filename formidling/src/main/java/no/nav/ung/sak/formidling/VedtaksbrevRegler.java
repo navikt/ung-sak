@@ -47,10 +47,10 @@ public class VedtaksbrevRegler {
     public VedtaksbrevRegelResulat kjør(Long id) {
         var behandling = behandlingRepository.hentBehandling(id);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
-        return lagResultatMedBygger(behandling, detaljertResultatTidslinje);
+        return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
-    private VedtaksbrevRegelResulat lagResultatMedBygger(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private VedtaksbrevRegelResulat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultaterInfo = detaljertResultat
             .toSegments().stream()
             .flatMap(it -> it.getValue().resultatInfo().stream())
