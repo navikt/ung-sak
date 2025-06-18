@@ -76,6 +76,7 @@ public class FatteVedtakTjeneste {
                 throw new IllegalStateException("Kunne ikke fatte vedtak. Hadde aksjonspunkt med status " + fatterVedtakAksjonspunkt.get().getStatus() + " og totrinnsvurderinger: " + totrinnaksjonspunktvurderinger);
             }
         } else {
+            totrinnTjeneste.deaktiverTotrinnaksjonspunktvurderinger(behandling);
             vedtakTjeneste.lagHistorikkinnslagFattVedtak(behandling);
         }
 

@@ -41,7 +41,6 @@ public class ForeslåVedtakOppdatererTjeneste {
 
         if (AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
             opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
-            totrinnTjeneste.settNyeTotrinnaksjonspunktvurderinger(behandling, List.of());
         }
         opprettHistorikkinnslag(behandling);
     }

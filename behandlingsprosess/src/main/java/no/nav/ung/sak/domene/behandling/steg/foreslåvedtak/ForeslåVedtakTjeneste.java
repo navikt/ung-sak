@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
+import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ class ForeslåVedtakTjeneste {
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
+    private TotrinnTjeneste totrinnTjeneste;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
