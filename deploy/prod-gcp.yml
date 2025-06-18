@@ -81,22 +81,13 @@ spec:
         - host: "dokarkiv.prod-fss-pub.nais.io"
         - host: "k9-abakus.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
-        - host: "k9-tilbake.prod-fss-pub.nais.io"
         - host: "norg2.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
+        - host: "oppgave.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
-          namespace: k9saksbehandling
-          cluster: prod-fss
-        - application: k9-klage
-          namespace: k9saksbehandling
-          cluster: prod-fss
-        - application: k9-los-api
-          namespace: k9saksbehandling
-          cluster: prod-fss
-        - application: k9-tilbake
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: sif-abac-pdp
@@ -139,13 +130,12 @@ spec:
       value: k9saksbehandling.aapen-ung-stonadstatistikk-v1
     - name: KAFKA_PRODUKSJONSSTYRING_TOPIC
       value: k9saksbehandling.privat-k9-produksjonsstyring-sak-v1
-    - name: KAFKA_K9_RAPID_TOPIC
-      value: omsorgspenger.k9-rapid-v2
-    - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
-      value: k9saksbehandling.k9-infotrygd-feed-hendelse
+    - name: HENDELSE_PERSON_LEESAH_TOPIC
+      value: pdl.leesah-v1
     - name: KAFKA_JOURNAL_TOPIC
       value: teamdokumenthandtering.aapen-dok-journalfoering
 
+    # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://ung.intern.nav.no
 
@@ -162,20 +152,12 @@ spec:
       value: https://ung-sak.intern.nav.no/ung/sak/api/registerdata/iay/callback
     - name: ABAKUS_CALLBACK_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-sak/.default
-    - name: ABAC_PDP_ENDPOINT_URL
-      value: http://abac-k9.k9saksbehandling/application/authorize
-    - name: K9_OPPDRAG_PROXY_URL
-      value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
       value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
-      value: https://oppgave.nais.adeo.no/api/v1/oppgaver
+      value: https://oppgave.prod-fss-pub.nais.io/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
       value: api://prod-fss.oppgavehandtering.oppgave/.default
-    - name: MEDL2_RS_URL
-      value: https://medlemskap-medl-api.intern.nav.no/api/v1/medlemskapsunntak
-    - name: MEDL2_RS_SCOPE
-      value: api://prod-fss.team-rocket.medlemskap-medl-api/.default
     - name: PDL_BASE_URL
       value: https://pdl-api.prod-fss-pub.nais.io/graphql
     - name: PDL_SCOPE
@@ -186,24 +168,10 @@ spec:
       value: https://k9-oppdrag.prod-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-oppdrag/.default
-    - name: K9_TILBAKE_DIREKTE_URL
-      value: https://k9-tilbake.prod-fss-pub.nais.io/k9/tilbake/api
-    - name: K9_TILBAKE_SCOPE
-      value: api://prod-fss.k9saksbehandling.k9-tilbake/.default
-    - name: INFOTRYGD_BS_BASE_URI
-      value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
-    - name: K9_INFOTRYGD_SCOPE
-      value: api://prod-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
+    - name: K9_OPPDRAG_PROXY_URL
+      value: /k9/oppdrag/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.adeo.no
-    - name: K9INNTEKTSMELDING_URL
-      value: https://k9-inntektsmelding.intern.nav.no/k9/inntektsmelding
-    - name: K9INNTEKTSMELDING_SCOPE
-      value: api://prod-gcp.k9saksbehandling.k9-inntektsmelding/.default
-    - name: K9FORDEL_URL
-      value: https://k9-fordel.prod-fss-pub.nais.io/k9/fordel/api
-    - name: K9FORDEL_SCOPE
-      value: api://prod-fss.k9saksbehandling.k9-fordel/.default
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: https://ung-deltakelse-opplyser.intern.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
@@ -237,13 +205,12 @@ spec:
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 
-    # metrics
     - name: SENSU_HOST
       value: "sensu.nais"
     - name: SENSU_PORT
       value: "3030"
 
-        # Feature-flag
+    # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
     - name: PUBLISER_PRODUKSJONSSTYRING_HENDELSE
@@ -270,6 +237,6 @@ spec:
       value: "ung-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus"
+      value: "srvPDP,srvsaf,srvk9-abakus"
     - name: PIP_APPS
       value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf"
