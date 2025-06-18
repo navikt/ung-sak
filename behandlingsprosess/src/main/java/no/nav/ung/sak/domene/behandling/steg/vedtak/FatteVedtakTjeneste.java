@@ -20,6 +20,20 @@ import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 
+/**
+ * Håndtering av fatte vedtak.
+ * Behandlinger som kommer inn kan ha fem tilstander:
+ *   1) Behandlinger som ikke er totrinnsbehandlinger
+ *      Resultat: Da opprettes behandlingvedtak og behandlingen går videre til iverksetting.
+ *   2) Behandlinger som er totrinnsbehandling og som ikke har blitt vurdert av beslutter tidligere
+ *      Resultat: Oppretter aksjonspunkt for fatter vedtak.
+ *   3) Behandlinger som er totrinnsbehandling og som har blitt vurdert (utført) der alle vurderinger er godkjent
+ *      Resultat: Da opprettes behandlingvedtak og behandlingen går videre til iverksetting.
+ *   4) Behandlinger som er totrinnsbehandling og som har blitt vurdert (utført) der minst en vurdering ikke er godkjent
+ *      Resultat: Fatter vedtak-aksjonspunkt avbrytes, behandlingen flyttes tilbake til første aksjonspunkt som ikke er godkjent.
+ *   5) Behandlinger som har tidligere blitt returnert til saksbehandler og som har avbrutt fatter vedtak-aksjonspunkt
+ *      Resultat: Fatter vedtak-aksjonspunkt opprettes på nytt.
+ */
 @ApplicationScoped
 public class FatteVedtakTjeneste {
 
