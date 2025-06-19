@@ -69,7 +69,7 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
 
     private EndretSluttDato lagEndretSluttdato(LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {
         var sluttDato = denneProgramperiode.getTom();
-        var opphørStartDato = PeriodeBeregner.nesteUkedag(sluttDato);
+        var opphørStartDato = sluttDato.plusDays(1);
         var harFlyttetBakover = sluttDato.isBefore(forrigeProgramperiode.getTom());
 
         var sisteUtbetalingsdato = PeriodeBeregner.utledFremtidigUtbetalingsdato(

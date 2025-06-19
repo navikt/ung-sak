@@ -36,7 +36,7 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
             .getMinLocalDate();
 
         var sisteUtbetalingsdato = PeriodeBeregner.utledFremtidigUtbetalingsdato(
-            PeriodeBeregner.forrigeUkedag(opphørStartdato),
+            opphørStartdato.minusDays(1),
             bestemInneværendeMåned());
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.OPPHØR,
