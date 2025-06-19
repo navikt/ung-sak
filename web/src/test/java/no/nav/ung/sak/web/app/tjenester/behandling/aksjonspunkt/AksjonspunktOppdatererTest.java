@@ -19,7 +19,6 @@ import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnRepository;
-import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.ung.sak.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -81,7 +80,6 @@ public class AksjonspunktOppdatererTest {
         var vedtaksbrevHåndterer = new ForeslåVedtakOppdatererTjeneste(
             mock(HistorikkinnslagRepository.class),
             opprettTotrinnsgrunnlag,
-            new TotrinnTjeneste(new TotrinnRepository(entityManager)),
             vedtakTjeneste);
 
         var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer);
