@@ -480,6 +480,42 @@ public class BrevScenarioer {
     }
 
     /**
+     *
+     *  Innvilget med sluttdato
+     *
+     */
+    public static UngTestScenario innvilget19årMedSluttdato(LocalDate startdato, LocalDate sluttdato) {
+        var p = new LocalDateInterval(startdato, startdato.plusYears(1));
+        var fagsakPeriode = new LocalDateInterval(startdato, startdato.plusWeeks(52).minusDays(1));
+        var programperiode = new LocalDateInterval(startdato, sluttdato);
+        var satser = new LocalDateTimeline<>(p, lavSatsBuilder(startdato).build());
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(programperiode.getFomDato(), programperiode.getTomDato())),
+            satser,
+            uttaksPerioder(programperiode),
+            tilkjentYtelsePerioder(satser, programperiode),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(programperiode, Utfall.OPPFYLT),
+                new LocalDateSegment<>(sluttdato.plusDays(1), fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+            )
+
+            ),
+            startdato.minusYears(19).plusDays(42),
+            List.of(startdato),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(startdato, sluttdato)),
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(startdato, sluttdato)),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(startdato, sluttdato))
+            ),
+            null,
+            Collections.emptyList(),
+            null);
+    }
+
+    /**
      * Har allerede opphørt, endrer opphørsdato
      */
     public static UngTestScenario endringSluttdato(LocalDate nySluttdato, LocalDateInterval opprinneligProgramPeriode) {

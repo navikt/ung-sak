@@ -68,6 +68,47 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
+    @DisplayName("Førstegangsbehandling med opphør")
+    @Test
+    void medOpphør() {
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        LocalDate sluttdato = LocalDate.of(2025, 12, 12);
+        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedSluttdato(fom, sluttdato);
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får ungdomsprogramytelse \
+                Fra 1. august 2025 til 12. desember 2025 får du ungdomsprogramytelse på 681 kroner per dag, utenom lørdag og søndag. \
+                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Den siste utbetalingen får du før den 10. januar 2026. \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
+                Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
+                Nå er grunnbeløpet på 130 160 kroner. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
+                Det blir 177 105 kroner i året. \
+                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Det vil si at du har rett på 681 kroner per dag. \
+                """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
+        );
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ungdomsprogramytelse</h1>"
+            );
+    }
+
     @Test
     void høySats() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
@@ -116,9 +157,10 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fra 1. august 2025 til 15. februar 2026 får du ungdomsprogramytelse på 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Den siste utbetalingen får du før den 10. mars 2026.
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
-                """ + hvorforFårDuPleiepengerAvsnitt() + """
+                """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """
                 Hvordan regner vi oss fram til hvor mye penger du får? \
                 Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
@@ -290,6 +332,16 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             Du får penger fordi du er med i ungdomsprogrammet. \
             Pengene gir deg en inntekt mens du deltar i ungdomsprogrammet. \
             Pengene får du så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få det i mer enn ett år. \
+            Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx. \
+            """;
+    }
+
+    private static String hvorforFårDuPleiepengerAvsnittForOpphør() {
+        return """
+            Hvorfor får du penger? \
+            Du får penger fordi du er med i ungdomsprogrammet. \
+            Pengene gir deg en inntekt mens du deltar i ungdomsprogrammet. \
+            Pengene får du så lenge du er i ungdomsprogrammet. \
             Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx. \
             """;
     }

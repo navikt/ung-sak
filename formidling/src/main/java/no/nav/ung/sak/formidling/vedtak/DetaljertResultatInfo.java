@@ -12,6 +12,6 @@ public record DetaljertResultatInfo(DetaljertResultatType detaljertResultatType,
 
     public String utledForklaring() {
         var typeTekst = detaljertResultatType.name() + " - " + detaljertResultatType.getNavn();
-        return forklaring != null ? typeTekst + ". Forklaring: " + forklaring : typeTekst;
+        return forklaring != null && !forklaring.isBlank() ? typeTekst + ". Forklaring: " + forklaring : typeTekst;
     }
 }
