@@ -142,7 +142,7 @@ spec:
 
     # PDL
     - name: PDL_TEMA
-      value: OMS
+      value: UNG
 
     # Restservice Generelle
     - name: K9ABAKUS_URL
