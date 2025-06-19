@@ -13,4 +13,14 @@ public class PeriodeUtils {
         }
         return nesteDag;
     }
+
+    public static LocalDate forrigeUkedag(LocalDate date) {
+        LocalDate forrigeDag = date.minusDays(1);
+        if (forrigeDag.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            return forrigeDag.minusDays(1);
+        } else if (forrigeDag.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            return forrigeDag.minusDays(2);
+        }
+        return forrigeDag;
+    }
 }
