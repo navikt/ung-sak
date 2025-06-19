@@ -507,8 +507,7 @@ public class BrevScenarioer {
             List.of(startdato),
             Set.of(
                 new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(startdato, sluttdato)),
-                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(startdato, sluttdato)),
-                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(startdato, sluttdato))
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(startdato, sluttdato))
             ),
             null,
             Collections.emptyList(),
