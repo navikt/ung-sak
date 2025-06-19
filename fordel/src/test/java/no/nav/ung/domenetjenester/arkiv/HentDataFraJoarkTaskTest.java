@@ -11,7 +11,7 @@ import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.MottattMeldingTjeneste;
 import no.nav.ung.fordel.repo.journalpost.JournalpostMottattEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.OmrådeTema;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.apache.commons.io.IOUtils;

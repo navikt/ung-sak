@@ -1,0 +1,1 @@
+drop table fordel_produksjonsstyring_oppgave;
