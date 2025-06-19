@@ -16,13 +16,12 @@
                 Du fikk tidligere melding om at du skulle få penger til og med {{endretFra}},
                 men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet {{endretTil}}.
             </p>
+            {{#if sisteUtbetalingsdato}}
+                <p>Den siste utbetalingen får du før den {{sisteUtbetalingsdato}}.</p>
+            {{/if}}
         {{/with}}
 
-        {{#if muligTilbakekreving}}
-            <p>Fordi du har fått en ny dato, kan det hende at du har fått mer penger enn du har rett på.
-                Da må du i så fall betale disse pengene tilbake.</p>
-            <p>Du får et nytt brev av oss hvis det skulle skje.</p>
-        {{/if}}
+
 
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx.</p>
     {{/felles/seksjon/hoved}}

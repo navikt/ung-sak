@@ -20,7 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-   EndringProgramPeriodeTest() {
+    private final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
+
+
+    EndringProgramPeriodeTest() {
         super(1,
             "Vi har endret ungdomsprogramytelsen din");
     }
@@ -38,6 +41,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
               Fra 25. august 2025 får du ikke penger fordi du ikke lenger er med i ungdomsprogrammet. \
               Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
               men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
+              Den siste utbetalingen får du før den 10. september 2025. \
               Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
               """);
 
@@ -151,7 +155,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        return new EndringProgramPeriodeInnholdBygger(ungTestRepositories.ungdomsprogramPeriodeRepository());
+        return new EndringProgramPeriodeInnholdBygger(ungTestRepositories.ungdomsprogramPeriodeRepository(), DAGENS_DATO);
     }
 
     @Override

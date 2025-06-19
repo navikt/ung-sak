@@ -35,8 +35,8 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
                 .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.ENDRING_SLUTTDATO))
             .getMinLocalDate();
 
-        var sisteUtbetalingsdato = utledFremtidigUtbetalingsdato(
-            PeriodeUtils.forrigeUkedag(opphørStartdato),
+        var sisteUtbetalingsdato = PeriodeBeregner.utledFremtidigUtbetalingsdato(
+            PeriodeBeregner.forrigeUkedag(opphørStartdato),
             bestemInneværendeMåned());
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.OPPHØR,
@@ -50,20 +50,6 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ?
             YearMonth.from(overrideDagensDatoForTest)
             : YearMonth.now();
-    }
-
-    /**
-     * Utleder fremtidig utbetalingsdato basert på sluttdato.
-     * For siste måned i ungdomsprogrammet kontrolleres ikke inntekt
-     * Oppdrag utbetaler siste måneden første virkedag i påfølgende måned.
-     * Hvis sluttdato var forrige måned så utbetales det neste virkedag.
-     * Nevner da ikke noe dato
-     */
-    private static LocalDate utledFremtidigUtbetalingsdato(LocalDate sluttdato, YearMonth denneMåneden) {
-        YearMonth sluttMåned = YearMonth.from(sluttdato);
-
-        return sluttMåned.isBefore(denneMåneden) ? null
-            : sluttMåned.plusMonths(1).atDay(10);
     }
 
 }
