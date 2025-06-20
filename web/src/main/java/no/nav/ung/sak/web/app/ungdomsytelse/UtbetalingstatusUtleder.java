@@ -17,10 +17,13 @@ import java.util.Map;
 public class UtbetalingstatusUtleder {
 
 
-    /** Finner utbetalingsstatus for periodene med ytelse på behandlingen. Utledning gjøres ved å sammenligne tidslinjer for behandlinger tilbake til førstegangsbehandlingen.
+    public static final int VENTEDAGER_I_OS = 3;
+
+    /**
+     * Finner utbetalingsstatus for periodene med ytelse på behandlingen. Utledning gjøres ved å sammenligne tidslinjer for behandlinger tilbake til førstegangsbehandlingen.
      *
      * @param aktuellBehandlingAvsluttetTidspunkt Avsluttet tidspunkt for aktuell behandling som skal brukes for å finne utbetalingsstatus.
-     * @param tidslinjeMap Map fra avsluttet tidspunkt for behandling til tidslinje med tilkjent ytelse verdier.
+     * @param tidslinjeMap                        Map fra avsluttet tidspunkt for behandling til tidslinje med tilkjent ytelse verdier.
      * @param dagensDato
      * @return
      */
@@ -28,15 +31,17 @@ public class UtbetalingstatusUtleder {
                                                                               Map<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>> tidslinjeMap, LocalDate dagensDato) {
 
         var kronologisk = sorterKronologisk(tidslinjeMap);
+        // Initialiserer med tomme tidslinjer for gjeldende ytelse og status, disse vil bli oppdatert i løkken under
         LocalDateTimeline<TilkjentYtelseVerdi> gjeldendeTilkjentYtelse = LocalDateTimeline.empty();
         LocalDateTimeline<UtbetalingStatus> gjeldendeStatus = LocalDateTimeline.empty();
 
+        // Itererer gjennom tidslinjene i kronologisk rekkefølge, starter med den eldste behandlingen
         var iterator = kronologisk.iterator();
         var gjeldendeEntry = iterator.hasNext() ? iterator.next() : null;
 
         while (gjeldendeEntry != null && gjeldendeEntry.getKey().compareTo(aktuellBehandlingAvsluttetTidspunkt) <= 0) {
             var erEndretTidslinje = finnEndretFraForrigeTidslinje(gjeldendeTilkjentYtelse, gjeldendeEntry.getValue());
-            // Bruker forrige utelede status for uendret ytelse
+            // Bruker forrige utledet status for perioder med uendret ytelse
             final var forrigeStatus = gjeldendeStatus;
             var statusForUendretYtelse = erEndretTidslinje.filterValue(Boolean.FALSE::equals).map(it -> forrigeStatus.intersection(it.getLocalDateInterval()).toSegments().stream().toList());
             var statusForEndretYtelse = finnUtbetalingstatusForEndring(dagensDato, erEndretTidslinje.filterValue(Boolean.TRUE::equals), gjeldendeEntry.getKey());
@@ -50,35 +55,34 @@ public class UtbetalingstatusUtleder {
     }
 
     private static List<Map.Entry<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>>> sorterKronologisk(Map<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>> tidslinjeMap) {
-        var sortert = tidslinjeMap.entrySet().stream()
+        return tidslinjeMap.entrySet().stream()
             .sorted(Comparator.comparing(e -> e.getKey().avsluttetTid(), Comparator.nullsLast(Comparator.naturalOrder())))
             .toList();
-        return sortert;
     }
 
     private static LocalDateTimeline<UtbetalingStatus> finnUtbetalingstatusForEndring(LocalDate dagensDato, LocalDateTimeline<Boolean> endretTidslinje, BehandlingAvsluttetTidspunkt behandlingAvsluttetTidspunkt) {
         var sisteUtbetalteDag = finnSisteMuligeUtbetalteDag(dagensDato, behandlingAvsluttetTidspunkt);
-        var statusForEndretYtelse = endretTidslinje.map(it -> it.getTom().isAfter(sisteUtbetalteDag) ?
+        return endretTidslinje.map(it -> it.getTom().isAfter(sisteUtbetalteDag) ?
             List.of(new LocalDateSegment<>(it.getFom(), it.getTom(), UtbetalingStatus.TIL_UTBETALING)) :
             List.of(new LocalDateSegment<>(it.getFom(), it.getTom(), UtbetalingStatus.UTBETALT)));
-        return statusForEndretYtelse;
     }
 
     private static LocalDate finnSisteMuligeUtbetalteDag(LocalDate dagensDato, BehandlingAvsluttetTidspunkt behandlingAvsluttetTidspunkt) {
+        // Utbetalinger som allerede er ligger i k9-oppdrag blir sendt til oppdragssystemet den første virkedagen i måneden
+        // Dersom behandlingen ikke er avsluttet (og det er ny periode eller endring i ytelse), så vil ikke k9-oppdrag ha mottatt utbetalingen enda, men vi antar at den vil skje i dag. (status blir uansett TIL_UTBETALING)
         var førsteVirkedagINåværendeMåned = finnFørsteVirkedagIMåned(YearMonth.from(dagensDato));
-
-
-        var sisteMuligeDatoForOversendingTilOS = finnDagForOversendingAvForrigeMåned(behandlingAvsluttetTidspunkt, førsteVirkedagINåværendeMåned, dagensDato);
-
-        var sisteMuligeDagForUtbetalingTilBruker = sisteMuligeDatoForOversendingTilOS.plusDays(3);
-        var sisteUtbetalteDag = !dagensDato.isBefore(sisteMuligeDagForUtbetalingTilBruker) ?
+        var dagForOversendingAvForrigeMåned = finnDagForOversendingAvForrigeMåned(behandlingAvsluttetTidspunkt, førsteVirkedagINåværendeMåned, dagensDato);
+        // Antar at utbetalinger ligger i 3 dager i OS før de blir utbetalt til bruker
+        var dagForUtbetalingAvForrigeMåned = dagForOversendingAvForrigeMåned.plusDays(VENTEDAGER_I_OS);
+        // Siste mulige utbetalte dag er da enten siste dag i forrige måned eller siste dag i måneden før det, avhengig av om dagens dato er før eller etter siste mulige utbetalingsdato
+        return !dagensDato.isBefore(dagForUtbetalingAvForrigeMåned) ?
             dagensDato.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()) : dagensDato.minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
-        return sisteUtbetalteDag;
     }
 
     private static LocalDate finnDagForOversendingAvForrigeMåned(BehandlingAvsluttetTidspunkt behandlingAvsluttetTidspunkt, LocalDate førsteVirkedagINåværendeMåned, LocalDate dagensDato) {
         if (!behandlingAvsluttetTidspunkt.erAvsluttet()) {
             // Hvis avsluttetDato er null, så betyr det at behandlingen ikke er avsluttet og vi antar at oversendingen skjer i dag
+            // Dette har ingen betydning siden vi uansett antar at utbetlingen venter i OS i noen dager og status blir dermed alltid TIL_UTBETALING
             return dagensDato;
         }
         return behandlingAvsluttetTidspunkt.avsluttetTid().toLocalDate().isAfter(førsteVirkedagINåværendeMåned) ? behandlingAvsluttetTidspunkt.getAvsluttetTid().toLocalDate() : førsteVirkedagINåværendeMåned;
@@ -101,7 +105,7 @@ public class UtbetalingstatusUtleder {
         // Antar her alltid at oppdragssystemet er oppe den første virkedagen i måneden. Dette vil som regel stemme, men ikke ved spesielle høytidsdager. Ok antagelse å gjøre for bruk til visning
         var dato = yearMonth.atDay(1);
         while (dato.getDayOfWeek().equals(DayOfWeek.SUNDAY) || dato.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
-            // Hvis første dag i måneden er helg, så flytt dato til mandag
+            // Hvis dag er helg, flytt en dag fremover
             dato = dato.plusDays(1);
         }
         return dato;

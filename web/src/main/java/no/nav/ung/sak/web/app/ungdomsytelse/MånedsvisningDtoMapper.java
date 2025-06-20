@@ -26,9 +26,7 @@ public class MånedsvisningDtoMapper {
                                                                           LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje,
                                                                           UngdomsytelseSatsPerioder perioder,
                                                                           Map<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>> tidslinjeMap) {
-
         var statusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(aktuellAvsluttetTid, tidslinjeMap, LocalDate.now());
-
         final var månederMedYtelse = månedsvisPeriodisering.intersection(tilkjentYtelseTidslinje.mapValue(it -> true).compress());
         return månederMedYtelse.toSegments().stream().map(måned -> {
             final var tilkjentYtelseForMåned = tilkjentYtelseTidslinje.intersection(måned.getLocalDateInterval());
