@@ -1371,6 +1371,40 @@
         "x-enum-varnames" : [ "IAY" ],
         "type" : "string"
       },
+      "DetaljertSimuleringResultatDto" : {
+        "properties" : {
+          "ingenPerioderMedAvvik" : {
+            "type" : "boolean"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/Periode"
+          },
+          "periodeTom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "perioderPerMottaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringForMottakerDto"
+            },
+            "type" : "array"
+          },
+          "sumEtterbetaling" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sumFeilutbetaling" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "sumInntrekk" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "periode" ],
+        "type" : "object"
+      },
       "DokumentDto" : {
         "properties" : {
           "behandlinger" : {
@@ -1453,7 +1487,7 @@
         "required" : [ "etterlysningEksternReferanse", "frist" ],
         "type" : "object"
       },
-      "EndreFristForEtterlysningDto" : {
+      "EndreFristRequest" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
@@ -1757,6 +1791,117 @@
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
         "type" : "string"
       },
+      "InformasjonsbrevBestillingRequest" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "dokumentMalType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequestDokumentMalType"
+          },
+          "innhold" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevInnholdDto"
+          },
+          "mottaker" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDto"
+          }
+        },
+        "required" : [ "behandlingId", "dokumentMalType", "mottaker" ],
+        "type" : "object"
+      },
+      "InformasjonsbrevBestillingRequestDokumentMalType" : {
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevInnholdDto" : {
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerDto" : {
+        "properties" : {
+          "id" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerDtoType"
+          }
+        },
+        "required" : [ "id", "type" ],
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerDtoType" : {
+        "enum" : [ "ORGNR", "AKTØRID" ],
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevMottakerValgResponse" : {
+        "properties" : {
+          "fødselsdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "idType" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponseIdType"
+          },
+          "navn" : {
+            "type" : "string"
+          },
+          "utilgjengeligÅrsak" : {
+            "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponseUtilgjengeligÅrsak"
+          }
+        },
+        "type" : "object"
+      },
+      "InformasjonsbrevMottakerValgResponseIdType" : {
+        "enum" : [ "ORGNR", "AKTØRID" ],
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevMottakerValgResponseUtilgjengeligÅrsak" : {
+        "enum" : [ "PERSON_DØD" ],
+        "x-enum-varnames" : [ "PERSON_DØD" ],
+        "type" : "string"
+      },
+      "InformasjonsbrevValgDto" : {
+        "properties" : {
+          "malType" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektDokumentMalType"
+          },
+          "mottakere" : {
+            "items" : {
+              "$ref" : "#/components/schemas/InformasjonsbrevMottakerValgResponse"
+            },
+            "type" : "array"
+          },
+          "støtterFritekst" : {
+            "type" : "boolean"
+          },
+          "støtterTittelOgFritekst" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "InformasjonsbrevValgResponseDto" : {
+        "properties" : {
+          "informasjonbrevValg" : {
+            "items" : {
+              "$ref" : "#/components/schemas/InformasjonsbrevValgDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "InitLinksDto" : {
         "properties" : {
           "links" : {
@@ -2036,6 +2181,29 @@
       "KodeverdiSomObjektBehandlingÅrsakTypeKilde" : {
         "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
         "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
+        "type" : "string"
+      },
+      "KodeverdiSomObjektDokumentMalType" : {
+        "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/KodeverdiSomObjektDokumentMalTypeKilde"
+          },
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektDokumentMalTypeKilde" : {
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
         "type" : "string"
       },
       "KodeverdiSomObjektDokumentTypeId" : {
@@ -3885,25 +4053,109 @@
         "x-enum-varnames" : [ "UDEFINERT", "ANKE_OVERSENDT_TIL_TRYGDERETTEN", "ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "AVV_DOK", "AVV_IM_MOT_AAREG", "AVV_IM_MOT_SØKNAD_AT", "AVV_SØKNADSPERIODER", "AVV_FODSEL", "AVV_RESPONS_REVURDERING", "FOR_TIDLIG_SOKNAD", "GRADERING_FLERE_ARBEIDSFORHOLD", "REFUSJON_3_MÅNEDER", "SCANN", "UTV_FRIST", "VENT_FEIL_ENDRINGSSØKNAD", "VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG", "VENT_INFOTRYGD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_MILITÆR_BG_UNDER_3G", "VENT_OPDT_INNTEKTSMELDING", "VENT_OPPTJENING_OPPLYSNINGER", "VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID", "VENT_REGISTERINNHENTING", "VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT", "VENT_SØKNAD_SENDT_INFORMASJONSBREV", "VENT_TIDLIGERE_BEHANDLING", "VENT_ÅPEN_BEHANDLING", "VENT_MANGL_FUNKSJ_SAKSBEHANDLER", "VENTER_SVAR_PORTEN", "VENTER_SVAR_TEAMS", "ANDRE_INNTEKTSOPPLYSNINGER", "INNTEKTSMELDING", "LEGEERKLÆRING", "MEDISINSKE_OPPLYSNINGER", "ANNET", "VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER", "VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "OPPD_ÅPEN_BEH", "VENT_DEKGRAD_REGEL", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER", "VENT_BEREGNING_TILBAKE_I_TID", "BRUKER_70ÅR_VED_REFUSJON", "VENT_LOVENDRING_8_41", "INGEN_PERIODE_UTEN_YTELSE", "PERIODE_MED_AVSLAG", "MANGLENDE_FUNKSJONALITET", "KORTVARIG_ARBEID", "FRISINN_ATFL_SAMME_ORG", "FRISINN_VARIANT_SN_MED_FL_INNTEKT", "FRISINN_VARIANT_FL_MED_SN_INNTEKT", "FRISINN_VARIANT_NY_FL", "FRISINN_VARIANT_NY_SN_2019", "FRISINN_VARIANT_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT", "FRISINN_VARIANT_KOMBINERT_NY_FL", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_SN_2020", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "MANGLER_SØKNAD_FOR_PERIODER_I_INFOTRYGD", "MANGLER_SØKNADOPPLYSNING_NÆRING", "MANGLER_SØKNADOPPLYSNING_FRILANS", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE", "DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP", "AAP_DP_SISTE_10_MND_SVP", "FL_SN_IKKE_STOTTET_FOR_SVP" ],
         "type" : "string"
       },
-      "SimuleringResultatDto" : {
+      "SimuleringDto" : {
         "properties" : {
+          "simuleringResultat" : {
+            "$ref" : "#/components/schemas/DetaljertSimuleringResultatDto"
+          },
+          "simuleringResultatUtenInntrekk" : {
+            "$ref" : "#/components/schemas/DetaljertSimuleringResultatDto"
+          },
           "slåttAvInntrekk" : {
             "type" : "boolean"
-          },
-          "sumEtterbetaling" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "sumFeilutbetaling" : {
-            "format" : "int64",
-            "type" : "integer"
-          },
-          "sumInntrekk" : {
-            "format" : "int64",
-            "type" : "integer"
           }
         },
+        "required" : [ "simuleringResultat", "simuleringResultatUtenInntrekk", "slåttAvInntrekk" ],
         "type" : "object"
+      },
+      "SimuleringForMottakerDto" : {
+        "properties" : {
+          "mottakerNavn" : {
+            "type" : "string"
+          },
+          "mottakerNummer" : {
+            "type" : "string"
+          },
+          "mottakerType" : {
+            "$ref" : "#/components/schemas/SimuleringForMottakerDtoMottakerType"
+          },
+          "nesteUtbPeriode" : {
+            "$ref" : "#/components/schemas/Periode"
+          },
+          "resultatOgMotregningRader" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatRadDto"
+            },
+            "type" : "array"
+          },
+          "resultatPerFagområde" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatPerFagområdeDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "mottakerType" ],
+        "type" : "object"
+      },
+      "SimuleringForMottakerDtoMottakerType" : {
+        "enum" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ],
+        "x-enum-varnames" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ],
+        "type" : "string"
+      },
+      "SimuleringResultatPerFagområdeDto" : {
+        "properties" : {
+          "fagOmrådeKode" : {
+            "$ref" : "#/components/schemas/SimuleringResultatPerFagområdeDtoFagOmrådeKode"
+          },
+          "rader" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatRadDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "fagOmrådeKode", "rader" ],
+        "type" : "object"
+      },
+      "SimuleringResultatPerFagområdeDtoFagOmrådeKode" : {
+        "enum" : [ "REFUTG", "FP", "FPREF", "SP", "SPREF", "SVP", "SVPREF", "PB", "PBREF", "PN", "PNREF", "OM", "OMREF", "OPP", "OPPREF", "OOP", "OOPREF", "FRISINN", "UNG", "-" ],
+        "x-enum-varnames" : [ "ENGANGSSTØNAD", "FORELDREPENGER", "FORELDREPENGER_ARBEIDSGIVER", "SYKEPENGER", "SYKEPENGER_ARBEIDSGIVER", "SVANGERSKAPSPENGER", "SVANGERSKAPSPENGER_ARBEIDSGIVER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_SYKT_BARN_ARBEIDSGIVER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_NÆRSTÅENDE_ARBEIDSGIVER", "OMSORGSPENGER", "OMSORGSPENGER_ARBEIDSGIVER", "OPPLÆRINGSPENGER", "OPPLÆRINGSPENGER_ARBEIDSGIVER", "PLEIEPENGER_V1", "PLEIEPENGER_V1_ARBEIDSGIVER", "FRISINN", "UNG", "UDEFINERT" ],
+        "type" : "string"
+      },
+      "SimuleringResultatPerMånedDto" : {
+        "properties" : {
+          "beløp" : {
+            "format" : "int64",
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/Periode"
+          }
+        },
+        "required" : [ "beløp", "periode" ],
+        "type" : "object"
+      },
+      "SimuleringResultatRadDto" : {
+        "properties" : {
+          "feltnavn" : {
+            "$ref" : "#/components/schemas/SimuleringResultatRadDtoFeltnavn"
+          },
+          "resultaterPerMåned" : {
+            "items" : {
+              "$ref" : "#/components/schemas/SimuleringResultatPerMånedDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "feltnavn" ],
+        "type" : "object"
+      },
+      "SimuleringResultatRadDtoFeltnavn" : {
+        "enum" : [ "nyttBeløp", "tidligereUtbetalt", "differanse", "resultatEtterMotregning", "inntrekkNesteMåned", "resultat" ],
+        "x-enum-varnames" : [ "NYTT_BELØP", "TIDLIGERE_UTBETALT", "DIFFERANSE", "RESULTAT_ETTER_MOTREGNING", "INNTREKK_NESTE_MÅNED", "RESULTAT" ],
+        "type" : "string"
       },
       "SkjulNotatDto" : {
         "properties" : {
@@ -4164,7 +4416,7 @@
             "items" : {
               "$ref" : "#/components/schemas/TilkjentYtelsePeriodeV1"
             },
-            "maxItems" : 700,
+            "maxItems" : 800,
             "minItems" : 0,
             "type" : "array"
           }
@@ -4205,7 +4457,7 @@
           },
           "satsBeloep" : {
             "format" : "int64",
-            "maximum" : 3440,
+            "maximum" : 3610,
             "minimum" : 1,
             "type" : "integer"
           },
@@ -4647,7 +4899,7 @@
         "required" : [ "varseltekst" ],
         "type" : "object"
       },
-      "VedtaksbrevForhåndsvisDto" : {
+      "VedtaksbrevForhåndsvisRequest" : {
         "properties" : {
           "behandlingId" : {
             "format" : "int64",
@@ -4665,7 +4917,35 @@
         "required" : [ "behandlingId" ],
         "type" : "object"
       },
-      "VedtaksbrevValgDto" : {
+      "VedtaksbrevValgRequest" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "emptyRedigertTekstAndRedigertTrue" : {
+            "type" : "boolean"
+          },
+          "hindret" : {
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "redigertHtml" : {
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          },
+          "redigertTextAndRedigertFalse" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
+      "VedtaksbrevValgResponse" : {
         "properties" : {
           "enableHindre" : {
             "type" : "boolean"
@@ -4695,34 +4975,6 @@
             "type" : "string"
           }
         },
-        "type" : "object"
-      },
-      "VedtaksbrevValgRequestDto" : {
-        "properties" : {
-          "behandlingId" : {
-            "format" : "int64",
-            "maximum" : 9223372036854775807,
-            "minimum" : 0,
-            "type" : "integer"
-          },
-          "emptyRedigertTekstAndRedigertTrue" : {
-            "type" : "boolean"
-          },
-          "hindret" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          },
-          "redigertHtml" : {
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
-            "type" : "string"
-          },
-          "redigertTextAndRedigertFalse" : {
-            "type" : "boolean"
-          }
-        },
-        "required" : [ "behandlingId" ],
         "type" : "object"
       },
       "VenteårsakSomObjekt" : {
@@ -5391,7 +5643,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/EndreFristForEtterlysningDto"
+                "$ref" : "#/components/schemas/EndreFristRequest"
               }
             }
           },
@@ -6830,6 +7082,106 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/api/formidling/informasjonsbrev" : {
+      "get" : {
+        "description" : "Maler for informasjon og støttebrev",
+        "operationId" : "informasjonsbrevValg",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InformasjonsbrevValgResponseDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/informasjonsbrev/bestill" : {
+      "post" : {
+        "description" : "Bestill informasjonsbrev for en behandling. ",
+        "operationId" : "bestillInformasjonsbrev",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/informasjonsbrev/forhaandsvis" : {
+      "post" : {
+        "description" : "Forhåndsvise inforasjonsbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
+        "operationId" : "forhåndsvisInformasjonsbrev",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "kunHtml",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InformasjonsbrevBestillingRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "pdf"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
     "/api/formidling/vedtaksbrev" : {
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
@@ -6847,7 +7199,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/VedtaksbrevValgDto"
+                  "$ref" : "#/components/schemas/VedtaksbrevValgResponse"
                 }
               }
             },
@@ -6863,7 +7215,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/VedtaksbrevValgRequestDto"
+                "$ref" : "#/components/schemas/VedtaksbrevValgRequest"
               }
             }
           },
@@ -6885,7 +7237,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisDto"
+                "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisRequest"
               }
             }
           },
@@ -7866,7 +8218,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SimuleringResultatDto"
+                  "$ref" : "#/components/schemas/SimuleringDto"
                 }
               }
             },

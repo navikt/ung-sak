@@ -61,8 +61,8 @@ public class KontrollerInntektTjeneste {
     }
 
     private static LocalDateTimeline<Kontrollresultat> opprettAksjonspunktForIkkeGodkjentUttalelse(LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje, LocalDateTimeline<Boolean> relevantTidslinje) {
-        final var relevantIkkeGodkjentUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgIkkeGodkjent()).intersection(relevantTidslinje);
-        return relevantIkkeGodkjentUttalelse
+        final var relevantUttalelse = etterlysningTidslinje.filterValue(it -> it.etterlysning().erBesvartOgHarUttalelse()).intersection(relevantTidslinje);
+        return relevantUttalelse
             .mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.OPPRETT_AKSJONSPUNKT));
     }
 
@@ -79,7 +79,7 @@ public class KontrollerInntektTjeneste {
         // Siden vi tillater et visst avvik her er det ikke sikkert at registerinntekten er nøyaktig lik 0
         var inntektFraBrukerTidslinje = gjeldendeRapporterteInntekter.filterValue(it -> !it.brukerRapporterteInntekter().isEmpty());
         return ingenAvvikTidslinje.disjoint(inntektFraBrukerTidslinje)
-            .mapValue(it -> new Kontrollresultat(KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER, new Inntektsresultat(BigDecimal.ZERO, KontrollertInntektKilde.BRUKER)));
+            .mapValue(it -> new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, new Inntektsresultat(BigDecimal.ZERO, KontrollertInntektKilde.BRUKER)));
     }
 
 
@@ -95,20 +95,20 @@ public class KontrollerInntektTjeneste {
 
         return brukersGodkjenteEllerRapporterteInntekter.intersection(relevantTidslinje)
             .mapValue(it -> new Inntektsresultat(summerInntekter(it), it.kilde()))
-            .mapValue(it -> new Kontrollresultat(KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER, it));
+            .mapValue(it -> new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, it));
     }
 
     private static LocalDateTimeline<BrukersAvklarteInntekter> sammenstillInntekter(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
-        final var godkjentRegisterinntektTidslinje = etterlysningTidslinje
+        final var ingenUttalelseRegisterinntektTidslinje = etterlysningTidslinje
             .intersection(relevantTidslinje)
-            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.TRUE.equals(etterlysning.etterlysning().erEndringenGodkjent()))
+            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.TRUE.equals(etterlysning.etterlysning().erBesvartOgHarIkkeUttalelse()))
             .mapValue(EtterlysningOgRegisterinntekt::registerInntekt);
 
         final var brukersRapporteInntekter = gjeldendeRapporterteInntekter
             .intersection(relevantTidslinje)
             .mapValue(RapporterteInntekter::brukerRapporterteInntekter);
 
-        return godkjentRegisterinntektTidslinje.crossJoin(brukersRapporteInntekter,
+        return ingenUttalelseRegisterinntektTidslinje.crossJoin(brukersRapporteInntekter,
             (di, lhs, rhs) ->
                 new LocalDateSegment<>(di,
                     new BrukersAvklarteInntekter(

@@ -65,7 +65,6 @@ public class EtterlysningProssesseringTjeneste {
         opprettet.forEach(e -> {
             var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptDersomVenterTask.class);
             prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
-            prosessTaskData.setProperty(SettEtterlysningTilUtløptDersomVenterTask.ETTERLYSNING_ID, e.getId().toString());
             prosessTaskData.setNesteKjøringEtter(e.getFrist());
             prosessTaskTjeneste.lagre(prosessTaskData);
         });

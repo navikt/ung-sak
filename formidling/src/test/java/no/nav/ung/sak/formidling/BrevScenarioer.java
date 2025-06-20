@@ -74,7 +74,7 @@ public class BrevScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null,
-            Collections.emptyList());
+            Collections.emptyList(), null);
     }
 
     /**
@@ -103,7 +103,7 @@ public class BrevScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null,
             List.of(
                 lagBarn(barnFødselsdato)
-            ));
+            ), null);
     }
 
     /**
@@ -144,8 +144,8 @@ public class BrevScenarioer {
             List.of(
                 lagBarnMedDødsdato(barnFødselsdato, barnDødsdato),
                 lagBarn(barnFødselsdato)
-            )
-        );
+            ),
+            null);
     }
 
 
@@ -179,7 +179,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(27).plusDays(42),
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null, Collections.emptyList());
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null, Collections.emptyList(), null);
     }
 
     /**
@@ -203,7 +203,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null, Collections.emptyList());
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null, Collections.emptyList(), null);
     }
 
     /**
@@ -238,7 +238,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null, Collections.emptyList());
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null, Collections.emptyList(), null);
     }
 
 
@@ -313,7 +313,7 @@ public class BrevScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             triggere,
-            opptjening, Collections.emptyList());
+            opptjening, Collections.emptyList(), null);
     }
 
     /**
@@ -342,7 +342,7 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(programPeriode, Utfall.OPPFYLT),
             fødselsdato,
             List.of(programPeriode.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))), null, Collections.emptyList());
+            Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))), null, Collections.emptyList(), null);
     }
 
     /**
@@ -370,7 +370,7 @@ public class BrevScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))), null,
             List.of(
                 lagBarn(barnFødselsdato)
-            ));
+            ), null);
     }
 
     /**
@@ -400,7 +400,7 @@ public class BrevScenarioer {
                 lagBarn(barnFødselsdato.minusYears(5)),
                 lagBarn(barnFødselsdato),
                 lagBarn(barnFødselsdato)
-            ));
+            ), null);
     }
 
 
@@ -434,17 +434,22 @@ public class BrevScenarioer {
             null,
             List.of(
                 lagBarn(fom.minusYears(5))
-            ));
+            ), null);
     }
 
 
     /**
-     * Opphør av programmet. OpprinneligProgramPeriode kan hentes fra et annet sceario
+     *
+     *  Opphør av programmet.
+     *
+     * @param opprinneligProgramPeriode - den perioden som opprinnelig ble innvilget
+     * @param sluttdato - sluttdato
+     * @return
      */
-    public static UngTestScenario endringOpphør(LocalDate opphørsdato, LocalDateInterval opprinneligProgramPeriode) {
+    public static UngTestScenario endringOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate sluttdato) {
         var fom = opprinneligProgramPeriode.getFomDato();
         var fagsakPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-        var nyProgramPeriode = new LocalDateInterval(fom, opphørsdato.minusDays(1));
+        var nyProgramPeriode = new LocalDateInterval(fom, sluttdato);
         var satser = new LocalDateTimeline<>(List.of(
            new LocalDateSegment<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), lavSatsBuilder(fom).build())
         ));
@@ -459,19 +464,54 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
             new LocalDateTimeline<>(List.of(
                 new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
-                new LocalDateSegment<>(opphørsdato, fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+                new LocalDateSegment<>(sluttdato.plusDays(1), fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
                 )
 
             ),
             fom.minusYears(19).plusDays(42),
             List.of(opprinneligProgramPeriode.getFomDato()),
             Set.of(
-                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), opphørsdato.minusDays(1))),
-                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(opphørsdato, fagsakPeriode.getTomDato()))
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), sluttdato)),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(sluttdato.plusDays(1), fagsakPeriode.getTomDato()))
             ),
             null,
-            Collections.emptyList()
-        );
+            Collections.emptyList(),
+            null);
+    }
+
+    /**
+     *
+     *  Innvilget med sluttdato
+     *
+     */
+    public static UngTestScenario innvilget19årMedSluttdato(LocalDate startdato, LocalDate sluttdato) {
+        var p = new LocalDateInterval(startdato, startdato.plusYears(1));
+        var fagsakPeriode = new LocalDateInterval(startdato, startdato.plusWeeks(52).minusDays(1));
+        var programperiode = new LocalDateInterval(startdato, sluttdato);
+        var satser = new LocalDateTimeline<>(p, lavSatsBuilder(startdato).build());
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(programperiode.getFomDato(), programperiode.getTomDato())),
+            satser,
+            uttaksPerioder(programperiode),
+            tilkjentYtelsePerioder(satser, programperiode),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(programperiode, Utfall.OPPFYLT),
+                new LocalDateSegment<>(sluttdato.plusDays(1), fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+            )
+
+            ),
+            startdato.minusYears(19).plusDays(42),
+            List.of(startdato),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(startdato, sluttdato)),
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(startdato, sluttdato))
+            ),
+            null,
+            Collections.emptyList(),
+            null);
     }
 
     /**
@@ -486,7 +526,7 @@ public class BrevScenarioer {
 
         var fom = opprinneligProgramPeriode.getFomDato();
 
-        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato.minusDays(1));
+        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato);
         var satser = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(opprinneligProgramPeriode.getFomDato(), opprinneligProgramPeriode.getTomDato(), lavSatsBuilder(fom).build())
         ));
@@ -502,20 +542,20 @@ public class BrevScenarioer {
             new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
             new LocalDateTimeline<>(List.of(
                 new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
-                new LocalDateSegment<>(nySluttdato, fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+                new LocalDateSegment<>(nySluttdato.plusDays(1), fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
             )),
             fom.minusYears(19).plusDays(42),
             List.of(opprinneligProgramPeriode.getFomDato()),
             Set.of(
-                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nySluttdato.minusDays(1))),
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nySluttdato)),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
                     flyttetBakover ?
-                        DatoIntervallEntitet.fra(nySluttdato, opprinneligProgramPeriode.getTomDato()) :
+                        DatoIntervallEntitet.fra(nySluttdato.plusDays(1), opprinneligProgramPeriode.getTomDato()) :
                         DatoIntervallEntitet.fra(opprinneligProgramPeriode.getTomDato().plusDays(1), nySluttdato))
             ),
             null,
-            Collections.emptyList()
-        );
+            Collections.emptyList(),
+            null);
     }
 
     /**
@@ -563,8 +603,42 @@ public class BrevScenarioer {
                         DatoIntervallEntitet.fra(fom, fagsakPeriode.getTomDato()))
             ),
             null,
-            Collections.emptyList()
-        );
+            Collections.emptyList(),
+            null);
+    }
+
+    /**
+     * Opphør pga dødsfall i første måned
+     */
+    public static UngTestScenario død19år(LocalDate fom) {
+        var dødsdato = fom.plusDays(15);
+        var fagsakPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+        var nyProgramPeriode = new LocalDateInterval(fom, dødsdato.minusDays(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), lavSatsBuilder(fom).build())
+        ));
+
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), nyProgramPeriode.getTomDato())),
+            satser,
+            uttaksPerioder(nyProgramPeriode),
+            tilkjentYtelsePerioder(satser, nyProgramPeriode),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
+                new LocalDateSegment<>(dødsdato, fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+            )),
+            fom.minusYears(19).plusDays(42),
+            List.of(fom),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(fom, dødsdato.minusDays(1))),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(dødsdato, fagsakPeriode.getTomDato()))
+            ),
+            null,
+            Collections.emptyList(),
+            dødsdato);
     }
 
     private static <T> LocalDateTimeline<T> splitPrMåned(LocalDateTimeline<T> satser) {

@@ -236,7 +236,7 @@ class EtterlysningTjenesteTest {
             periode,
             EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysning.vent(LocalDateTime.now());
-        etterlysning.mottattUttalelse(svarJournalpostId, false, "Uttalelse");
+        etterlysning.mottaSvar(svarJournalpostId, false, "Uttalelse");
         return etterlysning;
     }
 }

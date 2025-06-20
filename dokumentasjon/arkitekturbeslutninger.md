@@ -1,30 +1,38 @@
 # Arkitekturbeslutninger
 
+## Gjenbruk fra k9
+Det ble besluttet å gjenbruke arkitektur og kode fra k9-sak, saksbehandlingssytemet for ytelser i folketrygdloven kapittel 9 (k9). Grunnen til dette er:
+1. K9-sak er et velfungerende system med en solid arkitektur som har vært i produksjon i flere år og som har vist seg å være robust og skalerbar
+2. K9-sak har en arkitektur som er godt dokumentert og forstått av teamet
+3. Ved å gjenbruke kode fra k9-sak kunne vi raskt komme i gang med utviklingen, noe som var viktig grunnet den korte fristen.
+4. Det ble videre besluttet å kopiere koden fra k9-sak til en ny kodebase. Dette ble gjort fordi de funksjonelle kravene var så forskjellige at å dele kodebasen ville i stor grad påvirke kompleksiteten og forvaltbarheten til k9-sak. Siden ungdomsytelsen er et prøveprosjekt som muligens har begrenset levetid, ble det ansett som mer hensiktsmessig å ha en egen kodebase.
 
 ## Modularisering og mikrotjenester
-1. [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html) tilnærming til domene for å gå opp grensegang.  Initielt pga usikkerhet rundt vilkårsvurdering vs. faktavurdering, uklare domenegrenser mellom opptjening, uttak og beregningsgrunnlag.  Ut fra dette har følgende moduler blitt skilt ut:
-    1. Mottak av dokumenter
-    1. Mottak av eksterne hendelser (eks. fødsel/dødsfall, inntektsopplysninger)
-    1. Abakus: Registeropplysninger for inntekt-arbeid-ytelse
-    1. Formidling og Dokgen: Aggreging av data og produksjon av brev til bruker
-    1. Uttak: Beregning av årskvantum, uttak av pleiepenger, opplæringspenger, frisinn)
-    1. Følgende er opprettet fra start som uavhengige moduler:
-        1. LOS (Ledelse og Oppgavestyring
-        1. Statistikk for datavarehus
-        1. Risk (*\*tbd*)
+1. K9-sak ble utviklet ved bruk av [Monolith First](https://martinfowler.com/bliki/MonolithFirst.html) for å gå opp grensegang, og deretter delt opp i mikrotjenester. Av delene som ble delt ut ble noen av disse delene tatt inn igjen i monolitten (ung-sak) og noen står fortsatt utenfor. Dette er delene slik de ser ut i dag:
+    1. Mottak av dokumenter (modul i ung-sak)
+    1. Mottak av eksterne hendelser (del av ung-sak)
+    1. Abakus: Registeropplysninger for inntekt-arbeid-ytelse (Mikrotjeneste utenfor ung-sak)
+    1. Formidling og Dokgen: Aggreging av data og produksjon av brev til bruker (modul i ung-sak)
+    1. Registrering av programperioder fra veileder og oppgaver til bruker (ny funksjonalitet, mikrotjeneste utenfor ung-sak)
 1. Architecture Refactoring - for fornyelse og forbedring av grensegang mellom moduler og datamodeller
 1. Evergreen - kontinuerlig oppdatering av teknologistack og avhengigheter (biblioteker, container OS, rammeverk)
 
 ## Behandling og prosesskontroll
 1. Adaptiv saksbehandling (~ koordinerende og orkestrerende prosesskontroll)
-    - Hendelser oppstår utenfor kontroll av saksbehandlingssytemet (eks. ny inntektsmelding, flytting, dødsfall, innringing, nye opplysninger i registeret etc)
+    - Noen hendelser oppstår utenfor kontroll av saksbehandlingssytemet (eks. dødsfall, innringing, nye opplysninger i registeret etc)
+    - Andre hendelser oppstår som forventet tilbakemelding fra bruker på registeropplysninger som saksbehandlingssystemet har mottatt (eks. inntektsopplysninger, programperioder)
     - Behandlingskontroll sjekker hva som endres av datagrunnlag hver gang en behandling kjøres og tilpasser behandlingsprosess (eks. tilbakehopp i saksbehandling)
 1. Hovedflyt i saksbehandling går gjennom steg som vurderer datagrunnlag og produserer aggregater av data som benyttes i videre prosessering
 
 ## Revurdering
+1. Kilder/trigger til revurdering vil være:
+    - Hendelser (eks. dødsfall, fødsel, endring i programperioder)
+    - Månedtlig kontroll av inntektsopplysninger (trigges via batchtask)
+    - Endring av sats (f.eks at bruker går fra lav til høy sats ved 25 år)
+    - Justering av ytelse ved nytt g-beløp
+    - Manuelle igangsettinger (eks. feil på tidligere saker eller revurdering etter klage)
+1. Alle kilder oppretter en egen prosesstrigger med en definerende behandlingsårsak og periode som bestemmer hvilke deler av det opprinnelige vedtaket som skal endres og hva som skal vurderes
 1. Konseptuelt likt andre behandlinger, men tar utgangspunkt at det finnes minst ett tidligere behandling/vedtak. Gir et enhetlig konsept for saksbehandling uavhengig av trigger (hendelse, søknad, inntektsopplysninger, innsendt dokumntasjon, klage, g-regulering, manuelt igangsatt revurdering, håndtering av feil på tidligere saker, etterkontroll) og hva som er endret i datagrunnlag (oppgitte opplysninger, innhentende opplysninger, endring av vurderinger), kjente feil eller endring i regler.
-1. Endringer og forlengelser også likt revurderinger (sjekk for endringer i datagrunnlag skjer automatisk)
-1. Hendelser (eks. dødsfall) håndteres likt.
 1. Sjekker hva som er endret før vurderer saksbehandlingsløpet (eks. registergrunnlag, inntektsopplysninger, dokumentasjon/søknad/underlag fra bruker)
 
 ## Automatisering
@@ -43,7 +51,7 @@
     - Vedtak adskilt (*\*tbd*), benyttes som juridisk dokument for arkivering
 1. Bruk av Aggregater i modellering (Domain Driven Design)
     - Alle endring på aggregater lagres atomisk i relasjonsstruktur, og spores i helhetlig versjon (så tidligere versjoner av aggregater kan gjenopprettes)
-        - Eksempler:  Medlemskap, Personopplysninger, Opptjening, Beregningsgrunnlag, InntektArbeidYtelse Grunnlag, Tilsyn, Sykdomsdokumentasjon
+        - Eksempler:  Personopplysninger, Tilkjent ytelse, Satsberegning, InntektArbeidYtelse Grunnlag,
 
 ## Database og lagring
 1. Benytter Relasjonsdatabase (Postgresql) og normalisert datalagring
@@ -54,7 +62,6 @@
 
 # Integrasjon
 1. Asynk kommunikasjon mellom eksterne domener (når tilgjengelige), samt interne sub-domener med lav avhengighet (1-veis) og som er stateful, eller sub-domener der et er betydelig prosesseringstid (eksempel: abakus innhenting)
-1. Synk kommunikasjon mot interne sub-domener request/respons basert når kan forvente og krav til lav latenstid (eks. oppdatering, kalkulus)
 1. System-til-system kall gjøres idempotent og asynk internt gjennom ProsessTask biblioteket (håndtere retry, atLeastOnce, idempotente kall synkront)
 1. REST over HTTP med JSON foretrukket for skjemaer
 

@@ -387,7 +387,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
                 .medInnsendingstidspunkt(LocalDateTime.now())
                 .medFagsakId(behandling.getFagsakId())
             .build(), DokumentStatus.GYLDIG);
-        eksisterendeEtterlysning.mottattUttalelse(svarJournalpostId, true, null);
+        eksisterendeEtterlysning.mottaSvar(svarJournalpostId, true, null);
         etterlysningRepository.lagre(eksisterendeEtterlysning);
     }
 

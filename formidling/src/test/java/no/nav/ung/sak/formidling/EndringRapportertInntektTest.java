@@ -93,7 +93,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = BrevScenarioer.endring0KrInntekt_19år(fom);
         var behandling = lagScenario(ungTestGrunnlag);
-        assertThat(brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), true)).isNull();
+        assertThat(vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), true)).isNull();
 
     }
 

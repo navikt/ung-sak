@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -11,7 +12,6 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
-import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.KodeverdiSomObjekt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

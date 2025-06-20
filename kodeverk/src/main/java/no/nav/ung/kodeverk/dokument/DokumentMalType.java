@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Brevkoder for brev som kan bestilles. Brukes blant annet til journalføring.
+ */
 public enum DokumentMalType implements Kodeverdi {
     HENLEGG_BEHANDLING_DOK("HENLEG", "Behandling henlagt", false),
 
@@ -17,7 +20,7 @@ public enum DokumentMalType implements Kodeverdi {
     OPPHØR_DOK("OPPHOR", "Opphør brev", true),
     AVSLAG__DOK("AVSLAG", "Avslagsbrev", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekst vedtaksbrev", true),
-//    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false),
+    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false),
 //    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst", false),
 
     ;
@@ -32,13 +35,9 @@ public enum DokumentMalType implements Kodeverdi {
         }
     }
 
-    private String navn;
-
+    private final String navn;
     private final boolean vedtaksbrevmal;
-
-    private String kode;
-
-
+    private final String kode;
 
     DokumentMalType(String kode, String navn, boolean vedtaksbrevmal) {
         this.kode = kode;
@@ -65,6 +64,10 @@ public enum DokumentMalType implements Kodeverdi {
     @Override
     public String getNavn() {
         return navn;
+    }
+
+    public boolean isVedtaksbrevmal() {
+        return vedtaksbrevmal;
     }
 
     public static DokumentMalType fraKode(final String kode) {

@@ -39,4 +39,23 @@ class Satsberegner {
         }
         return norskFaktor;
     }
+
+    public static String tallTilNorskHunkjønnTekst(int antall) {
+        return switch (antall) {
+            case 0 -> "null";
+            case 1 -> "ett";
+            case 2 -> "to";
+            case 3 -> "tre";
+            case 4 -> "fire";
+            case 5 -> "fem";
+            case 6 -> "seks";
+            case 7 -> "sju";
+            case 8 -> "åtte";
+            case 9 -> "ni";
+            case 10 -> "ti";
+            case 11 -> "elleve";
+            case 12 -> "tolv";
+            default -> String.valueOf(antall); // Fallback
+        };
+    }
 }

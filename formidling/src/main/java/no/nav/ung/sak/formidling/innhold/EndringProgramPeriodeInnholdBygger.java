@@ -4,15 +4,21 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.template.dto.EndringProgramPeriodeDto;
-import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretDatoDto;
+import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretSluttDato;
+import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretStartDato;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
 
 @Dependent
 public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -20,10 +26,14 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
     private static final Logger LOG = LoggerFactory.getLogger(EndringProgramPeriodeInnholdBygger.class);
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
-    public EndringProgramPeriodeInnholdBygger(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public EndringProgramPeriodeInnholdBygger(
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
@@ -45,18 +55,32 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
         var forrigeProgramperiode = forrigeProgramPerioder.toSegments().last();
 
         var endretStartdato = !denneProgramperiode.getFom().equals(forrigeProgramperiode.getFom()) ?
-            new EndretDatoDto(denneProgramperiode.getFom(), forrigeProgramperiode.getFom()) : null;
+            new EndretStartDato(denneProgramperiode.getFom(), forrigeProgramperiode.getFom()) : null;
 
         var endretSluttdato = !denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom()) ?
-            new EndretDatoDto(denneProgramperiode.getTom().plusDays(1), forrigeProgramperiode.getTom()) : null;
-
+            lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode) : null;
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_PROGRAMPERIODE,
             new EndringProgramPeriodeDto(
-                endretSluttdato,
-                endretStartdato,
+                endretStartdato, endretSluttdato,
                 false
             ));
+    }
+
+    private EndretSluttDato lagEndretSluttdato(LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {
+        var sluttDato = denneProgramperiode.getTom();
+        var opphørStartDato = sluttDato.plusDays(1);
+
+        var sisteUtbetalingsdato = PeriodeBeregner.utledFremtidigUtbetalingsdato(
+            sluttDato, bestemInneværendeMåned());
+
+        return new EndretSluttDato(sluttDato, forrigeProgramperiode.getTom(), opphørStartDato, sisteUtbetalingsdato);
+    }
+
+    private YearMonth bestemInneværendeMåned() {
+        return Environment.current().isLocal() && overrideDagensDatoForTest != null ?
+            YearMonth.from(overrideDagensDatoForTest)
+            : YearMonth.now();
     }
 
     private LocalDateTimeline<Boolean> hentProgramperiodeTidslinje(Long behandlingid) {

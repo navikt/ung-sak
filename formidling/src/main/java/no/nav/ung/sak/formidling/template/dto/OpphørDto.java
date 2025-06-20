@@ -4,5 +4,5 @@ import java.time.LocalDate;
 
 public record OpphørDto(
     LocalDate opphørsdato,
-    String utbetalingsMånedÅr) implements TemplateInnholdDto {
+    LocalDate sisteUtbetalingsdato) implements TemplateInnholdDto {
 }
