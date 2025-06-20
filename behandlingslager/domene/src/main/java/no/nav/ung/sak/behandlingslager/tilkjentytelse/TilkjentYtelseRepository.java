@@ -3,17 +3,19 @@ package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
 import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -116,6 +118,29 @@ public class TilkjentYtelseRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
+    public Map<Behandling, LocalDateTimeline<TilkjentYtelseVerdi>> hentTidslinjerForFagsak(Long fagsakId) {
+        var tilkjentYtelseMap = hentTilkjentYtelseForFagsak(fagsakId);
+        return tilkjentYtelseMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> mapTilTidslinje(entry.getValue().getPerioder())
+            ));
+    }
+
+
+    private Map<Behandling, TilkjentYtelse> hentTilkjentYtelseForFagsak(Long fagsakId) {
+        var query = entityManager.createQuery("SELECT b,t FROM TilkjentYtelse t inner join Behandling b on b.id = t.behandlingId " +
+                "WHERE b.fagsak.id=:fagsakId AND t.aktiv = true", Tuple.class)
+            .setParameter("fagsakId", fagsakId);
+
+        return query.getResultList().stream()
+            .collect(Collectors.toMap(
+                it -> it.get(0, Behandling.class),
+                it -> it.get(1, TilkjentYtelse.class)
+            ));
+
+    }
+
     public LocalDateTimeline<BigDecimal> hentKontrollerInntektTidslinje(Long behandlingId) {
         return hentKontrollertInntektPerioder(behandlingId)
             .stream()
@@ -135,6 +160,10 @@ public class TilkjentYtelseRepository {
             .setParameter("id", behandlingId);
 
         List<TilkjentYtelsePeriode> perioder = query.getResultList();
+        return mapTilTidslinje(perioder);
+    }
+
+    private static LocalDateTimeline<TilkjentYtelseVerdi> mapTilTidslinje(List<TilkjentYtelsePeriode> perioder) {
         List<LocalDateSegment<TilkjentYtelseVerdi>> segments = perioder.stream()
             .map(p -> new LocalDateSegment<>(
                 p.getPeriode().getFomDato(),

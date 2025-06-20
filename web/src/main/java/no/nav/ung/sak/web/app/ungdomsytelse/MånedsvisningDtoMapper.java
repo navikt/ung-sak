@@ -9,21 +9,26 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto;
-import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UtbetalingStatus;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class MånedsvisningDtoMapper {
 
-    static List<UngdomsytelseUtbetaltMånedDto> mapSatsOgUtbetalingPrMåned(LocalDateTimeline<YearMonth> månedsvisPeriodisering,
+    static List<UngdomsytelseUtbetaltMånedDto> mapSatsOgUtbetalingPrMåned(BehandlingAvsluttetTidspunkt aktuellAvsluttetTid,
+                                                                          LocalDateTimeline<YearMonth> månedsvisPeriodisering,
                                                                           LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje,
                                                                           LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje,
-                                                                          UngdomsytelseSatsPerioder perioder) {
+                                                                          UngdomsytelseSatsPerioder perioder,
+                                                                          Map<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>> tidslinjeMap) {
+
+        var statusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(aktuellAvsluttetTid, tidslinjeMap, LocalDate.now());
+
         final var månederMedYtelse = månedsvisPeriodisering.intersection(tilkjentYtelseTidslinje.mapValue(it -> true).compress());
         return månederMedYtelse.toSegments().stream().map(måned -> {
             final var tilkjentYtelseForMåned = tilkjentYtelseTidslinje.intersection(måned.getLocalDateInterval());
@@ -33,7 +38,7 @@ public class MånedsvisningDtoMapper {
             final var utbetaltBeløp = finnUtbetaltBeløp(tilkjentYtelseForMåned);
             final var reduksjon = finnReduksjon(tilkjentYtelseForMåned);
             final var rapportertInntekt = finnRapportertInntekt(kontrollertInntektForMåned);
-            final var utbetalingStatus = finnUtbetalingStatus(måned);
+            final var utbetalingStatus = statusTidslinje.getSegment(måned.getLocalDateInterval()).getValue();
             return new UngdomsytelseUtbetaltMånedDto(
                 måned.getValue(),
                 satsperioder,
@@ -65,25 +70,15 @@ public class MånedsvisningDtoMapper {
         return satsperioder;
     }
 
-    private static UtbetalingStatus finnUtbetalingStatus(LocalDateSegment<YearMonth> måned) {
-        if (!måned.getValue().isBefore(YearMonth.now())) {
-            // Hvis måneden er i fremtiden, så er det ikke utbetalt noe ennå
-            return UtbetalingStatus.TIL_UTBETALING;
-        }
 
-        var utbetalingsdag = finnFørsteVirkedagIMånedenEtter(måned);
-
-        return LocalDate.now().isBefore(utbetalingsdag) ? UtbetalingStatus.TIL_UTBETALING : UtbetalingStatus.UTBETALT;
-    }
-
-    private static LocalDate finnFørsteVirkedagIMånedenEtter(LocalDateSegment<YearMonth> måned) {
+    private static LocalDate finnFørsteVirkedagIMåned(YearMonth yearMonth) {
         // Antar her alltid at oppdragssystemet er oppe den første virkedagen i måneden. Dette vil som regel stemme, men ikke ved spesielle høytidsdager. Ok antagelse å gjøre for bruk til visning
-        var dato = måned.getValue().plusMonths(1).atDay(1);
+        var dato = yearMonth.atDay(1);
         while (dato.getDayOfWeek().equals(DayOfWeek.SUNDAY) || dato.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
             // Hvis første dag i måneden er helg, så flytt dato til mandag
             dato = dato.plusDays(1);
         }
-        return dato.plusDays(3); // Legger på 3 ventedager for å ta hensyn til at oppdragssystemet venter 3 dager før pengene utbetales
+        return dato;
     }
 
     private static BigDecimal finnUtbetaltBeløp(LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseForMåned) {

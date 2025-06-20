@@ -38,7 +38,9 @@ import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
@@ -109,7 +111,15 @@ public class UngdomsytelseRestTjeneste {
         final var månedsvisPeriodisering = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandling.getId());
         final var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId());
         final var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
-        return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(månedsvisPeriodisering, tilkjentYtelseTidslinje, kontrollertInntektTidslinje, perioder);
+        var tidslinjeMap = tilkjentYtelseRepository.hentTidslinjerForFagsak(behandling.getFagsakId());
+        var avsluttetTidTilkjentYtelseMap = tidslinjeMap.entrySet().stream().collect(Collectors.toMap(e -> BehandlingAvsluttetTidspunkt.fraBehandling(e.getKey()), Map.Entry::getValue));
+        return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(
+            BehandlingAvsluttetTidspunkt.fraBehandling(behandling),
+            månedsvisPeriodisering,
+            tilkjentYtelseTidslinje,
+            kontrollertInntektTidslinje,
+            perioder,
+            avsluttetTidTilkjentYtelseMap);
     }
 
     @GET
