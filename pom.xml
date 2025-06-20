@@ -36,14 +36,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>4.6.8</felles.version>
-        <swagger.version>2.2.33</swagger.version>
+        <swagger.version>2.2.34</swagger.version>
         <junit.version>5.13.1</junit.version>
         <k9format.version>12.3.1</k9format.version>
         <jackson.version>2.19.1</jackson.version>
         <asm.version>9.8</asm.version>
         <kotlin-stdlib.version>2.1.21</kotlin-stdlib.version>
         <jandex.version>3.3.1</jandex.version>
-        <flyway.version>11.9.1</flyway.version>
+        <flyway.version>11.9.2</flyway.version>
         <pdfgen-core.version>1.1.52</pdfgen-core.version>
         <confluent.platform.version>8.0.0</confluent.platform.version>
         <mockito.version>5.18.0</mockito.version>
@@ -52,7 +52,7 @@
         <validation-model-jakarta.version>1.28.1</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.28</openhtmltopdf.version>
         <jsoup.version>1.20.1</jsoup.version>
-        <commonmark.version>0.24.0</commonmark.version>
+        <commonmark.version>0.25.0</commonmark.version>
 
     </properties>
 
