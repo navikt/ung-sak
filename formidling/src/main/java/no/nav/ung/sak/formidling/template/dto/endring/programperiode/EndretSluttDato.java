@@ -6,6 +6,5 @@ public record EndretSluttDato(
     LocalDate endretTil,
     LocalDate endretFra,
     LocalDate opphørStartDato,
-    boolean harFlyttetBakover,
     LocalDate sisteUtbetalingsdato) {
 }

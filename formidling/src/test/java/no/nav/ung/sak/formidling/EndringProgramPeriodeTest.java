@@ -39,7 +39,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
       var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
           """
               Vi har endret ungdomsprogramytelsen din \
-              Fra 23. august 2025 får du ikke penger fordi du ikke lenger er med i ungdomsprogrammet. \
+              Fra 23. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
               Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
               men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
               Den siste utbetalingen får du før den 10. september 2025. \
