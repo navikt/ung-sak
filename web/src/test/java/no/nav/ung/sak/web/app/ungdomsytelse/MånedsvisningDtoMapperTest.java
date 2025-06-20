@@ -46,8 +46,7 @@ class MånedsvisningDtoMapperTest {
             månedstidslinje,
             tilkjentYtelseTidslinje,
             kontrollTidslinje,
-            satsperioder,
-            originalTilkjentYtelse
+            satsperioder
         );
 
         // Assert
@@ -106,8 +105,7 @@ class MånedsvisningDtoMapperTest {
             månedstidslinje,
             tilkjentYtelseTidslinje,
             kontrollTidslinje,
-            satsperioder,
-            originalTilkjentYtelse
+            satsperioder
         );
 
         // Assert
@@ -196,8 +194,7 @@ class MånedsvisningDtoMapperTest {
             månedstidslinje,
             tilkjentYtelseTidslinje,
             kontrollTidslinje,
-            satsperioder,
-            originalTilkjentYtelse
+            satsperioder
         );
 
         // Assert

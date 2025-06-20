@@ -109,8 +109,7 @@ public class UngdomsytelseRestTjeneste {
         final var månedsvisPeriodisering = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandling.getId());
         final var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId());
         final var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
-        final var originalTilkjentYtelse = behandling.getOriginalBehandlingId().map(tilkjentYtelseRepository::hentTidslinje).orElse(LocalDateTimeline.empty());
-        return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(månedsvisPeriodisering, tilkjentYtelseTidslinje, kontrollertInntektTidslinje, perioder, originalTilkjentYtelse);
+        return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(månedsvisPeriodisering, tilkjentYtelseTidslinje, kontrollertInntektTidslinje, perioder);
     }
 
     @GET
