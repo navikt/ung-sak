@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
 import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
 import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
@@ -34,6 +35,14 @@ public class TilkjentYtelseRepository {
 
     public void lagre(long behandlingId, List<KontrollertInntektPeriode> perioder) {
         final var eksisterende = hentKontrollertInntektPerioder(behandlingId);
+        lagreKontrollertePerioder(behandlingId, perioder,
+            eksisterende.map(KontrollertInntektPerioder::getRegelInput).map(RegelData::asJsonString).orElse(null),
+            eksisterende.map(KontrollertInntektPerioder::getRegelSporing).map(RegelData::asJsonString).orElse(null));
+    }
+
+
+    public void lagreKontrollertePerioder(long behandlingId, List<KontrollertInntektPeriode> perioder, String input, String sporing) {
+        final var eksisterende = hentKontrollertInntektPerioder(behandlingId);
         final var eksisterendePerioder = eksisterende.stream()
             .flatMap(it -> it.getPerioder().stream())
             .toList();
@@ -51,10 +60,13 @@ public class TilkjentYtelseRepository {
 
         final var ny = KontrollertInntektPerioder.ny(behandlingId)
             .medPerioder(perioder)
+            .medRegelInput(input)
+            .medRegelSporing(sporing)
             .build();
         entityManager.persist(ny);
         entityManager.flush();
     }
+
 
     private DiffEntity differ() {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
