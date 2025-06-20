@@ -52,10 +52,6 @@
             <groupId>no.nav.k9</groupId>
             <artifactId>oppgave-ungdomsytelse</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>innsyn</artifactId>
-        </dependency>
 
 
         <!-- Test avhengigheter -->

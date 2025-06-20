@@ -15,8 +15,8 @@ public class UttalelseEntitet extends BaseEntitet {
     @Column(name = "uttalelse_begrunnelse", updatable = false)
     private String uttalelseBegrunnelse;
 
-    @Column(name = "har_godtatt_endringen", updatable = false, nullable = false)
-    private boolean harGodtattEndringen;
+    @Column(name = "har_uttalelse", updatable = false, nullable = false)
+    private boolean harUttalelse;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
@@ -26,9 +26,9 @@ public class UttalelseEntitet extends BaseEntitet {
         // Hibernate
     }
 
-    public UttalelseEntitet(boolean harGodtattEndringen, String uttalelseBegrunnelse, JournalpostId svarJournalpostId) {
+    public UttalelseEntitet(boolean harUttalelse, String uttalelseBegrunnelse, JournalpostId svarJournalpostId) {
         this.uttalelseBegrunnelse = uttalelseBegrunnelse;
-        this.harGodtattEndringen = harGodtattEndringen;
+        this.harUttalelse = harUttalelse;
         this.svarJournalpostId = svarJournalpostId;
     }
 
@@ -36,7 +36,7 @@ public class UttalelseEntitet extends BaseEntitet {
     public String toString() {
         return "UttalelseEntitet{" +
             "id=" + id +
-            ", harGodtattEndringen=" + harGodtattEndringen +
+            ", harUttalelse=" + harUttalelse +
             ", svarJournalpostId=" + svarJournalpostId +
             '}';
     }
@@ -45,8 +45,8 @@ public class UttalelseEntitet extends BaseEntitet {
         return uttalelseBegrunnelse;
     }
 
-    public boolean harGodtattEndringen() {
-        return harGodtattEndringen;
+    public boolean harUttalelse() {
+        return harUttalelse;
     }
 
     public JournalpostId getSvarJournalpostId() {

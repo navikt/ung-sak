@@ -1,10 +1,11 @@
 package no.nav.ung.sak.formidling.template.dto;
 
-import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretDatoDto;
+import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretSluttDato;
+import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretStartDato;
 
 public record EndringProgramPeriodeDto(
-    EndretDatoDto endretSluttdato,
-    EndretDatoDto endretStartdato,
+    EndretStartDato endretStartdato,
+    EndretSluttDato endretSluttdato,
     boolean muligTilbakekreving
 ) implements TemplateInnholdDto {
 }

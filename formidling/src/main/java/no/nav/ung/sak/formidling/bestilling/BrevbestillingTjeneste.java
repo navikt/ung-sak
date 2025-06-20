@@ -9,7 +9,6 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.formidling.bestilling.BehandlingBrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
@@ -18,6 +17,7 @@ import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
+import no.nav.ung.sak.typer.JournalpostId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,40 +45,33 @@ public class BrevbestillingTjeneste {
 
     public BrevbestillingResultat bestillBrev(Behandling behandling, GenerertBrev generertBrev) {
         Fagsak fagsak = behandling.getFagsak();
-        String saksnummer = fagsak.getSaksnummer().getVerdi();
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-            saksnummer,
+            behandling.getFagsakId(),
+            behandling.getId(),
             generertBrev.malType(),
+            generertBrev.templateType(),
             new BrevMottaker(generertBrev.mottaker().aktørId().getAktørId(), IdType.AKTØRID));
 
-        var behandlingBestilling = new BehandlingBrevbestillingEntitet(
-            behandling.getId(),
-            generertBrev.malType().isVedtaksbrevmal(),
-            bestilling
-        );
+        LOG.info("Brevbestilling forespurt {}", bestilling);
 
-        LOG.info("Brevbestilling forespurt {}", behandlingBestilling);
-
-        brevbestillingRepository.lagreForBehandling(behandlingBestilling);
+        brevbestillingRepository.lagre(bestilling);
 
         var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);
         var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
-        //TODO vurder å putte templateType ved new'ing  istedenfor her...
-        bestilling.generertOgJournalført(generertBrev.templateType(), opprettJournalpostResponse.journalpostId());
+        bestilling.journalført(opprettJournalpostResponse.journalpostId());
 
-        brevbestillingRepository.lagreForBehandling(behandlingBestilling);
+        brevbestillingRepository.lagre(bestilling);
         var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
         distTask.setBehandling(fagsak.getId(), behandling.getId());
-        distTask.setSaksnummer(fagsak.getSaksnummer().getVerdi());
         distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
-        distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, behandlingBestilling.isVedtaksbrev() ?
+        distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, bestilling.isVedtaksbrev() ?
             DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name() : DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
         prosessTaskTjeneste.lagre(distTask);
         distTask.setCallIdFraEksisterende();
 
         LOG.info("Brevbestilling journalført med journalpostId={}", bestilling.getJournalpostId());
-        return new BrevbestillingResultat(bestilling.getJournalpostId());
+        return new BrevbestillingResultat(new JournalpostId(bestilling.getJournalpostId()));
     }
 
     private OpprettJournalpostRequest opprettJournalpostRequest(UUID brevbestillingUuid, GenerertBrev generertBrev, Behandling behandling) {

@@ -1,12 +1,9 @@
 package no.nav.ung.sak.behandlingslager.formidling.bestilling;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -21,11 +18,12 @@ public class BrevbestillingEntitet extends BaseEntitet {
     @Column(name = "brevbestilling_uuid", updatable = false, nullable = false)
     private UUID brevbestillingUuid;
 
-    /**
-     * saksnummer bestillingen journalføres på, kan være GENERELL_SAK
-     */
-    @Column(name = "saksnummer", updatable = false, nullable = false)
-    private String saksnummer;
+
+    @Column(name = "fagsak_id", updatable = false, nullable = false)
+    private Long fagsakId;
+
+    @Column(name = "behandling_id", updatable = false, nullable = false)
+    private Long behandlingId;
 
     /**
      * malen bestilt
@@ -49,13 +47,6 @@ public class BrevbestillingEntitet extends BaseEntitet {
     private BrevbestillingStatusType status;
 
     /**
-     * template data som ikke er utledet, f.eks. fritekst
-     */
-    @Column(name = "dokumentdata", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON) //TODO endre til å bruke json subtypes? Eller bare droppe det? Trengs det ifm etterlevelse?
-    private JsonNode dokumentdata;
-
-    /**
      * journalpost fra dokarkiv etter journalføring
      */
     @Column(name = "journalpost_id")
@@ -66,6 +57,9 @@ public class BrevbestillingEntitet extends BaseEntitet {
      */
     @Column(name = "dokdist_bestilling_id")
     private String dokdistBestillingId;
+
+    @Column(name = "vedtaksbrev", updatable = false, nullable = false)
+    private boolean vedtaksbrev;
 
     @Embedded
     private BrevMottaker mottaker;
@@ -78,20 +72,22 @@ public class BrevbestillingEntitet extends BaseEntitet {
     private long versjon;
 
 
-    public BrevbestillingEntitet(String saksnummer, DokumentMalType dokumentMalType, BrevbestillingStatusType status, JsonNode dokumentdata, BrevMottaker mottaker) {
+    public BrevbestillingEntitet(Long fagsakId, Long behandlingId, DokumentMalType dokumentMalType, TemplateType templateType, BrevbestillingStatusType status, BrevMottaker mottaker) {
         this.brevbestillingUuid = UUID.randomUUID();
-        this.saksnummer = saksnummer;
+        this.fagsakId = fagsakId;
+        this.behandlingId = behandlingId;
         this.dokumentMalType = dokumentMalType;
+        this.templateType = templateType;
         this.status = status;
-        this.dokumentdata = dokumentdata;
         this.mottaker = mottaker;
+        this.vedtaksbrev = dokumentMalType.isVedtaksbrevmal();
     }
 
     public BrevbestillingEntitet() {
     }
 
-    public static BrevbestillingEntitet nyBrevbestilling(String saksnummer, DokumentMalType dokumentMalType, BrevMottaker mottaker) {
-        return new BrevbestillingEntitet(saksnummer, dokumentMalType, BrevbestillingStatusType.NY, null, mottaker);
+    public static BrevbestillingEntitet nyBrevbestilling(Long fagsakId, Long id, DokumentMalType dokumentMalType, TemplateType templateType, BrevMottaker brevMottaker) {
+        return new BrevbestillingEntitet(fagsakId, id, dokumentMalType, templateType, BrevbestillingStatusType.NY, brevMottaker);
     }
 
     public UUID getBrevbestillingUuid() {
@@ -110,13 +106,20 @@ public class BrevbestillingEntitet extends BaseEntitet {
         return dokdistBestillingId;
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
+    public Long getBehandlingId() {
+        return behandlingId;
     }
 
-    public void generertOgJournalført(TemplateType templateType, String journalpostId) {
+    public Long getFagsakId() {
+        return fagsakId;
+    }
+
+    public boolean isVedtaksbrev() {
+        return vedtaksbrev;
+    }
+
+    public void journalført(String journalpostId) {
         this.journalpostId = journalpostId;
-        this.templateType = templateType;
         status = BrevbestillingStatusType.JOURNALFØRT;
     }
 
@@ -133,10 +136,6 @@ public class BrevbestillingEntitet extends BaseEntitet {
         return templateType;
     }
 
-    public JsonNode getDokumentData() {
-        return dokumentdata;
-    }
-
     public BrevMottaker getMottaker() {
         return mottaker;
     }
@@ -148,15 +147,18 @@ public class BrevbestillingEntitet extends BaseEntitet {
     @Override
     public String toString() {
         return "BrevbestillingEntitet{" +
-               "id=" + id +
-               ", brevbestillingUuid=" + brevbestillingUuid +
-               ", saksnummer='" + saksnummer + '\'' +
-               ", templateType=" + templateType +
-               ", dokumentMalType=" + dokumentMalType +
-               ", status=" + status +
-               ", journalpostId='" + journalpostId + '\'' +
-               ", dokdistBestillingId='" + dokdistBestillingId + '\'' +
-               ", mottakerType=" + mottaker.getMottakerIdType() +
-               '}';
+            "id=" + id +
+            ", brevbestillingUuid=" + brevbestillingUuid +
+            ", fagsakId=" + fagsakId +
+            ", behandlingId=" + behandlingId +
+            ", dokumentMalType=" + dokumentMalType +
+            ", templateType=" + templateType +
+            ", status=" + status +
+            ", journalpostId='" + journalpostId + '\'' +
+            ", dokdistBestillingId='" + dokdistBestillingId + '\'' +
+            ", vedtaksbrev=" + vedtaksbrev +
+            ", mottakerType=" + mottaker.getMottakerIdType() +
+            ", versjon=" + versjon +
+            '}';
     }
 }

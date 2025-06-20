@@ -17,19 +17,14 @@ public class BrevbestillingRepository {
     }
 
 
-    public List<BehandlingBrevbestillingEntitet> hentForBehandling(Long behandlingId) {
-        TypedQuery<BehandlingBrevbestillingEntitet> query = entityManager.createQuery(
-            "from BehandlingBrevbestillingEntitet b where b.behandlingId = :behandlingId and aktiv = true",
-            BehandlingBrevbestillingEntitet.class
+    public List<BrevbestillingEntitet> hentForBehandling(Long behandlingId) {
+        TypedQuery<BrevbestillingEntitet> query = entityManager.createQuery(
+            "from BrevbestillingEntitet b where b.behandlingId = :behandlingId and aktiv = true",
+            BrevbestillingEntitet.class
         );
         query.setParameter("behandlingId", behandlingId);
 
         return query.getResultList();
-    }
-
-    public void lagreForBehandling(BehandlingBrevbestillingEntitet bestilling) {
-        entityManager.persist(bestilling);
-        entityManager.flush();
     }
 
     public void lagre(BrevbestillingEntitet bestilling) {

@@ -7,15 +7,15 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingTjeneste;
-import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
-import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.util.List;
 import java.util.Locale;
@@ -26,14 +26,14 @@ public class InformasjonsbrevTjeneste {
     private final BehandlingRepository behandlingRepository;
     private final InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste;
     private final BrevbestillingTjeneste brevbestillingTjeneste;
-    private final BrevMottakerTjeneste brevMottakerTjeneste;
+    private PersonopplysningRepository personopplysningRepository;
 
     @Inject
-    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste, BrevbestillingTjeneste brevbestillingTjeneste, BrevMottakerTjeneste brevMottakerTjeneste) {
+    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste, BrevbestillingTjeneste brevbestillingTjeneste, PersonopplysningRepository personopplysningRepository) {
         this.behandlingRepository = behandlingRepository;
         this.informasjonsbrevGenerererTjeneste = informasjonsbrevGenerererTjeneste;
         this.brevbestillingTjeneste = brevbestillingTjeneste;
-        this.brevMottakerTjeneste = brevMottakerTjeneste;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
     public List<InformasjonsbrevValgDto> informasjonsbrevValg(Long behandlingId) {
@@ -42,24 +42,29 @@ public class InformasjonsbrevTjeneste {
         boolean støtterFritekst = false;
         boolean støtterTittelOgFritekst = true;
         return List.of(new InformasjonsbrevValgDto(
-                new KodeverdiSomObjekt<>(DokumentMalType.GENERELT_FRITEKSTBREV),
-                mapMottakere(behandling),
-                støtterFritekst,
-                støtterTittelOgFritekst
+            new KodeverdiSomObjekt<>(DokumentMalType.GENERELT_FRITEKSTBREV),
+            mapMottakere(behandling),
+            støtterFritekst,
+            støtterTittelOgFritekst
         ));
     }
 
     private List<InformasjonsbrevMottakerValgResponse> mapMottakere(Behandling behandling) {
-        PdlPerson pdlPerson = brevMottakerTjeneste.hentMottaker(behandling);
+        AktørId aktørId = behandling.getAktørId();
+        var personopplysning = personopplysningRepository
+            .hentPersonopplysninger(behandling.getId())
+            .getGjeldendeVersjon()
+            .getPersonopplysning(aktørId);
 
         return List.of(
-                new InformasjonsbrevMottakerValgResponse(
-                        pdlPerson.aktørId().getId(),
-                        IdType.AKTØRID,
-                        formaterMedStoreOgSmåBokstaver(pdlPerson.navn()),
-                        pdlPerson.fnr(),
-                        //Kan ikke sende brev til død mottaker, men ønsker å vise det til klient.
-                        pdlPerson.dødsdato() != null ? UtilgjengeligÅrsak.PERSON_DØD : null));
+            new InformasjonsbrevMottakerValgResponse(
+                aktørId.getId(),
+                IdType.AKTØRID,
+                personopplysning.getFødselsdato(),
+                formaterMedStoreOgSmåBokstaver(personopplysning.getNavn()),
+                //Kan ikke sende brev til død mottaker, men ønsker å vise det til klient.
+                personopplysning.getDødsdato() != null ? UtilgjengeligÅrsak.PERSON_DØD : null
+            ));
 
     }
 
@@ -101,26 +106,26 @@ public class InformasjonsbrevTjeneste {
         }
 
         var valg = informasjonsbrevValgDtos.stream().
-                filter(it -> it.malType().getKilde() == dto.dokumentMalType())
-                .findFirst();
+            filter(it -> it.malType().getKilde() == dto.dokumentMalType())
+            .findFirst();
         if (valg.isEmpty()) {
             throw new IllegalArgumentException(("Støtter ikke maltype: " + dto.dokumentMalType()
-                    + ". Støtter kun: " + informasjonsbrevValgDtos.stream()
-                    .map(InformasjonsbrevValgDto::malType)
-                    .toList()));
+                + ". Støtter kun: " + informasjonsbrevValgDtos.stream()
+                .map(InformasjonsbrevValgDto::malType)
+                .toList()));
         }
 
         boolean valgtMottakerErDød = valg.get().mottakere().stream().anyMatch(
-                mottaker -> mottaker.idType() == dto.mottaker().type()
-                        && mottaker.id().equals(dto.mottaker().id())
-                        && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
+            mottaker -> mottaker.idType() == dto.mottaker().type()
+                && mottaker.id().equals(dto.mottaker().id())
+                && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
 
         if (valgtMottakerErDød) {
             throw new IllegalArgumentException(("Støtter ikke brev der mottaker er død"));
         }
 
         return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(
-                new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
+            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
     }
 
 }

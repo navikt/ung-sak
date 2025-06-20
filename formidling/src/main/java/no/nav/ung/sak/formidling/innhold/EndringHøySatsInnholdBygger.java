@@ -42,14 +42,14 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
         var nyeSatser = ungdomsytelseGrunnlag.getSatsTidslinje().getSegment(new LocalDateInterval(satsendringsdato, satsendringsdato)).getValue();
 
-        long barnetilleggDagsats = Satsberegner.beregnBarnetilleggSats(nyeSatser);
+        long totalBarnetillegg = nyeSatser.dagsatsBarnetillegg();
 
         return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_HØY_SATS,
             new EndringHøySatsDto(
                 satsendringsdato,
                 Satsberegner.beregnDagsatsInklBarnetillegg(nyeSatser),
                 Sats.HØY.getFomAlder(),
-                barnetilleggDagsats > 0 ? barnetilleggDagsats : null
+                totalBarnetillegg > 0 ? totalBarnetillegg : null
             ));
     }
 

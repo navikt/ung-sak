@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
@@ -27,13 +26,12 @@ public class VedtakFattetEventObserver {
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
            //TODO flytt til formidling pakke
-            var gruppe = new ProsessTaskGruppe(opprettTaskForBrevbestilling(event));
+            taskTjeneste.lagre(opprettTaskForBrevbestilling(event));
 
             if (erBehandlingAvRettTypeForAbakus(event)) {
-                gruppe.addNesteSekvensiell(opprettTaskForPubliseringAvVedtakMedYtelse(event));
+                taskTjeneste.lagre(opprettTaskForPubliseringAvVedtakMedYtelse(event));
             }
 
-            taskTjeneste.lagre(gruppe);
         }
     }
 

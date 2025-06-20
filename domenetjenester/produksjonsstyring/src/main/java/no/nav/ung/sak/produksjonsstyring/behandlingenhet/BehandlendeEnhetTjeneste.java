@@ -126,7 +126,9 @@ public class BehandlendeEnhetTjeneste {
         innslagBuilder.medAktør(aktør);
         innslagBuilder.medTittel("Behandlende enhet er endret");
         innslagBuilder.addLinje("Behandlende enhet er endret fra " + fraMessage + " til " + nyEnhet.getEnhetId() + " " + nyEnhet.getEnhetNavn());
-        innslagBuilder.addLinje(begrunnelse);
+        if (begrunnelse != null && !begrunnelse.isBlank()) {
+            innslagBuilder.addLinje(begrunnelse);
+        }
         innslagBuilder.medBehandlingId(behandling.getId());
         innslagBuilder.medFagsakId(behandling.getFagsakId());
         historikkinnslagRepository.lagre(innslagBuilder.build());

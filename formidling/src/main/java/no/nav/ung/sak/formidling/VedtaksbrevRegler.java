@@ -47,10 +47,10 @@ public class VedtaksbrevRegler {
     public VedtaksbrevRegelResulat kjør(Long id) {
         var behandling = behandlingRepository.hentBehandling(id);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
-        return lagResultatMedBygger(behandling, detaljertResultatTidslinje);
+        return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
-    private VedtaksbrevRegelResulat lagResultatMedBygger(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private VedtaksbrevRegelResulat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultaterInfo = detaljertResultat
             .toSegments().stream()
             .flatMap(it -> it.getValue().resultatInfo().stream())
@@ -141,7 +141,7 @@ public class VedtaksbrevRegler {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
             String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.tomRedigerbarBrev(
-                innholdByggere.select(ManuellVedtaksbrevInnholdBygger.class).get(),
+                innholdByggere.select(ManueltVedtaksbrevInnholdBygger.class).get(),
                 detaljertResultat,
                 forklaring
             );

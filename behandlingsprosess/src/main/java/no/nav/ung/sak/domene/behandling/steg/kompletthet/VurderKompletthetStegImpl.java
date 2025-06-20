@@ -3,8 +3,6 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
@@ -16,7 +14,6 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
-import no.nav.ung.sak.etterlysning.SettEtterlysningerForBehandlingTilUtløptTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,19 +30,19 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTH
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
 
- /**
-  * Implementasjon av steg for å vurdere kompletthet i en behandling.
-  * Dette steget oppretter nødvendige etterlysninger, utleder aksjonspunkter,
-  * og håndterer utløpte etterlysninger basert på fristen til eksisterende etterlysninger.
-  * <p>
-  * Opprettelse av oppgave hos deltaker skjer a-sync. Frist for etterlysning settes først når oppgaven har blitt opprettet og kan løses av deltaker. Etterlysningene vil derfor ikke har frist her ved første gjennomkjøring. Fristen som brukes er definert i miljøvariabelen `VENTEFRIST_UTTALELSE`, som har standardverdi på 14 dager (P14D).
-  * Steget kan returere tre ventepunkter:
-  * <ul>
-  *     <li>Venter på rapporteringsfrist</li>
-  *     <li>Venter på etterlysning av uttalelse for kontroll av inntekt</li>
-  *     <li>Venter på etterlysning av uttalelse for endring av programperiode</li>
-  * </ul>
-  */
+/**
+ * Implementasjon av steg for å vurdere kompletthet i en behandling.
+ * Dette steget oppretter nødvendige etterlysninger, utleder aksjonspunkter,
+ * og håndterer utløpte etterlysninger basert på fristen til eksisterende etterlysninger.
+ * <p>
+ * Opprettelse av oppgave hos deltaker skjer a-sync. Frist for etterlysning settes først når oppgaven har blitt opprettet og kan løses av deltaker. Etterlysningene vil derfor ikke har frist her ved første gjennomkjøring. Fristen som brukes er definert i miljøvariabelen `VENTEFRIST_UTTALELSE`, som har standardverdi på 14 dager (P14D).
+ * Steget kan returere tre ventepunkter:
+ * <ul>
+ *     <li>Venter på rapporteringsfrist</li>
+ *     <li>Venter på etterlysning av uttalelse for kontroll av inntekt</li>
+ *     <li>Venter på etterlysning av uttalelse for endring av programperiode</li>
+ * </ul>
+ */
 @BehandlingStegRef(value = VURDER_KOMPLETTHET)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
@@ -54,7 +51,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
     private static final Logger log = LoggerFactory.getLogger(VurderKompletthetStegImpl.class);
     private EtterlysningRepository etterlysningRepository;
-    private ProsessTaskTjeneste prosessTaskTjeneste;
     private BehandlingRepository behandlingRepository;
     private KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter;
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
@@ -67,14 +63,12 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
 
     @Inject
     public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository,
-                                     ProsessTaskTjeneste prosessTaskTjeneste,
                                      BehandlingRepository behandlingRepository,
                                      KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter,
                                      ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
                                      RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder,
                                      @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
         this.etterlysningRepository = etterlysningRepository;
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.kontrollerInntektEtterlysningOppretter = kontrollerInntektEtterlysningOppretter;
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
@@ -103,29 +97,13 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
 
-        // Steg 3 Håndterer utløpte etterlysninger
-        håndterUtløpteEtterlysninger(kontekst, etterlysningerSomVenterPåSvar);
-
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
-    }
-
-    private void håndterUtløpteEtterlysninger(BehandlingskontrollKontekst kontekst, List<Etterlysning> etterlysningerSomVenterPåSvar) {
-        final var harUtløpteEtterlysninger = etterlysningerSomVenterPåSvar.stream()
-            .anyMatch(e -> harPassertFrist(e.getFrist()));
-
-        if (harUtløpteEtterlysninger) {
-            // Dersom vi har utløpte etterlysninger ønsker vi å oppdatere status på disse
-            var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningerForBehandlingTilUtløptTask.class);
-            prosessTaskData.setBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId());
-            prosessTaskTjeneste.lagre(prosessTaskData);
-        }
     }
 
     private List<AksjonspunktResultat> utledFraEtterlysninger(List<Etterlysning> etterlysningerSomVenterPåSvar) {
         final var lengsteFristPrType = etterlysningerSomVenterPåSvar.stream().collect(Collectors.toMap(Etterlysning::getType, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Etterlysning::getFrist, Comparator.nullsLast(Comparator.naturalOrder())))));
         final var aksjonspunktresultater = lengsteFristPrType.entrySet()
             .stream()
-            .filter(e -> !harPassertFrist(e.getValue().getFrist()))
             .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
         log.info("Aksjonspunktresultatfrist={}, etterlysningfrister={}, harPassertFrist={}, now={}",
             aksjonspunktresultater.stream().map(AksjonspunktResultat::getFrist).toList(),

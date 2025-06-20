@@ -84,7 +84,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
     private void opprettKontrollerteInntektPerioder(BehandlingskontrollKontekst kontekst,
                                                     LocalDateTimeline<Kontrollresultat> kontrollResultat) {
-        kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.BRUK_GODKJENT_ELLER_RAPPORTERT_INNTEKT_FRA_BRUKER)
+        kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.FERDIG_KONTROLLERT)
             .toSegments()
             .forEach(segment -> {
                 log.info("Bruker inntekt fra bruker eller godkjent inntekt fra register for periode {}", segment.getLocalDateInterval());

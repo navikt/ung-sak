@@ -15,13 +15,15 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.etterlysning.EtterlysningProssesseringTjeneste;
+import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.etterlysning.EndreFristForEtterlysningDto;
+import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
 import no.nav.ung.sak.kontrakt.etterlysning.Etterlysning;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.rest.Redirect;
@@ -47,19 +49,19 @@ public class EtterlysningRestTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste) {
+    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @GET
@@ -86,27 +88,34 @@ public class EtterlysningRestTjeneste {
                                HttpServletRequest request,
                                @Parameter(description = "Liste over etterlysninger med ny frist.")
                                @Valid
-                               @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreFristForEtterlysningDto endreFristForEtterlysningDto) throws URISyntaxException {
+                               @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreFristRequest endreFristRequest) throws URISyntaxException {
 
-        final var behandlingId = endreFristForEtterlysningDto.getBehandlingId();
+        final var behandlingId = endreFristRequest.getBehandlingId();
         final var behandling = behandlingRepository.hentBehandling(behandlingId);
-        behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(behandlingId, endreFristForEtterlysningDto.getBehandlingVersjon());
-        endreFristForEtterlysningDto.getEndretFrister().forEach(it -> {
+        behandlingsutredningApplikasjonTjeneste.kanEndreBehandling(behandlingId, endreFristRequest.getBehandlingVersjon());
+        endreFristRequest.getEndretFrister().forEach(it -> {
             final var etterlysning = etterlysningRepository.hentEtterlysningForEksternReferanse(it.etterlysningEksternReferanse());
             if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
                 throw new IllegalArgumentException("Kan ikke endre frist for etterlysning dersom den ikke er i status VENTER. Status er " + etterlysning.getStatus());
             }
             // Anser det som usannsynlig at noen vil endre frist for etterlysning mer enn 14 dager frem i tid, så vi kaster en exception dersom det skjer siden det mest sannsynlig er gjort ved en feil
-            if (it.frist().atStartOfDay().isAfter(LocalDateTime.now().plusDays(14))) {
+            var frist = it.frist().atStartOfDay();
+            if (frist.isAfter(LocalDateTime.now().plusDays(14))) {
                 throw new IllegalArgumentException("Frist for etterlysning kan ikke settes mer enn 14 dager frem i tid.");
             }
-            etterlysning.setFrist(it.frist().atStartOfDay());
+            etterlysning.setFrist(frist);
             // Det vil mest sannsynlig bare være en etterlysning her, så vi anser det som ok å lagre inne i loopen for lesbarhet
             etterlysningRepository.lagre(etterlysning);
+            opprettNySettUtløptTask(behandling, frist);
         });
-        // Oppretter gjenoppta task for å oppdatere frist på aksjonspunkt (gjøres automatisk ved kjøring av kompletthetsteg)
-        behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
+    }
+
+    private void opprettNySettUtløptTask(Behandling behandling, LocalDateTime frist) {
+        var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptDersomVenterTask.class);
+        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
+        prosessTaskData.setNesteKjøringEtter(frist);
+        prosessTaskTjeneste.lagre(prosessTaskData);
     }
 
 
