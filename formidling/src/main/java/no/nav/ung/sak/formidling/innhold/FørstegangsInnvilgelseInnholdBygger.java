@@ -26,6 +26,7 @@ import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
@@ -84,6 +85,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje, brevfeilSamler);
 
+        var sisteUtbetalingsdato = ytelseTom != null ? PeriodeBeregner.utledFremtidigUtbetalingsdato(ytelseTom, YearMonth.from(bestemDagensDato())) : null;
+
         if (brevfeilSamler.harFeil()) {
             LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
         }
@@ -97,7 +100,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 satsOgBeregningDto,
                 brevfeilSamler.samletFeiltekst(),
                 erEtterbetaling,
-                satsEndringHendelseDtos.isEmpty()));
+                satsEndringHendelseDtos.isEmpty(),
+                sisteUtbetalingsdato));
     }
 
     private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, BrevfeilHåndterer brevfeilSamler) {
@@ -106,9 +110,13 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             brevfeilSamler.registrerFeilmelding("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
         }
         var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
-        var dagensDato = Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
+        var dagensDato = bestemDagensDato();
 
         return førsteTilkjentMåned.isBefore(dagensDato.withDayOfMonth(1));
+    }
+
+    private LocalDate bestemDagensDato() {
+        return Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
     }
 
     private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId, BrevfeilHåndterer brevfeilSamler) {

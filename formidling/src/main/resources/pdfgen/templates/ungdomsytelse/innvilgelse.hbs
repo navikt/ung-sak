@@ -34,6 +34,9 @@
             {{else}}
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet.
             {{/if}}
+            {{#if sisteUtbetalingsdato}}
+                Den siste utbetalingen får du før den {{sisteUtbetalingsdato}}.
+            {{/if}}
             Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.
         </p>
 
@@ -45,8 +48,9 @@
         <h2>Hvorfor får du penger?</h2>
         <p>Du får penger fordi du er med i ungdomsprogrammet. Pengene gir deg en inntekt mens du deltar i
             ungdomsprogrammet.</p>
-        <p>Pengene får du så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få det i
-            mer enn ett år.</p>
+        <p>Pengene får du så lenge du er i ungdomsprogrammet
+            {{~#unless ytelseTom~}}, men du kan som hovedregel ikke få det i mer enn ett år{{/unless}}.
+        </p>
 
         <p>Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx.</p>
 
