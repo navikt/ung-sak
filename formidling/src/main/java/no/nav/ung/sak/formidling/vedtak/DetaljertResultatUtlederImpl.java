@@ -124,19 +124,33 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
 
         if (!avslåtteVilkår.isEmpty()) {
-            if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
-                && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO, "Endring av startdato fremover");
-            }
-
-            if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
-                && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphør av ungdomsprogramperiode");
-            }
-
-            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
+            return bestemAvslagResultat(relevanteÅrsaker, avslåtteVilkår);
         }
 
+        DetaljertResultatInfo innvilgelsesResultat = bestemInnvilgelsesResultat(tilkjentYtelse, relevanteÅrsaker);
+        if (innvilgelsesResultat != null)  {
+            return innvilgelsesResultat;
+        }
+
+        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
+            .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
+    }
+
+    private static DetaljertResultatInfo bestemAvslagResultat(SetHelper<BehandlingÅrsakType> relevanteÅrsaker, Set<DetaljertVilkårResultat> avslåtteVilkår) {
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+            && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO, "Endring av startdato fremover");
+        }
+
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+            && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphør av ungdomsprogramperiode");
+        }
+
+        return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
+    }
+
+    private static DetaljertResultatInfo bestemInnvilgelsesResultat(TilkjentYtelseVerdi tilkjentYtelse, SetHelper<BehandlingÅrsakType> relevanteÅrsaker) {
         if (tilkjentYtelse != null) {
             var tilkjentYtelseResultat = bestemDetaljertResultatMedTilkjentYtelse(tilkjentYtelse, relevanteÅrsaker);
             if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
@@ -172,9 +186,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         if (relevanteÅrsaker.isEmpty()) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK, "Innvilget periode uten årsak");
         }
-
-        throw new IllegalStateException("Klarte ikke å utlede resultattype for periode %s og vilkårsresultat og behandlingsårsaker %s og tilkjent ytelse %s"
-            .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
+        return null;
     }
 
     private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, SetHelper<BehandlingÅrsakType> behandlingsårsaker) {

@@ -17,6 +17,9 @@ import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -105,6 +108,7 @@ class VedtaksbrevReglerTest {
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
         assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
 
