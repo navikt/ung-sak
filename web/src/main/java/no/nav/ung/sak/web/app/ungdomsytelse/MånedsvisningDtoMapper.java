@@ -11,7 +11,6 @@ import no.nav.ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeD
 import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -66,17 +65,6 @@ public class MånedsvisningDtoMapper {
             .map(it -> mapTilSatsperiode(it.getLocalDateInterval(), it.getValue()))
             .toList();
         return satsperioder;
-    }
-
-
-    private static LocalDate finnFørsteVirkedagIMåned(YearMonth yearMonth) {
-        // Antar her alltid at oppdragssystemet er oppe den første virkedagen i måneden. Dette vil som regel stemme, men ikke ved spesielle høytidsdager. Ok antagelse å gjøre for bruk til visning
-        var dato = yearMonth.atDay(1);
-        while (dato.getDayOfWeek().equals(DayOfWeek.SUNDAY) || dato.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
-            // Hvis første dag i måneden er helg, så flytt dato til mandag
-            dato = dato.plusDays(1);
-        }
-        return dato;
     }
 
     private static BigDecimal finnUtbetaltBeløp(LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseForMåned) {
