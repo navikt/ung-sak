@@ -9,6 +9,7 @@ import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -20,7 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-   EndringProgramPeriodeTest() {
+    private final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
+
+
+    EndringProgramPeriodeTest() {
         super(1,
             "Vi har endret ungdomsprogramytelsen din");
     }
@@ -35,9 +39,10 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
       var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
           """
               Vi har endret ungdomsprogramytelsen din \
-              Fra 25. august 2025 får du ikke penger fordi du ikke lenger er med i ungdomsprogrammet. \
+              Fra 23. august 2025 får du ikke penger fordi du ikke lenger er med i ungdomsprogrammet. \
               Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
               men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
+              Den siste utbetalingen får du før den 10. september 2025. \
               Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
               """);
 
@@ -54,17 +59,18 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
   }
 
   @Test
+  @DisplayName("Flytter sluttdato bakover til forrige måned")
   void flytteSluttdato_bakover() {
-      var nySluttdato = LocalDate.of(2025, 8, 1);
+      var nySluttdato = LocalDate.of(2025, 7, 31);
       var opprinneligSluttdato = LocalDate.of(2025, 8, 15);
       var behandling = lagScenarioForSluttdato(opprinneligSluttdato, nySluttdato);
 
       var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
           """
               Vi har endret ungdomsprogramytelsen din \
-              Fra 4. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
+              Fra 1. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
               Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
-              men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 1. august 2025. \
+              men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 31. juli 2025. \
               Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
               """);
 
@@ -151,7 +157,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        return new EndringProgramPeriodeInnholdBygger(ungTestRepositories.ungdomsprogramPeriodeRepository());
+        return new EndringProgramPeriodeInnholdBygger(ungTestRepositories.ungdomsprogramPeriodeRepository(), DAGENS_DATO);
     }
 
     @Override
