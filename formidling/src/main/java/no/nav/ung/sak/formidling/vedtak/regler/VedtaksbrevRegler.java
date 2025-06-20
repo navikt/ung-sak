@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak.regler;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
@@ -147,8 +147,17 @@ public class VedtaksbrevRegler {
             );
         }
 
+        if (resultater.innholderBare(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)) {
+            String forklaring = "Ingen brev ved full utbetaling etter kontroll av inntekt.";
+            return VedtaksbrevRegelResulat.ingenBrev(
+                detaljertResultat,
+                IngenBrevÅrsakType.IKKE_RELEVANT,
+                forklaring
+            );
+        }
+
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, forklaring);
+        return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring);
     }
 
     private boolean erFørsteOpphør(Behandling behandling) {

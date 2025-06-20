@@ -16,7 +16,10 @@ import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,12 +98,9 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
-        if (!regelResultat.vedtaksbrevEgenskaper().harBrev()) {
-            if (erIngenBrevForventet(regelResultat)) {
-                LOG.info(regelResultat.forklaring());
-            } else {
-                LOG.warn(regelResultat.forklaring());
-            }
+        var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
+        if (!vedtaksbrevEgenskaper.harBrev()) {
+            loggIngenBrev(vedtaksbrevEgenskaper, regelResultat);
             return null;
         }
 
@@ -163,6 +163,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             resultat.dokumentMalType(),
             resultat.templateType()
         );
+    }
+
+    private static void loggIngenBrev(VedtaksbrevEgenskaper vedtaksbrevEgenskaper, VedtaksbrevRegelResulat regelResultat) {
+        if (vedtaksbrevEgenskaper.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
+            LOG.warn("Ingen brev implementert for tilfelle: {}", regelResultat.forklaring());
+        } else {
+            LOG.info("Ingen brev relevant for tilfelle: {}", regelResultat.forklaring());
+        }
     }
 
 

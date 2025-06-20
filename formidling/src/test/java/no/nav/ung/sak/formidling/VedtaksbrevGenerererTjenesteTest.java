@@ -16,6 +16,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederFake;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
