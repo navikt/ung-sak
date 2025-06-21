@@ -262,15 +262,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "faktaOmBeregningTilfeller" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektFaktaOmBeregningTilfelle"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "historikkAktører" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkAktør"
@@ -346,15 +337,6 @@
           "inntektskategorier" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektInntektskategori"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "konsekvenserForYtelsen" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektKonsekvensForYtelsen"
             },
             "maxItems" : 1000,
             "minItems" : 1,
@@ -506,7 +488,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "AngittPersonDto" : {
@@ -2298,29 +2280,6 @@
         "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ],
         "type" : "string"
       },
-      "KodeverdiSomObjektFaktaOmBeregningTilfelle" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/KodeverdiSomObjektFaktaOmBeregningTilfelleKilde"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektFaktaOmBeregningTilfelleKilde" : {
-        "enum" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "-" ],
-        "x-enum-varnames" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "UDEFINERT" ],
-        "type" : "string"
-      },
       "KodeverdiSomObjektHistorikkAktør" : {
         "properties" : {
           "kilde" : {
@@ -2526,29 +2485,6 @@
       "KodeverdiSomObjektInntektskategoriKilde" : {
         "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
         "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ],
-        "type" : "string"
-      },
-      "KodeverdiSomObjektKonsekvensForYtelsen" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/KodeverdiSomObjektKonsekvensForYtelsenKilde"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektKonsekvensForYtelsenKilde" : {
-        "enum" : [ "YTELSE_OPPHØRER", "ENDRING_I_BEREGNING", "INGEN_ENDRING", "-" ],
-        "x-enum-varnames" : [ "YTELSE_OPPHØRER", "ENDRING_I_BEREGNING", "INGEN_ENDRING", "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverdiSomObjektMedlemskapDekningType" : {
@@ -4593,34 +4529,6 @@
         "required" : [ "andeler", "periode" ],
         "type" : "object"
       },
-      "TotrinnsBeregningDto" : {
-        "properties" : {
-          "faktaOmBeregningTilfeller" : {
-            "items" : {
-              "$ref" : "#/components/schemas/TotrinnsBeregningDtoFaktaOmBeregningTilfeller"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          },
-          "fastsattVarigEndring" : {
-            "type" : "boolean"
-          },
-          "fastsattVarigEndringNaering" : {
-            "type" : "boolean"
-          },
-          "skjæringstidspunkt" : {
-            "format" : "date",
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
-      "TotrinnsBeregningDtoFaktaOmBeregningTilfeller" : {
-        "enum" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "-" ],
-        "x-enum-varnames" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "UDEFINERT" ],
-        "type" : "string"
-      },
       "TotrinnskontrollAksjonspunkterDto" : {
         "properties" : {
           "aksjonspunktKode" : {
@@ -4628,15 +4536,6 @@
             "minLength" : 0,
             "pattern" : "^[\\p{Alnum}]+$",
             "type" : "string"
-          },
-          "beregningDto" : {
-            "$ref" : "#/components/schemas/TotrinnsBeregningDto"
-          },
-          "beregningDtoer" : {
-            "items" : {
-              "$ref" : "#/components/schemas/TotrinnsBeregningDto"
-            },
-            "type" : "array"
           },
           "besluttersBegrunnelse" : {
             "maxLength" : 4000,
