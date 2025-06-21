@@ -29,6 +29,7 @@ import no.nav.ung.sak.ytelse.kontroll.ManueltKontrollertInntekt;
 
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettInntektDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -128,7 +129,11 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     private void opprettHistorikkinnslag(FastsettInntektDto dto, BehandlingReferanse behandlingReferanse, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
 
         var linjer = dto.getPerioder().stream()
-            .map(p -> HistorikkinnslagLinjeBuilder.fraTilEquals("Inntekt for " + finnMåned(p), null, finnValgTekst(sammenslåtteInntekterTidslinje.getSegment(new LocalDateInterval(p.periode().getFom(), p.periode().getTom())))))
+            .flatMap(p ->
+                Stream.of(
+                    HistorikkinnslagLinjeBuilder.fraTilEquals("Inntekt for " + finnMåned(p), null, finnValgTekst(sammenslåtteInntekterTidslinje.getSegment(new LocalDateInterval(p.periode().getFom(), p.periode().getTom())))),
+                    HistorikkinnslagLinjeBuilder.plainTekstLinje(p.begrunnelse())
+                    ))
             .toList();
 
         var historikkinnslag = new Historikkinnslag.Builder()
