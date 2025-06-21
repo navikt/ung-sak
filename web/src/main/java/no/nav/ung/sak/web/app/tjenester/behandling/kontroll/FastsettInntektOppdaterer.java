@@ -14,7 +14,6 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -29,7 +28,6 @@ import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.kontroll.ManueltKontrollertInntekt;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Set;
 
 @ApplicationScoped
@@ -60,7 +58,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, param);
         validerVurdertePerioder(param, sammenslåtteInntekterTidslinje);
         kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje);
-        opprettHistorikkinnslag(dto, param.getRef());
+        opprettHistorikkinnslag(dto, param.getRef(), sammenslåtteInntekterTidslinje);
         return OppdateringResultat.builder().medTotrinnHvis(true).build();
     }
 
@@ -127,10 +125,10 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
             rapportert.getValue().registerRapporterteInntekter(), saksbehandlet == null ? null : saksbehandlet.getValue()));
     }
 
-    private void opprettHistorikkinnslag(FastsettInntektDto dto, BehandlingReferanse behandlingReferanse) {
+    private void opprettHistorikkinnslag(FastsettInntektDto dto, BehandlingReferanse behandlingReferanse, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
 
         var linjer = dto.getPerioder().stream()
-            .map(p -> HistorikkinnslagLinjeBuilder.fraTilEquals("Valgt inntekt for " + finnMåned(p), null, finnValgTekst(p)))
+            .map(p -> HistorikkinnslagLinjeBuilder.fraTilEquals("Inntekt for " + finnMåned(p), null, finnValgTekst(sammenslåtteInntekterTidslinje.getSegment(new LocalDateInterval(p.periode().getFom(), p.periode().getTom())))))
             .toList();
 
         var historikkinnslag = new Historikkinnslag.Builder()
@@ -143,12 +141,16 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         historikkinnslagRepository.lagre(historikkinnslag);
     }
 
-    private static String finnValgTekst(FastsettInntektPeriodeDto p) {
-        return switch (p.valg()) {
-            case BRUK_BRUKERS_INNTEKT -> "Inntekt fra bruker";
-            case BRUK_REGISTER_INNTEKT -> "Inntekt fra register";
-            case MANUELT_FASTSATT -> "Manuelt fastsatt inntekt: " + p.fastsattInnntekt();
+    private static String finnValgTekst(LocalDateSegment<ManueltKontrollertInntekt> segment) {
+        return switch (segment.getValue().kilde()) {
+            case BRUKER -> "Rapportert inntekt fra deltaker: " + formater(segment.getValue().samletInntekt().intValue());
+            case REGISTER -> "Rapportert inntekt fra a-ordningen: " + formater(segment.getValue().samletInntekt().intValue());
+            case SAKSBEHANDLER -> "Manuelt fastsatt beløp: " + formater(segment.getValue().samletInntekt().intValue());
         };
+    }
+
+    private static String formater(int i) {
+        return String.format("%,d", i).replace(',', ' ');
     }
 
     private static String finnMåned(FastsettInntektPeriodeDto p) {
@@ -165,7 +167,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
             case OCTOBER -> "oktober";
             case NOVEMBER -> "november";
             case DECEMBER -> "desember";
-        };
+        } + " " + p.periode().getFom().getYear();
     }
 
 
