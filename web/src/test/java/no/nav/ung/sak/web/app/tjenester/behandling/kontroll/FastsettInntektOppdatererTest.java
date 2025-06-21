@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -95,7 +96,8 @@ class FastsettInntektOppdatererTest {
         oppdaterer = new FastsettInntektOppdaterer(
             kontrollerteInntektperioderTjeneste,
             rapportertInntektMapper,
-            prosessTriggerPeriodeUtleder);
+            prosessTriggerPeriodeUtleder,
+            new HistorikkinnslagRepository(entityManager));
 
         fagsakRepository = new FagsakRepository(entityManager);
 
