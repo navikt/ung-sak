@@ -28,6 +28,8 @@ import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelse.kontroll.ManueltKontrollertInntekt;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -129,12 +131,16 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     private void opprettHistorikkinnslag(FastsettInntektDto dto, BehandlingReferanse behandlingReferanse, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
 
         var linjer = dto.getPerioder().stream()
-            .flatMap(p ->
-                Stream.of(
+            .map(p ->
+                new ArrayList<>(List.of(
                     HistorikkinnslagLinjeBuilder.fraTilEquals("Inntekt for " + finnMåned(p), null, finnValgTekst(sammenslåtteInntekterTidslinje.getSegment(new LocalDateInterval(p.periode().getFom(), p.periode().getTom())))),
                     HistorikkinnslagLinjeBuilder.plainTekstLinje(p.begrunnelse())
-                    ))
-            .toList();
+                    )))
+            .reduce((s1, s2) -> {
+                s1.add(HistorikkinnslagLinjeBuilder.LINJESKIFT);
+                s1.addAll(s2);
+                return new ArrayList<>(s1);
+            }).orElse(new ArrayList<>());
 
         var historikkinnslag = new Historikkinnslag.Builder()
             .medFagsakId(behandlingReferanse.getFagsakId())
