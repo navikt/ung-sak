@@ -14,7 +14,7 @@ import java.time.YearMonth;
 
 public class YtelserKorrigerer {
 
-    public static final BigDecimal AVVIK_NEDRE_GRENSE = BigDecimal.valueOf(0.5);
+    public static final BigDecimal AVVIK_NEDRE_GRENSE = BigDecimal.valueOf(-0.5);
 
     /** Ufører korrigering basert på avrundingsfeil fra tidligere perioder. Utbetaler som en korrigert dagsats i siste virkedag på ytelsen dersom avrundingsfeilen er større enn 0.5
      * @param ytelseTidslinje Beregnet ytelse tidslinje
@@ -27,7 +27,8 @@ public class YtelserKorrigerer {
             var totaltAvvik = ytelseTidslinje.toSegments().stream().map(it -> BigDecimal.valueOf(it.getValue().avvikGrunnetAvrunding()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
             // Dersom det totale avvike er er mindre enn 0.5, så vil ikke korrigeringen medføre endret utbetaling siden dette vil avrundes til 0
-            if (totaltAvvik.compareTo(AVVIK_NEDRE_GRENSE) >= 0) {
+            // Dersom avviket er positivt ønsker vi ikke å korrigere (bruker har fått for mye grunnet avrundingsfeil)
+            if (totaltAvvik.compareTo(AVVIK_NEDRE_GRENSE) <= 0) {
                 var sisteVirkedag = finnSisteVirkedag(ytelseTidslinje);
                 var sisteYtelseVerdi = ytelseTidslinje.intersection(new LocalDateInterval(sisteVirkedag, sisteVirkedag)).toSegments().first().getValue();
                 var korrigertDagsats = sisteYtelseVerdi.dagsats().add(totaltAvvik).setScale(0, RoundingMode.HALF_UP);
