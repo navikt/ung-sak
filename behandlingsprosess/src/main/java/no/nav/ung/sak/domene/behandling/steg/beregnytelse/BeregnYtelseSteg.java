@@ -68,7 +68,11 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
-        tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
+        tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(),
+            tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi),
+            LocalDateTimeline.empty(),
+            regelInput,
+            regelSporing);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

@@ -59,13 +59,17 @@ public class TilkjentYtelseBeregner {
         final var utbetalingsgrad = finnUtbetalingsgrad(redusertBeløp, sats.grunnsats(), dagsats);
         sporing.put("utbetalingsgrad", String.valueOf(utbetalingsgrad));
 
+        var avvikGrunnetAvrunding = dagsats.multiply(BigDecimal.valueOf(antallVirkedager)).subtract(redusertBeløp).doubleValue();
+        sporing.put("avvikGrunnetAvrunding", String.valueOf(avvikGrunnetAvrunding));
+
         sporing.put("periode", periode.toString());
         final var tilkjentYtelseVerdi = new TilkjentYtelseVerdi(
             uredusertBeløp,
             reduksjon,
             redusertBeløp,
             dagsats,
-            utbetalingsgrad);
+            utbetalingsgrad,
+            avvikGrunnetAvrunding);
         return new TilkjentYtelsePeriodeResultat(tilkjentYtelseVerdi, sporing);
     }
 

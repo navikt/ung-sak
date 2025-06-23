@@ -38,6 +38,9 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
     @Column(name = "utbetalingsgrad", nullable = false)
     private int utbetalingsgrad;
 
+    @Column(name = "avvikGrunnetAvrunding", nullable = false)
+    private double avvikGrunnetAvrunding;
+
     protected TilkjentYtelsePeriode() {
     }
 
@@ -45,13 +48,16 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
                                   BigDecimal uredusertBeløp,
                                   BigDecimal reduksjon,
                                   BigDecimal redusertBeløp,
-                                  BigDecimal dagsats, int utbetalingsgrad) {
+                                  BigDecimal dagsats,
+                                  int utbetalingsgrad,
+                                  double avvikGrunnetAvrunding) {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
         this.uredusertBeløp = uredusertBeløp;
         this.reduksjon = reduksjon;
         this.redusertBeløp = redusertBeløp;
         this.dagsats = dagsats;
         this.utbetalingsgrad = utbetalingsgrad;
+        this.avvikGrunnetAvrunding = avvikGrunnetAvrunding;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -78,6 +84,10 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
         return utbetalingsgrad;
     }
 
+    public double getAvvikGrunnetAvrunding() {
+        return avvikGrunnetAvrunding;
+    }
+
     public static Builder ny() {
         return new Builder();
     }
@@ -90,6 +100,7 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
         private BigDecimal redusertBeløp;
         private BigDecimal dagsats;
         private int utbetalingsgrad;
+        private double avvikGrunnetAvrunding;
 
         private Builder() {}
 
@@ -138,8 +149,14 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
             return this;
         }
 
+        public Builder medAvvikGrunnetAvrunding(double avvikGrunnetAvrunding) {
+            this.avvikGrunnetAvrunding = avvikGrunnetAvrunding;
+            return this;
+        }
+
+
         public TilkjentYtelsePeriode build() {
-            return new TilkjentYtelsePeriode(periode, uredusertBeløp, reduksjon, redusertBeløp, dagsats, utbetalingsgrad);
+            return new TilkjentYtelsePeriode(periode, uredusertBeløp, reduksjon, redusertBeløp, dagsats, utbetalingsgrad, avvikGrunnetAvrunding);
         }
 
 

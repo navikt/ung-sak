@@ -26,6 +26,12 @@ public class TilkjentYtelse extends BaseEntitet {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<TilkjentYtelsePeriode> perioder = new ArrayList<>();
 
+
+    @Immutable
+    @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    private List<KorrigertYtelsePeriode> korrigertePerioder = new ArrayList<>();
+
     @Column(name = "regel_input", nullable = false, updatable = false)
     private String input;
 
@@ -67,6 +73,8 @@ public class TilkjentYtelse extends BaseEntitet {
     public static class Builder {
         private Long behandlingId;
         private List<TilkjentYtelsePeriode> perioder = new ArrayList<>();
+        private List<KorrigertYtelsePeriode> korrigertePerioder = new ArrayList<>();
+
         private String input;
         private String sporing;
 
@@ -80,6 +88,14 @@ public class TilkjentYtelse extends BaseEntitet {
                 throw new IllegalArgumentException("perioder kan ikke være null");
             }
             this.perioder.addAll(perioder);
+            return this;
+        }
+
+        public Builder medKorrigertePerioder(List<KorrigertYtelsePeriode> perioder) {
+            if (perioder == null) {
+                throw new IllegalArgumentException("perioder kan ikke være null");
+            }
+            this.korrigertePerioder.addAll(perioder);
             return this;
         }
 
@@ -104,6 +120,7 @@ public class TilkjentYtelse extends BaseEntitet {
             TilkjentYtelse tilkjentYtelse = new TilkjentYtelse();
             tilkjentYtelse.behandlingId = this.behandlingId;
             tilkjentYtelse.perioder = this.perioder;
+            tilkjentYtelse.korrigertePerioder = this.korrigertePerioder;
             tilkjentYtelse.input = this.input;
             tilkjentYtelse.sporing = this.sporing;
             return tilkjentYtelse;

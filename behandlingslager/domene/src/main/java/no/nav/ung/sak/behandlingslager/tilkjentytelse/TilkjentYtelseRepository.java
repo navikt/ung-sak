@@ -100,7 +100,11 @@ public class TilkjentYtelseRepository {
     }
 
 
-        public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
+        public void lagre(long behandlingId,
+                          List<TilkjentYtelsePeriode> perioder,
+                          List<KorrigertYtelsePeriode> korrigertePerioder,
+                          String input,
+                          String sporing) {
         final var eksisterende = hentTilkjentYtelse(behandlingId);
         if (eksisterende.isPresent()) {
             eksisterende.get().setIkkeAktiv();
@@ -109,6 +113,7 @@ public class TilkjentYtelseRepository {
         }
         final var ny = TilkjentYtelse.ny(behandlingId)
             .medPerioder(perioder)
+            .medKorrigertePerioder(korrigertePerioder)
             .medInput(input)
             .medSporing(sporing)
             .build();
@@ -185,14 +190,19 @@ public class TilkjentYtelseRepository {
                     p.getReduksjon(),
                     p.getRedusertBeløp(),
                     p.getDagsats(),
-                    p.getUtbetalingsgrad())))
+                    p.getUtbetalingsgrad(),
+                    p.getAvvikGrunnetAvrunding())))
             .collect(Collectors.toList());
 
         return new LocalDateTimeline<>(segments);
     }
 
 
-    public void lagre(Long behandlingId, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje, String input, String sporing) {
+    public void lagre(Long behandlingId,
+                      LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje,
+                      LocalDateTimeline<KorrigertYtelseVerdi> korrigertYtelseTidslinje,
+                      String input,
+                      String sporing) {
         final var tilkjentYtelsePerioder = tilkjentYtelseTidslinje.toSegments().stream()
             .map(it -> TilkjentYtelsePeriode.ny()
                 .medUtbetalingsgrad(it.getValue().utbetalingsgrad())
@@ -201,8 +211,17 @@ public class TilkjentYtelseRepository {
                 .medReduksjon(it.getValue().reduksjon())
                 .medRedusertBeløp(it.getValue().redusertBeløp())
                 .medUredusertBeløp(it.getValue().uredusertBeløp())
+                .medAvvikGrunnetAvrunding(it.getValue().avvikGrunnetAvrunding())
                 .build()).toList();
 
-        lagre(behandlingId, tilkjentYtelsePerioder, input, sporing);
+        final var korrigertYtelsePerioder = korrigertYtelseTidslinje.toSegments().stream()
+            .map(it -> KorrigertYtelsePeriode.ny()
+                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
+                .medDagsats(it.getValue().dagsats())
+                .medÅrsak(it.getValue().årsak())
+                .build()).toList();
+
+
+        lagre(behandlingId, tilkjentYtelsePerioder, korrigertYtelsePerioder, input, sporing);
     }
 }

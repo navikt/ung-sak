@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
@@ -10,6 +11,7 @@ import no.nav.ung.sak.ytelse.kontroll.RelevanteKontrollperioderUtleder;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.util.List;
 
 /**
  * `LagTilkjentYtelse` er en hjelpeklasse som brukes til å generere en tidslinje for tilkjent ytelse basert på godkjente perioder,
@@ -39,6 +41,8 @@ public class LagTilkjentYtelse {
         tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePerioderSomSkalUtbetales);
 
 
+        // Dersom det ikke er rapportert inntekt settes denne til 0, ellers summeres alle inntektene
+        // Mapper verdier til TilkjentYtelsePeriodeResultat
         return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
                 // Dersom det ikke er rapportert inntekt settes denne til 0, ellers summeres alle inntektene
                 final var rapporertinntekt = rapportertInntekt == null ? BigDecimal.ZERO : rapportertInntekt.getValue();
@@ -47,6 +51,7 @@ public class LagTilkjentYtelse {
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);
             }, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .intersection(tidslinjeSomSkalHaTilkjentYtelse);
+
     }
 
     /** Perioder som ikke slutter ved månedsslutt legges kun til dersom foregående periode er ferdig kontrollert/behandlet
