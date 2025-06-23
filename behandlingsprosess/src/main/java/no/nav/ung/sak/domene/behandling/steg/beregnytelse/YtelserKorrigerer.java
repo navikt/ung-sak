@@ -31,7 +31,7 @@ public class YtelserKorrigerer {
             if (totaltAvvik.compareTo(AVVIK_NEDRE_GRENSE) <= 0) {
                 var sisteVirkedag = finnSisteVirkedag(ytelseTidslinje);
                 var sisteYtelseVerdi = ytelseTidslinje.intersection(new LocalDateInterval(sisteVirkedag, sisteVirkedag)).toSegments().first().getValue();
-                var korrigertDagsats = sisteYtelseVerdi.dagsats().add(totaltAvvik).setScale(0, RoundingMode.HALF_UP);
+                var korrigertDagsats = sisteYtelseVerdi.dagsats().add(totaltAvvik.abs()).setScale(0, RoundingMode.HALF_UP);
                 return new LocalDateTimeline<>(sisteVirkedag, sisteVirkedag, new KorrigertYtelseVerdi(korrigertDagsats, KorrigertYtelseÅrsak.KORRIGERING_AV_AVRUNDINGSFEIL));
             }
 
