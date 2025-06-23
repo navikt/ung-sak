@@ -180,6 +180,16 @@ public class TilkjentYtelseRepository {
         return mapTilTidslinje(perioder);
     }
 
+    public LocalDateTimeline<KorrigertYtelseVerdi> hentKorrigertTidslinje(Long behandlingId) {
+        var query = entityManager.createQuery(
+                "SELECT p FROM TilkjentYtelse t JOIN t.perioder p " +
+                    "WHERE t.behandlingId = :id AND t.aktiv = true", KorrigertYtelsePeriode.class)
+            .setParameter("id", behandlingId);
+
+        List<KorrigertYtelsePeriode> perioder = query.getResultList();
+        return mapTilKorrigertTidslinje(perioder);
+    }
+
     private static LocalDateTimeline<TilkjentYtelseVerdi> mapTilTidslinje(List<TilkjentYtelsePeriode> perioder) {
         List<LocalDateSegment<TilkjentYtelseVerdi>> segments = perioder.stream()
             .map(p -> new LocalDateSegment<>(
@@ -192,6 +202,19 @@ public class TilkjentYtelseRepository {
                     p.getDagsats(),
                     p.getUtbetalingsgrad(),
                     p.getAvvikGrunnetAvrunding())))
+            .collect(Collectors.toList());
+
+        return new LocalDateTimeline<>(segments);
+    }
+
+    private static LocalDateTimeline<KorrigertYtelseVerdi> mapTilKorrigertTidslinje(List<KorrigertYtelsePeriode> perioder) {
+        List<LocalDateSegment<KorrigertYtelseVerdi>> segments = perioder.stream()
+            .map(p -> new LocalDateSegment<>(
+                p.getPeriode().getFomDato(),
+                p.getPeriode().getTomDato(),
+                new KorrigertYtelseVerdi(
+                    p.getDagsats(),
+                    p.getÅrsak())))
             .collect(Collectors.toList());
 
         return new LocalDateTimeline<>(segments);
