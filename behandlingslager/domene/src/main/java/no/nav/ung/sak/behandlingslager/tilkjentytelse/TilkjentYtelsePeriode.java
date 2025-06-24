@@ -38,7 +38,7 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
     @Column(name = "utbetalingsgrad", nullable = false)
     private int utbetalingsgrad;
 
-    @Column(name = "avvikGrunnetAvrunding", nullable = false)
+    @Column(name = "avvik_avrunding", nullable = false)
     private double avvikGrunnetAvrunding;
 
     protected TilkjentYtelsePeriode() {
