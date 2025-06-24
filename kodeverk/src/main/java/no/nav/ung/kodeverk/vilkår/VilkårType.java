@@ -9,7 +9,7 @@ import java.util.*;
 public enum VilkårType implements Kodeverdi {
     ALDERSVILKÅR("UNG_VK_1",
         "Aldersvilkåret",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 3 bokstav a"), // TODO: Finn riktig paragraf
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 8 j.f. § 3 bokstav a"), // TODO: Finn riktig paragraf
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER,
         Avslagsårsak.SØKER_UNDER_MINSTE_ALDER),
     SØKNADSFRIST("UNG_VK_3",
