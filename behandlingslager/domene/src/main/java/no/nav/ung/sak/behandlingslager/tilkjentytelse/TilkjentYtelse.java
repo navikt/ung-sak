@@ -28,7 +28,7 @@ public class TilkjentYtelse extends BaseEntitet {
 
 
     @Immutable
-    @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
+    @JoinColumn(name = "tilkjent_ytelse_id", nullable = true, updatable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<KorrigertYtelsePeriode> korrigertePerioder = new ArrayList<>();
 
