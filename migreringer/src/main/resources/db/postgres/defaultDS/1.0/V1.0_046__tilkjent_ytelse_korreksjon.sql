@@ -14,7 +14,7 @@ create table korrigert_ytelse_periode
 create index idx_korrigert_ytelse_periode_tilkjent_ytelse_id on korrigert_ytelse_periode (tilkjent_ytelse_id);
 
 alter table korrigert_ytelse_periode
-    add constraint no_overlapping_daterange
+    add constraint no_overlapping_korreksjon_daterange
     exclude using gist (tilkjent_ytelse_id with =, periode with &&);
 
 create sequence if not exists seq_korrigert_ytelse_periode increment by 50 minvalue 1000000;
