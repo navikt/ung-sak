@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.hjemmel.HjemmelKodeverdiConverter;
 import no.nav.ung.kodeverk.ytelse.KorrigertYtelseÅrsak;
+import no.nav.ung.kodeverk.ytelse.KorrigertYtelseÅrsakKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;
@@ -27,7 +28,7 @@ public class KorrigertYtelsePeriode extends BaseEntitet {
     @Column(name = "korrigert_dagsats", nullable = false)
     private BigDecimal dagsats;
 
-    @Convert(converter = HjemmelKodeverdiConverter.class)
+    @Convert(converter = KorrigertYtelseÅrsakKodeverdiConverter.class)
     @Column(name = "aarsak_for_korrigering", nullable = false)
     private KorrigertYtelseÅrsak årsak;
 

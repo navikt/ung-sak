@@ -66,7 +66,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
 
         // Utfør reduksjon og map til tilkjent ytelse
         var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
-        var korrigertTidslinje = YtelserKorrigerer.korrigerYtelse(tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), månedsvisYtelseTidslinje);
+        var korrigertTidslinje = YtelserKorrigerer.korrigerYtelse(tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), godkjentUttakTidslinje);
         var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(),

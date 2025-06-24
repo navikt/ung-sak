@@ -10,19 +10,20 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.YearMonth;
 
 public class YtelserKorrigerer {
 
     public static final BigDecimal AVVIK_NEDRE_GRENSE = BigDecimal.valueOf(-0.5);
 
-    /** Ufører korrigering basert på avrundingsfeil fra tidligere perioder. Utbetaler som en korrigert dagsats i siste virkedag på ytelsen dersom avrundingsfeilen er større enn 0.5
-     * @param ytelseTidslinje Beregnet ytelse tidslinje
-     * @param ytelseperiodeTidslinje Perioder der bruker har rett på ytelse
+    /**
+     * Ufører korrigering basert på avrundingsfeil fra tidligere perioder. Utbetaler som en korrigert dagsats i siste virkedag på ytelsen dersom avrundingsfeilen er større enn 0.5
+     *
+     * @param ytelseTidslinje        Beregnet ytelse tidslinje
+     * @param godkjentUttakTidslinje
      * @return
      */
-    public static LocalDateTimeline<KorrigertYtelseVerdi> korrigerYtelse(LocalDateTimeline<TilkjentYtelseVerdi> ytelseTidslinje, LocalDateTimeline<YearMonth> ytelseperiodeTidslinje) {
-        var harBeregnetAllePerioder = ytelseperiodeTidslinje.disjoint(ytelseTidslinje).isEmpty();
+    public static LocalDateTimeline<KorrigertYtelseVerdi> korrigerYtelse(LocalDateTimeline<TilkjentYtelseVerdi> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje) {
+        var harBeregnetAllePerioder = godkjentUttakTidslinje.disjoint(ytelseTidslinje).isEmpty();
         if (harBeregnetAllePerioder) {
             var totaltAvvik = ytelseTidslinje.toSegments().stream().map(it -> BigDecimal.valueOf(it.getValue().avvikGrunnetAvrunding()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -34,8 +35,6 @@ public class YtelserKorrigerer {
                 var korrigertDagsats = sisteYtelseVerdi.dagsats().add(totaltAvvik.abs()).setScale(0, RoundingMode.HALF_UP);
                 return new LocalDateTimeline<>(sisteVirkedag, sisteVirkedag, new KorrigertYtelseVerdi(korrigertDagsats, KorrigertYtelseÅrsak.KORRIGERING_AV_AVRUNDINGSFEIL));
             }
-
-            return ytelseTidslinje.mapValue(ytelse -> new KorrigertYtelseVerdi(ytelse.dagsats(), null));
         }
 
         return LocalDateTimeline.empty();

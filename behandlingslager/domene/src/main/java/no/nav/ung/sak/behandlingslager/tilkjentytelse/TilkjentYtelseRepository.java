@@ -182,7 +182,7 @@ public class TilkjentYtelseRepository {
 
     public LocalDateTimeline<KorrigertYtelseVerdi> hentKorrigertTidslinje(Long behandlingId) {
         var query = entityManager.createQuery(
-                "SELECT p FROM TilkjentYtelse t JOIN t.perioder p " +
+                "SELECT p FROM TilkjentYtelse t JOIN t.korrigertePerioder p " +
                     "WHERE t.behandlingId = :id AND t.aktiv = true", KorrigertYtelsePeriode.class)
             .setParameter("id", behandlingId);
 

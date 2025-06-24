@@ -94,7 +94,7 @@ public class TilkjentYtelseBeregner {
             return 100;
         }
         // Regner ut prosentvis utbetalingsgrad
-        return redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(grunnsats, 0, BigDecimal.ROUND_HALF_UP).intValue();
+        return redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(grunnsats, 0, RoundingMode.HALF_UP).intValue();
     }
 
     public static <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(
