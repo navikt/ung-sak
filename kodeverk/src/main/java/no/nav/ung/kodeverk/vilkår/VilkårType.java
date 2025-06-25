@@ -9,7 +9,7 @@ import java.util.*;
 public enum VilkårType implements Kodeverdi {
     ALDERSVILKÅR("UNG_VK_1",
         "Aldersvilkåret",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 8 j.f. § 3 bokstav a"), // TODO: Finn riktig paragraf
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jamfør 3 bokstav a"),
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER,
         Avslagsårsak.SØKER_UNDER_MINSTE_ALDER),
     SØKNADSFRIST("UNG_VK_3",
@@ -18,12 +18,12 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.SØKT_FOR_SENT),
     SØKERSOPPLYSNINGSPLIKT("UNG_VK_4",
         "Søkers opplysningsplikt",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 4"),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 4"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     UNGDOMSPROGRAMVILKÅRET(
         "UNG_VK_2",
         "Deltar i ungdomsprogrammet",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 8"),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8"),
         Avslagsårsak.ENDRET_STARTDATO_UNGDOMSPROGRAM,
         Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM
     ),

@@ -10,9 +10,9 @@ import java.util.Map;
 @LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
 public enum Hjemmel implements Kodeverdi {
 
-    UNG_FORSKRIFT_PARAGRAF_11("UNG_FRSKRFT_11", "Forskrift om ungdomsprogram og ungdomsprogramytelse § 11"),
-    UNG_FORSKRIFT_PARAGRAF_9("UNG_FRSKRFT_9", "Forskrift om ungdomsprogram og ungdomsprogramytelse § 9"),
-    UNG_FORSKRIFT_PARAGRAF_6("UNG_FRSKRFT_6", "Forskrift om ungdomsprogram og ungdomsprogramytelse § 6");
+    UNG_FORSKRIFT_PARAGRAF_11("UNG_FRSKRFT_11", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 11"),
+    UNG_FORSKRIFT_PARAGRAF_9("UNG_FRSKRFT_9", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 9"),
+    UNG_FORSKRIFT_PARAGRAF_6("UNG_FRSKRFT_6", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 6");
 
 
     private static final Map<String, Hjemmel> KODER = new LinkedHashMap<>();
