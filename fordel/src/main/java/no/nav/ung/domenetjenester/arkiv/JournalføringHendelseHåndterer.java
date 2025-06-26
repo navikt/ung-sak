@@ -15,7 +15,7 @@ import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.sak.typer.JournalpostId;
 

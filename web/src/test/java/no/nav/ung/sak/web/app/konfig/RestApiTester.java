@@ -13,7 +13,6 @@ import jakarta.ws.rs.core.Application;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import no.nav.ung.sak.web.app.ApplicationConfig;
-import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 
 public class RestApiTester {
 
@@ -37,7 +36,6 @@ public class RestApiTester {
         List<Class<?>> klasser = new ArrayList<>();
 
         klasser.addAll(finnAlleRestTjenester(new ApplicationConfig()));
-        klasser.addAll(finnAlleRestTjenester(new OppgaveRedirectApplication()));
 
         return klasser;
     }

@@ -24,7 +24,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -38,7 +37,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -85,8 +83,6 @@ public class ForeslåVedtakTjenesteTest {
     private ForeslåVedtakTjeneste tjeneste;
 
     private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
-
-    private ArrayList<Oppgaveinfo> oppgaveinfoerSomReturneres = new ArrayList<>();
 
     @BeforeEach
     public void setUp() {

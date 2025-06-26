@@ -19,7 +19,7 @@ import no.nav.ung.domenetjenester.arkiv.dok.model.Bruker;
 import no.nav.ung.domenetjenester.arkiv.dok.model.BrukerIdType;
 import no.nav.ung.domenetjenester.arkiv.dok.model.OppdaterJournalpostRequest;
 import no.nav.ung.domenetjenester.arkiv.dok.model.Sak;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.OmrådeTema;
 import no.nav.ung.sak.typer.JournalpostId;
 
 
