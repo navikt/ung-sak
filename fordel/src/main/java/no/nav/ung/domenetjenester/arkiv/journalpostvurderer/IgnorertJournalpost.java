@@ -49,7 +49,7 @@ public class IgnorertJournalpost implements Journalpostvurderer {
 
         if (ignorer(vurderingsgrunnlag)) {
             log.info("Ignorerer melding brevkode=" + journalpostInfo.getBrevkode() + ", tema=" + temaPåJournalpostInfo);
-            return håndtert();
+            throw new IllegalArgumentException("Fikk brevkode som ikke kunne håndteres: " + journalpostInfo.getBrevkode());
         }
 
         return ikkeHåndtert();
