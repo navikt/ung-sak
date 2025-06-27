@@ -44,10 +44,10 @@ spec:
         - id: "grafana-lgtm"
   resources:
     limits:
-      memory: "1.72Gi"
+      memory: "172Mi"
     requests:
-      cpu: "627m"
-      memory: "1.16Gi"
+      cpu: "627M"
+      memory: "116Mi"
   ingresses:
     - "https://ung-sak.intern.dev.nav.no"
   kafka:
