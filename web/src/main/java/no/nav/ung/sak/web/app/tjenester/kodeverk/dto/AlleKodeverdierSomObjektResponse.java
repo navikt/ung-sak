@@ -10,7 +10,6 @@ import no.nav.ung.kodeverk.arbeidsforhold.*;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.ung.kodeverk.dokument.DokumentTypeId;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.historikk.*;
 import no.nav.ung.kodeverk.medlem.MedlemskapDekningType;
@@ -63,7 +62,6 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VurderÅrsak>> vurderingsÅrsaker,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<Språkkode>> språkkoder,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VedtakResultatType>> vedtakResultatTyper,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<DokumentTypeId>> dokumentTypeIder,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<ÅrsakTilVurdering>> årsakerTilVurdering,
     // avslagsårsakerPrVilkårTypeKode er eit spesialtilfelle der ein returnerer mapping frå VilkårType til tilknytta Avslagsårsak
     @NotNull @Valid @Size(min = 1, max = 1000) SortedMap<String, SortedSet<KodeverdiSomObjekt<Avslagsårsak>>> avslagårsakerPrVilkårTypeKode

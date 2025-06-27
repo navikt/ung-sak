@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.ung.kodeverk.dokument.DokumentTypeId;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.historikk.*;
 import no.nav.ung.kodeverk.medlem.MedlemskapDekningType;
@@ -63,7 +62,6 @@ public record StatiskeKodeverdier(
     @NotNull Set<VurderÅrsak> vurderingsÅrsaker,
     @NotNull Set<Språkkode> språkkoder,
     @NotNull Set<VedtakResultatType> vedtakResultatTyper,
-    @NotNull Set<DokumentTypeId> dokumentTypeIder,
     @NotNull Set<ÅrsakTilVurdering> årsakerTilVurdering
 ) {
 
@@ -111,7 +109,6 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(VurderÅrsak.class),
             new HashSet<>(Språkkode.kodeMap().values()),
             alleEnumVerdier(VedtakResultatType.class),
-            alleEnumVerdier(DokumentTypeId.class),
             alleEnumVerdier(ÅrsakTilVurdering.class)
         );
     }

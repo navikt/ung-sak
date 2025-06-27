@@ -37,7 +37,7 @@ public class VurderStrukturertDokumentTask extends WrappedProsessTaskHandler {
     }
 
     private static boolean erOppgaveBekreftelse(MottattMelding dataWrapper) {
-        return dataWrapper.getBrevkode() != null && dataWrapper.getBrevkode().equals(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getOffisiellKode());
+        return dataWrapper.getBrevkode() != null && dataWrapper.getBrevkode().equals(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode());
     }
 
     private void assertInneholderStrukturertDokument(MottattMelding dataWrapper) {

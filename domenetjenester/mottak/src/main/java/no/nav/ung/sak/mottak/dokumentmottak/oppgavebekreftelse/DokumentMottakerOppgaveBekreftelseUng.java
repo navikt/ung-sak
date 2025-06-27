@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
@@ -23,7 +22,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
-@DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE_KODE)
+@DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE_KODE)
 public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
 
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;
