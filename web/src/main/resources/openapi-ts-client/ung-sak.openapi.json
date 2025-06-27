@@ -2207,8 +2207,8 @@
         "type" : "object"
       },
       "KodeverdiSomObjektDokumentTypeIdKilde" : {
-        "enum" : [ "LEGEERKLÆRING", "-" ],
-        "x-enum-varnames" : [ "LEGEERKLÆRING", "UDEFINERT" ],
+        "enum" : [ "-" ],
+        "x-enum-varnames" : [ "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverdiSomObjektFagsakStatus" : {
