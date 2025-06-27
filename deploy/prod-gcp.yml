@@ -76,6 +76,7 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: ung-sak
         - application : sif-abac-pdp
         - application: ung-deltakelse-opplyser
       external:
