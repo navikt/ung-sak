@@ -29,7 +29,7 @@ public final class BrevkodeInformasjonUtleder {
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(), null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
         brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(), null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
-        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE.getOffisiellKode(), null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_ETTERLYSNING_UTTALELSE.getOffisiellKode(), null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
 
         final Map<String, BrevkodeInformasjon> titler = new HashMap<>();
         brevkodeliste.forEach(bi -> {
