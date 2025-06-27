@@ -15,7 +15,13 @@ public class JettyServerLifeCyleListener implements LifeCycle.Listener {
     public void lifeCycleStarted(LifeCycle event) {
         for (AppServiceHandler ash : findAppServiceHandlers()) {
             log.info("Starting " + ash.getClass().getSimpleName());
-            ash.start();
+            try {
+                ash.start();
+                log.info("Started " + ash.getClass().getSimpleName());
+            }  catch (Exception e) {
+                log.error("Error starting " + ash.getClass().getSimpleName(), e);
+                throw e;
+            }
         }
     }
 
