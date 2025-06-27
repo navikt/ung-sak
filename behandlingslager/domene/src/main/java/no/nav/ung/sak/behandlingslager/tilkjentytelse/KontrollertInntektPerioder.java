@@ -2,8 +2,11 @@ package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
+import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
 import org.hibernate.annotations.Immutable;
 
+import java.sql.Clob;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,10 +27,21 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
+    @Lob
+    @Column(name = "regel_input")
+    @DiffIgnore
+    private Clob regelInput; // Ved helmanuell kontroll av inntekt vil denne være null
+
+    @Lob
+    @Column(name = "regel_sporing")
+    @DiffIgnore
+    private Clob regelSporing; // Ved helmanuell kontroll av inntekt vil denne være null
+
     @Immutable
     @JoinColumn(name = "kontrollert_inntekt_perioder_id", nullable = false, updatable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
+
 
 
     public Long getBehandlingId() {
@@ -46,6 +60,15 @@ public class KontrollertInntektPerioder extends BaseEntitet {
         return perioder;
     }
 
+    public RegelData getRegelInput() {
+        return regelInput == null ? null : new RegelData(regelInput);
+    }
+
+    public RegelData getRegelSporing() {
+        return regelSporing == null ? null : new RegelData(regelSporing);
+    }
+
+
     public static Builder ny(Long behandlingId) {
         if (behandlingId == null) {
             throw new IllegalArgumentException("behandlingId kan ikke være null");
@@ -60,6 +83,8 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     public static class Builder {
         private Long behandlingId;
         private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
+        private Clob regelInput;
+        private Clob regelSporing;
 
 
         public Builder(Long behandlingId, KontrollertInntektPerioder perioder) {
@@ -79,12 +104,24 @@ public class KontrollertInntektPerioder extends BaseEntitet {
             return this;
         }
 
+        public Builder medRegelInput(String data) {
+            this.regelInput = data == null ? null : new RegelData(data).getClob();
+            return this;
+        }
+
+        public Builder medRegelSporing(String data) {
+            this.regelSporing = data == null ? null : new RegelData(data).getClob();
+            return this;
+        }
+
 
         public KontrollertInntektPerioder build() {
-            KontrollertInntektPerioder tilkjentYtelse = new KontrollertInntektPerioder();
-            tilkjentYtelse.behandlingId = this.behandlingId;
-            tilkjentYtelse.perioder = this.perioder;
-            return tilkjentYtelse;
+            KontrollertInntektPerioder kontrollertInntektPerioder = new KontrollertInntektPerioder();
+            kontrollertInntektPerioder.behandlingId = this.behandlingId;
+            kontrollertInntektPerioder.perioder = this.perioder;
+            kontrollertInntektPerioder.regelInput = this.regelInput;
+            kontrollertInntektPerioder.regelSporing = this.regelSporing;
+            return kontrollertInntektPerioder;
         }
 
     }

@@ -6,12 +6,15 @@ import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,7 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingHøySatsBatchTask.class);
     private SatsEndringRepository satsEndringRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
 
     OpprettRevurderingHøySatsBatchTask() {
@@ -40,9 +44,10 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public OpprettRevurderingHøySatsBatchTask(SatsEndringRepository satsEndringRepository, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public OpprettRevurderingHøySatsBatchTask(SatsEndringRepository satsEndringRepository, ProsessTaskTjeneste prosessTaskTjeneste, FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.satsEndringRepository = satsEndringRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
     @Override
@@ -52,17 +57,23 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
 
         Set<Map.Entry<Fagsak, LocalDate>> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(datoForKjøring).entrySet();
 
+
         List<ProsessTaskData> prosessTaskerTilRevurdering = utledProsessTaskerForRevurdering(fagsakerTilRevurdering);
 
         taskGruppeTilRevurderinger.addNesteParallell(prosessTaskerTilRevurdering);
         prosessTaskTjeneste.lagre(taskGruppeTilRevurderinger);
     }
 
-    static List<ProsessTaskData> utledProsessTaskerForRevurdering(Set<Map.Entry<Fagsak, LocalDate>> entries) {
+    List<ProsessTaskData> utledProsessTaskerForRevurdering(Set<Map.Entry<Fagsak, LocalDate>> entries) {
         return entries
             .stream()
             .map(fagsakerTilVurdering -> {
                 Fagsak fagsak = fagsakerTilVurdering.getKey();
+                var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true, null, null);
+                if (prosesstaskerForFagsak.stream().anyMatch(task -> task.getTaskType().equals(OpprettRevurderingEllerOpprettDiffTask.TASKNAME))) {
+                    log.info("Revurderingtask for fagsak med id {} eksisterer allerede, hopper over.", fagsak.getId());
+                    return null; // Hopp over hvis vi allerede har en revurderingtask for denne fagsaken. Ellers går de i beina på hverandre.
+                }
                 LocalDate endringsdato = fagsakerTilVurdering.getValue();
                 log.info("Oppretter revurdering for fagsak med id {} for økning av sats fra {}", fagsak.getId(), endringsdato);
 
@@ -71,6 +82,7 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
                 tilVurderingTask.setProperty(PERIODER, endringsdato + "/" + fagsak.getPeriode().getTomDato());
                 tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS.getKode());
                 return tilVurderingTask;
-            }).collect(Collectors.toList());
+            }).filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 }

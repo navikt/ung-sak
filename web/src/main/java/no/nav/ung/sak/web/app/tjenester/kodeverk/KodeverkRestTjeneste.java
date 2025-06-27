@@ -101,7 +101,6 @@ public class KodeverkRestTjeneste {
             sortert(alle.aktivitetStatuser()),
             sortert(alle.arbeidskategorier()),
             sortert(alle.fagsystemer()),
-            sortert(alle.faktaOmBeregningTilfeller()),
             sortert(alle.skjermlenkeTyper()),
             sortert(alle.historikkOpplysningTyper()),
             sortert(alle.historikkEndretFeltTyper()),
@@ -114,14 +113,12 @@ public class KodeverkRestTjeneste {
             sortert(alle.medlemskapDekningTyper()),
             sortert(alle.medlemskapTyper()),
             sortert(alle.avslagsårsaker()),
-            sortert(alle.konsekvenserForYtelsen()),
             sortert(alle.vilkårTyper()),
             sortert(alle.vurderArbeidsforholdHistorikkinnslag()),
             sortert(alle.tilbakekrevingVidereBehandlinger()),
             sortert(alle.vurderingsÅrsaker()),
             sortert(alle.språkkoder()),
             sortert(alle.vedtakResultatTyper()),
-            sortert(alle.dokumentTypeIder()),
             sortert(alle.årsakerTilVurdering()),
             new TreeMap<>(avslagårsakerGruppertPåVilkårType)
         );
@@ -164,7 +161,6 @@ public class KodeverkRestTjeneste {
             o.aktivitetStatuser(),
             o.arbeidskategorier(),
             o.fagsystemer(),
-            o.faktaOmBeregningTilfeller(),
             o.skjermlenkeTyper(),
             o.historikkOpplysningTyper(),
             o.historikkEndretFeltTyper(),
@@ -177,14 +173,12 @@ public class KodeverkRestTjeneste {
             o.medlemskapDekningTyper(),
             o.medlemskapTyper(),
             o.avslagsårsaker(),
-            o.konsekvenserForYtelsen(),
             o.vilkårTyper(),
             o.vurderArbeidsforholdHistorikkinnslag(),
             o.tilbakekrevingVidereBehandlinger(),
             o.vurderingsÅrsaker(),
             o.språkkoder(),
             o.vedtakResultatTyper(),
-            o.dokumentTypeIder(),
             o.årsakerTilVurdering()
         );
 

@@ -16,10 +16,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -122,18 +119,17 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         var avslåtteVilkår = vilkårsresultatOgBehandlingsårsaker.avslåtteVilkår();
-        var relevanteÅrsaker = vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker().stream()
-            .filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
-            .collect(Collectors.toSet());
+        var relevanteÅrsaker = new SetHelper<>(vilkårsresultatOgBehandlingsårsaker.behandlingÅrsaker())
+            .utenom(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
 
 
         if (!avslåtteVilkår.isEmpty()) {
-            if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+            if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
                 return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO, "Endring av startdato fremover");
             }
 
-            if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+            if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
                 && harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
                 return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphør av ungdomsprogramperiode");
             }
@@ -146,30 +142,30 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
         }
 
-        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO, "Endring av startdato bakover");
         }
 
-        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE);
         }
-        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS);
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+        if (relevanteÅrsaker.innholder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphørsdato flyttet fremover");
         }
 
-        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL);
         }
 
-        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga dødsfall av barn");
         }
 
-        if (innholderBare(relevanteÅrsaker, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
+        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør pga dødsfall av søker");
         }
 
@@ -181,8 +177,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             .formatted(p, vilkårsresultatOgBehandlingsårsaker, tilkjentYtelse));
     }
 
-    private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, Set<BehandlingÅrsakType> behandlingsårsaker) {
-        if (behandlingsårsaker.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
+    private static DetaljertResultatInfo bestemDetaljertResultatMedTilkjentYtelse(TilkjentYtelseVerdi tilkjentYtelse, SetHelper<BehandlingÅrsakType> behandlingsårsaker) {
+        if (behandlingsårsaker.innholder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
             if (tilkjentYtelse.utbetalingsgrad() <= 0) {
                 return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
             }
@@ -194,10 +190,13 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON);
         }
 
-        // Behandling ved endring av programperiode
-        if (innholderBare(behandlingsårsaker, BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+        if (behandlingsårsaker
+            .utenom(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)
+            .innholderBare(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+
             if (tilkjentYtelse.utbetalingsgrad() > 0) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE);
+                return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE,
+                    lagForklaringForInnvilgelseUtbetalingNyPeriode(behandlingsårsaker));
             }
             return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Ny programperiode uten tilkjent ytelse og uten rapportert inntekt");
         }
@@ -209,6 +208,17 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         return null;
     }
 
+    private static String lagForklaringForInnvilgelseUtbetalingNyPeriode(SetHelper<BehandlingÅrsakType> behandlingsårsaker) {
+        var forklaring = DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE.getNavn();
+        if (behandlingsårsaker.innholder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+            forklaring += " Inkl. endring av startdato.";
+        }
+        if (behandlingsårsaker.innholder(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+            forklaring += " Inkl. opphør.";
+        }
+        return forklaring;
+    }
+
     @SafeVarargs
     private static <V> boolean innholderBare(Set<V> set, V... value) {
         return set.equals(Arrays.stream(value).collect(Collectors.toSet()));
@@ -217,5 +227,31 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     private static boolean harAvslåttVilkår(Set<DetaljertVilkårResultat> avslåtteVilkår, VilkårType vilkårType) {
         return avslåtteVilkår.stream().anyMatch
             (it -> it.vilkårType() == vilkårType);
+    }
+
+    private static class SetHelper<T> {
+        private final Set<T> elementer;
+
+        SetHelper(Set<T> årsaker) {
+            this.elementer = Set.copyOf(årsaker);
+        }
+
+        boolean innholderBare(T... elementer) {
+            return this.elementer.equals(Set.of(elementer));
+        }
+
+        SetHelper<T> utenom(T... element) {
+            var filtrert = new HashSet<>(this.elementer);
+            filtrert.removeAll(Set.of(element));
+            return new SetHelper<>(filtrert);
+        }
+
+        public boolean innholder(T element) {
+            return elementer.contains(element);
+        }
+
+        public boolean isEmpty() {
+            return elementer.isEmpty();
+        }
     }
 }

@@ -15,7 +15,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.domene.vedtak.impl.FatterVedtakAksjonspunkt;
-import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;

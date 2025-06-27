@@ -76,7 +76,7 @@ public class HistorikkinnslagTjeneste {
         if (brevkode.equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)) {
             return INNTEKTSRAPPORTERING;
         }
-        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE)) {
+        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE)) {
             return OPPGAVEBEKREFTELSE;
         }
         if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
