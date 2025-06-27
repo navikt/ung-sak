@@ -162,7 +162,7 @@ class InntektBekreftelseHåndtererTest {
                 new Søker(NorskIdentitetsnummer.of("12345678910")),
                 inntektBekreftelse
             ),
-            Brevkode.UNGDOMSYTELSE_ETTERLYSNING_UTTALELSE
+            Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE
         );
     }
 }

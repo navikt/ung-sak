@@ -22,7 +22,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
-@DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_ETTERLYSNING_UTTALELSE_KODE)
+@DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE_KODE)
 public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
 
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;

@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 @ApplicationScoped
-@DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_ETTERLYSNING_UTTALELSE_KODE)
+@DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE_KODE)
 public class UngdomsytelseOppgaveBekreftelseValidator implements DokumentValidator {
 
     private OppgaveBekreftelseParser oppgaveBekreftelseParser;
@@ -35,8 +35,8 @@ public class UngdomsytelseOppgaveBekreftelseValidator implements DokumentValidat
     @Override
     public void validerDokument(MottattDokument mottattDokument) {
         Objects.requireNonNull(mottattDokument);
-        if (!Objects.equals(Brevkode.UNGDOMSYTELSE_ETTERLYSNING_UTTALELSE, mottattDokument.getType())) {
-            throw new IllegalArgumentException("Forventet brevkode: " + Brevkode.UNGDOMSYTELSE_ETTERLYSNING_UTTALELSE + ", fikk: " + mottattDokument.getType());
+        if (!Objects.equals(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE, mottattDokument.getType())) {
+            throw new IllegalArgumentException("Forventet brevkode: " + Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE + ", fikk: " + mottattDokument.getType());
         }
         // TODO: Gjer valdering
         final var oppgaveBekreftelse = oppgaveBekreftelseParser.parseOppgaveBekreftelse(mottattDokument);
