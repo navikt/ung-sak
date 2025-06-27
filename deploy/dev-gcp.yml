@@ -46,7 +46,7 @@ spec:
     limits:
       memory: "172Mi"
     requests:
-      cpu: "627m"
+      cpu: "516m"
       memory: "116Mi"
   ingresses:
     - "https://ung-sak.intern.dev.nav.no"
