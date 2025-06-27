@@ -7,13 +7,17 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.inject.spi.CDI;
 import no.nav.k9.felles.apptjeneste.AppServiceHandler;
 
+import java.util.stream.Stream;
+
 public class JettyServerLifeCyleListener implements LifeCycle.Listener {
 
     private static final Logger log = LoggerFactory.getLogger(JettyServerLifeCyleListener.class);
 
     @Override
     public void lifeCycleStarted(LifeCycle event) {
-        for (AppServiceHandler ash : findAppServiceHandlers()) {
+        var appServiceHandlers = findAppServiceHandlers();
+        log.info("Starter tjenester: " + Stream.of(appServiceHandlers).map(Object::getClass).map(Class::getSimpleName).toList());
+        for (AppServiceHandler ash : appServiceHandlers) {
             log.info("Starting " + ash.getClass().getSimpleName());
             try {
                 ash.start();
