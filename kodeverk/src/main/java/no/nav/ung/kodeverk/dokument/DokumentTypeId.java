@@ -11,7 +11,6 @@ import java.util.*;
  */
 public enum DokumentTypeId implements Kodeverdi {
 
-    LEGEERKLÆRING("LEGEERKLÆRING", "I000023", DokumentGruppe.VEDLEGG, Brevkode.LEGEERKLÆRING),
     UDEFINERT("-", null, null, null),
     ;
 
