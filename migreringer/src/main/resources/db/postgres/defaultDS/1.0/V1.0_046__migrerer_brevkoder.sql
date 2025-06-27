@@ -36,3 +36,16 @@ WHERE brevkode IN (
                    'UNG Inntektrapportering',
                    'UNG Oppgavebekreftelse'
     );
+
+UPDATE mottatt_dokument
+SET type = CASE type
+                   WHEN 'UNG Søknad' THEN 'NAV 76-13.92'
+                   WHEN 'UNG Inntektrapportering' THEN 'NAV 76-13.93'
+                   WHEN 'UNG Oppgavebekreftelse' THEN 'NAV 76-13.94'
+                   ELSE type
+    END
+WHERE type IN (
+                   'UNG Søknad',
+                   'UNG Inntektrapportering',
+                   'UNG Oppgavebekreftelse'
+    );
