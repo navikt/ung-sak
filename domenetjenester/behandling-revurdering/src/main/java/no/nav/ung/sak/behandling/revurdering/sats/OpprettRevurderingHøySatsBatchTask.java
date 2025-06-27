@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -70,7 +71,7 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
                 Fagsak fagsak = fagsakerTilVurdering.getKey();
                 var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true, null, null);
                 if (prosesstaskerForFagsak.stream().anyMatch(task -> task.getTaskType().equals(OpprettRevurderingEllerOpprettDiffTask.TASKNAME))) {
-                    log.info("Revurderingtask for fagsak med id {} er eksisterer allerede, hopper over.", fagsak.getId());
+                    log.info("Revurderingtask for fagsak med id {} eksisterer allerede, hopper over.", fagsak.getId());
                     return null; // Hopp over hvis vi allerede har en revurderingtask for denne fagsaken. Ellers går de i beina på hverandre.
                 }
                 LocalDate endringsdato = fagsakerTilVurdering.getValue();
@@ -81,6 +82,7 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
                 tilVurderingTask.setProperty(PERIODER, endringsdato + "/" + fagsak.getPeriode().getTomDato());
                 tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS.getKode());
                 return tilVurderingTask;
-            }).collect(Collectors.toList());
+            }).filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 }
