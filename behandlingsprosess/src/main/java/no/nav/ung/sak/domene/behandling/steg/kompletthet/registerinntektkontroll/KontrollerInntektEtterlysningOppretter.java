@@ -52,7 +52,7 @@ public class KontrollerInntektEtterlysningOppretter {
                                                   InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                   ProsessTaskTjeneste prosessTaskTjeneste,
                                                   KontrollerInntektInputMapper inputMapper,
-                                                  @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "100") int akseptertDifferanse) {
+                                                  @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
         this.etterlysningRepository = etterlysningRepository;
         this.sporingRepository = sporingRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
