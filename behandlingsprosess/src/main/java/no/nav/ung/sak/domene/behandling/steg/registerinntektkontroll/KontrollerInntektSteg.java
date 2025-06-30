@@ -41,7 +41,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     public KontrollerInntektSteg(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
                                  BehandlingRepository behandlingRepository,
                                  KontrollerInntektInputMapper inputMapper,
-                                 @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "100") int akseptertDifferanse) {
+                                 @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.inputMapper = inputMapper;
