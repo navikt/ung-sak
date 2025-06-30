@@ -16,7 +16,6 @@ public class JettyServerLifeCyleListener implements LifeCycle.Listener {
     @Override
     public void lifeCycleStarted(LifeCycle event) {
         var appServiceHandlers = findAppServiceHandlers();
-        log.info("Starter tjenester: " + Stream.of(appServiceHandlers).map(Object::getClass).map(Class::getSimpleName).toList());
         for (AppServiceHandler ash : appServiceHandlers) {
             log.info("Starting " + ash.getClass().getSimpleName());
             try {
