@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.ung.kodeverk.Fagsystem;
-import no.nav.ung.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
@@ -44,8 +43,6 @@ public class KodeverkWeb {
         public ArbeidType arbeidType;
         @NotNull
         public Inntektskategori inntektskategori;
-        @NotNull
-        public AktivitetStatus aktivitetStatus;
         @NotNull
         public Arbeidskategori arbeidskategori;
     }
