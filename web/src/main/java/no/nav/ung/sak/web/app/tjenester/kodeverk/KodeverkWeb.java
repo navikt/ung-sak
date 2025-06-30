@@ -6,7 +6,6 @@ import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -41,8 +40,6 @@ public class KodeverkWeb {
         public RelatertYtelseTilstand relatertYtelseTilstand;
         @NotNull
         public ArbeidType arbeidType;
-        @NotNull
-        public Inntektskategori inntektskategori;
         @NotNull
         public Arbeidskategori arbeidskategori;
     }
