@@ -59,7 +59,7 @@ public class DokumentMottakerOppgaveBekreftelseUng implements Dokumentmottaker {
             bekreftelseHåndterer.håndter(new OppgaveBekreftelseInnhold(
                 dokument, behandling, oppgaveBekreftelse, dokument.getType()
             ));
-            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId());
+            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandlingId, dokument.getJournalpostId());
         }
     }
 
