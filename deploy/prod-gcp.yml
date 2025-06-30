@@ -226,7 +226,7 @@ spec:
     - name: RAPPORTERINGSFRIST_DAG_I_MAANED
       value: "5"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
-      value: "100"
+      value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P14D"
 
