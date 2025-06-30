@@ -8,10 +8,9 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 public enum RapportType {
 
-    UTBETALING_PER_DAG(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OMP, FagsakYtelseType.FRISINN),
-    UTBETALING_PER_BRUKER(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OMP, FagsakYtelseType.FRISINN),
-    G_REGULERING(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OMP, FagsakYtelseType.FRISINN),
-    DELVIS_FULLT_KANTIKANT(FagsakYtelseType.OMP)
+    UTBETALING_PER_DAG(FagsakYtelseType.UNGDOMSYTELSE),
+    UTBETALING_PER_BRUKER(FagsakYtelseType.UNGDOMSYTELSE),
+    G_REGULERING(FagsakYtelseType.UNGDOMSYTELSE)
     ;
 
     @JsonIgnore
