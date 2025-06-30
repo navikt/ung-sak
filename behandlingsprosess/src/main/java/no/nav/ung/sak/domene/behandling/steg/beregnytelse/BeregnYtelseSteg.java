@@ -49,26 +49,31 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         // Henter repository data
-        final var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId());
+        var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId());
         if (ungdomsytelseGrunnlag.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        final var månedsvisYtelseTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(kontekst.getBehandlingId());
+        var månedsvisYtelseTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(kontekst.getBehandlingId());
 
-        final var kontrollertInntektperiodeTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(kontekst.getBehandlingId());
+        var kontrollertInntektperiodeTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(kontekst.getBehandlingId());
 
         // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);
 
-        final var satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
-        final var totalsatsTidslinje = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
-        final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
+        var satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
+        var totalsatsTidslinje = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
+        var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
 
         // Utfør reduksjon og map til tilkjent ytelse
-        final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
-        final var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
-        final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
-        tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
+        var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        var korrigertTidslinje = YtelserKorrigerer.korrigerYtelse(tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), godkjentUttakTidslinje);
+        var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        var regelSporing = lagSporing(tilkjentYtelseTidslinje);
+        tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(),
+            tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi),
+            korrigertTidslinje,
+            regelInput,
+            regelSporing);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
