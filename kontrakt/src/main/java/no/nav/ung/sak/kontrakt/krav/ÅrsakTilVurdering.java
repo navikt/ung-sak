@@ -13,13 +13,16 @@ import java.util.Map;
 @LegacyKodeverdiJsonValue() // <- Denne Kodeverdi har alltid blitt serialisert til kode string
 public enum ÅrsakTilVurdering implements Kodeverdi {
 
-    ENDRING_FRA_BRUKER("ENDRING_FRA_BRUKER", "Endring fra søknad/Punsj"),
     HENDELSE_DØD_BRUKER("HENDELSE_DØD_BRUKER", "Dødsfall bruker"),
     HENDELSE_DØD_BARN("HENDELSE_DØD_BARN", "Dødsfall barn"),
+    HENDELSE_FØDSEL_BARN("HENDELSE_FØDSEL_BARN", "Fødsel barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
+    ENDRET_STARTDATO_UNGDOMSPROGRAM("ENDRET_STARTDATO_UNGDOMSPROGRAM", "Endret startdato for ungdomsprogram"),
+    KONTROLL_AV_INNTEKT("OPPHØR_UNGDOMSPROGRAM", "Kontroll og rapportering av inntekt"),
+    OVERGANG_HØY_SATS("OVERGANG_HØY_SATS", "Overgang til høy sats"),
+
     // Vurderes på nytt pga G_REGULERING
     G_REGULERING("G_REGULERING", "G-regulering"),
-    REVURDERER_BEREGNING("REVURDERER_BEREGNING", "Endring opplysninger som påvirker beregningsgrunnlaget."),
     // Vurderes for første gang
     FØRSTEGANGSVURDERING("FØRSTEGANGSVURDERING", "Ny periode");
     private static final Map<String, ÅrsakTilVurdering> KODER = new LinkedHashMap<>();
@@ -30,7 +33,12 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_SATS_REGULERING, G_REGULERING);;
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, HENDELSE_DØD_BRUKER);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, HENDELSE_DØD_BARN);
+        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, HENDELSE_FØDSEL_BARN);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, OPPHØR_UNGDOMSPROGRAM);
+        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, ENDRET_STARTDATO_UNGDOMSPROGRAM);
+        sammenheng.put(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, KONTROLL_AV_INNTEKT);
+        sammenheng.put(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, KONTROLL_AV_INNTEKT);
+        sammenheng.put(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, OVERGANG_HØY_SATS);
         SAMMENHENG = Collections.unmodifiableMap(sammenheng);
     }
 
