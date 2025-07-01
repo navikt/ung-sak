@@ -3,8 +3,6 @@ package no.nav.ung.sak.behandling.revurdering.inntektskontroll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.*;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +12,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
-import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
-import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
 import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask.*;
 
 
@@ -61,9 +57,9 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessT
             .stream()
             .map(fagsak -> {
                 log.info("Oppretter oppgave for inntektrappportering for fagsak {} for periode {} - {}", fagsak.getSaksnummer(), fom, tom);
-
                 ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettOppgaveForInntektsrapporteringTask.class);
                 tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
+                tilVurderingTask.setSaksnummer(fagsak.getSaksnummer().getVerdi());
                 tilVurderingTask.setProperty(PERIODE_FOM, fom.toString());
                 tilVurderingTask.setProperty(PERIODE_TOM, tom.toString());
                 tilVurderingTask.setProperty(OPPGAVE_REF, UUID.randomUUID().toString());
