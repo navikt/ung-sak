@@ -1,12 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.kravperioder;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,13 +20,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedUtfall;
@@ -41,10 +31,16 @@ import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.søknadsfrist.SøknadsfristTjenesteProvider;
-import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 @ApplicationScoped
 @Transactional
@@ -86,9 +82,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public StatusForPerioderPåBehandling hentPerioderTilBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType()));
-
-        return statusForPerioderPåBehandling;
+        return getStatusForPerioderPåBehandling(ref);
     }
 
     @GET
@@ -107,7 +101,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, perioderTilVurderingTjeneste);
+        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref);
 
         var timelineTilVurdering = utledTidslinjeTilVurdering(behandling, perioderTilVurderingTjeneste);
 
@@ -142,12 +136,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
 
-    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(ref.getBehandlingId());
+    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref) {
         var kravdokumenterTilBehandling = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
         return UtledStatusForPerioderPåBehandling.utledStatus(
-            perioderTilVurdering,
             kravdokumenterTilBehandling,
             prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList()
         );
