@@ -32,7 +32,7 @@ public class AutomatiskUtløptEtterlysningTjeneste {
 
         List<Behandling> behandlingListe = behandlingKandidaterRepository.finnBehandlingerForUtløptEtterlysning();
 
-        logger.info("Fant {} behandlinger som skal ha etterlysninger satt til utløpt", behandlingListe.size());
+        logger.info("Fant følgende behandlinger som skal ha etterlysninger satt til utløpt: {}", behandlingListe.stream().map(Behandling::getId).toList());
 
         for (Behandling behandling : behandlingListe) {
             try {
