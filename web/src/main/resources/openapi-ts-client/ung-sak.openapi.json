@@ -144,15 +144,6 @@
       },
       "AlleKodeverdierSomObjektResponse" : {
         "properties" : {
-          "aktivitetStatuser" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektAktivitetStatus"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "arbeidTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidType"
@@ -325,15 +316,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "inntektskategorier" : {
-            "items" : {
-              "$ref" : "#/components/schemas/KodeverdiSomObjektInntektskategori"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "medlemskapDekningTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapDekningType"
@@ -479,7 +461,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "AngittPersonDto" : {
@@ -516,25 +498,6 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
-      "ArbeidsgiverDto" : {
-        "properties" : {
-          "identifikator" : {
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "identifikatorGUI" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "navn" : {
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
             "type" : "string"
           }
         },
@@ -1074,10 +1037,6 @@
       },
       "BeregningsresultatDto" : {
         "properties" : {
-          "opphoersdato" : {
-            "format" : "date",
-            "type" : "string"
-          },
           "perioder" : {
             "items" : {
               "$ref" : "#/components/schemas/BeregningsresultatPeriodeDto"
@@ -1085,163 +1044,12 @@
             "maxItems" : 100,
             "minItems" : 0,
             "type" : "array"
-          },
-          "skalHindreTilbaketrekk" : {
-            "type" : "boolean"
           }
         },
         "type" : "object"
-      },
-      "BeregningsresultatMedUtbetaltePeriodeDto" : {
-        "properties" : {
-          "opphoersdato" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "perioder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/BeregningsresultatPeriodeDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          },
-          "skalHindreTilbaketrekk" : {
-            "type" : "boolean"
-          },
-          "utbetaltePerioder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/BeregningsresultatPeriodeDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
-      "BeregningsresultatPeriodeAndelDto" : {
-        "properties" : {
-          "aktivitetStatus" : {
-            "$ref" : "#/components/schemas/BeregningsresultatPeriodeAndelDtoAktivitetStatus"
-          },
-          "aktørId" : {
-            "type" : "string"
-          },
-          "arbeidsforholdId" : {
-            "maxLength" : 50,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\-\\p{P}\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "arbeidsforholdType" : {
-            "$ref" : "#/components/schemas/BeregningsresultatPeriodeAndelDtoArbeidsforholdType"
-          },
-          "arbeidsgiver" : {
-            "$ref" : "#/components/schemas/ArbeidsgiverDto"
-          },
-          "arbeidsgiverNavn" : {
-            "maxLength" : 200,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "arbeidsgiverOrgnr" : {
-            "type" : "string"
-          },
-          "arbeidsgiverPersonIdent" : {
-            "type" : "string"
-          },
-          "eksternArbeidsforholdId" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "inntektskategori" : {
-            "$ref" : "#/components/schemas/BeregningsresultatPeriodeAndelDtoInntektskategori"
-          },
-          "refusjon" : {
-            "format" : "int32",
-            "maximum" : 1000000,
-            "minimum" : 0,
-            "type" : "integer"
-          },
-          "sisteUtbetalingsdato" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "stillingsprosent" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 500.00,
-            "minimum" : 0.00,
-            "type" : "number"
-          },
-          "tilSoker" : {
-            "format" : "int32",
-            "maximum" : 1000000,
-            "minimum" : 0,
-            "type" : "integer"
-          },
-          "utbetalingsgrad" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 100.00,
-            "minimum" : 0.00,
-            "type" : "number"
-          },
-          "utbetalingsgradOppdragForBruker" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 100.00,
-            "minimum" : 0.00,
-            "type" : "number"
-          },
-          "utbetalingsgradOppdragForRefusjon" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 100.00,
-            "minimum" : 0.00,
-            "type" : "number"
-          },
-          "uttak" : {
-            "items" : {
-              "$ref" : "#/components/schemas/UttakDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          }
-        },
-        "required" : [ "inntektskategori" ],
-        "type" : "object"
-      },
-      "BeregningsresultatPeriodeAndelDtoAktivitetStatus" : {
-        "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
-        "x-enum-varnames" : [ "MIDLERTIDIG_INAKTIV", "ARBEIDSAVKLARINGSPENGER", "ARBEIDSTAKER", "DAGPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "FRILANSER", "MILITÆR_ELLER_SIVIL", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINERT_AT_FL", "KOMBINERT_AT_SN", "KOMBINERT_FL_SN", "KOMBINERT_AT_FL_SN", "BRUKERS_ANDEL", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TTLSTØTENDE_YTELSE", "VENTELØNN_VARTPENGER", "UDEFINERT" ],
-        "type" : "string"
-      },
-      "BeregningsresultatPeriodeAndelDtoArbeidsforholdType" : {
-        "enum" : [ "AAP", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "-" ],
-        "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ],
-        "type" : "string"
-      },
-      "BeregningsresultatPeriodeAndelDtoInntektskategori" : {
-        "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
-        "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ],
-        "type" : "string"
       },
       "BeregningsresultatPeriodeDto" : {
         "properties" : {
-          "andeler" : {
-            "items" : {
-              "$ref" : "#/components/schemas/BeregningsresultatPeriodeAndelDto"
-            },
-            "maxItems" : 200,
-            "minItems" : 0,
-            "type" : "array"
-          },
           "dagsats" : {
             "format" : "int32",
             "maximum" : 100000,
@@ -1252,33 +1060,12 @@
             "format" : "date",
             "type" : "string"
           },
-          "reduksjonsfaktorInaktivTypeA" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 1.00,
-            "minimum" : 0.00,
-            "type" : "number"
-          },
           "tom" : {
             "format" : "date",
             "type" : "string"
-          },
-          "totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 1,
-            "minimum" : 0,
-            "type" : "number"
-          },
-          "totalUtbetalingsgradFraUttak" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 1,
-            "minimum" : 0,
-            "type" : "number"
           }
         },
-        "required" : [ "andeler", "dagsats", "fom", "tom" ],
+        "required" : [ "dagsats", "fom", "tom" ],
         "type" : "object"
       },
       "ByttBehandlendeEnhetDto" : {
@@ -1972,29 +1759,6 @@
         "required" : [ "journalpostId" ],
         "type" : "object"
       },
-      "KodeverdiSomObjektAktivitetStatus" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/KodeverdiSomObjektAktivitetStatusKilde"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektAktivitetStatusKilde" : {
-        "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
-        "x-enum-varnames" : [ "MIDLERTIDIG_INAKTIV", "ARBEIDSAVKLARINGSPENGER", "ARBEIDSTAKER", "DAGPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "FRILANSER", "MILITÆR_ELLER_SIVIL", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINERT_AT_FL", "KOMBINERT_AT_SN", "KOMBINERT_FL_SN", "KOMBINERT_AT_FL_SN", "BRUKERS_ANDEL", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TTLSTØTENDE_YTELSE", "VENTELØNN_VARTPENGER", "UDEFINERT" ],
-        "type" : "string"
-      },
       "KodeverdiSomObjektArbeidType" : {
         "properties" : {
           "kilde" : {
@@ -2432,29 +2196,6 @@
         "x-enum-varnames" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKREVING_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNET", "OVST_UTTAK_OPPDATERT", "UDEFINERT" ],
         "type" : "string"
       },
-      "KodeverdiSomObjektInntektskategori" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/KodeverdiSomObjektInntektskategoriKilde"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "KodeverdiSomObjektInntektskategoriKilde" : {
-        "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
-        "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ],
-        "type" : "string"
-      },
       "KodeverdiSomObjektMedlemskapDekningType" : {
         "properties" : {
           "kilde" : {
@@ -2797,29 +2538,18 @@
       },
       "KodeverkArbeidsforhold" : {
         "properties" : {
-          "aktivitetStatus" : {
-            "$ref" : "#/components/schemas/KodeverkArbeidsforholdAktivitetStatus"
-          },
           "arbeidType" : {
             "$ref" : "#/components/schemas/KodeverkArbeidsforholdArbeidType"
           },
           "arbeidskategori" : {
             "$ref" : "#/components/schemas/KodeverkArbeidsforholdArbeidskategori"
           },
-          "inntektskategori" : {
-            "$ref" : "#/components/schemas/KodeverkArbeidsforholdInntektskategori"
-          },
           "relatertYtelseTilstand" : {
             "$ref" : "#/components/schemas/KodeverkArbeidsforholdRelatertYtelseTilstand"
           }
         },
-        "required" : [ "aktivitetStatus", "arbeidType", "arbeidskategori", "inntektskategori", "relatertYtelseTilstand" ],
+        "required" : [ "arbeidType", "arbeidskategori", "relatertYtelseTilstand" ],
         "type" : "object"
-      },
-      "KodeverkArbeidsforholdAktivitetStatus" : {
-        "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
-        "x-enum-varnames" : [ "MIDLERTIDIG_INAKTIV", "ARBEIDSAVKLARINGSPENGER", "ARBEIDSTAKER", "DAGPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "FRILANSER", "MILITÆR_ELLER_SIVIL", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINERT_AT_FL", "KOMBINERT_AT_SN", "KOMBINERT_FL_SN", "KOMBINERT_AT_FL_SN", "BRUKERS_ANDEL", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TTLSTØTENDE_YTELSE", "VENTELØNN_VARTPENGER", "UDEFINERT" ],
-        "type" : "string"
       },
       "KodeverkArbeidsforholdArbeidType" : {
         "enum" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "NÆRING", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "-" ],
@@ -2829,11 +2559,6 @@
       "KodeverkArbeidsforholdArbeidskategori" : {
         "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
         "x-enum-varnames" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "UDEFINERT" ],
-        "type" : "string"
-      },
-      "KodeverkArbeidsforholdInntektskategori" : {
-        "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
-        "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ],
         "type" : "string"
       },
       "KodeverkArbeidsforholdRelatertYtelseTilstand" : {
@@ -4730,30 +4455,6 @@
         "required" : [ "fom", "landNavn", "tom" ],
         "type" : "object"
       },
-      "UttakDto" : {
-        "properties" : {
-          "periode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "utbetalingsgrad" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 100.00,
-            "minimum" : 0.00,
-            "type" : "number"
-          },
-          "utfall" : {
-            "$ref" : "#/components/schemas/UttakDtoUtfall"
-          }
-        },
-        "required" : [ "periode", "utbetalingsgrad", "utfall" ],
-        "type" : "object"
-      },
-      "UttakDtoUtfall" : {
-        "enum" : [ "INNVILGET", "AVSLÅTT", "UDEFINERT" ],
-        "x-enum-varnames" : [ "INNVILGET", "AVSLÅTT", "UDEFINERT" ],
-        "type" : "string"
-      },
       "VarseltekstDto" : {
         "properties" : {
           "varseltekst" : {
@@ -5439,36 +5140,6 @@
             "description" : "default response"
           }
         },
-        "tags" : [ "beregningsresultat" ]
-      }
-    },
-    "/api/behandling/beregningsresultat/utbetalt" : {
-      "get" : {
-        "description" : "Hent beregningsresultat med uttaksplan for foreldrepenger behandling",
-        "operationId" : "hentBeregningsresultatMedUtbetaling",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/BeregningsresultatMedUtbetaltePeriodeDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Returnerer beregningsresultat med uttaksplan for behandling.",
         "tags" : [ "beregningsresultat" ]
       }
     },
