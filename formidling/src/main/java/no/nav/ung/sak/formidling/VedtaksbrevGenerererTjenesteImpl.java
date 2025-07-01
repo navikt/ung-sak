@@ -16,8 +16,11 @@ import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
+import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static no.nav.ung.sak.formidling.vedtak.DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING;
 
 @ApplicationScoped
 public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTjeneste {
@@ -57,7 +60,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     @WithSpan
     @Override
     public GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet( () -> doGenererVedtaksbrev(behandlingId, kunHtml));
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererVedtaksbrev(behandlingId, kunHtml));
     }
 
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
@@ -93,7 +96,11 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
         if (!regelResultat.vedtaksbrevEgenskaper().harBrev()) {
-            LOG.warn(regelResultat.forklaring());
+            if (erIngenBrevForventet(regelResultat)) {
+                LOG.info(regelResultat.forklaring());
+            } else {
+                LOG.warn(regelResultat.forklaring());
+            }
             return null;
         }
 
@@ -117,6 +124,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             resultat.dokumentMalType(),
             resultat.templateType()
         );
+    }
+
+    private static boolean erIngenBrevForventet(VedtaksbrevRegelResulat regelResultat) {
+        var harKunFullUtbetalingEtterKontroll = regelResultat.detaljertResultatTimeline().toSegments().stream()
+            .allMatch(segment ->
+                segment.getValue().resultatInfo().stream().map(DetaljertResultatInfo::detaljertResultatType)
+                    .allMatch(KONTROLLER_INNTEKT_FULL_UTBETALING::equals));
+        return harKunFullUtbetalingEtterKontroll;
     }
 
     /**
