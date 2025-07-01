@@ -59,7 +59,7 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessT
                 log.info("Oppretter oppgave for inntektrappportering for fagsak {} for periode {} - {}", fagsak.getSaksnummer(), fom, tom);
                 ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettOppgaveForInntektsrapporteringTask.class);
                 tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
-                tilVurderingTask.setFagsakId(fagsak.getId());
+                tilVurderingTask.setSaksnummer(fagsak.getSaksnummer().getVerdi());
                 tilVurderingTask.setProperty(PERIODE_FOM, fom.toString());
                 tilVurderingTask.setProperty(PERIODE_TOM, tom.toString());
                 tilVurderingTask.setProperty(OPPGAVE_REF, UUID.randomUUID().toString());
