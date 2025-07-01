@@ -32,6 +32,8 @@ public class AutomatiskUtløptEtterlysningTjeneste {
 
         List<Behandling> behandlingListe = behandlingKandidaterRepository.finnBehandlingerForUtløptEtterlysning();
 
+        logger.info("Fant {} behandlinger som skal ha etterlysninger satt til utløpt", behandlingListe.size());
+
         for (Behandling behandling : behandlingListe) {
             try {
                 opprettProsessTask(behandling);
