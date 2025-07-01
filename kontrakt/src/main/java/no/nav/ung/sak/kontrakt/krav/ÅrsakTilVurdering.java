@@ -18,7 +18,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     HENDELSE_FØDSEL_BARN("HENDELSE_FØDSEL_BARN", "Fødsel barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
     ENDRET_STARTDATO_UNGDOMSPROGRAM("ENDRET_STARTDATO_UNGDOMSPROGRAM", "Endret startdato for ungdomsprogram"),
-    KONTROLL_AV_INNTEKT("OPPHØR_UNGDOMSPROGRAM", "Kontroll og rapportering av inntekt"),
+    KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll og rapportering av inntekt"),
     OVERGANG_HØY_SATS("OVERGANG_HØY_SATS", "Overgang til høy sats"),
 
     // Vurderes på nytt pga G_REGULERING
