@@ -8,6 +8,6 @@ ALTER TABLE SO_SOEKNAD
     DROP COLUMN IF EXISTS er_endringssoeknad,
     DROP COLUMN IF EXISTS tilleggsopplysninger,
     DROP COLUMN IF EXISTS fom,
-    DROP COLUMN IF EXISTS tom,
-    RENAME COLUMN soeknadsdato TO startdato;
+    DROP COLUMN IF EXISTS tom;
+ALTER TABLE SO_SOEKNAD RENAME COLUMN soeknadsdato TO startdato;
 
