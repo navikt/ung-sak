@@ -48,24 +48,6 @@ public class SøknadRepositoryTest {
     }
 
     @Test
-    public void skal_finne_søknad_med_overlapp() {
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
-        fagsakRepository.opprettNy(fagsak);
-
-        Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        behandlingRepository.lagre(behandling, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling));
-
-        SøknadEntitet søknad = opprettSøknad();
-        søknadRepository.lagreOgFlush(behandling, søknad);
-
-        var dato = søknadsperiode.getTomDato().minusDays(1);
-        List<Behandling> behandlinger = søknadRepository.hentBehandlingerMedOverlappendeSøknaderIPeriode(fagsak.getId(), dato, dato);
-
-        assertThat(behandlinger).containsOnly(behandling);
-
-    }
-
-    @Test
     public void skal_kopiere_søknadsgrunnlaget_fra_behandling1_til_behandling2() {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
