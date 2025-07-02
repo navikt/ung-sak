@@ -13,7 +13,7 @@ import java.util.Map;
 @LegacyKodeverdiJsonValue() // <- Denne Kodeverdi har alltid blitt serialisert til kode string
 public enum ÅrsakTilVurdering implements Kodeverdi {
 
-    HENDELSE_DØD_BRUKER("HENDELSE_DØD_BRUKER", "Dødsfall bruker"),
+    HENDELSE_DØD_BRUKER("HENDELSE_DØD_BRUKER", "Dødsfall deltaker"),
     HENDELSE_DØD_BARN("HENDELSE_DØD_BARN", "Dødsfall barn"),
     HENDELSE_FØDSEL_BARN("HENDELSE_FØDSEL_BARN", "Fødsel barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
