@@ -30,11 +30,6 @@ public class SøknadDto {
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelseForSenInnsending;
 
-    @JsonProperty(value = "angittePersoner")
-    @Valid
-    @Size(max = 30)
-    private List<AngittPersonDto> angittePersoner = new ArrayList<>();
-
     /**
      * Dato søknad mottatt av Nav.
      */
@@ -49,29 +44,9 @@ public class SøknadDto {
     @NotNull
     private LocalDate oppgittStartdato;
 
-    @JsonProperty(value = "oppgittTilknytning")
-    @Valid
-    private OppgittTilknytningDto oppgittTilknytning;
-
-    /**
-     * Dato søknad sendt fra bruker. (er forskjellig fra mottatdato dersom ikke digital søknad).
-     */
-    @JsonProperty(value = "soknadsdato", required = true)
-    @NotNull
-    private LocalDate soknadsdato;
-
     @JsonProperty(value = "spraakkode")
     @Valid
     private Språkkode spraakkode;
-
-    @JsonProperty(value = "tilleggsopplysninger")
-    @Size(max = 5000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    private String tilleggsopplysninger;
-
-    @JsonProperty(value = "søknadsperiode")
-    @Valid
-    private Periode søknadsperiode;
 
     public SøknadDto() {
     }
@@ -100,47 +75,11 @@ public class SøknadDto {
         this.oppgittStartdato = oppgittStartdato;
     }
 
-    public OppgittTilknytningDto getOppgittTilknytning() {
-        return oppgittTilknytning;
-    }
-
-    public void setOppgittTilknytning(OppgittTilknytningDto oppgittTilknytning) {
-        this.oppgittTilknytning = oppgittTilknytning;
-    }
-
-    public LocalDate getSoknadsdato() {
-        return soknadsdato;
-    }
-
-    public void setSoknadsdato(LocalDate soknadsdato) {
-        this.soknadsdato = soknadsdato;
-    }
-
     public Språkkode getSpraakkode() {
         return spraakkode;
     }
 
     public void setSpraakkode(Språkkode spraakkode) {
         this.spraakkode = spraakkode;
-    }
-
-    public String getTilleggsopplysninger() {
-        return tilleggsopplysninger;
-    }
-
-    public void setTilleggsopplysninger(String tilleggsopplysninger) {
-        this.tilleggsopplysninger = tilleggsopplysninger;
-    }
-
-    public List<AngittPersonDto> getAngittePersoner() {
-        return angittePersoner;
-    }
-
-    public void setAngittePersoner(Collection<AngittPersonDto> angittePersoner) {
-        this.angittePersoner = angittePersoner == null ? Collections.emptyList() : List.copyOf(angittePersoner);
-    }
-
-    public void setSøknadsperiode(Periode periode) {
-        this.søknadsperiode = periode;
     }
 }

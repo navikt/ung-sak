@@ -48,33 +48,6 @@ public class SøknadRepositoryTest {
     }
 
     @Test
-    public void skal_finne_endringssøknad_for_behandling() {
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
-        fagsakRepository.opprettNy(fagsak);
-
-        Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        behandlingRepository.lagre(behandling, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling));
-
-        Behandling behandling2 = Behandling.forFørstegangssøknad(fagsak).build();
-        behandlingRepository.lagre(behandling2, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling2));
-
-        SøknadEntitet søknad = opprettSøknad(false);
-        søknadRepository.lagreOgFlush(behandling, søknad);
-
-        SøknadEntitet søknad2 = opprettSøknad(true);
-        søknadRepository.lagreOgFlush(behandling2, søknad2);
-
-        // Act
-        Optional<SøknadEntitet> endringssøknad = repositoryProvider.getSøknadRepository().hentSøknadHvisEksisterer(behandling.getId());
-        Optional<SøknadEntitet> endringssøknad2 = repositoryProvider.getSøknadRepository().hentSøknadHvisEksisterer(behandling2.getId());
-
-        // Assert
-        assertThat(endringssøknad).isPresent();
-        assertThat(endringssøknad2).isPresent();
-        assertThat(endringssøknad.get()).isNotEqualTo(endringssøknad2.get());
-    }
-
-    @Test
     public void skal_finne_søknad_med_overlapp() {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
@@ -82,7 +55,7 @@ public class SøknadRepositoryTest {
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
         behandlingRepository.lagre(behandling, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling));
 
-        SøknadEntitet søknad = opprettSøknad(false);
+        SøknadEntitet søknad = opprettSøknad();
         søknadRepository.lagreOgFlush(behandling, søknad);
 
         var dato = søknadsperiode.getTomDato().minusDays(1);
@@ -93,32 +66,13 @@ public class SøknadRepositoryTest {
     }
 
     @Test
-    public void skal_ikke_finne_endringssøknad_for_behandling() {
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
-        fagsakRepository.opprettNy(fagsak);
-
-        Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        behandlingRepository.lagre(behandling, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling));
-
-        SøknadEntitet søknad = opprettSøknad(false);
-        søknadRepository.lagreOgFlush(behandling, søknad);
-
-        // Act
-        Optional<SøknadEntitet> endringssøknad = repositoryProvider.getSøknadRepository().hentSøknadHvisEksisterer(behandling.getId());
-
-        // Assert
-        assertThat(endringssøknad).isPresent();
-        assertThat(endringssøknad.get().erEndringssøknad()).isFalse();
-    }
-
-    @Test
     public void skal_kopiere_søknadsgrunnlaget_fra_behandling1_til_behandling2() {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.FORELDREPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
 
         Behandling behandling1 = Behandling.forFørstegangssøknad(fagsak).build();
         behandlingRepository.lagre(behandling1, repositoryProvider.getBehandlingRepository().taSkriveLås(behandling1));
-        SøknadEntitet søknad = opprettSøknad(false);
+        SøknadEntitet søknad = opprettSøknad();
         søknadRepository.lagreOgFlush(behandling1, søknad);
 
         Behandling behandling2 = Behandling.forFørstegangssøknad(fagsak).build();
@@ -132,12 +86,10 @@ public class SøknadRepositoryTest {
         assertThat(søknadEntitet).isPresent();
     }
 
-    private SøknadEntitet opprettSøknad(boolean erEndringssøknad) {
+    private SøknadEntitet opprettSøknad() {
         return new SøknadEntitet.Builder()
-            .medSøknadsperiode(søknadsperiode)
-            .medSøknadsdato(søknadsperiode.getTomDato().plusDays(1))
+            .medStartdato(søknadsperiode.getFomDato())
             .medJournalpostId(new JournalpostId(1L))
-            .medErEndringssøknad(erEndringssøknad)
             .build();
     }
 }

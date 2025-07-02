@@ -3,7 +3,6 @@ package no.nav.ung.sak.test.util.behandling;
 import java.time.LocalDate;
 
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.typer.AktørId;
 
 /**
@@ -30,9 +29,7 @@ public class TestScenarioBuilder extends AbstractTestScenario<TestScenarioBuilde
     }
 
     private void settDefaultSøknad() {
-            medSøknad()
-                .medRelasjonsRolleType(RelasjonsRolleType.MORA)
-                .medSøknadsdato(LocalDate.now());
+            medSøknad().medStartdato(LocalDate.now());
     }
 
     public static TestScenarioBuilder builderMedSøknad() {
