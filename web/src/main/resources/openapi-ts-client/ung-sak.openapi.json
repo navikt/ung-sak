@@ -4717,7 +4717,7 @@
   },
   "info" : {
     "description" : "REST grensesnitt for Vedtaksløsningen.",
-    "title" : "Ung saksbehandling - Saksbehandling for ungdomsytelse",
+    "title" : "Ung saksbehandling - Saksbehandling for ungdomsprogramytelsen",
     "version" : "0.2"
   },
   "openapi" : "3.0.1",
@@ -5378,7 +5378,7 @@
     },
     "/api/behandling/soknad/perioder" : {
       "post" : {
-        "description" : "Henter søknadsperioder på siste fagsak på ytelse, bruker, og pleieptrengende",
+        "description" : "Henter søknadsperioder på siste fagsak for deltaker",
         "operationId" : "hentSøknadPerioder",
         "requestBody" : {
           "content" : {
@@ -6383,7 +6383,7 @@
     },
     "/api/fagsak/match" : {
       "post" : {
-        "description" : "Søk etter saker på ytelse, bruker, og evt. pleieptrengende/relatertPerson",
+        "description" : "Søk etter saker på ytelse og deltaker",
         "operationId" : "matchFagsaker",
         "requestBody" : {
           "content" : {
@@ -6499,7 +6499,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Spesifikke saker kan søkes via saksnummer. Oversikt over saker knyttet til en bruker kan søkes via fødselsnummer eller d-nummer.",
+        "summary" : "Spesifikke saker kan søkes via saksnummer. Oversikt over saker knyttet til en deltaker kan søkes via fødselsnummer eller d-nummer.",
         "tags" : [ "fagsak" ]
       }
     },
