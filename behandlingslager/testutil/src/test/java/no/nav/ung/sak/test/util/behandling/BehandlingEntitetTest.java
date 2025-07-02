@@ -93,7 +93,7 @@ public class BehandlingEntitetTest {
         Behandling første = alle.get(0);
         final SøknadEntitet søknad = repositoryProvider.getSøknadRepository().hentSøknad(første);
         assertThat(søknad).isNotNull();
-        assertThat(søknad.getSøknadsdato()).isEqualTo(LocalDate.now());
+        assertThat(søknad.getStartdato()).isEqualTo(LocalDate.now());
     }
 
 }

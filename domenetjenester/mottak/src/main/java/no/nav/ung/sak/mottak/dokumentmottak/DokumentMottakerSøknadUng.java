@@ -49,7 +49,10 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
                 dokument.setKildesystem(søknad.getKildesystem().get().getKode());
             }
             Ungdomsytelse ytelse = søknad.getYtelse();
-            ungdomsytelseSøknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, Optional.of(ytelse.getSøknadsperiode()), dokument.getMottattDato());
+            if (ytelse.getStartdatoer().size() != 1) {
+                throw new IllegalStateException("Forventet at søknaden inneholder nøyaktig én startdato, fant " + ytelse.getStartdatoer().size() + " startdatoer.");
+            }
+            ungdomsytelseSøknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, ytelse.getStartdatoer().get(0), dokument.getMottattDato());
             ungdomsytelseSøknadPersisterer.lagreSøknadsperioder(ytelse.getStartdatoer(), dokument.getJournalpostId(), behandlingId);
             ungdomsytelseSøknadPersisterer.oppdaterFagsakperiode(ytelse.getSøknadsperiode().getFraOgMed(), behandling);
 
