@@ -4717,7 +4717,7 @@
   },
   "info" : {
     "description" : "REST grensesnitt for Vedtaksløsningen.",
-    "title" : "Ung saksbehandling - Saksbehandling for ungdomsytelse",
+    "title" : "Ung saksbehandling - Saksbehandling for ungdomsprogramytelsen",
     "version" : "0.2"
   },
   "openapi" : "3.0.1",
