@@ -25,7 +25,7 @@ public class ApplicationConfig extends ResourceConfig {
 
     public OpenAPI resolveOpenAPI() {
         final var info = new Info()
-            .title("Ung saksbehandling - Saksbehandling for ungdomsytelse")
+            .title("Ung saksbehandling - Saksbehandling for ungdomsprogramytelsen")
             .version("0.2")
             .description("REST grensesnitt for Vedtaksløsningen.");
 
