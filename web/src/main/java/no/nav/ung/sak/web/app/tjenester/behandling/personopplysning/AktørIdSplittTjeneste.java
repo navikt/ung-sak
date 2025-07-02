@@ -79,7 +79,6 @@ public class AktørIdSplittTjeneste {
                                    String tjeneste) {
         var brukerOppdaterteFagsaker = oppdaterFagsakForBruker(nyAktørId, gammelAktørId);
         oppdaterPoAggregat(nyAktørId, gammelAktørId);
-        oppdaterSøknadGrunnlag(nyAktørId, gammelAktørId);
         oppdaterNotatISak(nyAktørId, gammelAktørId);
         var personidenterSomSkalByttesUt = aktørIdForIdenterSomSkalByttes.map(aktørTjeneste::hentHistoriskePersonIdenterForAktørId)
             .orElse(Collections.emptySet());
@@ -101,13 +100,6 @@ public class AktørIdSplittTjeneste {
 
     private void slettIdentFraAktørCache(AktørId gammelAktørId) {
         entityManager.createNativeQuery("delete from tmp_aktoer_id where aktoer_id = :gammel_aktoer_id")
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-    }
-
-    private void oppdaterSøknadGrunnlag(AktørId nyAktørId, AktørId gammelAktørId) {
-        entityManager.createNativeQuery("update SO_SOEKNAD_ANGITT_PERSON set AKTOER_ID = :ny_aktoer_id where AKTOER_ID = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
             .executeUpdate();
     }

@@ -8,12 +8,10 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadAngittPersonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.kontrakt.søknad.AngittPersonDto;
 import no.nav.ung.sak.kontrakt.søknad.SøknadDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.AktørId;
@@ -23,7 +21,6 @@ import no.nav.ung.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -59,18 +56,9 @@ public class SøknadDtoTjeneste {
     private Optional<SøknadDto> lagSoknadDto(SøknadEntitet søknad) {
         var dto = new SøknadDto();
         dto.setMottattDato(søknad.getMottattDato());
-        dto.setSoknadsdato(søknad.getSøknadsdato());
-
-        // FIXME K9 sett korrekt startdato for ytelse
-        dto.setOppgittStartdato(søknad.getSøknadsdato());
-
-        dto.setTilleggsopplysninger(søknad.getTilleggsopplysninger());
+        dto.setOppgittStartdato(søknad.getStartdato());
         dto.setSpraakkode(søknad.getSpråkkode());
         dto.setBegrunnelseForSenInnsending(søknad.getBegrunnelseForSenInnsending());
-        Optional.ofNullable(søknad.getSøknadsperiode()).ifPresent(sp -> dto.setSøknadsperiode(new Periode(sp.getFomDato(), sp.getTomDato())));
-
-        dto.setAngittePersoner(mapAngittePersoner(søknad.getAngittePersoner()));
-
         return Optional.of(dto);
     }
 
@@ -112,37 +100,6 @@ public class SøknadDtoTjeneste {
         return bruker.erAktørId()
             ? new AktørId(bruker.getAktørId())
             : personinfoAdapter.hentAktørIdForPersonIdent(bruker).orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for bruker"));
-    }
-
-    private List<AngittPersonDto> mapAngittePersoner(Set<SøknadAngittPersonEntitet> angittePersoner) {
-        if (angittePersoner == null || angittePersoner.isEmpty()) {
-            return List.of();
-        }
-
-        var identMap = angittePersoner.stream()
-            .map(SøknadAngittPersonEntitet::getAktørId)
-            .filter(Objects::nonNull)
-            .distinct()
-            .collect(Collectors.toMap(Function.identity(), aktørId -> personinfoAdapter.hentBrukerBasisForAktør(aktørId).orElseThrow(() -> new IllegalArgumentException("Fant ikke informasjon for person på saken"))));
-
-        return angittePersoner.stream()
-            .map(p -> {
-
-                var dto = new AngittPersonDto()
-                    .setAktørId(p.getAktørId())
-                    .setRolle(p.getRolle())
-                    .setSituasjonKode(p.getSituasjonKode())
-                    .setTilleggsopplysninger(p.getTilleggsopplysninger());
-
-                var personBasis = identMap.get(p.getAktørId());
-                if (personBasis != null) {
-                    dto.setPersonIdent(personBasis.getPersonIdent());
-                    dto.setNavn(personBasis.getNavn());
-                    dto.setFødselsdato(personBasis.getFødselsdato());
-                }
-                return dto;
-            })
-            .toList();
     }
 
     private VilkårsPerioderTilVurderingTjeneste finnVilkårsPerioderTilVurderingTjeneste(FagsakYtelseType ytelseType, BehandlingType behandlingType) {

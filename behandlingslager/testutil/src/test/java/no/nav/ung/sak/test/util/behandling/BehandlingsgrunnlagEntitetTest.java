@@ -28,7 +28,6 @@ import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -72,16 +71,15 @@ public class BehandlingsgrunnlagEntitetTest {
         lagreBehandling(behandling);
 
         SøknadEntitet.Builder søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(søknadsdato, søknadsdato)
             .medJournalpostId(new JournalpostId(1L))
-            .medSøknadsdato(søknadsdato);
+            .medStartdato(søknadsdato);
         søknadRepository.lagreOgFlush(behandling, søknadBuilder.build());
         repository.flush();
 
         // Assert
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandling);
         assertThat(søknad).isNotNull();
-        assertThat(søknad.getSøknadsdato()).isEqualTo(søknadsdato);
+        assertThat(søknad.getStartdato()).isEqualTo(søknadsdato);
     }
 
     @Test
