@@ -464,45 +464,6 @@
         "required" : [ "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
-      "AngittPersonDto" : {
-        "properties" : {
-          "aktørId" : {
-            "type" : "string"
-          },
-          "fødselsdato" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "navn" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "personIdent" : {
-            "type" : "string"
-          },
-          "rolle" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "situasjonKode" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}\\p{L}\\p{N}]+$",
-            "type" : "string"
-          },
-          "tilleggsopplysninger" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
       "AsyncPollingStatus" : {
         "properties" : {
           "cancelUri" : {
@@ -3017,19 +2978,6 @@
         },
         "type" : "object"
       },
-      "OppgittTilknytningDto" : {
-        "properties" : {
-          "utlandsopphold" : {
-            "items" : {
-              "$ref" : "#/components/schemas/UtlandsoppholdDto"
-            },
-            "maxItems" : 50,
-            "minItems" : 0,
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
       "OpprettNotatDto" : {
         "properties" : {
           "notatGjelderType" : {
@@ -3928,14 +3876,6 @@
       },
       "SøknadDto" : {
         "properties" : {
-          "angittePersoner" : {
-            "items" : {
-              "$ref" : "#/components/schemas/AngittPersonDto"
-            },
-            "maxItems" : 30,
-            "minItems" : 0,
-            "type" : "array"
-          },
           "begrunnelseForSenInnsending" : {
             "maxLength" : 5000,
             "minLength" : 0,
@@ -3950,27 +3890,11 @@
             "format" : "date",
             "type" : "string"
           },
-          "oppgittTilknytning" : {
-            "$ref" : "#/components/schemas/OppgittTilknytningDto"
-          },
-          "soknadsdato" : {
-            "format" : "date",
-            "type" : "string"
-          },
           "spraakkode" : {
-            "type" : "string"
-          },
-          "søknadsperiode" : {
-            "$ref" : "#/components/schemas/Periode"
-          },
-          "tilleggsopplysninger" : {
-            "maxLength" : 5000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           }
         },
-        "required" : [ "mottattDato", "oppgittStartdato", "soknadsdato" ],
+        "required" : [ "mottattDato", "oppgittStartdato" ],
         "type" : "object"
       },
       "SøknadsfristPeriodeDto" : {
@@ -4434,26 +4358,6 @@
         "enum" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ],
         "x-enum-varnames" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ],
         "type" : "string"
-      },
-      "UtlandsoppholdDto" : {
-        "properties" : {
-          "fom" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "landNavn" : {
-            "maxLength" : 1000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
-            "type" : "string"
-          },
-          "tom" : {
-            "format" : "date",
-            "type" : "string"
-          }
-        },
-        "required" : [ "fom", "landNavn", "tom" ],
-        "type" : "object"
       },
       "VarseltekstDto" : {
         "properties" : {
