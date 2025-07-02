@@ -213,7 +213,7 @@ public class FagsakRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Søk etter saker på saksnummer eller fødselsnummer", tags = "fagsak", summary = ("Spesifikke saker kan søkes via saksnummer. " +
-        "Oversikt over saker knyttet til en bruker kan søkes via fødselsnummer eller d-nummer."))
+        "Oversikt over saker knyttet til en deltaker kan søkes via fødselsnummer eller d-nummer."))
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SøkeSakEllerBrukerDto søkestreng) {
@@ -225,7 +225,7 @@ public class FagsakRestTjeneste {
     @Path(MATCH_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Søk etter saker på ytelse, bruker, og evt. pleieptrengende/relatertPerson", tags = "fagsak", summary = ("Finner matchende fagsaker for angitt ytelse, bruker, etc.. "))
+    @Operation(description = "Søk etter saker på ytelse og deltaker", tags = "fagsak", summary = ("Finner matchende fagsaker for angitt ytelse, bruker, etc.. "))
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<FagsakInfoDto> matchFagsaker(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchFagsakAttributter.class) MatchFagsak matchFagsak) {
