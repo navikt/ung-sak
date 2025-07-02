@@ -59,13 +59,17 @@ public class TilkjentYtelseBeregner {
         final var utbetalingsgrad = finnUtbetalingsgrad(redusertBeløp, sats.grunnsats(), dagsats);
         sporing.put("utbetalingsgrad", String.valueOf(utbetalingsgrad));
 
+        var avvikGrunnetAvrunding = dagsats.multiply(BigDecimal.valueOf(antallVirkedager)).subtract(redusertBeløp).doubleValue();
+        sporing.put("avvikGrunnetAvrunding", String.valueOf(avvikGrunnetAvrunding));
+
         sporing.put("periode", periode.toString());
         final var tilkjentYtelseVerdi = new TilkjentYtelseVerdi(
             uredusertBeløp,
             reduksjon,
             redusertBeløp,
             dagsats,
-            utbetalingsgrad);
+            utbetalingsgrad,
+            avvikGrunnetAvrunding);
         return new TilkjentYtelsePeriodeResultat(tilkjentYtelseVerdi, sporing);
     }
 
@@ -90,7 +94,7 @@ public class TilkjentYtelseBeregner {
             return 100;
         }
         // Regner ut prosentvis utbetalingsgrad
-        return redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(grunnsats, 0, BigDecimal.ROUND_HALF_UP).intValue();
+        return redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(grunnsats, 0, RoundingMode.HALF_UP).intValue();
     }
 
     public static <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(
