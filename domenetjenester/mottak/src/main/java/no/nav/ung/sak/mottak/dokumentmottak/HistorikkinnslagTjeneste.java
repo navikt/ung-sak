@@ -23,7 +23,7 @@ public class HistorikkinnslagTjeneste {
     private static final String SØKNAD = "Søknad";
     private static final String INNSENDING = "Innsending";
     private static final String INNTEKTSRAPPORTERING = "Inntektsrapportering";
-    private static final String OPPGAVEBEKREFTELSE = "Svar på forhåndsvarsel";
+    private static final String OPPGAVEBEKREFTELSE = "Svar på varsel";
     private HistorikkinnslagRepository historikkinnslagRepository;
     private EtterlysningRepository etterlysningRepository;
     private SafTjeneste safTjeneste;
