@@ -75,7 +75,7 @@ public class BigQueryKlient {
         if (response.hasErrors()) {
             response.getInsertErrors()
                 .forEach((idx, errs) -> {
-                    errs.forEach(err -> log.error("BigQuery insert feilet for rad {}: {}", idx, err.getMessage()));
+                    errs.forEach(err -> log.error("BigQuery insert feilet for rad {}: {}", idx, err));
                 });
             throw new RuntimeException("BigQuery insert feilet for noen rader: " + response.getInsertErrors().size());
         }
