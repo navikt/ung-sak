@@ -7,6 +7,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import org.json.JSONObject;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -141,9 +142,13 @@ public class BigQueryKlient {
     }
 
     private InsertAllRequest.RowToInsert tilRowInsert(JSONObject jsonObject) {
+        // Hent nåværende tid som LocalDateTime uten tidssone
+        String now = ZonedDateTime.now()
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
         return InsertAllRequest.RowToInsert.of(Map.of(
             JSON_DATA_SCHEMA_FIELD.getName(), jsonObject.toString(),
-            TIMESTAMP_SCHEMA_FIELD.getName(), ZonedDateTime.now()
+            TIMESTAMP_SCHEMA_FIELD.getName(), now
         ));
     }
 }
