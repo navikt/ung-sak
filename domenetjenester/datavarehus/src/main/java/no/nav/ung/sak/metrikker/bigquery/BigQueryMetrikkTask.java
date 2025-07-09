@@ -69,10 +69,6 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
     }
 
     private void publiserMetrikker(BigQueryDataset dataset, Map<BigQueryTable, JSONObject> metrikker) {
-        metrikker.forEach((bigQueryTable, data) -> bigQueryKlient.publish(dataset, bigQueryTable, tilRowInsert(data)));
-    }
-
-    private InsertAllRequest.RowToInsert tilRowInsert(JSONObject jsonObject) {
-        return InsertAllRequest.RowToInsert.of(jsonObject.toMap());
+        metrikker.forEach((bigQueryTable, data) -> bigQueryKlient.publish(dataset, bigQueryTable, data));
     }
 }

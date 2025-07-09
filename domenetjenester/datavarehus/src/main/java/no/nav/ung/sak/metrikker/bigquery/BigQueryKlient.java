@@ -4,9 +4,13 @@ import com.google.cloud.bigquery.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import org.json.JSONObject;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
 /**
  * Klient for å håndtere interaksjoner med Google BigQuery.
  * Sørger for at nødvendige datasett eksisterer og håndterer innsetting av data i BigQuery-tabeller.
@@ -45,13 +49,15 @@ public class BigQueryKlient {
     }
 
     /**
-     * Publiserer en rad med data til en spesifikk BigQuery-tabell.
+     * Publiserer en data med data til en spesifikk BigQuery-tabell.
      *
      * @param bigQueryDataset Datasettet som tabellen tilhører.
      * @param bigQueryTable   Tabellen som data skal publiseres til. Dersom tabellen ikke finnes, vil den bli opprettet.
-     * @param rad             Dataen som skal publiseres, representert som en rad i BigQuery. Verdien av "jsonData" feltet må være en gyldig JSON-streng.
+     * @param data            Dataen som skal publiseres, representert som en data i BigQuery. Verdien av "jsonData" feltet må være en gyldig JSON-streng.
      */
-    public void publish(BigQueryDataset bigQueryDataset, BigQueryTable bigQueryTable, InsertAllRequest.RowToInsert rad) {
+    public void publish(BigQueryDataset bigQueryDataset, BigQueryTable bigQueryTable, JSONObject data) {
+        InsertAllRequest.RowToInsert rad = tilRowInsert(data);
+
         String datasetNavn = bigQueryDataset.getDatasetNavn();
         String tableNavn = bigQueryTable.getTableNavn();
         Table eksisterendeTable = bigQuery.getTable(TableId.of(datasetNavn, tableNavn));
@@ -132,5 +138,12 @@ public class BigQueryKlient {
             log.error("Noe gikk galt ved forsøk på å hente dataset {}: {}", datasetNavn, e.getMessage(), e);
             throw new RuntimeException("Kunne ikke hente dataset " + datasetNavn + " fra BigQuery.", e);
         }
+    }
+
+    private InsertAllRequest.RowToInsert tilRowInsert(JSONObject jsonObject) {
+        return InsertAllRequest.RowToInsert.of(Map.of(
+            JSON_DATA_SCHEMA_FIELD.getName(), jsonObject.toString(),
+            TIMESTAMP_SCHEMA_FIELD.getName(), ZonedDateTime.now()
+        ));
     }
 }
