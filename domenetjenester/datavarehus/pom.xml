@@ -13,8 +13,11 @@
 	<artifactId>datavarehus</artifactId>
 	<packaging>jar</packaging>
 	<name>ung-sak :: Domenetjenester - Datavarehus</name>
+    <properties>
+        <google-cloud-bigquery.version>2.52.0</google-cloud-bigquery.version>
+    </properties>
 
-	<dependencies>
+    <dependencies>
 		<dependency>
 			<groupId>no.nav.k9.felles.sikkerhet</groupId>
 			<artifactId>k9-felles-sikkerhet</artifactId>
@@ -45,6 +48,12 @@
 			<groupId>no.nav.k9.felles.integrasjon</groupId>
 			<artifactId>k9-sensu-klient</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-bigquery</artifactId>
+            <version>${google-cloud-bigquery.version}</version>
+        </dependency>
 
 		<!-- Test avhengigheter -->
 		<dependency>

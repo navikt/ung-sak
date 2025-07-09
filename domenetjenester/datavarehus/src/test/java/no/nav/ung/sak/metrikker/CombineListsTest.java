@@ -16,24 +16,24 @@ public class CombineListsTest {
     public void skal_kombinere_angitte_vektorer() throws Exception {
 
         var res = new CombineLists<>(Map.of(
-            YTELSE_TYPE, StatistikkRepository.YTELSER,
-            FAGSAK_STATUS, StatistikkRepository.FAGSAK_STATUS,
-            AVSLAG_ARSAK, StatistikkRepository.AVSLAGSÅRSAKER)).toMap();
+            YTELSE_TYPE, MetrikkUtils.YTELSER,
+            FAGSAK_STATUS, MetrikkUtils.FAGSAK_STATUS,
+            AVSLAG_ARSAK, MetrikkUtils.AVSLAGSÅRSAKER)).toMap();
 
         assertThat(res).isNotEmpty();
         var firstRow = res.get(0);
         assertThat(firstRow).hasSize(3);
         assertThat(firstRow.keySet()).containsOnly(YTELSE_TYPE, FAGSAK_STATUS, AVSLAG_ARSAK);
 
-        for (var yt : StatistikkRepository.YTELSER) {
+        for (var yt : MetrikkUtils.YTELSER) {
             assertThat(res).anyMatch(m -> m.get(YTELSE_TYPE).equals(yt));
         }
 
-        for (var av : StatistikkRepository.AVSLAGSÅRSAKER) {
+        for (var av : MetrikkUtils.AVSLAGSÅRSAKER) {
             assertThat(res).anyMatch(m -> m.get(AVSLAG_ARSAK).equals(av));
         }
 
-        for (var av : StatistikkRepository.FAGSAK_STATUS) {
+        for (var av : MetrikkUtils.FAGSAK_STATUS) {
             assertThat(res).anyMatch(m -> m.get(FAGSAK_STATUS).equals(av));
         }
     }
