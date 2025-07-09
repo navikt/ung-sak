@@ -27,6 +27,11 @@ public class BigQueryKlient {
 
     private final BigQuery bigQuery;
 
+    public BigQueryKlient() {
+        // For CDI proxying
+        this.bigQuery = null;
+    }
+
     /**
      * Konstruktør for BigQueryKlient som initialiserer BigQuery-tjenesten.
      * Forsikrer at nødvendige BigQuery-datasett eksisterer ved oppstart.
