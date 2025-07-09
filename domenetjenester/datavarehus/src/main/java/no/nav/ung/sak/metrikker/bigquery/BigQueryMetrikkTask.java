@@ -3,6 +3,7 @@ package no.nav.ung.sak.metrikker.bigquery;
 import com.google.cloud.bigquery.InsertAllRequest;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -28,6 +29,7 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
     static final String TASKTYPE = "bigquery.metrikk.task";
 
     private static final Logger log = LoggerFactory.getLogger(BigQueryMetrikkTask.class);
+    private boolean bigQueryEnabled;
 
     private BigQueryKlient bigQueryKlient;
 
@@ -38,9 +40,10 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public BigQueryMetrikkTask(BigQueryKlient bigQueryKlient, BigQueryStatistikkRepository statistikkRepository) {
+    public BigQueryMetrikkTask(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled, BigQueryKlient bigQueryKlient, BigQueryStatistikkRepository statistikkRepository) {
         this.bigQueryKlient = bigQueryKlient;
         this.statistikkRepository = statistikkRepository;
+        this.bigQueryEnabled = bigQueryEnabled;
     }
 
     @Override
@@ -50,7 +53,11 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
         try {
             Map<BigQueryTable, JSONObject> metrikker = statistikkRepository.hentHyppigRapporterte();
 
-            publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, metrikker);
+           if (bigQueryEnabled && !metrikker.isEmpty()) {
+               publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, metrikker);
+            } else {
+                log.info("Ingen metrikker å publisere eller BigQuery er ikke aktivert.");
+            }
 
         } finally {
             var varighet = Duration.ofNanos(System.nanoTime() - startTime);

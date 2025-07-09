@@ -3,10 +3,10 @@ package no.nav.ung.sak.metrikker.bigquery;
 import com.google.cloud.bigquery.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 import java.util.Arrays;
 import java.util.List;
-
 /**
  * Klient for å håndtere interaksjoner med Google BigQuery.
  * Sørger for at nødvendige datasett eksisterer og håndterer innsetting av data i BigQuery-tabeller.
@@ -32,9 +32,11 @@ public class BigQueryKlient {
      * Forsikrer at nødvendige BigQuery-datasett eksisterer ved oppstart.
      */
     @Inject
-    public BigQueryKlient() {
-        this.bigQuery = BigQueryOptions.getDefaultInstance().getService();
-        Arrays.stream(BIG_QUERY_DATASET).forEach(this::forsikreDatasetEksisterer);
+    public BigQueryKlient(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled) {
+        if(bigQueryEnabled) {
+            this.bigQuery = BigQueryOptions.getDefaultInstance().getService();
+            Arrays.stream(BIG_QUERY_DATASET).forEach(this::forsikreDatasetEksisterer);
+        } else this.bigQuery = null;
     }
 
     /**

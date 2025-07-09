@@ -35,7 +35,8 @@ public class BigQueryStatistikkRepository {
     ) {
         this.entityManager = entityManager;
         this.taskTyper = handlers.stream()
-                .map(bean -> extractClass(bean).getAnnotation(ProsessTask.class).value())
+                .map(this::extractClass)
+                .map(it -> it.getAnnotation(ProsessTask.class).value())
                 .collect(Collectors.toSet());
     }
 
