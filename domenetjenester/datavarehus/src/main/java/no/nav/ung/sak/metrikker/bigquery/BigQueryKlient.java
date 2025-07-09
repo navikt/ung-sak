@@ -144,7 +144,7 @@ public class BigQueryKlient {
     private InsertAllRequest.RowToInsert tilRowInsert(JSONObject jsonObject) {
         // Hent nåværende tid som LocalDateTime uten tidssone
         String now = ZonedDateTime.now()
-            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
 
         return InsertAllRequest.RowToInsert.of(Map.of(
             JSON_DATA_SCHEMA_FIELD.getName(), jsonObject.toString(),
