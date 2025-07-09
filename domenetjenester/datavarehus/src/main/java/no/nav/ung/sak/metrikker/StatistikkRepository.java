@@ -1,33 +1,5 @@
 package no.nav.ung.sak.metrikker;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.hibernate.QueryTimeoutException;
-import org.hibernate.jpa.QueryHints;
-import org.hibernate.query.NativeQuery;
-import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -35,57 +7,37 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskFeil;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import org.hibernate.QueryTimeoutException;
+import org.hibernate.jpa.QueryHints;
+import org.hibernate.query.NativeQuery;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static no.nav.ung.sak.metrikker.MetrikkUtils.UDEFINERT;
+import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
 
 @Dependent
 public class StatistikkRepository {
 
     private static final Logger log = LoggerFactory.getLogger(StatistikkRepository.class);
 
-    private static final String UDEFINERT = "-";
-
-    static final List<String> YTELSER = Stream.of(
-            FagsakYtelseType.FRISINN,
-            FagsakYtelseType.OMSORGSPENGER,
-            FagsakYtelseType.OMSORGSPENGER_KS,
-            FagsakYtelseType.OMSORGSPENGER_MA,
-            FagsakYtelseType.OMSORGSPENGER_AO,
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
-        .map(FagsakYtelseType::getKode).collect(Collectors.toList());
-
-    static final List<String> PROSESS_TASK_STATUSER = Stream.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR).map(ProsessTaskStatus::getDbKode).collect(Collectors.toList());
-    static final List<String> AKSJONSPUNKTER = AksjonspunktDefinisjon.kodeMap().values().stream()
-        .filter(p -> !AksjonspunktDefinisjon.UNDEFINED.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
-    static final List<String> AKSJONSPUNKT_STATUSER = AksjonspunktStatus.kodeMap().values().stream()
-        .filter(p -> !AksjonspunktStatus.AVBRUTT.equals(p)).map(k -> k.getKode())
-        .collect(Collectors.toList());
-
-    static final List<String> BEHANDLING_RESULTAT_TYPER = List.copyOf(BehandlingResultatType.kodeMap().keySet());
-    static final List<String> BEHANDLING_STATUS = List.copyOf(BehandlingStatus.kodeMap().keySet());
-    static final List<String> FAGSAK_STATUS = List.copyOf(FagsakStatus.kodeMap().keySet());
-    static final List<String> BEHANDLING_TYPER = BehandlingType.kodeMap().values().stream().filter(p -> !BehandlingType.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
-    static final List<String> AVSLAGSÅRSAKER = Avslagsårsak.kodeMap().values().stream().filter(p -> !Avslagsårsak.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
-    static final List<String> BREVKODER = Brevkode.registrerteKoder().values().stream().filter(p -> !Brevkode.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
-
-    private static final ObjectMapper OM = new ObjectMapper();
-
-    static final String PROSESS_TASK_VER = "v4";
-    private final Set<String> taskTyper;
-
     private EntityManager entityManager;
+    private final Set<String> taskTyper;
 
     @Inject
     public StatistikkRepository(EntityManager entityManager, @Any Instance<ProsessTaskHandler> handlers) {
@@ -168,8 +120,8 @@ public class StatistikkRepository {
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
-                "ytelse_type", YTELSER,
-                "fagsak_status", FAGSAK_STATUS),
+                "ytelse_type", MetrikkUtils.YTELSER,
+                "fagsak_status", MetrikkUtils.FAGSAK_STATUS),
             Map.of(
                 metricField, 0L));
 
@@ -217,9 +169,9 @@ public class StatistikkRepository {
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
-                "ytelse_type", YTELSER,
-                "behandling_type", BEHANDLING_TYPER,
-                "behandling_resultat_type", BEHANDLING_RESULTAT_TYPER),
+                "ytelse_type", MetrikkUtils.YTELSER,
+                "behandling_type", MetrikkUtils.BEHANDLING_TYPER,
+                "behandling_resultat_type", MetrikkUtils.BEHANDLING_RESULTAT_TYPER),
             Map.of(
                 metricField1, 0L,
                 metricField2, 0L,
@@ -258,9 +210,9 @@ public class StatistikkRepository {
         /* siden behandling endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
-                "ytelse_type", YTELSER,
-                "behandling_type", BEHANDLING_TYPER,
-                "behandling_status", BEHANDLING_STATUS),
+                "ytelse_type", MetrikkUtils.YTELSER,
+                "behandling_type", MetrikkUtils.BEHANDLING_TYPER,
+                "behandling_status", MetrikkUtils.BEHANDLING_STATUS),
             Map.of(
                 metricField, 0L));
 
@@ -374,7 +326,7 @@ public class StatistikkRepository {
         String metricField = "totalt_antall";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("statuser", AKSJONSPUNKT_STATUSER.stream().collect(Collectors.toSet()));
+            .setParameter("statuser", MetrikkUtils.AKSJONSPUNKT_STATUSER.stream().collect(Collectors.toSet()));
 
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
@@ -390,9 +342,9 @@ public class StatistikkRepository {
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
-                "ytelse_type", YTELSER,
-                "aksjonspunkt", AKSJONSPUNKTER,
-                "aksjonspunkt_status", AKSJONSPUNKT_STATUSER),
+                "ytelse_type", MetrikkUtils.YTELSER,
+                "aksjonspunkt", MetrikkUtils.AKSJONSPUNKTER,
+                "aksjonspunkt_status", MetrikkUtils.AKSJONSPUNKT_STATUSER),
             Map.of(
                 metricField, 0L));
 
@@ -415,7 +367,7 @@ public class StatistikkRepository {
         String metricName = "aksjonspunkt_daglig_v2";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("statuser", AKSJONSPUNKT_STATUSER.stream().collect(Collectors.toSet()))
+            .setParameter("statuser", MetrikkUtils.AKSJONSPUNKT_STATUSER.stream().collect(Collectors.toSet()))
             .setParameter("startAvDag", dato.atStartOfDay())
             .setParameter("nesteDag", dato.plusDays(1).atStartOfDay());
 
@@ -431,6 +383,7 @@ public class StatistikkRepository {
                 String aksjonspunktStatus = t.get(4, String.class);
                 String venteÅrsak = coalesce(t.get(5, String.class), UDEFINERT);
                 long tidsstempel = t.get(6, Timestamp.class).getTime();
+
                 return SensuEvent.createSensuEvent(metricName,
                     toMap(
                         "ytelse_type", ytelseType,
@@ -484,8 +437,8 @@ public class StatistikkRepository {
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
-                "ytelse_type", YTELSER,
-                "type", BREVKODER),
+                "ytelse_type", MetrikkUtils.YTELSER,
+                "type", MetrikkUtils.BREVKODER),
             Map.of(
                 metricField, 0L));
 
@@ -522,8 +475,8 @@ public class StatistikkRepository {
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
-                "ytelse_type", YTELSER,
-                "type", BREVKODER),
+                "ytelse_type", MetrikkUtils.YTELSER,
+                "type", MetrikkUtils.BREVKODER),
             Map.of(
                 metricField, 0L));
 
@@ -544,11 +497,11 @@ public class StatistikkRepository {
             " group by 1, 2, 3" +
             " order by 1, 2, 3";
 
-        String metricName = "prosess_task_" + PROSESS_TASK_VER;
+        String metricName = "prosess_task_" + MetrikkUtils.PROSESS_TASK_VER;
         String metricField = "totalt_antall";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("statuser", PROSESS_TASK_STATUSER);
+            .setParameter("statuser", MetrikkUtils.PROSESS_TASK_STATUSER);
 
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
@@ -564,9 +517,9 @@ public class StatistikkRepository {
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
-                "ytelse_type", YTELSER,
+                "ytelse_type", MetrikkUtils.YTELSER,
                 "prosess_task_type", taskTyper,
-                "status", PROSESS_TASK_STATUSER),
+                "status", MetrikkUtils.PROSESS_TASK_STATUSER),
             Map.of(
                 metricField, 0L));
 
@@ -587,7 +540,7 @@ public class StatistikkRepository {
             + "    OR (p.status IN ('VENTER_SVAR', 'SUSPENDERT') AND p.opprettet_tid < :ts )" // har ligget og ventet svar lenge
             + " )";
 
-        String metricName = "prosess_task_feil_log_" + PROSESS_TASK_VER;
+        String metricName = "prosess_task_feil_log_" + MetrikkUtils.PROSESS_TASK_VER;
         LocalDateTime nå = LocalDateTime.now();
 
         @SuppressWarnings("unchecked")
@@ -609,7 +562,7 @@ public class StatistikkRepository {
                 Timestamp sistKjørt = t.get(5, Timestamp.class);
                 long tidsstempel = sistKjørt == null ? now : sistKjørt.getTime();
 
-                String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
+                String sisteFeil = MetrikkUtils.finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
                 String taskParams = t.get(7, String.class);
 
                 Number blokkertAvId = t.get(8, Number.class);
@@ -639,24 +592,6 @@ public class StatistikkRepository {
         return values;
     }
 
-    private static String coalesce(String str, String defValue) {
-        return str != null ? str : defValue;
-    }
-
-    private static Optional<String> finnStacktraceStartFra(String sisteFeil, int maksLen) {
-        boolean guessItsJson = sisteFeil != null && sisteFeil.startsWith("{");
-        if (guessItsJson) {
-            try {
-                var feil = OM.readValue(sisteFeil, ProsessTaskFeil.class);
-                var strFeil = feil.getStackTrace();
-                return strFeil == null ? Optional.empty() : Optional.of(strFeil.substring(0, Math.min(maksLen, strFeil.length()))); // chop-chop
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("Ugyldig json: " + sisteFeil, e);
-            }
-        }
-        return Optional.empty();
-    }
-
     /**
      * Lager events med 0 målinger for alle kombinasjoner av oppgitte vektorer.
      */
@@ -676,7 +611,7 @@ public class StatistikkRepository {
         }
         var map = new HashMap<String, String>();
         for (int i = 0; i < args.length; i += 2) {
-            // influxdb Point takler ikke null key eller value. skipper null verdier
+            // Influxdb Point takler ikke null key eller value. Skipper null verdier
             String v = args[i + 1];
             if (v != null) {
                 map.put(args[i], v);

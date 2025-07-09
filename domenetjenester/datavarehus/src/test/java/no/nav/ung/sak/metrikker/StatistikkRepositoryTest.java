@@ -39,7 +39,7 @@ class StatistikkRepositoryTest {
     @Test
     void skal_kunne_hente_statistikk()  {
 
-        assertThat(statistikkRepository.prosessTaskStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER));
+        assertThat(statistikkRepository.prosessTaskStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("prosess_task_" + MetrikkUtils.PROSESS_TASK_VER));
 
         assertThat(statistikkRepository.behandlingResultatStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("behandling_resultat_v1"));
 
@@ -50,7 +50,7 @@ class StatistikkRepositoryTest {
             .anyMatch(v -> v.toString().contains("behandling_status_v2"))
             .anyMatch(v -> v.toString().contains("fagsak_status_v2"))
             .anyMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v3"))
-            .anyMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER))
+            .anyMatch(v -> v.toString().contains("prosess_task_" + MetrikkUtils.PROSESS_TASK_VER))
             .noneMatch(v -> v.toString().contains("avslagStatistikk"));
     }
 
@@ -72,5 +72,4 @@ class StatistikkRepositoryTest {
             .anyMatch(v -> v.toString().contains("ytelse_type=" + ytelseType.getKode()) && v.toString().contains("aksjonspunkt=" + aksjonspunkt.getKode()) && v.toString().contains("totalt_antall=1"));
 
     }
-
 }
