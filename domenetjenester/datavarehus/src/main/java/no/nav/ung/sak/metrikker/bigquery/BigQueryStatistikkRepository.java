@@ -8,15 +8,19 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import org.hibernate.query.NativeQuery;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Dependent
@@ -31,14 +35,14 @@ public class BigQueryStatistikkRepository {
 
     @Inject
     public BigQueryStatistikkRepository(
-            EntityManager entityManager,
-            @Any Instance<ProsessTaskHandler> handlers
+        EntityManager entityManager,
+        @Any Instance<ProsessTaskHandler> handlers
     ) {
         this.entityManager = entityManager;
         this.taskTyper = handlers.stream()
-                .map(this::extractClass)
-                .map(it -> it.getAnnotation(ProsessTask.class).value())
-                .collect(Collectors.toSet());
+            .map(this::extractClass)
+            .map(it -> it.getAnnotation(ProsessTask.class).value())
+            .collect(Collectors.toSet());
     }
 
     private Class<?> extractClass(ProsessTaskHandler bean) {
@@ -49,12 +53,11 @@ public class BigQueryStatistikkRepository {
         }
     }
 
-    public Map<BigQueryTable, JSONObject> hentHyppigRapporterte() {
-        LocalDate dag = LocalDate.now();
-        Map<BigQueryTable, JSONObject> hyppigRapporterte = new HashMap<>();
+    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte() {
+        List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
-        Tuple<BigQueryTable, JSONObject> fagsakStatusStatistikk = fagsakStatusStatistikk();
-        hyppigRapporterte.put(fagsakStatusStatistikk.getElement1(), fagsakStatusStatistikk.getElement2());
+        Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
+        hyppigRapporterte.add(new Tuple<>(Tabeller.FAGSAK_STATUS_V2, fagsakStatusStatistikk));
 
         // TODO; behandlingStatusStatistikk
         // TODO: behandlingResultatStatistikk
@@ -69,41 +72,28 @@ public class BigQueryStatistikkRepository {
         return hyppigRapporterte;
     }
 
-    public Map<BigQueryTable, JSONObject> hentDagligRapporterte() {
+    public Map<BigQueryTabell, JSONObject> hentDagligRapporterte() {
         // TODO: avslagStatistikk
         throw new UnsupportedOperationException("TODO: avslagStatistikk");
     }
 
-    Tuple<BigQueryTable, JSONObject> fagsakStatusStatistikk() {
-        BigQueryTable fagsakStatusTabell = BigQueryTable.FAGSAK_STATUS_TABELL_V1;
-        String metricName = fagsakStatusTabell.getTableNavn();
+    Collection<FagsakStatusRecord> fagsakStatusStatistikk() {
+        String sql = "select f.fagsak_status, count(*) as antall" +
+            "         from fagsak f" +
+            "         where f.ytelse_type <> :obsoleteKode " +
+            "         group by 1" +
+            "         order by 1";
 
-        String sql = "SELECT jsonb_build_object(" +
-                ":metricName, jsonb_agg(row_to_json(subQuery))) AS result " +
-                "FROM (" +
-                "  SELECT f.fagsak_status, count(*) as antall " +
-                "  FROM fagsak f " +
-                "  WHERE f.ytelse_type <> :obsoleteKode " +
-                "  GROUP BY 1" +
-                "  ORDER BY 1" +
-                ") subQuery";
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .getResultStream();
 
-        String jsonResultat = (String) entityManager
-                .createNativeQuery(sql)
-                .setParameter("metricName", metricName)
-                .setParameter("obsoleteKode", OBSOLETE_KODE)
-                .getSingleResult(); // Henter resultatet som ett JSON-objekt
+        return stream.map(t -> {
+            String fagsakStatus = t.get(0, String.class);
+            Long totaltAntall = t.get(1, Long.class);
 
-        return byggJsonObject(jsonResultat, fagsakStatusTabell);
-    }
-
-    private static Tuple<BigQueryTable, JSONObject> byggJsonObject(String jsonResultat, BigQueryTable bigQueryTable) {
-        if (jsonResultat != null) {
-            // Resultatet fra Postgres kommer som ett JSON-objekt
-            return new Tuple<>(bigQueryTable, new JSONObject(jsonResultat));
-        } else {
-            // Fallback hvis ingen rader eller resultat null
-            return new Tuple<>(bigQueryTable, new JSONObject().put(bigQueryTable.getTableNavn(), Collections.emptyList()));
-        }
+            return new FagsakStatusRecord(BigDecimal.valueOf(totaltAntall), FagsakStatus.fraKode(fagsakStatus), ZonedDateTime.now());
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

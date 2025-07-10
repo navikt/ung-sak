@@ -15,6 +15,7 @@
 	<name>ung-sak :: Domenetjenester - Datavarehus</name>
     <properties>
         <google-cloud-bigquery.version>2.52.0</google-cloud-bigquery.version>
+        <testContainers.version>1.21.3</testContainers.version>
     </properties>
 
     <dependencies>
@@ -67,7 +68,23 @@
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>gcloud</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 </project>

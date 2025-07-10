@@ -4,13 +4,10 @@ import com.google.cloud.bigquery.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import org.json.JSONObject;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Klient for å håndtere interaksjoner med Google BigQuery.
@@ -27,9 +24,6 @@ public class BigQueryKlient {
 
     private static final BigQueryDataset[] BIG_QUERY_DATASET = BigQueryDataset.values();
 
-    private static final Field JSON_DATA_SCHEMA_FIELD = Field.of("jsonData", StandardSQLTypeName.JSON);
-    private static final Field TIMESTAMP_SCHEMA_FIELD = Field.of("timestamp", StandardSQLTypeName.DATETIME);
-
     private final BigQuery bigQuery;
 
     public BigQueryKlient() {
@@ -38,54 +32,50 @@ public class BigQueryKlient {
     }
 
     /**
-     * Konstruktør for BigQueryKlient som initialiserer BigQuery-tjenesten.
-     * Forsikrer at nødvendige BigQuery-datasett eksisterer ved oppstart.
+     * Konstruktør for BigQueryKlient som sørger for at nødvendige BigQuery-datasett eksisterer ved oppstart.
+     *
+     * @param bigQueryEnabled Angir om BigQuery er aktivert.
+     * @param bigQuery        Instans av BigQuery som injiseres via CDI fra BigQueryProducer.
      */
     @Inject
-    public BigQueryKlient(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled) {
-        if(bigQueryEnabled) {
-            this.bigQuery = BigQueryOptions.getDefaultInstance().getService();
+    public BigQueryKlient(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled, BigQuery bigQuery) {
+        this.bigQuery = bigQuery;
+        if (bigQueryEnabled && bigQuery != null) {
             Arrays.stream(BIG_QUERY_DATASET).forEach(this::forsikreDatasetEksisterer);
-        } else this.bigQuery = null;
+        }
     }
 
     /**
      * Publiserer en data med data til en spesifikk BigQuery-tabell.
      *
-     * @param bigQueryDataset Datasettet som tabellen tilhører.
-     * @param bigQueryTable   Tabellen som data skal publiseres til. Dersom tabellen ikke finnes, vil den bli opprettet.
-     * @param data            Dataen som skal publiseres, representert som en data i BigQuery. Verdien av "jsonData" feltet må være en gyldig JSON-streng.
+     * @param dataset  Datasettet som tabellen tilhører.
+     * @param tableDef Tabellen som data skal publiseres til. Dersom tabellen ikke finnes, vil den bli opprettet.
+     * @param records  Dataene som skal publiseres. Dette er en liste av objekter som implementerer BigQueryRecord.
      */
-    public void publish(BigQueryDataset bigQueryDataset, BigQueryTable bigQueryTable, JSONObject data) {
-        InsertAllRequest.RowToInsert rad = tilRowInsert(data);
-
-        String datasetNavn = bigQueryDataset.getDatasetNavn();
-        String tableNavn = bigQueryTable.getTableNavn();
-        Table eksisterendeTable = bigQuery.getTable(TableId.of(datasetNavn, tableNavn));
-
-        TableId tableId = hentTableId(eksisterendeTable, datasetNavn, tableNavn);
-
-        InsertAllResponse response = bigQuery.insertAll(
-            InsertAllRequest.newBuilder(tableId)
-                .setRows(List.of(rad))
-                .build());
-
-        håndterResponse(response);
-    }
-
-    /**
-     * Håndterer responsen fra BigQuery etter et forsøk på å sette inn data.
-     * Hvis det er feil i innsettingen, logges feilmeldingene og en RuntimeException kastes.
-     * @param response Responsen fra BigQuery etter innsetting av data.
-     */
-    private static void håndterResponse(InsertAllResponse response) {
-        if (response.hasErrors()) {
-            response.getInsertErrors()
-                .forEach((idx, errs) -> {
-                    errs.forEach(err -> log.error("BigQuery insert feilet for rad {}: {}", idx, err));
-                });
-            throw new RuntimeException("BigQuery insert feilet for noen rader: " + response.getInsertErrors().size());
+    public <T extends BigQueryRecord> void publish(
+        BigQueryDataset dataset,
+        BigQueryTabell<T> tableDef,
+        Collection<T> records
+    ) {
+        if (bigQuery == null) {
+            throw new IllegalStateException("Utviklerfeil: BigQuery er ikke instansiert. {}");
         }
+
+        // 1) map
+        if (records == null || records.isEmpty()) {
+            log.warn("Ingen data å publisere til BigQuery-tabell {}", tableDef.getTabellnavn());
+            return;
+        }
+        List<InsertAllRequest.RowToInsert> rader = records.stream().map(tableDef::tilRowInsert).toList();
+
+        TableId tableId = hentEllerOpprettTabell(dataset.getDatasetNavn(), tableDef);
+
+        InsertAllRequest req = InsertAllRequest.newBuilder(tableId)
+            .setRows(rader)
+            .build();
+
+        InsertAllResponse insertAllResponse = bigQuery.insertAll(req);
+        håndterResponse(insertAllResponse, req.getRows().size());
     }
 
     /**
@@ -93,29 +83,26 @@ public class BigQueryKlient {
      * Hvis tabellen allerede finnes, brukes den eksisterende tabellen.
      * Hvis tabellen ikke finnes, opprettes en ny tabell med det angitte navnet og skjemaet.
      *
-     * @param eksisterendeTable Eksisterende BigQuery-tabell, kan være null hvis tabellen ikke finnes.
-     * @param datasetNavn       Navnet på BigQuery-datasettet tabellen tilhører.
-     * @param tableNavn         Navnet på BigQuery-tabellen som skal opprettes eller brukes.
+     * @param datasetNavn Navnet på BigQuery-datasettet tabellen tilhører.
+     * @param tableDef    Eksisterende BigQuery-tabell, kan være null hvis tabellen ikke finnes.
      * @return TableId for den eksisterende eller nye tabellen.
      */
-    private TableId hentTableId(Table eksisterendeTable, String datasetNavn, String tableNavn) {
-        TableId tableId;
-        if (eksisterendeTable != null) {
-            // Hvis tabellen allerede finnes, bruk den eksisterende tabellen
-            tableId = eksisterendeTable.getTableId();
-            log.info("Bruker eksisterende BigQuery-tabell: {}", tableId);
-        } else {
-            // Hvis tabellen ikke finnes, opprett en ny tabell
-            tableId = TableId.of(datasetNavn, tableNavn);
-
-            Schema schema = Schema.of(JSON_DATA_SCHEMA_FIELD, TIMESTAMP_SCHEMA_FIELD);
-            TableDefinition tableDefinition = StandardTableDefinition.newBuilder()
-                .setSchema(schema)
-                .build();
-            TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
-            bigQuery.create(tableInfo);
-            log.info("Opprettet ny BigQuery-tabell: {}", tableId);
+    private TableId hentEllerOpprettTabell(String datasetNavn, BigQueryTabell<?> tableDef) {
+        Table existing = bigQuery.getTable(TableId.of(datasetNavn, tableDef.getTabellnavn()));
+        if (existing != null) {
+            log.info("Bruker eksisternde tabell {}", existing.getTableId());
+            return existing.getTableId();
         }
+
+        // Opprett
+        TableId tableId = TableId.of(datasetNavn, tableDef.getTabellnavn());
+        TableDefinition tableDefinition = StandardTableDefinition.newBuilder()
+            .setSchema(tableDef.getSkjema())
+            .build();
+
+        TableInfo tableInfo = TableInfo.newBuilder(tableId, tableDefinition).build();
+        bigQuery.create(tableInfo);
+        log.info("Opprettet nytt tabell {}", tableId);
         return tableId;
     }
 
@@ -141,14 +128,20 @@ public class BigQueryKlient {
         }
     }
 
-    private InsertAllRequest.RowToInsert tilRowInsert(JSONObject jsonObject) {
-        // Hent nåværende tid som LocalDateTime uten tidssone
-        String now = ZonedDateTime.now()
-            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS"));
-
-        return InsertAllRequest.RowToInsert.of(Map.of(
-            JSON_DATA_SCHEMA_FIELD.getName(), jsonObject.toString(),
-            TIMESTAMP_SCHEMA_FIELD.getName(), now
-        ));
+    /**
+     * Håndterer responsen fra BigQuery etter et forsøk på å sette inn data.
+     * Hvis det er feil i innsettingen, logges feilmeldingene og en RuntimeException kastes.
+     *
+     * @param response    Responsen fra BigQuery etter innsetting av data.
+     * @param antallRader Antall rader som ble forsøkt satt inn.
+     */
+    private static void håndterResponse(InsertAllResponse response, int antallRader) {
+        if (response.hasErrors()) {
+            response.getInsertErrors()
+                .forEach((idx, errs) -> {
+                    errs.forEach(err -> log.error("BigQuery insert feilet for rad {}: {}", idx, err));
+                });
+            throw new RuntimeException("BigQuery insert feilet for noen rader: " + response.getInsertErrors().size());
+        } else log.info("BigQuery insert vellykket for {} rader.", antallRader);
     }
 }

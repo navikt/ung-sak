@@ -13,14 +13,14 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
-import org.assertj.core.api.MapAssert;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -66,41 +66,50 @@ class BigQueryStatistikkRepositoryTest {
         ));
 
         // Når vi henter statistikken
-        Tuple<BigQueryTable, JSONObject> fagsakStatusStatistikk = statistikkRepository.fagsakStatusStatistikk();
-        assertThat(fagsakStatusStatistikk.getElement1()).isEqualTo(BigQueryTable.FAGSAK_STATUS_TABELL_V1);
-        JSONObject jsonObject = fagsakStatusStatistikk.getElement2();
-        System.out.println(jsonObject.toString(2));
+        Collection<FagsakStatusRecord> fagsakStatusRecords = statistikkRepository.fagsakStatusStatistikk();
 
-        String tabellNavn = "fagsak_status_v1";
-        String statusKolonne = "fagsak_status";
-        String antallKolonne = "antall";
+        // Så skal vi ha riktige records med korrekt antall for hver status
+        assertThat(fagsakStatusRecords).isNotNull();
+        assertThat(fagsakStatusRecords).hasSize(4); // 4 forskjellige statuser
 
-        // Så skal vi ha en JSON med riktig struktur og data
-        assertThat(jsonObject).isNotNull();
-        assertThat(jsonObject.isEmpty()).isFalse();
+        // Verifiser at vi har korrekt antall for hver status
+        Map<FagsakStatus, Long> statusCounts = fagsakStatusRecords.stream()
+            .collect(Collectors.groupingBy(
+                FagsakStatusRecord::fagsakStatus,
+                Collectors.summingLong(record -> record.antall().longValue())
+            ));
 
-        // Sjekk at vi har de forventede statusene og antall
-        assertJsonInneholderTabellNavn(jsonObject, tabellNavn);
-        assertJsonInneholderAntallDataPunkter(jsonObject, tabellNavn, 4);
-
-        assertJsonInneholerEksaktData(jsonObject, tabellNavn,
-            Map.of(statusKolonne, FagsakStatus.OPPRETTET.getKode(), antallKolonne, 2),
-            Map.of(statusKolonne, FagsakStatus.UNDER_BEHANDLING.getKode(), antallKolonne, 3),
-            Map.of(statusKolonne, FagsakStatus.LØPENDE.getKode(), antallKolonne, 4),
-            Map.of(statusKolonne, FagsakStatus.AVSLUTTET.getKode(), antallKolonne, 5)
-        );
+        assertThat(statusCounts)
+            .containsEntry(FagsakStatus.OPPRETTET, 2L)
+            .containsEntry(FagsakStatus.UNDER_BEHANDLING, 3L)
+            .containsEntry(FagsakStatus.LØPENDE, 4L)
+            .containsEntry(FagsakStatus.AVSLUTTET, 5L);
     }
 
-    private static void assertJsonInneholerEksaktData(JSONObject jsonObject, String tabellNavn, Map<String, Object>... forventedeData) {
-        assertThat(jsonObject.getJSONArray(tabellNavn).toList()).containsExactlyInAnyOrder(forventedeData);
-    }
+    @Test
+    void skal_kunne_hente_hyppig_rapporterte_metrikker() {
+        // Gitt eksisterende fagsaker med ulike status
+        lagreFagsaker(List.of(
+            byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.OPPRETTET),
+            byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.LØPENDE),
+            byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.AVSLUTTET),
+            byggFagsak(FagsakYtelseType.OBSOLETE, FagsakStatus.LØPENDE) // OBSOLETE fagsak
+        ));
 
-    private static void assertJsonInneholderAntallDataPunkter(JSONObject jsonObject, String tabellNavn, int antall) {
-        assertThat(jsonObject.getJSONArray(tabellNavn).length()).isEqualTo(antall);
-    }
+        // Når vi henter hyppig rapporterte metrikker
+        List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte();
 
-    private static MapAssert<String, Object> assertJsonInneholderTabellNavn(JSONObject jsonObject, String tabellNavn) {
-        return assertThat(jsonObject.toMap()).containsKey(tabellNavn);
+        // Så skal vi ha minst én metrikk
+        assertThat(metrikker).isNotEmpty();
+
+        // Og første metrikk skal være for FAGSAK_STATUS_V1 tabellen
+        Tuple<BigQueryTabell<?>, Collection<?>> fagsakStatusMetrikk = metrikker.get(0);
+        assertThat(fagsakStatusMetrikk.getElement1()).isEqualTo(Tabeller.FAGSAK_STATUS_V2);
+
+        // Og den skal inneholde records (vi verifiserer ikke antallet her siden det er testet i den andre testen)
+        Collection<?> records = fagsakStatusMetrikk.getElement2();
+        assertThat(records).isNotEmpty();
+        assertThat(records.iterator().next()).isInstanceOf(FagsakStatusRecord.class);
     }
 
     private Fagsak byggFagsak(FagsakYtelseType fagsakYtelseType, FagsakStatus status) {
