@@ -1,18 +1,18 @@
 package no.nav.ung.sak.metrikker.bigquery;
 
-import com.google.cloud.bigquery.InsertAllRequest;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Map;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Task for publisering av metrikker til BigQuery.
@@ -51,10 +51,10 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            Map<BigQueryTable, JSONObject> metrikker = statistikkRepository.hentHyppigRapporterte();
+            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte();
 
-           if (bigQueryEnabled && !metrikker.isEmpty()) {
-               publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, metrikker);
+            if (bigQueryEnabled && !metrikker.isEmpty()) {
+                publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, metrikker);
             } else {
                 log.info("Ingen metrikker å publisere eller BigQuery er ikke aktivert.");
             }
@@ -68,7 +68,12 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
         }
     }
 
-    private void publiserMetrikker(BigQueryDataset dataset, Map<BigQueryTable, JSONObject> metrikker) {
-        metrikker.forEach((bigQueryTable, data) -> bigQueryKlient.publish(dataset, bigQueryTable, data));
+    private void publiserMetrikker(BigQueryDataset dataset, List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker) {
+        metrikker.forEach(tuple -> {
+            BigQueryTabell<BigQueryRecord> tabell = (BigQueryTabell<BigQueryRecord>) tuple.getElement1();
+            Collection<BigQueryRecord> records = (Collection<BigQueryRecord>) tuple.getElement2();
+
+            bigQueryKlient.publish(dataset, tabell, records);
+        });
     }
 }
