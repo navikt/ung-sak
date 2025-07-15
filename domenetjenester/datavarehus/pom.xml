@@ -14,7 +14,7 @@
 	<packaging>jar</packaging>
 	<name>ung-sak :: Domenetjenester - Datavarehus</name>
     <properties>
-        <google-cloud-bigquery.version>2.52.0</google-cloud-bigquery.version>
+        <google-cloud-bigquery.version>2.53.0</google-cloud-bigquery.version>
         <testContainers.version>1.21.3</testContainers.version>
     </properties>
 
