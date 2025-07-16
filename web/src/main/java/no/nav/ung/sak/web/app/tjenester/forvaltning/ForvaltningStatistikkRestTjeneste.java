@@ -20,6 +20,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
 import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
@@ -129,4 +130,45 @@ public class ForvaltningStatistikkRestTjeneste {
                 """)
             .getSingleResult();
     }
+
+    @GET
+    @Path("vedtak")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Lister ut antall vedtak for en måned", summary = ("Brukes for statistikkformål"), tags = "statistikk")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public VedtakStatistikkMåned vedtak(@NotNull @QueryParam("måned") @Parameter(description = "måned i format YYYY-MM", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) String månedParameter) {
+        YearMonth måned = YearMonth.parse(månedParameter, DateTimeFormatter.ofPattern("yyyy-MM"));
+        //hardkodet 260 representerer ett år (ca antall virkedager)
+        Object[] resultat = (Object[]) entityManager.createNativeQuery("""
+                with aktuelle_vedtak as (
+                    select bv.id, b.ansvarlig_saksbehandler
+                    from behandling_vedtak bv
+                    join behandling b on bv.behandling_id = b.id
+                    where vedtak_dato >= :fom and vedtak_dato < :til),
+                summerte_vedtak as (
+                    select sum(1.0) as                                                      antall,
+                    sum(case when ansvarlig_saksbehandler is null then 1 else 0 end) antall_automatiske
+                    from aktuelle_vedtak)
+                select antall, antall_automatiske, 100 * round(antall_automatiske / antall, 4) as prosentandel_automatiske
+                from summerte_vedtak
+                """)
+            .setParameter("fom", måned.atDay(1))
+            .setParameter("til", måned.plusMonths(1).atDay(1))
+            .getSingleResult();
+
+        return new VedtakStatistikkMåned(
+            måned,
+            resultat[0] != null ? ((BigDecimal) resultat[0]).longValue() : 0L,
+            resultat[1] != null ? (Long) resultat[1] : 0L,
+            resultat[2] != null ? (BigDecimal) resultat[2] : null
+        );
+    }
+
+    public record VedtakStatistikkMåned(
+        YearMonth måned,
+        long antallVedtak,
+        long antallAutomatiskeVedtak,
+        BigDecimal prosentandelAutomatiskeVedtak) {
+    }
+
 }
