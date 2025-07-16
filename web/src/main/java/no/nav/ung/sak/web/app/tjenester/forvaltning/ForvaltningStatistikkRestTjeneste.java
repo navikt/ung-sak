@@ -76,7 +76,7 @@ public class ForvaltningStatistikkRestTjeneste {
                         and usp.periode && daterange(:dato, :dato, '[]')
                         and programdeltakelse.fom <= :dato
                         and programdeltakelse.tom >= :dato
-                        order by f.saksnummer, b.opprettet_tid desc)
+                        order by f.saksnummer, b.opprettet_tid desc) --sorterer på behandlingens opprettettid for å velge den nyeste behandlingen som treffer perioden (pr sak)
                  select
                     count(*) as antall_totalt,
                     sum(case when sats_type = 'LAV' then 1 else 0 end) as antall_lav,
