@@ -1,17 +1,17 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
@@ -21,7 +21,6 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 
 import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
 
@@ -42,14 +41,12 @@ public class ForvaltningStatistikkRestTjeneste {
     }
 
 
-    @GET
+    @POST
     @Path("antall-deltakere")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lister ut antall deltakere med ulike sats-typer for en dato", summary = ("Brukes for statistikkformål"), tags = "statistikk")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public AntallDeltakereStatistikk antallDeltakere(@NotNull @QueryParam("dato") @Parameter(description = "dato i format YYYY-MM-DD", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) String datoParameter) {
-        LocalDate dato = LocalDate.parse(datoParameter, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
+    public AntallDeltakereStatistikk antallDeltakere(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) LocalDate dato) {
         Object[] resultat = (Object[]) entityManager.createNativeQuery("""
                 with
                     --hent programdeltakelse for siste vedtatte avsluttede behandling
@@ -107,9 +104,9 @@ public class ForvaltningStatistikkRestTjeneste {
         long antallBarn) {
     }
 
-    @GET
+    @POST
     @Path("utmeldt-prosentandel")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lister ut prosentandel av deltaker som meldes ut før det har gått ett år", summary = ("Brukes for statistikkformål"), tags = "statistikk")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public BigDecimal utmeldtProsentandel() {
@@ -131,13 +128,13 @@ public class ForvaltningStatistikkRestTjeneste {
             .getSingleResult();
     }
 
-    @GET
+    @POST
     @Path("vedtak")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lister ut antall vedtak for en måned", summary = ("Brukes for statistikkformål"), tags = "statistikk")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public VedtakStatistikkMåned vedtak(@NotNull @QueryParam("måned") @Parameter(description = "måned i format YYYY-MM", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) String månedParameter) {
-        YearMonth måned = YearMonth.parse(månedParameter, DateTimeFormatter.ofPattern("yyyy-MM"));
+    public VedtakStatistikkMåned vedtak(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedDto månedDto) {
+        YearMonth måned = YearMonth.of(månedDto.år, månedDto.måned);
         //hardkodet 260 representerer ett år (ca antall virkedager)
         Object[] resultat = (Object[]) entityManager.createNativeQuery("""
                 with aktuelle_vedtak as (
@@ -162,6 +159,12 @@ public class ForvaltningStatistikkRestTjeneste {
             resultat[1] != null ? (Long) resultat[1] : 0L,
             resultat[2] != null ? (BigDecimal) resultat[2] : null
         );
+    }
+
+    public record MånedDto(
+        @Min(1) @Max(9999) int år,
+        @Min(1) @Max(12) int måned
+    ) {
     }
 
     public record VedtakStatistikkMåned(
