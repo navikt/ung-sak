@@ -27,6 +27,7 @@ import no.nav.ung.sak.web.app.tjenester.formidling.FormidlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppgaveRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningProduksjonsstyringRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
@@ -90,6 +91,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningOppgaveRestTjeneste.class);
         classes.add(ForvaltningPersonRestTjeneste.class);
         classes.add(ForvaltningStatistikkRestTjeneste.class);
+        classes.add(ForvaltningProduksjonsstyringRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
         classes.add(NotatRestTjeneste.class);
