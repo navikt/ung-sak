@@ -7564,6 +7564,29 @@
         "tags" : [ "pip" ]
       }
     },
+    "/api/produksjonsstyring/forvaltning/saker-med-aksjonspunkt" : {
+      "get" : {
+        "description" : "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først",
+        "operationId" : "sakerPåAksjonspunkt",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for produksjonsstyring",
+        "tags" : [ "statistikk" ]
+      }
+    },
     "/api/prosesstask/create" : {
       "post" : {
         "description" : "Oppretter en prosess task i henhold til request",
