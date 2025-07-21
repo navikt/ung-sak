@@ -12,8 +12,8 @@
       },
       "AbakusKodeverkIaygrunnlagVirksomhetType" : {
         "enum" : [ "DAGMAMMA", "FISKE", "JORDBRUK_SKOGBRUK", "ANNEN", "-" ],
-        "x-enum-varnames" : [ "DAGMAMMA", "FISKE", "JORDBRUK_SKOGBRUK", "ANNEN", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGMAMMA", "FISKE", "JORDBRUK_SKOGBRUK", "ANNEN", "UDEFINERT" ]
       },
       "AksjonspunktDto" : {
         "properties" : {
@@ -86,33 +86,33 @@
       },
       "AksjonspunktDtoAksjonspunktType" : {
         "enum" : [ "AUTO", "MANU", "OVST", "SAOV", "-" ],
-        "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "AksjonspunktDtoDefinisjon" : {
         "enum" : [ "5015", "5016", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "6006", "6100", "7001", "7003", "7005", "7014", "7040", "8000", "UNDEFINED" ],
-        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "UNDEFINED" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "UNDEFINED" ]
       },
       "AksjonspunktDtoStatus" : {
         "enum" : [ "AVBR", "OPPR", "UTFO" ],
-        "x-enum-varnames" : [ "AVBRUTT", "OPPRETTET", "UTFØRT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AVBRUTT", "OPPRETTET", "UTFØRT" ]
       },
       "AksjonspunktDtoVenteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ]
       },
       "AksjonspunktDtoVilkarType" : {
         "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "-" ],
-        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ]
       },
       "AksjonspunktDtoVurderPaNyttArsaker" : {
         "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
-        "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
       "AktørIdDto" : {
         "properties" : {
@@ -499,8 +499,8 @@
       },
       "AsyncPollingStatusStatus" : {
         "enum" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ],
-        "x-enum-varnames" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "CANCELLED", "COMPLETE", "DELAYED", "HALTED", "PENDING" ]
       },
       "AvklarteOpplysninger" : {
         "properties" : {
@@ -566,23 +566,23 @@
       },
       "BehandlingAksjonspunktDtoBehandlingStatus" : {
         "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
-        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
       },
       "BehandlingAksjonspunktDtoBehandlingType" : {
         "enum" : [ "BT-002", "BT-004", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ]
       },
       "BehandlingAksjonspunktDtoFagsakStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
-        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
       "BehandlingAksjonspunktDtoYtelseType" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "BehandlingDto" : {
         "properties" : {
@@ -764,28 +764,28 @@
       },
       "BehandlingDtoBehandlingResultatType" : {
         "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ]
       },
       "BehandlingDtoSakstype" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "BehandlingDtoStatus" : {
         "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
-        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
       },
       "BehandlingDtoType" : {
         "enum" : [ "BT-002", "BT-004", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ]
       },
       "BehandlingDtoVenteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ]
       },
       "BehandlingIdListe" : {
         "properties" : {
@@ -849,8 +849,8 @@
       },
       "BehandlingOpprettingDtoBehandlingType" : {
         "enum" : [ "BT-002", "BT-004", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ]
       },
       "BehandlingStegTilstandDto" : {
         "properties" : {
@@ -870,13 +870,13 @@
       },
       "BehandlingStegTilstandDtoStegStatus" : {
         "enum" : [ "STARTET", "INNGANG", "UTGANG", "VENTER", "AVBRUTT", "UTFØRT", "FREMOVERFØRT", "TILBAKEFØRT", "-" ],
-        "x-enum-varnames" : [ "STARTET", "INNGANG", "UTGANG", "VENTER", "AVBRUTT", "UTFØRT", "FREMOVERFØRT", "TILBAKEFØRT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "STARTET", "INNGANG", "UTGANG", "VENTER", "AVBRUTT", "UTFØRT", "FREMOVERFØRT", "TILBAKEFØRT", "UDEFINERT" ]
       },
       "BehandlingStegTilstandDtoStegType" : {
         "enum" : [ "BERYT", "FVEDSTEG", "FORBRES", "FORVEDSTEG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INREG", "IVEDSTEG", "VURDEROP", "SIMOPP", "START", "VURDERKOMPLETT", "VURDER_ALDER", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM" ],
-        "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM" ]
       },
       "BehandlingsresultatDto" : {
         "properties" : {
@@ -906,8 +906,8 @@
       },
       "BehandlingsresultatDtoType" : {
         "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ]
       },
       "BehandlingÅrsakDto" : {
         "properties" : {
@@ -925,8 +925,8 @@
       },
       "BehandlingÅrsakDtoBehandlingArsakType" : {
         "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "BekreftedeAksjonspunkterDto" : {
         "properties" : {
@@ -1089,8 +1089,8 @@
       },
       "CallbackDtoGrunnlagType" : {
         "enum" : [ "IAY" ],
-        "x-enum-varnames" : [ "IAY" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IAY" ]
       },
       "DetaljertSimuleringResultatDto" : {
         "properties" : {
@@ -1165,8 +1165,8 @@
       },
       "DokumentDtoKommunikasjonsretning" : {
         "enum" : [ "I", "U", "N" ],
-        "x-enum-varnames" : [ "INN", "UT", "NOTAT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "INN", "UT", "NOTAT" ]
       },
       "DokumentIdDto" : {
         "properties" : {
@@ -1275,13 +1275,13 @@
       },
       "EtterlysningStatus" : {
         "enum" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLOPT" ],
-        "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ]
       },
       "EtterlysningType" : {
         "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
-        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ]
       },
       "FagsakDto" : {
         "properties" : {
@@ -1317,13 +1317,13 @@
       },
       "FagsakDtoSakstype" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "FagsakDtoStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
-        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
       "FagsakInfoDto" : {
         "properties" : {
@@ -1365,8 +1365,8 @@
       },
       "FinnSakYtelseType" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "FødselHendelse" : {
         "allOf" : [ {
@@ -1509,8 +1509,8 @@
       },
       "HentSøknadPerioderDtoYtelseType" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "InformasjonsbrevBestillingRequest" : {
         "properties" : {
@@ -1535,8 +1535,8 @@
       },
       "InformasjonsbrevBestillingRequestDokumentMalType" : {
         "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
-        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ]
       },
       "InformasjonsbrevInnholdDto" : {
         "type" : "object"
@@ -1558,8 +1558,8 @@
       },
       "InformasjonsbrevMottakerDtoType" : {
         "enum" : [ "ORGNR", "AKTØRID" ],
-        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ]
       },
       "InformasjonsbrevMottakerValgResponse" : {
         "properties" : {
@@ -1584,13 +1584,13 @@
       },
       "InformasjonsbrevMottakerValgResponseIdType" : {
         "enum" : [ "ORGNR", "AKTØRID" ],
-        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID" ]
       },
       "InformasjonsbrevMottakerValgResponseUtilgjengeligÅrsak" : {
         "enum" : [ "PERSON_DØD" ],
-        "x-enum-varnames" : [ "PERSON_DØD" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "PERSON_DØD" ]
       },
       "InformasjonsbrevValgDto" : {
         "properties" : {
@@ -1700,8 +1700,8 @@
       },
       "InntektspostFraRegisterDtoYtelseType" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "InntrekkBeslutning" : {
         "properties" : {
@@ -1740,8 +1740,8 @@
       },
       "KodeverdiSomObjektArbeidTypeKilde" : {
         "enum" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "NÆRING", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "-" ],
-        "x-enum-varnames" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER_MED_MER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "SELVSTENDIG_NÆRINGSDRIVENDE", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER_MED_MER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "SELVSTENDIG_NÆRINGSDRIVENDE", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "UDEFINERT" ]
       },
       "KodeverdiSomObjektArbeidskategori" : {
         "properties" : {
@@ -1763,8 +1763,8 @@
       },
       "KodeverdiSomObjektArbeidskategoriKilde" : {
         "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
-        "x-enum-varnames" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "UDEFINERT" ]
       },
       "KodeverdiSomObjektAvslagsårsak" : {
         "properties" : {
@@ -1786,8 +1786,8 @@
       },
       "KodeverdiSomObjektAvslagsårsakKilde" : {
         "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "-" ],
-        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ]
       },
       "KodeverdiSomObjektBehandlingResultatType" : {
         "properties" : {
@@ -1809,8 +1809,8 @@
       },
       "KodeverdiSomObjektBehandlingResultatTypeKilde" : {
         "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ]
       },
       "KodeverdiSomObjektBehandlingStatus" : {
         "properties" : {
@@ -1832,8 +1832,8 @@
       },
       "KodeverdiSomObjektBehandlingStatusKilde" : {
         "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
-        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
       },
       "KodeverdiSomObjektBehandlingType" : {
         "properties" : {
@@ -1855,8 +1855,8 @@
       },
       "KodeverdiSomObjektBehandlingTypeKilde" : {
         "enum" : [ "BT-002", "BT-004", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ]
       },
       "KodeverdiSomObjektBehandlingÅrsakType" : {
         "properties" : {
@@ -1878,8 +1878,8 @@
       },
       "KodeverdiSomObjektBehandlingÅrsakTypeKilde" : {
         "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "KodeverdiSomObjektDokumentMalType" : {
         "properties" : {
@@ -1901,8 +1901,8 @@
       },
       "KodeverdiSomObjektDokumentMalTypeKilde" : {
         "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
-        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_DOK", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ]
       },
       "KodeverdiSomObjektFagsakStatus" : {
         "properties" : {
@@ -1924,8 +1924,8 @@
       },
       "KodeverdiSomObjektFagsakStatusKilde" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
-        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
       "KodeverdiSomObjektFagsakYtelseType" : {
         "properties" : {
@@ -1947,8 +1947,8 @@
       },
       "KodeverdiSomObjektFagsakYtelseTypeKilde" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "KodeverdiSomObjektFagsystem" : {
         "properties" : {
@@ -1970,8 +1970,8 @@
       },
       "KodeverdiSomObjektFagsystemKilde" : {
         "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
-        "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ]
       },
       "KodeverdiSomObjektHistorikkAktør" : {
         "properties" : {
@@ -1993,8 +1993,8 @@
       },
       "KodeverdiSomObjektHistorikkAktørKilde" : {
         "enum" : [ "BESL", "SBH", "SOKER", "ARBEIDSGIVER", "VL", "-" ],
-        "x-enum-varnames" : [ "BESLUTTER", "SAKSBEHANDLER", "SØKER", "ARBEIDSGIVER", "VEDTAKSLØSNINGEN", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BESLUTTER", "SAKSBEHANDLER", "SØKER", "ARBEIDSGIVER", "VEDTAKSLØSNINGEN", "UDEFINERT" ]
       },
       "KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeType" : {
         "properties" : {
@@ -2016,8 +2016,8 @@
       },
       "KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeTypeKilde" : {
         "enum" : [ "-" ],
-        "x-enum-varnames" : [ "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT" ]
       },
       "KodeverdiSomObjektHistorikkBegrunnelseType" : {
         "properties" : {
@@ -2039,8 +2039,8 @@
       },
       "KodeverdiSomObjektHistorikkBegrunnelseTypeKilde" : {
         "enum" : [ "-", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
-        "x-enum-varnames" : [ "UDEFINIERT", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINIERT", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ]
       },
       "KodeverdiSomObjektHistorikkEndretFeltType" : {
         "properties" : {
@@ -2062,8 +2062,8 @@
       },
       "KodeverdiSomObjektHistorikkEndretFeltTypeKilde" : {
         "enum" : [ "AKTIVITET", "AKTIVITET_PERIODE", "OPPTJENINGSVILKARET", "ARBEIDSFORHOLD", "DAGPENGER_INNTEKT", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "AVKLARSAKSOPPLYSNINGER", "BEHANDLENDE_ENHET", "BEHANDLING", "OVERSTYRT_VURDERING", "SOKERSOPPLYSNINGSPLIKT", "SOKNADSFRISTVILKARET", "ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "FRILANSVIRKSOMHET", "FRILANS_INNTEKT", "INNTEKTSKATEGORI", "INNTEKT_FRA_ARBEIDSFORHOLD", "LØNNSENDRING_I_PERIODEN", "MILITÆR_ELLER_SIVIL", "MOTTAR_YTELSE_ARBEID", "MOTTAR_YTELSE_FRILANS", "SELVSTENDIG_NAERINGSDRIVENDE", "VURDER_ETTERLØNN_SLUTTPAKKE", "ENDRING_NAERING", "BRUTTO_NAERINGSINNTEKT", "KOMPLETTHET", "NY_STARTDATO_REFUSJON", "VURDER_NYTT_INNTEKTSFORHOLD", "BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "DELVIS_REFUSJON_FØR_STARTDATO", "PERIODE_TOM", "ER_SOKER_BOSATT_I_NORGE", "GYLDIG_MEDLEM_FOLKETRYGDEN", "OPPHOLDSRETT_EOS", "OPPHOLDSRETT_IKKE_EOS", "UTLAND", "UTTAK_OVERSTYRT_PERIODE", "UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "UTTAK_OVERSTYRT_UTBETALINGSGRAD", "OVST_UTTAK_FJERNET", "TILKJENT_YTELSE", "ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "FASTSETT_VIDERE_BEHANDLING", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "TILBAKETREKK", "OMSORG_FOR", "FARESIGNALER", "NYTT_REFUSJONSKRAV", "NY_REFUSJONSFRIST", "OPPHOER_REFUSJON", "UTVIDETRETT", "ALENE_OM_OMSORG", "MIDLERTIDIG_ALENE", "ALDERSVILKAR_BARN", "VALG", "-" ],
-        "x-enum-varnames" : [ "AKTIVITET", "AKTIVITET_PERIODE", "OPPTJENINGSVILKARET", "ARBEIDSFORHOLD", "DAGPENGER_INNTEKT", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "AVKLARSAKSOPPLYSNINGER", "BEHANDLENDE_ENHET", "BEHANDLING", "OVERSTYRT_VURDERING", "SOKERSOPPLYSNINGSPLIKT", "SOKNADSFRISTVILKARET", "ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "FRILANSVIRKSOMHET", "FRILANS_INNTEKT", "INNTEKTSKATEGORI", "INNTEKT_FRA_ARBEIDSFORHOLD", "LØNNSENDRING_I_PERIODEN", "MILITÆR_ELLER_SIVIL", "MOTTAR_YTELSE_ARBEID", "MOTTAR_YTELSE_FRILANS", "SELVSTENDIG_NÆRINGSDRIVENDE", "VURDER_ETTERLØNN_SLUTTPAKKE", "ENDRING_NÆRING", "BRUTTO_NAERINGSINNTEKT", "KOMPLETTHET", "NY_STARTDATO_REFUSJON", "VURDER_NYTT_INNTEKTSFORHOLD", "BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "DELVIS_REFUSJON_FØR_STARTDATO", "PERIODE_TOM", "ER_SOKER_BOSATT_I_NORGE", "GYLDIG_MEDLEM_FOLKETRYGDEN", "OPPHOLDSRETT_EOS", "OPPHOLDSRETT_IKKE_EOS", "UTLAND", "UTTAK_OVERSTYRT_PERIODE", "UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "UTTAK_OVERSTYRT_UTBETALINGSGRAD", "OVST_UTTAK_FJERNET", "TILKJENT_YTELSE", "ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "FASTSETT_VIDERE_BEHANDLING", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "TILBAKETREKK", "OMSORG_FOR", "FARESIGNALER", "NYTT_REFUSJONSKRAV", "NY_REFUSJONSFRIST", "OPPHØR_REFUSJON", "UTVIDETRETT", "ALENE_OM_OMSORG", "MIDLERTIDIG_ALENE", "ALDERSVILKÅR_BARN", "VALG", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AKTIVITET", "AKTIVITET_PERIODE", "OPPTJENINGSVILKARET", "ARBEIDSFORHOLD", "DAGPENGER_INNTEKT", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "AVKLARSAKSOPPLYSNINGER", "BEHANDLENDE_ENHET", "BEHANDLING", "OVERSTYRT_VURDERING", "SOKERSOPPLYSNINGSPLIKT", "SOKNADSFRISTVILKARET", "ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "FRILANSVIRKSOMHET", "FRILANS_INNTEKT", "INNTEKTSKATEGORI", "INNTEKT_FRA_ARBEIDSFORHOLD", "LØNNSENDRING_I_PERIODEN", "MILITÆR_ELLER_SIVIL", "MOTTAR_YTELSE_ARBEID", "MOTTAR_YTELSE_FRILANS", "SELVSTENDIG_NÆRINGSDRIVENDE", "VURDER_ETTERLØNN_SLUTTPAKKE", "ENDRING_NÆRING", "BRUTTO_NAERINGSINNTEKT", "KOMPLETTHET", "NY_STARTDATO_REFUSJON", "VURDER_NYTT_INNTEKTSFORHOLD", "BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "DELVIS_REFUSJON_FØR_STARTDATO", "PERIODE_TOM", "ER_SOKER_BOSATT_I_NORGE", "GYLDIG_MEDLEM_FOLKETRYGDEN", "OPPHOLDSRETT_EOS", "OPPHOLDSRETT_IKKE_EOS", "UTLAND", "UTTAK_OVERSTYRT_PERIODE", "UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "UTTAK_OVERSTYRT_UTBETALINGSGRAD", "OVST_UTTAK_FJERNET", "TILKJENT_YTELSE", "ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "FASTSETT_VIDERE_BEHANDLING", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "TILBAKETREKK", "OMSORG_FOR", "FARESIGNALER", "NYTT_REFUSJONSKRAV", "NY_REFUSJONSFRIST", "OPPHØR_REFUSJON", "UTVIDETRETT", "ALENE_OM_OMSORG", "MIDLERTIDIG_ALENE", "ALDERSVILKÅR_BARN", "VALG", "UDEFINERT" ]
       },
       "KodeverdiSomObjektHistorikkEndretFeltVerdiType" : {
         "properties" : {
@@ -2085,8 +2085,8 @@
       },
       "KodeverdiSomObjektHistorikkEndretFeltVerdiTypeKilde" : {
         "enum" : [ "BOSATT_I_NORGE", "BOSATT_UTLAND", "EØS_BOSATT_NORGE", "IKKE_BOSATT_I_NORGE", "IKKE_LOVLIG_OPPHOLD", "IKKE_OPPHOLDSRETT", "LOVLIG_OPPHOLD", "OPPHOLDSRETT", "NASJONAL", "FORTSETT_BEHANDLING", "HENLEGG_BEHANDLING", "HINDRE_TILBAKETREKK", "UTFØR_TILBAKETREKK", "IKKE_NY_I_ARBEIDSLIVET", "IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "NY_I_ARBEIDSLIVET", "TIDSBEGRENSET_ARBEIDSFORHOLD", "VARIG_ENDRET_NAERING", "INGEN_VARIG_ENDRING_NAERING", "NYOPPSTARTET", "IKKE_NYOPPSTARTET", "BENYTT", "IKKE_BENYTT", "VILKAR_IKKE_OPPFYLT", "VILKAR_OPPFYLT", "IKKE_OPPFYLT", "OPPFYLT", "OPPFYLT_8_47_A", "OPPFYLT_8_47_B", "INGEN_INNVIRKNING", "INNVIRKNING", "-" ],
-        "x-enum-varnames" : [ "BOSATT_I_NORGE", "BOSATT_UTLAND", "EØS_BOSATT_NORGE", "IKKE_BOSATT_I_NORGE", "IKKE_LOVLIG_OPPHOLD", "IKKE_OPPHOLDSRETT", "LOVLIG_OPPHOLD", "OPPHOLDSRETT", "NASJONAL", "FORTSETT_BEHANDLING", "HENLEGG_BEHANDLING", "HINDRE_TILBAKETREKK", "UTFØR_TILBAKETREKK", "IKKE_NY_I_ARBEIDSLIVET", "IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "NY_I_ARBEIDSLIVET", "TIDSBEGRENSET_ARBEIDSFORHOLD", "VARIG_ENDRET_NAERING", "INGEN_VARIG_ENDRING_NAERING", "NYOPPSTARTET", "IKKE_NYOPPSTARTET", "BENYTT", "IKKE_BENYTT", "VILKAR_IKKE_OPPFYLT", "VILKAR_OPPFYLT", "IKKE_OPPFYLT", "OPPFYLT", "OPPFYLT_8_47_A", "OPPFYLT_8_47_B", "INGEN_INNVIRKNING", "INNVIRKNING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BOSATT_I_NORGE", "BOSATT_UTLAND", "EØS_BOSATT_NORGE", "IKKE_BOSATT_I_NORGE", "IKKE_LOVLIG_OPPHOLD", "IKKE_OPPHOLDSRETT", "LOVLIG_OPPHOLD", "OPPHOLDSRETT", "NASJONAL", "FORTSETT_BEHANDLING", "HENLEGG_BEHANDLING", "HINDRE_TILBAKETREKK", "UTFØR_TILBAKETREKK", "IKKE_NY_I_ARBEIDSLIVET", "IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "NY_I_ARBEIDSLIVET", "TIDSBEGRENSET_ARBEIDSFORHOLD", "VARIG_ENDRET_NAERING", "INGEN_VARIG_ENDRING_NAERING", "NYOPPSTARTET", "IKKE_NYOPPSTARTET", "BENYTT", "IKKE_BENYTT", "VILKAR_IKKE_OPPFYLT", "VILKAR_OPPFYLT", "IKKE_OPPFYLT", "OPPFYLT", "OPPFYLT_8_47_A", "OPPFYLT_8_47_B", "INGEN_INNVIRKNING", "INNVIRKNING", "UDEFINERT" ]
       },
       "KodeverdiSomObjektHistorikkOpplysningType" : {
         "properties" : {
@@ -2108,8 +2108,8 @@
       },
       "KodeverdiSomObjektHistorikkOpplysningTypeKilde" : {
         "enum" : [ "-" ],
-        "x-enum-varnames" : [ "UDEFINIERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINIERT" ]
       },
       "KodeverdiSomObjektHistorikkResultatType" : {
         "properties" : {
@@ -2131,8 +2131,8 @@
       },
       "KodeverdiSomObjektHistorikkResultatTypeKilde" : {
         "enum" : [ "-" ],
-        "x-enum-varnames" : [ "UDEFINIERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINIERT" ]
       },
       "KodeverdiSomObjektHistorikkinnslagType" : {
         "properties" : {
@@ -2154,8 +2154,8 @@
       },
       "KodeverdiSomObjektHistorikkinnslagTypeKilde" : {
         "enum" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKR_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNE", "OVST_UTTAK_OPPDATERE", "-" ],
-        "x-enum-varnames" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKREVING_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNET", "OVST_UTTAK_OPPDATERT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKREVING_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNET", "OVST_UTTAK_OPPDATERT", "UDEFINERT" ]
       },
       "KodeverdiSomObjektMedlemskapDekningType" : {
         "properties" : {
@@ -2177,8 +2177,8 @@
       },
       "KodeverdiSomObjektMedlemskapDekningTypeKilde" : {
         "enum" : [ "FTL_2_6", "FTL_2_7_a", "FTL_2_7_b", "FTL_2_9_1_a", "FTL_2_9_1_b", "FTL_2_9_1_c", "FTL_2_9_2_a", "FTL_2_9_2_c", "FULL", "IHT_AVTALE", "OPPHOR", "UNNTATT", "-" ],
-        "x-enum-varnames" : [ "FTL_2_6", "FTL_2_7_a", "FTL_2_7_b", "FTL_2_9_1_a", "FTL_2_9_1_b", "FTL_2_9_1_c", "FTL_2_9_2_a", "FTL_2_9_2_c", "FULL", "IHT_AVTALE", "OPPHOR", "UNNTATT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FTL_2_6", "FTL_2_7_a", "FTL_2_7_b", "FTL_2_9_1_a", "FTL_2_9_1_b", "FTL_2_9_1_c", "FTL_2_9_2_a", "FTL_2_9_2_c", "FULL", "IHT_AVTALE", "OPPHOR", "UNNTATT", "UDEFINERT" ]
       },
       "KodeverdiSomObjektMedlemskapManuellVurderingType" : {
         "properties" : {
@@ -2200,8 +2200,8 @@
       },
       "KodeverdiSomObjektMedlemskapManuellVurderingTypeKilde" : {
         "enum" : [ "-", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "OPPHOR_PGA_ENDRING_I_TPS" ],
-        "x-enum-varnames" : [ "UDEFINERT", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS" ]
       },
       "KodeverdiSomObjektMedlemskapType" : {
         "properties" : {
@@ -2223,8 +2223,8 @@
       },
       "KodeverdiSomObjektMedlemskapTypeKilde" : {
         "enum" : [ "ENDELIG", "FORELOPIG", "AVKLARES", "-" ],
-        "x-enum-varnames" : [ "ENDELIG", "FORELOPIG", "UNDER_AVKLARING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ENDELIG", "FORELOPIG", "UNDER_AVKLARING", "UDEFINERT" ]
       },
       "KodeverdiSomObjektOppgaveÅrsak" : {
         "properties" : {
@@ -2246,8 +2246,8 @@
       },
       "KodeverdiSomObjektOppgaveÅrsakKilde" : {
         "enum" : [ "BEH_SAK_VL", "RV_VL", "GOD_VED_VL", "REG_SOK_VL", "VUR_KONS_YTE", "VUR", "FEILUTBET", "INNH_DOK", "SETTVENT", "BEH_SAK", "-" ],
-        "x-enum-varnames" : [ "BEHANDLE_SAK_VL", "REVURDER_VL", "GODKJENN_VEDTAK_VL", "REG_SOKNAD_VL", "VURDER_KONSEKVENS_YTELSE", "VURDER_DOKUMENT", "FEILUTBETALING", "INNHENT_DOK", "SETTVENT", "BEHANDLE_SAK_IT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BEHANDLE_SAK_VL", "REVURDER_VL", "GODKJENN_VEDTAK_VL", "REG_SOKNAD_VL", "VURDER_KONSEKVENS_YTELSE", "VURDER_DOKUMENT", "FEILUTBETALING", "INNHENT_DOK", "SETTVENT", "BEHANDLE_SAK_IT", "UDEFINERT" ]
       },
       "KodeverdiSomObjektOpptjeningAktivitetType" : {
         "properties" : {
@@ -2269,8 +2269,8 @@
       },
       "KodeverdiSomObjektOpptjeningAktivitetTypeKilde" : {
         "enum" : [ "AAP", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "-" ],
-        "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ]
       },
       "KodeverdiSomObjektRelatertYtelseTilstand" : {
         "properties" : {
@@ -2292,8 +2292,8 @@
       },
       "KodeverdiSomObjektRelatertYtelseTilstandKilde" : {
         "enum" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKESTARTET" ],
-        "x-enum-varnames" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKE_STARTET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKE_STARTET" ]
       },
       "KodeverdiSomObjektRevurderingVarslingÅrsak" : {
         "properties" : {
@@ -2315,8 +2315,8 @@
       },
       "KodeverdiSomObjektRevurderingVarslingÅrsakKilde" : {
         "enum" : [ "BARNIKKEREG", "JOBBFULLTID", "IKKEOPPTJENT", "UTVANDRET", "JOBBUTLAND", "IKKEOPPHOLD", "JOBB6MND", "AKTIVITET", "ANNET" ],
-        "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ]
       },
       "KodeverdiSomObjektSkjermlenkeType" : {
         "properties" : {
@@ -2338,8 +2338,8 @@
       },
       "KodeverdiSomObjektSkjermlenkeTypeKilde" : {
         "enum" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ],
-        "x-enum-varnames" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ]
       },
       "KodeverdiSomObjektSpråkkode" : {
         "properties" : {
@@ -2379,8 +2379,8 @@
       },
       "KodeverdiSomObjektTilbakekrevingVidereBehandlingKilde" : {
         "enum" : [ "-", "TILBAKEKR_OPPRETT", "TILBAKEKR_IGNORER", "TILBAKEKR_INNTREKK", "TILBAKEKR_OPPDATER" ],
-        "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ]
       },
       "KodeverdiSomObjektVedtakResultatType" : {
         "properties" : {
@@ -2402,8 +2402,8 @@
       },
       "KodeverdiSomObjektVedtakResultatTypeKilde" : {
         "enum" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "-" ],
-        "x-enum-varnames" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "UDEFINERT" ]
       },
       "KodeverdiSomObjektVilkårType" : {
         "properties" : {
@@ -2425,8 +2425,8 @@
       },
       "KodeverdiSomObjektVilkårTypeKilde" : {
         "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "-" ],
-        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ]
       },
       "KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslag" : {
         "properties" : {
@@ -2448,8 +2448,8 @@
       },
       "KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslagKilde" : {
         "enum" : [ "-", "MANGLENDE_OPPLYSNINGER", "LAGT_TIL_AV_SAKSBEHANDLER" ],
-        "x-enum-varnames" : [ "UDEFINERT", "MANGLENDE_OPPLYSNINGER", "LAGT_TIL_AV_SAKSBEHANDLER" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "MANGLENDE_OPPLYSNINGER", "LAGT_TIL_AV_SAKSBEHANDLER" ]
       },
       "KodeverdiSomObjektVurderÅrsak" : {
         "properties" : {
@@ -2471,8 +2471,8 @@
       },
       "KodeverdiSomObjektVurderÅrsakKilde" : {
         "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
-        "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
       "KodeverdiSomObjektÅrsakTilVurdering" : {
         "properties" : {
@@ -2494,8 +2494,8 @@
       },
       "KodeverdiSomObjektÅrsakTilVurderingKilde" : {
         "enum" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
-        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ]
       },
       "KodeverkArbeidsforhold" : {
         "properties" : {
@@ -2514,18 +2514,18 @@
       },
       "KodeverkArbeidsforholdArbeidType" : {
         "enum" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "NÆRING", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "-" ],
-        "x-enum-varnames" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER_MED_MER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "SELVSTENDIG_NÆRINGSDRIVENDE", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER_MED_MER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "SELVSTENDIG_NÆRINGSDRIVENDE", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "UDEFINERT" ]
       },
       "KodeverkArbeidsforholdArbeidskategori" : {
         "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
-        "x-enum-varnames" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "UDEFINERT" ]
       },
       "KodeverkArbeidsforholdRelatertYtelseTilstand" : {
         "enum" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKESTARTET" ],
-        "x-enum-varnames" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKE_STARTET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKE_STARTET" ]
       },
       "KodeverkBehandling" : {
         "properties" : {
@@ -2559,28 +2559,28 @@
       },
       "KodeverkBehandlingAksjonspunktVenteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ]
       },
       "KodeverkBehandlingBehandlingResultatType" : {
         "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ]
       },
       "KodeverkBehandlingBehandlingType" : {
         "enum" : [ "BT-002", "BT-004", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ]
       },
       "KodeverkBehandlingBehandlingÅrsakType" : {
         "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "KodeverkBehandlingRevurderingVarslingÅrsak" : {
         "enum" : [ "BARNIKKEREG", "JOBBFULLTID", "IKKEOPPTJENT", "UTVANDRET", "JOBBUTLAND", "IKKEOPPHOLD", "JOBB6MND", "AKTIVITET", "ANNET" ],
-        "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ]
       },
       "KodeverkHistorikk" : {
         "properties" : {
@@ -2593,8 +2593,8 @@
       },
       "KodeverkHistorikkHistorikkBegrunnelseType" : {
         "enum" : [ "-", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
-        "x-enum-varnames" : [ "UDEFINIERT", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINIERT", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ]
       },
       "KodeverkMedlem" : {
         "properties" : {
@@ -2607,8 +2607,8 @@
       },
       "KodeverkMedlemMedlemskapManuellVurderingType" : {
         "enum" : [ "-", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "OPPHOR_PGA_ENDRING_I_TPS" ],
-        "x-enum-varnames" : [ "UDEFINERT", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS" ]
       },
       "KodeverkOpptjening" : {
         "properties" : {
@@ -2621,8 +2621,8 @@
       },
       "KodeverkOpptjeningOpptjeningAktivitetType" : {
         "enum" : [ "AAP", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "-" ],
-        "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ]
       },
       "KodeverkWeb" : {
         "properties" : {
@@ -2656,13 +2656,13 @@
       },
       "KodeverkWebFagsystem" : {
         "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
-        "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "UDEFINERT" ]
       },
       "KodeverkWebVilkårtype" : {
         "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "-" ],
-        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ]
       },
       "KontrollerInntektDto" : {
         "properties" : {
@@ -2707,13 +2707,13 @@
       },
       "KontrollerInntektPeriodeDtoStatus" : {
         "enum" : [ "AVVIK", "INGEN_AVVIK" ],
-        "x-enum-varnames" : [ "AVVIK", "INGEN_AVVIK" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AVVIK", "INGEN_AVVIK" ]
       },
       "KontrollerInntektPeriodeDtoValg" : {
         "enum" : [ "BRUK_BRUKERS_INNTEKT", "BRUK_REGISTER_INNTEKT", "MANUELT_FASTSATT" ],
-        "x-enum-varnames" : [ "BRUK_BRUKERS_INNTEKT", "BRUK_REGISTER_INNTEKT", "MANUELT_FASTSATT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BRUK_BRUKERS_INNTEKT", "BRUK_REGISTER_INNTEKT", "MANUELT_FASTSATT" ]
       },
       "KravDokumentMedSøktePerioder" : {
         "properties" : {
@@ -2747,8 +2747,8 @@
       },
       "KravDokumentMedSøktePerioderType" : {
         "enum" : [ "SØKNAD" ],
-        "x-enum-varnames" : [ "SØKNAD" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "SØKNAD" ]
       },
       "KravDokumentStatus" : {
         "properties" : {
@@ -2782,8 +2782,8 @@
       },
       "KravDokumentStatusType" : {
         "enum" : [ "INNTEKTSMELDING", "SØKNAD" ],
-        "x-enum-varnames" : [ "INNTEKTSMELDING", "SØKNAD" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "INNTEKTSMELDING", "SØKNAD" ]
       },
       "LocalDateInterval" : {
         "properties" : {
@@ -2855,8 +2855,8 @@
       },
       "MatchFagsakYtelseType" : {
         "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
       "NotatDto" : {
         "discriminator" : {
@@ -2912,8 +2912,8 @@
       },
       "NotatDtoGjelderType" : {
         "enum" : [ "FAGSAK" ],
-        "x-enum-varnames" : [ "FAGSAK" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FAGSAK" ]
       },
       "NyBehandlingDto" : {
         "properties" : {
@@ -2935,13 +2935,13 @@
       },
       "NyBehandlingDtoBehandlingArsakType" : {
         "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_KLAGE_UTEN_END_INNTEKT", "RE_KLAGE_MED_END_INNTEKT", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "NyBehandlingDtoBehandlingType" : {
         "enum" : [ "BT-002", "BT-004", "-" ],
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ]
       },
       "OppdaterAktørIdDto" : {
         "properties" : {
@@ -2998,8 +2998,8 @@
       },
       "OpprettNotatDtoNotatGjelderType" : {
         "enum" : [ "FAGSAK" ],
-        "x-enum-varnames" : [ "FAGSAK" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FAGSAK" ]
       },
       "OrganisasjonsEnhet" : {
         "properties" : {
@@ -3070,8 +3070,8 @@
       },
       "PeriodeMedUtfallUtfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
-        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ]
       },
       "PeriodeMedÅrsaker" : {
         "properties" : {
@@ -3093,8 +3093,8 @@
       },
       "PeriodeMedÅrsakerÅrsaker" : {
         "enum" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
-        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ]
       },
       "PersonDto" : {
         "properties" : {
@@ -3189,13 +3189,13 @@
       },
       "PersonopplysningDtoDiskresjonskode" : {
         "enum" : [ "UDEF", "URIK", "UFB", "SVAL", "SPSF", "SPFO", "PEND", "MILI", "KLIE" ],
-        "x-enum-varnames" : [ "UDEFINERT", "UTENRIKS_TJENST", "UTEN_FAST_BO", "SVALBARD", "KODE6", "KODE7", "PENDLER", "MILITÆR", "KLIENT_ADRESSE" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "UTENRIKS_TJENST", "UTEN_FAST_BO", "SVALBARD", "KODE6", "KODE7", "PENDLER", "MILITÆR", "KLIENT_ADRESSE" ]
       },
       "PersonopplysningDtoNavBrukerKjonn" : {
         "enum" : [ "K", "M", "-" ],
-        "x-enum-varnames" : [ "KVINNE", "MANN", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "KVINNE", "MANN", "UDEFINERT" ]
       },
       "PipDto" : {
         "properties" : {
@@ -3247,13 +3247,13 @@
       },
       "PipDtoV2BehandlingStatus" : {
         "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
-        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
       },
       "PipDtoV2FagsakStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
-        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
       "ProsessTaskDataDto" : {
         "properties" : {
@@ -3517,8 +3517,8 @@
       },
       "ResourceLinkType" : {
         "enum" : [ "DELETE", "GET", "PATCH", "POST", "PUT" ],
-        "x-enum-varnames" : [ "DELETE", "GET", "PATCH", "POST", "PUT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DELETE", "GET", "PATCH", "POST", "PUT" ]
       },
       "ReåpneBehandlingDto" : {
         "properties" : {
@@ -3627,8 +3627,8 @@
       },
       "SettBehandlingPaVentDtoVentearsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ]
       },
       "SimuleringDto" : {
         "properties" : {
@@ -3677,8 +3677,8 @@
       },
       "SimuleringForMottakerDtoMottakerType" : {
         "enum" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ],
-        "x-enum-varnames" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ]
       },
       "SimuleringResultatPerFagområdeDto" : {
         "properties" : {
@@ -3697,8 +3697,8 @@
       },
       "SimuleringResultatPerFagområdeDtoFagOmrådeKode" : {
         "enum" : [ "REFUTG", "FP", "FPREF", "SP", "SPREF", "SVP", "SVPREF", "PB", "PBREF", "PN", "PNREF", "OM", "OMREF", "OPP", "OPPREF", "OOP", "OOPREF", "FRISINN", "UNG", "-" ],
-        "x-enum-varnames" : [ "ENGANGSSTØNAD", "FORELDREPENGER", "FORELDREPENGER_ARBEIDSGIVER", "SYKEPENGER", "SYKEPENGER_ARBEIDSGIVER", "SVANGERSKAPSPENGER", "SVANGERSKAPSPENGER_ARBEIDSGIVER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_SYKT_BARN_ARBEIDSGIVER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_NÆRSTÅENDE_ARBEIDSGIVER", "OMSORGSPENGER", "OMSORGSPENGER_ARBEIDSGIVER", "OPPLÆRINGSPENGER", "OPPLÆRINGSPENGER_ARBEIDSGIVER", "PLEIEPENGER_V1", "PLEIEPENGER_V1_ARBEIDSGIVER", "FRISINN", "UNG", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ENGANGSSTØNAD", "FORELDREPENGER", "FORELDREPENGER_ARBEIDSGIVER", "SYKEPENGER", "SYKEPENGER_ARBEIDSGIVER", "SVANGERSKAPSPENGER", "SVANGERSKAPSPENGER_ARBEIDSGIVER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_SYKT_BARN_ARBEIDSGIVER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_NÆRSTÅENDE_ARBEIDSGIVER", "OMSORGSPENGER", "OMSORGSPENGER_ARBEIDSGIVER", "OPPLÆRINGSPENGER", "OPPLÆRINGSPENGER_ARBEIDSGIVER", "PLEIEPENGER_V1", "PLEIEPENGER_V1_ARBEIDSGIVER", "FRISINN", "UNG", "UDEFINERT" ]
       },
       "SimuleringResultatPerMånedDto" : {
         "properties" : {
@@ -3731,8 +3731,8 @@
       },
       "SimuleringResultatRadDtoFeltnavn" : {
         "enum" : [ "nyttBeløp", "tidligereUtbetalt", "differanse", "resultatEtterMotregning", "inntrekkNesteMåned", "resultat" ],
-        "x-enum-varnames" : [ "NYTT_BELØP", "TIDLIGERE_UTBETALT", "DIFFERANSE", "RESULTAT_ETTER_MOTREGNING", "INNTREKK_NESTE_MÅNED", "RESULTAT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "NYTT_BELØP", "TIDLIGERE_UTBETALT", "DIFFERANSE", "RESULTAT_ETTER_MOTREGNING", "INNTREKK_NESTE_MÅNED", "RESULTAT" ]
       },
       "SkjulNotatDto" : {
         "properties" : {
@@ -3911,8 +3911,8 @@
       },
       "SøknadsfristPeriodeDtoStatus" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
-        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ]
       },
       "SøknadsfristTilstandDto" : {
         "properties" : {
@@ -3960,8 +3960,8 @@
       },
       "TilbakekrevingValgDtoVidereBehandling" : {
         "enum" : [ "-", "TILBAKEKR_OPPRETT", "TILBAKEKR_IGNORER", "TILBAKEKR_INNTREKK", "TILBAKEKR_OPPDATER" ],
-        "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ]
       },
       "TilkjentYtelse" : {
         "properties" : {
@@ -4033,13 +4033,13 @@
       },
       "TilkjentYtelseAndelV1Inntektskategori" : {
         "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
-        "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ]
       },
       "TilkjentYtelseAndelV1SatsType" : {
         "enum" : [ "DAG", "DAG7", "UKE", "MND", "AAR", "ENG", "AKTO", "-" ],
-        "x-enum-varnames" : [ "DAG", "DAG7", "UKE", "MND", "ÅR", "ENGANG", "AKTO", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAG", "DAG7", "UKE", "MND", "ÅR", "ENGANG", "AKTO", "UDEFINERT" ]
       },
       "TilkjentYtelseBehandlingInfoV1" : {
         "properties" : {
@@ -4094,8 +4094,8 @@
       },
       "TilkjentYtelseBehandlingInfoV1YtelseType" : {
         "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "-" ],
-        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "UDEFINERT" ]
       },
       "TilkjentYtelseFeriepengerV1" : {
         "properties" : {
@@ -4177,8 +4177,8 @@
       },
       "TotrinnskontrollAksjonspunkterDtoVurderPaNyttArsaker" : {
         "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
-        "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
       "TotrinnskontrollSkjermlenkeContextDto" : {
         "properties" : {
@@ -4297,8 +4297,8 @@
       },
       "UngdomsytelseSatsPeriodeDtoSatsType" : {
         "enum" : [ "LAV", "HØY" ],
-        "x-enum-varnames" : [ "LAV", "HØY" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "LAV", "HØY" ]
       },
       "UngdomsytelseUtbetaltMånedDto" : {
         "properties" : {
@@ -4334,8 +4334,8 @@
       },
       "UngdomsytelseUtbetaltMånedDtoStatus" : {
         "enum" : [ "TIL_UTBETALING", "UTBETALT" ],
-        "x-enum-varnames" : [ "TIL_UTBETALING", "UTBETALT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "TIL_UTBETALING", "UTBETALT" ]
       },
       "UngdomsytelseUttakPeriodeDto" : {
         "properties" : {
@@ -4356,8 +4356,8 @@
       },
       "UngdomsytelseUttakPeriodeDtoAvslagsårsak" : {
         "enum" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ],
-        "x-enum-varnames" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ]
       },
       "VarseltekstDto" : {
         "properties" : {
@@ -4472,8 +4472,8 @@
       },
       "VenteårsakSomObjektKilde" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "UDEFINERT", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE", "VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE" ]
       },
       "VilkårMedPerioderDto" : {
         "properties" : {
@@ -4501,8 +4501,8 @@
       },
       "VilkårMedPerioderDtoVilkarType" : {
         "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "-" ],
-        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ]
       },
       "VilkårPeriodeDto" : {
         "properties" : {
@@ -4554,13 +4554,13 @@
       },
       "VilkårPeriodeDtoMerknad" : {
         "enum" : [ "1001", "1002", "1003", "1004", "1005", "1006", "1007", "1019", "1020", "1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029", "1099", "1035", "1041", "1042", "1043", "1051", "1067", "1068", "1069", "1071", "1080", "1081", "1101", "1102", "5007", "7001", "7002", "7003", "7004", "7006", "7847A", "7847B", "8000", "8001", "8002", "9002", "9013", "9015", "-" ],
-        "x-enum-varnames" : [ "VM_1001", "VM_1002", "VM_1003", "VM_1004", "VM_1005", "VM_1006", "VM_1007", "VM_1019", "VM_1020", "VM_1021", "VM_1022", "VM_1023", "VM_1024", "VM_1025", "VM_1026", "VM_1027", "VM_1028", "VM_1029", "VM_1099", "VM_1035", "VM_1041", "VM_1042", "VM_1043", "VM_1051", "VM_1067", "VM_1068", "VM_1069", "VM_1071", "VM_1080", "VM_1081", "VM_1101", "VM_1102", "VM_5007", "VM_7001", "VM_7002", "VM_7003", "VM_7004", "VM_7006", "VM_7847_A", "VM_7847_B", "VM_8000", "VM_8001", "VM_8002", "VM_9002", "VM_9013", "VM_9015", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "VM_1001", "VM_1002", "VM_1003", "VM_1004", "VM_1005", "VM_1006", "VM_1007", "VM_1019", "VM_1020", "VM_1021", "VM_1022", "VM_1023", "VM_1024", "VM_1025", "VM_1026", "VM_1027", "VM_1028", "VM_1029", "VM_1099", "VM_1035", "VM_1041", "VM_1042", "VM_1043", "VM_1051", "VM_1067", "VM_1068", "VM_1069", "VM_1071", "VM_1080", "VM_1081", "VM_1101", "VM_1102", "VM_5007", "VM_7001", "VM_7002", "VM_7003", "VM_7004", "VM_7006", "VM_7847_A", "VM_7847_B", "VM_8000", "VM_8001", "VM_8002", "VM_9002", "VM_9013", "VM_9015", "UDEFINERT" ]
       },
       "VilkårPeriodeDtoVilkarStatus" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
-        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ]
       },
       "VilkårResultatContainer" : {
         "properties" : {
@@ -4587,13 +4587,13 @@
       },
       "VilkårResultatDtoAvslagsårsak" : {
         "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "-" ],
-        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ]
       },
       "VilkårResultatDtoUtfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
-        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ]
       },
       "ÅrsakMedPerioder" : {
         "properties" : {
@@ -4614,8 +4614,8 @@
       },
       "ÅrsakMedPerioderÅrsak" : {
         "enum" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
-        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
-        "type" : "string"
+        "type" : "string",
+        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ]
       }
     }
   },
@@ -7007,8 +7007,8 @@
           "schema" : {
             "default" : "OMP",
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
-            "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ],
-            "type" : "string"
+            "type" : "string",
+            "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
           }
         } ],
         "responses" : {
@@ -7335,8 +7335,8 @@
           "required" : true,
           "schema" : {
             "enum" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
-            "x-enum-varnames" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
-            "type" : "string"
+            "type" : "string",
+            "x-enum-varnames" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ]
           }
         } ],
         "requestBody" : {
@@ -7378,8 +7378,8 @@
           "required" : true,
           "schema" : {
             "enum" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
-            "x-enum-varnames" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
-            "type" : "string"
+            "type" : "string",
+            "x-enum-varnames" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ]
           }
         } ],
         "requestBody" : {
@@ -7702,14 +7702,14 @@
                   "rapport" : {
                     "description" : "rapport",
                     "enum" : [ "UTBETALING_PER_DAG", "UTBETALING_PER_BRUKER", "G_REGULERING" ],
-                    "x-enum-varnames" : [ "UTBETALING_PER_DAG", "UTBETALING_PER_BRUKER", "G_REGULERING" ],
-                    "type" : "string"
+                    "type" : "string",
+                    "x-enum-varnames" : [ "UTBETALING_PER_DAG", "UTBETALING_PER_BRUKER", "G_REGULERING" ]
                   },
                   "ytelseType" : {
                     "description" : "ytelseType",
                     "enum" : [ "OMP", "PSB", "PPN", "OMP_KS", "OMP_MA", "OMP_AO", "FRISINN" ],
-                    "x-enum-varnames" : [ "OMP", "PSB", "PPN", "OMP_KS", "OMP_MA", "OMP_AO", "FRISINN" ],
-                    "type" : "string"
+                    "type" : "string",
+                    "x-enum-varnames" : [ "OMP", "PSB", "PPN", "OMP_KS", "OMP_MA", "OMP_AO", "FRISINN" ]
                   }
                 },
                 "required" : [ "periode", "rapport", "ytelseType" ],
