@@ -37,7 +37,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
                 "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden. " +
                 "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen. " +
                 "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen. " +
-                "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+                "Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 11. ");
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -71,7 +71,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
                 "Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsytelsen for den måneden. " +
                 "Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsytelse, enn hvis du bare hadde fått penger gjennom ungdomsytelsen. " +
                 "Se eksempel på hvordan vi regner ut ungdomsytelsen basert på inntekt i Ungdomsportalen. " +
-                "Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. ");
+                "Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 11. ");
 
         var behandling = lagScenario(ungTestGrunnlag);
 

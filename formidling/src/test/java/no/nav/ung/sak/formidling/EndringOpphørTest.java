@@ -34,7 +34,7 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fra 16. august 2025 får du ikke lenger penger gjennom ungdomsytelsen. \
                 Det er fordi du ikke lenger er med i ungdomsprogrammet. \
                 Den siste utbetalingen får du før den 10. september 2025. \
-                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
                 """);
 
 
@@ -64,7 +64,7 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får ikke lenger ungdomsprogramytelse \
                 Fra 16. juni 2025 får du ikke lenger penger gjennom ungdomsytelsen. \
                 Det er fordi du ikke lenger er med i ungdomsprogrammet. \
-                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
                 """);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
