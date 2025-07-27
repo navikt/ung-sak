@@ -44,7 +44,7 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
         long totalBarnetillegg = nyeSatser.dagsatsBarnetillegg();
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_HØY_SATS,
+        return new TemplateInnholdResultat(DokumentMalType.ENDRING_HØY_SATS, TemplateType.ENDRING_HØY_SATS,
             new EndringHøySatsDto(
                 satsendringsdato,
                 Satsberegner.beregnDagsatsInklBarnetillegg(nyeSatser),

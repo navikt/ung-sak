@@ -60,7 +60,7 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
         var endretSluttdato = !denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom()) ?
             lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode) : null;
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_PROGRAMPERIODE,
+        return new TemplateInnholdResultat(DokumentMalType.ENDRING_PROGRAMPERIODE, TemplateType.ENDRING_PROGRAMPERIODE,
             new EndringProgramPeriodeDto(
                 endretStartdato, endretSluttdato,
                 false

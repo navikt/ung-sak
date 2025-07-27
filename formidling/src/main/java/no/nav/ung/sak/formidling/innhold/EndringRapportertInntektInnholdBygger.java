@@ -75,7 +75,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
                 .collect(Collectors.toList())
         );
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_INNTEKT, dto);
+        return new TemplateInnholdResultat(DokumentMalType.ENDRING_INNTEKT, TemplateType.ENDRING_INNTEKT, dto);
     }
 
     private static LocalDateSegment<EndringRapportertInntektPeriodeDto> mapTilPeriodeDto(
