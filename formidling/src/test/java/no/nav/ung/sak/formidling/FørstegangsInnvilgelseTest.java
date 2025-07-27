@@ -332,7 +332,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             Du får penger fordi du er med i ungdomsprogrammet. \
             Pengene gir deg en inntekt mens du deltar i ungdomsprogrammet. \
             Pengene får du så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få det i mer enn ett år. \
-            Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx. \
+            Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og §§ 6, 9 og 10. \
             """;
     }
 
@@ -342,7 +342,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             Du får penger fordi du er med i ungdomsprogrammet. \
             Pengene gir deg en inntekt mens du deltar i ungdomsprogrammet. \
             Pengene får du så lenge du er i ungdomsprogrammet. \
-            Vedtaket er gjort etter arbeidsmarkedsloven § 12, 3. ledd og forskrift om xxx § xx. \
+            Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og §§ 6, 9 og 10. \
             """;
     }
 
