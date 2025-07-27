@@ -34,7 +34,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får 37 kroner i barnetillegg per dag fra og med 27. mai 2025, utenom lørdag og søndag. \
                 Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
-                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 9. \
                 """
         );
 
@@ -65,7 +65,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får 111 kroner i barnetillegg per dag fra og med 27. mai 2025, utenom lørdag og søndag. \
                 Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
-                Vedtaket er gjort etter arbeidsmarkedsloven § xx og forskrift om xxx § xx. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 9. \
                 """
         );
 
