@@ -126,7 +126,7 @@ class BrevbestillingTjenesteTest {
         assertThat(dokArkivKlient.getRequests()).hasSize(1);
         var request = dokArkivKlient.getRequests().getFirst();
         UUID dokumentBestillingId = bestilling.getBrevbestillingUuid();
-        var tittel = "Ungdomsytelse Fritekst generelt brev";
+        var tittel = "Ungdomsprogramytelse Fritekst generelt brev";
         assertThat(request.behandlingstema()).isNull();
         assertThat(request.tittel()).isEqualTo(tittel);
 
@@ -159,7 +159,7 @@ class BrevbestillingTjenesteTest {
 
 
     private void assertDokArkivRequest(OpprettJournalpostRequest request, UUID dokumentBestillingId, Behandling behandling) {
-        var innvilgelseTittel = "Ungdomsytelse Innvilgelse";
+        var innvilgelseTittel = "Ungdomsprogramytelse Innvilgelse";
         // Verify main request fields
         assertThat(request.journalpostType()).isEqualTo("UTGAAENDE");
         assertThat(request.tema()).isEqualTo("UNG");
