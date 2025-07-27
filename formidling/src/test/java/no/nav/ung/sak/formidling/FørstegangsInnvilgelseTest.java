@@ -63,7 +63,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 "<h1>Du får ungdomsprogramytelse</h1>",
                 "<h2>Hvorfor får du penger?</h2>",
                 "<h2>Hvordan regner vi oss fram til hvor mye penger du får?</h2>",
-                "<h2>Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen</h2>"
+                "<h2>Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen</h2>"
             );
 
     }
@@ -317,12 +317,12 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     private static String meldFraTilOssHvisDuHarEndringerAvsnitt() {
         return """
-            Meld fra til oss hvis du har inntekt i tillegg til ungdomsprogramytelsen \
-            Hvis du har en annen inntekt i tillegg til ytelsen, er det veldig viktig at du sier fra til oss om det. \
+            Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen \
+            Hvis du har inntekt fra arbeid i tillegg til ungdomsprogramytelsen, er det veldig viktig at du sier fra til oss om det. \
             Du får en SMS den 1. hver måned. \
-            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all inntekt du har hatt måneden før. \
-            Når du har en inntekt, får du mindre penger gjennom ungdomsprogramytelsen. \
-            Likevel får du til sammen mer penger når du både har en inntekt og får ytelsen, enn hvis du bare får ytelsen. \
+            Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all arbeidsinntekt du har hatt måneden før. \
+            Når du har en inntekt fra arbeid, får du mindre penger gjennom ungdomsprogramytelsen. \
+            Likevel får du til sammen mer penger når du både har en inntekt fra arbeid og får ungdomsprogramytelsen, enn hvis du bare får ytelsen. \
             """;
     }
 
