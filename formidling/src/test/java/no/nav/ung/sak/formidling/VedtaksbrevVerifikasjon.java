@@ -9,8 +9,11 @@ public class VedtaksbrevVerifikasjon {
         Til: %s \
         Fødselsnummer: %s \
         %s\
-        Du har rett til å klage Du kan klage innen 6 uker fra den datoen du mottok vedtaket. \
-        Du finner skjema og informasjon på nav.no/klage. \
+        Du har rett til å klage \
+        Du kan klage på dette vedtaket. \
+        Hvis du skal klage, må du gjøre det innen seks uker har gått fra den datoen da du mottok dette vedtaksbrevet. \
+        Når du skal klage, kan du skrive en melding til oss på nettsiden vår: nav.no/skriv-til-oss. \
+        Pass på at du får tydelig fram hva slags vedtak du klager på, og hvorfor du klager. \
         Du har rett til innsyn \
         Du kan se dokumentene i saken din ved å logge deg inn på nav.no. \
         Trenger du mer informasjon? \
