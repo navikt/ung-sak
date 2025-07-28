@@ -117,11 +117,14 @@ public class BrevbestillingTjeneste {
     }
 
     private String utledTittel(DokumentMalType dokumentMalType) {
-        var prefix = "Ungdomsytelse ";
+        var prefix = "Ungdomsprogramytelse ";
         String fraMal = switch (dokumentMalType) {
             case HENLEGG_BEHANDLING_DOK -> "Henleggelse";
             case INNVILGELSE_DOK -> "Innvilgelse";
-            case ENDRING_DOK -> "Endring";
+            case ENDRING_BARNETILLEGG -> "Endring Barnetillegg";
+            case ENDRING_PROGRAMPERIODE -> "Endring Programperiode";
+            case ENDRING_INNTEKT -> "Endring Inntekt";
+            case ENDRING_HØY_SATS -> "Endring Høy Sats";
             case OPPHØR_DOK -> "Opphør";
             case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";

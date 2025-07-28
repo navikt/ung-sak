@@ -39,7 +39,7 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
             opphørStartdato.minusDays(1),
             bestemInneværendeMåned());
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.OPPHØR,
+        return new TemplateInnholdResultat(DokumentMalType.OPPHØR_DOK, TemplateType.OPPHØR,
             new OpphørDto(
                 opphørStartdato,
                 sisteUtbetalingsdato

@@ -16,14 +16,16 @@ public enum DokumentMalType implements Kodeverdi {
 //    UENDRETUTFALL_DOK("UENDRE", "Uendret utfall", true),
 //    FORLENGET_DOK("FORLEN", "Forlenget saksbehandlingstid", false),
     INNVILGELSE_DOK("INNVILGELSE", "Innvilgelsesbrev", true),
-    ENDRING_DOK("ENDRING", "Endring vedtaksbrev", true),
+    ENDRING_BARNETILLEGG("ENDRING_BARNETILLEGG", "Endring barnetillegg", true),
+    ENDRING_PROGRAMPERIODE("ENDRING_PROGRAMPERIODE", "Endring programperiode", true),
+    ENDRING_INNTEKT("ENDRING_INNTEKT", "Endring inntekt", true),
+    ENDRING_HØY_SATS("ENDRING_HØY_SATS", "Endring høy sats", true),
     OPPHØR_DOK("OPPHOR", "Opphør brev", true),
     AVSLAG__DOK("AVSLAG", "Avslagsbrev", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekst vedtaksbrev", true),
-    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false),
-//    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst", false),
+    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false);
+//    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst", false);
 
-    ;
 
     private static final Map<String, DokumentMalType> KODER = new LinkedHashMap<>();
 
