@@ -15,6 +15,8 @@ public enum DetaljertResultatType {
     //Bør spisse nærmere når det kommer brevtester
     AVSLAG_ANNET("Avslag pga annen årsak - se forklaring"),
     //Bør spisse nærmere når det kommer brevtester,
+    ENDRING_BARN_DØDSFALL("Endring pga dødsfall av barn"),
+    ENDRING_DELTAKER_DØDSFALL("Endring pga dødsfall av deltaker"),
     INNVILGELSE_ANNET("Innvilgelse pga annen årsak - se forklaring"),
     INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak")
     ;

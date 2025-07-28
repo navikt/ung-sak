@@ -4,12 +4,16 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.*;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
@@ -31,21 +35,50 @@ public class VedtaksbrevRegler {
     private final Instance<VedtaksbrevInnholdBygger> innholdByggere;
     private final DetaljertResultatUtleder detaljertResultatUtleder;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private final boolean enableAutoBrevVedBarnDødsfall;
 
     @Inject
     public VedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         @Any Instance<VedtaksbrevInnholdBygger> innholdByggere,
         DetaljertResultatUtleder detaljertResultatUtleder,
-        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+        @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall) {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
+        this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
     }
 
-    public VedtaksbrevRegelResulat kjør(Long id) {
-        var behandling = behandlingRepository.hentBehandling(id);
+    public VedtaksbrevRegelResulat kjør(Long behandlingId) {
+        //TODO flytt dette til DetaljertResultatUtleder, bruk combinator til å finne resultat. Refactor førstegangsbygger til å bruke dette istedenfor å utlede selv.
+        // .... Du har laget test for førstegangsbehandling, så få den til å kjøre
+        var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId);
+        if (!enableAutoBrevVedBarnDødsfall && ungdomsytelseGrunnlag.isPresent()) {
+            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
+            var satsSegments = satsTidslinje.toSegments();
+            LocalDateSegment<UngdomsytelseSatser> previous = null;
+            for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
+                if (previous == null) {
+                    previous = current;
+                    continue;
+                }
+                if (SatsEndring.bestemSatsendring(current.getValue(), previous.getValue()).dødsfallBarn()) {
+                    return VedtaksbrevRegelResulat.ingenBrev(
+                        LocalDateTimeline.empty(),
+                        IngenBrevÅrsakType.IKKE_IMPLEMENTERT,
+                        "Ingen brev ved dødsfall av barn."
+                    );
+                }
+                previous = current;
+            }
+        }
+
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }

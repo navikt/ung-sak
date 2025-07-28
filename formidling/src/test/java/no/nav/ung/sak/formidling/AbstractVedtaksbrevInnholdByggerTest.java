@@ -47,7 +47,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     @Inject
     protected EntityManager entityManager;
 
-    private final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    protected final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     private final int forventetAntallPdfSider;
     private final String forventetPdfHovedoverskrift;
 
@@ -67,10 +67,17 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        vedtaksbrevGenerererTjeneste = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
+        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
     }
 
-    private VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
+
+
+
+    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
+        return lagBrevGenererTjeneste(vedtaksbrevInnholdBygger, ungTestRepositories, pdlKlient, false);
+    }
+
+    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
@@ -88,12 +95,14 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             behandlingRepository,
             new PdfGenKlient(),
             new VedtaksbrevRegler(
-                    behandlingRepository,
-                    innholdByggere,
-                    detaljertResultatUtleder,
-                    ungdomsprogramPeriodeRepository),
-                ungTestRepositories.vedtaksbrevValgRepository(),
-                new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+                behandlingRepository,
+                innholdByggere,
+                detaljertResultatUtleder,
+                ungdomsprogramPeriodeRepository,
+                ungTestRepositories.ungdomsytelseGrunnlagRepository(),
+                enableAutoBrevVedBarnDødsfall),
+            ungTestRepositories.vedtaksbrevValgRepository(),
+            new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 
@@ -136,6 +145,14 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
+        return genererVedtaksbrev(vedtaksbrevGenerererTjeneste, behandlingId);
+    }
+
+
+    /**
+     * Mulighet for å bruke egen VedtaksbrevGenerererTjeneste
+     */
+    final protected GenerertBrev genererVedtaksbrev(VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste, Long behandlingId) {
         String lagre = System.getenv("LAGRE");
         if (lagre == null) {
             return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);

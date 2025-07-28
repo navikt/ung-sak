@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -13,10 +13,11 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.BrevScenarioer;
+import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
@@ -117,6 +118,42 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
+    void skal_gi_ingen_brev_ved_dødsfall_av_barn_hendelse() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(BrevScenarioer.endringDødsfall(fom, fom.plusDays(4)));
+
+        var vedtaksbrevRegler = lagVedtaksbrevRegler(null);
+        VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
+
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
+
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isNull();
+        assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
+    void skal_gi_ingen_brev_ved_dødsfall_av_barn_under_førstegangsbehandling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom));
+
+        var vedtaksbrevRegler = lagVedtaksbrevRegler(null);
+        VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
+
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
+
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isNull();
+        assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
     void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.KONTROLLER_INNTEKT); // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
@@ -153,7 +190,8 @@ class VedtaksbrevReglerTest {
             behandlingRepository,
             forventetBygger != null ? new UnitTestLookupInstanceImpl<>(mock(forventetBygger)) : null,
             detaljertResultatUtleder,
-            ungTestRepositories.ungdomsprogramPeriodeRepository());
+            ungTestRepositories.ungdomsprogramPeriodeRepository(),
+            ungTestRepositories.ungdomsytelseGrunnlagRepository(), false);
 
     }
 

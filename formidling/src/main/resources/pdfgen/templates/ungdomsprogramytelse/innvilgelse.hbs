@@ -78,7 +78,7 @@
         {{/with}}
 
         {{#with satsOgBeregning.barnetillegg}}
-            <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp grunnsats}} per dag i barnetillegg.
+            <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp grunnsats}} per dag i barnetillegg{{#if harFlereBarn}} for hvert barn{{/if}}.
                 {{#if ../ingenSatsEndringHendelser}}
                     Det vil si at du til sammen får {{> felles/beløp grunnsatsTotal}} per dag.
                 {{/if}}

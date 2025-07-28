@@ -69,7 +69,7 @@ class VedtaksbrevGenerererTjenesteTest {
                 new UnitTestLookupInstanceImpl<>(førstegangsInnvilgelseInnholdBygger),
                 new DetaljertResultatUtlederFake(
                     ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet()))),
-                ungTestRepositories.ungdomsprogramPeriodeRepository()),
+                ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseGrunnlagRepository(), false),
             ungTestRepositories.vedtaksbrevValgRepository(), new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
 

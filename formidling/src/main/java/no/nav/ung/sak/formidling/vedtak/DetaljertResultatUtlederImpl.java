@@ -156,6 +156,10 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             if (tilkjentYtelseResultat != null) return tilkjentYtelseResultat;
         }
 
+        if (relevanteÅrsaker.innholder(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_DØDSFALL);
+        }
+
         if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_STARTDATO, "Endring av startdato bakover");
         }
@@ -175,12 +179,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL);
         }
 
-        if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Endring pga dødsfall av barn");
-        }
-
         if (relevanteÅrsaker.innholderBare(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Opphør pga dødsfall av søker");
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_DELTAKER_DØDSFALL, "Endring pga dødsfall av deltaker");
         }
 
         if (relevanteÅrsaker.isEmpty()) {
