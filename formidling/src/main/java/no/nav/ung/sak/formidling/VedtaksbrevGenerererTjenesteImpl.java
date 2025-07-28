@@ -23,8 +23,6 @@ import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.nav.ung.sak.formidling.vedtak.DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING;
-
 @ApplicationScoped
 public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTjeneste {
 
@@ -124,14 +122,6 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             resultat.dokumentMalType(),
             resultat.templateType()
         );
-    }
-
-    private static boolean erIngenBrevForventet(VedtaksbrevRegelResulat regelResultat) {
-        var harKunFullUtbetalingEtterKontroll = regelResultat.detaljertResultatTimeline().toSegments().stream()
-            .allMatch(segment ->
-                segment.getValue().resultatInfo().stream().map(DetaljertResultatInfo::detaljertResultatType)
-                    .allMatch(KONTROLLER_INNTEKT_FULL_UTBETALING::equals));
-        return harKunFullUtbetalingEtterKontroll;
     }
 
     /**
