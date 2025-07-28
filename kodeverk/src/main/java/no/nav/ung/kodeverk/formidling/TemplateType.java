@@ -14,7 +14,7 @@ public enum TemplateType {
     GENERELT_FRITEKSTBREV("generelt_fritekstbrev", "Generelt fritekstbrev"),;
 
     final String path;
-    final String dir = "ungdomsytelse";
+    final String dir = "ungdomsprogramytelse";
     final String beskrivelse;
 
     TemplateType(String path, String beskrivelse) {
