@@ -70,7 +70,6 @@ class VedtaksbrevGenerererTjenesteTest {
             new PdfGenKlient(),
             new VedtaksbrevRegler(
                 repositoryProvider.getBehandlingRepository(),
-                new UnitTestLookupInstanceImpl<>(førstegangsInnvilgelseInnholdBygger),
                 new DetaljertResultatUtlederFake(
                     ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet()))),
                 ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,

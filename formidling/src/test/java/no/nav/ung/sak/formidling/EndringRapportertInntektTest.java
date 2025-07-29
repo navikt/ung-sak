@@ -5,7 +5,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringInntektReduksjonStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -114,11 +113,6 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
 
 
         return behandling;
-    }
-
-    @Override
-    protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        return new EndringRapportertInntektInnholdBygger(ungTestRepositories.tilkjentYtelseRepository());
     }
 
     @Override

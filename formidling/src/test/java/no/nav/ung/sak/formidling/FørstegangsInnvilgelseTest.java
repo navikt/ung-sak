@@ -4,7 +4,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -320,7 +319,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void medDødsfallAvBarn() {
         //Må toggles på for at brevet skal genereres
-        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerStrategier());
+        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerStrategier());
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
@@ -399,17 +398,6 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
         return behandling;
-    }
-
-    @Override
-    protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
-
-        FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
-            ungTestRepositories.ungdomsytelseGrunnlagRepository(),
-            ungdomsprogramPeriodeTjeneste,
-            ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
-        return førstegangsInnvilgelseInnholdBygger;
     }
 
     @Override

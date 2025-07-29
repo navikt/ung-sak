@@ -13,7 +13,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
@@ -30,7 +29,6 @@ public class VedtaksbrevRegler {
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
 
     private final BehandlingRepository behandlingRepository;
-    private final Instance<VedtaksbrevInnholdBygger> innholdByggere;
     private final DetaljertResultatUtleder detaljertResultatUtleder;
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final boolean enableAutoBrevVedBarnDødsfall;
@@ -40,14 +38,12 @@ public class VedtaksbrevRegler {
     @Inject
     public VedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
-        @Any Instance<VedtaksbrevInnholdBygger> innholdByggere,
         DetaljertResultatUtleder detaljertResultatUtleder,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall,
         @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies,
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger) {
         this.behandlingRepository = behandlingRepository;
-        this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
