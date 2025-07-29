@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -18,8 +17,8 @@ import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ public class VedtaksbrevRegler {
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final boolean enableAutoBrevVedBarnDødsfall;
-    private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerVelger;
+    private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
 
     @Inject
     public VedtaksbrevRegler(
@@ -47,14 +46,14 @@ public class VedtaksbrevRegler {
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall,
-        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerVelger) {
+        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies) {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
-        this.innholdByggerVelger = innholdByggerVelger;
+        this.innholdbyggerStrategies = innholdbyggerStrategies;
     }
 
     public VedtaksbrevRegelResulat kjør(Long behandlingId) {
@@ -87,30 +86,16 @@ public class VedtaksbrevRegler {
     }
 
     private VedtaksbrevRegelResulat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-
-
-        Set<ByggerResultat> resultat = innholdByggerVelger.stream()
+        Set<ByggerResultat> resultat = innholdbyggerStrategies.stream()
             .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
             .map(it -> it.evaluer(behandling, detaljertResultat))
             .collect(Collectors.toSet());
 
         var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
-        if (!resultat.isEmpty()) {
-            ByggerResultat byggerResultat = resultat.stream().findFirst().orElseThrow();
-            return VedtaksbrevRegelResulat.automatiskBrev(
-                byggerResultat.bygger(),
-                detaljertResultat,
-                byggerResultat.forklaring() + " " + redigerRegelResultat.forklaring(),
-                redigerRegelResultat.kanRedigere()
-            );
+        boolean harBygger = !resultat.isEmpty() && resultat.stream().allMatch(it -> it.bygger() != null);
+        if (harBygger) {
+            return automatiskBrevResultat(detaljertResultat, resultat, redigerRegelResultat);
         }
-
-        var resultaterInfo = detaljertResultat
-            .toSegments().stream()
-            .flatMap(it -> it.getValue().resultatInfo().stream())
-            .collect(Collectors.toSet());
-
-        var resultater = new ResultatHelper(resultaterInfo);
 
         if (redigerRegelResultat.kanRedigere()) {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
@@ -122,25 +107,32 @@ public class VedtaksbrevRegler {
             );
         }
 
-        if (resultater.innholderBare(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)) {
-            String forklaring = "Ingen brev ved full utbetaling etter kontroll av inntekt.";
+        boolean skalIkkeHaBrev = !resultat.isEmpty() && resultat.stream().allMatch(it -> it.bygger() == null);
+        if (skalIkkeHaBrev) {
+            ByggerResultat byggerResultat = resultat.stream().findFirst().orElseThrow();
             return VedtaksbrevRegelResulat.ingenBrev(
-                detaljertResultat,
-                IngenBrevÅrsakType.IKKE_RELEVANT,
-                forklaring
+                detaljertResultat, byggerResultat.ingenBrevÅrsakType(), byggerResultat.forklaring()
             );
         }
+
+        var resultaterInfo = detaljertResultat
+            .toSegments().stream()
+            .flatMap(it -> it.getValue().resultatInfo().stream())
+            .collect(Collectors.toSet());
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
         return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring);
     }
 
-    private boolean erFørsteOpphør(Behandling behandling) {
-        var forrigeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getOriginalBehandlingId().orElseThrow(
-            () -> new IllegalStateException("Må ha original behandling ved opphør")
-        )).orElseThrow(() -> new IllegalStateException("Mangler grunnlag for forrige behandling"));
-        return forrigeGrunnlag.getUngdomsprogramPerioder().getPerioder().stream()
-            .anyMatch(it -> Tid.TIDENES_ENDE.equals(it.getPeriode().getTomDato()));
+    @NotNull
+    private static VedtaksbrevRegelResulat automatiskBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, Set<ByggerResultat> resultat, RedigerRegelResultat redigerRegelResultat) {
+        ByggerResultat byggerResultat = resultat.stream().findFirst().orElseThrow();
+        return VedtaksbrevRegelResulat.automatiskBrev(
+            byggerResultat.bygger(),
+            detaljertResultat,
+            byggerResultat.forklaring() + " " + redigerRegelResultat.forklaring(),
+            redigerRegelResultat.kanRedigere()
+        );
     }
 
     private static RedigerRegelResultat harUtførteManuelleAksjonspunkterMedToTrinn(Behandling behandling) {

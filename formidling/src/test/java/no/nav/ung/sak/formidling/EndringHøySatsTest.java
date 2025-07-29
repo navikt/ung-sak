@@ -6,7 +6,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringHøySatsByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringHøySatsStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -107,7 +107,7 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
-        return List.of(new EndringHøySatsByggerStrategy(
+        return List.of(new EndringHøySatsStrategy(
             new EndringHøySatsInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository()))
         );
     }

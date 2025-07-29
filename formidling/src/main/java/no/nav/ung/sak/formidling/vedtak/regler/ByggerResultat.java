@@ -4,6 +4,6 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 
 public record ByggerResultat(
     VedtaksbrevInnholdBygger bygger,
-    String forklaring
-) {
+    String forklaring,
+    IngenBrevÅrsakType ingenBrevÅrsakType) {
 }

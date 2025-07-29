@@ -57,13 +57,13 @@ public record VedtaksbrevRegelResulat(
 
     public static VedtaksbrevRegelResulat ingenBrev(
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-        IngenBrevÅrsakType ikkeRelevant,
+        IngenBrevÅrsakType ingenBrevÅrsakType,
         String forklaring
     ) {
         return new VedtaksbrevRegelResulat(
             new VedtaksbrevEgenskaper(
                 false,
-                ikkeRelevant,
+                ingenBrevÅrsakType,
                 false,
                 false,
                 false,

@@ -192,10 +192,11 @@ class VedtaksbrevReglerTest {
             ungTestRepositories.ungdomsprogramPeriodeRepository(),
             ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
             new UnitTestMultiLookupInstanceImpl<>(
-                new FørstegangsInnvilgelseByggerStrategy(mock()),
-                new EndringInntektByggerStrategy(mock()),
-                new EndringSluttdatoByggerStrategy(mock(), mock(), mock()),
-                new EndringStartdatoByggerStrategy(mock())
+                new FørstegangsInnvilgelseStrategy(mock()),
+                new EndringInntektReduksjonStrategy(mock()),
+                new EndringSluttdatoStrategy(mock(), mock(), mock()),
+                new EndringStartdatoStrategy(mock()),
+                new EndringInntektFullUtbetalingStrategy()
             )
         );
 

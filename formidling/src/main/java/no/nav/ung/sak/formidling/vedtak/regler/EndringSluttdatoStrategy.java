@@ -10,14 +10,14 @@ import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 
-public final class EndringSluttdatoByggerStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class EndringSluttdatoStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final OpphørInnholdBygger opphørInnholdBygger;
     private final EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger;
 
     @Inject
-    public EndringSluttdatoByggerStrategy(
+    public EndringSluttdatoStrategy(
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
         OpphørInnholdBygger opphørInnholdBygger,
         EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger
@@ -32,11 +32,11 @@ public final class EndringSluttdatoByggerStrategy implements VedtaksbrevInnholdb
         if (erFørsteOpphør(behandling)) {
             return new ByggerResultat(
                 opphørInnholdBygger,
-                "Automatisk brev ved opphør."
-            );
+                "Automatisk brev ved opphør.",
+                null);
         }
 
-        return new ByggerResultat(endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av sluttdato");
+        return new ByggerResultat(endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av sluttdato", null);
     }
 
     @Override

@@ -7,7 +7,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.Test;
@@ -120,7 +120,7 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Override
     protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
         var ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
-        return List.of(new EndringSluttdatoByggerStrategy(
+        return List.of(new EndringSluttdatoStrategy(
             ungdomsprogramPeriodeRepository,
             new OpphørInnholdBygger(DAGENS_DATO),
             new EndringProgramPeriodeInnholdBygger(ungdomsprogramPeriodeRepository, DAGENS_DATO)

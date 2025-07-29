@@ -8,8 +8,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoByggerStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringStartdatoByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringStartdatoStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -170,12 +170,12 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         var endringProgramPeriodeInnholdBygger = new EndringProgramPeriodeInnholdBygger(ungdomsprogramPeriodeRepository, DAGENS_DATO);
 
         return List.of(
-            new EndringSluttdatoByggerStrategy(
+            new EndringSluttdatoStrategy(
                 ungdomsprogramPeriodeRepository,
                 new OpphørInnholdBygger(DAGENS_DATO),
                 endringProgramPeriodeInnholdBygger
             ),
-            new EndringStartdatoByggerStrategy(endringProgramPeriodeInnholdBygger));
+            new EndringStartdatoStrategy(endringProgramPeriodeInnholdBygger));
     }
 
     @Override

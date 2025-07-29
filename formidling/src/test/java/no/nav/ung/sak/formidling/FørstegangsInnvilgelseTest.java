@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -419,7 +419,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
-        return List.of(new FørstegangsInnvilgelseByggerStrategy(førstegangsInnvilgelseInnholdBygger));
+        return List.of(new FørstegangsInnvilgelseStrategy(førstegangsInnvilgelseInnholdBygger));
     }
 
     @Override

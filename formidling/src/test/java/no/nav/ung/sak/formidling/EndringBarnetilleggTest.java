@@ -6,7 +6,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnetilleggByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnetilleggStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -111,7 +111,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
-        return List.of(new EndringBarnetilleggByggerStrategy(new EndringBarnetilleggInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository())));
+        return List.of(new EndringBarnetilleggStrategy(new EndringBarnetilleggInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository())));
     }
 
     @Override

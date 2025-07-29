@@ -3,29 +3,31 @@ package no.nav.ung.sak.formidling.vedtak.regler;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 
-public final class EndringBarnetilleggByggerStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class EndringStartdatoStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final EndringBarnetilleggInnholdBygger endringHøySatsInnholdBygger;
+    private final EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger;
 
     @Inject
-    public EndringBarnetilleggByggerStrategy(EndringBarnetilleggInnholdBygger endringBarnetilleggInnholdBygger) {
-        this.endringHøySatsInnholdBygger = endringBarnetilleggInnholdBygger;
+    public EndringStartdatoStrategy(EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger) {
+        this.endringProgramPeriodeInnholdBygger = endringProgramPeriodeInnholdBygger;
     }
 
     @Override
     public ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new ByggerResultat(endringHøySatsInnholdBygger, "Automatisk brev ved fødsel av barn.");
+        return new ByggerResultat(endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av startdato", null);
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderBare(DetaljertResultatType.ENDRING_BARN_FØDSEL);
+        return resultater
+            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
+            .innholderBare(DetaljertResultatType.ENDRING_STARTDATO);
     }
 
 }
