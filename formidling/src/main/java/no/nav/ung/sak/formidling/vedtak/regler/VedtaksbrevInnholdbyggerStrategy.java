@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public sealed interface VedtaksbrevInnholdbyggerStrategy
-    permits EndringInntektByggerStrategy, EndringSluttdatoByggerStrategy, EndringStartdatoByggerStrategy, FørstegangsInnvilgelseByggerStrategy {
+    permits EndringHøySatsByggerStrategy, EndringInntektByggerStrategy, EndringSluttdatoByggerStrategy, EndringStartdatoByggerStrategy, FørstegangsInnvilgelseByggerStrategy {
 
     ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
 

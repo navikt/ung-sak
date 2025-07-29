@@ -96,7 +96,9 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             ungTestRepositories.tilkjentYtelseRepository(), repositoryProvider.getVilkårResultatRepository());
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(vedtaksbrevInnholdBygger);
-        Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerStrategier = new UnitTestMultiLookupInstanceImpl<>(vedtaksbrevInnholdbyggerStrategies);
+        Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerStrategier = new UnitTestMultiLookupInstanceImpl<>(
+            vedtaksbrevInnholdbyggerStrategies
+        );
 
         return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
