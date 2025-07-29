@@ -10,7 +10,7 @@ import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 
-public class EndringSluttdatoByggerStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class EndringSluttdatoByggerStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final OpphørInnholdBygger opphørInnholdBygger;

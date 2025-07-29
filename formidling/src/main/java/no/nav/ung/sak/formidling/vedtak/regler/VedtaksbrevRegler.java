@@ -14,7 +14,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
-import no.nav.ung.sak.formidling.innhold.*;
+import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
@@ -110,16 +113,6 @@ public class VedtaksbrevRegler {
             .collect(Collectors.toSet());
 
         var resultater = new ResultatHelper(resultaterInfo);
-
-        if (resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
-            String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();
-            return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(EndringRapportertInntektInnholdBygger.class).get(),
-                detaljertResultat,
-                forklaring,
-                redigerRegelResultat.kanRedigere()
-            );
-        }
 
         if (resultater.innholderBare(DetaljertResultatType.ENDRING_ØKT_SATS)) {
             String forklaring = "Automatisk brev ved endring til høy sats. " + redigerRegelResultat.forklaring();

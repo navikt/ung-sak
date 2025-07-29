@@ -7,7 +7,7 @@ import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 
-public class FørstegangsInnvilgelseByggerStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class FørstegangsInnvilgelseByggerStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger;
 

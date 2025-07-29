@@ -21,7 +21,7 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringInntektByggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
@@ -42,7 +42,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -87,7 +86,7 @@ class VedtaksbrevTjenesteTest {
 
         vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder, ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
             new UnitTestMultiLookupInstanceImpl<>(
-                new FørstegangsInnvilgelseByggerStrategy(mock()) //TODO endre til å bruke regel EndringRapportertInntekt?
+                new EndringInntektByggerStrategy(new EndringRapportertInntektInnholdBygger(ungTestRepositories.tilkjentYtelseRepository()))
             ));
 
         vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
