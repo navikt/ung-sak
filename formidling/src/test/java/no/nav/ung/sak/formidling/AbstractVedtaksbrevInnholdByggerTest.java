@@ -20,6 +20,7 @@ import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
+import no.nav.ung.sak.test.util.UnitTestMultiLookupInstanceImpl;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -28,9 +29,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,17 +71,19 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), lagVedtaksbrevByggerStrategy());
+        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), lagVedtaksbrevByggerStrategier());
     }
 
 
 
 
-    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, VedtaksbrevInnholdbyggerStrategy vedtaksbrevInnholdbyggerStrategy) {
-        return lagBrevGenererTjeneste(vedtaksbrevInnholdBygger, ungTestRepositories, pdlKlient, false, vedtaksbrevInnholdbyggerStrategy);
+    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(
+        VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger,
+        List<VedtaksbrevInnholdbyggerStrategy> vedtaksbrevInnholdbyggerStrategies) {
+        return lagBrevGenererTjeneste(vedtaksbrevInnholdBygger, ungTestRepositories, pdlKlient, false, vedtaksbrevInnholdbyggerStrategies);
     }
 
-    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall, VedtaksbrevInnholdbyggerStrategy innholdByggerVelger) {
+    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall, List<VedtaksbrevInnholdbyggerStrategy> vedtaksbrevInnholdbyggerStrategies) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
@@ -91,7 +96,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             ungTestRepositories.tilkjentYtelseRepository(), repositoryProvider.getVilkårResultatRepository());
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(vedtaksbrevInnholdBygger);
-        Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerStrategier = new UnitTestLookupInstanceImpl<>(innholdByggerVelger);
+        Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerStrategier = new UnitTestMultiLookupInstanceImpl<>(vedtaksbrevInnholdbyggerStrategies);
 
         return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
@@ -128,6 +133,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     }
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "PDF", matches = "true")
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
@@ -187,9 +193,11 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
      * Brukes for å lage BrevGenerererTjeneste
      */
     //TODO gjør abstract når alle impl er laget
-    protected VedtaksbrevInnholdbyggerStrategy lagVedtaksbrevByggerStrategy() {
+    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
         return null;
     }
+
+
 
 
     /**

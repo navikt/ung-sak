@@ -14,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -319,7 +320,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void medDødsfallAvBarn() {
         //Må toggles på for at brevet skal genereres
-        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerStrategy());
+        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerStrategier());
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
@@ -412,13 +413,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     }
 
     @Override
-    protected VedtaksbrevInnholdbyggerStrategy lagVedtaksbrevByggerStrategy() {
+    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
         FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
-        return new FørstegangsInnvilgelseByggerStrategy(førstegangsInnvilgelseInnholdBygger);
+        return List.of(new FørstegangsInnvilgelseByggerStrategy(førstegangsInnvilgelseInnholdBygger));
     }
 
     @Override

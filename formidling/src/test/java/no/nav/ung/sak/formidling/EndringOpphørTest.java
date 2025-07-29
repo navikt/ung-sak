@@ -13,6 +13,7 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,14 +116,15 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
         return new OpphørInnholdBygger(DAGENS_DATO);
     }
 
+
     @Override
-    protected VedtaksbrevInnholdbyggerStrategy lagVedtaksbrevByggerStrategy() {
+    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
         var ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
-        return new EndringSluttdatoByggerStrategy(
+        return List.of(new EndringSluttdatoByggerStrategy(
             ungdomsprogramPeriodeRepository,
             new OpphørInnholdBygger(DAGENS_DATO),
             new EndringProgramPeriodeInnholdBygger(ungdomsprogramPeriodeRepository, DAGENS_DATO)
-        );
+        ));
     }
 
     @Override

@@ -111,19 +111,6 @@ public class VedtaksbrevRegler {
 
         var resultater = new ResultatHelper(resultaterInfo);
 
-        if (resultater
-            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
-            .innholderBare(DetaljertResultatType.ENDRING_STARTDATO)) {
-            String forklaring = "Automatisk brev ved endring av startdato. " + redigerRegelResultat.forklaring();
-            return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
-                detaljertResultat,
-                forklaring,
-                redigerRegelResultat.kanRedigere()
-            );
-        }
-
-
         if (resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)) {
             String forklaring = "Automatisk brev ved endring av rapportert inntekt. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.automatiskBrev(
