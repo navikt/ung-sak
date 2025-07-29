@@ -62,6 +62,9 @@ class VedtaksbrevGenerererTjenesteTest {
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository()),
             ungTestRepositories.tilkjentYtelseRepository(), false, null);
+
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger = new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository());
+
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new PdfGenKlient(),
@@ -70,9 +73,9 @@ class VedtaksbrevGenerererTjenesteTest {
                 new UnitTestLookupInstanceImpl<>(førstegangsInnvilgelseInnholdBygger),
                 new DetaljertResultatUtlederFake(
                     ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet()))),
-                ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
-                new UnitTestLookupInstanceImpl<>(new FørstegangsInnvilgelseStrategy(førstegangsInnvilgelseInnholdBygger))),
-            ungTestRepositories.vedtaksbrevValgRepository(), new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+                ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
+                new UnitTestLookupInstanceImpl<>(new FørstegangsInnvilgelseStrategy(førstegangsInnvilgelseInnholdBygger)), manueltVedtaksbrevInnholdBygger),
+            ungTestRepositories.vedtaksbrevValgRepository(), manueltVedtaksbrevInnholdBygger,
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
 
 

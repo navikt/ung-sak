@@ -10,7 +10,6 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
@@ -33,27 +32,27 @@ public class VedtaksbrevRegler {
     private final BehandlingRepository behandlingRepository;
     private final Instance<VedtaksbrevInnholdBygger> innholdByggere;
     private final DetaljertResultatUtleder detaljertResultatUtleder;
-    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final boolean enableAutoBrevVedBarnDødsfall;
     private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
+    private final ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
 
     @Inject
     public VedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         @Any Instance<VedtaksbrevInnholdBygger> innholdByggere,
         DetaljertResultatUtleder detaljertResultatUtleder,
-        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall,
-        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies) {
+        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies,
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger) {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
         this.innholdbyggerStrategies = innholdbyggerStrategies;
+        this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
     }
 
     public VedtaksbrevRegelResulat kjør(Long behandlingId) {
@@ -101,7 +100,7 @@ public class VedtaksbrevRegler {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
             String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring();
             return VedtaksbrevRegelResulat.tomRedigerbarBrev(
-                innholdByggere.select(ManueltVedtaksbrevInnholdBygger.class).get(),
+                manueltVedtaksbrevInnholdBygger,
                 detaljertResultat,
                 forklaring
             );

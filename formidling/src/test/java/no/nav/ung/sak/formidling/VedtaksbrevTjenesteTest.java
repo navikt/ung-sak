@@ -84,17 +84,19 @@ class VedtaksbrevTjenesteTest {
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
 
-        vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder, ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger = new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository());
+
+        vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder, ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
             new UnitTestMultiLookupInstanceImpl<>(
                 new EndringInntektReduksjonStrategy(new EndringRapportertInntektInnholdBygger(ungTestRepositories.tilkjentYtelseRepository()))
-            ));
+            ), manueltVedtaksbrevInnholdBygger);
 
         vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
             repositoryProvider.getBehandlingRepository(),
             new PdfGenKlient(),
             vedtaksbrevRegler,
             ungTestRepositories.vedtaksbrevValgRepository(),
-            new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+            manueltVedtaksbrevInnholdBygger,
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 

@@ -189,7 +189,6 @@ class VedtaksbrevReglerTest {
             behandlingRepository,
             forventetBygger != null ? new UnitTestLookupInstanceImpl<>(mock(forventetBygger)) : null,
             detaljertResultatUtleder,
-            ungTestRepositories.ungdomsprogramPeriodeRepository(),
             ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
             new UnitTestMultiLookupInstanceImpl<>(
                 new FørstegangsInnvilgelseStrategy(mock()),
@@ -197,8 +196,8 @@ class VedtaksbrevReglerTest {
                 new EndringSluttdatoStrategy(mock(), mock(), mock()),
                 new EndringStartdatoStrategy(mock()),
                 new EndringInntektFullUtbetalingStrategy()
-            )
-        );
+            ),
+            new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
 
     }
 

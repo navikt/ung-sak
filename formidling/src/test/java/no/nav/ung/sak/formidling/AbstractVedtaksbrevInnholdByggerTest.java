@@ -100,6 +100,8 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             vedtaksbrevInnholdbyggerStrategies
         );
 
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger = new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository());
+
         return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
             new PdfGenKlient(),
@@ -107,12 +109,11 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
                 behandlingRepository,
                 innholdByggere,
                 detaljertResultatUtleder,
-                ungdomsprogramPeriodeRepository,
                 ungTestRepositories.ungdomsytelseGrunnlagRepository(),
                 enableAutoBrevVedBarnDødsfall,
-                innholdByggerStrategier),
+                innholdByggerStrategier, manueltVedtaksbrevInnholdBygger),
             ungTestRepositories.vedtaksbrevValgRepository(),
-            new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
+            manueltVedtaksbrevInnholdBygger,
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 
