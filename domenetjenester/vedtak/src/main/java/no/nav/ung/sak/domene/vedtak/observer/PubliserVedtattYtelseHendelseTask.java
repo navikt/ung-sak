@@ -36,7 +36,8 @@ import java.util.Properties;
 import java.util.Set;
 
 
-@Deprecated//TODO denne publiserer melding til eksterne om vedtak fattet. Vurder om nødvendig for UNG etterhvert som detaljene for samhandling er landet
+// trengs p.t. for å opprette tilbakekrevinger, da ung-tilbake lytter på denne (men trenger ikke være public topic)
+// TODO denne publiserer melding til eksterne om vedtak fattet. Vurder om nødvendig for UNG etterhvert som detaljene for samhandling er landet
 @ApplicationScoped
 @ProsessTask(PubliserVedtattYtelseHendelseTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
