@@ -113,18 +113,6 @@ public class VedtaksbrevRegler {
 
 
         if (resultater
-            .utenom(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE)
-            .innholderBare(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)) {
-            String forklaring = "Automatisk brev ved ny innvilgelse. " + redigerRegelResultat.forklaring();
-            return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(FørstegangsInnvilgelseInnholdBygger.class).get(),
-                detaljertResultat,
-                forklaring,
-                redigerRegelResultat.kanRedigere()
-            );
-        }
-
-        if (resultater
             .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
             .innholderBare(DetaljertResultatType.ENDRING_SLUTTDATO)) {
             if (erFørsteOpphør(behandling)) {
