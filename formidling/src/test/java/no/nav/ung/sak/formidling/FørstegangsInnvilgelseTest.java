@@ -5,6 +5,8 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseByggerVelger;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevByggerVelger;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
@@ -317,7 +319,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void medDødsfallAvBarn() {
         //Må toggles på for at brevet skal genereres
-        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), ungTestRepositories, pdlKlient, true);
+        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerVelger());
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
@@ -402,10 +404,21 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
 
-        return  new FørstegangsInnvilgelseInnholdBygger(
+        FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
+        return førstegangsInnvilgelseInnholdBygger;
+    }
+
+    @Override
+    protected VedtaksbrevByggerVelger lagVedtaksbrevByggerVelger() {
+        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
+        FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
+            ungTestRepositories.ungdomsytelseGrunnlagRepository(),
+            ungdomsprogramPeriodeTjeneste,
+            ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
+        return new FørstegangsInnvilgelseByggerVelger(førstegangsInnvilgelseInnholdBygger);
     }
 
     @Override

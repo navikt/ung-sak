@@ -26,7 +26,8 @@ public record VedtaksbrevRegelResulat(
         return new VedtaksbrevRegelResulat(
             new VedtaksbrevEgenskaper(
                 true,
-                null, kanRedigere,
+                null,
+                kanRedigere,
                 kanRedigere,
                 kanRedigere,
                 kanRedigere), bygger,

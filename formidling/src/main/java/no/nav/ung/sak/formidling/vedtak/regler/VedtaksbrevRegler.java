@@ -22,7 +22,6 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +36,7 @@ public class VedtaksbrevRegler {
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final boolean enableAutoBrevVedBarnDødsfall;
+    private final Instance<VedtaksbrevByggerVelger> innholdByggerVelger;
 
     @Inject
     public VedtaksbrevRegler(
@@ -45,13 +45,15 @@ public class VedtaksbrevRegler {
         DetaljertResultatUtleder detaljertResultatUtleder,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-        @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall) {
+        @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall,
+        @Any Instance<VedtaksbrevByggerVelger> innholdByggerVelger) {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
+        this.innholdByggerVelger = innholdByggerVelger;
     }
 
     public VedtaksbrevRegelResulat kjør(Long behandlingId) {
@@ -84,6 +86,24 @@ public class VedtaksbrevRegler {
     }
 
     private VedtaksbrevRegelResulat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+
+
+        Set<ByggerResultat> resultat = innholdByggerVelger.stream()
+            .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
+            .map(it -> it.evaluer(behandling, detaljertResultat))
+            .collect(Collectors.toSet());
+
+        var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
+        if (!resultat.isEmpty()) {
+            ByggerResultat byggerResultat = resultat.stream().findFirst().orElseThrow();
+            return VedtaksbrevRegelResulat.automatiskBrev(
+                byggerResultat.bygger(),
+                detaljertResultat,
+                byggerResultat.forklaring() + " " + redigerRegelResultat.forklaring(),
+                redigerRegelResultat.kanRedigere()
+            );
+        }
+
         var resultaterInfo = detaljertResultat
             .toSegments().stream()
             .flatMap(it -> it.getValue().resultatInfo().stream())
@@ -91,7 +111,6 @@ public class VedtaksbrevRegler {
 
         var resultater = new ResultatHelper(resultaterInfo);
 
-        var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
 
         if (resultater
             .utenom(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE)
@@ -218,31 +237,4 @@ public class VedtaksbrevRegler {
     private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {
     }
 
-    private static class ResultatHelper {
-        private final Set<DetaljertResultatInfo> resultatInfo;
-        private final Set<DetaljertResultatType> resultatTyper;
-
-        ResultatHelper(Set<DetaljertResultatInfo> resultatInfo) {
-            this.resultatInfo = resultatInfo;
-            this.resultatTyper = resultatInfo.stream()
-                .map(DetaljertResultatInfo::detaljertResultatType)
-                .collect(Collectors.toSet());
-        }
-
-        boolean innholderBare(DetaljertResultatType... typer) {
-            return resultatTyper.equals(Arrays.stream(typer).collect(Collectors.toSet()));
-        }
-
-        ResultatHelper utenom(DetaljertResultatType... typer) {
-            var typerSet = Arrays.stream(typer).collect(Collectors.toSet());
-            var filtrert = resultatInfo.stream()
-                .filter(it -> !typerSet.contains(it.detaljertResultatType()))
-                .collect(Collectors.toSet());
-            return new ResultatHelper(filtrert);
-        }
-
-        public boolean innholder(DetaljertResultatType detaljertResultatType) {
-            return resultatTyper.contains(detaljertResultatType);
-        }
-    }
 }

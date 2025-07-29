@@ -14,6 +14,7 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevByggerVelger;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
@@ -67,17 +68,17 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
+        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), lagVedtaksbrevByggerVelger());
     }
 
 
 
 
-    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
-        return lagBrevGenererTjeneste(vedtaksbrevInnholdBygger, ungTestRepositories, pdlKlient, false);
+    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, VedtaksbrevByggerVelger vedtaksbrevByggerVelger) {
+        return lagBrevGenererTjeneste(vedtaksbrevInnholdBygger, ungTestRepositories, pdlKlient, false, vedtaksbrevByggerVelger);
     }
 
-    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall) {
+    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall, VedtaksbrevByggerVelger innholdByggerVelger) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
@@ -90,6 +91,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             ungTestRepositories.tilkjentYtelseRepository(), repositoryProvider.getVilkårResultatRepository());
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(vedtaksbrevInnholdBygger);
+        Instance<VedtaksbrevByggerVelger> innholdByggereVelger = new UnitTestLookupInstanceImpl<>(innholdByggerVelger);
 
         return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
@@ -100,7 +102,8 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
                 detaljertResultatUtleder,
                 ungdomsprogramPeriodeRepository,
                 ungTestRepositories.ungdomsytelseGrunnlagRepository(),
-                enableAutoBrevVedBarnDødsfall),
+                enableAutoBrevVedBarnDødsfall,
+                innholdByggereVelger),
             ungTestRepositories.vedtaksbrevValgRepository(),
             new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
@@ -179,6 +182,15 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
      * Brukes for å lage BrevGenerererTjeneste
      */
     protected abstract VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger();
+
+    /**
+     * Brukes for å lage BrevGenerererTjeneste
+     */
+    //TODO gjør abstract når alle impl er laget
+    protected VedtaksbrevByggerVelger lagVedtaksbrevByggerVelger() {
+        return null;
+    }
+
 
     /**
      * Brukes av fellestester i base klasse
