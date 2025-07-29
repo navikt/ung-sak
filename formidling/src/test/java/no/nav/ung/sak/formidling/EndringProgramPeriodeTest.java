@@ -6,7 +6,10 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.DisplayName;
@@ -158,6 +161,16 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Override
     protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
         return new EndringProgramPeriodeInnholdBygger(ungTestRepositories.ungdomsprogramPeriodeRepository(), DAGENS_DATO);
+    }
+
+    @Override
+    protected VedtaksbrevInnholdbyggerStrategy lagVedtaksbrevByggerStrategy() {
+        var ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
+        return new EndringSluttdatoByggerStrategy(
+            ungdomsprogramPeriodeRepository,
+            new OpphørInnholdBygger(DAGENS_DATO),
+            new EndringProgramPeriodeInnholdBygger(ungdomsprogramPeriodeRepository, DAGENS_DATO)
+        );
     }
 
     @Override

@@ -18,7 +18,7 @@ import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseByggerVelger;
+import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseByggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
@@ -195,7 +195,7 @@ class VedtaksbrevReglerTest {
             ungTestRepositories.ungdomsprogramPeriodeRepository(),
             ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
             new UnitTestMultiLookupInstanceImpl<>(
-                new FørstegangsInnvilgelseByggerVelger(mock())
+                new FørstegangsInnvilgelseByggerStrategy(mock())
             )
         );
 

@@ -5,8 +5,8 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseByggerVelger;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevByggerVelger;
+import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseByggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
@@ -319,7 +319,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void medDødsfallAvBarn() {
         //Må toggles på for at brevet skal genereres
-        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerVelger());
+        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerStrategy());
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
@@ -412,13 +412,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     }
 
     @Override
-    protected VedtaksbrevByggerVelger lagVedtaksbrevByggerVelger() {
+    protected VedtaksbrevInnholdbyggerStrategy lagVedtaksbrevByggerStrategy() {
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
         FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
-        return new FørstegangsInnvilgelseByggerVelger(førstegangsInnvilgelseInnholdBygger);
+        return new FørstegangsInnvilgelseByggerStrategy(førstegangsInnvilgelseInnholdBygger);
     }
 
     @Override

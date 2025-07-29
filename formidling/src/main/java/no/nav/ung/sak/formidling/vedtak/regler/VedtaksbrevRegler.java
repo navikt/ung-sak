@@ -36,7 +36,7 @@ public class VedtaksbrevRegler {
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private final boolean enableAutoBrevVedBarnDødsfall;
-    private final Instance<VedtaksbrevByggerVelger> innholdByggerVelger;
+    private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerVelger;
 
     @Inject
     public VedtaksbrevRegler(
@@ -46,7 +46,7 @@ public class VedtaksbrevRegler {
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall,
-        @Any Instance<VedtaksbrevByggerVelger> innholdByggerVelger) {
+        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerVelger) {
         this.behandlingRepository = behandlingRepository;
         this.innholdByggere = innholdByggere;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
@@ -110,29 +110,6 @@ public class VedtaksbrevRegler {
             .collect(Collectors.toSet());
 
         var resultater = new ResultatHelper(resultaterInfo);
-
-
-        if (resultater
-            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
-            .innholderBare(DetaljertResultatType.ENDRING_SLUTTDATO)) {
-            if (erFørsteOpphør(behandling)) {
-                String forklaring = "Automatisk brev ved opphør. " + redigerRegelResultat.forklaring();
-                return VedtaksbrevRegelResulat.automatiskBrev(
-                    innholdByggere.select(OpphørInnholdBygger.class).get(),
-                    detaljertResultat,
-                    forklaring,
-                    redigerRegelResultat.kanRedigere()
-                );
-            }
-
-            String forklaring = "Automatisk brev ved endring av sluttdato. " + redigerRegelResultat.forklaring();
-            return VedtaksbrevRegelResulat.automatiskBrev(
-                innholdByggere.select(EndringProgramPeriodeInnholdBygger.class).get(),
-                detaljertResultat,
-                forklaring,
-                redigerRegelResultat.kanRedigere()
-            );
-        }
 
         if (resultater
             .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)

@@ -7,12 +7,12 @@ import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 
-public class FørstegangsInnvilgelseByggerVelger implements VedtaksbrevByggerVelger {
+public class FørstegangsInnvilgelseByggerStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger;
 
     @Inject
-    public FørstegangsInnvilgelseByggerVelger(FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger) {
+    public FørstegangsInnvilgelseByggerStrategy(FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger) {
         this.førstegangsInnvilgelseInnholdBygger = førstegangsInnvilgelseInnholdBygger;
     }
 
@@ -23,7 +23,7 @@ public class FørstegangsInnvilgelseByggerVelger implements VedtaksbrevByggerVel
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatInfo = VedtaksbrevByggerVelger.tilResultatInfo(detaljertResultat);
+        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater
             .utenom(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE)

@@ -14,7 +14,7 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevByggerVelger;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
@@ -68,17 +68,17 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), lagVedtaksbrevByggerVelger());
+        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevInnholdBygger(), lagVedtaksbrevByggerStrategy());
     }
 
 
 
 
-    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, VedtaksbrevByggerVelger vedtaksbrevByggerVelger) {
-        return lagBrevGenererTjeneste(vedtaksbrevInnholdBygger, ungTestRepositories, pdlKlient, false, vedtaksbrevByggerVelger);
+    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, VedtaksbrevInnholdbyggerStrategy vedtaksbrevInnholdbyggerStrategy) {
+        return lagBrevGenererTjeneste(vedtaksbrevInnholdBygger, ungTestRepositories, pdlKlient, false, vedtaksbrevInnholdbyggerStrategy);
     }
 
-    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall, VedtaksbrevByggerVelger innholdByggerVelger) {
+    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger, UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall, VedtaksbrevInnholdbyggerStrategy innholdByggerVelger) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
@@ -91,7 +91,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             ungTestRepositories.tilkjentYtelseRepository(), repositoryProvider.getVilkårResultatRepository());
 
         Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(vedtaksbrevInnholdBygger);
-        Instance<VedtaksbrevByggerVelger> innholdByggereVelger = new UnitTestLookupInstanceImpl<>(innholdByggerVelger);
+        Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerStrategier = new UnitTestLookupInstanceImpl<>(innholdByggerVelger);
 
         return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
@@ -103,7 +103,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
                 ungdomsprogramPeriodeRepository,
                 ungTestRepositories.ungdomsytelseGrunnlagRepository(),
                 enableAutoBrevVedBarnDødsfall,
-                innholdByggereVelger),
+                innholdByggerStrategier),
             ungTestRepositories.vedtaksbrevValgRepository(),
             new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
             new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
@@ -187,7 +187,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
      * Brukes for å lage BrevGenerererTjeneste
      */
     //TODO gjør abstract når alle impl er laget
-    protected VedtaksbrevByggerVelger lagVedtaksbrevByggerVelger() {
+    protected VedtaksbrevInnholdbyggerStrategy lagVedtaksbrevByggerStrategy() {
         return null;
     }
 

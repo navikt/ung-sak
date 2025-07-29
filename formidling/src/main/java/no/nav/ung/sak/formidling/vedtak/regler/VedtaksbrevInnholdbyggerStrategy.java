@@ -8,7 +8,7 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface VedtaksbrevByggerVelger {
+public interface VedtaksbrevInnholdbyggerStrategy {
 
     ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
 
