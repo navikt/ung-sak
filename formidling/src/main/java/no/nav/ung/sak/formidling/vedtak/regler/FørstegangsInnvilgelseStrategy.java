@@ -19,8 +19,8 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
     }
 
     @Override
-    public ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new ByggerResultat(førstegangsInnvilgelseInnholdBygger, "Automatisk brev ved ny innvilgelse. ", null);
+    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return new VedtaksbrevStrategyResultat(førstegangsInnvilgelseInnholdBygger, "Automatisk brev ved ny innvilgelse. ", null);
     }
 
     @Override

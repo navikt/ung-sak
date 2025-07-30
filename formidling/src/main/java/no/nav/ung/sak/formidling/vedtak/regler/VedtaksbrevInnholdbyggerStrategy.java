@@ -8,10 +8,15 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Regler for å bestemme riktig bygger av vedtaksbrev. Kan også avgjøre om brev IKKE skal bestilles.
+ * Reglene skal være rekkefølgeuavhengig, men regler som fører til ingen brev har høyere presedens.
+ *
+ */
 public sealed interface VedtaksbrevInnholdbyggerStrategy
-    permits EndringBarnetilleggStrategy, EndringHøySatsStrategy, EndringInntektFullUtbetalingStrategy, EndringInntektReduksjonStrategy, EndringSluttdatoStrategy, EndringStartdatoStrategy, FørstegangsInnvilgelseStrategy {
+    permits EndringBarnetilleggStrategy, EndringHøySatsStrategy, EndringInntektFullUtbetalingStrategy, EndringInntektReduksjonStrategy, EndringSluttdatoStrategy, EndringStartdatoStrategy, FørstegangsInnvilgelseStrategy, EndringBarnDødsfallStrategy {
 
-    ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
+    VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
 
     boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
 

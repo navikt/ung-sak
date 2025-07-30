@@ -4,14 +4,10 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
@@ -30,8 +26,6 @@ public class VedtaksbrevRegler {
 
     private final BehandlingRepository behandlingRepository;
     private final DetaljertResultatUtleder detaljertResultatUtleder;
-    private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private final boolean enableAutoBrevVedBarnDødsfall;
     private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
     private final ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
 
@@ -39,54 +33,33 @@ public class VedtaksbrevRegler {
     public VedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         DetaljertResultatUtleder detaljertResultatUtleder,
-        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-        @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall,
         @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies,
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger) {
         this.behandlingRepository = behandlingRepository;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
-        this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
-        this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
         this.innholdbyggerStrategies = innholdbyggerStrategies;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
     }
 
     public VedtaksbrevRegelResulat kjør(Long behandlingId) {
-        //TODO flytt dette til DetaljertResultatUtleder, bruk combinator til å finne resultat. Refactor førstegangsbygger til å bruke dette istedenfor å utlede selv.
-        // .... Du har laget test for førstegangsbehandling, så få den til å kjøre
-        var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId);
-        if (!enableAutoBrevVedBarnDødsfall && ungdomsytelseGrunnlag.isPresent()) {
-            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
-            var satsSegments = satsTidslinje.toSegments();
-            LocalDateSegment<UngdomsytelseSatser> previous = null;
-            for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
-                if (previous == null) {
-                    previous = current;
-                    continue;
-                }
-                if (SatsEndring.bestemSatsendring(current.getValue(), previous.getValue()).dødsfallBarn()) {
-                    return VedtaksbrevRegelResulat.ingenBrev(
-                        LocalDateTimeline.empty(),
-                        IngenBrevÅrsakType.IKKE_IMPLEMENTERT,
-                        "Ingen brev ved dødsfall av barn."
-                    );
-                }
-                previous = current;
-            }
-        }
-
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
     private VedtaksbrevRegelResulat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        Set<ByggerResultat> resultat = innholdbyggerStrategies.stream()
+        Set<VedtaksbrevStrategyResultat> resultat = innholdbyggerStrategies.stream()
             .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
             .map(it -> it.evaluer(behandling, detaljertResultat))
             .collect(Collectors.toSet());
 
         var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
+
+        boolean skalIkkeHaBrev = !resultat.isEmpty() && resultat.stream().anyMatch(it -> it.bygger() == null);
+        if (skalIkkeHaBrev) {
+            return ingenBrevResultat(detaljertResultat, redigerRegelResultat, resultat);
+        }
+
         boolean harBygger = !resultat.isEmpty() && resultat.stream().allMatch(it -> it.bygger() != null);
         if (harBygger) {
             return automatiskBrevResultat(detaljertResultat, resultat, redigerRegelResultat);
@@ -94,20 +67,7 @@ public class VedtaksbrevRegler {
 
         if (redigerRegelResultat.kanRedigere()) {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
-            String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring();
-            return VedtaksbrevRegelResulat.tomRedigerbarBrev(
-                manueltVedtaksbrevInnholdBygger,
-                detaljertResultat,
-                forklaring
-            );
-        }
-
-        boolean skalIkkeHaBrev = !resultat.isEmpty() && resultat.stream().allMatch(it -> it.bygger() == null);
-        if (skalIkkeHaBrev) {
-            ByggerResultat byggerResultat = resultat.stream().findFirst().orElseThrow();
-            return VedtaksbrevRegelResulat.ingenBrev(
-                detaljertResultat, byggerResultat.ingenBrevÅrsakType(), byggerResultat.forklaring()
-            );
+            return tomManueltBrev(detaljertResultat, redigerRegelResultat);
         }
 
         var resultaterInfo = detaljertResultat
@@ -120,12 +80,35 @@ public class VedtaksbrevRegler {
     }
 
     @NotNull
-    private static VedtaksbrevRegelResulat automatiskBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, Set<ByggerResultat> resultat, RedigerRegelResultat redigerRegelResultat) {
-        ByggerResultat byggerResultat = resultat.stream().findFirst().orElseThrow();
-        return VedtaksbrevRegelResulat.automatiskBrev(
-            byggerResultat.bygger(),
+    private VedtaksbrevRegelResulat ingenBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, RedigerRegelResultat redigerRegelResultat, Set<VedtaksbrevStrategyResultat> resultat) {
+        if (redigerRegelResultat.kanRedigere()) {
+            // ingen brev, men har ap så tilbyr tom brev for redigering
+            return tomManueltBrev(detaljertResultat, redigerRegelResultat);
+        }
+
+        var byggerResultat = resultat.stream().findFirst().orElseThrow();
+        return VedtaksbrevRegelResulat.ingenBrev(
+            detaljertResultat, byggerResultat.ingenBrevÅrsakType(), byggerResultat.forklaring()
+        );
+    }
+
+    @NotNull
+    private VedtaksbrevRegelResulat tomManueltBrev(LocalDateTimeline<DetaljertResultat> detaljertResultat, RedigerRegelResultat redigerRegelResultat) {
+        String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring();
+        return VedtaksbrevRegelResulat.tomRedigerbarBrev(
+            manueltVedtaksbrevInnholdBygger,
             detaljertResultat,
-            byggerResultat.forklaring() + " " + redigerRegelResultat.forklaring(),
+            forklaring
+        );
+    }
+
+    @NotNull
+    private static VedtaksbrevRegelResulat automatiskBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, Set<VedtaksbrevStrategyResultat> resultat, RedigerRegelResultat redigerRegelResultat) {
+        VedtaksbrevStrategyResultat vedtaksbrevStrategyResultat = resultat.stream().findFirst().orElseThrow();
+        return VedtaksbrevRegelResulat.automatiskBrev(
+            vedtaksbrevStrategyResultat.bygger(),
+            detaljertResultat,
+            vedtaksbrevStrategyResultat.forklaring() + " " + redigerRegelResultat.forklaring(),
             redigerRegelResultat.kanRedigere()
         );
     }

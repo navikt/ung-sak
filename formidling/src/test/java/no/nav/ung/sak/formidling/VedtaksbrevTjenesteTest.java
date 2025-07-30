@@ -78,7 +78,7 @@ class VedtaksbrevTjenesteTest {
 
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger = new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository());
 
-        vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), detaljertResultatUtleder, ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
+        vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), detaljertResultatUtleder,
             new UnitTestMultiLookupInstanceImpl<>(
                 new EndringInntektReduksjonStrategy(new EndringRapportertInntektInnholdBygger(ungTestRepositories.tilkjentYtelseRepository()))
             ), manueltVedtaksbrevInnholdBygger);

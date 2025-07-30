@@ -16,8 +16,8 @@ public final class EndringInntektFullUtbetalingStrategy implements VedtaksbrevIn
     }
 
     @Override
-    public ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new ByggerResultat(null, "Ingen brev ved full utbetaling etter kontroll av inntekt.", IngenBrevÅrsakType.IKKE_RELEVANT);
+    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return new VedtaksbrevStrategyResultat(null, "Ingen brev ved full utbetaling etter kontroll av inntekt.", IngenBrevÅrsakType.IKKE_RELEVANT);
     }
 
     @Override

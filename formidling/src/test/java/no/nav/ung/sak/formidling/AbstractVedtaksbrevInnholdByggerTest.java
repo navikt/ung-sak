@@ -104,8 +104,6 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             new VedtaksbrevRegler(
                 behandlingRepository,
                 detaljertResultatUtleder,
-                ungTestRepositories.ungdomsytelseGrunnlagRepository(),
-                enableAutoBrevVedBarnDødsfall,
                 innholdByggerStrategier,
                 manueltVedtaksbrevInnholdBygger),
             ungTestRepositories.vedtaksbrevValgRepository(),

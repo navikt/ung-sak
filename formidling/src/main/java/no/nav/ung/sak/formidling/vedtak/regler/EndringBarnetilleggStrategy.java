@@ -19,8 +19,8 @@ public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbygg
     }
 
     @Override
-    public ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new ByggerResultat(endringHøySatsInnholdBygger, "Automatisk brev ved fødsel av barn.", null);
+    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return new VedtaksbrevStrategyResultat(endringHøySatsInnholdBygger, "Automatisk brev ved fødsel av barn.", null);
     }
 
     @Override

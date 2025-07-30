@@ -19,8 +19,8 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
     }
 
     @Override
-    public ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new ByggerResultat(endringHøySatsInnholdBygger, "Automatisk brev ved endring til høy sats.", null);
+    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return new VedtaksbrevStrategyResultat(endringHøySatsInnholdBygger, "Automatisk brev ved endring til høy sats.", null);
     }
 
     @Override

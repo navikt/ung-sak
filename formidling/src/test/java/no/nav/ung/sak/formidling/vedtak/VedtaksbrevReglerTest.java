@@ -186,13 +186,13 @@ class VedtaksbrevReglerTest {
         return new VedtaksbrevRegler(
             behandlingRepository,
             detaljertResultatUtleder,
-            ungTestRepositories.ungdomsytelseGrunnlagRepository(), false,
             new UnitTestMultiLookupInstanceImpl<>(
                 new FørstegangsInnvilgelseStrategy(mock()),
                 new EndringInntektReduksjonStrategy(mock()),
                 new EndringSluttdatoStrategy(mock(), mock(), mock()),
                 new EndringStartdatoStrategy(mock()),
-                new EndringInntektFullUtbetalingStrategy()
+                new EndringInntektFullUtbetalingStrategy(),
+                new EndringBarnDødsfallStrategy(ungTestRepositories.ungdomsytelseGrunnlagRepository(), false)
             ),
             new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
 

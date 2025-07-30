@@ -30,15 +30,15 @@ public final class EndringSluttdatoStrategy implements VedtaksbrevInnholdbyggerS
     }
 
     @Override
-    public ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         if (erFørsteOpphør(behandling)) {
-            return new ByggerResultat(
+            return new VedtaksbrevStrategyResultat(
                 opphørInnholdBygger,
                 "Automatisk brev ved opphør.",
                 null);
         }
 
-        return new ByggerResultat(endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av sluttdato", null);
+        return new VedtaksbrevStrategyResultat(endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av sluttdato", null);
     }
 
     @Override

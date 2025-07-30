@@ -19,8 +19,8 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
     }
 
     @Override
-    public ByggerResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new ByggerResultat(endringRapportertInntektInnholdBygger, "Automatisk brev ved endring av rapportert inntekt.", null);
+    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return new VedtaksbrevStrategyResultat(endringRapportertInntektInnholdBygger, "Automatisk brev ved endring av rapportert inntekt.", null);
     }
 
     @Override
