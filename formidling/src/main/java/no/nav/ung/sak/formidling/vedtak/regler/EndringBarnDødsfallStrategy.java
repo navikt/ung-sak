@@ -37,7 +37,7 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
             return false;
         }
 
-        if (harSatsendringenDødsfall(behandling)) {
+        if (harSatsendringenDødsfall(behandling, detaljertResultat)) {
             return true;
         }
 
@@ -47,10 +47,10 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
         return resultater.innholder(DetaljertResultatType.ENDRING_BARN_DØDSFALL);
     }
 
-    private boolean harSatsendringenDødsfall(Behandling behandling) {
+    private boolean harSatsendringenDødsfall(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId());
         if (ungdomsytelseGrunnlag.isPresent()) {
-            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
+            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje().intersection(detaljertResultat);
             var satsSegments = satsTidslinje.toSegments();
             LocalDateSegment<UngdomsytelseSatser> previous = null;
             for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
