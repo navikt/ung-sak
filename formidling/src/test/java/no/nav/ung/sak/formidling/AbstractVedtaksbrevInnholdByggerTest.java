@@ -108,7 +108,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
                 manueltVedtaksbrevInnholdBygger),
             ungTestRepositories.vedtaksbrevValgRepository(),
             manueltVedtaksbrevInnholdBygger,
-            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()), false);
     }
 
     @Test

@@ -4,6 +4,7 @@ package no.nav.ung.sak.formidling;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -19,7 +20,6 @@ import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +33,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
+    private boolean enableIgnoreManglendeBrev;
 
     private VedtaksbrevRegler vedtaksbrevRegler;
 
@@ -42,7 +43,8 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         PdfGenKlient pdfGen,
         VedtaksbrevRegler vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste) {
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste,
+        @KonfigVerdi(value = "IGNORE_MANGLENDE_BREV", defaultVerdi = "false") boolean ignoreManglendeBrev) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
@@ -50,6 +52,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
+        this.enableIgnoreManglendeBrev = ignoreManglendeBrev;
     }
 
     public VedtaksbrevGenerererTjenesteImpl() {
@@ -98,7 +101,8 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
         var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
         if (!vedtaksbrevEgenskaper.harBrev()) {
-            return håndterIngenBrevResultat(regelResultat);
+            håndterIngenBrevResultat(regelResultat);
+            return null;
         }
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -123,14 +127,16 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    @Nullable
-    private static GenerertBrev håndterIngenBrevResultat(VedtaksbrevRegelResulat regelResultat) {
+    private void håndterIngenBrevResultat(VedtaksbrevRegelResulat regelResultat) {
         if (regelResultat.vedtaksbrevEgenskaper().ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
-            throw new IllegalStateException("Ingen brev implementert for tilfelle: " + regelResultat.forklaring());
+            if (enableIgnoreManglendeBrev) {
+                LOG.warn("Ingen brev implementert for tilfelle : {}", regelResultat.forklaring());
+            }
+            else {
+                throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + regelResultat.forklaring());
+            }
         }
         LOG.info("Ingen brev relevant for tilfelle: {}", regelResultat.forklaring());
-
-        return null;
     }
 
     /**

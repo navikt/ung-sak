@@ -74,7 +74,7 @@ class VedtaksbrevGenerererTjenesteTest {
                     ungTestGrunnlag.ungdomsprogramvilkår().mapValue(it -> DetaljertResultat.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE), Collections.emptySet(), Collections.emptySet(), Collections.emptySet()))),
                 new UnitTestLookupInstanceImpl<>(new FørstegangsInnvilgelseStrategy(førstegangsInnvilgelseInnholdBygger)), manueltVedtaksbrevInnholdBygger),
             ungTestRepositories.vedtaksbrevValgRepository(), manueltVedtaksbrevInnholdBygger,
-            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()), false);
 
 
         GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
