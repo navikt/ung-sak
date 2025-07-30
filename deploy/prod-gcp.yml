@@ -126,8 +126,8 @@ spec:
       value: k9saksbehandling.ung-sak-aksjonspunkthendelse
     - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
       value: k9saksbehandling.k9-dokumenthendelse-v1
-    - name: KAFKA_FATTEVEDTAK_TOPIC
-      value: teamforeldrepenger.familie-vedtakfattet-v1
+    - name: KAFKA_FATTEVEDTAK_UNG_TOPIC
+      value: k9saksbehandling.ung-vedtakhendelse
     - name: KAFKA_STONADSTATISTIKK_TOPIC
       value: k9saksbehandling.aapen-ung-stonadstatistikk-v1
     - name: KAFKA_PRODUKSJONSSTYRING_TOPIC
