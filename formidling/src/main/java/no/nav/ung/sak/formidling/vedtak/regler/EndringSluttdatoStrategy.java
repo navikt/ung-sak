@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.uttak.Tid;
@@ -10,6 +11,7 @@ import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 
+@Dependent
 public final class EndringSluttdatoStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;

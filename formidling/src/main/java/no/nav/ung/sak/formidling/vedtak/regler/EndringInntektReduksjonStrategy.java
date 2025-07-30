@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -7,6 +8,7 @@ import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
 
+@Dependent
 public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final EndringRapportertInntektInnholdBygger endringRapportertInntektInnholdBygger;
