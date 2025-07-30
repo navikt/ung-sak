@@ -1,8 +1,8 @@
-package no.nav.ung.kodeverk.hjemmel;
+package no.nav.ung.sak.behandlingslager.kodeverk;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
+import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 
 @Converter(autoApply = true)
 public class HjemmelKodeverdiConverter implements AttributeConverter<Hjemmel, String> {
