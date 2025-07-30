@@ -77,10 +77,10 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(
         List<VedtaksbrevInnholdbyggerStrategy> vedtaksbrevInnholdbyggerStrategies) {
-        return lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, false, vedtaksbrevInnholdbyggerStrategies);
+        return lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, vedtaksbrevInnholdbyggerStrategies);
     }
 
-    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, Boolean enableAutoBrevVedBarnDødsfall, List<VedtaksbrevInnholdbyggerStrategy> vedtaksbrevInnholdbyggerStrategies) {
+    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, List<VedtaksbrevInnholdbyggerStrategy> vedtaksbrevInnholdbyggerStrategies) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();

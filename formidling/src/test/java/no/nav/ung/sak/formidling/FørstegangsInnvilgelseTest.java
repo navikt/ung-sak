@@ -4,11 +4,13 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnDødsfallStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +19,7 @@ import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
@@ -319,7 +322,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void medDødsfallAvBarn() {
         //Må toggles på for at brevet skal genereres
-        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, true, lagVedtaksbrevByggerStrategier());
+        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, lagByggerOgStrategier(true));
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
@@ -357,6 +360,20 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 "<h1>Du får ungdomsprogramytelse</h1>"
             );
 
+    }
+
+    @DisplayName("Dødsfall av barn skal feile hvis togglet av")
+    @Test
+    void dødsfallBarnSkalFeileDefault() {
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        assertThatThrownBy(
+            () -> genererVedtaksbrev(behandling.getId()
+            )).isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("dødsfall");
     }
 
     private static String meldFraTilOssHvisDuHarEndringerAvsnitt() {
@@ -402,12 +419,20 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
+        return lagByggerOgStrategier(false);
+    }
+
+    @NotNull
+    private List<VedtaksbrevInnholdbyggerStrategy> lagByggerOgStrategier(boolean enableAutoBrevVedBarnDødsfall) {
         var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
         FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
-        return List.of(new FørstegangsInnvilgelseStrategy(førstegangsInnvilgelseInnholdBygger));
+        return List.of(
+            new FørstegangsInnvilgelseStrategy(førstegangsInnvilgelseInnholdBygger),
+            new EndringBarnDødsfallStrategy(ungTestRepositories.ungdomsytelseGrunnlagRepository(), enableAutoBrevVedBarnDødsfall)
+        );
     }
 
     @Override

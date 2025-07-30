@@ -40,6 +40,9 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+/**
+ * Tester at ulike flyter fra klient funker.
+ */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class VedtaksbrevTjenesteTest {

@@ -17,9 +17,9 @@ import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,8 +98,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
         var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
         if (!vedtaksbrevEgenskaper.harBrev()) {
-            loggIngenBrev(vedtaksbrevEgenskaper, regelResultat);
-            return null;
+            return håndterIngenBrevResultat(regelResultat);
         }
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -122,6 +121,16 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             resultat.dokumentMalType(),
             resultat.templateType()
         );
+    }
+
+    @Nullable
+    private static GenerertBrev håndterIngenBrevResultat(VedtaksbrevRegelResulat regelResultat) {
+        if (regelResultat.vedtaksbrevEgenskaper().ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
+            throw new IllegalStateException("Ingen brev implementert for tilfelle: " + regelResultat.forklaring());
+        }
+        LOG.info("Ingen brev relevant for tilfelle: {}", regelResultat.forklaring());
+
+        return null;
     }
 
     /**
@@ -153,14 +162,6 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             resultat.dokumentMalType(),
             resultat.templateType()
         );
-    }
-
-    private static void loggIngenBrev(VedtaksbrevEgenskaper vedtaksbrevEgenskaper, VedtaksbrevRegelResulat regelResultat) {
-        if (vedtaksbrevEgenskaper.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
-            LOG.warn("Ingen brev implementert for tilfelle: {}", regelResultat.forklaring());
-        } else {
-            LOG.info("Ingen brev relevant for tilfelle: {}", regelResultat.forklaring());
-        }
     }
 
 
