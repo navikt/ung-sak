@@ -1,21 +1,18 @@
 package no.nav.ung.sak.typer;
 
-import java.io.Serializable;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
-import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
-
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.api.IndexKey;
+
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Id som genereres fra NAV Aktør Register. Denne iden benyttes til interne forhold i Nav og vil ikke endres f.eks. dersom bruker går fra
@@ -23,7 +20,6 @@ import no.nav.ung.kodeverk.api.IndexKey;
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-@Embeddable
 public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
 
     @JsonValue
