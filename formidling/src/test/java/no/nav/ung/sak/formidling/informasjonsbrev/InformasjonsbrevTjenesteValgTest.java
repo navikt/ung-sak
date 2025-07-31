@@ -10,11 +10,8 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.PdlKlientFake;
-import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 import no.nav.ung.sak.formidling.scenarioer.EndringProgramPeriodeScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
@@ -43,6 +40,7 @@ class InformasjonsbrevTjenesteValgTest {
     protected String fnr = pdlKlient.fnr();
 
     private UngTestRepositories ungTestRepositories;
+    @Inject
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
 
 
@@ -50,17 +48,6 @@ class InformasjonsbrevTjenesteValgTest {
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
 
-        informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
-            ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-            new InformasjonsbrevGenerererTjeneste(
-                ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-                new PdfGenKlient(),
-                new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
-                null),
-            null,
-            ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
-        );
     }
 
     @Test

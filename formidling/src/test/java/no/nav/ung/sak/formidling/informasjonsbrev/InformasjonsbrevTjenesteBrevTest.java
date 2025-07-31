@@ -3,8 +3,6 @@ package no.nav.ung.sak.formidling.informasjonsbrev;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
-import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
@@ -13,21 +11,14 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.PdlKlientFake;
-import no.nav.ung.sak.formidling.bestilling.BrevbestillingTjeneste;
-import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
-import no.nav.ung.sak.formidling.informasjonsbrev.innhold.GenereltFritekstbrevInnholdBygger;
-import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,11 +37,14 @@ class InformasjonsbrevTjenesteBrevTest {
     @Inject
     private EntityManager entityManager;
 
-    private final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
-    protected String fnr = pdlKlient.fnr();
-
+    @Inject
+    private PdlKlientFake pdlKlient;
+    private String fnr;
     private UngTestRepositories ungTestRepositories;
+
+    @Inject
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
+
     private BrevbestillingRepository brevbestillingRepository;
 
 
@@ -58,22 +52,7 @@ class InformasjonsbrevTjenesteBrevTest {
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         brevbestillingRepository = new BrevbestillingRepository(entityManager);
-        var brevbestillingTjeneste = new BrevbestillingTjeneste(
-            brevbestillingRepository,
-            new DokArkivKlientFake(),
-            new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null)));
-        informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
-            ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-            new InformasjonsbrevGenerererTjeneste(
-                ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-                new PdfGenKlient(),
-                new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
-                new UnitTestLookupInstanceImpl<>(new GenereltFritekstbrevInnholdBygger())
-            ),
-            brevbestillingTjeneste,
-            ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
-        );
+        fnr = pdlKlient.fnr();
     }
 
     @Test

@@ -1,13 +1,16 @@
 package no.nav.ung.sak.formidling.dokdist;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
+import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostResponse;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
-import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostResponse;
-
-
+@Alternative
+@ApplicationScoped
 public class DokDistRestKlientFake implements DokDistRestKlient {
 
     private final List<DistribuerJournalpostRequest> requests = new ArrayList<>();

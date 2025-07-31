@@ -4,5 +4,7 @@
        version="3.0" bean-discovery-mode="annotated">
     <alternatives>
         <class>no.nav.ung.sak.formidling.PdlKlientFake</class>
+        <class>no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake</class>
+        <class>no.nav.ung.sak.formidling.dokdist.DokDistRestKlientFake</class>
     </alternatives>
 </beans>
