@@ -464,6 +464,35 @@
         "required" : [ "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
+      "AntallDeltakereStatistikk" : {
+        "properties" : {
+          "antallBarn" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallHøySats" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallLavSats" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallMedBarnetillegg" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallTotalt" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "dato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "AsyncPollingStatus" : {
         "properties" : {
           "cancelUri" : {
@@ -2858,6 +2887,23 @@
         "type" : "string",
         "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
       },
+      "MånedDto" : {
+        "properties" : {
+          "måned" : {
+            "format" : "int32",
+            "maximum" : 12,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "år" : {
+            "format" : "int32",
+            "maximum" : 9999,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "NotatDto" : {
         "discriminator" : {
           "propertyName" : "gjelderType"
@@ -4369,6 +4415,26 @@
           }
         },
         "required" : [ "varseltekst" ],
+        "type" : "object"
+      },
+      "VedtakStatistikkMåned" : {
+        "properties" : {
+          "antallAutomatiskeVedtak" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallVedtak" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "måned" : {
+            "format" : "year-month",
+            "type" : "string"
+          },
+          "prosentandelAutomatiskeVedtak" : {
+            "type" : "number"
+          }
+        },
         "type" : "object"
       },
       "VedtaksbrevForhåndsvisRequest" : {
@@ -7498,6 +7564,29 @@
         "tags" : [ "pip" ]
       }
     },
+    "/api/produksjonsstyring/forvaltning/saker-med-aksjonspunkt" : {
+      "get" : {
+        "description" : "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først",
+        "operationId" : "sakerPåAksjonspunkt",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for produksjonsstyring",
+        "tags" : [ "statistikk" ]
+      }
+    },
     "/api/prosesstask/create" : {
       "post" : {
         "description" : "Oppretter en prosess task i henhold til request",
@@ -7856,6 +7945,87 @@
         },
         "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
         "tags" : [ "nav-ansatt" ]
+      }
+    },
+    "/api/statistikk/forvaltning/antall-deltakere" : {
+      "post" : {
+        "description" : "Lister ut antall deltakere med ulike sats-typer for en dato",
+        "operationId" : "antallDeltakere",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "format" : "date",
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AntallDeltakereStatistikk"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
+      }
+    },
+    "/api/statistikk/forvaltning/utmeldt-prosentandel" : {
+      "post" : {
+        "description" : "Lister ut prosentandel av deltaker som meldes ut før det har gått ett år",
+        "operationId" : "utmeldtProsentandel",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "number"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
+      }
+    },
+    "/api/statistikk/forvaltning/vedtak" : {
+      "post" : {
+        "description" : "Lister ut antall vedtak for en måned",
+        "operationId" : "vedtak",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MånedDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/VedtakStatistikkMåned"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
       }
     },
     "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
