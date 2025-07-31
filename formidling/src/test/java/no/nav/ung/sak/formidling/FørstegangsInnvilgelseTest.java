@@ -4,6 +4,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnDødsfallStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;

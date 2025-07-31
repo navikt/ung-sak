@@ -14,7 +14,6 @@ import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepos
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.BrevScenarioer;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.PdlKlientFake;
@@ -23,6 +22,7 @@ import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
 import no.nav.ung.sak.formidling.informasjonsbrev.innhold.GenereltFritekstbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;

@@ -1,5 +1,7 @@
 package no.nav.ung.sak.formidling;
 
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+
 import java.time.LocalDate;
 
 public class VedtaksbrevVerifikasjon {

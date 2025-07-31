@@ -1,7 +1,7 @@
 package no.nav.ung.sak.formidling.informasjonsbrev;
 
-import no.nav.ung.sak.formidling.BrevScenarioer;
 import no.nav.ung.sak.formidling.BrevTestUtils;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
 
 import java.time.LocalDate;
 

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.scenarioer;
 
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;

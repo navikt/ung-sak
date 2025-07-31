@@ -5,6 +5,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringHøySatsStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;

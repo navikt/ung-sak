@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringStartdatoStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
