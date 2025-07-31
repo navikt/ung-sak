@@ -3,6 +3,8 @@ package no.nav.ung.sak.behandlingslager.fagsak;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.AttributeOverride;
@@ -42,7 +44,8 @@ public class Fagsak extends BaseEntitet {
     @Column(name = "ytelse_type", nullable = false, updatable = false)
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
-    @Embedded
+    @Convert(converter = AktørIdConverter.class, attributeName = "brukerAktørId")
+    //@Column(name = "bruker_aktoer_id",  nullable = false, updatable = false, unique = true)
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId brukerAktørId;
 
