@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak.regler;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -26,6 +26,7 @@ public record VedtaksbrevRegelResulat(
         return new VedtaksbrevRegelResulat(
             new VedtaksbrevEgenskaper(
                 true,
+                null,
                 kanRedigere,
                 kanRedigere,
                 kanRedigere,
@@ -43,6 +44,7 @@ public record VedtaksbrevRegelResulat(
         return new VedtaksbrevRegelResulat(
             new VedtaksbrevEgenskaper(
                 true,
+                null,
                 true,
                 true,
                 true,
@@ -55,11 +57,13 @@ public record VedtaksbrevRegelResulat(
 
     public static VedtaksbrevRegelResulat ingenBrev(
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+        IngenBrevÅrsakType ingenBrevÅrsakType,
         String forklaring
     ) {
         return new VedtaksbrevRegelResulat(
             new VedtaksbrevEgenskaper(
                 false,
+                ingenBrevÅrsakType,
                 false,
                 false,
                 false,
@@ -69,13 +73,5 @@ public record VedtaksbrevRegelResulat(
         );
     }
 
-    public record VedtaksbrevEgenskaper(
-        boolean harBrev,
-        boolean kanHindre,
-        boolean kanOverstyreHindre,
-        boolean kanRedigere,
-        boolean kanOverstyreRediger
-    ) {
-    }
 }
 

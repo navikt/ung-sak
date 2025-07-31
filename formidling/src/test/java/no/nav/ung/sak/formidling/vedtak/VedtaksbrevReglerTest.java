@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -13,14 +13,15 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.BrevScenarioer;
+import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
+import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
+import no.nav.ung.sak.test.util.UnitTestMultiLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
@@ -57,7 +58,7 @@ class VedtaksbrevReglerTest {
     void skal_ikke_redigere_brev_uten_aksjonspunkt() {
         var behandling = lagBehandling(BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
 
-        var vedtaksbrevRegler = lagVedtaksbrevRegler(EndringRapportertInntektInnholdBygger.class);
+        var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
@@ -75,7 +76,7 @@ class VedtaksbrevReglerTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(BrevScenarioer.endringMedInntektPå10k_19år(fom), BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
-        var vedtaksbrevRegler = lagVedtaksbrevRegler(EndringRapportertInntektInnholdBygger.class);
+        var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
@@ -96,7 +97,7 @@ class VedtaksbrevReglerTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom));
 
-        var vedtaksbrevRegler = lagVedtaksbrevRegler(null);
+        var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
@@ -105,8 +106,45 @@ class VedtaksbrevReglerTest {
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
         assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
         assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
+    void skal_gi_ingen_brev_ved_dødsfall_av_barn_hendelse() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(BrevScenarioer.endringDødsfall(fom, fom.plusDays(4)));
+
+        var vedtaksbrevRegler = lagVedtaksbrevRegler();
+        VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
+
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
+
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isNull();
+        assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
+    void skal_gi_ingen_brev_ved_dødsfall_av_barn_under_førstegangsbehandling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom));
+
+        var vedtaksbrevRegler = lagVedtaksbrevRegler();
+        VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
+
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
+
+        assertThat(regelResulat.automatiskVedtaksbrevBygger()).isNull();
+        assertThat(vedtaksbrevEgenskaper.harBrev()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
 
         assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
 
@@ -117,7 +155,7 @@ class VedtaksbrevReglerTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.KONTROLLER_INNTEKT); // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
 
-        var vedtaksbrevRegler = lagVedtaksbrevRegler(ManueltVedtaksbrevInnholdBygger.class);
+        var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
@@ -133,7 +171,7 @@ class VedtaksbrevReglerTest {
 
     }
 
-    private VedtaksbrevRegler lagVedtaksbrevRegler(Class<? extends VedtaksbrevInnholdBygger> forventetBygger) {
+    private VedtaksbrevRegler lagVedtaksbrevRegler() {
         BehandlingRepositoryProvider repositoryProvider = ungTestRepositories.repositoryProvider();
         BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
@@ -147,9 +185,16 @@ class VedtaksbrevReglerTest {
 
         return new VedtaksbrevRegler(
             behandlingRepository,
-            forventetBygger != null ? new UnitTestLookupInstanceImpl<>(mock(forventetBygger)) : null,
             detaljertResultatUtleder,
-            ungTestRepositories.ungdomsprogramPeriodeRepository());
+            new UnitTestMultiLookupInstanceImpl<>(
+                new FørstegangsInnvilgelseStrategy(mock()),
+                new EndringInntektReduksjonStrategy(mock()),
+                new EndringSluttdatoStrategy(mock(), mock(), mock()),
+                new EndringStartdatoStrategy(mock()),
+                new EndringInntektFullUtbetalingStrategy(),
+                new EndringBarnDødsfallStrategy(ungTestRepositories.ungdomsytelseGrunnlagRepository(), false)
+            ),
+            new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
 
     }
 

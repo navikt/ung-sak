@@ -6,7 +6,10 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringStartdatoStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +18,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,61 +34,61 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
     }
 
 
-  @Test
-  void flytteSluttdato_fremover() {
-      var nySluttDato = LocalDate.of(2025, 8, 22);
-      var opprinneligSluttdato = LocalDate.of(2025, 8, 15);
-      var behandling = lagScenarioForSluttdato(opprinneligSluttdato, nySluttDato);
+    @Test
+    void flytteSluttdato_fremover() {
+        var nySluttDato = LocalDate.of(2025, 8, 22);
+        var opprinneligSluttdato = LocalDate.of(2025, 8, 15);
+        var behandling = lagScenarioForSluttdato(opprinneligSluttdato, nySluttDato);
 
-      var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-          """
-              Vi har endret ungdomsprogramytelsen din \
-              Fra 23. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
-              Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
-              men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
-              Den siste utbetalingen får du før den 10. september 2025. \
-              Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
-              """);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Vi har endret ungdomsprogramytelsen din \
+                Fra 23. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
+                Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
+                men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
+                Den siste utbetalingen får du før den 10. september 2025. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
+                """);
 
-      GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-      assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_PROGRAMPERIODE);
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_PROGRAMPERIODE);
 
-      var brevtekst = generertBrev.dokument().html();
+        var brevtekst = generertBrev.dokument().html();
 
-      assertThatHtml(brevtekst)
-          .asPlainTextIsEqualTo(forventet)
-          .containsHtmlSubSequenceOnce(
-              "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
-          );
-  }
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+            );
+    }
 
-  @Test
-  @DisplayName("Flytter sluttdato bakover til forrige måned")
-  void flytteSluttdato_bakover() {
-      var nySluttdato = LocalDate.of(2025, 7, 31);
-      var opprinneligSluttdato = LocalDate.of(2025, 8, 15);
-      var behandling = lagScenarioForSluttdato(opprinneligSluttdato, nySluttdato);
+    @Test
+    @DisplayName("Flytter sluttdato bakover til forrige måned")
+    void flytteSluttdato_bakover() {
+        var nySluttdato = LocalDate.of(2025, 7, 31);
+        var opprinneligSluttdato = LocalDate.of(2025, 8, 15);
+        var behandling = lagScenarioForSluttdato(opprinneligSluttdato, nySluttdato);
 
-      var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-          """
-              Vi har endret ungdomsprogramytelsen din \
-              Fra 1. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
-              Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
-              men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 31. juli 2025. \
-              Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
-              """);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Vi har endret ungdomsprogramytelsen din \
+                Fra 1. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
+                Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
+                men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 31. juli 2025. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
+                """);
 
-      GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-      assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_PROGRAMPERIODE);
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_PROGRAMPERIODE);
 
-      var brevtekst = generertBrev.dokument().html();
+        var brevtekst = generertBrev.dokument().html();
 
-      assertThatHtml(brevtekst)
-          .asPlainTextIsEqualTo(forventet)
-          .containsHtmlSubSequenceOnce(
-              "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
-          );
-  }
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+            );
+    }
 
     private Behandling lagScenarioForSluttdato(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         LocalDate fomDato = LocalDate.of(2024, 12, 1);
@@ -133,8 +137,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
     private Behandling lagEndringScenario(UngTestScenario ungTestscenario, UngTestScenario forrigeBehandlingScenario) {
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
-            .medUngTestGrunnlag(forrigeBehandlingScenario)
-            ;
+            .medUngTestGrunnlag(forrigeBehandlingScenario);
         var originalBehandling = builder.buildOgLagreMedUng(ungTestRepositories);
         originalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         originalBehandling.avsluttBehandling();
@@ -156,8 +159,17 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
     @Override
-    protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        return new EndringProgramPeriodeInnholdBygger(ungTestRepositories.ungdomsprogramPeriodeRepository(), DAGENS_DATO);
+    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
+        var ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
+        var endringProgramPeriodeInnholdBygger = new EndringProgramPeriodeInnholdBygger(ungdomsprogramPeriodeRepository, DAGENS_DATO);
+
+        return List.of(
+            new EndringSluttdatoStrategy(
+                ungdomsprogramPeriodeRepository,
+                new OpphørInnholdBygger(DAGENS_DATO),
+                endringProgramPeriodeInnholdBygger
+            ),
+            new EndringStartdatoStrategy(endringProgramPeriodeInnholdBygger));
     }
 
     @Override

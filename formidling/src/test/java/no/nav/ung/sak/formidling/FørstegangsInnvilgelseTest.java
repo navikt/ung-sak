@@ -4,17 +4,22 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnDødsfallStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
@@ -281,13 +286,11 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         var brevtekst = generertBrev.dokument().html();
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-            //TODO G-verdi endrer seg i perioder som teksten omtaler, men endret G-verdi er ikke nevnt
             """
                 Du får ungdomsprogramytelse \
                 Fra 21. april 2025 får du ungdomsprogramytelse på 649 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fikk barn 6. mai 2025, får du 37 kroner mer for hvert barn fra denne datoen. Da får du 755 kroner per dag, utenom lørdag og søndag. \
-                Fordi du mistet barn 10. mai 2025, får du ikke barnetillegg på 37 kroner fra denne datoen. Da får du 718 kroner per dag, utenom lørdag og søndag. \
-                Fordi du fylte 25 år 12. mai 2025, får du mer penger fra denne datoen. Da får du 1 059 kroner per dag, utenom lørdag og søndag. \
+                Fordi du fylte 25 år 8. mai 2025, får du mer penger fra denne datoen. Da får du 1 096 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
                 Den første utbetalingen får du innen en uke. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
@@ -303,7 +306,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Det vil si at du har rett på 649 kroner per dag. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
-                Fordi du har ett barn, får du i tillegg 37 kroner per dag i barnetillegg. \
+                Fordi du har to barn, får du i tillegg 37 kroner per dag i barnetillegg for hvert barn. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
 
@@ -313,6 +316,64 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 "<h1>Du får ungdomsprogramytelse</h1>"
             );
 
+    }
+
+    @DisplayName("Innvilgelsesbrev med barnedødsfall av barn")
+    @Test
+    void medDødsfallAvBarn() {
+        //Må toggles på for at brevet skal genereres
+        var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, lagByggerOgStrategier(true));
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(vendtaksbrevTjenesteMedToggle, behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får ungdomsprogramytelse \
+                Fra 1. august 2025 får du ungdomsprogramytelse på 718 kroner per dag, utenom lørdag og søndag. \
+                Fordi du mistet barn 16. august 2025, får du ikke barnetillegg på 37 kroner fra denne datoen. Da får du 681 kroner per dag, utenom lørdag og søndag. \
+                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
+                Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                """ + hvorforFårDuPleiepengerAvsnitt() + """
+                Hvordan regner vi oss fram til hvor mye penger du får? \
+                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
+                Nå er grunnbeløpet på 130 160 kroner. \
+                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
+                Det blir 177 105 kroner i året. \
+                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Det vil si at du har rett på 681 kroner per dag. \
+                """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
+        );
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ungdomsprogramytelse</h1>"
+            );
+
+    }
+
+    @DisplayName("Dødsfall av barn skal feile hvis togglet av")
+    @Test
+    void dødsfallBarnSkalFeileDefault() {
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        assertThatThrownBy(
+            () -> genererVedtaksbrev(behandling.getId()
+            )).isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("dødsfall");
     }
 
     private static String meldFraTilOssHvisDuHarEndringerAvsnitt() {
@@ -357,13 +418,21 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     }
 
     @Override
-    protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
+    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
+        return lagByggerOgStrategier(false);
+    }
 
-        return  new FørstegangsInnvilgelseInnholdBygger(
+    @NotNull
+    private List<VedtaksbrevInnholdbyggerStrategy> lagByggerOgStrategier(boolean enableAutoBrevVedBarnDødsfall) {
+        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
+        FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger = new FørstegangsInnvilgelseInnholdBygger(
             ungTestRepositories.ungdomsytelseGrunnlagRepository(),
             ungdomsprogramPeriodeTjeneste,
             ungTestRepositories.tilkjentYtelseRepository(), false, DAGENS_DATO);
+        return List.of(
+            new FørstegangsInnvilgelseStrategy(førstegangsInnvilgelseInnholdBygger),
+            new EndringBarnDødsfallStrategy(ungTestRepositories.ungdomsytelseGrunnlagRepository(), enableAutoBrevVedBarnDødsfall)
+        );
     }
 
     @Override

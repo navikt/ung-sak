@@ -107,25 +107,52 @@ public class BrevScenarioer {
     }
 
     /**
-     * Scenario med alle kombinasjoner:
+     * Førstegangsbehandling med dødsfall av barn
+     */
+    public static UngTestScenario innvilget19årMedDødsfallBarn15DagerEtterStartdato(LocalDate fom) {
+        LocalDate barnDødsdato = fom.plusDays(15);
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(p.getFomDato(), barnDødsdato.minusDays(1), lavSatsMedBarnBuilder(fom, 1).build()),
+            new LocalDateSegment<>(barnDødsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnDødsdato, 0).build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(p),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null,
+            List.of(
+                lagBarnMedDødsdato(fom.minusYears(1), barnDødsdato)
+            ), null);
+    }
+
+    /**
+     * Scenario med alle kombinasjoner utenom dødsfall av barn:
      * Innvilget fom lenge før dagens dato
-     * 24 år ungdom blir 25 år i mai. 2 barn født etter startdato der ene dør. Overgang av G-beløp i tillegg
+     * 24 år ungdom blir 25 år i mai. 2 barn født etter startdato . Overgang av G-beløp i tillegg
      * Søker i mai slutten av mai med startdato 20 april. Får hele mai og april
-     * Får 2 barn så dør ene barnet så overgang til 25 år.
+     * Får 2 barn så overgang til 25 år.
      */
     public static UngTestScenario innvilget24MedAlleKombinasjonerFom21April2025() {
         LocalDate fom = LocalDate.of(2025, 4, 21);
         LocalDate barnFødselsdato = fom.plusDays(15);
-        LocalDate barnDødsdato = barnFødselsdato.plusDays(4);
-        LocalDate tjuvefemårsdato = barnDødsdato.plusDays(2);
+        LocalDate tjuvefemårsdato = barnFødselsdato.plusDays(2);
         LocalDate fødselsdato = tjuvefemårsdato.minusYears(25);
 
         var p = new LocalDateInterval(fom, fom.plusYears(1));
         var satser = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(p.getFomDato(), barnFødselsdato.minusDays(1), lavSatsBuilder(fom).build()),
-            new LocalDateSegment<>(barnFødselsdato, barnDødsdato.minusDays(1), lavSatsMedBarnBuilder(barnFødselsdato, 2).build()), //Får ny G
-            new LocalDateSegment<>(barnDødsdato, tjuvefemårsdato.minusDays(1), lavSatsMedBarnBuilder(barnFødselsdato, 1).build()),
-            new LocalDateSegment<>(tjuvefemårsdato, p.getTomDato(), høySatsBuilderMedBarn(barnFødselsdato, 1).build())
+            new LocalDateSegment<>(barnFødselsdato, tjuvefemårsdato.minusDays(1), lavSatsMedBarnBuilder(barnFødselsdato, 2).build()), //Får ny G
+            new LocalDateSegment<>(tjuvefemårsdato, p.getTomDato(), høySatsBuilderMedBarn(barnFødselsdato, 2).build())
         ));
 
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
@@ -142,7 +169,7 @@ public class BrevScenarioer {
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null,
             List.of(
-                lagBarnMedDødsdato(barnFødselsdato, barnDødsdato),
+                lagBarn(barnFødselsdato),
                 lagBarn(barnFødselsdato)
             ),
             null);
@@ -402,6 +429,35 @@ public class BrevScenarioer {
                 lagBarn(barnFødselsdato)
             ), null);
     }
+
+    /**
+     * Endring pga dødsfall av barn.
+     */
+    public static UngTestScenario endringDødsfall(LocalDate fom, LocalDate barnDødsdato) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, barnDødsdato.minusDays(1), lavSatsMedBarnBuilder(fom, 1).build()),
+            new LocalDateSegment<>(barnDødsdato, p.getTomDato(), lavSatsMedBarnBuilder(barnDødsdato, 0).build())
+        ));
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+
+        return new UngTestScenario(
+            DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            uttaksPerioder(p),
+            tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, DatoIntervallEntitet.fra(barnDødsdato, p.getTomDato()))), null,
+            List.of(
+                lagBarnMedDødsdato(fom.minusYears(1), barnDødsdato)
+            ), null);
+    }
+
 
 
     /**

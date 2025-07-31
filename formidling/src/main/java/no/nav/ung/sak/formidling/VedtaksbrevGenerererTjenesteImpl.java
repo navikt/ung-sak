@@ -4,6 +4,7 @@ package no.nav.ung.sak.formidling;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -16,11 +17,11 @@ import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static no.nav.ung.sak.formidling.vedtak.DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING;
 
 @ApplicationScoped
 public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTjeneste {
@@ -32,6 +33,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
+    private boolean enableIgnoreManglendeBrev;
 
     private VedtaksbrevRegler vedtaksbrevRegler;
 
@@ -41,7 +43,8 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         PdfGenKlient pdfGen,
         VedtaksbrevRegler vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste) {
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste,
+        @KonfigVerdi(value = "IGNORE_MANGLENDE_BREV", defaultVerdi = "false") boolean ignoreManglendeBrev) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
@@ -49,6 +52,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
+        this.enableIgnoreManglendeBrev = ignoreManglendeBrev;
     }
 
     public VedtaksbrevGenerererTjenesteImpl() {
@@ -95,12 +99,9 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
-        if (!regelResultat.vedtaksbrevEgenskaper().harBrev()) {
-            if (erIngenBrevForventet(regelResultat)) {
-                LOG.info(regelResultat.forklaring());
-            } else {
-                LOG.warn(regelResultat.forklaring());
-            }
+        var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
+        if (!vedtaksbrevEgenskaper.harBrev()) {
+            håndterIngenBrevResultat(regelResultat);
             return null;
         }
 
@@ -126,12 +127,16 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private static boolean erIngenBrevForventet(VedtaksbrevRegelResulat regelResultat) {
-        var harKunFullUtbetalingEtterKontroll = regelResultat.detaljertResultatTimeline().toSegments().stream()
-            .allMatch(segment ->
-                segment.getValue().resultatInfo().stream().map(DetaljertResultatInfo::detaljertResultatType)
-                    .allMatch(KONTROLLER_INNTEKT_FULL_UTBETALING::equals));
-        return harKunFullUtbetalingEtterKontroll;
+    private void håndterIngenBrevResultat(VedtaksbrevRegelResulat regelResultat) {
+        if (regelResultat.vedtaksbrevEgenskaper().ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
+            if (enableIgnoreManglendeBrev) {
+                LOG.warn("Ingen brev implementert for tilfelle : {}", regelResultat.forklaring());
+            }
+            else {
+                throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + regelResultat.forklaring());
+            }
+        }
+        LOG.info("Ingen brev relevant for tilfelle: {}", regelResultat.forklaring());
     }
 
     /**

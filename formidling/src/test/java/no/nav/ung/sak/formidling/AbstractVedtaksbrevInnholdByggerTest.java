@@ -10,14 +10,15 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
+import no.nav.ung.sak.test.util.UnitTestMultiLookupInstanceImpl;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -26,9 +27,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +49,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     @Inject
     protected EntityManager entityManager;
 
-    private final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    protected final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
     private final int forventetAntallPdfSider;
     private final String forventetPdfHovedoverskrift;
 
@@ -66,10 +69,18 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        vedtaksbrevGenerererTjeneste = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
+        vedtaksbrevGenerererTjeneste = lagDefaultBrevGenererTjeneste(lagVedtaksbrevByggerStrategier());
     }
 
-    private VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
+
+
+
+    private VedtaksbrevGenerererTjeneste lagDefaultBrevGenererTjeneste(
+        List<VedtaksbrevInnholdbyggerStrategy> vedtaksbrevInnholdbyggerStrategies) {
+        return lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, vedtaksbrevInnholdbyggerStrategies);
+    }
+
+    protected static VedtaksbrevGenerererTjeneste lagBrevGenererTjeneste(UngTestRepositories ungTestRepositories, PdlKlientFake pdlKlient, List<VedtaksbrevInnholdbyggerStrategy> vedtaksbrevInnholdbyggerStrategies) {
         var repositoryProvider = ungTestRepositories.repositoryProvider();
 
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
@@ -81,19 +92,23 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, behandlingRepository)),
             ungTestRepositories.tilkjentYtelseRepository(), repositoryProvider.getVilkårResultatRepository());
 
-        Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(vedtaksbrevInnholdBygger);
+        Instance<VedtaksbrevInnholdbyggerStrategy> innholdByggerStrategier = new UnitTestMultiLookupInstanceImpl<>(
+            vedtaksbrevInnholdbyggerStrategies
+        );
+
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger = new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository());
 
         return new VedtaksbrevGenerererTjenesteImpl(
             behandlingRepository,
             new PdfGenKlient(),
             new VedtaksbrevRegler(
-                    behandlingRepository,
-                    innholdByggere,
-                    detaljertResultatUtleder,
-                    ungdomsprogramPeriodeRepository),
-                ungTestRepositories.vedtaksbrevValgRepository(),
-                new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
-            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
+                behandlingRepository,
+                detaljertResultatUtleder,
+                innholdByggerStrategier,
+                manueltVedtaksbrevInnholdBygger),
+            ungTestRepositories.vedtaksbrevValgRepository(),
+            manueltVedtaksbrevInnholdBygger,
+            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()), false);
     }
 
     @Test
@@ -115,6 +130,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     }
 
     @Test
+    @EnabledIfEnvironmentVariable(named = "PDF", matches = "true")
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
@@ -135,6 +151,14 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
+        return genererVedtaksbrev(vedtaksbrevGenerererTjeneste, behandlingId);
+    }
+
+
+    /**
+     * Mulighet for å bruke egen VedtaksbrevGenerererTjeneste
+     */
+    final protected GenerertBrev genererVedtaksbrev(VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste, Long behandlingId) {
         String lagre = System.getenv("LAGRE");
         if (lagre == null) {
             return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
@@ -160,7 +184,10 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     /**
      * Brukes for å lage BrevGenerererTjeneste
      */
-    protected abstract VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger();
+    protected abstract List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier();
+
+
+
 
     /**
      * Brukes av fellestester i base klasse
