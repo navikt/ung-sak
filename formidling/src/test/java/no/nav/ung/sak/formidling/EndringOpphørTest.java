@@ -6,7 +6,8 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.EndringProgramPeriodeScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -85,8 +86,8 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
     }
 
     private Behandling lagOpphørsbehandling(LocalDate sluttdato) {
-        var forrigeBehandlingGrunnlag = BrevScenarioer.innvilget19år(LocalDate.of(2025, 1, 1));
-        var ungTestGrunnlag = BrevScenarioer.endringOpphør(forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval(), sluttdato);
+        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(LocalDate.of(2025, 1, 1));
+        var ungTestGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval(), sluttdato);
 
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)

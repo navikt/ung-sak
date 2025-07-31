@@ -4,7 +4,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnDødsfallStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.FørstegangsInnvilgelseStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
@@ -34,7 +34,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void standardInnvilgelse() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget19år(fom);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -79,7 +79,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     void medOpphør() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         LocalDate sluttdato = LocalDate.of(2025, 12, 12);
-        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedSluttdato(fom, sluttdato);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedSluttdato(fom, sluttdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
@@ -118,7 +118,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void høySats() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget27år(fom);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget27år(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -155,7 +155,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     void høySatsMaksAlder6MndIProgrammet() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var fødselsdato = LocalDate.of(1997, 2, 15); //Blir 29 etter 6 mnd/130 dager i programmet
-        var ungTestGrunnlag = BrevScenarioer.innvilget29År(fom, fødselsdato);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget29År(fom, fødselsdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
@@ -194,7 +194,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void lavOgHøySats() {
         var fom = LocalDate.of(2025, 8, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget24årBle25årførsteMåned(fom);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget24årBle25årførsteMåned(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får ungdomsprogramytelse \
@@ -235,7 +235,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void barnetillegg() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedBarn15DagerEtterStartdato(fom);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedBarn15DagerEtterStartdato(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -277,7 +277,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @DisplayName("Innvilgelsesbrev med alle kombinasjoner: barnefødsel, barnedødsfall, overgang 25 år, etterbetaling. Sjekker om alt kommer i riktig rekkefølge")
     @Test
     void medAlleKombinasjoner() {
-        var ungTestGrunnlag = BrevScenarioer.innvilget24MedAlleKombinasjonerFom21April2025();
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget24MedAlleKombinasjonerFom21April2025();
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -325,7 +325,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         //Må toggles på for at brevet skal genereres
         var vendtaksbrevTjenesteMedToggle = lagBrevGenererTjeneste(ungTestRepositories, pdlKlient, lagByggerOgStrategier(true));
         LocalDate fom = LocalDate.of(2025, 8, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -367,7 +367,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void dødsfallBarnSkalFeileDefault() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
-        var ungTestGrunnlag = BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -438,7 +438,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
-        UngTestScenario ungTestscenario = BrevScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
+        UngTestScenario ungTestscenario = FørstegangsbehandlingScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
         return lagScenario(ungTestscenario);
     }
 }

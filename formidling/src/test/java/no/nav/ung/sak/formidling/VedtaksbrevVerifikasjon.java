@@ -1,6 +1,6 @@
 package no.nav.ung.sak.formidling;
 
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 
 import java.time.LocalDate;
 
@@ -33,7 +33,7 @@ public class VedtaksbrevVerifikasjon {
         return STANDARD_HEADER_FOOTER
             .formatted(
                 BrevTestUtils.brevDatoString(brevdato),
-                BrevScenarioer.DEFAULT_NAVN,
+                BrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body,
                 "Dette er et automatisk behandlet vedtak. ");
@@ -44,7 +44,7 @@ public class VedtaksbrevVerifikasjon {
         return STANDARD_HEADER_FOOTER
             .formatted(
                 BrevTestUtils.brevDatoString(brevdato),
-                BrevScenarioer.DEFAULT_NAVN,
+                BrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body,
                 "");

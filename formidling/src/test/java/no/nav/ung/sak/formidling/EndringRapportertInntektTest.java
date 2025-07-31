@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringInntektFullUtbetalingStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringInntektReduksjonStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
@@ -31,7 +31,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
     @Test
     void standardEndringRapportertInntekt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_19år(fom);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får 8 329 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
@@ -62,7 +62,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
     @Test
     void melder_inntekt_for_flere_mnd() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får 14 710 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
@@ -95,7 +95,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
     @Test
     void full_ungdomsprogram_med_ingen_rapportert_inntekt_gir_ingen_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = BrevScenarioer.endring0KrInntekt_19år(fom);
+        var ungTestGrunnlag = EndringInntektScenarioer.endring0KrInntekt_19år(fom);
         var behandling = lagScenario(ungTestGrunnlag);
         assertThat(vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), true)).isNull();
 
@@ -127,7 +127,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
-        UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
         return lagScenario(ungTestscenario);
     }
 }

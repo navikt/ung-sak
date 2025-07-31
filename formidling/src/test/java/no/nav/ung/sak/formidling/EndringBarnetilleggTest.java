@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.EndringBarnetilleggScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnetilleggStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -29,7 +29,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
     void standardEndringBarnetillegg() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
-        UngTestScenario ungTestGrunnlag = BrevScenarioer.endringBarnetillegg(startdato, barnFødselsdato);
+        UngTestScenario ungTestGrunnlag = EndringBarnetilleggScenarioer.endringBarnetillegg(startdato, barnFødselsdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
@@ -60,7 +60,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
     void flereBarn() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
-        UngTestScenario ungTestGrunnlag = BrevScenarioer.endringBarnetilleggFlereBarn(startdato, barnFødselsdato);
+        UngTestScenario ungTestGrunnlag = EndringBarnetilleggScenarioer.endringBarnetilleggFlereBarn(startdato, barnFødselsdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
@@ -113,7 +113,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
     protected Behandling lagScenarioForFellesTester() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
-        return lagStandardScenario(BrevScenarioer.endringBarnetillegg(startdato, barnFødselsdato));
+        return lagStandardScenario(EndringBarnetilleggScenarioer.endringBarnetillegg(startdato, barnFødselsdato));
     }
 
 

@@ -16,7 +16,9 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.EndringBarnetilleggScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
@@ -56,7 +58,7 @@ class VedtaksbrevReglerTest {
 
     @Test
     void skal_ikke_redigere_brev_uten_aksjonspunkt() {
-        var behandling = lagBehandling(BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
+        var behandling = lagBehandling(EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1)));
 
         var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
@@ -74,7 +76,7 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_kunne_redigere_automatisk_brev_ved_aksjonspunkt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(BrevScenarioer.endringMedInntektPå10k_19år(fom), BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+        var behandling = lagBehandling(EndringInntektScenarioer.endringMedInntektPå10k_19år(fom), BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
@@ -95,7 +97,7 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_gi_ingen_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_uten_ap() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom));
+        var behandling = lagBehandling(EndringInntektScenarioer.endring0KrInntekt_19år(fom));
 
         var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
@@ -117,7 +119,7 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_gi_ingen_brev_ved_dødsfall_av_barn_hendelse() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(BrevScenarioer.endringDødsfall(fom, fom.plusDays(4)));
+        var behandling = lagBehandling(EndringBarnetilleggScenarioer.endringDødsfall(fom, fom.plusDays(4)));
 
         var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
@@ -135,7 +137,7 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_gi_ingen_brev_ved_dødsfall_av_barn_under_førstegangsbehandling() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(BrevScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom));
+        var behandling = lagBehandling(FørstegangsbehandlingScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom));
 
         var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());
@@ -153,7 +155,7 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(BrevScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.KONTROLLER_INNTEKT); // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
+        var behandling = lagBehandling(EndringInntektScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.KONTROLLER_INNTEKT); // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
 
         var vedtaksbrevRegler = lagVedtaksbrevRegler();
         VedtaksbrevRegelResulat regelResulat = vedtaksbrevRegler.kjør(behandling.getId());

@@ -22,7 +22,7 @@ import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake;
 import no.nav.ung.sak.formidling.informasjonsbrev.innhold.GenereltFritekstbrevInnholdBygger;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
@@ -80,7 +80,7 @@ class InformasjonsbrevTjenesteBrevTest {
     void skal_forhåndsvise_informasjonsbrev() {
         // Given
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
+        UngTestScenario scenario = FørstegangsbehandlingScenarioer.innvilget19år(fom);
         Behandling behandling = lagStandardBehandling(scenario);
 
         // When
@@ -124,7 +124,7 @@ class InformasjonsbrevTjenesteBrevTest {
     void skal_bestille_informasjonsbrev() {
         // Given
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
+        UngTestScenario scenario = FørstegangsbehandlingScenarioer.innvilget19år(fom);
         Behandling behandling = lagStandardBehandling(scenario);
 
         // When

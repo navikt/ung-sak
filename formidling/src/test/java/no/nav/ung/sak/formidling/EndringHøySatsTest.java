@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringHøySatsInnholdBygger;
-import no.nav.ung.sak.formidling.scenarioer.BrevScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.EndringHøySatsScenarioer;
 import no.nav.ung.sak.formidling.vedtak.regler.EndringHøySatsStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -30,7 +30,7 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void standardEndringHøySats() {
         LocalDate fødselsdato = LocalDate.of(2000, 3, 25);
-        var ungTestGrunnlag = BrevScenarioer.endring25År(fødselsdato);
+        var ungTestGrunnlag = EndringHøySatsScenarioer.endring25År(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
@@ -58,7 +58,7 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Test
     void medBarnetillegg() {
         LocalDate fødselsdato = LocalDate.of(2000, 3, 25);
-        var ungTestGrunnlag = BrevScenarioer.endring25ÅrMedToBarn(fødselsdato);
+        var ungTestGrunnlag = EndringHøySatsScenarioer.endring25ÅrMedToBarn(fødselsdato);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
@@ -109,7 +109,7 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
-        UngTestScenario ungTestscenario = BrevScenarioer.endring25År(LocalDate.of(1999, 3, 25));
+        UngTestScenario ungTestscenario = EndringHøySatsScenarioer.endring25År(LocalDate.of(1999, 3, 25));
         return lagScenario(ungTestscenario);
     }
 }
