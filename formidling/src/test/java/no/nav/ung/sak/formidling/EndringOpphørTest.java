@@ -4,17 +4,14 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.sak.formidling.scenarioer.EndringProgramPeriodeScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,13 +19,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-    private final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
+    private static final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
+
+
 
 
     EndringOpphørTest() {
         super(1, "Du får ikke lenger ungdomsprogramytelse");
     }
 
+    @BeforeAll
+    static void beforeAll() {
+        System.setProperty("BREV_DAGENS_DATO_TEST", DAGENS_DATO.toString());
+    }
+
+    @AfterAll
+    static void afterAll() {
+        System.clearProperty("BREV_DAGENS_DATO_TEST");
+    }
 
     @Test
     void standardOpphørsbrev() {
@@ -111,16 +119,6 @@ class EndringOpphørTest extends AbstractVedtaksbrevInnholdByggerTest {
         return behandling;
     }
 
-
-    @Override
-    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
-        var ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
-        return List.of(new EndringSluttdatoStrategy(
-            ungdomsprogramPeriodeRepository,
-            new OpphørInnholdBygger(DAGENS_DATO),
-            new EndringProgramPeriodeInnholdBygger(ungdomsprogramPeriodeRepository, DAGENS_DATO)
-        ));
-    }
 
     @Override
     protected Behandling lagScenarioForFellesTester() {

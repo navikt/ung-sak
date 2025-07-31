@@ -1,23 +1,36 @@
 package no.nav.ung.sak.formidling;
 
-import java.util.List;
-
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResult;
-
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
 import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 
-public record PdlKlientFake(String fnr) implements Pdl {
+import java.util.List;
+
+@Alternative
+@ApplicationScoped
+public class PdlKlientFake implements Pdl {
+
     private static final FiktiveFnr fiktiveFnr = new FiktiveFnr();
+    private String fnr;
+
+    public PdlKlientFake() {
+        this.fnr = gyldigFnr();
+    }
+
+    public PdlKlientFake(String fnr) {
+        this.fnr = fnr;
+    }
 
     public static PdlKlientFake medTilfeldigFnr() {
         return new PdlKlientFake(gyldigFnr());
     }
 
-    public static String gyldigFnr() {
+    private static String gyldigFnr() {
         return fiktiveFnr.nesteFnr();
     }
 
@@ -71,4 +84,9 @@ public record PdlKlientFake(String fnr) implements Pdl {
     public <T extends GraphQLResult<?>> T query(GraphQLOperationRequest q, GraphQLResponseProjection p, Class<T> clazz) {
         return null;
     }
+
+    public String fnr() {
+        return fnr;
+    }
+
 }

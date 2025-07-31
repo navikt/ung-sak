@@ -4,16 +4,12 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
 import no.nav.ung.sak.formidling.scenarioer.EndringBarnetilleggScenarioer;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnetilleggStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,11 +99,6 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
         return behandling;
     }
 
-
-    @Override
-    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
-        return List.of(new EndringBarnetilleggStrategy(new EndringBarnetilleggInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository())));
-    }
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
