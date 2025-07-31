@@ -18,7 +18,7 @@ import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     @WithSpan
     private GenerertBrev doGenererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        VedtaksbrevRegelResulat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
+        VedtaksbrevRegelResultat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
         var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
@@ -127,7 +127,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private void håndterIngenBrevResultat(VedtaksbrevRegelResulat regelResultat) {
+    private void håndterIngenBrevResultat(VedtaksbrevRegelResultat regelResultat) {
         if (regelResultat.vedtaksbrevEgenskaper().ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
             if (enableIgnoreManglendeBrev) {
                 LOG.warn("Ingen brev implementert for tilfelle : {}", regelResultat.forklaring());

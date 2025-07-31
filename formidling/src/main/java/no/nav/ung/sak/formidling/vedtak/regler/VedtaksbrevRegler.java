@@ -41,13 +41,13 @@ public class VedtaksbrevRegler {
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
     }
 
-    public VedtaksbrevRegelResulat kjør(Long behandlingId) {
+    public VedtaksbrevRegelResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
-    private VedtaksbrevRegelResulat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private VedtaksbrevRegelResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var strategyResultater = innholdbyggerStrategies.stream()
             .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
             .map(it -> it.evaluer(behandling, detaljertResultat))
@@ -72,7 +72,7 @@ public class VedtaksbrevRegler {
 
         if (redigerRegelResultat.kanRedigere()) {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
-            return VedtaksbrevRegelResulat.tomRedigerbarBrev(
+            return VedtaksbrevRegelResultat.tomRedigerbarBrev(
                 manueltVedtaksbrevInnholdBygger,
                 detaljertResultat,
                 "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring()
@@ -85,11 +85,11 @@ public class VedtaksbrevRegler {
             .collect(Collectors.toSet());
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return VedtaksbrevRegelResulat.ingenBrev(detaljertResultat, IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring);
+        return VedtaksbrevRegelResultat.ingenBrev(detaljertResultat, IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring);
     }
 
     @NotNull
-    private VedtaksbrevRegelResulat håndterIngenBrevResultat(
+    private VedtaksbrevRegelResultat håndterIngenBrevResultat(
         LocalDateTimeline<DetaljertResultat> detaljertResultat,
         RedigerRegelResultat redigerRegelResultat,
         List<VedtaksbrevStrategyResultat> ingenBrevResultater) {
@@ -99,25 +99,25 @@ public class VedtaksbrevRegler {
             // ingen brev, men har ap så tilbyr tom brev for redigering
             String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. %s. Ingen brev pga %s."
                 .formatted(redigerRegelResultat.forklaring(), byggerResultat.forklaring());
-            return VedtaksbrevRegelResulat.tomRedigerbarBrev(
+            return VedtaksbrevRegelResultat.tomRedigerbarBrev(
                 manueltVedtaksbrevInnholdBygger,
                 detaljertResultat,
                 forklaring
             );
         }
 
-        return VedtaksbrevRegelResulat.ingenBrev(
+        return VedtaksbrevRegelResultat.ingenBrev(
             detaljertResultat, byggerResultat.ingenBrevÅrsakType(), byggerResultat.forklaring()
         );
     }
 
-    private static VedtaksbrevRegelResulat håndterAutomatiskBrevResultat(
+    private static VedtaksbrevRegelResultat håndterAutomatiskBrevResultat(
         LocalDateTimeline<DetaljertResultat> detaljertResultat,
         List<VedtaksbrevStrategyResultat> resultat,
         RedigerRegelResultat automatiskBrevResultat) {
 
         var vedtaksbrevStrategyResultat = resultat.stream().findFirst().orElseThrow(); //TODO håndtere flere resultater
-        return VedtaksbrevRegelResulat.automatiskBrev(
+        return VedtaksbrevRegelResultat.automatiskBrev(
             vedtaksbrevStrategyResultat.bygger(),
             detaljertResultat,
             vedtaksbrevStrategyResultat.forklaring() + " " + automatiskBrevResultat.forklaring(),

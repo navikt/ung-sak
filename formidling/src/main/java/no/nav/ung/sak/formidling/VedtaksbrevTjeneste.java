@@ -6,7 +6,7 @@ import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResulat;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
@@ -43,7 +43,7 @@ public class VedtaksbrevTjeneste {
 
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
-        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(behandlingId);
+        VedtaksbrevRegelResultat resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
@@ -75,7 +75,7 @@ public class VedtaksbrevTjeneste {
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
             .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
 
-        VedtaksbrevRegelResulat resultat = vedtaksbrevRegler.kjør(dto.behandlingId());
+        VedtaksbrevRegelResultat resultat = vedtaksbrevRegler.kjør(dto.behandlingId());
         var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
 
         if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
