@@ -41,13 +41,13 @@ public class VedtaksbrevRegler {
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
     }
 
-    public VedtaksbrevResultat kjør(Long behandlingId) {
+    public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
-    private VedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var strategyResultater = innholdbyggerStrategies.stream()
             .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
             .map(it -> it.evaluer(behandling, detaljertResultat))
@@ -67,20 +67,20 @@ public class VedtaksbrevRegler {
             .toList();
 
         if (!ingenBrevResultat.isEmpty()) {
-            return new VedtaksbrevResultat(detaljertResultat, håndterIngenBrevResultat(redigerRegelResultat, ingenBrevResultat));
+            return new BehandlingVedtaksbrevResultat(detaljertResultat, håndterIngenBrevResultat(redigerRegelResultat, ingenBrevResultat));
         }
 
         var automatiskBrevResultat = strategyResultater.stream()
             .filter(it -> it.bygger() != null)
             .toList();
         if (!automatiskBrevResultat.isEmpty()) {
-            return new VedtaksbrevResultat(detaljertResultat, håndterAutomatiskBrevResultat(automatiskBrevResultat, redigerRegelResultat));
+            return new BehandlingVedtaksbrevResultat(detaljertResultat, håndterAutomatiskBrevResultat(automatiskBrevResultat, redigerRegelResultat));
         }
 
         if (redigerRegelResultat.kanRedigere()) {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
-            return new VedtaksbrevResultat(detaljertResultat,
-                List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
+            return new BehandlingVedtaksbrevResultat(detaljertResultat,
+                List.of(VedtaksbrevResultat.tomRedigerbarBrev(
                     manueltVedtaksbrevInnholdBygger,
                     "Tom fritekstbrev pga manuelle aksjonspunkter: " + redigerRegelResultat.forklaring()))
             );
@@ -92,11 +92,11 @@ public class VedtaksbrevRegler {
             .collect(Collectors.toSet());
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return new VedtaksbrevResultat(detaljertResultat, List.of(VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring)));
+        return new BehandlingVedtaksbrevResultat(detaljertResultat, List.of(VedtaksbrevResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring)));
     }
 
     @NotNull
-    private List<VedtaksbrevRegelResultat> håndterIngenBrevResultat(RedigerRegelResultat redigerRegelResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultater) {
+    private List<VedtaksbrevResultat> håndterIngenBrevResultat(RedigerRegelResultat redigerRegelResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultater) {
 
         if (redigerRegelResultat.kanRedigere()) {
             String forklaringer = ingenBrevResultater.stream().map(VedtaksbrevStrategyResultat::forklaring).collect(Collectors.joining(", "));
@@ -104,25 +104,26 @@ public class VedtaksbrevRegler {
             // ingen brev, men har ap så tilbyr tom brev for redigering
             String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter: %s. Ingen automatisk brev pga: %s."
                 .formatted(redigerRegelResultat.forklaring(), forklaringer);
-            return List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
+            return List.of(VedtaksbrevResultat.tomRedigerbarBrev(
                 manueltVedtaksbrevInnholdBygger,
                 forklaring
             ));
         }
 
-        return ingenBrevResultater.stream().map(it -> VedtaksbrevRegelResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring())).toList();
+        return ingenBrevResultater.stream().map(it -> VedtaksbrevResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring())).toList();
     }
 
 
-    private static List<VedtaksbrevRegelResultat> håndterAutomatiskBrevResultat(
+    private static List<VedtaksbrevResultat> håndterAutomatiskBrevResultat(
         List<VedtaksbrevStrategyResultat> resultat,
         RedigerRegelResultat redigerRegelResultat) {
 
         return resultat.stream()
             .map(it -> {
                 String forklaring = it.forklaring() + "." + (redigerRegelResultat.kanRedigere() ? " Kan redigeres pga " + redigerRegelResultat.forklaring() : "");
-                    return VedtaksbrevRegelResultat
+                    return VedtaksbrevResultat
                         .automatiskBrev(
+                            it.dokumentMalType(),
                             it.bygger(),
                             forklaring,
                             redigerRegelResultat.kanRedigere());

@@ -6,8 +6,8 @@ import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevResultat;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
@@ -44,7 +44,7 @@ public class VedtaksbrevTjeneste {
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
         //TODO håndtere flere resultater
-        var resultat = vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevRegelResultater().getFirst();
+        var resultat = vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevResultater().getFirst();
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
@@ -63,8 +63,8 @@ public class VedtaksbrevTjeneste {
     }
 
     public boolean måSkriveBrev(Long behandlingId) {
-        return vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevRegelResultater().stream()
-            .map(VedtaksbrevRegelResultat::vedtaksbrevEgenskaper)
+        return vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevResultater().stream()
+            .map(VedtaksbrevResultat::vedtaksbrevEgenskaper)
             .anyMatch(
                 egenskaper -> egenskaper.harBrev() && egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
             );
@@ -80,7 +80,7 @@ public class VedtaksbrevTjeneste {
             .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
 
         //TODO håndtere flere resultater
-        var resultat = vedtaksbrevRegler.kjør(dto.behandlingId()).vedtaksbrevRegelResultater().getFirst();
+        var resultat = vedtaksbrevRegler.kjør(dto.behandlingId()).vedtaksbrevResultater().getFirst();
         var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
 
         if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {

@@ -17,8 +17,8 @@ import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
+import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevResultat;
 import org.slf4j.Logger;
@@ -97,8 +97,8 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     @WithSpan
     private GenerertBrev doGenererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        VedtaksbrevResultat regelResultater = vedtaksbrevRegler.kjør(behandlingId);
-        var regelResultat = regelResultater.vedtaksbrevRegelResultater().getFirst();
+        BehandlingVedtaksbrevResultat regelResultater = vedtaksbrevRegler.kjør(behandlingId);
+        var regelResultat = regelResultater.vedtaksbrevResultater().getFirst();
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
         var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
@@ -109,7 +109,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        VedtaksbrevInnholdBygger bygger = regelResultat.automatiskVedtaksbrevBygger();
+        VedtaksbrevInnholdBygger bygger = regelResultat.vedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, regelResultater.detaljertResultatTimeline());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
@@ -129,7 +129,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private void håndterIngenBrevResultat(VedtaksbrevRegelResultat regelResultat) {
+    private void håndterIngenBrevResultat(VedtaksbrevResultat regelResultat) {
         if (regelResultat.vedtaksbrevEgenskaper().ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
             if (enableIgnoreManglendeBrev) {
                 LOG.warn("Ingen brev implementert for tilfelle : {}", regelResultat.forklaring());
