@@ -10,12 +10,11 @@ import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.BrevScenarioer;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.PdlKlientFake;
-import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
+import no.nav.ung.sak.formidling.scenarioer.EndringProgramPeriodeScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
 import no.nav.ung.sak.test.util.UngTestRepositories;
@@ -41,6 +40,7 @@ class InformasjonsbrevTjenesteValgTest {
     protected String fnr = pdlKlient.fnr();
 
     private UngTestRepositories ungTestRepositories;
+    @Inject
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
 
 
@@ -48,24 +48,13 @@ class InformasjonsbrevTjenesteValgTest {
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
 
-        informasjonsbrevTjeneste = new InformasjonsbrevTjeneste(
-            ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-            new InformasjonsbrevGenerererTjeneste(
-                ungTestRepositories.repositoryProvider().getBehandlingRepository(),
-                new PdfGenKlient(),
-                new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient),
-                    ungTestRepositories.repositoryProvider().getPersonopplysningRepository()),
-                null),
-            null,
-            ungTestRepositories.repositoryProvider().getPersonopplysningRepository()
-        );
     }
 
     @Test
     void skal_få_generelt_fritekstbrev_med_riktige_valg() {
         // Given
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        UngTestScenario scenario = BrevScenarioer.innvilget19år(fom);
+        UngTestScenario scenario = FørstegangsbehandlingScenarioer.innvilget19år(fom);
         Behandling behandling = lagStandardBehandling(scenario);
 
         // When
@@ -80,7 +69,7 @@ class InformasjonsbrevTjenesteValgTest {
         InformasjonsbrevMottakerValgResponse mottaker = first.mottakere().getFirst();
         assertThat(mottaker.id()).isEqualTo(behandling.getFagsak().getAktørId().getId());
         assertThat(mottaker.idType()).isEqualTo(IdType.AKTØRID);
-        assertThat(mottaker.navn()).isEqualTo(BrevScenarioer.DEFAULT_NAVN);
+        assertThat(mottaker.navn()).isEqualTo(BrevScenarioerUtils.DEFAULT_NAVN);
         assertThat(mottaker.fødselsdato()).isEqualTo(scenario.fødselsdato());
         assertThat(mottaker.utilgjengeligÅrsak()).isNull();
 
@@ -93,7 +82,7 @@ class InformasjonsbrevTjenesteValgTest {
     void skal_få_generelt_fritekstbrev_på_avsluttet_behandling() {
         // Given
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        Behandling behandling = lagStandardBehandling(BrevScenarioer.innvilget19år(fom));
+        Behandling behandling = lagStandardBehandling(FørstegangsbehandlingScenarioer.innvilget19år(fom));
 
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
@@ -111,7 +100,7 @@ class InformasjonsbrevTjenesteValgTest {
     void skal_få_utilgjegelig_mottaker_hvis_død() {
         // Given
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        UngTestScenario scenario = BrevScenarioer.død19år(fom);
+        UngTestScenario scenario = EndringProgramPeriodeScenarioer.død19år(fom);
 
         Behandling behandling = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
@@ -127,7 +116,7 @@ class InformasjonsbrevTjenesteValgTest {
         assertThat(first.mottakere()).isEqualTo(List.of(new InformasjonsbrevMottakerValgResponse(
             behandling.getFagsak().getAktørId().getId(),
             IdType.AKTØRID,
-            scenario.fødselsdato(), BrevScenarioer.DEFAULT_NAVN,
+            scenario.fødselsdato(), BrevScenarioerUtils.DEFAULT_NAVN,
             UtilgjengeligÅrsak.PERSON_DØD)));
     }
 

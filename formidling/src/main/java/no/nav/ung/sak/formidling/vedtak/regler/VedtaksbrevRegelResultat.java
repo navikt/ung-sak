@@ -4,13 +4,13 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 
-public record VedtaksbrevRegelResulat(
+public record VedtaksbrevRegelResultat(
     VedtaksbrevEgenskaper vedtaksbrevEgenskaper,
     VedtaksbrevInnholdBygger automatiskVedtaksbrevBygger,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
     String forklaring) {
     public String safePrint() {
-        return "VedtaksbrevRegelResulat{" +
+        return "VedtaksbrevRegelResultat{" +
             "vedtaksbrevEgenskaper=" + vedtaksbrevEgenskaper +
             ", bygger=" + (automatiskVedtaksbrevBygger != null ? automatiskVedtaksbrevBygger.getClass().getSimpleName() : "null") +
             ", detaljertResultatTimeline=" + DetaljertResultat.timelineToString(detaljertResultatTimeline) +
@@ -18,12 +18,12 @@ public record VedtaksbrevRegelResulat(
             '}';
     }
 
-    public static VedtaksbrevRegelResulat automatiskBrev(
+    public static VedtaksbrevRegelResultat automatiskBrev(
         VedtaksbrevInnholdBygger bygger,
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
         String forklaring,
         boolean kanRedigere) {
-        return new VedtaksbrevRegelResulat(
+        return new VedtaksbrevRegelResultat(
             new VedtaksbrevEgenskaper(
                 true,
                 null,
@@ -36,12 +36,12 @@ public record VedtaksbrevRegelResulat(
         );
     }
 
-    public static VedtaksbrevRegelResulat tomRedigerbarBrev(
+    public static VedtaksbrevRegelResultat tomRedigerbarBrev(
         VedtaksbrevInnholdBygger bygger,
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
         String forklaring
     ) {
-        return new VedtaksbrevRegelResulat(
+        return new VedtaksbrevRegelResultat(
             new VedtaksbrevEgenskaper(
                 true,
                 null,
@@ -55,12 +55,12 @@ public record VedtaksbrevRegelResulat(
         );
     }
 
-    public static VedtaksbrevRegelResulat ingenBrev(
+    public static VedtaksbrevRegelResultat ingenBrev(
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
         IngenBrevÅrsakType ingenBrevÅrsakType,
         String forklaring
     ) {
-        return new VedtaksbrevRegelResulat(
+        return new VedtaksbrevRegelResultat(
             new VedtaksbrevEgenskaper(
                 false,
                 ingenBrevÅrsakType,

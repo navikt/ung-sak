@@ -4,15 +4,12 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringBarnetilleggStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
+import no.nav.ung.sak.formidling.scenarioer.EndringBarnetilleggScenarioer;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +25,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
     void standardEndringBarnetillegg() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
-        UngTestScenario ungTestGrunnlag = BrevScenarioer.endringBarnetillegg(startdato, barnFødselsdato);
+        UngTestScenario ungTestGrunnlag = EndringBarnetilleggScenarioer.endringBarnetillegg(startdato, barnFødselsdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
@@ -59,7 +56,7 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
     void flereBarn() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
-        UngTestScenario ungTestGrunnlag = BrevScenarioer.endringBarnetilleggFlereBarn(startdato, barnFødselsdato);
+        UngTestScenario ungTestGrunnlag = EndringBarnetilleggScenarioer.endringBarnetilleggFlereBarn(startdato, barnFødselsdato);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
@@ -104,15 +101,10 @@ class EndringBarnetilleggTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
     @Override
-    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
-        return List.of(new EndringBarnetilleggStrategy(new EndringBarnetilleggInnholdBygger(ungTestRepositories.ungdomsytelseGrunnlagRepository())));
-    }
-
-    @Override
     protected Behandling lagScenarioForFellesTester() {
         LocalDate startdato = LocalDate.of(2025, 5, 3);
         LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
-        return lagStandardScenario(BrevScenarioer.endringBarnetillegg(startdato, barnFødselsdato));
+        return lagStandardScenario(EndringBarnetilleggScenarioer.endringBarnetillegg(startdato, barnFødselsdato));
     }
 
 

@@ -5,32 +5,41 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringSluttdatoStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringStartdatoStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevInnholdbyggerStrategy;
+import no.nav.ung.sak.formidling.scenarioer.EndringProgramPeriodeScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-    private final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
+    private static final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
 
 
     EndringProgramPeriodeTest() {
         super(1,
             "Vi har endret ungdomsprogramytelsen din");
+    }
+
+
+    @BeforeAll
+    static void beforeAll() {
+        System.setProperty("BREV_DAGENS_DATO_TEST", DAGENS_DATO.toString());
+    }
+
+    @AfterAll
+    static void afterAll() {
+        System.clearProperty("BREV_DAGENS_DATO_TEST");
     }
 
 
@@ -94,8 +103,8 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         LocalDate fomDato = LocalDate.of(2024, 12, 1);
 
         LocalDateInterval opprinneligProgramPeriode = new LocalDateInterval(fomDato, fomDato.plusWeeks(52));
-        var opphørGrunnlag = BrevScenarioer.endringOpphør(opprinneligProgramPeriode, opprinneligSluttdato);
-        var endringGrunnlag = BrevScenarioer.endringSluttdato(nySluttdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        var opphørGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(opprinneligProgramPeriode, opprinneligSluttdato);
+        var endringGrunnlag = EndringProgramPeriodeScenarioer.endringSluttdato(nySluttdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
         return lagEndringScenario(endringGrunnlag, opphørGrunnlag);
     }
 
@@ -108,8 +117,8 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
         LocalDate opprinneligStartdato = LocalDate.of(2025, 8, 15);
         LocalDate nyStartdato = LocalDate.parse(nyStartdatoStr);
 
-        var førstegangsbehandling = BrevScenarioer.innvilget19år(opprinneligStartdato);
-        var endringGrunnlag = BrevScenarioer.endringStartdato(nyStartdato, førstegangsbehandling.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        var førstegangsbehandling = FørstegangsbehandlingScenarioer.innvilget19år(opprinneligStartdato);
+        var endringGrunnlag = EndringProgramPeriodeScenarioer.endringStartdato(nyStartdato, førstegangsbehandling.programPerioder().getFirst().getPeriode().toLocalDateInterval());
         var behandling = lagEndringScenario(endringGrunnlag, førstegangsbehandling);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
@@ -159,27 +168,13 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
     @Override
-    protected List<VedtaksbrevInnholdbyggerStrategy> lagVedtaksbrevByggerStrategier() {
-        var ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
-        var endringProgramPeriodeInnholdBygger = new EndringProgramPeriodeInnholdBygger(ungdomsprogramPeriodeRepository, DAGENS_DATO);
-
-        return List.of(
-            new EndringSluttdatoStrategy(
-                ungdomsprogramPeriodeRepository,
-                new OpphørInnholdBygger(DAGENS_DATO),
-                endringProgramPeriodeInnholdBygger
-            ),
-            new EndringStartdatoStrategy(endringProgramPeriodeInnholdBygger));
-    }
-
-    @Override
     protected Behandling lagScenarioForFellesTester() {
         LocalDate fomDato = LocalDate.of(2024, 12, 1);
         LocalDate opprinnligOpphørsdato = LocalDate.of(2025, 8, 15);
         LocalDate nyOpphørsdato = LocalDate.of(2025, 8, 10);
 
-        var opphørGrunnlag = BrevScenarioer.endringOpphør(new LocalDateInterval(fomDato, fomDato.plusWeeks(52)), opprinnligOpphørsdato);
-        var endringGrunnlag = BrevScenarioer.endringSluttdato(nyOpphørsdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
+        var opphørGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(new LocalDateInterval(fomDato, fomDato.plusWeeks(52)), opprinnligOpphørsdato);
+        var endringGrunnlag = EndringProgramPeriodeScenarioer.endringSluttdato(nyOpphørsdato, opphørGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval());
         return lagEndringScenario(endringGrunnlag, opphørGrunnlag);
     }
 }

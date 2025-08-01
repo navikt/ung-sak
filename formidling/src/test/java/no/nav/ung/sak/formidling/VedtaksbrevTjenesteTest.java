@@ -11,25 +11,13 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.formidling.vedtak.regler.EndringInntektReduksjonStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.UnitTestMultiLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,52 +35,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @ExtendWith(JpaExtension.class)
 class VedtaksbrevTjenesteTest {
 
-    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private VedtaksbrevRegler vedtaksbrevRegler;
-    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
-    private UngTestRepositories ungTestRepositories;
+    @Inject
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
-
-    PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
-
     @Inject
     private EntityManager entityManager;
+
+    private UngTestRepositories ungTestRepositories;
 
     @BeforeEach
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        lagBrevgenererOgVedtaksbrevRegler();
-        vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
-        vedtaksbrevTjeneste = new VedtaksbrevTjeneste(
-                vedtaksbrevGenerererTjeneste, vedtaksbrevRegler, vedtaksbrevValgRepository,
-            ungTestRepositories.repositoryProvider().getBehandlingRepository());
-
-    }
-
-    private void lagBrevgenererOgVedtaksbrevRegler() {
-        var repositoryProvider = ungTestRepositories.repositoryProvider();
-        var tilkjentYtelseRepository = ungTestRepositories.tilkjentYtelseRepository();
-
-        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
-
-        var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-            tilkjentYtelseRepository, repositoryProvider.getVilkårResultatRepository());
-
-        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger = new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository());
-
-        vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), detaljertResultatUtleder,
-            new UnitTestMultiLookupInstanceImpl<>(
-                new EndringInntektReduksjonStrategy(new EndringRapportertInntektInnholdBygger(ungTestRepositories.tilkjentYtelseRepository()))
-            ), manueltVedtaksbrevInnholdBygger);
-
-        vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
-            repositoryProvider.getBehandlingRepository(),
-            new PdfGenKlient(),
-            vedtaksbrevRegler,
-            ungTestRepositories.vedtaksbrevValgRepository(),
-            manueltVedtaksbrevInnholdBygger,
-            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()), false);
     }
 
     @Test
@@ -269,7 +221,7 @@ class VedtaksbrevTjenesteTest {
 
 
     private Behandling lagScenarioMedRedigerbarBrev() {
-        UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
