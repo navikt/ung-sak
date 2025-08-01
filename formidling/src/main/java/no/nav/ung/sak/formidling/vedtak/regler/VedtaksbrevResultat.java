@@ -6,8 +6,8 @@ import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import java.util.List;
 
 public record VedtaksbrevResultat(
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-        List<VedtaksbrevRegelResultat> vedtaksbrevRegelResultater) {
+    LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+    List<VedtaksbrevRegelResultat> vedtaksbrevRegelResultater) {
 
 }
 

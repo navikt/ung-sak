@@ -16,18 +16,20 @@ public record VedtaksbrevRegelResultat(
     }
 
     public static VedtaksbrevRegelResultat automatiskBrev(
-        VedtaksbrevInnholdBygger bygger,
-        String forklaring,
-        boolean kanRedigere) {
+            VedtaksbrevInnholdBygger bygger,
+            String forklaring,
+            boolean kanRedigere) {
         return new VedtaksbrevRegelResultat(
-            new VedtaksbrevEgenskaper(
-                true,
-                null,
-                kanRedigere,
-                kanRedigere,
-                kanRedigere,
-                kanRedigere), bygger,
-            forklaring
+                new VedtaksbrevEgenskaper(
+                        true,
+                        null,
+                        kanRedigere,
+                        kanRedigere,
+                        kanRedigere,
+                        kanRedigere
+                ),
+                bygger,
+                forklaring
         );
     }
 

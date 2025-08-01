@@ -3,6 +3,7 @@ package no.nav.ung.sak.formidling.vedtak.regler;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
@@ -20,7 +21,7 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new VedtaksbrevStrategyResultat(endringRapportertInntektInnholdBygger, "Automatisk brev ved endring av rapportert inntekt.", null);
+        return new VedtaksbrevStrategyResultat(DokumentMalType.ENDRING_INNTEKT, endringRapportertInntektInnholdBygger, "Automatisk brev ved endring av rapportert inntekt.", null);
     }
 
     @Override
