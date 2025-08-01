@@ -43,7 +43,8 @@ public class VedtaksbrevTjeneste {
 
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
-        VedtaksbrevRegelResultat resultat = vedtaksbrevRegler.kjør(behandlingId);
+        //TODO håndtere flere resultater
+        var resultat = vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevRegelResultater().getFirst();
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
@@ -62,8 +63,11 @@ public class VedtaksbrevTjeneste {
     }
 
     public boolean måSkriveBrev(Long behandlingId) {
-        var regelResulat = vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevEgenskaper();
-        return regelResulat.harBrev() && regelResulat.kanRedigere() && !regelResulat.kanOverstyreRediger();
+        return vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevRegelResultater().stream()
+            .map(VedtaksbrevRegelResultat::vedtaksbrevEgenskaper)
+            .anyMatch(
+                egenskaper -> egenskaper.harBrev() && egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
+            );
     }
 
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
@@ -75,7 +79,8 @@ public class VedtaksbrevTjeneste {
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
             .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
 
-        VedtaksbrevRegelResultat resultat = vedtaksbrevRegler.kjør(dto.behandlingId());
+        //TODO håndtere flere resultater
+        var resultat = vedtaksbrevRegler.kjør(dto.behandlingId()).vedtaksbrevRegelResultater().getFirst();
         var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
 
         if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {

@@ -27,7 +27,7 @@ public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbygg
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderBare(DetaljertResultatType.ENDRING_BARN_FØDSEL);
+        return resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL);
     }
 
 }

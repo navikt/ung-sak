@@ -20,6 +20,7 @@ import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,8 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     @WithSpan
     private GenerertBrev doGenererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        VedtaksbrevRegelResultat regelResultat = vedtaksbrevRegler.kjør(behandlingId);
+        VedtaksbrevResultat regelResultater = vedtaksbrevRegler.kjør(behandlingId);
+        var regelResultat = regelResultater.vedtaksbrevRegelResultater().getFirst();
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
         var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
@@ -108,7 +110,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         VedtaksbrevInnholdBygger bygger = regelResultat.automatiskVedtaksbrevBygger();
-        var resultat = bygger.bygg(behandling, regelResultat.detaljertResultatTimeline());
+        var resultat = bygger.bygg(behandling, regelResultater.detaljertResultatTimeline());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(

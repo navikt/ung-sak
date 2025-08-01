@@ -109,4 +109,5 @@ public class BrevScenarioerUtils {
             new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), sats)
         ))).stream().findFirst().orElseThrow().getValue();
     }
+
 }
