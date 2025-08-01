@@ -2,9 +2,5 @@
 <beans xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/3_0.xsd"
        version="3.0" bean-discovery-mode="annotated">
-    <alternatives>
-        <class>no.nav.ung.sak.formidling.PdlKlientFake</class>
-        <class>no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientFake</class>
-        <class>no.nav.ung.sak.formidling.dokdist.DokDistRestKlientFake</class>
-    </alternatives>
+
 </beans>

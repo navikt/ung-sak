@@ -4,6 +4,7 @@ import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLOperationRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLRequest;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResponseProjection;
 import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResult;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import no.nav.k9.felles.integrasjon.pdl.*;
@@ -11,8 +12,9 @@ import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
 
 import java.util.List;
 
-@Alternative
 @ApplicationScoped
+@Alternative
+@Priority(value = 1)
 public class PdlKlientFake implements Pdl {
 
     private static final FiktiveFnr fiktiveFnr = new FiktiveFnr();
@@ -90,3 +92,4 @@ public class PdlKlientFake implements Pdl {
     }
 
 }
+

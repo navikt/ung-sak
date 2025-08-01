@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.dokarkiv;
 
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Alternative
 @ApplicationScoped
+@Priority(value = 1)
 public class DokArkivKlientFake implements DokArkivKlient {
 
     public DokArkivKlientFake() {

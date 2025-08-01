@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.dokdist;
 
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostRequest;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Alternative
 @ApplicationScoped
+@Priority(value = 1)
 public class DokDistRestKlientFake implements DokDistRestKlient {
 
     private final List<DistribuerJournalpostRequest> requests = new ArrayList<>();
