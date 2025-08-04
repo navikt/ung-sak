@@ -106,14 +106,15 @@ public class VedtaksbrevTjeneste {
     public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
 
+        VedtaksbrevBestillingInput vedtaksbrevBestillingInput = new VedtaksbrevBestillingInput(dto.behandlingId(), kunHtml);
         if (dto.redigertVersjon() == null) {
-            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(dto.behandlingId(), kunHtml);
+            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(vedtaksbrevBestillingInput);
         }
         if (dto.redigertVersjon()) {
-            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
+            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(vedtaksbrevBestillingInput);
         }
 
-        return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(dto.behandlingId(), kunHtml);
+        return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(vedtaksbrevBestillingInput);
     }
 
     public void ryddVedTilbakeHopp(Long behandlingId) {

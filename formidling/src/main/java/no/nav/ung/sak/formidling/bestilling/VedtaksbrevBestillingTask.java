@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevBestillingInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         validerBrevbestillingForespørsel(behandling);
 
-        var generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        var generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), false));
         if (generertBrev == null) {
             LOG.info("Ingen brev generert.");
             return;

@@ -5,9 +5,9 @@ import no.nav.ung.sak.formidling.GenerertBrev;
 
 public interface VedtaksbrevGenerererTjeneste {
     @WithSpan
-    GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml);
+    GenerertBrev genererVedtaksbrevForBehandling(VedtaksbrevBestillingInput vedtaksbrevBestillingInput);
     @WithSpan
-    GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml);
+    GenerertBrev genererManuellVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput);
     @WithSpan
-    GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml);
+    GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput);
 }

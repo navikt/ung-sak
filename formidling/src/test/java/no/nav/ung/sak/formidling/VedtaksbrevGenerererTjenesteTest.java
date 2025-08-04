@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevBestillingInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ class VedtaksbrevGenerererTjenesteTest {
         var behandling = scenario.getBehandling();
 
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), false));
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
 
         assertThat(erPdf(generertBrev.dokument().pdf())).isTrue();

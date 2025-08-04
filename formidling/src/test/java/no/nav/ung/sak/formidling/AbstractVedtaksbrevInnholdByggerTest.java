@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevBestillingInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import org.apache.pdfbox.Loader;
@@ -70,8 +71,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void verifiserOverskrifter() {
         var behandling = lagScenarioForFellesTester();
 
-        Long behandlingId = (behandling.getId());
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), true));
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -88,7 +88,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), false));
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -112,10 +112,10 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     static protected GenerertBrev genererVedtaksbrev(VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste, Long behandlingId, TestInfo testInfo) {
         String lagre = System.getenv("LAGRE");
         if (lagre == null) {
-            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandlingId, true));
         }
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, !lagre.equals("PDF"));
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandlingId, !lagre.equals("PDF")));
 
         switch (lagre) {
             case "PDF":

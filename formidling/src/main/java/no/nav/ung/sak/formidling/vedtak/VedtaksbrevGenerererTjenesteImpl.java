@@ -66,13 +66,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
      */
     @WithSpan
     @Override
-    public GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererVedtaksbrev(behandlingId, kunHtml));
+    public GenerertBrev genererVedtaksbrevForBehandling(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererVedtaksbrev(vedtaksbrevBestillingInput));
     }
 
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
-    private GenerertBrev doGenererVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        VedtaksbrevValgEntitet vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
+    private GenerertBrev doGenererVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
+        VedtaksbrevValgEntitet vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(vedtaksbrevBestillingInput.behandlingId()).orElse(null);
         if (vedtaksbrevValgEntitet != null) {
             if (vedtaksbrevValgEntitet.isHindret()) {
                 LOG.info("Vedtaksbrev er manuelt stoppet - lager ikke brev");
@@ -80,12 +80,12 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             }
             if (vedtaksbrevValgEntitet.isRedigert()) {
                 LOG.info("Vedtaksbrev er manuelt redigert - genererer manuell brev");
-                return doGenererManuellVedtaksbrev(behandlingId, kunHtml);
+                return doGenererManuellVedtaksbrev(vedtaksbrevBestillingInput);
             }
             LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
         }
 
-        return doGenererAutomatiskVedtaksbrev(behandlingId, kunHtml);
+        return doGenererAutomatiskVedtaksbrev(vedtaksbrevBestillingInput);
     }
 
     /**
@@ -93,13 +93,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
      */
     @WithSpan
     @Override
-    public GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(behandlingId, kunHtml));
+    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(vedtaksbrevBestillingInput));
     }
 
     @WithSpan
-    private GenerertBrev doGenererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        BehandlingVedtaksbrevResultat regelResultater = vedtaksbrevRegler.kjør(behandlingId);
+    private GenerertBrev doGenererAutomatiskVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
+        BehandlingVedtaksbrevResultat regelResultater = vedtaksbrevRegler.kjør(vedtaksbrevBestillingInput.behandlingId());
         var regelResultat = regelResultater.vedtaksbrevResultater().getFirst();
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
@@ -108,7 +108,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             return null;
         }
 
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var behandling = behandlingRepository.hentBehandling(vedtaksbrevBestillingInput.behandlingId());
 
         VedtaksbrevInnholdBygger bygger = regelResultat.vedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, regelResultater.detaljertResultatTimeline());
@@ -120,7 +120,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             )
         );
 
-        PdfGenDokument dokument = pdfGen.lagDokument(input, kunHtml);
+        PdfGenDokument dokument = pdfGen.lagDokument(input, vedtaksbrevBestillingInput.kunHtml());
         return new GenerertBrev(
             dokument,
             pdlMottaker,
@@ -147,13 +147,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
      */
     @WithSpan
     @Override
-    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, kunHtml));
+    public GenerertBrev genererManuellVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(vedtaksbrevBestillingInput));
     }
 
     @WithSpan
-    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
+    private GenerertBrev doGenererManuellVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
+        var behandling = behandlingRepository.hentBehandling(vedtaksbrevBestillingInput.behandlingId());
         var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, null);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
@@ -163,7 +163,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             )
         );
 
-        PdfGenDokument dokument = pdfGen.lagDokument(input, kunHtml);
+        PdfGenDokument dokument = pdfGen.lagDokument(input, vedtaksbrevBestillingInput.kunHtml());
         return new GenerertBrev(
             dokument,
             pdlMottaker,
