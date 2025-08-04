@@ -9,6 +9,7 @@ import java.util.List;
  * Vedtaksbrevresultat for hele behandlingen. Vet om det er flere vedtaksbrev.
  */
 public record BehandlingVedtaksbrevResultat(
+    boolean harBrev,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
     List<VedtaksbrevResultat> vedtaksbrevResultater) {
 

@@ -101,8 +101,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var regelResultat = regelResultater.vedtaksbrevResultater().getFirst();
         LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
 
-        var vedtaksbrevEgenskaper = regelResultat.vedtaksbrevEgenskaper();
-        if (!vedtaksbrevEgenskaper.harBrev()) {
+        if (!regelResultater.harBrev()) {
             håndterIngenBrevResultat(regelResultat);
             return null;
         }
@@ -130,7 +129,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     }
 
     private void håndterIngenBrevResultat(VedtaksbrevResultat regelResultat) {
-        if (regelResultat.vedtaksbrevEgenskaper().ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
+        if (regelResultat.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
             if (enableIgnoreManglendeBrev) {
                 LOG.warn("Ingen brev implementert for tilfelle : {}", regelResultat.forklaring());
             }

@@ -6,6 +6,7 @@ import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
+import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevResultat;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
@@ -44,13 +45,14 @@ public class VedtaksbrevTjeneste {
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
         //TODO håndtere flere resultater
-        var resultat = vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevResultater().getFirst();
+        BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegler.kjør(behandlingId);
+        var resultat = totalResultat.vedtaksbrevResultater().getFirst();
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
 
         return new VedtaksbrevValgResponse(
-            egenskaper.harBrev(),
+            totalResultat.harBrev(),
             egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreHindre(),
@@ -63,10 +65,11 @@ public class VedtaksbrevTjeneste {
     }
 
     public boolean måSkriveBrev(Long behandlingId) {
-        return vedtaksbrevRegler.kjør(behandlingId).vedtaksbrevResultater().stream()
+        var totalResultat = vedtaksbrevRegler.kjør(behandlingId);
+        return totalResultat.vedtaksbrevResultater().stream()
             .map(VedtaksbrevResultat::vedtaksbrevEgenskaper)
             .anyMatch(
-                egenskaper -> egenskaper.harBrev() && egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
+                egenskaper -> totalResultat.harBrev() && egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
             );
     }
 
