@@ -36,23 +36,23 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>5.1.5</felles.version>
-        <swagger.version>2.2.34</swagger.version>
+        <swagger.version>2.2.35</swagger.version>
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.3.2</k9format.version>
         <jackson.version>2.19.2</jackson.version>
         <asm.version>9.8</asm.version>
         <kotlin-stdlib.version>2.2.0</kotlin-stdlib.version>
         <jandex.version>3.4.0</jandex.version>
-        <flyway.version>11.10.4</flyway.version>
         <pdfgen-core.version>1.1.56</pdfgen-core.version>
+        <flyway.version>11.10.5</flyway.version>
         <confluent.platform.version>8.0.0</confluent.platform.version>
         <mockito.version>5.18.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.4.0</ung-deltakelse-opplyser.version>
         <handlebars.version>4.4.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
-        <openhtmltopdf.version>1.1.28</openhtmltopdf.version>
+        <openhtmltopdf.version>1.1.29</openhtmltopdf.version>
         <jsoup.version>1.21.1</jsoup.version>
-        <commonmark.version>0.25.0</commonmark.version>
+        <commonmark.version>0.25.1</commonmark.version>
 
     </properties>
 
@@ -154,7 +154,7 @@
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>6.3.2</version>
+                <version>7.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
@@ -748,7 +748,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
-                    <version>1.7.1</version>
+                    <version>1.7.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
