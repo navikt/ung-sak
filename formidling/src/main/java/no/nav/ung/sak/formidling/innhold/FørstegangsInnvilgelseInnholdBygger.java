@@ -20,8 +20,8 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.SatsEndringHendelseDto
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.SatsOgBeregningDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.SatsEndring;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;

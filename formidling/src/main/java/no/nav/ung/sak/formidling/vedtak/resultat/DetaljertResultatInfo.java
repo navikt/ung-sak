@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak;
+package no.nav.ung.sak.formidling.vedtak.resultat;
 
 public record DetaljertResultatInfo(DetaljertResultatType detaljertResultatType, String forklaring) {
 

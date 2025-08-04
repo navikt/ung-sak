@@ -9,8 +9,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.OpphørInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 @Dependent
 public final class EndringSluttdatoStrategy implements VedtaksbrevInnholdbyggerStrategy {

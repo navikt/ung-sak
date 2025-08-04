@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.template.dto.ManuellVedtaksbrevDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 
 @Dependent
 public class ManueltVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger {

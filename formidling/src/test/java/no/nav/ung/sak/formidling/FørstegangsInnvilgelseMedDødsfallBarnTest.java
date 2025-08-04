@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;

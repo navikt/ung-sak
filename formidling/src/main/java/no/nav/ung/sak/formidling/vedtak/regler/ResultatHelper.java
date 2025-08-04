@@ -1,7 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.util.Arrays;
 import java.util.Set;

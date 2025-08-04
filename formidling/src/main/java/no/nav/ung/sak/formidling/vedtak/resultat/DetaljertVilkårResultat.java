@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak;
+package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;

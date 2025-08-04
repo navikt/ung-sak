@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
 import no.nav.ung.sak.formidling.template.dto.endring.inntekt.EndringRapportertInntektPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

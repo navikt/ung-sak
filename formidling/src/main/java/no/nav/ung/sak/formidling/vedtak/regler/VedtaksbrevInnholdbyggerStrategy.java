@@ -2,8 +2,8 @@ package no.nav.ung.sak.formidling.vedtak.regler;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 
 import java.util.Set;
 import java.util.stream.Collectors;

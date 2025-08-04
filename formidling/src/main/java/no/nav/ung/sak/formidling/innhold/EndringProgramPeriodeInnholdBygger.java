@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.template.dto.EndringProgramPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretSluttDato;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretStartDato;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

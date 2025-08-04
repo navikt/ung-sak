@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak;
+package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;

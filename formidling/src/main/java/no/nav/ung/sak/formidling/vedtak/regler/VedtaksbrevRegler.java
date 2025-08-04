@@ -9,9 +9,9 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
