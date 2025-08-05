@@ -45,7 +45,7 @@ public class Fagsak extends BaseEntitet {
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
     @Convert(converter = AktørIdConverter.class, attributeName = "brukerAktørId")
-    //@Column(name = "bruker_aktoer_id",  nullable = false, updatable = false, unique = true)
+    @Column(name = "bruker_aktoer_id",  nullable = false, updatable = false, unique = true)
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId brukerAktørId;
 
