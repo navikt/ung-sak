@@ -40,7 +40,7 @@ public class IntegrasjonstatusRestTjeneste {
 
     @GET
     @Path("/status")
-    @Operation(description = "Gir en oversikt over systemer som er nede", summary = ("Inneholder også detaljer og evt kjent tidspunkt for når systemet er oppe igjen."), tags = "integrasjon")
+    @Operation(description = "Gir en oversikt over systemer som er nede", summary = ("Inneholder også detaljer og evt kjent opprettetTidspunkt for når systemet er oppe igjen."), tags = "integrasjon")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<SystemNedeDto> finnSystemerSomErNede() {

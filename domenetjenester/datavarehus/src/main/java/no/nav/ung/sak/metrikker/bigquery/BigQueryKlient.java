@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 
 import java.util.Arrays;
 import java.util.Collection;

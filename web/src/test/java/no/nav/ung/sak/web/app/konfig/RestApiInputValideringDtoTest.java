@@ -165,7 +165,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         Set<Class<?>> filtreteParametre = new TreeSet<>(Comparator.comparing(Class::getName));
         for (Class<?> klasse : klasser) {
             if (klasse.getName().startsWith("java")) {
-                // ikke sjekk nedover i innebygde klasser, det skal brukes annoteringer på tidligere tidspunkt
+                // ikke sjekk nedover i innebygde klasser, det skal brukes annoteringer på tidligere opprettetTidspunkt
                 continue;
             }
             filtreteParametre.add(klasse);
