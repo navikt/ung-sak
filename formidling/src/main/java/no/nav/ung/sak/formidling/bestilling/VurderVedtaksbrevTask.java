@@ -12,8 +12,8 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevResultat;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +93,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
     @NotNull
-    private static ProsessTaskData lagBestillingTask(VedtaksbrevResultat resultat, ProsessTaskData forrigeProsessTask) {
+    private static ProsessTaskData lagBestillingTask(VedtaksbrevRegelResultat.Vedtaksbrev resultat, ProsessTaskData forrigeProsessTask) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
         prosessTaskData.setBehandling(forrigeProsessTask.getFagsakId(), Long.valueOf(forrigeProsessTask.getBehandlingId()));
         prosessTaskData.setProperty(VedtaksbrevBestillingTask.DOKUMENT_MAL_TYPE_PARAM, resultat.dokumentMalType().getKode());
@@ -102,9 +102,9 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
 
     private void håndterIngenBrevResultat(BehandlingVedtaksbrevResultat resultat) {
-        String forklaring = resultat.vedtaksbrevResultater().stream().map(VedtaksbrevResultat::forklaring).collect(Collectors.joining(", ", "[", "]"));
+        String forklaring = resultat.ingenBrevResultater().stream().map(VedtaksbrevRegelResultat::forklaring).collect(Collectors.joining(", ", "[", "]"));
 
-        var ikkeImplementerteBrev = resultat.vedtaksbrevResultater().stream()
+        var ikkeImplementerteBrev = resultat.ingenBrevResultater().stream()
             .filter(it -> it.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT)
             .toList();
 

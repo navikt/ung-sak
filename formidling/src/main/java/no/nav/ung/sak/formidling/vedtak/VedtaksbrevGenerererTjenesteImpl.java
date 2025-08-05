@@ -21,8 +21,8 @@ import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,17 +101,16 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     @WithSpan
     private GenerertBrev doGenererAutomatiskVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
         BehandlingVedtaksbrevResultat regelResultater = vedtaksbrevRegler.kjør(vedtaksbrevBestillingInput.behandlingId());
-        var regelResultat = regelResultater.vedtaksbrevResultater().getFirst();
-        LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultat.safePrint());
+        LOG.info("Resultat fra vedtaksbrev regler: {}", regelResultater.safePrint());
 
         if (!regelResultater.harBrev()) {
-            håndterIngenBrevResultat(regelResultat);
+            håndterIngenBrevResultat(regelResultater.ingenBrevResultater().getFirst());
             return null;
         }
 
         var behandling = behandlingRepository.hentBehandling(vedtaksbrevBestillingInput.behandlingId());
 
-        VedtaksbrevInnholdBygger bygger = regelResultat.vedtaksbrevBygger();
+        VedtaksbrevInnholdBygger bygger = regelResultater.vedtaksbrevResultater().getFirst().vedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, regelResultater.detaljertResultatTimeline());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
@@ -131,16 +130,16 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private void håndterIngenBrevResultat(VedtaksbrevResultat regelResultat) {
-        if (regelResultat.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
+    private void håndterIngenBrevResultat(VedtaksbrevRegelResultat.IngenBrev ingenBrevResultat) {
+        if (ingenBrevResultat.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT) {
             if (enableIgnoreManglendeBrev) {
-                LOG.warn("Ingen brev implementert for tilfelle : {}", regelResultat.forklaring());
+                LOG.warn("Ingen brev implementert for tilfelle : {}", ingenBrevResultat.forklaring());
             }
             else {
-                throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + regelResultat.forklaring());
+                throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + ingenBrevResultat.forklaring());
             }
         }
-        LOG.info("Ingen brev relevant for tilfelle: {}", regelResultat.forklaring());
+        LOG.info("Ingen brev relevant for tilfelle: {}", ingenBrevResultat.forklaring());
     }
 
     /**

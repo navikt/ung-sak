@@ -8,8 +8,8 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevResultat;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
@@ -47,7 +47,10 @@ public class VedtaksbrevTjeneste {
 
         //TODO håndtere flere resultater
         BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegler.kjør(behandlingId);
-        var resultat = totalResultat.vedtaksbrevResultater().getFirst();
+        VedtaksbrevRegelResultat.Vedtaksbrev resultat = totalResultat.vedtaksbrevResultater().stream()
+                .findFirst()
+                .orElseThrow();
+
         LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
@@ -67,10 +70,14 @@ public class VedtaksbrevTjeneste {
 
     public boolean måSkriveBrev(Long behandlingId) {
         var totalResultat = vedtaksbrevRegler.kjør(behandlingId);
+        if (!totalResultat.harBrev()) {
+            return false;
+        }
+
         return totalResultat.vedtaksbrevResultater().stream()
-            .map(VedtaksbrevResultat::vedtaksbrevEgenskaper)
+            .map(VedtaksbrevRegelResultat.Vedtaksbrev::vedtaksbrevEgenskaper)
             .anyMatch(
-                egenskaper -> totalResultat.harBrev() && egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
+                egenskaper -> egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
             );
     }
 

@@ -107,14 +107,11 @@ class VedtaksbrevReglerTest {
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isFalse();
-        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
 
-        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
         assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
 
-        assertThat(regelResulat.vedtaksbrevBygger()).isNull();
-        assertThat(regelResulat.dokumentMalType()).isNull();
-        assertThat(regelResulat.vedtaksbrevEgenskaper()).isNull();
         assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
 
     }
@@ -127,12 +124,10 @@ class VedtaksbrevReglerTest {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isFalse();
 
-        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
 
-        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
         assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
-        assertThat(regelResulat.vedtaksbrevBygger()).isNull();
-        assertThat(regelResulat.vedtaksbrevEgenskaper()).isNull();
 
         assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
 
@@ -146,13 +141,10 @@ class VedtaksbrevReglerTest {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isFalse();
 
-        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
 
-        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
         assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
-        assertThat(regelResulat.vedtaksbrevEgenskaper()).isNull();
-        assertThat(regelResulat.vedtaksbrevBygger()).isNull();
-        assertThat(regelResulat.dokumentMalType()).isNull();
 
         assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
 
