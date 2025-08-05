@@ -7,7 +7,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -92,7 +91,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
         }
 
-        return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
+        return new TemplateInnholdResultat(TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
                 ytelseTom,

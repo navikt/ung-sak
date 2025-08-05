@@ -51,6 +51,9 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
+
+        //TODO lagre resultat i databasen.  + lag flere tester + verdikjedetest.
+
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", resultat.safePrint());

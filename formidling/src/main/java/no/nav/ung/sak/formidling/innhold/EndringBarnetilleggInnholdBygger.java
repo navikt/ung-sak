@@ -4,7 +4,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
@@ -47,7 +46,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
         var sats = Satsberegner.beregnBarnetilleggSats(nyeSatser);
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_BARNETILLEGG, TemplateType.ENDRING_BARNETILLEGG,
+        return new TemplateInnholdResultat(TemplateType.ENDRING_BARNETILLEGG,
                 new EndringBarnetilleggDto(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats));
 
     }

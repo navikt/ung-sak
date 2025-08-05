@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.template.dto.OpphørDto;
@@ -39,7 +38,7 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
             opphørStartdato.minusDays(1),
             bestemInneværendeMåned());
 
-        return new TemplateInnholdResultat(DokumentMalType.OPPHØR_DOK, TemplateType.OPPHØR,
+        return new TemplateInnholdResultat(TemplateType.OPPHØR,
             new OpphørDto(
                 opphørStartdato,
                 sisteUtbetalingsdato

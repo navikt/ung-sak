@@ -4,7 +4,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
@@ -44,7 +43,7 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
         long totalBarnetillegg = nyeSatser.dagsatsBarnetillegg();
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_HØY_SATS, TemplateType.ENDRING_HØY_SATS,
+        return new TemplateInnholdResultat(TemplateType.ENDRING_HØY_SATS,
             new EndringHøySatsDto(
                 satsendringsdato,
                 Satsberegner.beregnDagsatsInklBarnetillegg(nyeSatser),
