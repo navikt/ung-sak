@@ -22,8 +22,8 @@ public class UtbetalingstatusUtleder {
     /**
      * Finner utbetalingsstatus for periodene med ytelse på behandlingen. Utledning gjøres ved å sammenligne tidslinjer for behandlinger tilbake til førstegangsbehandlingen.
      *
-     * @param aktuellBehandlingAvsluttetTidspunkt Avsluttet opprettetTidspunkt for aktuell behandling som skal brukes for å finne utbetalingsstatus.
-     * @param tidslinjeMap                        Map fra avsluttet opprettetTidspunkt for behandling til tidslinje med tilkjent ytelse verdier.
+     * @param aktuellBehandlingAvsluttetTidspunkt Avsluttet tidspunkt for aktuell behandling som skal brukes for å finne utbetalingsstatus.
+     * @param tidslinjeMap                        Map fra avsluttet tidspunkt for behandling til tidslinje med tilkjent ytelse verdier.
      * @param dagensDato
      * @return
      */
