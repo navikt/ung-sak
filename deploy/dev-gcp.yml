@@ -209,11 +209,6 @@ spec:
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 
-    - name: SENSU_HOST
-      value: "sensu.nais"
-    - name: SENSU_PORT
-      value: "3030"
-
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"

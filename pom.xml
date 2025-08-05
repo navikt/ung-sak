@@ -126,11 +126,6 @@
                 <artifactId>k9-felles-db</artifactId>
                 <version>${felles.version}</version>
             </dependency>
-            <dependency>
-                <groupId>no.nav.k9.felles.integrasjon</groupId>
-                <artifactId>k9-sensu-klient</artifactId>
-                <version>${felles.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>

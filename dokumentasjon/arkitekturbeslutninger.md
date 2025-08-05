@@ -102,7 +102,7 @@ Det ble besluttet å gjenbruke arkitektur og kode fra k9-sak, saksbehandlingssyt
     - Prosesssteg
     - Tjenestekall
     - Diagnosetjenester (eks. diagnose av saker)
-1. Grafana, Prometheus, Sensu
+1. Grafana, Prometheus
 1. Kibana for logging
 1. Rollforward og auto-scaling
 1. Feature toggles (benytter deployment/env flag da ikke behov for eget system)
