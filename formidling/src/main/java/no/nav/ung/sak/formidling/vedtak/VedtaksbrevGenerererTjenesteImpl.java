@@ -70,6 +70,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererVedtaksbrev(vedtaksbrevBestillingInput));
     }
 
+    //TODO Flytt denne til tjeneste/vurderer task
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
     private GenerertBrev doGenererVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
         VedtaksbrevValgEntitet vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(vedtaksbrevBestillingInput.behandlingId()).orElse(null);

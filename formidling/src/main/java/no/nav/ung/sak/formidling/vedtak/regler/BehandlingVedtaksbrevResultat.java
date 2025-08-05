@@ -13,5 +13,19 @@ public record BehandlingVedtaksbrevResultat(
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
     List<VedtaksbrevResultat> vedtaksbrevResultater) {
 
+    public static BehandlingVedtaksbrevResultat medBrev(
+        LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+        List<VedtaksbrevResultat> vedtaksbrevResultater) {
+        return new BehandlingVedtaksbrevResultat(true, detaljertResultatTimeline, vedtaksbrevResultater);
+    }
+
+    public static BehandlingVedtaksbrevResultat utenBrev(LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+                                                         List<VedtaksbrevResultat> ingenBrevResultat) {
+                return new BehandlingVedtaksbrevResultat(false, detaljertResultatTimeline, ingenBrevResultat);
+    }
+
+
+
+
 }
 

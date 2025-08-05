@@ -75,12 +75,12 @@ public class VedtaksbrevRegler {
 
         if (!automatiskBrevResultat.isEmpty()) {
             var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat, redigerRegelResultat);
-            return new BehandlingVedtaksbrevResultat(true, detaljertResultat, automatiskVedtaksbrevResultater);
+            return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, automatiskVedtaksbrevResultater);
         }
 
         if (redigerRegelResultat.kanRedigere()) {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
-            return new BehandlingVedtaksbrevResultat(true, detaljertResultat,
+            return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat,
                 List.of(VedtaksbrevResultat.tomRedigerbarBrev(
                     manueltVedtaksbrevInnholdBygger,
                     "Tom fritekstbrev pga manuelle aksjonspunkter: " + redigerRegelResultat.forklaring()))
@@ -93,7 +93,7 @@ public class VedtaksbrevRegler {
             .collect(Collectors.toSet());
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return new BehandlingVedtaksbrevResultat(false, detaljertResultat, List.of(VedtaksbrevResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring)));
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(VedtaksbrevResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring)));
     }
 
     private BehandlingVedtaksbrevResultat håndterIngenBrevResultat(
@@ -107,8 +107,7 @@ public class VedtaksbrevRegler {
             // ingen brev, men har ap så tilbyr tom brev for redigering
             String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter: %s. Ingen automatisk brev pga: %s."
                 .formatted(redigerRegelResultat.forklaring(), forklaringer);
-            return new BehandlingVedtaksbrevResultat(
-                true,
+            return BehandlingVedtaksbrevResultat.medBrev(
                 detaljertResultat,
                 List.of(VedtaksbrevResultat.tomRedigerbarBrev(
                     manueltVedtaksbrevInnholdBygger,
@@ -116,10 +115,10 @@ public class VedtaksbrevRegler {
                 )));
         }
 
-        return new BehandlingVedtaksbrevResultat(
-            false,
-            detaljertResultat,
-            ingenBrevResultat.stream().map(it -> VedtaksbrevResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring())).toList()
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
+            ingenBrevResultat.stream()
+                .map(it -> VedtaksbrevResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring()))
+                .toList()
         );
 
     }
