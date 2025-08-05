@@ -8,7 +8,7 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
@@ -47,7 +47,7 @@ public class VedtaksbrevTjeneste {
 
         //TODO håndtere flere resultater
         BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegler.kjør(behandlingId);
-        VedtaksbrevRegelResultat.Vedtaksbrev resultat = totalResultat.vedtaksbrevResultater().stream()
+        Vedtaksbrev resultat = totalResultat.vedtaksbrevResultater().stream()
                 .findFirst()
                 .orElseThrow();
 
@@ -75,7 +75,7 @@ public class VedtaksbrevTjeneste {
         }
 
         return totalResultat.vedtaksbrevResultater().stream()
-            .map(VedtaksbrevRegelResultat.Vedtaksbrev::vedtaksbrevEgenskaper)
+            .map(Vedtaksbrev::vedtaksbrevEgenskaper)
             .anyMatch(
                 egenskaper -> egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
             );

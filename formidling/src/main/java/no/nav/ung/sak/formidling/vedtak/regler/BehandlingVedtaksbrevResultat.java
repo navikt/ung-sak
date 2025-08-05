@@ -12,8 +12,8 @@ import java.util.List;
 public record BehandlingVedtaksbrevResultat(
     boolean harBrev,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-    List<VedtaksbrevRegelResultat.Vedtaksbrev> vedtaksbrevResultater,
-    List<VedtaksbrevRegelResultat.IngenBrev> ingenBrevResultater) {
+    List<Vedtaksbrev> vedtaksbrevResultater,
+    List<IngenBrev> ingenBrevResultater) {
 
     public BehandlingVedtaksbrevResultat {
         // Valider at kun en av vedtaksbrevResultater og ingenBrevResultater har elementer
@@ -26,12 +26,12 @@ public record BehandlingVedtaksbrevResultat(
 
     public static BehandlingVedtaksbrevResultat medBrev(
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-        List<VedtaksbrevRegelResultat.Vedtaksbrev> vedtaksbrevResultater) {
+        List<Vedtaksbrev> vedtaksbrevResultater) {
         return new BehandlingVedtaksbrevResultat(true, detaljertResultatTimeline, vedtaksbrevResultater, Collections.emptyList());
     }
 
     public static BehandlingVedtaksbrevResultat utenBrev(LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-                                                         List<VedtaksbrevRegelResultat.IngenBrev> ingenBrevResultater) {
+                                                         List<IngenBrev> ingenBrevResultater) {
                 return new BehandlingVedtaksbrevResultat(false, detaljertResultatTimeline, Collections.emptyList() , ingenBrevResultater );
     }
 
@@ -43,8 +43,6 @@ public record BehandlingVedtaksbrevResultat(
             ", ingenBrevResultater=" + ingenBrevResultater +
             '}';
     }
-
-
 
 }
 

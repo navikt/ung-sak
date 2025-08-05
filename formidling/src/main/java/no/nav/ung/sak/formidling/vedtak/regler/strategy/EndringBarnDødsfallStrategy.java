@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak.regler;
+package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -8,6 +8,8 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.SatsEndring;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 

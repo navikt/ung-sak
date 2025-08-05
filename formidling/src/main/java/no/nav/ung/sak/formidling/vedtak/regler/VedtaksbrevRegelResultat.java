@@ -3,12 +3,10 @@ package no.nav.ung.sak.formidling.vedtak.regler;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 
-import java.util.Objects;
-
 /**
  * Vedtaksbrev resultat for ett enkelt brev.
  */
-public sealed interface VedtaksbrevRegelResultat permits VedtaksbrevRegelResultat.IngenBrev, VedtaksbrevRegelResultat.Vedtaksbrev {
+public sealed interface VedtaksbrevRegelResultat permits IngenBrev, Vedtaksbrev {
     String forklaring();
     String safePrint();
 
@@ -41,46 +39,5 @@ public sealed interface VedtaksbrevRegelResultat permits VedtaksbrevRegelResulta
         return new IngenBrev(ingenBrevÅrsakType, forklaring);
     }
 
-    record Vedtaksbrev(
-            DokumentMalType dokumentMalType,
-            VedtaksbrevInnholdBygger vedtaksbrevBygger,
-            VedtaksbrevEgenskaper vedtaksbrevEgenskaper,
-            String forklaring
-    ) implements VedtaksbrevRegelResultat {
-        public Vedtaksbrev {
-            Objects.requireNonNull(dokumentMalType, "dokumentMalType cannot be null");
-            Objects.requireNonNull(vedtaksbrevBygger, "vedtaksbrevBygger cannot be null");
-            Objects.requireNonNull(vedtaksbrevEgenskaper, "vedtaksbrevEgenskaper cannot be null");
-        }
-
-        @Override
-        public String safePrint() {
-            return "AutomatiskBrev{" +
-                "vedtaksbrevEgenskaper=" + vedtaksbrevEgenskaper +
-                ", dokumentMalType=" + dokumentMalType +
-                ", bygger=" + (vedtaksbrevBygger.getClass().getSimpleName()) +
-                ", forklaring='" + forklaring + '\'' +
-                '}';
-        }
-    }
-
-    record IngenBrev(
-        IngenBrevÅrsakType ingenBrevÅrsakType,
-        String forklaring
-    ) implements VedtaksbrevRegelResultat {
-
-        public IngenBrev {
-            Objects.requireNonNull(ingenBrevÅrsakType);
-            Objects.requireNonNull(forklaring);
-        }
-
-        @Override
-        public String safePrint() {
-            return "IngenBrev{" +
-                "ingenBrevÅrsakType='" + ingenBrevÅrsakType + '\'' +
-                ", forklaring='" + forklaring + '\'' +
-                '}';
-        }
-    }
 }
 

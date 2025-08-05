@@ -10,10 +10,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.*;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +90,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
     @NotNull
-    private static ProsessTaskData lagBestillingTask(VedtaksbrevRegelResultat.Vedtaksbrev resultat, ProsessTaskData forrigeProsessTask) {
+    private static ProsessTaskData lagBestillingTask(Vedtaksbrev resultat, ProsessTaskData forrigeProsessTask) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
         prosessTaskData.setBehandling(forrigeProsessTask.getFagsakId(), Long.valueOf(forrigeProsessTask.getBehandlingId()));
         prosessTaskData.setProperty(VedtaksbrevBestillingTask.DOKUMENT_MAL_TYPE_PARAM, resultat.dokumentMalType().getKode());

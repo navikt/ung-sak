@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak.regler;
+package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;

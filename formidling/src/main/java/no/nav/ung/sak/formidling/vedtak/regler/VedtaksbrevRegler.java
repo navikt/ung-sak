@@ -9,6 +9,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatUtleder;
@@ -124,7 +126,7 @@ public class VedtaksbrevRegler {
     }
 
 
-    private static List<VedtaksbrevRegelResultat.Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(
+    private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(
         List<VedtaksbrevStrategyResultat> resultat,
         RedigerRegelResultat redigerRegelResultat) {
 

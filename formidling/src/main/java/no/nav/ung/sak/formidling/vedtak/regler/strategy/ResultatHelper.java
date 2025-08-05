@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak.regler;
+package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
