@@ -8,6 +8,7 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
@@ -15,6 +16,8 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.stream.Collectors;
 
 @Dependent
 public class VedtaksbrevTjeneste {
@@ -47,16 +50,21 @@ public class VedtaksbrevTjeneste {
 
         //TODO håndtere flere resultater
         BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegler.kjør(behandlingId);
+        LOG.info("Regel resultater: {}", totalResultat.safePrint());
+
+        if (!totalResultat.harBrev()) {
+            return mapIngenBrevResponse(totalResultat);
+        }
+
         Vedtaksbrev resultat = totalResultat.vedtaksbrevResultater().stream()
                 .findFirst()
                 .orElseThrow();
 
-        LOG.info("VedtaksbrevRegelResultat: {}", resultat.safePrint());
 
         var egenskaper = resultat.vedtaksbrevEgenskaper();
 
         return new VedtaksbrevValgResponse(
-            totalResultat.harBrev(),
+            true,
             egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreHindre(),
@@ -65,6 +73,20 @@ public class VedtaksbrevTjeneste {
             !erAvsluttet && egenskaper.kanOverstyreRediger(),
             resultat.forklaring(),
             valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null)
+        );
+    }
+
+    private static VedtaksbrevValgResponse mapIngenBrevResponse(BehandlingVedtaksbrevResultat totalResultat) {
+        return new VedtaksbrevValgResponse(
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            totalResultat.ingenBrevResultater().stream().map(IngenBrev::forklaring).collect(Collectors.joining(", ", "[", "]")),
+            null
         );
     }
 
@@ -87,11 +109,17 @@ public class VedtaksbrevTjeneste {
             throw new BadRequestException("Kan ikke endre vedtaksbrev på avsluttet behandling");
         }
 
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(dto.behandlingId());
+        if (!totalresultater.harBrev()) {
+            throw new BadRequestException("Ingen vedtaksbrev resultater for behandling");
+        }
+
+        var resultat = totalresultater.vedtaksbrevResultater().getFirst();
+
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
             .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
 
         //TODO håndtere flere resultater
-        var resultat = vedtaksbrevRegler.kjør(dto.behandlingId()).vedtaksbrevResultater().getFirst();
         var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
 
         if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {

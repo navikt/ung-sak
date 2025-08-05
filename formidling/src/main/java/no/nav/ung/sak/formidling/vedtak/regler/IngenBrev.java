@@ -12,11 +12,4 @@ public record IngenBrev(
         Objects.requireNonNull(forklaring);
     }
 
-    @Override
-    public String safePrint() {
-        return "IngenBrev{" +
-            "ingenBrevÅrsakType='" + ingenBrevÅrsakType + '\'' +
-            ", forklaring='" + forklaring + '\'' +
-            '}';
-    }
 }

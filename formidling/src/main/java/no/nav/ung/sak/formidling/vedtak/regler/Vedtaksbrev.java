@@ -18,12 +18,13 @@ public record Vedtaksbrev(
     }
 
     @Override
-    public String safePrint() {
-        return "AutomatiskBrev{" +
-            "vedtaksbrevEgenskaper=" + vedtaksbrevEgenskaper +
-            ", dokumentMalType=" + dokumentMalType +
-            ", bygger=" + (vedtaksbrevBygger.getClass().getSimpleName()) +
+    public String toString() {
+        return "Vedtaksbrev{" +
+            "dokumentMalType=" + dokumentMalType +
+            ", vedtaksbrevBygger=" + (vedtaksbrevBygger.getClass().getSimpleName()) +
+            ", vedtaksbrevEgenskaper=" + vedtaksbrevEgenskaper +
             ", forklaring='" + forklaring + '\'' +
             '}';
     }
+
 }

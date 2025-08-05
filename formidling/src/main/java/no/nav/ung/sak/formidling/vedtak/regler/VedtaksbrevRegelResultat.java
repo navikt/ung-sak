@@ -8,7 +8,6 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
  */
 public sealed interface VedtaksbrevRegelResultat permits IngenBrev, Vedtaksbrev {
     String forklaring();
-    String safePrint();
 
     static Vedtaksbrev automatiskBrev(DokumentMalType dokumentMalType, VedtaksbrevInnholdBygger bygger, String forklaring, boolean kanRedigere) {
         return new Vedtaksbrev(
