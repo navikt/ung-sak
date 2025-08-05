@@ -59,6 +59,8 @@ public class BigQueryStatistikkRepository {
         Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
         hyppigRapporterte.add(new Tuple<>(Tabeller.FAGSAK_STATUS_V2, fagsakStatusStatistikk));
 
+        // TODO: satsStatistikk
+        // TODO: barnetilleggStatistikk
         // TODO; behandlingStatusStatistikk
         // TODO: behandlingResultatStatistikk
         // TODO: prosessTaskStatistikk
