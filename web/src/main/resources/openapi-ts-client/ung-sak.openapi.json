@@ -6972,7 +6972,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Inneholder også detaljer og evt kjent opprettetTidspunkt for når systemet er oppe igjen.",
+        "summary" : "Inneholder også detaljer og evt kjent tidspunkt for når systemet er oppe igjen.",
         "tags" : [ "integrasjon" ]
       }
     },
