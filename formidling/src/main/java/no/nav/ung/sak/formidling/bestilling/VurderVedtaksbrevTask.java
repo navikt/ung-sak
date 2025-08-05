@@ -7,7 +7,6 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -112,7 +111,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     private static ProsessTaskData lagManuellBrevBestillingTask(ProsessTaskData forrigeProsessTask) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
         prosessTaskData.setBehandling(forrigeProsessTask.getFagsakId(), Long.valueOf(forrigeProsessTask.getBehandlingId()));
-        prosessTaskData.setProperty(VedtaksbrevBestillingTask.DOKUMENT_MAL_TYPE_PARAM, DokumentMalType.MANUELT_VEDTAK_DOK.getKode());
+        prosessTaskData.setProperty(VedtaksbrevBestillingTask.MANUELL_BREV_PARAM, "true");
         return prosessTaskData;
     }
 

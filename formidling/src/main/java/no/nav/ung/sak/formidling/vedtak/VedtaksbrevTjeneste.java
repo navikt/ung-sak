@@ -139,17 +139,47 @@ public class VedtaksbrevTjeneste {
     }
 
     public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(dto.behandlingId());
+        if (!totalresultater.harBrev()) {
+            throw new IllegalArgumentException("Ingen vedtaksbrev resultater for behandling. Årsak: "+ totalresultater.ingenBrevResultater().stream()
+                .map(IngenBrev::forklaring)
+                .collect(Collectors.joining(", ", "[", "]")));
+        }
+
+
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
 
-        VedtaksbrevBestillingInput vedtaksbrevBestillingInput = new VedtaksbrevBestillingInput(dto.behandlingId(), kunHtml);
         if (dto.redigertVersjon() == null) {
-            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(vedtaksbrevBestillingInput);
+            var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()).orElse(null);
+            if (valg != null) {
+                if (valg.isHindret()) {
+                    LOG.info("Vedtaksbrev er manuelt stoppet - lager ikke brev");
+                    return null;
+                }
+                if (valg.isRedigert()) {
+                    LOG.info("Vedtaksbrev er manuelt redigert - genererer manuell brev");
+                    return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
+                }
+            }
+
+            return genererAutomatiskVedtaksbrev(kunHtml, totalresultater, dto.behandlingId());
         }
         if (dto.redigertVersjon()) {
-            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(vedtaksbrevBestillingInput);
+            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml);
         }
 
-        return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(vedtaksbrevBestillingInput);
+        return genererAutomatiskVedtaksbrev(kunHtml, totalresultater, dto.behandlingId());
+    }
+
+    private GenerertBrev genererAutomatiskVedtaksbrev(boolean kunHtml, BehandlingVedtaksbrevResultat totalresultater, Long behandlingId) {
+        return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
+            new VedtaksbrevBestillingInput(
+                behandlingId,
+                totalresultater.vedtaksbrevResultater().getFirst(), totalresultater.detaljertResultatTimeline(), kunHtml
+                //TODO håndtere flere resultater
+            )
+        );
     }
 
     public void ryddVedTilbakeHopp(Long behandlingId) {

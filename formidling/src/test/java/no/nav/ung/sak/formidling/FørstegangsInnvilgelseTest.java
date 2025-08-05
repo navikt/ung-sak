@@ -334,7 +334,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
         assertThatThrownBy(
             () -> genererVedtaksbrev(behandling.getId()
-            )).isInstanceOf(IllegalStateException.class)
+            )).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("dødsfall");
     }
 

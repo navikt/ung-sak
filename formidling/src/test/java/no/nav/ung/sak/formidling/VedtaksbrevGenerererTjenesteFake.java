@@ -24,17 +24,12 @@ public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTje
 
 
     @Override
-    public GenerertBrev genererVedtaksbrevForBehandling(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
-        return resultat;
-    }
-
-    @Override
-    public GenerertBrev genererManuellVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
-        return resultat;
-    }
-
-    @Override
     public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
+        return resultat;
+    }
+
+    @Override
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
         return resultat;
     }
 }

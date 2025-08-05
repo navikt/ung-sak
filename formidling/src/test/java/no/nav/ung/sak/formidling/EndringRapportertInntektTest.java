@@ -5,7 +5,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevBestillingInput;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -85,16 +84,6 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
             );
-    }
-
-    @DisplayName("Ingen brev ved ingen rapportert inntekt og ingen inntekt")
-    @Test
-    void full_ungdomsprogram_med_ingen_rapportert_inntekt_gir_ingen_brev() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = EndringInntektScenarioer.endring0KrInntekt_19år(fom);
-        var behandling = lagScenario(ungTestGrunnlag);
-        assertThat(vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), true))).isNull();
-
     }
 
 

@@ -5,8 +5,8 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevBestillingInput;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -50,7 +50,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     protected UngTestRepositories ungTestRepositories;
 
     @Inject
-    protected VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
+    protected VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     AbstractVedtaksbrevInnholdByggerTest(int forventetAntallPdfSider, String forventetPdfHovedoverskrift) {
         this.forventetAntallPdfSider = forventetAntallPdfSider;
@@ -71,7 +71,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void verifiserOverskrifter() {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), true));
+        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), true));
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -83,12 +83,16 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
+    private static VedtaksbrevForhåndsvisRequest lagForhåndsvisInput(Long behandlingId, boolean kunHtml) {
+        return new VedtaksbrevForhåndsvisRequest(behandlingId, null, kunHtml);
+    }
+
     @Test
     @EnabledIfEnvironmentVariable(named = "PDF", matches = "true")
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), false));
+        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), false));
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -102,20 +106,21 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     }
 
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return genererVedtaksbrev(vedtaksbrevGenerererTjeneste, behandlingId, testInfo);
+        return genererVedtaksbrev(behandlingId, testInfo, vedtaksbrevTjeneste);
     }
 
 
     /**
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
-    static protected GenerertBrev genererVedtaksbrev(VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste, Long behandlingId, TestInfo testInfo) {
+    static protected GenerertBrev genererVedtaksbrev(Long behandlingId, TestInfo testInfo, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         String lagre = System.getenv("LAGRE");
+
         if (lagre == null) {
-            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandlingId, true));
+            return vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
         }
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandlingId, !lagre.equals("PDF")));
+        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, !lagre.equals("PDF")));
 
         switch (lagre) {
             case "PDF":

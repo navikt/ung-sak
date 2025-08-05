@@ -11,8 +11,12 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevBestillingInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
+import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +34,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.vedtak.brevbestilling";
     public static final String DOKUMENT_MAL_TYPE_PARAM = "dokumentMalType";
+    public static final String MANUELL_BREV_PARAM = "manuellBrev";
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
 
@@ -37,17 +42,20 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private BrevbestillingRepository brevbestillingRepository;
     private BrevbestillingTjeneste brevbestillingTjeneste;
+    private VedtaksbrevRegler vedtaksbrevRegler;
 
     @Inject
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         BrevbestillingRepository brevbestillingRepository,
-        BrevbestillingTjeneste brevbestillingTjeneste) {
+        BrevbestillingTjeneste brevbestillingTjeneste,
+        VedtaksbrevRegler vedtaksbrevRegler) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.brevbestillingRepository = brevbestillingRepository;
         this.brevbestillingTjeneste = brevbestillingTjeneste;
+        this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
 
     VedtaksbrevBestillingTask() {
@@ -57,14 +65,25 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData)  {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+        var manuellBrev = Boolean.parseBoolean(prosessTaskData.getPropertyValue(MANUELL_BREV_PARAM));
+
+        if (manuellBrev) {
+            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
+            brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+            return;
+        }
+
         DokumentMalType dokumentMalType = DokumentMalType.fraKode(prosessTaskData.getPropertyValue(DOKUMENT_MAL_TYPE_PARAM));
         validerBrevbestillingForespørsel(behandling, dokumentMalType);
 
-        var generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(new VedtaksbrevBestillingInput(behandling.getId(), false));
-        if (generertBrev == null) {
-            LOG.info("Ingen brev generert.");
-            return;
-        }
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        Vedtaksbrev vedtaksbrev = totalresultater.vedtaksbrevResultater().stream().filter(it -> it.dokumentMalType() == dokumentMalType)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
+
+        var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
+            new VedtaksbrevBestillingInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
 
        brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
 
