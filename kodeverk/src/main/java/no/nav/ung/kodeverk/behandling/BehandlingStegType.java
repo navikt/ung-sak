@@ -36,8 +36,13 @@ public enum BehandlingStegType implements Kodeverdi {
 
     // Utgåtte steg: Lagres på behandling og aksjonspunkt og kan ikke fjernes med mindre man håndterer dette i BehandlingStegTypeKodeverdiConverter
     @Deprecated
-    KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Utgått steg: Kontroller endring i ungdomsprogram", UTREDES);
+    KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Utgått steg: Kontroller endring i ungdomsprogram", UTREDES),
 
+
+    VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS("VURDER_FK_UI", "Vurder formkrav (Vedtaksinstans)", UTREDES),
+    VURDER_KLAGE_FØRSTEINSTANS("KLAGEUI", "Vurder Klage (Vedtaksinstans)", UTREDES),
+    OVERFØRT_NK("OVERFØRT_NK", "Overført til enhet for Klage-og ankebehandling", BehandlingStatus.FATTER_VEDTAK),
+    ;
 
     private static final Map<String, BehandlingStegType> KODER = new LinkedHashMap<>();
 
