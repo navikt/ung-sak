@@ -11,13 +11,18 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
@@ -26,9 +31,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -48,6 +52,9 @@ class BigQueryStatistikkRepositoryTest {
 
     @Inject
     private BehandlingRepository behandlingRepository;
+
+    @Inject
+    private AksjonspunktRepository aksjonspunktRepository;
 
     private BigQueryStatistikkRepository statistikkRepository;
 
@@ -158,6 +165,25 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(records.iterator().next()).isInstanceOf(FagsakStatusRecord.class);
     }
 
+    @Test
+    void skal_kunne_hente_aksjonspunkter() {
+        Fagsak fagsak = byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.OPPRETTET);
+        lagreFagsaker(List.of(fagsak));
+
+        // Gitt en fagsak med behandling med aksjonspunkt
+        Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
+        leggTilAksjonspunktPåBehandling(behandling, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+        lagreBehandling(behandling);
+
+        // Når vi henter aksjonspunkt statistikken
+        Collection<AksjonspunktRecord> behandlingStatusRecords = statistikkRepository.aksjonspunktStatistikkDaglig(LocalDate.now());
+        // Og vi skal ha minst ett aksjonspunkt i statistikken
+        assertThat(behandlingStatusRecords).isNotEmpty();
+        // Verifiser at aksjonspunktet er med i statistikken
+        assertThat(behandlingStatusRecords)
+            .anyMatch(rec -> Objects.equals(rec.aksjonspunktDefinisjon(), AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
+    }
+
     private Behandling byggBehandlingForFagsak(Fagsak fagsak, BehandlingType behandlingType, BehandlingStatus behandlingStatus) {
         return Behandling.nyBehandlingFor(fagsak, behandlingType)
             .medBehandlingStatus(behandlingStatus)
@@ -184,5 +210,9 @@ class BigQueryStatistikkRepositoryTest {
 
     private void lagreBehandlinger(List<Behandling> behandlinger) {
         behandlinger.forEach(this::lagreBehandling);
+    }
+
+    private Aksjonspunkt leggTilAksjonspunktPåBehandling(Behandling behandling, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        return new AksjonspunktTestSupport().leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
     }
 }

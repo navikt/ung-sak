@@ -4,10 +4,14 @@ import com.google.cloud.NoCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.DatasetInfo;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,6 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Testcontainers
 class BigQueryKlientTest {
@@ -57,6 +62,25 @@ class BigQueryKlientTest {
                     FagsakYtelseType.UNGDOMSYTELSE,
                     BehandlingType.FØRSTEGANGSSØKNAD,
                     BehandlingStatus.UTREDES,
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
+    @Test
+    void publisering_av_AKSJONSPUNKT_TABELL_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            AksjonspunktRecord.AKSJONSPUNKT_TABELL,
+            List.of(
+                new AksjonspunktRecord(
+                    FagsakYtelseType.UNGDOMSYTELSE,
+                    "ABC123",
+                    UUID.randomUUID().toString(),
+                    AksjonspunktDefinisjon.KONTROLLER_INNTEKT,
+                    AksjonspunktStatus.OPPRETTET,
+                    Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
                     ZonedDateTime.now()
                 )
             )
