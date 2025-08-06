@@ -207,7 +207,7 @@ class VedtaksbrevReglerTest {
     }
 
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
-        return this.lagBehandling(ungTestGrunnlag, null, null);
+        return lagBehandling(ungTestGrunnlag, null, null);
     }
 
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag, BehandlingStegType behandlingStegType, AksjonspunktDefinisjon aksjonspunktDefinisjon) {

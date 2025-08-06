@@ -52,4 +52,15 @@ public class VedtaksbrevResultatEntitet extends BaseEntitet {
         this.brevbestilling = brevbestilling;
     }
 
+    public VedtaksbrevResultatType getResultatType() {
+        return resultatType;
+    }
+
+    public String getForklaring() {
+        return forklaring;
+    }
+
+    public BrevbestillingEntitet getBrevbestilling() {
+        return brevbestilling;
+    }
 }

@@ -19,7 +19,6 @@ import no.nav.ung.sak.behandlingslager.formidling.bestilling.VedtaksbrevResultat
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.VedtaksbrevResultatType;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.vedtak.regler.*;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,14 +130,13 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             }
             //TODO håndtere flere vedtaksbrev
             var brevbestillingEntitet = brevbestillingTjeneste.nyBestilling(behandling, DokumentMalType.MANUELT_VEDTAK_DOK);
-            vedtaksbrevResultatRepository.lagre(VedtaksbrevResultatEntitet.medBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.BESTILT, "Redigert automatisk vedtaksbrev", brevbestillingEntitet));
+            vedtaksbrevResultatRepository.lagre(VedtaksbrevResultatEntitet.medBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.BESTILT, "Redigert vedtaksbrev", brevbestillingEntitet));
             prosessTaskTjeneste.lagre(lagBestillingTask(behandling, brevbestillingEntitet.getId()));
 
         }
 
     }
 
-    @NotNull
     private static ProsessTaskData lagBestillingTask(Behandling behandling, Long brevbestillingId) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
@@ -158,13 +156,15 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         if (!ikkeImplementerteBrev.isEmpty()) {
             if (enableIgnoreManglendeBrev) {
                 LOG.warn("Ingen brev implementert for tilfelle pga: {}", forklaring);
-                vedtaksbrevResultatRepository.lagre(VedtaksbrevResultatEntitet.utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
+                vedtaksbrevResultatRepository.lagre(VedtaksbrevResultatEntitet
+                    .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
             } else {
                 throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
             }
         }
         LOG.info("Ingen brev relevant for tilfelle: {}", forklaring);
-        vedtaksbrevResultatRepository.lagre(VedtaksbrevResultatEntitet.utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
+        vedtaksbrevResultatRepository.lagre(VedtaksbrevResultatEntitet
+            .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
     }
 
 }

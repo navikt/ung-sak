@@ -132,7 +132,7 @@ public class VedtaksbrevRegler {
 
         return resultat.stream()
             .map(it -> {
-                String forklaring = it.forklaring() + (redigerRegelResultat.kanRedigere() ? ". Kan redigeres pga " + redigerRegelResultat.forklaring() : "");
+                String forklaring = it.forklaring() + (redigerRegelResultat.kanRedigere() ? " Kan redigeres pga " + redigerRegelResultat.forklaring() : "");
                     return VedtaksbrevRegelResultat
                         .automatiskBrev(
                             it.dokumentMalType(),

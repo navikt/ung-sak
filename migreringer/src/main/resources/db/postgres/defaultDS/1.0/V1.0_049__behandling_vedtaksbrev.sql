@@ -11,7 +11,7 @@ create table behandling_vedtaksbrev
     id                bigint primary key,
     behandling_id     bigint                                                        not null,
     fagsak_id         bigint                                                        not null,
-    resultat_type     varchar(20)                                                   not null,
+    resultat_type     varchar(100)                                                   not null,
     forklaring        text,
     brevbestilling_id bigint,
     opprettet_av      varchar(20)                    default 'VL'                   not null,
