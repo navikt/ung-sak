@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE;
 import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
@@ -48,23 +49,48 @@ public class BrevbestillingTjeneste {
      */
     public BrevbestillingResultat bestillBrev(Behandling behandling, GenerertBrev generertBrev) {
 
-        var bestilling = nyBestilling(behandling.getFagsakId(), behandling.getId(), generertBrev.malType());
+        var bestilling = nyBestilling(behandling, generertBrev.malType());
 
         return journalførOgDistribuer(behandling, bestilling, generertBrev);
     }
 
-    public BrevbestillingEntitet nyBestilling(Long fagsakId, Long behandlingId, DokumentMalType dokumentMalType) {
+    public BrevbestillingEntitet nyBestilling(Behandling behandling, DokumentMalType dokumentMalType) {
+        if (dokumentMalType.isVedtaksbrevmal()) {
+            validerBrevbestillingForespørsel(behandling, dokumentMalType);
+        }
+
+
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-            fagsakId,
-            behandlingId,
+            behandling.getFagsakId(),
+            behandling.getId(),
             dokumentMalType
         );
+
+
         LOG.info("Ny brevbestilling forespurt {}", bestilling);
         brevbestillingRepository.lagre(bestilling);
 
         return bestilling;
     }
 
+
+    private void validerBrevbestillingForespørsel(Behandling behandling, DokumentMalType dokumentMalType) {
+        if (!behandling.erAvsluttet()) {
+            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+        }
+
+        var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
+        var tidligereVedtaksbrev= tidligereBestillinger.stream()
+            .filter(BrevbestillingEntitet::isVedtaksbrev)
+            .filter(it -> it.getDokumentMalType() == dokumentMalType)
+            .toList();
+        if (!tidligereVedtaksbrev.isEmpty()) {
+            String collect = tidligereVedtaksbrev.stream()
+                .map(BrevbestillingEntitet::toString)
+                .collect(Collectors.joining(", "));
+            throw new IllegalStateException("Det finnes allerede en bestilling for samme vedtaksbrev: " + collect);
+        }
+    }
     public BrevbestillingResultat journalførOgDistribuer(Behandling behandling, BrevbestillingEntitet bestilling, GenerertBrev generertBrev) {
 
         var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);

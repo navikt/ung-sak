@@ -168,7 +168,7 @@ public class BrevbestillingEntitet extends BaseEntitet {
             ", journalpostId='" + journalpostId + '\'' +
             ", dokdistBestillingId='" + dokdistBestillingId + '\'' +
             ", vedtaksbrev=" + vedtaksbrev +
-            ", mottakerType=" + mottaker.getMottakerIdType() +
+            ", mottakerType=" + (mottaker != null ? mottaker.getMottakerIdType() : null) +
             ", versjon=" + versjon +
             '}';
     }

@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * <a href="https://confluence.adeo.no/pages/viewpage.action?pageId=377701645">dokarkiv doc</a>
@@ -71,8 +70,6 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
 
-        validerBrevbestillingForespørsel(behandling, dokumentMalType);
-
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
             GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
             brevbestillingTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
@@ -96,24 +93,6 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
             new VedtaksbrevBestillingInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
 
         brevbestillingTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
-    }
-
-    private void validerBrevbestillingForespørsel(Behandling behandling, DokumentMalType dokumentMalType) {
-        if (!behandling.erAvsluttet()) {
-            throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
-        }
-
-        var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
-        var tidligereVedtaksbrev= tidligereBestillinger.stream()
-            .filter(BrevbestillingEntitet::isVedtaksbrev)
-            .filter(it -> it.getDokumentMalType() == dokumentMalType)
-            .toList();
-        if (!tidligereVedtaksbrev.isEmpty()) {
-            String collect = tidligereVedtaksbrev.stream()
-                    .map(BrevbestillingEntitet::toString)
-                    .collect(Collectors.joining(", "));
-            throw new IllegalStateException("Det finnes allerede en bestilling for samme vedtaksbrev: " + collect);
-        }
     }
 
 }
