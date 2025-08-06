@@ -62,7 +62,7 @@ public class PipRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Set<AktørId> hentAktørIdListeTilknyttetSak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
-        Set<AktørId> aktører = pipRepository.hentAktørIdKnyttetTilSaksnummer(saksnummerDto.getVerdi());
+        Set<AktørId> aktører = pipRepository.hentAktørIdKnyttetTilFagsaker(Set.of( saksnummerDto.getVerdi()));
         return aktører;
     }
 
@@ -126,7 +126,7 @@ public class PipRestTjeneste {
     }
 
     private Set<AktørId> hentAktørIder(PipBehandlingsData pipBehandlingsData) {
-        return pipRepository.hentAktørIdKnyttetTilFagsaker(List.of(pipBehandlingsData.getFagsakId()));
+        return pipRepository.hentAktørIdKnyttetTilFagsaker(List.of(new Saksnummer(pipBehandlingsData.getSaksnummer())));
     }
 
 }
