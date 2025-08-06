@@ -69,6 +69,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.SAKSBEHANDLEROVERSTYRING, "Overstyring av Søknadsfrist",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VilkårType.SØKNADSFRIST,
         SkjermlenkeType.SOEKNADSFRIST, TOTRINN, AVVENTER_SAKSBEHANDLER),
+
     OVERSTYRING_AV_INNTEKT(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_INNTEKT_KODE,
         AksjonspunktType.OVERSTYRING, "Overstyring av intekt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT,
         UTEN_VILKÅR, UTEN_SKJERMLENKE, TOTRINN, AVVENTER_SAKSBEHANDLER),
@@ -97,8 +98,23 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe: 80xx
     KONTROLLER_INNTEKT(
         AksjonspunktKodeDefinisjon.KONTROLLER_INNTEKT_KODE, AksjonspunktType.MANUELL, "Kontroller inntekt",
-        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT,
-        UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
+
+
+    VURDERING_AV_FORMKRAV_KLAGE_NFP(
+        AksjonspunktKodeDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_KODE, AksjonspunktType.MANUELL, "Vurder formkrav (Vedtaksinstans)",
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS, UTEN_VILKÅR,
+        SkjermlenkeType.FORMKRAV_KLAGE_NFP, ENTRINN, AVVENTER_SAKSBEHANDLER),
+
+    MANUELL_VURDERING_AV_KLAGE_NFP(
+        AksjonspunktKodeDefinisjon.MANUELL_VURDERING_AV_KLAGE_KODE, AksjonspunktType.MANUELL, "Manuell vurdering av klage (Vedtaksinstans)",
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KLAGE_FØRSTEINSTANS, UTEN_VILKÅR,
+        SkjermlenkeType.KLAGE_BEH_NFP, ENTRINN, AVVENTER_SAKSBEHANDLER),
+
+    AUTO_OVERFØRT_NK(
+        AksjonspunktKodeDefinisjon.AUTO_OVERFØRT_NK_KODE, AksjonspunktType.AUTOPUNKT, "Venter på vedtak fra Klageinstans",
+        BehandlingStatus.UTREDES, BehandlingStegType.OVERFØRT_NK, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, FORBLI, null, AVVENTER_SAKSBEHANDLER),
 
     UNDEFINED,
 
