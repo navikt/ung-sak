@@ -4,7 +4,16 @@ import com.google.cloud.NoCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.DatasetInfo;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BigQueryEmulatorContainer;
@@ -14,6 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Testcontainers
 class BigQueryKlientTest {
@@ -33,11 +43,46 @@ class BigQueryKlientTest {
     }
 
     @Test
-    void publisering_fungerer() {
+    void publisering_av_FAGSAK_STATUS_V2_fungerer() {
         bigQueryKlient.publish(
             BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
-            Tabeller.FAGSAK_STATUS_V2,
+            FagsakStatusRecord.FAGSAK_STATUS_TABELL_V2,
             List.of(new FagsakStatusRecord(BigDecimal.ONE, FagsakStatus.OPPRETTET, ZonedDateTime.now()))
+        );
+    }
+
+    @Test
+    void publisering_av_BEHANDLING_STATUS_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            BehandlingStatusRecord.BEHANDLING_STATUS_TABELL,
+            List.of(
+                new BehandlingStatusRecord(
+                    BigDecimal.TEN,
+                    FagsakYtelseType.UNGDOMSYTELSE,
+                    BehandlingType.FØRSTEGANGSSØKNAD,
+                    BehandlingStatus.UTREDES,
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
+    @Test
+    void publisering_av_AKSJONSPUNKT_TABELL_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            AksjonspunktRecord.AKSJONSPUNKT_TABELL,
+            List.of(
+                new AksjonspunktRecord(
+                    FagsakYtelseType.UNGDOMSYTELSE,
+                    1L,
+                    AksjonspunktDefinisjon.KONTROLLER_INNTEKT,
+                    AksjonspunktStatus.OPPRETTET,
+                    Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
+                    ZonedDateTime.now()
+                )
+            )
         );
     }
 
