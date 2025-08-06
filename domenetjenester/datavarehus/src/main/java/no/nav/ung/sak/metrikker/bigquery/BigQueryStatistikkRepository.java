@@ -22,12 +22,10 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import org.hibernate.query.NativeQuery;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,7 +66,6 @@ public class BigQueryStatistikkRepository {
     }
 
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte() {
-        LocalDate dag = LocalDate.now();
         List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
         Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
@@ -77,24 +74,15 @@ public class BigQueryStatistikkRepository {
         Collection<BehandlingStatusRecord> behandlingStatusStatistikk = behandlingStatusStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandlingStatusRecord.BEHANDLING_STATUS_TABELL, behandlingStatusStatistikk));
 
+        Collection<AksjonspunktRecord> aksjonspunktStatistikk = aksjonspunktStatistikk();
+        hyppigRapporterte.add(new Tuple<>(AksjonspunktRecord.AKSJONSPUNKT_TABELL, aksjonspunktStatistikk));
+
         // TODO: satsStatistikk
         // TODO: barnetilleggStatistikk
         // TODO: behandlingResultatStatistikk
-        // TODO: prosessTaskStatistikk
         // TODO: mottattDokumentMedKildesystemStatistikk
-        // TODO: aksjonspunktStatistikk
-        Collection<AksjonspunktRecord> aksjonspunktStatistikkDaglig = aksjonspunktStatistikkDaglig(dag);
-        hyppigRapporterte.add(new Tuple<>(AksjonspunktRecord.AKSJONSPUNKT_TABELL, aksjonspunktStatistikkDaglig));
-        // TODO: avslagStatistikkDaglig
-        // TODO: avslagStatistikk
-        // TODO: prosessTaskFeilStatistikk
 
         return hyppigRapporterte;
-    }
-
-    public Map<BigQueryTabell, JSONObject> hentDagligRapporterte() {
-        // TODO: avslagStatistikk
-        throw new UnsupportedOperationException("TODO: avslagStatistikk");
     }
 
     Collection<FagsakStatusRecord> fagsakStatusStatistikk() {
@@ -145,39 +133,33 @@ public class BigQueryStatistikkRepository {
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    Collection<AksjonspunktRecord> aksjonspunktStatistikkDaglig(LocalDate dato) {
-        String sql = "select f.ytelse_type, f.saksnummer, b.id as behandling_id, a.aksjonspunkt_def as aksjonspunkt, " +
-            "      a.aksjonspunkt_status as status, a.vent_aarsak, coalesce(a.endret_tid, a.opprettet_tid) as tid " +
+    Collection<AksjonspunktRecord> aksjonspunktStatistikk() {
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status as status, a.vent_aarsak, count(*) as antall " +
             " from aksjonspunkt a " +
             " inner join behandling b on b.id = a.behandling_id" +
             " inner join fagsak f on f.id = b.fagsak_id" +
             " where a.aksjonspunkt_status IN (:statuser)" +
-            " and coalesce(a.endret_tid, a.opprettet_tid) >= :startAvDag " +
-            " and coalesce(a.endret_tid, a.opprettet_tid) < :nesteDag" +
-            " and f.ytelse_type <> :obsoleteKode";
+            " and f.ytelse_type <> :obsoleteKode " +
+            " group by 1, 2, 3, 4";
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
             .setParameter("statuser", MetrikkUtils.AKSJONSPUNKT_STATUSER)
-            .setParameter("startAvDag", dato)
-            .setParameter("nesteDag", dato.plusDays(1).atStartOfDay())
             .setParameter("obsoleteKode", OBSOLETE_KODE)
             .getResultStream();
 
         return stream.map(t -> {
             String ytelseType = t.get(0, String.class);
-            String saksnummer = t.get(1, String.class);
-            String behandlingId = t.get(2, Long.class).toString();
-            String aksjonspunktKode = t.get(3, String.class);
+            String aksjonspunktKode = t.get(1, String.class);
             AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED);
 
-            String aksjonspunktStatusKode = t.get(4, String.class);
-            String venteÅrsakKode = coalesce(t.get(5, String.class), UDEFINERT);
+            String aksjonspunktStatusKode = t.get(2, String.class);
+            String venteÅrsakKode = coalesce(t.get(3, String.class), UDEFINERT);
+            Long antall = t.get(4, Long.class);
 
             return new AksjonspunktRecord(
                 FagsakYtelseType.fraKode(ytelseType),
-                saksnummer,
-                behandlingId,
+                antall,
                 aksjonspunktDefinisjon,
                 AksjonspunktStatus.fraKode(aksjonspunktStatusKode),
                 Venteårsak.fraKode(venteÅrsakKode),

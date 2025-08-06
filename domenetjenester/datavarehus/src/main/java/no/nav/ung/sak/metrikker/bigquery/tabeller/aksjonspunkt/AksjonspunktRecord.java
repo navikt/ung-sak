@@ -17,8 +17,7 @@ import java.util.Map;
 
 public record AksjonspunktRecord(
     FagsakYtelseType ytelseType,
-    String saksnummer,
-    String behandlingId,
+    Long antall,
     AksjonspunktDefinisjon aksjonspunktDefinisjon,
     AksjonspunktStatus aksjonspunktStatus,
     Venteårsak ventearsak,
@@ -27,11 +26,10 @@ public record AksjonspunktRecord(
 
     public static final BigQueryTabell<AksjonspunktRecord> AKSJONSPUNKT_TABELL =
         new BigQueryTabell<>(
-            "aksjonspunkter",
+            "aksjonspunkter_status",
             Schema.of(
                 Field.of("ytelse_type", StandardSQLTypeName.STRING),
-                Field.of("saksnummer", StandardSQLTypeName.STRING),
-                Field.of("behandling_id", StandardSQLTypeName.STRING),
+                Field.of("antall", StandardSQLTypeName.BIGNUMERIC),
                 Field.of("aksjonspunkt_kode", StandardSQLTypeName.STRING),
                 Field.of("aksjonspunkt_navn", StandardSQLTypeName.STRING),
                 Field.of("aksjonspunkt_status", StandardSQLTypeName.STRING),
@@ -41,8 +39,7 @@ public record AksjonspunktRecord(
             AksjonspunktRecord.class,
             rec -> Map.of(
                 "ytelse_type", rec.ytelseType().getKode(),
-                "saksnummer", rec.saksnummer(),
-                "behandling_id", rec.behandlingId(),
+                "antall", rec.antall(),
                 "aksjonspunkt_kode", rec.aksjonspunktDefinisjon().getKode(),
                 "aksjonspunkt_navn", rec.aksjonspunktDefinisjon().getNavn(),
                 "aksjonspunkt_status", rec.aksjonspunktStatus().getNavn(),

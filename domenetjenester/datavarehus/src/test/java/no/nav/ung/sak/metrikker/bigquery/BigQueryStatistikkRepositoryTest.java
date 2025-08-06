@@ -175,7 +175,7 @@ class BigQueryStatistikkRepositoryTest {
         lagreBehandling(behandling);
 
         // Når vi henter aksjonspunkt statistikken
-        Collection<AksjonspunktRecord> behandlingStatusRecords = statistikkRepository.aksjonspunktStatistikkDaglig(LocalDate.now());
+        Collection<AksjonspunktRecord> behandlingStatusRecords = statistikkRepository.aksjonspunktStatistikk();
         // Og vi skal ha minst ett aksjonspunkt i statistikken
         assertThat(behandlingStatusRecords).isNotEmpty();
         // Verifiser at aksjonspunktet er med i statistikken

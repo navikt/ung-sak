@@ -76,8 +76,7 @@ class BigQueryKlientTest {
             List.of(
                 new AksjonspunktRecord(
                     FagsakYtelseType.UNGDOMSYTELSE,
-                    "ABC123",
-                    UUID.randomUUID().toString(),
+                    1L,
                     AksjonspunktDefinisjon.KONTROLLER_INNTEKT,
                     AksjonspunktStatus.OPPRETTET,
                     Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
