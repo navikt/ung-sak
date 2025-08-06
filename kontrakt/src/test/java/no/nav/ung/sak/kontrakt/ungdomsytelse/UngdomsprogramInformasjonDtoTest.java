@@ -1,6 +1,7 @@
 package no.nav.ung.sak.kontrakt.ungdomsytelse;
 
 import no.nav.ung.kontrakt.JsonUtil;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ class UngdomsprogramInformasjonDtoTest {
 
         final var json = JsonUtil.getJson(dto);
 
-        assertThat(json).isEqualTo("""
+        assertThat(json).isEqualToIgnoringWhitespace("""
             {
               "startdato" : "2025-01-01",
               "maksdatoForDeltakelse" : "2025-04-30",

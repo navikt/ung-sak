@@ -355,6 +355,11 @@
                 <artifactId>fordel</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>klage</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
