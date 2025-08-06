@@ -91,7 +91,7 @@ public class BigQueryKlient {
     private TableId hentEllerOpprettTabell(String datasetNavn, BigQueryTabell<?> tableDef) {
         Table existing = bigQuery.getTable(TableId.of(datasetNavn, tableDef.getTabellnavn()));
         if (existing != null) {
-            log.info("Bruker eksisternde tabell {}", existing.getTableId());
+            log.info("Bruker eksisterende tabell {}", existing.getTableId());
             return existing.getTableId();
         }
 
@@ -120,8 +120,8 @@ public class BigQueryKlient {
             if (dataset != null) {
                 log.info("Forsikret at dataset {} eksisterer i BigQuery.", datasetNavn);
             } else {
-                log.error("Dataset {} eksister ikke i BigQuery. Opprett en dataset i BigQuery før du publiserer data.", datasetNavn);
-                throw new RuntimeException("Dataset " + datasetNavn + " eksister ikke i BigQuery. Opprett dataset før publisering.");
+                log.error("Dataset {} eksisterer ikke i BigQuery. Opprett en dataset i BigQuery før du publiserer data.", datasetNavn);
+                throw new RuntimeException("Dataset " + datasetNavn + " eksisterer ikke i BigQuery. Opprett dataset før publisering.");
             }
         } catch (BigQueryException e) {
             log.error("Noe gikk galt ved forsøk på å hente dataset {}: {}", datasetNavn, e.getMessage(), e);
