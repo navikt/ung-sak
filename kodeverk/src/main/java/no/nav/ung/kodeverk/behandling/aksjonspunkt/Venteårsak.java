@@ -27,6 +27,8 @@ public enum Venteårsak implements Kodeverdi {
     VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE("VENTER_ETTERLYS_INNTEKT_UTTALELSE", "Venter på svar fra deltaker om avvik i registerinntekt", false, AVVENTER_SØKER),
     VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE("VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "Venter på svar fra deltaker om endring i ungdomsprogramperiode", false, AVVENTER_SØKER),
 
+    OVERSENDT_KABAL("OVERSENDT_KABAL", "Venter på at behandling utføres av Klage- og ankeenheten", false, AVVENTER_ANNET),
+
     ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();
