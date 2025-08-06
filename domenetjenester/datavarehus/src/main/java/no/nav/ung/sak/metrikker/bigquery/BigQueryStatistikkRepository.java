@@ -12,12 +12,16 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.metrikker.MetrikkUtils;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import org.hibernate.query.NativeQuery;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +30,9 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static no.nav.ung.sak.metrikker.MetrikkUtils.UDEFINERT;
+import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
 
 
 @Dependent
@@ -67,23 +74,14 @@ public class BigQueryStatistikkRepository {
         Collection<BehandlingStatusRecord> behandlingStatusStatistikk = behandlingStatusStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandlingStatusRecord.BEHANDLING_STATUS_TABELL, behandlingStatusStatistikk));
 
+        Collection<AksjonspunktRecord> aksjonspunktStatistikk = aksjonspunktStatistikk();
+        hyppigRapporterte.add(new Tuple<>(AksjonspunktRecord.AKSJONSPUNKT_TABELL, aksjonspunktStatistikk));
+
         // TODO: satsStatistikk
         // TODO: barnetilleggStatistikk
         // TODO: behandlingResultatStatistikk
-        // TODO: prosessTaskStatistikk
-        // TODO: mottattDokumentMedKildesystemStatistikk
-        // TODO: aksjonspunktStatistikk
-        // TODO: aksjonspunktStatistikkDaglig
-        // TODO: avslagStatistikkDaglig
-        // TODO: avslagStatistikk
-        // TODO: prosessTaskFeilStatistikk
 
         return hyppigRapporterte;
-    }
-
-    public Map<BigQueryTabell, JSONObject> hentDagligRapporterte() {
-        // TODO: avslagStatistikk
-        throw new UnsupportedOperationException("TODO: avslagStatistikk");
     }
 
     Collection<FagsakStatusRecord> fagsakStatusStatistikk() {
@@ -129,6 +127,41 @@ public class BigQueryStatistikkRepository {
                 FagsakYtelseType.fraKode(ytelseType),
                 BehandlingType.fraKode(behandlingType),
                 BehandlingStatus.fraKode(behandlingStatus),
+                ZonedDateTime.now()
+            );
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    Collection<AksjonspunktRecord> aksjonspunktStatistikk() {
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status as status, a.vent_aarsak, count(*) as antall " +
+            " from aksjonspunkt a " +
+            " inner join behandling b on b.id = a.behandling_id" +
+            " inner join fagsak f on f.id = b.fagsak_id" +
+            " where a.aksjonspunkt_status IN (:statuser)" +
+            " and f.ytelse_type <> :obsoleteKode " +
+            " group by 1, 2, 3, 4";
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("statuser", MetrikkUtils.AKSJONSPUNKT_STATUSER)
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .getResultStream();
+
+        return stream.map(t -> {
+            String ytelseType = t.get(0, String.class);
+            String aksjonspunktKode = t.get(1, String.class);
+            AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED);
+
+            String aksjonspunktStatusKode = t.get(2, String.class);
+            String venteÅrsakKode = coalesce(t.get(3, String.class), UDEFINERT);
+            Long antall = t.get(4, Long.class);
+
+            return new AksjonspunktRecord(
+                FagsakYtelseType.fraKode(ytelseType),
+                antall,
+                aksjonspunktDefinisjon,
+                AksjonspunktStatus.fraKode(aksjonspunktStatusKode),
+                Venteårsak.fraKode(venteÅrsakKode),
                 ZonedDateTime.now()
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
