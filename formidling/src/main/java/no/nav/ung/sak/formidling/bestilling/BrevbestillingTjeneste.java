@@ -172,4 +172,8 @@ public class BrevbestillingTjeneste {
         };
         return prefix + fraMal;
     }
+
+    public BrevbestillingEntitet hent(Long brevbestillingId) {
+        return brevbestillingRepository.hent(brevbestillingId);
+    }
 }

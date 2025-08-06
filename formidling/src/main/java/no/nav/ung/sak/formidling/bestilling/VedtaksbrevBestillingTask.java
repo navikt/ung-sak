@@ -9,7 +9,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
-import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevBestillingInput;
@@ -39,7 +38,6 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     private BehandlingRepository behandlingRepository;
     private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private BrevbestillingRepository brevbestillingRepository;
     private BrevbestillingTjeneste brevbestillingTjeneste;
     private VedtaksbrevRegler vedtaksbrevRegler;
 
@@ -47,12 +45,10 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        BrevbestillingRepository brevbestillingRepository,
         BrevbestillingTjeneste brevbestillingTjeneste,
         VedtaksbrevRegler vedtaksbrevRegler) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
-        this.brevbestillingRepository = brevbestillingRepository;
         this.brevbestillingTjeneste = brevbestillingTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
@@ -65,7 +61,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData)  {
         Objects.requireNonNull(prosessTaskData.getPropertyValue(BREVBESTILLING_ID), "Må ha brevbestillingId");
 
-        var brevbestilling = brevbestillingRepository.hent(Long.valueOf(prosessTaskData.getPropertyValue(BREVBESTILLING_ID)));
+        var brevbestilling = brevbestillingTjeneste.hent(Long.valueOf(prosessTaskData.getPropertyValue(BREVBESTILLING_ID)));
 
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
