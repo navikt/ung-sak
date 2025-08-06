@@ -15,6 +15,8 @@ public enum SkjermlenkeType implements Kodeverdi {
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     VEDTAK("VEDTAK", "Vedtak"),
+    FORMKRAV_KLAGE_NFP("FORMKRAV_KLAGE_NFP", "Formkrav klage Vedtaksinstans"),
+    KLAGE_BEH_NFP("KLAGE_BEH_NFP", "Klageresultat Vedtaksinstans"),
     ;
 
     private static final Map<String, SkjermlenkeType> KODER = new LinkedHashMap<>();
