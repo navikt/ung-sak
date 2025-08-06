@@ -80,7 +80,6 @@ public class BigQueryStatistikkRepository {
         // TODO: satsStatistikk
         // TODO: barnetilleggStatistikk
         // TODO: behandlingResultatStatistikk
-        // TODO: mottattDokumentMedKildesystemStatistikk
 
         return hyppigRapporterte;
     }
