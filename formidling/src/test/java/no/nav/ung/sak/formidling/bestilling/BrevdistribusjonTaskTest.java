@@ -65,15 +65,13 @@ class BrevdistribusjonTaskTest {
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
             behandling.getFagsakId(),
             behandling.getId(),
-            DokumentMalType.INNVILGELSE_DOK,
-            TemplateType.INNVILGELSE,
-            new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
+            DokumentMalType.INNVILGELSE_DOK);
 
         String jpId = "jp123";
         String dokumentId = "567";
         safTjeneste.leggTilJournalpost(new SafFake.JournalpostFake(jpId, dokumentId, DokumentMalType.INNVILGELSE_DOK));
 
-        bestilling.journalført(jpId);
+        bestilling.journalført(jpId, TemplateType.INNVILGELSE, new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
         brevbestillingRepository.lagre(bestilling);
 
         var pd = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
@@ -132,15 +130,13 @@ class BrevdistribusjonTaskTest {
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
             behandling.getFagsakId(),
             behandling.getId(),
-            DokumentMalType.GENERELT_FRITEKSTBREV,
-            TemplateType.GENERELT_FRITEKSTBREV,
-            new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
+            DokumentMalType.GENERELT_FRITEKSTBREV);
 
         String jpId = "jp123";
         String dokumentId = "567";
         safTjeneste.leggTilJournalpost(new SafFake.JournalpostFake(jpId, dokumentId, DokumentMalType.GENERELT_FRITEKSTBREV));
 
-        bestilling.journalført(jpId);
+        bestilling.journalført(jpId, TemplateType.GENERELT_FRITEKSTBREV, new BrevMottaker(behandling.getAktørId().getAktørId(), IdType.AKTØRID));
         brevbestillingRepository.lagre(bestilling);
 
         var pd = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);

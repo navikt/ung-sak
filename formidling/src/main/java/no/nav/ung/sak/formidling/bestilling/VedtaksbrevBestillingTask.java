@@ -20,6 +20,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -33,8 +34,7 @@ import java.util.stream.Collectors;
 public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.vedtak.brevbestilling";
-    public static final String DOKUMENT_MAL_TYPE_PARAM = "dokumentMalType";
-    public static final String MANUELL_BREV_PARAM = "manuellBrev";
+    public static final String BREVBESTILLING_ID = "brevbestillingId";
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
 
@@ -64,29 +64,38 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData)  {
-        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
-        var manuellBrev = Boolean.parseBoolean(prosessTaskData.getPropertyValue(MANUELL_BREV_PARAM));
+        Objects.requireNonNull(prosessTaskData.getPropertyValue(BREVBESTILLING_ID), "Må ha brevbestillingId");
 
-        if (manuellBrev) {
+        var brevbestilling = brevbestillingRepository.hent(Long.valueOf(prosessTaskData.getPropertyValue(BREVBESTILLING_ID)));
+
+        Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+        DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
+
+        validerBrevbestillingForespørsel(behandling, dokumentMalType);
+
+        if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
             GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
-            brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+            brevbestillingTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
             return;
         }
 
-        DokumentMalType dokumentMalType = DokumentMalType.fraKode(prosessTaskData.getPropertyValue(DOKUMENT_MAL_TYPE_PARAM));
-        validerBrevbestillingForespørsel(behandling, dokumentMalType);
+        genererOgJournalførAutomatiskBrev(behandling, brevbestilling);
 
+    }
+
+    private void genererOgJournalførAutomatiskBrev(Behandling behandling, BrevbestillingEntitet brevbestilling) {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
 
-        Vedtaksbrev vedtaksbrev = totalresultater.vedtaksbrevResultater().stream().filter(it -> it.dokumentMalType() == dokumentMalType)
+        DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
+        Vedtaksbrev vedtaksbrev = totalresultater.vedtaksbrevResultater().stream()
+            .filter(it -> it.dokumentMalType() == dokumentMalType)
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
 
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
             new VedtaksbrevBestillingInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
 
-       brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
-
+        brevbestillingTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
     }
 
     private void validerBrevbestillingForespørsel(Behandling behandling, DokumentMalType dokumentMalType) {
