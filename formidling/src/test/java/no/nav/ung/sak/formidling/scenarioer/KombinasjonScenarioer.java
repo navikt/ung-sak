@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -94,8 +95,7 @@ public class KombinasjonScenarioer {
 
 
         var rapportertInntektPeriode = new LocalDateInterval(fom.withDayOfMonth(1).plusMonths(3),
-            fom.withDayOfMonth(1).plusMonths(3)
-                .with(TemporalAdjusters.lastDayOfMonth()));
+            fom.withDayOfMonth(1).plusMonths(3).with(TemporalAdjusters.lastDayOfMonth()));
 
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
         var rapportertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, BigDecimal.valueOf(10000)));
@@ -127,6 +127,85 @@ public class KombinasjonScenarioer {
             ),
             null,
             Collections.emptyList(),
+            null);
+    }
+
+    /**
+     * Kombinasjon - endrer startdato og blir 25 år
+     *
+     **/
+    public static UngTestScenario kombinasjon_endringStartDatoOgEndringHøySats(LocalDate fødselsdato, LocalDate nyStartdato, LocalDateInterval opprinneligProgramPeriode) {
+        UngTestScenario ungTestScenario = EndringProgramPeriodeScenarioer.endringStartdato(nyStartdato, opprinneligProgramPeriode);
+
+
+        var tjuvefemårsdag = fødselsdato.plusYears(25);
+        var fom = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
+
+        var programPeriode = ungTestScenario.programPerioder().get(0).getPeriode();
+
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(programPeriode.getFomDato(), tjuvefemårsdag.minusDays(1), BrevScenarioerUtils.lavSatsBuilder(fom).build()),
+            new LocalDateSegment<>(tjuvefemårsdag, programPeriode.getTomDato(), BrevScenarioerUtils.høySatsBuilder(fom).build())
+        ));
+
+        var triggere = new HashSet<>(ungTestScenario.behandlingTriggere());
+        triggere.add(
+            new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))
+        );
+
+        return new UngTestScenario(
+            ungTestScenario.navn(),
+            ungTestScenario.programPerioder(),
+            satser,
+            ungTestScenario.uttakPerioder(),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            ungTestScenario.aldersvilkår(),
+            ungTestScenario.ungdomsprogramvilkår(),
+            fødselsdato,
+            ungTestScenario.søknadStartDato(),
+            triggere,
+            null,
+            ungTestScenario.barn(),
+            null);
+    }
+
+
+    /**
+     * Kombinasjon - førstegangsinnvilgelse og fødsel av barn
+     *
+     **/
+    public static UngTestScenario kombinasjon_førstegangsBehandlingOgBarn(LocalDate fom) {
+        UngTestScenario ungTestScenario = FørstegangsbehandlingScenarioer.innvilget19år(fom);
+        var barnFødselsdato = fom.withDayOfMonth(1).plusMonths(1).withDayOfMonth(15);
+
+        var programPeriode = ungTestScenario.programPerioder().get(0).getPeriode();
+
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, barnFødselsdato.minusDays(1), BrevScenarioerUtils.lavSatsBuilder(fom).build()),
+            new LocalDateSegment<>(barnFødselsdato, programPeriode.getTomDato(), BrevScenarioerUtils.lavSatsMedBarnBuilder(barnFødselsdato, 1).build())
+        ));
+
+
+        var triggere = new HashSet<>(ungTestScenario.behandlingTriggere());
+        triggere.add(
+            new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, programPeriode.getTomDato()))
+        );
+
+        return new UngTestScenario(
+            ungTestScenario.navn(),
+            ungTestScenario.programPerioder(),
+            satser,
+            ungTestScenario.uttakPerioder(),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            ungTestScenario.aldersvilkår(),
+            ungTestScenario.ungdomsprogramvilkår(),
+            fom.minusYears(19).plusDays(42),
+            ungTestScenario.søknadStartDato(),
+            triggere,
+            null,
+            List.of(
+                BrevScenarioerUtils.lagBarn(barnFødselsdato)
+            ),
             null);
     }
 }

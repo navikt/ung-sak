@@ -112,6 +112,15 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
         return genererVedtaksbrev(behandlingId, testInfo, vedtaksbrevTjeneste);
     }
 
+    final protected GenerertBrev genererVedtaksbrevUtenLagring(Long behandlingId) {
+        return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
+    }
+
+    private static GenerertBrev genererVedtaksbrevUtenLagring(Long behandlingId, VedtaksbrevTjeneste vedtaksbrevTjeneste1) {
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste1.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
+        assertThat(forhåndsvis).hasSize(1);
+        return forhåndsvis.getFirst();
+    }
 
     /**
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
@@ -120,9 +129,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
         String lagre = System.getenv("LAGRE");
 
         if (lagre == null) {
-            List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
-            assertThat(forhåndsvis).hasSize(1);
-            return forhåndsvis.getFirst();
+            return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
         }
 
         List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, !lagre.equals("PDF")));

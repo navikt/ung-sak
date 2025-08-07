@@ -16,10 +16,7 @@ import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.scenarioer.EndringBarnetilleggScenarioer;
-import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
-import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
-import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.*;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
@@ -149,6 +146,28 @@ class VedtaksbrevReglerTest {
         assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
 
     }
+
+    @Test
+    void skal_gi_ingen_brev_ved_avslag_aldersvilkår() {
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
+        var behandling = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
+            .medUngTestGrunnlag(ungTestGrunnlag)
+            .buildOgLagreMedUng(ungTestRepositories);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isFalse();
+
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
 
     @Test
     void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {

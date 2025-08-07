@@ -33,4 +33,8 @@ class ResultatHelper {
     public boolean innholder(DetaljertResultatType detaljertResultatType) {
         return resultatTyper.contains(detaljertResultatType);
     }
+
+    public boolean innholderIkke(DetaljertResultatType detaljertResultatType) {
+        return !resultatTyper.contains(detaljertResultatType);
+    }
 }

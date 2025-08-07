@@ -271,4 +271,33 @@ public class FørstegangsbehandlingScenarioer {
             Collections.emptyList(),
             null);
     }
+
+    /**
+     * 18 år blir 19 år i program. Usikker om dette er mulig
+     */
+    public static UngTestScenario innvilgetDelvis(LocalDate fom, LocalDate nittenårsdag) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+
+        var satser = new LocalDateTimeline<>(p, BrevScenarioerUtils.lavSatsBuilder(fom).build());
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), Tid.TIDENES_ENDE));
+
+        LocalDate fødselsdato = nittenårsdag.minusYears(19);
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(p),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fom, nittenårsdag.minusDays(1), Utfall.IKKE_OPPFYLT),
+                new LocalDateSegment<>(nittenårsdag, p.getTomDato(), Utfall.OPPFYLT)
+            )),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fødselsdato, // 10 dager til blir 19 år
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), null,
+            Collections.emptyList(), null);
+    }
 }

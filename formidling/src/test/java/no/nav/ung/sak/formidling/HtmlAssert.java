@@ -33,6 +33,10 @@ public class HtmlAssert extends AbstractAssert<HtmlAssert, String> {
         return this;
     }
 
+    public HtmlAssert asPlainTextContains(String text) {
+        assertThat(actualTextTrimmed).contains(text);
+        return this;
+    }
 
     public HtmlAssert containsHtmlSubSequenceOnce(String... html) {
         assertThatContainsSubSequenceOnce(actualHtmlTrimmed, html);

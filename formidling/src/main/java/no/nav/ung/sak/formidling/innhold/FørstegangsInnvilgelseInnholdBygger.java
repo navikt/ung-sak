@@ -21,6 +21,7 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.BeregningDto
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.SatsOgBeregningDto;
 import no.nav.ung.sak.formidling.vedtak.regler.SatsEndring;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
@@ -68,7 +69,10 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var brevfeilSamler = new BrevfeilHåndterer(!ignoreIkkeStøttedeBrev);
         Long behandlingId = behandling.getId();
 
-        var ytelseFom = detaljertResultatTidslinje.getMinLocalDate();
+        var ytelseFom = DetaljertResultat
+            .filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
+            .getMinLocalDate();
+
         var ytelseTom = finnEvtTomDato(detaljertResultatTidslinje, behandlingId, brevfeilSamler);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
