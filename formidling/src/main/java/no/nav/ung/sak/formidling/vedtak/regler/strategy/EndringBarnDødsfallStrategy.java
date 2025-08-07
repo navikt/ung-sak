@@ -30,7 +30,7 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new VedtaksbrevStrategyResultat(null, null, "Ingen brev ved dødsfall av barn.", IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+        return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "Ingen brev ved dødsfall av barn.");
     }
 
     @Override

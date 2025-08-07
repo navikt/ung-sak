@@ -82,7 +82,7 @@ class VurderVedtaksbrevTaskTest {
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getBrevbestilling().getId()).isEqualTo(bestilling.getId());
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);
-        assertThat(resultat.getForklaring()).isNotNull();
+        assertThat(resultat.getBeskrivelse()).isNotNull();
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(1);
@@ -130,12 +130,12 @@ class VurderVedtaksbrevTaskTest {
             .anySatisfy(resultat -> {
                 assertThat(resultat.getBrevbestilling().getId()).isEqualTo(bestillinger.getFirst().getId());
                 assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);
-                assertThat(resultat.getForklaring()).isNotNull();
+                assertThat(resultat.getBeskrivelse()).isNotNull();
             })
             .anySatisfy(resultat -> {
                 assertThat(resultat.getBrevbestilling().getId()).isEqualTo(bestillinger.get(1).getId());
                 assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);
-                assertThat(resultat.getForklaring()).isNotNull();
+                assertThat(resultat.getBeskrivelse()).isNotNull();
             });
 
 
@@ -167,7 +167,7 @@ class VurderVedtaksbrevTaskTest {
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getBrevbestilling()).isNull();
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.IKKE_RELEVANT);
-        assertThat(resultat.getForklaring()).isNotNull();
+        assertThat(resultat.getBeskrivelse()).isNotNull();
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(0);
@@ -206,7 +206,7 @@ class VurderVedtaksbrevTaskTest {
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getBrevbestilling()).isNull();
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.HINDRET_SAKSBEHANDLER);
-        assertThat(resultat.getForklaring()).isNull();
+        assertThat(resultat.getBeskrivelse()).isNull();
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(0);
@@ -240,7 +240,7 @@ class VurderVedtaksbrevTaskTest {
         assertThat(vedtaksbrevResultater).hasSize(1);
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);
-        assertThat(resultat.getForklaring()).isNotNull();
+        assertThat(resultat.getBeskrivelse()).isNotNull();
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(1);

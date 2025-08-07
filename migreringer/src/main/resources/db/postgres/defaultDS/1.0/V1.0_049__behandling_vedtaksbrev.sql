@@ -4,15 +4,15 @@ alter table brevbestilling
 alter table brevbestilling
     alter column mottaker_id_type drop not null;
 
-create sequence if not exists seq_behandling_vedtaksbrev start with 1 increment by 50;
+create sequence if not exists seq_behandling_vedtaksbrev increment by 50 minvalue 1000000;
 
 create table behandling_vedtaksbrev
 (
     id                bigint primary key,
     behandling_id     bigint                                                        not null,
     fagsak_id         bigint                                                        not null,
-    resultat_type     varchar(100)                                                   not null,
-    forklaring        text,
+    resultat_type     varchar(100)                                                  not null,
+    beskrivelse       text,
     brevbestilling_id bigint,
     opprettet_av      varchar(20)                    default 'VL'                   not null,
     opprettet_tid     timestamp(3) without time zone default timezone('utc', now()) not null,
@@ -27,3 +27,5 @@ create table behandling_vedtaksbrev
 comment on column behandling_vedtaksbrev.resultat_type is 'resultat av vurdering for vedtaksbrev';
 comment on column behandling_vedtaksbrev.brevbestilling_id is 'brevbestilling id hvis det ble bestilt et vedtaksbrev';
 
+drop sequence if exists seq_brevbestilling;
+create sequence seq_brevbestilling increment by 50 minvalue 1000000;

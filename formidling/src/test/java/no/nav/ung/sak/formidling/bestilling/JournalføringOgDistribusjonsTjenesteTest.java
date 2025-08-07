@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class BrevbestillingTjenesteTest {
+class JournalføringOgDistribusjonsTjenesteTest {
 
 
     @Inject
@@ -46,7 +46,7 @@ class BrevbestillingTjenesteTest {
     private DokArkivKlientFake dokArkivKlient;
     private BrevbestillingRepository brevbestillingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private BrevbestillingTjeneste brevbestillingTjeneste;
+    private JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste;
     private BehandlingRepositoryProvider repositoryProvider;
 
     private String fnr = new FiktiveFnr().nesteFnr();
@@ -58,7 +58,7 @@ class BrevbestillingTjenesteTest {
         prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         dokArkivKlient = new DokArkivKlientFake();
         brevbestillingRepository = new BrevbestillingRepository(entityManager);
-        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
+        journalføringOgDistribusjonsTjeneste = new JournalføringOgDistribusjonsTjeneste(brevbestillingRepository, dokArkivKlient, prosessTaskTjeneste);
     }
 
     @Test
@@ -79,7 +79,13 @@ class BrevbestillingTjenesteTest {
             TemplateType.INNVILGELSE
         );
 
-        brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+        var bestilling1 = BrevbestillingEntitet.nyBrevbestilling(
+            behandling.getFagsakId(),
+            behandling.getId(),
+            generertBrev.malType()
+        );
+
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling1, generertBrev);
 
 
         var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
@@ -115,7 +121,13 @@ class BrevbestillingTjenesteTest {
             TemplateType.GENERELT_FRITEKSTBREV
         );
 
-        brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+        var bestilling1 = BrevbestillingEntitet.nyBrevbestilling(
+            behandling.getFagsakId(),
+            behandling.getId(),
+            generertBrev.malType()
+        );
+
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling1, generertBrev);
 
 
         var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();

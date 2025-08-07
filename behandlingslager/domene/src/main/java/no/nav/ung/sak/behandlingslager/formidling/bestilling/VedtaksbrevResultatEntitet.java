@@ -24,31 +24,31 @@ public class VedtaksbrevResultatEntitet extends BaseEntitet {
     @Enumerated(EnumType.STRING)
     private VedtaksbrevResultatType resultatType;
 
-    @Column(name = "forklaring")
-    private String forklaring;
+    @Column(name = "beskrivelse")
+    private String beskrivelse;
 
     @OneToOne
     @JoinColumn(name = "brevbestilling_id", insertable = false, updatable = false,
                 foreignKey = @ForeignKey(name = "fk_brevbestilling"))
     private BrevbestillingEntitet brevbestilling;
 
-    public static VedtaksbrevResultatEntitet medBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String forklaring, BrevbestillingEntitet brevBestilling) {
-        return new VedtaksbrevResultatEntitet(behandlingId, fagsakId, resultatType, forklaring, brevBestilling);
+    public static VedtaksbrevResultatEntitet medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType) {
+        return new VedtaksbrevResultatEntitet(brevBestilling.getBehandlingId(), brevBestilling.getFagsakId(), resultatType, beskrivelse, brevBestilling);
     }
 
-    public static VedtaksbrevResultatEntitet utenBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String forklaring) {
-        return new VedtaksbrevResultatEntitet(behandlingId, fagsakId, resultatType, forklaring, null);
+    public static VedtaksbrevResultatEntitet utenBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse) {
+        return new VedtaksbrevResultatEntitet(behandlingId, fagsakId, resultatType, beskrivelse, null);
     }
 
     // Default constructor required by JPA
     public VedtaksbrevResultatEntitet() {
     }
 
-    public VedtaksbrevResultatEntitet(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String forklaring, BrevbestillingEntitet brevbestilling) {
+    public VedtaksbrevResultatEntitet(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse, BrevbestillingEntitet brevbestilling) {
         this.behandlingId = behandlingId;
         this.fagsakId = fagsakId;
         this.resultatType = resultatType;
-        this.forklaring = forklaring;
+        this.beskrivelse = beskrivelse;
         this.brevbestilling = brevbestilling;
     }
 
@@ -56,8 +56,8 @@ public class VedtaksbrevResultatEntitet extends BaseEntitet {
         return resultatType;
     }
 
-    public String getForklaring() {
-        return forklaring;
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 
     public BrevbestillingEntitet getBrevbestilling() {

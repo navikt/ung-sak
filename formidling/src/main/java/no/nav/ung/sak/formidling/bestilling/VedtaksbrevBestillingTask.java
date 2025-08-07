@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
@@ -38,19 +39,21 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     private BehandlingRepository behandlingRepository;
     private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private BrevbestillingTjeneste brevbestillingTjeneste;
+    private JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste;
     private VedtaksbrevRegler vedtaksbrevRegler;
+    private BrevbestillingRepository brevbestillingRepository;
 
     @Inject
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        BrevbestillingTjeneste brevbestillingTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler) {
+        JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste,
+        VedtaksbrevRegler vedtaksbrevRegler, BrevbestillingRepository brevbestillingRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
-        this.brevbestillingTjeneste = brevbestillingTjeneste;
+        this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
+        this.brevbestillingRepository = brevbestillingRepository;
     }
 
     VedtaksbrevBestillingTask() {
@@ -61,14 +64,14 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData)  {
         Objects.requireNonNull(prosessTaskData.getPropertyValue(BREVBESTILLING_ID), "Må ha brevbestillingId");
 
-        var brevbestilling = brevbestillingTjeneste.hent(Long.valueOf(prosessTaskData.getPropertyValue(BREVBESTILLING_ID)));
+        var brevbestilling = brevbestillingRepository.hent(Long.valueOf(prosessTaskData.getPropertyValue(BREVBESTILLING_ID)));
 
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
 
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
             GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
-            brevbestillingTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
+            journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
             return;
         }
 
@@ -88,7 +91,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
             new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
 
-        brevbestillingTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
     }
 
 }

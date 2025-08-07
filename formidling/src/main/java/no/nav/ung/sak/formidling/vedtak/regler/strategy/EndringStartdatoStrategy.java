@@ -21,7 +21,7 @@ public final class EndringStartdatoStrategy implements VedtaksbrevInnholdbyggerS
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new VedtaksbrevStrategyResultat(DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av startdato", null);
+        return VedtaksbrevStrategyResultat.medBrev(DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av startdato");
     }
 
     @Override

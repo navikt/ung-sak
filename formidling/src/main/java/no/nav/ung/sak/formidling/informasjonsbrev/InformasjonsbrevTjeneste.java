@@ -9,9 +9,11 @@ import no.nav.ung.kodeverk.formidling.UtilgjengeligÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
-import no.nav.ung.sak.formidling.bestilling.BrevbestillingTjeneste;
+import no.nav.ung.sak.formidling.bestilling.JournalføringOgDistribusjonsTjeneste;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
@@ -25,14 +27,16 @@ public class InformasjonsbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
     private final InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste;
-    private final BrevbestillingTjeneste brevbestillingTjeneste;
-    private PersonopplysningRepository personopplysningRepository;
+    private final JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste;
+    private final BrevbestillingRepository brevbestillingRepository;
+    private final PersonopplysningRepository personopplysningRepository;
 
     @Inject
-    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste, BrevbestillingTjeneste brevbestillingTjeneste, PersonopplysningRepository personopplysningRepository) {
+    public InformasjonsbrevTjeneste(BehandlingRepository behandlingRepository, InformasjonsbrevGenerererTjeneste informasjonsbrevGenerererTjeneste, JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste, BrevbestillingRepository brevbestillingRepository, PersonopplysningRepository personopplysningRepository) {
         this.behandlingRepository = behandlingRepository;
         this.informasjonsbrevGenerererTjeneste = informasjonsbrevGenerererTjeneste;
-        this.brevbestillingTjeneste = brevbestillingTjeneste;
+        this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
+        this.brevbestillingRepository = brevbestillingRepository;
         this.personopplysningRepository = personopplysningRepository;
     }
 
@@ -96,7 +100,15 @@ public class InformasjonsbrevTjeneste {
     public BrevbestillingResultat bestill(InformasjonsbrevBestillingRequest dto) {
         GenerertBrev generertBrev = validerOgGenererBrev(dto, false);
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
-        return brevbestillingTjeneste.bestillBrev(behandling, generertBrev);
+
+        BrevbestillingEntitet bestilling = BrevbestillingEntitet.nyBrevbestilling(
+            behandling.getFagsakId(),
+            behandling.getId(),
+            generertBrev.malType()
+        );
+        brevbestillingRepository.lagre(bestilling);
+
+        return journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling, generertBrev);
     }
 
     private GenerertBrev validerOgGenererBrev(InformasjonsbrevBestillingRequest dto, Boolean kunHtml) {
