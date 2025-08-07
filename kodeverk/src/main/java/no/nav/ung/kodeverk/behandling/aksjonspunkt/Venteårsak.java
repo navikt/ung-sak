@@ -58,13 +58,15 @@ public enum Venteårsak implements Kodeverdi {
         this.ventekategori = ventekategori;
     }
 
-    public static Venteårsak fraKode(final String kode) {
+    public static Venteårsak fraKode(final String kode, boolean feilHvisUkjent) {
         if (kode == null) {
             return null;
         }
         var ad = KODER.get(kode);
-        if (ad == null) {
+        if (ad == null && feilHvisUkjent) {
             throw new IllegalArgumentException("Ukjent Venteårsak: " + kode);
+        } else if (ad == null) {
+            return UDEFINERT;
         }
         return ad;
     }
