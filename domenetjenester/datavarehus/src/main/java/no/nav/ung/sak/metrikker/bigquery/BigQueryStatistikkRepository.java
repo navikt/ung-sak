@@ -154,6 +154,13 @@ public class BigQueryStatistikkRepository {
 
             String aksjonspunktStatusKode = t.get(2, String.class);
             String venteÅrsakKode = coalesce(t.get(3, String.class), UDEFINERT);
+            Venteårsak venteårsak;
+            try {
+                venteårsak = Venteårsak.fraKode(venteÅrsakKode);
+            } catch (Exception e) {
+                venteårsak = Venteårsak.UDEFINERT;
+            }
+
             Long antall = t.get(4, Long.class);
 
             return new AksjonspunktRecord(
@@ -161,7 +168,7 @@ public class BigQueryStatistikkRepository {
                 antall,
                 aksjonspunktDefinisjon,
                 AksjonspunktStatus.fraKode(aksjonspunktStatusKode),
-                Venteårsak.fraKode(venteÅrsakKode),
+                venteårsak,
                 ZonedDateTime.now()
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
