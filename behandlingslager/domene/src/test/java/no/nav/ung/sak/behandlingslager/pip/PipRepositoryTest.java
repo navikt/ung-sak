@@ -10,6 +10,7 @@ import java.util.Set;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,9 +82,9 @@ public class PipRepositoryTest {
         @SuppressWarnings("unused")
         Fagsak fagsakAnnenAktør = new BasicBehandlingBuilder(entityManager).opprettFagsak(FagsakYtelseType.FORELDREPENGER);
 
-        Set<Long> resultat = pipRepository.fagsakIderForSøker(Collections.singleton(aktørId1));
+        Set<Saksnummer> resultat = pipRepository.saksnumreForSøker(Collections.singleton(aktørId1));
 
-        assertThat(resultat).containsOnly(fagsak1.getId(), fagsak2.getId());
+        assertThat(resultat).containsOnly(fagsak1.getSaksnummer(), fagsak2.getSaksnummer());
     }
 
     @Test
@@ -91,7 +92,7 @@ public class PipRepositoryTest {
         AktørId aktørId1 = AktørId.dummy();
         var fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER, aktørId1);
 
-        Set<AktørId> aktørIder = pipRepository.hentAktørIdKnyttetTilFagsaker(Collections.singleton(fagsak.getId()));
+        Set<AktørId> aktørIder = pipRepository.hentAktørIdKnyttetTilFagsaker(Collections.singleton(fagsak.getSaksnummer()));
         assertThat(aktørIder).containsOnly(aktørId1);
     }
 
@@ -106,8 +107,8 @@ public class PipRepositoryTest {
         fagsakRepository.lagre(journalpost2);
         (new Repository(entityManager)).flush();
 
-        Set<Long> fagsakId = pipRepository.fagsakIdForJournalpostId(Collections.singleton(JOURNALPOST_ID));
-        assertThat(fagsakId).containsOnly(fagsak1.getId());
+        Set<Saksnummer> fagsakId = pipRepository.saksnumreForJournalpostId(Collections.singleton(JOURNALPOST_ID));
+        assertThat(fagsakId).containsOnly(fagsak1.getSaksnummer());
     }
 
     @Test

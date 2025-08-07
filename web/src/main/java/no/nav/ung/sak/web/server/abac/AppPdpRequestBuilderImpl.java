@@ -18,13 +18,21 @@ import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -37,16 +45,12 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private static final Cluster CLUSTER = Environment.current().getCluster();
     private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(
         CLUSTER.clusterName() + ":k9saksbehandling",
-        CLUSTER.DEV_GCP.clusterName() + ":omsorgspenger",
-        CLUSTER.PROD_GCP.clusterName() + ":omsorgspenger",
         CLUSTER.DEV_GCP.clusterName() + ":dusseldorf",
         CLUSTER.PROD_GCP.clusterName() + ":dusseldorf"
     );
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørTjeneste aktørTjeneste;
-
-
 
     public AppPdpRequestBuilderImpl() {
     }
@@ -57,8 +61,8 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         this.aktørTjeneste = aktørTjeneste;
     }
 
-    private static void validerSamsvarBehandlingOgFagsak(Long behandlingId, Long fagsakId, Set<Long> fagsakIder) {
-        List<Long> fagsakerSomIkkeErForventet = fagsakIder.stream()
+    private static void validerSamsvarBehandlingOgFagsak(Long behandlingId, Saksnummer fagsakId, Set<Saksnummer> fagsakIder) {
+        List<Saksnummer> fagsakerSomIkkeErForventet = fagsakIder.stream()
             .filter(f -> !fagsakId.equals(f))
             .collect(Collectors.toList());
         if (!fagsakerSomIkkeErForventet.isEmpty()) {
@@ -78,29 +82,28 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         }
 
         Optional<Long> behandlingId = utledBehandlingIder(attributter);
+        behandlingId.ifPresent(it -> LOG_CONTEXT.add("behandling", it));
+
         Optional<PipBehandlingsData> behandlingData = behandlingId.isPresent()
             ? pipRepository.hentDataForBehandling(behandlingId.get())
             : Optional.empty();
-        Set<Long> fagsakIder = behandlingData.isPresent()
-            ? utledFagsakIder(attributter, behandlingData.get())
-            : utledFagsakIder(attributter);
+        if (behandlingId.isPresent() && behandlingData.isEmpty()) {
+            throw new UkjentBehandlingException(behandlingId.get());
+        }
+        Set<Saksnummer> saksnumre = behandlingData.isPresent()
+            ? utledSaksnumre(attributter, behandlingData.get())
+            : utledSaksnumre(attributter);
 
         behandlingData.ifPresent(pipBehandlingsData -> {
-            validerSamsvarBehandlingOgFagsak(behandlingId.get(), pipBehandlingsData.getFagsakId(), fagsakIder);
-            LOG_CONTEXT.add("behandling", behandlingId.get());
-            LOG_CONTEXT.add("saksnummer", pipBehandlingsData.getSaksnummer());
+            validerSamsvarBehandlingOgFagsak(behandlingId.get(), new Saksnummer(pipBehandlingsData.getSaksnummer()), saksnumre);
+            LOG_CONTEXT.add("behandlingUuid", pipBehandlingsData.getBehandlingUuid());
         });
 
-        Set<Saksnummer> saksnummere = attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER);
-        if (saksnummere != null && !saksnummere.isEmpty() && behandlingData.isEmpty()) {
-            LOG_CONTEXT.add("saksnummer", saksnummere.size() == 1 ? saksnummere.iterator().next().toString() : saksnummere.toString());
+        if (saksnumre.size() == 1) {
+            LOG_CONTEXT.add("saksnummer", saksnumre.iterator().next());
         }
 
-        if (!fagsakIder.isEmpty()) {
-            LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
-        }
-
-        Set<AktørId> aktørIder = utledAktørIder(attributter, fagsakIder);
+        Set<AktørId> aktørIder = utledAktørIder(attributter, saksnumre);
         Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(AppAbacAttributtType.AKSJONSPUNKT_KODE));
         return behandlingData.isPresent()
             ? lagPdpRequest(attributter, aktørIder, aksjonspunktType, behandlingData.get())
@@ -159,12 +162,17 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     }
 
     private Optional<Long> utledBehandlingIder(AbacAttributtSamling attributter) {
-        Set<UUID> uuids = attributter.getVerdier(AppAbacAttributtType.BEHANDLING_UUID);
-        Set<Long> behandlingIdVerdier = attributter.getVerdier(AppAbacAttributtType.BEHANDLING_ID);
-        Set<Long> behandlingId0 = behandlingIdVerdier.stream().mapToLong(Long::valueOf).boxed().collect(Collectors.toSet());
+        Set<Long> behandlingIdFraAttributter = attributter.<Long>getVerdier(AppAbacAttributtType.BEHANDLING_ID).stream().mapToLong(Long::valueOf).boxed().collect(Collectors.toSet());
 
-        Set<Long> behandlingsIder = new LinkedHashSet<>(behandlingId0);
-        behandlingsIder.addAll(pipRepository.behandlingsIdForUuid(uuids));
+        Set<UUID> uuids = attributter.getVerdier(AppAbacAttributtType.BEHANDLING_UUID);
+        Set<Long> behandlingIdForUuid = pipRepository.behandlingsIdForUuid(uuids);
+        if (uuids.size() != behandlingIdForUuid.size()) {
+            throw new UkjentBehandlingException(uuids);
+        }
+
+        Set<Long> behandlingsIder = new LinkedHashSet<>();
+        behandlingsIder.addAll(behandlingIdFraAttributter);
+        behandlingsIder.addAll(behandlingIdForUuid);
         behandlingsIder.addAll(pipRepository.behandlingsIdForOppgaveId(attributter.getVerdier(AppAbacAttributtType.OPPGAVE_ID)));
 
         if (behandlingsIder.isEmpty()) {
@@ -177,36 +185,36 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         throw FeilFactory.create(PdpRequestBuilderFeil.class).ugyldigInputFlereBehandlingIder(behandlingsIder).toException();
     }
 
-    private Set<Long> utledFagsakIder(AbacAttributtSamling attributter, PipBehandlingsData behandlingData) {
-        Set<Long> fagsaker = utledFagsakIder(attributter);
-        fagsaker.add(behandlingData.getFagsakId());
-        return fagsaker;
+    private Set<Saksnummer> utledSaksnumre(AbacAttributtSamling attributter, PipBehandlingsData behandlingData) {
+        Set<Saksnummer> saksnumre = utledSaksnumre(attributter);
+        saksnumre.add(new Saksnummer(behandlingData.getSaksnummer()));
+        return saksnumre;
     }
 
-    private Set<Long> utledFagsakIder(AbacAttributtSamling attributter) {
-        Set<Long> fagsakIder = new HashSet<>();
-        fagsakIder.addAll(attributter.getVerdier(AppAbacAttributtType.FAGSAK_ID));
-
-        //
-        fagsakIder.addAll(pipRepository.fagsakIderForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
-
-        // fra saksnummer
-        Set<Saksnummer> saksnummere = attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER);
-        fagsakIder.addAll(pipRepository.fagsakIdForSaksnummer(saksnummere));
-
-        // journalpostIder
-        Set<JournalpostId> journalpostIder = attributter.getVerdier(AppAbacAttributtType.JOURNALPOST_ID);
-        fagsakIder.addAll(pipRepository.fagsakIdForJournalpostId(journalpostIder));
-
-        return fagsakIder;
+    private Set<Saksnummer> utledSaksnumre(AbacAttributtSamling attributter) {
+        Set<Saksnummer> saksnumre = new LinkedHashSet<>();
+        saksnumre.addAll(attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER));
+        saksnumre.addAll(hentSaksnumreForFagsakIder(attributter));
+        saksnumre.addAll(pipRepository.saksnumreForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
+        saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(AppAbacAttributtType.JOURNALPOST_ID)));
+        return saksnumre;
     }
 
-    private Set<AktørId> utledAktørIder(AbacAttributtSamling attributter, Set<Long> fagsakIder) {
+    private Set<Saksnummer> hentSaksnumreForFagsakIder(AbacAttributtSamling attributter) {
+        Set<Long> fagsakIder = attributter.getVerdier(AppAbacAttributtType.FAGSAK_ID);
+        Set<Saksnummer> saksnumre = pipRepository.saksnummerForFagsakId(fagsakIder);
+        if (fagsakIder.size() != saksnumre.size()) {
+            throw new UkjentFagsakException(fagsakIder);
+        }
+        return saksnumre;
+    }
+
+    private Set<AktørId> utledAktørIder(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre) {
         Set<String> aktørIdVerdier = attributter.getVerdier(AppAbacAttributtType.AKTØR_ID);
 
         Set<AktørId> aktørIder = new HashSet<>();
         aktørIder.addAll(aktørIdVerdier.stream().map(AktørId::new).collect(Collectors.toSet()));
-        aktørIder.addAll(pipRepository.hentAktørIdKnyttetTilFagsaker(fagsakIder));
+        aktørIder.addAll(pipRepository.hentAktørIdKnyttetTilFagsaker(saksnumre));
         return aktørIder;
     }
 
