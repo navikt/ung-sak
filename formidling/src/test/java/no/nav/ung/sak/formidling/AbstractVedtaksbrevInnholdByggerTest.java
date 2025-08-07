@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -91,7 +90,6 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     }
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "PDF", matches = "true")
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
