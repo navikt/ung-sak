@@ -28,8 +28,7 @@ public class VedtaksbrevResultatEntitet extends BaseEntitet {
     private String beskrivelse;
 
     @OneToOne
-    @JoinColumn(name = "brevbestilling_id", insertable = false, updatable = false,
-                foreignKey = @ForeignKey(name = "fk_brevbestilling"))
+    @JoinColumn(name = "brevbestilling_id", insertable = false, updatable = false)
     private BrevbestillingEntitet brevbestilling;
 
     public static VedtaksbrevResultatEntitet medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType) {
