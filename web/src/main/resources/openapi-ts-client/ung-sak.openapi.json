@@ -4379,6 +4379,9 @@
             "minimum" : 0,
             "type" : "integer"
           },
+          "dokumentMalType" : {
+            "$ref" : "#/components/schemas/VedtaksbrevForhåndsvisRequestDokumentMalType"
+          },
           "htmlVersjon" : {
             "type" : "boolean"
           },
@@ -4388,6 +4391,48 @@
         },
         "required" : [ "behandlingId" ],
         "type" : "object"
+      },
+      "VedtaksbrevForhåndsvisRequestDokumentMalType" : {
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_HØY_SATS", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_HØY_SATS", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ]
+      },
+      "VedtaksbrevValg" : {
+        "properties" : {
+          "dokumentMalType" : {
+            "$ref" : "#/components/schemas/VedtaksbrevValgDokumentMalType"
+          },
+          "enableHindre" : {
+            "type" : "boolean"
+          },
+          "enableRediger" : {
+            "type" : "boolean"
+          },
+          "forklaring" : {
+            "type" : "string"
+          },
+          "hindret" : {
+            "type" : "boolean"
+          },
+          "kanOverstyreHindre" : {
+            "type" : "boolean"
+          },
+          "kanOverstyreRediger" : {
+            "type" : "boolean"
+          },
+          "redigert" : {
+            "type" : "boolean"
+          },
+          "redigertBrevHtml" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "VedtaksbrevValgDokumentMalType" : {
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_HØY_SATS", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_HØY_SATS", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV" ]
       },
       "VedtaksbrevValgRequest" : {
         "properties" : {
@@ -4445,6 +4490,12 @@
           },
           "redigertBrevHtml" : {
             "type" : "string"
+          },
+          "vedtaksbrevValg" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VedtaksbrevValg"
+            },
+            "type" : "array"
           }
         },
         "type" : "object"
