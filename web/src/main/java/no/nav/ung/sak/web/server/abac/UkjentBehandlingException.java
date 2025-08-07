@@ -11,6 +11,6 @@ public class UkjentBehandlingException extends UkjentAbacVerdiException {
     }
 
     protected UkjentBehandlingException(Set<UUID> behandlingUuid) {
-        super("Minst en ab behandlingen med uuid " + behandlingUuid + " finnes ikke i applikasjonen.");
+        super("Minst en av behandlingen med uuid " + behandlingUuid + " finnes ikke i applikasjonen.");
     }
 }
