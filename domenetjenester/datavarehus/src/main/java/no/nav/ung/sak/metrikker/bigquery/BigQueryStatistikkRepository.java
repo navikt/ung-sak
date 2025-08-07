@@ -187,12 +187,12 @@ public class BigQueryStatistikkRepository {
                      inner join ung_sats_perioder uspr on uspr.id = ur.ung_sats_perioder_id
                      inner join ung_sats_periode usp on usp.ung_sats_perioder_id = uspr.id
 
-                where f.ytelse_type <> 'OBSOLETE'
+                where f.ytelse_type <> :obsoleteKode
                   and ur.aktiv is true
                   and b.opprettet_tid = (SELECT max(b2.opprettet_tid)
                                          FROM Behandling b2
                                          WHERE b2.fagsak_id = f.id
-                                           and b2.behandling_status = 'AVSLU') -- siste avsluttede behandling for fagsaken
+                                           and b2.behandling_status = :behandlingStatusAvsluttetLKode) -- siste avsluttede behandling for fagsaken
                   and (usp.periode @> current_date -- og perioden overlapper med dagens dato
                     or (lower(usp.periode) > current_date -- eller fom dato på perioden er i fremtiden
                     -- og er første satsperiode for denne behandlingen
@@ -212,6 +212,7 @@ public class BigQueryStatistikkRepository {
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
             .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("behandlingStatusAvsluttetLKode", BehandlingStatus.AVSLUTTET.getKode())
             .getResultStream();
 
         return stream.map(t -> {
