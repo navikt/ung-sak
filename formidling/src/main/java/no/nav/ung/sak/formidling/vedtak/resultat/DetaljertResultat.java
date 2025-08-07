@@ -31,4 +31,9 @@ public record DetaljertResultat(
             .collect(Collectors.toSet()));
     }
 
+    public static LocalDateTimeline<DetaljertResultat> filtererTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje, DetaljertResultatType detaljertResultatType) {
+        return resultatTidslinje
+            .filterValue(it -> it.resultatInfo().stream()
+                .anyMatch(b -> b.detaljertResultatType() == detaljertResultatType));
+    }
 }

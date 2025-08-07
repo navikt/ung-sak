@@ -48,17 +48,17 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     @WithSpan
     @Override
-    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(vedtaksbrevBestillingInput));
+    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(vedtaksbrevGenerererInput));
     }
 
     @WithSpan
-    private GenerertBrev doGenererAutomatiskVedtaksbrev(VedtaksbrevBestillingInput vedtaksbrevBestillingInput) {
-        var behandling = behandlingRepository.hentBehandling(vedtaksbrevBestillingInput.behandlingId());
+    private GenerertBrev doGenererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
+        var behandling = behandlingRepository.hentBehandling(vedtaksbrevGenerererInput.behandlingId());
 
-        Vedtaksbrev vedtaksbrev = vedtaksbrevBestillingInput.vedtaksbrev();
+        Vedtaksbrev vedtaksbrev = vedtaksbrevGenerererInput.vedtaksbrev();
         VedtaksbrevInnholdBygger bygger = vedtaksbrev.vedtaksbrevBygger();
-        var resultat = bygger.bygg(behandling, vedtaksbrevBestillingInput.detaljertResultatTidslinje());
+        var resultat = bygger.bygg(behandling, vedtaksbrevGenerererInput.detaljertResultatTidslinje());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
@@ -67,7 +67,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             )
         );
 
-        PdfGenDokument dokument = pdfGen.lagDokument(input, vedtaksbrevBestillingInput.kunHtml());
+        PdfGenDokument dokument = pdfGen.lagDokument(input, vedtaksbrevGenerererInput.kunHtml());
         return new GenerertBrev(
             dokument,
             pdlMottaker,

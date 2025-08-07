@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -217,7 +217,9 @@ class VedtaksbrevTjenesteTest {
         assertThat(forhåndsvis(behandling, true)).contains(redigertHtml);
 
         //Ingen brev som brukes av behandling
-        assertThat(forhåndsvis(behandling, null)).isNull();
+        assertThatThrownBy(() -> forhåndsvis(behandling, null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("hindret");
     }
 
 
@@ -240,10 +242,10 @@ class VedtaksbrevTjenesteTest {
     }
 
     private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
-        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(
-            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true)
+        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(
+            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true, null)
         );
-        return Optional.ofNullable(generertBrev).map(it -> it.dokument().html()).orElse(null);
+        return generertBrev.stream().map(it -> it.dokument().html()).collect(Collectors.joining(",", "[", "]"));
     }
 
 }

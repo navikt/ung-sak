@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.formidling.template.dto.EndringHøySatsDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,8 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
 
-        // Min. dato i resultattidslinjen er da deltager blir 25 år utledet av prosessTrigger
-        // via DetaljertResultatUtleder
-        LocalDate satsendringsdato = resultatTidslinje.getMinLocalDate();
+        LocalDate satsendringsdato = DetaljertResultat.filtererTidslinje(resultatTidslinje, DetaljertResultatType.ENDRING_ØKT_SATS)
+            .getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));

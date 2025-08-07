@@ -19,6 +19,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +72,9 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void verifiserOverskrifter() {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), true));
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), true));
+        assertThat(brev).hasSize(1);
+        GenerertBrev generertBrev = brev.getFirst();
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -84,7 +87,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     }
 
     private static VedtaksbrevForhåndsvisRequest lagForhåndsvisInput(Long behandlingId, boolean kunHtml) {
-        return new VedtaksbrevForhåndsvisRequest(behandlingId, null, kunHtml);
+        return new VedtaksbrevForhåndsvisRequest(behandlingId, null, kunHtml, null);
     }
 
     @Test
@@ -92,7 +95,9 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), false));
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), false));
+        assertThat(brev).hasSize(1);
+        GenerertBrev generertBrev = brev.getFirst();
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -117,10 +122,14 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
         String lagre = System.getenv("LAGRE");
 
         if (lagre == null) {
-            return vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
+            List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
+            assertThat(forhåndsvis).hasSize(1);
+            return forhåndsvis.getFirst();
         }
 
-        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, !lagre.equals("PDF")));
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, !lagre.equals("PDF")));
+        assertThat(forhåndsvis).hasSize(1);
+        GenerertBrev generertBrev = forhåndsvis.getFirst();
 
         switch (lagre) {
             case "PDF":

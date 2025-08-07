@@ -34,4 +34,15 @@ public record GenerertBrev(
 
 
 ) {
+
+    @Override
+    public String toString() {
+        return "GenerertBrev{" +
+            "dokument=" + (dokument != null) +
+            ", mottaker=" + (mottaker != null)  +
+            ", gjelder=" + (gjelder != null) +
+            ", malType=" + malType +
+            ", templateType=" + templateType +
+            '}';
+    }
 }

@@ -206,6 +206,7 @@ class VedtaksbrevReglerTest {
             });
     }
 
+
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
         return lagBehandling(ungTestGrunnlag, null, null);
     }

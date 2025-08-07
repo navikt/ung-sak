@@ -29,8 +29,7 @@ public final class EndringStartdatoStrategy implements VedtaksbrevInnholdbyggerS
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater
-            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
-            .innholderBare(DetaljertResultatType.ENDRING_STARTDATO);
+            .innholder(DetaljertResultatType.ENDRING_STARTDATO);
     }
 
 }

@@ -29,7 +29,6 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater
-            .utenom(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE)
-            .innholderBare(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE);
+            .innholder(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE);
     }
 }

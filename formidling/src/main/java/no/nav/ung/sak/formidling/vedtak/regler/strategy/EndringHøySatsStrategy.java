@@ -28,7 +28,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderBare(DetaljertResultatType.ENDRING_ØKT_SATS);
+        return resultater.innholder(DetaljertResultatType.ENDRING_ØKT_SATS);
     }
 
 }

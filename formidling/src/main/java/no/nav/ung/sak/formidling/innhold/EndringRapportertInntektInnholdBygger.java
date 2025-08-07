@@ -14,6 +14,7 @@ import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
 import no.nav.ung.sak.formidling.template.dto.endring.inntekt.EndringRapportertInntektPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -43,8 +44,10 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
         final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
 
-        var relevantTilkjentYtelse = resultatTidslinje.combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
-            LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        var relevantTilkjentYtelse = DetaljertResultat
+            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
+            .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
+                LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         if (relevantTilkjentYtelse.isEmpty()) {
             throw new IllegalStateException("Fant ingen tilkjent ytelse i perioden" + resultatTidslinje.getLocalDateIntervals());

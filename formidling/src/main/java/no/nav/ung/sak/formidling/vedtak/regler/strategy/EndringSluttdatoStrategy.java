@@ -47,8 +47,7 @@ public final class EndringSluttdatoStrategy implements VedtaksbrevInnholdbyggerS
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater
-            .utenom(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK)
-            .innholderBare(DetaljertResultatType.ENDRING_SLUTTDATO);
+            .innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
     }
 
     private boolean erFørsteOpphør(Behandling behandling) {
