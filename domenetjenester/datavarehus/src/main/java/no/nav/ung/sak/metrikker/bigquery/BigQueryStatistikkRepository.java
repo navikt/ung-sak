@@ -15,11 +15,13 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import org.hibernate.query.NativeQuery;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.slf4j.Logger;
@@ -77,7 +79,9 @@ public class BigQueryStatistikkRepository {
         Collection<AksjonspunktRecord> aksjonspunktStatistikk = aksjonspunktStatistikk();
         hyppigRapporterte.add(new Tuple<>(AksjonspunktRecord.AKSJONSPUNKT_TABELL, aksjonspunktStatistikk));
 
-        // TODO: satsStatistikk
+        Collection<SatsStatistikkRecord> satsStatistikk = satsSatistikk();
+        hyppigRapporterte.add(new Tuple<>(SatsStatistikkRecord.SATS_STATISTIKK_TABELL, satsStatistikk));
+
         // TODO: barnetilleggStatistikk
         // TODO: behandlingResultatStatistikk
 
@@ -85,11 +89,13 @@ public class BigQueryStatistikkRepository {
     }
 
     Collection<FagsakStatusRecord> fagsakStatusStatistikk() {
-        String sql = "select f.fagsak_status, count(*) as antall" +
-            "         from fagsak f" +
-            "         where f.ytelse_type <> :obsoleteKode " +
-            "         group by 1" +
-            "         order by 1";
+        String sql = """
+            select f.fagsak_status, count(*) as antall
+                     from fagsak f
+                     where f.ytelse_type <> :obsoleteKode
+                     group by 1
+                     order by 1
+            """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
@@ -105,12 +111,14 @@ public class BigQueryStatistikkRepository {
     }
 
     Collection<BehandlingStatusRecord> behandlingStatusStatistikk() {
-        String sql = "select f.ytelse_type, b.behandling_type, b.behandling_status, count(*) as antall" +
-            "      from fagsak f" +
-            "      inner join behandling b on b.fagsak_id=f.id" +
-            "      where f.ytelse_type <> :obsoleteKode " +
-            "      group by 1, 2, 3" +
-            "      order by 1, 2";
+        String sql = """
+            select f.ytelse_type, b.behandling_type, b.behandling_status, count(*) as antall\
+                  from fagsak f\
+                  inner join behandling b on b.fagsak_id=f.id\
+                  where f.ytelse_type <> :obsoleteKode \
+                  group by 1, 2, 3\
+                  order by 1, 2
+            """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
@@ -133,13 +141,15 @@ public class BigQueryStatistikkRepository {
     }
 
     Collection<AksjonspunktRecord> aksjonspunktStatistikk() {
-        String sql = "select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status as status, a.vent_aarsak, count(*) as antall " +
-            " from aksjonspunkt a " +
-            " inner join behandling b on b.id = a.behandling_id" +
-            " inner join fagsak f on f.id = b.fagsak_id" +
-            " where a.aksjonspunkt_status IN (:statuser)" +
-            " and f.ytelse_type <> :obsoleteKode " +
-            " group by 1, 2, 3, 4";
+        String sql = """
+            select f.ytelse_type, a.aksjonspunkt_def as aksjonspunkt, a.aksjonspunkt_status as status, a.vent_aarsak, count(*) as antall
+             from aksjonspunkt a
+             inner join behandling b on b.id = a.behandling_id
+             inner join fagsak f on f.id = b.fagsak_id
+             where a.aksjonspunkt_status IN (:statuser)
+             and f.ytelse_type <> :obsoleteKode
+             group by 1, 2, 3, 4
+            """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
@@ -162,6 +172,58 @@ public class BigQueryStatistikkRepository {
                 aksjonspunktDefinisjon,
                 AksjonspunktStatus.fraKode(aksjonspunktStatusKode),
                 Venteårsak.fraKode(venteÅrsakKode, false),
+                ZonedDateTime.now()
+            );
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    Collection<SatsStatistikkRecord> satsSatistikk() {
+        // language=sql
+        String sql = """
+                select usp.antall_barn, usp.sats_type, count(*) as antall
+                from ung_gr ur
+                     inner join behandling b on b.id = ur.behandling_id
+                     inner join fagsak f on f.id = b.fagsak_id
+                     inner join ung_sats_perioder uspr on uspr.id = ur.ung_sats_perioder_id
+                     inner join ung_sats_periode usp on usp.ung_sats_perioder_id = uspr.id
+
+                where f.ytelse_type <> :obsoleteKode
+                  and ur.aktiv is true
+                  and b.opprettet_tid = (SELECT max(b2.opprettet_tid)
+                                         FROM Behandling b2
+                                         WHERE b2.fagsak_id = f.id
+                                           and b2.behandling_status = :behandlingStatusAvsluttetLKode) -- siste avsluttede behandling for fagsaken
+                  and (usp.periode @> current_date -- og perioden overlapper med dagens dato
+                    or (lower(usp.periode) > current_date -- eller fom dato på perioden er i fremtiden
+                    -- og er første satsperiode for denne behandlingen
+                        and lower(usp.periode) =
+                            (select min(lower(usp2.periode)) from ung_sats_periode usp2 where usp2.ung_sats_perioder_id = uspr.id)
+
+                        -- og det finnes ingen andre perioder som overlapper med dagens dato
+                        and not exists(select 1
+                                       from ung_sats_periode usp2
+                                       where usp2.ung_sats_perioder_id = uspr.id
+                                         and usp2.periode @> current_date)
+                           )
+                    )
+                group by usp.antall_barn, usp.sats_type
+                """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("behandlingStatusAvsluttetLKode", BehandlingStatus.AVSLUTTET.getKode())
+            .getResultStream();
+
+        return stream.map(t -> {
+            Integer antallBarn = t.get(0, Integer.class);
+            String satsTypeKode = t.get(1, String.class);
+            Long antall = t.get(2, Long.class);
+
+            return new SatsStatistikkRecord(
+                antall,
+                antallBarn,
+                UngdomsytelseSatsType.fraKode(satsTypeKode),
                 ZonedDateTime.now()
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
