@@ -38,7 +38,7 @@ public record BehandlingVedtaksbrevResultat(
     public String safePrint() {
         return "BehandlingVedtaksbrevResultat{" +
             "harBrev=" + harBrev +
-            ", detaljertResultatTimeline=" + DetaljertResultat.timelineToString(detaljertResultatTimeline) +
+            ", detaljertResultatTimeline=[" + DetaljertResultat.timelineToString(detaljertResultatTimeline)+ "]" +
             ", vedtaksbrevResultater=" + vedtaksbrevResultater +
             ", ingenBrevResultater=" + ingenBrevResultater +
             '}';

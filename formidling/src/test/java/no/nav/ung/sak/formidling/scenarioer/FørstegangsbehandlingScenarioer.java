@@ -289,7 +289,7 @@ public class FørstegangsbehandlingScenarioer {
             programPerioder,
             satser,
             BrevScenarioerUtils.uttaksPerioder(p),
-            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(nittenårsdag, fom.plusMonths(1).minusDays(1))),
             new LocalDateTimeline<>(List.of(
                 new LocalDateSegment<>(fom, nittenårsdag.minusDays(1), Utfall.IKKE_OPPFYLT),
                 new LocalDateSegment<>(nittenårsdag, p.getTomDato(), Utfall.OPPFYLT)

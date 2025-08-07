@@ -26,8 +26,11 @@ public record DetaljertResultat(
         return String.join(", ", detaljertResultatTidslinje.toSegments().stream()
             .map(it ->
                 it.getLocalDateInterval().toString() + " -> " +
-                    "resultatInfo: " + it.getValue().resultatInfo() +", "
-                    + "behandlingÅrsaker: " + it.getValue().behandlingsårsaker() + " ")
+                    "resultatInfo: " + it.getValue().resultatInfo()
+                    + ", behandlingÅrsaker: " + it.getValue().behandlingsårsaker()
+                    + ", avslåtteVilkår: " + it.getValue().avslåtteVilkår()
+                    + ", ikkeVurderteVilkår: " + it.getValue().ikkeVurderteVilkår()
+            )
             .collect(Collectors.toSet()));
     }
 
