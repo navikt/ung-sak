@@ -7,6 +7,7 @@ public enum DetaljertResultatType {
     KONTROLLER_INNTEKT_REDUKSJON("Reduksjon etter kontroll av inntekt"),
     KONTROLLER_INNTEKT_FULL_UTBETALING("Full utbetaling etter kontroll av inntekt"),
     KONTROLLER_INNTEKT_INGEN_UTBETALING("Ingen utbetaling etter kontroll av inntekt"),
+    KONTROLLER_INNTEKT_UTEN_TILKJENT_YTELSE("Ingen tilkjent ytelse etter kontroll av inntekt"),
     ENDRING_STARTDATO("Endring startdato"),
     ENDRING_SLUTTDATO("Opphør eller endring sluttdato"),
     IKKE_VURDERT("Ikke vurdert"),
@@ -21,13 +22,13 @@ public enum DetaljertResultatType {
     INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak")
     ;
 
-    private final String navn;
+    private final String beskrivelse;
 
-    DetaljertResultatType(String navn) {
-        this.navn = navn;
+    DetaljertResultatType(String beskrivelse) {
+        this.beskrivelse = beskrivelse;
     }
 
-    public String getNavn() {
-        return navn;
+    public String getBeskrivelse() {
+        return beskrivelse;
     }
 }
