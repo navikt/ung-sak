@@ -35,7 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>5.1.5</felles.version>
+        <felles.version>5.1.6</felles.version>
         <swagger.version>2.2.35</swagger.version>
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.3.2</k9format.version>
@@ -43,7 +43,7 @@
         <asm.version>9.8</asm.version>
         <kotlin-stdlib.version>2.2.0</kotlin-stdlib.version>
         <jandex.version>3.4.0</jandex.version>
-        <pdfgen-core.version>1.1.56</pdfgen-core.version>
+        <pdfgen-core.version>1.1.57</pdfgen-core.version>
         <flyway.version>11.10.5</flyway.version>
         <confluent.platform.version>8.0.0</confluent.platform.version>
         <mockito.version>5.18.0</mockito.version>
@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.7.23</version>
+                <version>2.7.24</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
