@@ -23,23 +23,22 @@ public record BehandslingsresultatStatistikkRecord(
 ) implements BigQueryRecord {
 
     public static final BigQueryTabell<BehandslingsresultatStatistikkRecord> BEHANDLINGSRESULTAT_STATISTIKK_TABELL = new BigQueryTabell<>(
-        "behandlingsresultat_statistikk",
+        "behandlingsresultat_statistikk_v2",
         Schema.of(
-            Field.of("antall", StandardSQLTypeName.BIGNUMERIC),
             Field.of("behandlingstype_navn", StandardSQLTypeName.STRING),
             Field.of("behandlingResultatType_navn", StandardSQLTypeName.STRING),
-            Field.of("total_antall", StandardSQLTypeName.STRING),
-            Field.of("manuell_behandling_antall", StandardSQLTypeName.STRING),
-            Field.of("totrinn_behandling_antall", StandardSQLTypeName.STRING),
+            Field.of("total_antall", StandardSQLTypeName.BIGNUMERIC),
+            Field.of("manuell_behandling_antall", StandardSQLTypeName.BIGNUMERIC),
+            Field.of("totrinn_behandling_antall", StandardSQLTypeName.BIGNUMERIC),
             Field.of("opprettetTidspunkt", StandardSQLTypeName.DATETIME)
         ),
         BehandslingsresultatStatistikkRecord.class,
         rec -> Map.of(
             "behandlingstype_navn", rec.behandlingType().getNavn(),
             "behandlingResultatType_navn", rec.behandlingResultatType().getNavn(),
-            "total_antall", rec.totalAntall().toString(),
-            "manuell_behandling_antall", rec.manuellBehandlingAntall().toString(),
-            "totrinn_behandling_antall", rec.totrinnsbehandlingAntall().toString(),
+            "total_antall", rec.totalAntall(),
+            "manuell_behandling_antall", rec.manuellBehandlingAntall(),
+            "totrinn_behandling_antall", rec.totrinnsbehandlingAntall(),
             "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
         )
     );
