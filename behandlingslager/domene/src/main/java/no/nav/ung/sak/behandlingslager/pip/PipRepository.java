@@ -64,15 +64,17 @@ public class PipRepository {
     public Optional<PipBehandlingsData> hentDataForBehandlingUuid(UUID behandlingUuid) {
         Objects.requireNonNull(behandlingUuid, "behandlingUuid"); // NOSONAR
 
-        String sql = "SELECT " +
-            "b.behandling_status behandligStatus, " +
-            "b.ansvarlig_saksbehandler ansvarligSaksbehandler, " +
-            "f.id fagsakId, " +
-            "f.fagsak_status fagsakStatus, " +
-            "f.saksnummer " +
-            "FROM BEHANDLING b " +
-            "JOIN FAGSAK f ON b.fagsak_id = f.id " +
-            "WHERE b.uuid = :behandlingUuid";
+        String sql = """
+            SELECT
+                b.uuid behandlingUuid,
+                b.behandling_status behandligStatus,
+                b.ansvarlig_saksbehandler ansvarligSaksbehandler,
+                f.id fagsakId,
+                f.fagsak_status fagsakStatus,
+                f.saksnummer
+             FROM BEHANDLING b
+             JOIN FAGSAK f ON b.fagsak_id = f.id
+             WHERE b.uuid = :behandlingUuid""";
 
         Query query = entityManager.createNativeQuery(sql, "PipDataResult");
         query.setParameter("behandlingUuid", behandlingUuid);
