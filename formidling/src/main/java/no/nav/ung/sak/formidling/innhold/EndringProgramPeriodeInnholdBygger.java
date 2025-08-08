@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.template.dto.EndringProgramPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretSluttDato;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretStartDato;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.OpphørStrategy;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,14 +57,23 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
         var endretStartdato = !denneProgramperiode.getFom().equals(forrigeProgramperiode.getFom()) ?
             new EndretStartDato(denneProgramperiode.getFom(), forrigeProgramperiode.getFom()) : null;
 
-        var endretSluttdato = !denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom()) ?
-            lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode) : null;
+        var endretSluttdato = bestemEndretSluttdato(behandling, denneProgramperiode, forrigeProgramperiode);
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_PROGRAMPERIODE,
             new EndringProgramPeriodeDto(
                 endretStartdato, endretSluttdato,
                 false
             ));
+    }
+
+    private EndretSluttDato bestemEndretSluttdato(Behandling behandling, LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {
+        boolean harEndretTomDato = !denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom());
+        boolean erIkkeFørsteOpphør = !OpphørStrategy.erFørsteSluttdato(behandling, ungdomsprogramPeriodeRepository);
+        if (harEndretTomDato && erIkkeFørsteOpphør) {
+            return lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode);
+        }
+
+        return null;
     }
 
     private EndretSluttDato lagEndretSluttdato(LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {
