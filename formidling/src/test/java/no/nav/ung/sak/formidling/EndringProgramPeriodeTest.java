@@ -56,7 +56,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
                 men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
                 Den siste utbetalingen får du før den 10. september 2025. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 6. \
                 """);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
@@ -84,7 +84,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fra 1. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
                 Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
                 men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 31. juli 2025. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 6. \
                 """);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
@@ -127,7 +127,7 @@ class EndringProgramPeriodeTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Fra %1$s får du penger fordi du er med i ungdomsprogrammet. \
                 Du fikk tidligere melding om at du skulle få penger fra og med 15. august 2025, \
                 men den datoen gjelder ikke lenger fordi du startet i ungdomsprogrammet %1$s. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 6. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 6. \
                 """.formatted(forventetDatoTekst));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());

@@ -1,7 +1,8 @@
-package no.nav.ung.sak.metrikker.bigquery;
+package no.nav.ung.sak.metrikker.bigquery.tabeller;
 
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.Schema;
+import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 
 import java.util.Map;
 import java.util.function.Function;

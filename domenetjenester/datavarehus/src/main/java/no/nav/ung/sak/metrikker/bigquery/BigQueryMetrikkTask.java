@@ -7,6 +7,7 @@ import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +18,11 @@ import java.util.List;
 /**
  * Task for publisering av metrikker til BigQuery.
  * Denne tasken henter hyppig rapporterte metrikker fra BigQueryStatistikkRepository og publiserer dem til BigQuery.
- * Det er satt opp en cron-jobb som kjører denne tasken hvert 5. minutt.
+ * Det er satt opp en cron-jobb som kjører denne tasken en gang i timen.
  * Det er også satt en grense for maksimalt antall mislykkede kjøringer til 20.
  */
 @ApplicationScoped
-@ProsessTask(value = BigQueryMetrikkTask.TASKTYPE, cronExpression = "0 */5 * * * *", maxFailedRuns = 20, firstDelay = 60)
+@ProsessTask(value = BigQueryMetrikkTask.TASKTYPE, cronExpression = "0 1 * * * *", maxFailedRuns = 20, firstDelay = 60)
 public class BigQueryMetrikkTask implements ProsessTaskHandler {
 
     private static final int LOG_THRESHOLD = 5000;

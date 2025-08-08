@@ -14,6 +14,6 @@ public class VenteårsakKodeverdiConverter implements AttributeConverter<Venteå
 
     @Override
     public Venteårsak convertToEntityAttribute(String dbData) {
-        return dbData == null ? null : Venteårsak.fraKode(dbData);
+        return dbData == null ? null : Venteårsak.fraKode(dbData, true);
     }
 }

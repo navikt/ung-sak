@@ -3255,6 +3255,40 @@
         "type" : "string",
         "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
+      "PipDtoV3" : {
+        "properties" : {
+          "aktørIder" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "ansvarligSaksbehandler" : {
+            "type" : "string"
+          },
+          "behandlingStatus" : {
+            "$ref" : "#/components/schemas/PipDtoV3BehandlingStatus"
+          },
+          "fagsakStatus" : {
+            "$ref" : "#/components/schemas/PipDtoV3FagsakStatus"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "PipDtoV3BehandlingStatus" : {
+        "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
+      },
+      "PipDtoV3FagsakStatus" : {
+        "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
+      },
       "ProsessTaskDataDto" : {
         "properties" : {
           "gruppe" : {
@@ -7494,6 +7528,7 @@
     },
     "/api/pip/pipdata-for-behandling" : {
       "get" : {
+        "deprecated" : true,
         "description" : "Henter aktørIder, fagsak- og behandlingstatus tilknyttet til en behandling",
         "operationId" : "hentAktørIdListeTilknyttetBehandling",
         "parameters" : [ {
@@ -7521,6 +7556,7 @@
     },
     "/api/pip/pipdata-for-behandling-v2" : {
       "get" : {
+        "deprecated" : true,
         "description" : "Henter aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
         "operationId" : "hentPipDataTilknyttetBehandlingV2",
         "parameters" : [ {
@@ -7538,6 +7574,36 @@
                 "schema" : {
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/PipDtoV2"
+                  } ],
+                  "nullable" : true
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-behandling-v3" : {
+      "get" : {
+        "description" : "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
+        "operationId" : "hentPipDataTilknyttetBehandlingV3",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/PipDtoV3"
                   } ],
                   "nullable" : true
                 }

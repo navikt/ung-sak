@@ -107,6 +107,10 @@ spec:
         databases:
           - name: ung-sak
             envVarPrefix: DB
+    bigQueryDatasets:
+      - name: ung_sak_statistikk_dataset
+        description: Inneholder tabeller for ung-sak ment for statistikk
+        permission: READWRITE
   envFrom:
     - secret: ung-sak-secrets
   env:
@@ -217,6 +221,8 @@ spec:
       value: "true"
     - name: PUBLISER_PRODUKSJONSSTYRING_HENDELSE
       value: "false"
+    - name: BIGQUERY_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

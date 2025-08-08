@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -75,7 +76,7 @@ public class BigQueryKlient {
             .build();
 
         InsertAllResponse insertAllResponse = bigQuery.insertAll(req);
-        håndterResponse(insertAllResponse, req.getRows().size());
+        håndterResponse(insertAllResponse, req.getRows().size(), tableDef.getTabellnavn());
     }
 
     /**
@@ -90,7 +91,7 @@ public class BigQueryKlient {
     private TableId hentEllerOpprettTabell(String datasetNavn, BigQueryTabell<?> tableDef) {
         Table existing = bigQuery.getTable(TableId.of(datasetNavn, tableDef.getTabellnavn()));
         if (existing != null) {
-            log.info("Bruker eksisternde tabell {}", existing.getTableId());
+            log.info("Bruker eksisterende tabell {}", existing.getTableId());
             return existing.getTableId();
         }
 
@@ -119,8 +120,8 @@ public class BigQueryKlient {
             if (dataset != null) {
                 log.info("Forsikret at dataset {} eksisterer i BigQuery.", datasetNavn);
             } else {
-                log.error("Dataset {} eksister ikke i BigQuery. Opprett en dataset i BigQuery før du publiserer data.", datasetNavn);
-                throw new RuntimeException("Dataset " + datasetNavn + " eksister ikke i BigQuery. Opprett dataset før publisering.");
+                log.error("Dataset {} eksisterer ikke i BigQuery. Opprett en dataset i BigQuery før du publiserer data.", datasetNavn);
+                throw new RuntimeException("Dataset " + datasetNavn + " eksisterer ikke i BigQuery. Opprett dataset før publisering.");
             }
         } catch (BigQueryException e) {
             log.error("Noe gikk galt ved forsøk på å hente dataset {}: {}", datasetNavn, e.getMessage(), e);
@@ -134,14 +135,15 @@ public class BigQueryKlient {
      *
      * @param response    Responsen fra BigQuery etter innsetting av data.
      * @param antallRader Antall rader som ble forsøkt satt inn.
+     * @param tabellnavn Navnet på tabellen som data ble forsøkt satt inn i.
      */
-    private static void håndterResponse(InsertAllResponse response, int antallRader) {
+    private static void håndterResponse(InsertAllResponse response, int antallRader, String tabellnavn) {
         if (response.hasErrors()) {
             response.getInsertErrors()
                 .forEach((idx, errs) -> {
                     errs.forEach(err -> log.error("BigQuery insert feilet for rad {}: {}", idx, err));
                 });
             throw new RuntimeException("BigQuery insert feilet for noen rader: " + response.getInsertErrors().size());
-        } else log.info("BigQuery insert vellykket for {} rader.", antallRader);
+        } else log.info("BigQuery skrev {} rader inn i {}.", antallRader, tabellnavn);
     }
 }
