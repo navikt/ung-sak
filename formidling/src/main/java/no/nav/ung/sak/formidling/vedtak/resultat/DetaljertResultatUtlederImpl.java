@@ -151,7 +151,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
         relevanteÅrsaker.stream()
             .filter(ÅRSAK_RESULTAT_INNVILGELSE_MAP::containsKey)
-            .map(ÅRSAK_RESULTAT_INNVILGELSE_MAP::get)
+            .map(årsak -> behandlingsårsakDetaljertResultat(årsak, avslåtteVilkår))
             .forEach(resultater::add);
 
         if (resultater.isEmpty()) {
@@ -166,9 +166,17 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     }
 
+    private static DetaljertResultatInfo behandlingsårsakDetaljertResultat(BehandlingÅrsakType key, Set<DetaljertVilkårResultat> avslåtteVilkår) {
+        if (avslåtteVilkår.isEmpty()) {
+            return ÅRSAK_RESULTAT_INNVILGELSE_MAP.get(key);
+        }
+
+        return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår, med behandlingsårsak %s".formatted(key));
+    }
+
     private static Optional<DetaljertResultatInfo> håndterUkjenteTilfeller(TilkjentYtelseVerdi tilkjentYtelse, Set<DetaljertVilkårResultat> avslåtteVilkår, Set<BehandlingÅrsakType> relevanteÅrsaker) {
         if (!avslåtteVilkår.isEmpty()) {
-            return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Avslåtte vilkår ukjent årsak"));
+            return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår ukjent årsak"));
         }
 
         if (tilkjentYtelse == null) {

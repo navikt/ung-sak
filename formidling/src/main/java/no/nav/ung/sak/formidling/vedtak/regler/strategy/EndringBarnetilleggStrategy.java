@@ -29,6 +29,7 @@ public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbygg
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
+            && resultater.innholderIkke(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)
             && resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL);
     }
 
