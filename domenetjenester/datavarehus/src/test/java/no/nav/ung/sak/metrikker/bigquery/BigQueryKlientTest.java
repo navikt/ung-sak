@@ -4,6 +4,7 @@ import com.google.cloud.NoCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.DatasetInfo;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
@@ -13,6 +14,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
@@ -25,7 +27,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Testcontainers
 class BigQueryKlientTest {
@@ -98,6 +99,24 @@ class BigQueryKlientTest {
                     AksjonspunktDefinisjon.KONTROLLER_INNTEKT,
                     AksjonspunktStatus.OPPRETTET,
                     Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
+    @Test
+    void publisering_av_BEHANDLINGSRESULTAT_STATISTIKK_TABELL_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL,
+            List.of(
+                new BehandslingsresultatStatistikkRecord(
+                    BehandlingType.FØRSTEGANGSSØKNAD,
+                    BehandlingResultatType.INNVILGET,
+                    1L,
+                    1L,
+                    0L,
                     ZonedDateTime.now()
                 )
             )
