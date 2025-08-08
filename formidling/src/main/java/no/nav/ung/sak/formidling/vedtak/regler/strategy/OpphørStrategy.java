@@ -42,7 +42,7 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
             && erFørsteSluttdato(behandling, ungdomsprogramPeriodeRepository);
     }
 
-    public static boolean erFørsteSluttdato(Behandling behandling, UngdomsprogramPeriodeRepository repo) {
+    static boolean erFørsteSluttdato(Behandling behandling, UngdomsprogramPeriodeRepository repo) {
         return behandling.getOriginalBehandlingId()
             .flatMap(repo::hentGrunnlag)
             .map(grunnlag -> grunnlag.getUngdomsprogramPerioder().getPerioder().stream()
