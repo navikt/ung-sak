@@ -45,15 +45,19 @@ updates:
       - fp-tidsserie
     groups:
       nav-deps:
+        update-types:
+          - "minor"
+          - "patch"
         patterns:
           - "*no.nav*"
       annet-deps:
+        update-types:
+          - "minor"
+          - "patch"
         patterns:
           - "*"
         exclude-patterns:
           - "*no.nav*"
-          - "*jersey-bom*"
-          - "*jetty-bom*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
