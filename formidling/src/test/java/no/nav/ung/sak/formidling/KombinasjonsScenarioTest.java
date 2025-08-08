@@ -2,6 +2,7 @@ package no.nav.ung.sak.formidling;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -172,6 +173,52 @@ public class KombinasjonsScenarioTest {
         var endringHøySatsBrev = generertBrev.stream().filter(it -> it.malType() == DokumentMalType.ENDRING_HØY_SATS).findFirst().orElseThrow();
         assertThatHtml(endringHøySatsBrev.dokument().html())
             .asPlainTextContains(BrevTestUtils.brevDatoString(fødselsdato.plusYears(25)));
+
+    }
+
+    @Test
+    void endringStartDatoOgOpphør_lagerBrev() {
+        LocalDate opprinneligStartdato = LocalDate.of(2025, 8, 15);
+        LocalDate nyStartdato = LocalDate.of(2025, 8, 5);
+        var forrigeBehandlingScenario = FørstegangsbehandlingScenarioer.innvilget19år(opprinneligStartdato);
+        LocalDate nySluttdato = LocalDate.of(2025, 12, 31);
+
+        LocalDateInterval opprinneligProgramPeriode = forrigeBehandlingScenario.programPerioder().getFirst().getPeriode().toLocalDateInterval();
+        var ungTestScenario = KombinasjonScenarioer.endringStartdatoOgOpphør(opprinneligProgramPeriode, nyStartdato, nySluttdato);
+
+        var ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
+        var builder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(forrigeBehandlingScenario);
+
+        var originalBehandling = builder.buildOgLagreMedUng(ungTestRepositories);
+        originalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        originalBehandling.avsluttBehandling();
+
+        builder
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestScenario)
+            .medOriginalBehandling(originalBehandling, null);
+
+        var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
+        behandling.avsluttBehandling();
+
+        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.forhåndsvis(new VedtaksbrevForhåndsvisRequest(
+            behandling.getId(),
+            null,
+            true,
+            null));
+
+        assertThat(generertBrev).hasSize(2);
+
+        var endringProgramPeriodeBrev = generertBrev.stream().filter(it -> it.malType() == DokumentMalType.ENDRING_PROGRAMPERIODE).findFirst().orElseThrow();
+        assertThatHtml(endringProgramPeriodeBrev.dokument().html())
+            .asPlainTextContains(BrevTestUtils.brevDatoString(nyStartdato))
+            .asPlainTextNotContains(BrevTestUtils.brevDatoString(nySluttdato));
+
+        var endringHøySatsBrev = generertBrev.stream().filter(it -> it.malType() == DokumentMalType.OPPHØR_DOK).findFirst().orElseThrow();
+        assertThatHtml(endringHøySatsBrev.dokument().html())
+            .asPlainTextContains(BrevTestUtils.brevDatoString(nySluttdato.plusDays(1)));
 
     }
 

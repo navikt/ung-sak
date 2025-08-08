@@ -169,6 +169,43 @@ public class KombinasjonScenarioer {
             null);
     }
 
+    public static UngTestScenario endringStartdatoOgOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate nyStartdato, LocalDate sluttdato) {
+        UngTestScenario ungTestScenario = EndringProgramPeriodeScenarioer.endringStartdato(nyStartdato, opprinneligProgramPeriode);
+
+        var fom = opprinneligProgramPeriode.getFomDato();
+        var fagsakPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+        LocalDate nyStartDato = ungTestScenario.programPerioder().get(0).getPeriode().getFomDato();
+        var nyProgramPeriode = new LocalDateInterval(nyStartDato, sluttdato);
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(nyStartDato, fagsakPeriode.getTomDato(), BrevScenarioerUtils.lavSatsBuilder(fom).build())
+        ));
+
+        var triggere = new HashSet<>(ungTestScenario.behandlingTriggere());
+        triggere.add(new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), sluttdato)));
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(sluttdato.plusDays(1), fagsakPeriode.getTomDato())));
+
+
+        return new UngTestScenario(
+            ungTestScenario.navn(),
+            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), nyProgramPeriode.getTomDato())),
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, nyProgramPeriode),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
+                new LocalDateSegment<>(sluttdato.plusDays(1), fagsakPeriode.getTomDato(), Utfall.IKKE_OPPFYLT)
+            )
+
+            ),
+            ungTestScenario.fødselsdato(),
+            ungTestScenario.søknadStartDato(),
+            triggere,
+            null,
+            ungTestScenario.barn(),
+            null);
+    }
+
 
     /**
      * Kombinasjon - førstegangsinnvilgelse og fødsel av barn
