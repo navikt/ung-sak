@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevMottaker;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
@@ -28,42 +27,35 @@ import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBEST
 import static no.nav.ung.sak.formidling.bestilling.BrevdistribusjonTask.BREVBESTILLING_ID_PARAM;
 
 @Dependent
-public class BrevbestillingTjeneste {
+public class JournalføringOgDistribusjonsTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BrevbestillingTjeneste.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JournalføringOgDistribusjonsTjeneste.class);
 
     private final BrevbestillingRepository brevbestillingRepository;
     private final DokArkivKlient dokArkivKlient;
     private final ProsessTaskTjeneste prosessTaskTjeneste;
 
     @Inject
-    public BrevbestillingTjeneste(BrevbestillingRepository brevbestillingRepository, DokArkivKlient dokArkivKlient, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public JournalføringOgDistribusjonsTjeneste(BrevbestillingRepository brevbestillingRepository, DokArkivKlient dokArkivKlient, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.brevbestillingRepository = brevbestillingRepository;
         this.dokArkivKlient = dokArkivKlient;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public BrevbestillingResultat bestillBrev(Behandling behandling, GenerertBrev generertBrev) {
-        Fagsak fagsak = behandling.getFagsak();
 
-        var bestilling = BrevbestillingEntitet.nyBrevbestilling(
-            behandling.getFagsakId(),
-            behandling.getId(),
-            generertBrev.malType(),
-            generertBrev.templateType(),
-            new BrevMottaker(generertBrev.mottaker().aktørId().getAktørId(), IdType.AKTØRID));
-
-        LOG.info("Brevbestilling forespurt {}", bestilling);
-
-        brevbestillingRepository.lagre(bestilling);
+    public BrevbestillingResultat journalførOgDistribuer(Behandling behandling, BrevbestillingEntitet bestilling, GenerertBrev generertBrev) {
 
         var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);
         var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
-        bestilling.journalført(opprettJournalpostResponse.journalpostId());
+
+        bestilling.journalført(
+            opprettJournalpostResponse.journalpostId(),
+            generertBrev.templateType(),
+            new BrevMottaker(generertBrev.mottaker().aktørId().getAktørId(), IdType.AKTØRID));
 
         brevbestillingRepository.lagre(bestilling);
         var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
-        distTask.setBehandling(fagsak.getId(), behandling.getId());
+        distTask.setBehandling(bestilling.getFagsakId(), bestilling.getBehandlingId());
         distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, bestilling.isVedtaksbrev() ?
             DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name() : DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
@@ -132,4 +124,5 @@ public class BrevbestillingTjeneste {
         };
         return prefix + fraMal;
     }
+
 }

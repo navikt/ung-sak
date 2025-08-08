@@ -17,8 +17,7 @@ public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnhol
     public TemplateInnholdResultat bygg(Behandling behandling, GenereltFritekstBrevDto innhold) {
 
         return new TemplateInnholdResultat(
-            DokumentMalType.GENERELT_FRITEKSTBREV,
-            TemplateType.GENERELT_FRITEKSTBREV,
+                TemplateType.GENERELT_FRITEKSTBREV,
             new GenereltFritekstBrevTemplateDto(
                 innhold.overskrift(),
                 MarkdownParser.markdownTilHtml(innhold.brødtekst())

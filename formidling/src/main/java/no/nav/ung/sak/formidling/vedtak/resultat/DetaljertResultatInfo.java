@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak;
+package no.nav.ung.sak.formidling.vedtak.resultat;
 
 public record DetaljertResultatInfo(DetaljertResultatType detaljertResultatType, String forklaring) {
 
@@ -11,7 +11,7 @@ public record DetaljertResultatInfo(DetaljertResultatType detaljertResultatType,
     }
 
     public String utledForklaring() {
-        var typeTekst = detaljertResultatType.name() + " - " + detaljertResultatType.getNavn();
+        var typeTekst = detaljertResultatType.name() + " - " + detaljertResultatType.getBeskrivelse();
         return forklaring != null && !forklaring.isBlank() ? typeTekst + ". Forklaring: " + forklaring : typeTekst;
     }
 }

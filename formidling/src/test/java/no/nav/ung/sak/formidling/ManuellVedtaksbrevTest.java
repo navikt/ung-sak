@@ -44,7 +44,7 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
 
         var behandling = lagScenario(
-            EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+            EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
@@ -100,7 +100,7 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
     @Override
     protected Behandling lagScenarioForFellesTester() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        Behandling behandling = lagScenario(EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+        Behandling behandling = lagScenario(EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),

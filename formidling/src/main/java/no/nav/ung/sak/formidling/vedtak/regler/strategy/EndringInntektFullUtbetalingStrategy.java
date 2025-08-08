@@ -1,11 +1,12 @@
-package no.nav.ung.sak.formidling.vedtak.regler;
+package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 @Dependent
 public final class EndringInntektFullUtbetalingStrategy implements VedtaksbrevInnholdbyggerStrategy {
@@ -17,7 +18,7 @@ public final class EndringInntektFullUtbetalingStrategy implements VedtaksbrevIn
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new VedtaksbrevStrategyResultat(null, "Ingen brev ved full utbetaling etter kontroll av inntekt.", IngenBrevÅrsakType.IKKE_RELEVANT);
+        return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,"Ingen brev ved full utbetaling etter kontroll av inntekt.");
     }
 
     @Override

@@ -1,7 +1,7 @@
-package no.nav.ung.sak.formidling.vedtak.regler;
+package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -32,5 +32,9 @@ class ResultatHelper {
 
     public boolean innholder(DetaljertResultatType detaljertResultatType) {
         return resultatTyper.contains(detaljertResultatType);
+    }
+
+    public boolean innholderIkke(DetaljertResultatType detaljertResultatType) {
+        return !resultatTyper.contains(detaljertResultatType);
     }
 }

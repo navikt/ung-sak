@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling.vedtak;
+package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -26,9 +26,17 @@ public record DetaljertResultat(
         return String.join(", ", detaljertResultatTidslinje.toSegments().stream()
             .map(it ->
                 it.getLocalDateInterval().toString() + " -> " +
-                    "resultatInfo: " + it.getValue().resultatInfo() +", "
-                    + "behandlingÅrsaker: " + it.getValue().behandlingsårsaker() + " ")
+                    "resultatInfo: " + it.getValue().resultatInfo()
+                    + ", behandlingÅrsaker: " + it.getValue().behandlingsårsaker()
+                    + ", avslåtteVilkår: " + it.getValue().avslåtteVilkår()
+                    + ", ikkeVurderteVilkår: " + it.getValue().ikkeVurderteVilkår()
+            )
             .collect(Collectors.toSet()));
     }
 
+    public static LocalDateTimeline<DetaljertResultat> filtererTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje, DetaljertResultatType detaljertResultatType) {
+        return resultatTidslinje
+            .filterValue(it -> it.resultatInfo().stream()
+                .anyMatch(b -> b.detaljertResultatType() == detaljertResultatType));
+    }
 }

@@ -6,14 +6,13 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.template.dto.EndringProgramPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretSluttDato;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretStartDato;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +59,7 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
         var endretSluttdato = !denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom()) ?
             lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode) : null;
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_PROGRAMPERIODE, TemplateType.ENDRING_PROGRAMPERIODE,
+        return new TemplateInnholdResultat(TemplateType.ENDRING_PROGRAMPERIODE,
             new EndringProgramPeriodeDto(
                 endretStartdato, endretSluttdato,
                 false

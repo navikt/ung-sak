@@ -5,6 +5,8 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -13,10 +15,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +50,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     protected UngTestRepositories ungTestRepositories;
 
     @Inject
-    protected VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
+    protected VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     AbstractVedtaksbrevInnholdByggerTest(int forventetAntallPdfSider, String forventetPdfHovedoverskrift) {
         this.forventetAntallPdfSider = forventetAntallPdfSider;
@@ -69,8 +71,9 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void verifiserOverskrifter() {
         var behandling = lagScenarioForFellesTester();
 
-        Long behandlingId = (behandling.getId());
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), true));
+        assertThat(brev).hasSize(1);
+        GenerertBrev generertBrev = brev.getFirst();
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -82,12 +85,17 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
+    private static VedtaksbrevForhåndsvisRequest lagForhåndsvisInput(Long behandlingId, boolean kunHtml) {
+        return new VedtaksbrevForhåndsvisRequest(behandlingId, null, kunHtml, null);
+    }
+
     @Test
-    @EnabledIfEnvironmentVariable(named = "PDF", matches = "true")
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), false));
+        assertThat(brev).hasSize(1);
+        GenerertBrev generertBrev = brev.getFirst();
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -101,20 +109,32 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     }
 
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        return genererVedtaksbrev(vedtaksbrevGenerererTjeneste, behandlingId, testInfo);
+        return genererVedtaksbrev(behandlingId, testInfo, vedtaksbrevTjeneste);
     }
 
+    final protected GenerertBrev genererVedtaksbrevUtenLagring(Long behandlingId) {
+        return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
+    }
+
+    private static GenerertBrev genererVedtaksbrevUtenLagring(Long behandlingId, VedtaksbrevTjeneste vedtaksbrevTjeneste1) {
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste1.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
+        assertThat(forhåndsvis).hasSize(1);
+        return forhåndsvis.getFirst();
+    }
 
     /**
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
-    static protected GenerertBrev genererVedtaksbrev(VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste, Long behandlingId, TestInfo testInfo) {
+    static protected GenerertBrev genererVedtaksbrev(Long behandlingId, TestInfo testInfo, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         String lagre = System.getenv("LAGRE");
+
         if (lagre == null) {
-            return vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+            return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
         }
 
-        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, !lagre.equals("PDF"));
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, !lagre.equals("PDF")));
+        assertThat(forhåndsvis).hasSize(1);
+        GenerertBrev generertBrev = forhåndsvis.getFirst();
 
         switch (lagre) {
             case "PDF":
