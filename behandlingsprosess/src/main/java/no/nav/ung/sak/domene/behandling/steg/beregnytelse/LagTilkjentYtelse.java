@@ -27,7 +27,7 @@ public class LagTilkjentYtelse {
             return LocalDateTimeline.empty();
         }
 
-        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje);
+        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje.intersection(godkjentTidslinje.compress()));
 
 
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);
@@ -39,6 +39,8 @@ public class LagTilkjentYtelse {
         tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePerioderSomSkalUtbetales);
 
 
+        // Dersom det ikke er rapportert inntekt settes denne til 0, ellers summeres alle inntektene
+        // Mapper verdier til TilkjentYtelsePeriodeResultat
         return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
                 // Dersom det ikke er rapportert inntekt settes denne til 0, ellers summeres alle inntektene
                 final var rapporertinntekt = rapportertInntekt == null ? BigDecimal.ZERO : rapportertInntekt.getValue();
@@ -47,6 +49,7 @@ public class LagTilkjentYtelse {
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);
             }, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .intersection(tidslinjeSomSkalHaTilkjentYtelse);
+
     }
 
     /** Perioder som ikke slutter ved månedsslutt legges kun til dersom foregående periode er ferdig kontrollert/behandlet
