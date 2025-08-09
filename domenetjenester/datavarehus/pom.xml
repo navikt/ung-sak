@@ -45,11 +45,6 @@
 			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>vedtak</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>no.nav.k9.felles.integrasjon</groupId>
-			<artifactId>k9-sensu-klient</artifactId>
-		</dependency>
-
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
