@@ -5,7 +5,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.Test;

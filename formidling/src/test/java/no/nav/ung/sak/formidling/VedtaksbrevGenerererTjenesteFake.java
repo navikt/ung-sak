@@ -4,6 +4,8 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 
 public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTjeneste {
@@ -22,17 +24,12 @@ public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTje
 
 
     @Override
-    public GenerertBrev genererVedtaksbrevForBehandling(Long behandlingId, boolean kunHtml) {
+    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
         return resultat;
     }
 
     @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        return resultat;
-    }
-
-    @Override
-    public GenerertBrev genererAutomatiskVedtaksbrev(Long behandlingId, boolean kunHtml) {
         return resultat;
     }
 }

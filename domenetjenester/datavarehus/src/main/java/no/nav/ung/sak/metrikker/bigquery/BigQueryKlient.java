@@ -76,7 +76,7 @@ public class BigQueryKlient {
             .build();
 
         InsertAllResponse insertAllResponse = bigQuery.insertAll(req);
-        håndterResponse(insertAllResponse, req.getRows().size());
+        håndterResponse(insertAllResponse, req.getRows().size(), tableDef.getTabellnavn());
     }
 
     /**
@@ -135,14 +135,15 @@ public class BigQueryKlient {
      *
      * @param response    Responsen fra BigQuery etter innsetting av data.
      * @param antallRader Antall rader som ble forsøkt satt inn.
+     * @param tabellnavn Navnet på tabellen som data ble forsøkt satt inn i.
      */
-    private static void håndterResponse(InsertAllResponse response, int antallRader) {
+    private static void håndterResponse(InsertAllResponse response, int antallRader, String tabellnavn) {
         if (response.hasErrors()) {
             response.getInsertErrors()
                 .forEach((idx, errs) -> {
                     errs.forEach(err -> log.error("BigQuery insert feilet for rad {}: {}", idx, err));
                 });
             throw new RuntimeException("BigQuery insert feilet for noen rader: " + response.getInsertErrors().size());
-        } else log.info("BigQuery insert vellykket for {} rader.", antallRader);
+        } else log.info("BigQuery skrev {} rader inn i {}.", antallRader, tabellnavn);
     }
 }

@@ -86,16 +86,6 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             );
     }
 
-    @DisplayName("Ingen brev ved ingen rapportert inntekt og ingen inntekt")
-    @Test
-    void full_ungdomsprogram_med_ingen_rapportert_inntekt_gir_ingen_brev() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = EndringInntektScenarioer.endring0KrInntekt_19år(fom);
-        var behandling = lagScenario(ungTestGrunnlag);
-        assertThat(vedtaksbrevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), true)).isNull();
-
-    }
-
 
     private Behandling lagScenario(UngTestScenario ungTestscenario) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()

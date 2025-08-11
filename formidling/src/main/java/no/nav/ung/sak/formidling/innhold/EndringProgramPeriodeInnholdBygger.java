@@ -6,14 +6,14 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.template.dto.EndringProgramPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretSluttDato;
 import no.nav.ung.sak.formidling.template.dto.endring.programperiode.EndretStartDato;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,14 +57,21 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
         var endretStartdato = !denneProgramperiode.getFom().equals(forrigeProgramperiode.getFom()) ?
             new EndretStartDato(denneProgramperiode.getFom(), forrigeProgramperiode.getFom()) : null;
 
-        var endretSluttdato = !denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom()) ?
-            lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode) : null;
+        var endretSluttdato = bestemEndretSluttdato(denneProgramperiode, forrigeProgramperiode);
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_PROGRAMPERIODE, TemplateType.ENDRING_PROGRAMPERIODE,
+        return new TemplateInnholdResultat(TemplateType.ENDRING_PROGRAMPERIODE,
             new EndringProgramPeriodeDto(
                 endretStartdato, endretSluttdato,
                 false
             ));
+    }
+
+    private EndretSluttDato bestemEndretSluttdato(LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {
+        boolean erFørsteSluttdato = Tid.TIDENES_ENDE.equals(forrigeProgramperiode.getTom());
+        if (erFørsteSluttdato || denneProgramperiode.getTom().equals(forrigeProgramperiode.getTom())) {
+            return null;
+        }
+        return lagEndretSluttdato(denneProgramperiode, forrigeProgramperiode);
     }
 
     private EndretSluttDato lagEndretSluttdato(LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {

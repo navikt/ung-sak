@@ -80,8 +80,6 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
             throw new IllegalStateException("Krever at bestillingen har status JOURNALFØRT. Brevbestilling: " + bestilling);
         }
 
-        if (bestilling.getJournalpostId() == null) {
-            throw new IllegalStateException("Krever at bestillingen har journalpostId. Brevbestilling: " + bestilling);
-        }
+        Objects.requireNonNull(bestilling.getJournalpostId(), "Krever at bestillingen har journalpostId. Brevbestilling: " + bestilling);
     }
 }

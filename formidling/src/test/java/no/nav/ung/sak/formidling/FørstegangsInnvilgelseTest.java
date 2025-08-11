@@ -334,8 +334,26 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
 
         assertThatThrownBy(
             () -> genererVedtaksbrev(behandling.getId()
-            )).isInstanceOf(IllegalStateException.class)
+            )).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("dødsfall");
+    }
+
+    @Test
+    void delvisInnvilget() {
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        LocalDate nittenårsdag = fom.plusDays(10);
+        var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilgetDelvis(fom, nittenårsdag);
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrevUtenLagring(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextContains(BrevTestUtils.brevDatoString(nittenårsdag));
+
     }
 
     static String meldFraTilOssHvisDuHarEndringerAvsnitt() {

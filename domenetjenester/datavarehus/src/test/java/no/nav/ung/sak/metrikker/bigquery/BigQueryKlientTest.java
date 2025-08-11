@@ -4,12 +4,20 @@ import com.google.cloud.NoCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.DatasetInfo;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BigQueryEmulatorContainer;
@@ -57,6 +65,58 @@ class BigQueryKlientTest {
                     FagsakYtelseType.UNGDOMSYTELSE,
                     BehandlingType.FØRSTEGANGSSØKNAD,
                     BehandlingStatus.UTREDES,
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
+    @Test
+    void publisering_av_SATS_STATISTIKK_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            SatsStatistikkRecord.SATS_STATISTIKK_TABELL,
+            List.of(
+                new SatsStatistikkRecord(
+                    4L,
+                    2,
+                    UngdomsytelseSatsType.HØY,
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
+    @Test
+    void publisering_av_AKSJONSPUNKT_TABELL_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            AksjonspunktRecord.AKSJONSPUNKT_TABELL,
+            List.of(
+                new AksjonspunktRecord(
+                    FagsakYtelseType.UNGDOMSYTELSE,
+                    1L,
+                    AksjonspunktDefinisjon.KONTROLLER_INNTEKT,
+                    AksjonspunktStatus.OPPRETTET,
+                    Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE,
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
+    @Test
+    void publisering_av_BEHANDLINGSRESULTAT_STATISTIKK_TABELL_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL,
+            List.of(
+                new BehandslingsresultatStatistikkRecord(
+                    BehandlingType.FØRSTEGANGSSØKNAD,
+                    BehandlingResultatType.INNVILGET,
+                    1L,
+                    1L,
+                    0L,
                     ZonedDateTime.now()
                 )
             )

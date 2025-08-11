@@ -32,7 +32,7 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får mer i ungdomsprogramytelse fordi du fyller 25 år \
                 Du får mer penger fordi du fyller 25 år 25. mars 2025. \
                 Fra og med denne datoen får du 974 kroner per dag, utenom lørdag og søndag. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 9. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9. \
                 """);
 
 
@@ -61,7 +61,7 @@ class EndringHøySatsTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Du får mer penger fordi du fyller 25 år 25. mars 2025. \
                 Fra og med denne datoen får du 1 048 kroner per dag, utenom lørdag og søndag. \
                 Denne summen inkluderer også et barnetillegg på 74 kroner per dag fordi du har barn. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 9. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9. \
                 """);
 
 
