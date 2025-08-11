@@ -11,6 +11,8 @@ where bvb.behandling_id = bb.behandling_id
           select count(*)
           from brevbestilling bb2
           where bb2.behandling_id = bvb.behandling_id
+          and bb2.vedtaksbrev = true
+          and bb2.aktiv = true
       ) = 1;
 
 update brevbestilling bb
