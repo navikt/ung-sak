@@ -1,3 +1,4 @@
+-- dette skriptet funker kun for vedtaksbrev som har kun en bestilling. For flere må 
 update behandling_vedtaksbrev bvb
 set brevbestilling_id = bb.id
 from brevbestilling bb

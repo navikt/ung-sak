@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import org.hibernate.annotations.Immutable;
 
-@Entity(name = "VedtaksbrevResultatEntitet")
+@Entity(name = "BehandlingVedtaksbrev")
 @Immutable
 @Table(name = "behandling_vedtaksbrev")
-public class VedtaksbrevResultatEntitet extends BaseEntitet {
+public class BehandlingVedtaksbrev extends BaseEntitet {
 
     @Id
     @SequenceGenerator(name = "seq_behandling_vedtaksbrev", sequenceName = "seq_behandling_vedtaksbrev")
@@ -24,26 +24,26 @@ public class VedtaksbrevResultatEntitet extends BaseEntitet {
     @Enumerated(EnumType.STRING)
     private VedtaksbrevResultatType resultatType;
 
-    @Column(name = "beskrivelse")
+    @Column(name = "beskrivelse", updatable = false)
     private String beskrivelse;
 
     @OneToOne
-    @JoinColumn(name = "brevbestilling_id")
+    @JoinColumn(name = "brevbestilling_id", updatable = false)
     private BrevbestillingEntitet brevbestilling;
 
-    public static VedtaksbrevResultatEntitet medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType) {
-        return new VedtaksbrevResultatEntitet(brevBestilling.getBehandlingId(), brevBestilling.getFagsakId(), resultatType, beskrivelse, brevBestilling);
+    public static BehandlingVedtaksbrev medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType) {
+        return new BehandlingVedtaksbrev(brevBestilling.getBehandlingId(), brevBestilling.getFagsakId(), resultatType, beskrivelse, brevBestilling);
     }
 
-    public static VedtaksbrevResultatEntitet utenBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse) {
-        return new VedtaksbrevResultatEntitet(behandlingId, fagsakId, resultatType, beskrivelse, null);
+    public static BehandlingVedtaksbrev utenBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse) {
+        return new BehandlingVedtaksbrev(behandlingId, fagsakId, resultatType, beskrivelse, null);
     }
 
     // Default constructor required by JPA
-    public VedtaksbrevResultatEntitet() {
+    public BehandlingVedtaksbrev() {
     }
 
-    public VedtaksbrevResultatEntitet(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse, BrevbestillingEntitet brevbestilling) {
+    public BehandlingVedtaksbrev(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse, BrevbestillingEntitet brevbestilling) {
         this.behandlingId = behandlingId;
         this.fagsakId = fagsakId;
         this.resultatType = resultatType;
