@@ -6,7 +6,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -14,7 +13,8 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
 import no.nav.ung.sak.formidling.template.dto.endring.inntekt.EndringRapportertInntektPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,8 +44,10 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
         final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
 
-        var relevantTilkjentYtelse = resultatTidslinje.combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
-            LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        var relevantTilkjentYtelse = DetaljertResultat
+            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
+            .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
+                LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         if (relevantTilkjentYtelse.isEmpty()) {
             throw new IllegalStateException("Fant ingen tilkjent ytelse i perioden" + resultatTidslinje.getLocalDateIntervals());
@@ -75,7 +77,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
                 .collect(Collectors.toList())
         );
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_INNTEKT, TemplateType.ENDRING_INNTEKT, dto);
+        return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto);
     }
 
     private static LocalDateSegment<EndringRapportertInntektPeriodeDto> mapTilPeriodeDto(

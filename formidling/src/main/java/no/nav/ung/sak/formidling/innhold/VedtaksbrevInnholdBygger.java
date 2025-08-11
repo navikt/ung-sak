@@ -2,7 +2,7 @@ package no.nav.ung.sak.formidling.innhold;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,76 +1,41 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
 
-public record VedtaksbrevRegelResultat(
-    VedtaksbrevEgenskaper vedtaksbrevEgenskaper,
-    VedtaksbrevInnholdBygger automatiskVedtaksbrevBygger,
-    LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-    String forklaring) {
-    public String safePrint() {
-        return "VedtaksbrevRegelResultat{" +
-            "vedtaksbrevEgenskaper=" + vedtaksbrevEgenskaper +
-            ", bygger=" + (automatiskVedtaksbrevBygger != null ? automatiskVedtaksbrevBygger.getClass().getSimpleName() : "null") +
-            ", detaljertResultatTimeline=" + DetaljertResultat.timelineToString(detaljertResultatTimeline) +
-            ", forklaring='" + forklaring + '\'' +
-            '}';
+/**
+ * Vedtaksbrev resultat for ett enkelt brev.
+ */
+public sealed interface VedtaksbrevRegelResultat permits IngenBrev, Vedtaksbrev {
+    String forklaring();
+
+    static Vedtaksbrev automatiskBrev(DokumentMalType dokumentMalType, VedtaksbrevInnholdBygger bygger, String forklaring, boolean kanRedigere) {
+        return new Vedtaksbrev(
+                dokumentMalType,
+                bygger,
+                new VedtaksbrevEgenskaper(
+                        kanRedigere,
+                        kanRedigere,
+                        kanRedigere,
+                        kanRedigere
+                ),
+            forklaring);
     }
 
-    public static VedtaksbrevRegelResultat automatiskBrev(
-        VedtaksbrevInnholdBygger bygger,
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-        String forklaring,
-        boolean kanRedigere) {
-        return new VedtaksbrevRegelResultat(
+    static Vedtaksbrev tomRedigerbarBrev(VedtaksbrevInnholdBygger bygger, String forklaring) {
+        return new Vedtaksbrev(
+            DokumentMalType.MANUELT_VEDTAK_DOK,
+            bygger,
             new VedtaksbrevEgenskaper(
-                true,
-                null,
-                kanRedigere,
-                kanRedigere,
-                kanRedigere,
-                kanRedigere), bygger,
-            detaljertResultatTimeline,
-            forklaring
-        );
-    }
-
-    public static VedtaksbrevRegelResultat tomRedigerbarBrev(
-        VedtaksbrevInnholdBygger bygger,
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-        String forklaring
-    ) {
-        return new VedtaksbrevRegelResultat(
-            new VedtaksbrevEgenskaper(
-                true,
-                null,
                 true,
                 true,
                 true,
                 false),
-            bygger,
-            detaljertResultatTimeline,
-            forklaring
-        );
+            forklaring);
     }
 
-    public static VedtaksbrevRegelResultat ingenBrev(
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
-        IngenBrevÅrsakType ingenBrevÅrsakType,
-        String forklaring
-    ) {
-        return new VedtaksbrevRegelResultat(
-            new VedtaksbrevEgenskaper(
-                false,
-                ingenBrevÅrsakType,
-                false,
-                false,
-                false,
-                false), null,
-            detaljertResultatTimeline,
-            forklaring
-        );
+    static IngenBrev ingenBrev(IngenBrevÅrsakType ingenBrevÅrsakType, String forklaring) {
+        return new IngenBrev(ingenBrevÅrsakType, forklaring);
     }
 
 }

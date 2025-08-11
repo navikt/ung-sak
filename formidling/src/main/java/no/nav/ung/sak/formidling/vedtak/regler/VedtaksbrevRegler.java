@@ -9,10 +9,11 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtleder;
-import org.jetbrains.annotations.NotNull;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,17 +42,24 @@ public class VedtaksbrevRegler {
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
     }
 
-    public VedtaksbrevRegelResultat kjør(Long behandlingId) {
+    public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
-    private VedtaksbrevRegelResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var strategyResultater = innholdbyggerStrategies.stream()
             .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
             .map(it -> it.evaluer(behandling, detaljertResultat))
             .toList();
+
+
+        if (strategyResultater.size() > 1) {
+            LOG.info("Flere resultater for strategier: {}", strategyResultater.stream()
+                .map(VedtaksbrevStrategyResultat::forklaring)
+                .collect(Collectors.joining(", ")));
+        }
 
         var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
 
@@ -66,16 +74,18 @@ public class VedtaksbrevRegler {
         var automatiskBrevResultat = strategyResultater.stream()
             .filter(it -> it.bygger() != null)
             .toList();
+
         if (!automatiskBrevResultat.isEmpty()) {
-            return håndterAutomatiskBrevResultat(detaljertResultat, automatiskBrevResultat, redigerRegelResultat);
+            var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat, redigerRegelResultat);
+            return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, automatiskVedtaksbrevResultater);
         }
 
         if (redigerRegelResultat.kanRedigere()) {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
-            return VedtaksbrevRegelResultat.tomRedigerbarBrev(
-                manueltVedtaksbrevInnholdBygger,
-                detaljertResultat,
-                "Tom fritekstbrev pga manuelle aksjonspunkter. " + redigerRegelResultat.forklaring()
+            return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat,
+                List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
+                    manueltVedtaksbrevInnholdBygger,
+                    "Tom fritekstbrev pga manuelle aksjonspunkter: " + redigerRegelResultat.forklaring()))
             );
         }
 
@@ -85,44 +95,52 @@ public class VedtaksbrevRegler {
             .collect(Collectors.toSet());
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return VedtaksbrevRegelResultat.ingenBrev(detaljertResultat, IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring);
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring)));
     }
 
-    @NotNull
-    private VedtaksbrevRegelResultat håndterIngenBrevResultat(
+    private BehandlingVedtaksbrevResultat håndterIngenBrevResultat(
         LocalDateTimeline<DetaljertResultat> detaljertResultat,
         RedigerRegelResultat redigerRegelResultat,
-        List<VedtaksbrevStrategyResultat> ingenBrevResultater) {
+        List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
 
-        var byggerResultat = ingenBrevResultater.stream().findFirst().orElseThrow(); //TODO håndtere flere resultater
         if (redigerRegelResultat.kanRedigere()) {
+            String forklaringer = ingenBrevResultat.stream().map(VedtaksbrevStrategyResultat::forklaring).collect(Collectors.joining(", "));
+
             // ingen brev, men har ap så tilbyr tom brev for redigering
-            String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter. %s. Ingen brev pga %s."
-                .formatted(redigerRegelResultat.forklaring(), byggerResultat.forklaring());
-            return VedtaksbrevRegelResultat.tomRedigerbarBrev(
-                manueltVedtaksbrevInnholdBygger,
+            String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter: %s. Ingen automatisk brev pga: %s."
+                .formatted(redigerRegelResultat.forklaring(), forklaringer);
+            return BehandlingVedtaksbrevResultat.medBrev(
                 detaljertResultat,
-                forklaring
-            );
+                List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
+                    manueltVedtaksbrevInnholdBygger,
+                    forklaring
+                )));
         }
 
-        return VedtaksbrevRegelResultat.ingenBrev(
-            detaljertResultat, byggerResultat.ingenBrevÅrsakType(), byggerResultat.forklaring()
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
+            ingenBrevResultat.stream()
+                .map(it -> VedtaksbrevRegelResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring()))
+                .toList()
         );
+
     }
 
-    private static VedtaksbrevRegelResultat håndterAutomatiskBrevResultat(
-        LocalDateTimeline<DetaljertResultat> detaljertResultat,
-        List<VedtaksbrevStrategyResultat> resultat,
-        RedigerRegelResultat automatiskBrevResultat) {
 
-        var vedtaksbrevStrategyResultat = resultat.stream().findFirst().orElseThrow(); //TODO håndtere flere resultater
-        return VedtaksbrevRegelResultat.automatiskBrev(
-            vedtaksbrevStrategyResultat.bygger(),
-            detaljertResultat,
-            vedtaksbrevStrategyResultat.forklaring() + " " + automatiskBrevResultat.forklaring(),
-            automatiskBrevResultat.kanRedigere()
-        );
+    private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(
+        List<VedtaksbrevStrategyResultat> resultat,
+        RedigerRegelResultat redigerRegelResultat) {
+
+        return resultat.stream()
+            .map(it -> {
+                String forklaring = it.forklaring() + (redigerRegelResultat.kanRedigere() ? " Kan redigeres pga " + redigerRegelResultat.forklaring() : "");
+                    return VedtaksbrevRegelResultat
+                        .automatiskBrev(
+                            it.dokumentMalType(),
+                            it.bygger(),
+                            forklaring,
+                            redigerRegelResultat.kanRedigere());
+                }
+            ).toList();
     }
 
     private static RedigerRegelResultat harUtførteManuelleAksjonspunkterMedToTrinn(Behandling behandling) {
@@ -130,7 +148,7 @@ public class VedtaksbrevRegler {
             .filter(Aksjonspunkt::erUtført).toList();
         boolean kanRedigere = !lukkedeApMedToTrinn.isEmpty();
         if (kanRedigere) {
-            return new RedigerRegelResultat(true, "Kan redigeres pga aksjonspunkt(er) %s".formatted(
+            return new RedigerRegelResultat(true, "aksjonspunkt(er) %s".formatted(
                 lukkedeApMedToTrinn.stream().map(it -> it.getAksjonspunktDefinisjon().getKode())
                     .collect(Collectors.toSet())
             ));

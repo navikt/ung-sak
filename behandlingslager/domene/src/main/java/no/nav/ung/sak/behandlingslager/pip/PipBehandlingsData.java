@@ -2,21 +2,32 @@ package no.nav.ung.sak.behandlingslager.pip;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class PipBehandlingsData {
+    private UUID behandlingUuid;
     private String behandligStatus;
     private String fagsakStatus;
     private String ansvarligSaksbehandler;
     private Long fagsakId;
     private String saksnummer;
 
-    public PipBehandlingsData(String behandligStatus, String ansvarligSaksbehandler, Number fagsakId,
-            String fagsakStatus, String saksnummer) {
+    public PipBehandlingsData(UUID behandlingUuid, String behandligStatus, String ansvarligSaksbehandler, Number fagsakId,
+                              String fagsakStatus, String saksnummer) {
+        this.behandlingUuid = behandlingUuid;
         this.behandligStatus = behandligStatus;
         this.saksnummer = saksnummer;
         this.fagsakId = fagsakId.longValue();
         this.fagsakStatus = fagsakStatus;
         this.ansvarligSaksbehandler = ansvarligSaksbehandler;
+    }
+
+    public UUID getBehandlingUuid() {
+        return behandlingUuid;
+    }
+
+    public void setBehandlingUuid(UUID behandlingUuid) {
+        this.behandlingUuid = behandlingUuid;
     }
 
     public String getBehandligStatus() {

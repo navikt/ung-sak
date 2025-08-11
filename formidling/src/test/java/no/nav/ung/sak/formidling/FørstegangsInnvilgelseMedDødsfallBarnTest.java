@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,14 +22,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class FørstegangsInnvilgelseMedDødsfallBarnTest {
 
     @Inject
-    VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-
-    @Inject
     PdlKlientFake pdlKlientFake;
 
     @Inject
     EntityManager entityManager;
 
+    @Inject
+    VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     @BeforeAll
     static void beforeAll() {
@@ -44,7 +44,6 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
     @Test
     void medDødsfallAvBarn(TestInfo testInfo) {
         //Må toggles på for at brevet skal genereres
-        var vendtaksbrevTjenesteMedToggle = vedtaksbrevGenerererTjeneste;
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var ungTestGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedDødsfallBarn15DagerEtterStartdato(fom);
 
@@ -54,7 +53,7 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
 
-        GenerertBrev generertBrev = AbstractVedtaksbrevInnholdByggerTest.genererVedtaksbrev(vendtaksbrevTjenesteMedToggle, behandling.getId(), testInfo);
+        GenerertBrev generertBrev = AbstractVedtaksbrevInnholdByggerTest.genererVedtaksbrev(behandling.getId(), testInfo, vedtaksbrevTjeneste);
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.INNVILGELSE);
 
         var brevtekst = generertBrev.dokument().html();
