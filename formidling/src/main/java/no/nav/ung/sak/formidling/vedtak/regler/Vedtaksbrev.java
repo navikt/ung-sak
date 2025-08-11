@@ -20,7 +20,7 @@ public record Vedtaksbrev(
     @Override
     public String toString() {
         return "Vedtaksbrev{" +
-            "dokumentMalType=" + dokumentMalType +
+            "dokumentMalType=" + dokumentMalType.getKode() +
             ", vedtaksbrevBygger=" + (vedtaksbrevBygger.getClass().getSimpleName()) +
             ", vedtaksbrevEgenskaper=" + vedtaksbrevEgenskaper +
             ", forklaring='" + forklaring + '\'' +

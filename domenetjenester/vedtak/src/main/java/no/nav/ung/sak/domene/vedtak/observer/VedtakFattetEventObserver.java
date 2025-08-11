@@ -36,7 +36,8 @@ public class VedtakFattetEventObserver {
 
     private static ProsessTaskData opprettTaskForBrevbestilling(BehandlingVedtakEvent event) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VurderVedtaksbrevTask.class);
-        prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId());
+        prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
+        prosessTaskData.setSaksnummer(event.getBehandling().getFagsak().getSaksnummer().toString());
         return prosessTaskData;
     }
 

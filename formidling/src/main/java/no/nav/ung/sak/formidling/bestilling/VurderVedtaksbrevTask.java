@@ -119,7 +119,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         vedtaksbrevResultatRepository.lagre(vedtaksbrevResultatEntitet);
 
         prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId()));
-
+        LOG.info("Opprettet vedtaksbrev bestilling med id: {} og mal {}", bestilling.getId(), bestilling.getDokumentMalType().getKode());
 
     }
 
@@ -156,7 +156,9 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     private static ProsessTaskData lagBestillingTask(Behandling behandling, Long brevbestillingId) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
+        prosessTaskData.setSaksnummer(behandling.getFagsak().getSaksnummer().toString());
         prosessTaskData.setProperty(VedtaksbrevBestillingTask.BREVBESTILLING_ID, brevbestillingId.toString());
+        prosessTaskData.setCallIdFraEksisterende();
         return prosessTaskData;
     }
 
