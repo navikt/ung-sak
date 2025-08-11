@@ -18,4 +18,6 @@ set mottaker_id = f.bruker_aktoer_id,
     mottaker_id_type = 'AKTØRID'
 from fagsak f
 where bb.fagsak_id = f.id
+  and bb.mottaker_id is null
+  and bb.mottaker_id_type is null
   and bb.aktiv = true;
