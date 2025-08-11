@@ -28,7 +28,7 @@ public class VedtaksbrevResultatEntitet extends BaseEntitet {
     private String beskrivelse;
 
     @OneToOne
-    @JoinColumn(name = "brevbestilling_id", insertable = false, updatable = false)
+    @JoinColumn(name = "brevbestilling_id")
     private BrevbestillingEntitet brevbestilling;
 
     public static VedtaksbrevResultatEntitet medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType) {
