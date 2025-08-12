@@ -66,23 +66,11 @@ public class UngdomsprogramPeriodeTjeneste {
             .filterValue(v -> v);
     }
 
-    public LocalDateTimeline<Boolean> finnEndretPeriodeTidslinje(UUID fraReferanse, UUID tilReferanse) {
-        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(tilReferanse);
-        var originaltGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(fraReferanse);
-        return finnEndretTidslinje(ungdomsprogramPeriodeGrunnlag, originaltGrunnlag);
-    }
-
     public static LocalDateTimeline<Boolean> finnEndretTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag, Optional<UngdomsprogramPeriodeGrunnlag> originaltGrunnlag) {
         var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
         var initiellPeriodeTidslinje = lagPeriodeTidslinje(originaltGrunnlag);
         return initiellPeriodeTidslinje.crossJoin(periodeTidslinje, UngdomsprogramPeriodeTjeneste::erEndret)
             .filterValue(v -> v);
-    }
-
-    public List<EndretDato> finnEndretStartdatoer(UUID førsteReferanse, UUID andreReferanse) {
-        var andreGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(andreReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + andreReferanse));
-        var førsteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(førsteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + førsteReferanse));
-        return finnEndretStartdatoer(andreGrunnlag, førsteGrunnlag);
     }
 
     public static List<EndretDato> finnEndretStartdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
@@ -111,12 +99,6 @@ public class UngdomsprogramPeriodeTjeneste {
         }
 
         return List.of(new EndretDato(gjeldendeDato, oppgittStartdato));
-    }
-
-    public List<EndretDato> finnEndretSluttdatoer(UUID førsteReferanse, UUID andreReferanse) {
-        var andreGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(andreReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + andreReferanse));
-        var førsteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(førsteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + førsteReferanse));
-        return finnEndretSluttdatoer(andreGrunnlag, førsteGrunnlag);
     }
 
     public static List<EndretDato> finnEndretSluttdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
