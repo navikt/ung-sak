@@ -8,25 +8,25 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 @Dependent
-public class VedtaksbrevResultatRepository {
+public class BehandlingVedtaksbrevRepository {
 
     private final EntityManager entityManager;
 
     @Inject
-    public VedtaksbrevResultatRepository(EntityManager entityManager) {
+    public BehandlingVedtaksbrevRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    public VedtaksbrevResultatEntitet lagre(VedtaksbrevResultatEntitet vedtaksbrevResultat) {
+    public BehandlingVedtaksbrev lagre(BehandlingVedtaksbrev vedtaksbrevResultat) {
         entityManager.persist(vedtaksbrevResultat);
         entityManager.flush();
         return vedtaksbrevResultat;
     }
 
-    public List<VedtaksbrevResultatEntitet> hentForBehandling(Long behandlingId) {
-        TypedQuery<VedtaksbrevResultatEntitet> query = entityManager.createQuery(
-            "from VedtaksbrevResultatEntitet b where b.behandlingId = :behandlingId",
-            VedtaksbrevResultatEntitet.class
+    public List<BehandlingVedtaksbrev> hentForBehandling(Long behandlingId) {
+        TypedQuery<BehandlingVedtaksbrev> query = entityManager.createQuery(
+            "from BehandlingVedtaksbrev b where b.behandlingId = :behandlingId",
+            BehandlingVedtaksbrev.class
         );
         query.setParameter("behandlingId", behandlingId);
 
