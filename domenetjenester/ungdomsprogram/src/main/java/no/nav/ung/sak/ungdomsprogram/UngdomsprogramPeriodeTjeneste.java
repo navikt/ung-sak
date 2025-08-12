@@ -19,6 +19,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -68,8 +69,12 @@ public class UngdomsprogramPeriodeTjeneste {
 
     public LocalDateTimeline<Boolean> finnEndretPeriodeTidslinje(UUID fraReferanse, UUID tilReferanse) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(tilReferanse);
-        var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
         var originaltGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(fraReferanse);
+        return finnEndretTidslinje(ungdomsprogramPeriodeGrunnlag, originaltGrunnlag);
+    }
+
+    public static LocalDateTimeline<Boolean> finnEndretTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag, Optional<UngdomsprogramPeriodeGrunnlag> originaltGrunnlag) {
+        var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
         var initiellPeriodeTidslinje = lagPeriodeTidslinje(originaltGrunnlag);
         return initiellPeriodeTidslinje.crossJoin(periodeTidslinje, UngdomsprogramPeriodeTjeneste::erEndret)
             .filterValue(v -> v);
@@ -78,6 +83,10 @@ public class UngdomsprogramPeriodeTjeneste {
     public List<EndretDato> finnEndretStartdatoer(UUID førsteReferanse, UUID andreReferanse) {
         var andreGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(andreReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + andreReferanse));
         var førsteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(førsteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + førsteReferanse));
+        return finnEndretStartdatoer(andreGrunnlag, førsteGrunnlag);
+    }
+
+    public static List<EndretDato> finnEndretStartdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
         // Støtter kun en periode her foreløpig
         var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
         var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
@@ -91,9 +100,7 @@ public class UngdomsprogramPeriodeTjeneste {
         return List.of(new EndretDato(andreStartdato, førsteStartdato));
     }
 
-    public List<EndretDato> finnEndretStartdatoFraOppgitteStartdatoer(long behandlingId) {
-        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for behandlingid: " + behandlingId));
-        var ungdomsytelseStartdatoGrunnlag = ungdomsytelseStartdatoRepository.hentGrunnlag(behandlingId);
+    public static List<EndretDato> finnEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
         // Støtter kun en periode her foreløpig
         var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
         var gjeldendeDato = gjelendePeriode.getFomDato();
@@ -110,6 +117,10 @@ public class UngdomsprogramPeriodeTjeneste {
     public List<EndretDato> finnEndretSluttdatoer(UUID førsteReferanse, UUID andreReferanse) {
         var andreGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(andreReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + andreReferanse));
         var førsteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(førsteReferanse).orElseThrow(() -> new IllegalStateException("Forventet å finne grunnlag for referanse: " + førsteReferanse));
+        return finnEndretSluttdatoer(andreGrunnlag, førsteGrunnlag);
+    }
+
+    public static List<EndretDato> finnEndretSluttdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
         // Støtter kun en periode her foreløpig
         var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
         var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
@@ -130,13 +141,13 @@ public class UngdomsprogramPeriodeTjeneste {
      * @param ungdomsprogramPeriodeGrunnlag Ungdomsprogram-grunnlag med perioder der bruker er i ungdomsprogram
      * @return Tidslinje for perioder der bruker er i ungdomsprogram
      */
-    public LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag) {
+    public static LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag) {
         return ungdomsprogramPeriodeGrunnlag.stream()
             .flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
             .map(UngdomsprogramPeriode::getPeriode)
             .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
             .reduce(LocalDateTimeline::crossJoin)
-            .map(this::komprimer)
+            .map(UngdomsprogramPeriodeTjeneste::komprimer)
             .orElse(LocalDateTimeline.empty());
     }
 
@@ -145,7 +156,7 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
 
-    private LocalDateTimeline<Boolean> komprimer(LocalDateTimeline<Boolean> t) {
+    private static LocalDateTimeline<Boolean> komprimer(LocalDateTimeline<Boolean> t) {
         return t.compress((d1, d2) -> KANT_I_KANT_VURDERER.erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
     }
 

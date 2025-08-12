@@ -12,7 +12,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -66,15 +66,14 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
     void setUp() {
         scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.medBehandlingÅrsak(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM).lagre(entityManager);
-        final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         programperiodeendringEtterlysningTjeneste = new ProgramperiodeendringEtterlysningTjeneste(
-            ungdomsprogramPeriodeTjeneste,
             ungdomsprogramPeriodeRepository,
             prosessTaskTjeneste,
             etterlysningRepository,
             new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository),
-            new BehandlingRepository(entityManager)
+            ungdomsytelseStartdatoRepository,
+            new BehandingprosessSporingRepository(entityManager)
         );
     }
 
