@@ -19,7 +19,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
