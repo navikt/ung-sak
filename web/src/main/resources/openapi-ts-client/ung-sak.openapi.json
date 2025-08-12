@@ -96,7 +96,7 @@
         },
         "type" : "object"
       },
-      "oppdrag.kontrakt.Periode" : {
+      "k9.oppdrag.kontrakt.Periode" : {
         "properties" : {
           "fom" : {
             "format" : "date",
@@ -110,38 +110,38 @@
         "required" : [ "fom", "tom" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.kodeverk.FagOmrådeKode" : {
+      "k9.oppdrag.kontrakt.kodeverk.FagOmrådeKode" : {
         "enum" : [ "REFUTG", "FP", "FPREF", "SP", "SPREF", "SVP", "SVPREF", "PB", "PBREF", "PN", "PNREF", "OM", "OMREF", "OPP", "OPPREF", "OOP", "OOPREF", "FRISINN", "UNG", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "ENGANGSSTØNAD", "FORELDREPENGER", "FORELDREPENGER_ARBEIDSGIVER", "SYKEPENGER", "SYKEPENGER_ARBEIDSGIVER", "SVANGERSKAPSPENGER", "SVANGERSKAPSPENGER_ARBEIDSGIVER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_SYKT_BARN_ARBEIDSGIVER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_NÆRSTÅENDE_ARBEIDSGIVER", "OMSORGSPENGER", "OMSORGSPENGER_ARBEIDSGIVER", "OPPLÆRINGSPENGER", "OPPLÆRINGSPENGER_ARBEIDSGIVER", "PLEIEPENGER_V1", "PLEIEPENGER_V1_ARBEIDSGIVER", "FRISINN", "UNG", "UDEFINERT" ]
       },
-      "oppdrag.kontrakt.kodeverk.Inntektskategori" : {
+      "k9.oppdrag.kontrakt.kodeverk.Inntektskategori" : {
         "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "UDEFINERT" ]
       },
-      "oppdrag.kontrakt.kodeverk.MottakerType" : {
+      "k9.oppdrag.kontrakt.kodeverk.MottakerType" : {
         "enum" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ],
         "type" : "string",
         "x-enum-varnames" : [ "BRUKER", "ARBG_ORG", "ARBG_PRIV" ]
       },
-      "oppdrag.kontrakt.kodeverk.SatsType" : {
+      "k9.oppdrag.kontrakt.kodeverk.SatsType" : {
         "enum" : [ "DAG", "DAG7", "UKE", "MND", "AAR", "ENG", "AKTO", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "DAG", "DAG7", "UKE", "MND", "ÅR", "ENGANG", "AKTO", "UDEFINERT" ]
       },
-      "oppdrag.kontrakt.kodeverk.YtelseType" : {
+      "k9.oppdrag.kontrakt.kodeverk.YtelseType" : {
         "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "UDEFINERT" ]
       },
-      "oppdrag.kontrakt.simulering.v1.DetaljertSimuleringResultatDto" : {
+      "k9.oppdrag.kontrakt.simulering.v1.DetaljertSimuleringResultatDto" : {
         "properties" : {
           "ingenPerioderMedAvvik" : {
             "type" : "boolean"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.Periode"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.Periode"
           },
           "periodeTom" : {
             "format" : "date",
@@ -149,7 +149,7 @@
           },
           "perioderPerMottaker" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.SimuleringForMottakerDto"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.SimuleringForMottakerDto"
             },
             "type" : "array"
           },
@@ -169,18 +169,18 @@
         "required" : [ "periode" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.simulering.v1.RadId" : {
+      "k9.oppdrag.kontrakt.simulering.v1.RadId" : {
         "enum" : [ "nyttBeløp", "tidligereUtbetalt", "differanse", "resultatEtterMotregning", "inntrekkNesteMåned", "resultat" ],
         "type" : "string",
         "x-enum-varnames" : [ "NYTT_BELØP", "TIDLIGERE_UTBETALT", "DIFFERANSE", "RESULTAT_ETTER_MOTREGNING", "INNTREKK_NESTE_MÅNED", "RESULTAT" ]
       },
-      "oppdrag.kontrakt.simulering.v1.SimuleringDto" : {
+      "k9.oppdrag.kontrakt.simulering.v1.SimuleringDto" : {
         "properties" : {
           "simuleringResultat" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.DetaljertSimuleringResultatDto"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.DetaljertSimuleringResultatDto"
           },
           "simuleringResultatUtenInntrekk" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.DetaljertSimuleringResultatDto"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.DetaljertSimuleringResultatDto"
           },
           "slåttAvInntrekk" : {
             "type" : "boolean"
@@ -189,7 +189,7 @@
         "required" : [ "simuleringResultat", "simuleringResultatUtenInntrekk", "slåttAvInntrekk" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.simulering.v1.SimuleringForMottakerDto" : {
+      "k9.oppdrag.kontrakt.simulering.v1.SimuleringForMottakerDto" : {
         "properties" : {
           "mottakerNavn" : {
             "type" : "string"
@@ -198,20 +198,20 @@
             "type" : "string"
           },
           "mottakerType" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.kodeverk.MottakerType"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.kodeverk.MottakerType"
           },
           "nesteUtbPeriode" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.Periode"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.Periode"
           },
           "resultatOgMotregningRader" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.SimuleringResultatRadDto"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatRadDto"
             },
             "type" : "array"
           },
           "resultatPerFagområde" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.SimuleringResultatPerFagområdeDto"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatPerFagområdeDto"
             },
             "type" : "array"
           }
@@ -219,14 +219,14 @@
         "required" : [ "mottakerType" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.simulering.v1.SimuleringResultatPerFagområdeDto" : {
+      "k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatPerFagområdeDto" : {
         "properties" : {
           "fagOmrådeKode" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.kodeverk.FagOmrådeKode"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.kodeverk.FagOmrådeKode"
           },
           "rader" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.SimuleringResultatRadDto"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatRadDto"
             },
             "type" : "array"
           }
@@ -234,7 +234,7 @@
         "required" : [ "fagOmrådeKode", "rader" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.simulering.v1.SimuleringResultatPerMånedDto" : {
+      "k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatPerMånedDto" : {
         "properties" : {
           "beløp" : {
             "format" : "int64",
@@ -242,20 +242,20 @@
             "type" : "integer"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.Periode"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.Periode"
           }
         },
         "required" : [ "beløp", "periode" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.simulering.v1.SimuleringResultatRadDto" : {
+      "k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatRadDto" : {
         "properties" : {
           "feltnavn" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.RadId"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.RadId"
           },
           "resultaterPerMåned" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.SimuleringResultatPerMånedDto"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatPerMånedDto"
             },
             "type" : "array"
           }
@@ -263,7 +263,7 @@
         "required" : [ "feltnavn" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning" : {
+      "k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning" : {
         "properties" : {
           "brukInntrekk" : {
             "type" : "boolean"
@@ -271,11 +271,11 @@
         },
         "type" : "object"
       },
-      "oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse" : {
+      "k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse" : {
         "properties" : {
           "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1"
             },
             "maxItems" : 800,
             "minItems" : 0,
@@ -285,7 +285,7 @@
         "required" : [ "perioder" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1" : {
+      "k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1" : {
         "properties" : {
           "arbeidsforholdId" : {
             "maxLength" : 100,
@@ -307,14 +307,14 @@
           },
           "feriepenger" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseFeriepengerV1"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseFeriepengerV1"
             },
             "maxItems" : 3,
             "minItems" : 0,
             "type" : "array"
           },
           "inntektskategori" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.kodeverk.Inntektskategori"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.kodeverk.Inntektskategori"
           },
           "satsBeloep" : {
             "format" : "int64",
@@ -323,7 +323,7 @@
             "type" : "integer"
           },
           "satsType" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.kodeverk.SatsType"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.kodeverk.SatsType"
           },
           "utbetalesTilBruker" : {
             "type" : "boolean"
@@ -339,7 +339,7 @@
         "required" : [ "inntektskategori", "satsBeloep", "satsType", "utbetalingsgrad" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1" : {
+      "k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1" : {
         "properties" : {
           "aktoerId" : {
             "maxLength" : 50,
@@ -384,13 +384,13 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.kodeverk.YtelseType"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.kodeverk.YtelseType"
           }
         },
         "required" : [ "aktoerId", "behandlingId", "behandlingTidspunkt", "saksnummer", "vedtaksdato", "ytelseType" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseFeriepengerV1" : {
+      "k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseFeriepengerV1" : {
         "properties" : {
           "beloep" : {
             "format" : "int64",
@@ -407,39 +407,39 @@
         },
         "type" : "object"
       },
-      "oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag" : {
+      "k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag" : {
         "properties" : {
           "behandlingsinfo" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1"
           },
           "inntrekkBeslutning" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning"
           },
           "tilkjentYtelse" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse"
           }
         },
         "required" : [ "behandlingsinfo", "inntrekkBeslutning", "tilkjentYtelse" ],
         "type" : "object"
       },
-      "oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1" : {
+      "k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1" : {
         "properties" : {
           "andeler" : {
             "items" : {
-              "$ref" : "#/components/schemas/oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1"
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1"
             },
             "maxItems" : 100,
             "minItems" : 1,
             "type" : "array"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/oppdrag.kontrakt.Periode"
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.Periode"
           }
         },
         "required" : [ "andeler", "periode" ],
         "type" : "object"
       },
-      "prosesstask.rest.dto.ProsessTaskDataDto" : {
+      "k9.prosesstask.rest.dto.ProsessTaskDataDto" : {
         "properties" : {
           "gruppe" : {
             "maxLength" : 200,
@@ -487,7 +487,7 @@
         "required" : [ "gruppe", "id", "sekvens", "status", "taskType" ],
         "type" : "object"
       },
-      "prosesstask.rest.dto.ProsessTaskOpprettInputDto" : {
+      "k9.prosesstask.rest.dto.ProsessTaskOpprettInputDto" : {
         "properties" : {
           "taskParametre" : {
             "additionalProperties" : {
@@ -505,7 +505,7 @@
         "required" : [ "taskParametre", "taskType" ],
         "type" : "object"
       },
-      "prosesstask.rest.dto.ProsessTaskRestartInputDto" : {
+      "k9.prosesstask.rest.dto.ProsessTaskRestartInputDto" : {
         "description" : "Informasjon for restart av en eksisterende prosesstask",
         "properties" : {
           "inneværendeStatus" : {
@@ -526,7 +526,7 @@
         "required" : [ "inneværendeStatus", "prosessTaskId" ],
         "type" : "object"
       },
-      "prosesstask.rest.dto.ProsessTaskRestartResultatDto" : {
+      "k9.prosesstask.rest.dto.ProsessTaskRestartResultatDto" : {
         "description" : "Resultatet av asynkron-restart av en eksisterende prosesstask",
         "properties" : {
           "nesteKjoeretidspunkt" : {
@@ -547,7 +547,7 @@
         "required" : [ "nesteKjoeretidspunkt", "prosessTaskId", "prosessTaskStatus" ],
         "type" : "object"
       },
-      "prosesstask.rest.dto.ProsessTaskRetryAllResultatDto" : {
+      "k9.prosesstask.rest.dto.ProsessTaskRetryAllResultatDto" : {
         "description" : "Resultatet av asynkron-restart av feilede prosesstasks",
         "properties" : {
           "prosessTaskIds" : {
@@ -562,7 +562,7 @@
         },
         "type" : "object"
       },
-      "prosesstask.rest.dto.ProsessTaskSetFerdigInputDto" : {
+      "k9.prosesstask.rest.dto.ProsessTaskSetFerdigInputDto" : {
         "description" : "Informasjon for restart av en eksisterende prosesstask",
         "properties" : {
           "inneværendeStatus" : {
@@ -583,7 +583,7 @@
         "required" : [ "inneværendeStatus", "prosessTaskId" ],
         "type" : "object"
       },
-      "prosesstask.rest.dto.ProsessTaskStatusDto" : {
+      "k9.prosesstask.rest.dto.ProsessTaskStatusDto" : {
         "properties" : {
           "prosessTaskStatusName" : {
             "description" : "Status som slås opp.",
@@ -597,11 +597,11 @@
         "required" : [ "prosessTaskStatusName" ],
         "type" : "object"
       },
-      "prosesstask.rest.dto.StatusFilterDto" : {
+      "k9.prosesstask.rest.dto.StatusFilterDto" : {
         "properties" : {
           "prosessTaskStatuser" : {
             "items" : {
-              "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskStatusDto"
+              "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskStatusDto"
             },
             "maxItems" : 10,
             "minItems" : 0,
@@ -7561,7 +7561,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag"
+                  "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag"
                 }
               }
             },
@@ -7855,7 +7855,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskOpprettInputDto"
+                "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskOpprettInputDto"
               }
             }
           },
@@ -7866,7 +7866,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskDataDto"
+                  "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskDataDto"
                 }
               }
             },
@@ -7888,7 +7888,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskRestartInputDto"
+                "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskRestartInputDto"
               }
             }
           },
@@ -7899,7 +7899,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskRestartResultatDto"
+                  "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskRestartResultatDto"
                 }
               }
             },
@@ -7921,7 +7921,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/prosesstask.rest.dto.StatusFilterDto"
+                "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.StatusFilterDto"
               }
             }
           },
@@ -7932,7 +7932,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskDataDto"
+                  "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskDataDto"
                 }
               }
             },
@@ -7951,7 +7951,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskRetryAllResultatDto"
+                  "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskRetryAllResultatDto"
                 }
               }
             },
@@ -7973,7 +7973,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/prosesstask.rest.dto.ProsessTaskSetFerdigInputDto"
+                "$ref" : "#/components/schemas/k9.prosesstask.rest.dto.ProsessTaskSetFerdigInputDto"
               }
             }
           },
@@ -8009,7 +8009,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/oppdrag.kontrakt.simulering.v1.SimuleringDto"
+                  "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.simulering.v1.SimuleringDto"
                 }
               }
             },

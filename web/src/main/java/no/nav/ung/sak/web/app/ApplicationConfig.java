@@ -37,7 +37,7 @@ public class ApplicationConfig extends ResourceConfig {
         openapiSetupHelper.addResourcePackage("no.nav.k9");
         // The same classes registered as subtypes in object mapper are registered as subtypes in openapi setup helper:
         openapiSetupHelper.registerSubTypes(ObjectMapperFactory.allJsonTypeNameClasses());
-        openapiSetupHelper.setTypeNameResolver(new PrefixStrippingFQNTypeNameResolver("no.nav.k9.", "no.nav."));
+        openapiSetupHelper.setTypeNameResolver(new PrefixStrippingFQNTypeNameResolver("no.nav."));
         try {
             return openapiSetupHelper.resolveOpenAPI();
         } catch (OpenApiConfigurationException e) {
