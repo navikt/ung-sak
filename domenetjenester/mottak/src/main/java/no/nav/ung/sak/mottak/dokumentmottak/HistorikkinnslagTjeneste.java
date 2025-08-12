@@ -41,9 +41,6 @@ public class HistorikkinnslagTjeneste {
         this.safTjeneste = safTjeneste;
     }
 
-
-
-
     private void leggTilHistorikkinnslagDokumentlinker(JournalpostId journalpostId, Long behandlingId, Historikkinnslag.Builder historikkinnslagBuilder) {
         List<HistorikkinnslagDokumentLink> dokumentLinker = new ArrayList<>();
         if (journalpostId != null) {

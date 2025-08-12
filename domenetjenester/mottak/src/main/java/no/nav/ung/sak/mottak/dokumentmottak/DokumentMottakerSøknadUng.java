@@ -27,15 +27,17 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer;
+    private HistorikkinnslagTjeneste historikkinnslagTjeneste;
 
     public DokumentMottakerSøknadUng() {
     }
 
     @Inject
-    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer) {
+    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer, HistorikkinnslagTjeneste historikkinnslagTjeneste) {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.ungdomsytelseSøknadPersisterer = ungdomsytelseSøknadPersisterer;
+        this.historikkinnslagTjeneste = historikkinnslagTjeneste;
     }
 
     @Override
@@ -56,6 +58,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
             ungdomsytelseSøknadPersisterer.lagreSøknadsperioder(ytelse.getStartdatoer(), dokument.getJournalpostId(), behandlingId);
             ungdomsytelseSøknadPersisterer.oppdaterFagsakperiode(ytelse.getSøknadsperiode().getFraOgMed(), behandling);
 
+            historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandlingId, dokument.getJournalpostId());
         }
         mottatteDokumentRepository.oppdaterStatus(mottattDokument.stream().toList(), DokumentStatus.GYLDIG);
     }
