@@ -5,6 +5,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "BrevbestillingEntitet")
@@ -64,7 +65,7 @@ public class BrevbestillingEntitet extends BaseEntitet {
     @Embedded
     private BrevMottaker mottaker;
 
-    @Column(name = "aktiv", nullable = false, updatable = false)
+    @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
     @Version
@@ -128,6 +129,10 @@ public class BrevbestillingEntitet extends BaseEntitet {
     }
 
     public void journalført(String journalpostId, TemplateType templateType, BrevMottaker brevMottaker) {
+        Objects.requireNonNull(brevMottaker);
+        Objects.requireNonNull(templateType);
+        Objects.requireNonNull(journalpostId);
+
         this.journalpostId = journalpostId;
         this.templateType = templateType;
         this.mottaker = brevMottaker;

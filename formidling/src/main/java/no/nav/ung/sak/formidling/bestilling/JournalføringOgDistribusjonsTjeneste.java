@@ -56,13 +56,14 @@ public class JournalføringOgDistribusjonsTjeneste {
         brevbestillingRepository.lagre(bestilling);
         var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
         distTask.setBehandling(bestilling.getFagsakId(), bestilling.getBehandlingId());
+        distTask.setSaksnummer(behandling.getFagsak().getSaksnummer().toString());
         distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
         distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, bestilling.isVedtaksbrev() ?
             DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name() : DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
         prosessTaskTjeneste.lagre(distTask);
         distTask.setCallIdFraEksisterende();
 
-        LOG.info("Brevbestilling journalført med journalpostId={}", bestilling.getJournalpostId());
+        LOG.info("Brevbestilling med id={} journalført med journalpostId={}", bestilling.getId(), bestilling.getJournalpostId());
         return new BrevbestillingResultat(new JournalpostId(bestilling.getJournalpostId()));
     }
 
