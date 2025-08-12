@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -400,14 +401,14 @@ public class BigQueryStatistikkRepository {
             String saksnummer = t.get(0, String.class);
             String type = t.get(1, String.class);
             String status = t.get(2, String.class);
-            LocalDate fom = t.get(3, LocalDate.class);
-            LocalDate tom = t.get(4, LocalDate.class);
+            Date fom = t.get(3, Date.class);
+            Date tom = t.get(4, Date.class);
 
             return new EtterlysningRecord(
                 new Saksnummer(saksnummer),
                 EtterlysningType.fraKode(type),
                 EtterlysningStatus.fraKode(status),
-                DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
+                DatoIntervallEntitet.fraOgMedTilOgMed(fom.toLocalDate(), tom.toLocalDate()),
                 ZonedDateTime.now()
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
