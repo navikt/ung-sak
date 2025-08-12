@@ -384,7 +384,7 @@ public class BigQueryStatistikkRepository {
      */
     Collection<EtterlysningRecord> etterlysningData() {
         String sql = """
-            select f.saksnnummer, e.type, e.status, e.fom, e.tom
+            select f.saksnummer, e.type, e.status, e.fom, e.tom
              from etterlysning e
              inner join behandling b on b.id = e.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
