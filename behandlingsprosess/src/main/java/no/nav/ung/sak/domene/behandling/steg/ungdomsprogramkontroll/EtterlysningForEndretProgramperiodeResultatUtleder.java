@@ -1,7 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll;
 
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -9,14 +8,10 @@ import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste.*;
 
 public class EtterlysningForEndretProgramperiodeResultatUtleder {
-
-    public static final Set<EtterlysningStatus> VENTER_STATUSER = Set.of(EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
-
 
     /**
      * Utleder resultat som beskriver behov for etterlysning i forbindelse med endring av ungdomsprogramperiode.
@@ -34,16 +29,15 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
     private static ResultatType håndterForType(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
         final var gjeldendeEtterlysning = input.gjeldendeEtterlysningOgGrunnlag();
         if (gjeldendeEtterlysning.isPresent()) {
-            if (VENTER_STATUSER.contains(gjeldendeEtterlysning.get().etterlysningData().status())) {
-                return erstattDersomEndret(
-                    input.gjeldendePeriodeGrunnlag(),
-                    gjeldendeEtterlysning.get()
-                );
-            } else if (gjeldendeEtterlysning.get().etterlysningData().status() == EtterlysningStatus.MOTTATT_SVAR) {
-                if (!erSisteMottatteGyldig(input.gjeldendePeriodeGrunnlag(), gjeldendeEtterlysning.get().grunnlag())) {
-                    return ResultatType.OPPRETT_ETTERLYSNING;
-                }
-            }
+            var etterlysningStatus = gjeldendeEtterlysning.get().etterlysningData().status();
+            return switch (etterlysningStatus) {
+                case VENTER, OPPRETTET ->
+                    finnResultatForEksisterendeEtterlysningUtenSvar(input.gjeldendePeriodeGrunnlag(), gjeldendeEtterlysning.get());
+                case MOTTATT_SVAR ->
+                    finnResultatForEksisterendeEtterlysningMedSvar(input.gjeldendePeriodeGrunnlag(), gjeldendeEtterlysning.get());
+                default ->
+                    throw new IllegalStateException("Ugyldig status for gjeldende etterlysning: " + etterlysningStatus);
+            };
         } else if (harEndretPeriodeSidenInitiell(input, input.gjeldendePeriodeGrunnlag(), behandlingReferanse, etterlysningType)) {
             return ResultatType.OPPRETT_ETTERLYSNING;
         }
@@ -87,8 +81,15 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         return harEndretStartdato;
     }
 
-    private static ResultatType erstattDersomEndret(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
-                                                    EtterlysningOgGrunnlag ventendeEtterlysningOgGrunnlag) {
+    private static ResultatType finnResultatForEksisterendeEtterlysningMedSvar(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, EtterlysningOgGrunnlag gjeldendeEtterlysning) {
+        if (!erSisteMottatteGyldig(gjeldendePeriodeGrunnlag, gjeldendeEtterlysning.grunnlag())) {
+            return ResultatType.OPPRETT_ETTERLYSNING;
+        }
+        return ResultatType.INGEN_ENDRING;
+    }
+
+    private static ResultatType finnResultatForEksisterendeEtterlysningUtenSvar(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
+                                                                                EtterlysningOgGrunnlag ventendeEtterlysningOgGrunnlag) {
         var etterlysningType = ventendeEtterlysningOgGrunnlag.etterlysningData().type();
         final var endretDatoer = finnEndretDatoer(etterlysningType, ventendeEtterlysningOgGrunnlag.grunnlag(), gjeldendePeriodeGrunnlag);
         if (!endretDatoer.isEmpty()) {
