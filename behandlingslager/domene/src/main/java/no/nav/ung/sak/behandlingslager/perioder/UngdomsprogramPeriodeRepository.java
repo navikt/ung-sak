@@ -29,8 +29,8 @@ public class UngdomsprogramPeriodeRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public Optional<UngdomsprogramPeriodeGrunnlag> hentGrunnlagFraGrunnlagsReferanse(UUID grunnlagsReferanse) {
-        return hentEksisterendeGrunnlag(grunnlagsReferanse);
+    public UngdomsprogramPeriodeGrunnlag hentGrunnlagFraGrunnlagsReferanse(UUID grunnlagsReferanse) {
+        return hentEksisterendeGrunnlag(grunnlagsReferanse).orElseThrow(() -> new IllegalStateException("Fant ikke grunnlag med grunnlagsreferanse: " + grunnlagsReferanse));
     }
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder) {
