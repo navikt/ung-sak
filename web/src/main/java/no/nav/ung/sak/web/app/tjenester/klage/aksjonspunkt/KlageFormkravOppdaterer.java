@@ -45,9 +45,8 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
     private AksjonspunktRepository aksjonspunktRepository;
     private BehandlingRepository behandlingRepository;
 
-    KlageFormkravOppdaterer(AksjonspunktRepository aksjonspunktRepository) {
+    KlageFormkravOppdaterer() {
         // for CDI proxy
-        this.aksjonspunktRepository = aksjonspunktRepository;
     }
 
     @Inject

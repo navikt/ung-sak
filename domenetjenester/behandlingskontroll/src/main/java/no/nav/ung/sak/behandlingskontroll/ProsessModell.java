@@ -71,6 +71,7 @@ public class ProsessModell {
     public BehandlingModell klage() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.KLAGE, null);
         modellBuilder
+            .medSteg(BehandlingStegType.START_STEG, StartpunktType.UDEFINERT)
             .medSteg(BehandlingStegType.VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS)
             .medSteg(BehandlingStegType.VURDER_KLAGE_FØRSTEINSTANS)
 
