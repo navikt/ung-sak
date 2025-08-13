@@ -23,6 +23,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
@@ -62,7 +63,11 @@ class BigQueryStatistikkRepositoryTest {
     @Inject
     private EtterlysningRepository etterlysningRepository;
 
+    @Inject
+    private SaksnummerRepository saksnummerRepository;
+
     private BigQueryStatistikkRepository statistikkRepository;
+
 
     @BeforeEach
     void setup() {
@@ -218,7 +223,7 @@ class BigQueryStatistikkRepositoryTest {
     }
 
     private Fagsak byggFagsak(FagsakYtelseType fagsakYtelseType, FagsakStatus status) {
-        return FagsakBuilder.nyFagsak(fagsakYtelseType).medSaksnummer(new Saksnummer("SAKEN")).medStatus(status).build();
+        return FagsakBuilder.nyFagsak(fagsakYtelseType).medSaksnummer(new Saksnummer(saksnummerRepository.genererNyttSaksnummer())).medStatus(status).build();
     }
 
     private void lagreFagsaker(List<Fagsak> fagsaker) {
