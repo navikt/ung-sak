@@ -35,7 +35,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>5.1.6</felles.version>
+        <felles.version>5.1.7</felles.version>
         <swagger.version>2.2.35</swagger.version>
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.3.2</k9format.version>
@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.7.24</version>
+                <version>2.7.25</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
