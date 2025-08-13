@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ObjectMapperFactory {
 
@@ -56,24 +57,16 @@ public class ObjectMapperFactory {
         return indexClasses.getClassesWithAnnotation(JsonTypeName.class);
     }
 
-    public static ObjectMapper createBaseObjectMapper() {
-        final var om = new ObjectMapper();
-        om.registerModule(new Jdk8Module());
-        om.registerModule(new JavaTimeModule());
-        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        om.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
-        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
+    public static Collection<Class<?>> allJsonTypeNameClasses() {
         // registrer jackson JsonTypeName subtypes basert på rest implementasjoner
-        Collection<Class<?>> restClasses = new RestImplementationClasses().getImplementationClasses();
+        final Collection<Class<?>> restClasses = new RestImplementationClasses().getImplementationClasses();
 
-        Set<Class<?>> scanClasses = new LinkedHashSet<>(restClasses);
+        final Set<Class<?>> scanClasses = new LinkedHashSet<>(restClasses);
 
         scanClasses.add(VurderFeilutbetalingDto.class);
 
-
         // avled code location fra klassene
-        scanClasses
+        return scanClasses
             .stream()
             .map(c -> {
                 try {
@@ -83,7 +76,23 @@ public class ObjectMapperFactory {
                 }
             })
             .distinct()
-            .forEach(uri -> om.registerSubtypes(getJsonTypeNameClasses(uri)));
+            .flatMap(uri -> getJsonTypeNameClasses(uri).stream())
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+
+    public static ObjectMapper createBaseObjectMapper() {
+        final var om = new ObjectMapper();
+        om.registerModule(new Jdk8Module());
+        om.registerModule(new JavaTimeModule());
+        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        om.disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
+        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        // Registrer alle klasser med JsonTypeName annotasjon som subtyper i object mapper.
+        // Slik at ein ikkje må deklarere disse manuelt som subtyper på alle superklasser.
+        om.registerSubtypes(allJsonTypeNameClasses());
+
         return om;
     }
 
