@@ -34,7 +34,9 @@ public class ForeslåVedtakOppdatererTjeneste {
         Behandling behandling = param.getBehandling();
 
         if (AksjonspunktDefinisjon.FORESLÅ_VEDTAK.equals(aksjonspunktDefinisjon)) {
-            opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
+            if (behandling.getType().erYtelseBehandlingType()) {
+                opprettToTrinnsgrunnlag.settNyttTotrinnsgrunnlag(behandling);
+            }
         }
         opprettHistorikkinnslag(behandling);
     }
