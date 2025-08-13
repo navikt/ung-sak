@@ -312,6 +312,42 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
     }
 
+    @Test
+    void skal_ikke_opprette_ny_etterlysning_for_sluttdato_dersom_sluttdato_er_endret_siden_mottatt_svar_på_endret_startdato() {
+
+        final var fom = LocalDate.now();
+        final var tom = fom.plusDays(10);
+        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(fom, new JournalpostId("1L"))));
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
+        final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+
+        opprettEtterlysningMedMottattSvar(ungdomsprogramPeriodeGrunnlag, fom, tom, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+
+        final var nyTom = LocalDate.now().plusMonths(30);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(
+            new UngdomsprogramPeriode(fom, nyTom)
+        ));
+        final var nyttGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+
+
+        // act
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
+
+        // Assert
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        assertThat(etterlysninger.size()).isEqualTo(2);
+        final var gammelEtterlysning = etterlysninger.get(0);
+        assertThat(gammelEtterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+        assertThat(gammelEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
+        assertThat(gammelEtterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
+
+        final var nyEtterlysning = etterlysninger.get(1);
+        assertThat(nyEtterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, nyTom));
+        assertThat(nyEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
+        assertThat(nyEtterlysning.getGrunnlagsreferanse()).isEqualTo(nyttGrunnlag.getGrunnlagsreferanse());
+    }
+
+
 
     @Test
     void skal_opprette_ny_etterlysning_dersom_etterlysning_med_mottatt_svar_ikke_er_gyldig() {

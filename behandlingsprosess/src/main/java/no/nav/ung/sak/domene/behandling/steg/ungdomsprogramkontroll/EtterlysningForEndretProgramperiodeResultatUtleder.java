@@ -1,14 +1,13 @@
 package no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll;
 
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste.*;
 
@@ -24,34 +23,37 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
      */
     static ResultatType finnResultat(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse) {
         validerNøyaktigEnProgramperiode(input);
-        return håndterForType(input, behandlingReferanse, input.etterlysningType());
+        return utledResultat(input, behandlingReferanse, input.etterlysningType());
     }
 
-    private static ResultatType håndterForType(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
-        final var gjeldendeEtterlysning = input.gjeldendeEtterlysningOgGrunnlag();
-        if (gjeldendeEtterlysning.isPresent()) {
-            var etterlysningStatus = gjeldendeEtterlysning.get().etterlysningData().status();
-            return switch (etterlysningStatus) {
-                case VENTER, OPPRETTET ->
-                    finnForEksisterendeEtterlysningSomVenterSvar(input.gjeldendePeriodeGrunnlag(), gjeldendeEtterlysning.get());
-                case MOTTATT_SVAR, UTLØPT ->
-                    finnForEksisterendeEtterlysningSomIkkeVenterSvar(input.gjeldendePeriodeGrunnlag(), gjeldendeEtterlysning.get());
-                default ->
-                    throw new IllegalStateException("Ugyldig status for gjeldende etterlysning: " + etterlysningStatus);
-            };
-        } else if (harEndretPeriodeSidenInitiell(input, input.gjeldendePeriodeGrunnlag(), behandlingReferanse, etterlysningType)) {
+    private static ResultatType utledResultat(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
+        if (harEksisterendeEtterlysningOgRelevantEndringIProgramperiode(input)) {
+            return utledResultatForEksisterendeEtterlysning(input);
+        }
+        if (harEndretPeriodeSidenInitiell(input, input.gjeldendePeriodeGrunnlag(), behandlingReferanse, etterlysningType)) {
             return ResultatType.OPPRETT_ETTERLYSNING;
         }
         return ResultatType.INGEN_ENDRING;
+    }
+
+    private static ResultatType utledResultatForEksisterendeEtterlysning(EndretUngdomsprogramEtterlysningInput input) {
+        var gjeldendeEtterlysning = input.gjeldendeEtterlysningOgGrunnlag().orElseThrow(() -> new IllegalStateException("Utviklerfeil: Skal ikke komme hit uten å ha eksisterende etterlysning"));
+        return switch (gjeldendeEtterlysning.etterlysningData().status()) {
+            case VENTER, OPPRETTET -> ResultatType.ERSTATT_EKSISTERENDE_ETTERLYSNING;
+            case MOTTATT_SVAR, UTLØPT -> ResultatType.OPPRETT_ETTERLYSNING;
+            default -> throw new IllegalStateException("Ugyldig status for gjeldende etterlysning: " + gjeldendeEtterlysning.etterlysningData().status());
+        };
+    }
+
+    private static boolean harEksisterendeEtterlysningOgRelevantEndringIProgramperiode(EndretUngdomsprogramEtterlysningInput input) {
+        return input.gjeldendeEtterlysningOgGrunnlag().map(it -> erEndringFraEtterlysning(input.gjeldendePeriodeGrunnlag(), it)).orElse(false);
     }
 
     private static boolean harEndretPeriodeSidenInitiell(EndretUngdomsprogramEtterlysningInput input,
                                                          UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
                                                          BehandlingReferanse behandlingReferanse,
                                                          EtterlysningType etterlysningType) {
-        var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType,
-            input.initiellPeriodegrunnlag(),
-            input.gjeldendePeriodeGrunnlag()).isEmpty();
+        var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType, input.initiellPeriodegrunnlag(), input.gjeldendePeriodeGrunnlag()).isEmpty();
 
         if (erEndringSidenInitiell) {
             return true;
@@ -63,7 +65,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
                 case UTTALELSE_ENDRET_STARTDATO -> harEndretStartdato(input);
                 case UTTALELSE_ENDRET_SLUTTDATO -> harEndretSluttdato(gjeldendePeriodeGrunnlag);
                 default ->
-                    throw new IllegalArgumentException("Ugyldig etterlysningstype for endring i programperiode: " + etterlysningType);
+                        throw new IllegalArgumentException("Ugyldig etterlysningstype for endring i programperiode: " + etterlysningType);
             };
         }
         return false;
@@ -80,26 +82,6 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         var endringFraOppgitt = finnEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag());
         var harEndretStartdato = !endringFraOppgitt.isEmpty();
         return harEndretStartdato;
-    }
-
-    private static ResultatType finnForEksisterendeEtterlysningSomIkkeVenterSvar(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, EtterlysningOgGrunnlag gjeldendeEtterlysning) {
-        if (!erSisteMottatteGyldig(gjeldendePeriodeGrunnlag, gjeldendeEtterlysning.grunnlag())) {
-            return ResultatType.OPPRETT_ETTERLYSNING;
-        }
-        return ResultatType.INGEN_ENDRING;
-    }
-
-    private static boolean erSisteMottatteGyldig(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
-                                                 UngdomsprogramPeriodeGrunnlag sisteMottatte) {
-        final var endringTidslinje = finnEndretTidslinje(Optional.of(sisteMottatte), Optional.of(gjeldendePeriodeGrunnlag));
-        return endringTidslinje.isEmpty();
-    }
-
-    private static ResultatType finnForEksisterendeEtterlysningSomVenterSvar(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
-                                                                             EtterlysningOgGrunnlag ventendeEtterlysningOgGrunnlag) {
-        var erstattEksisterendeEtterlysning = erEndringFraEtterlysning(gjeldendePeriodeGrunnlag, ventendeEtterlysningOgGrunnlag);
-        if (erstattEksisterendeEtterlysning) return ResultatType.ERSTATT_EKSISTERENDE_ETTERLYSNING;;
-        return ResultatType.INGEN_ENDRING;
     }
 
     private static boolean erEndringFraEtterlysning(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, EtterlysningOgGrunnlag ventendeEtterlysningOgGrunnlag) {
@@ -119,7 +101,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
             case UTTALELSE_ENDRET_STARTDATO -> finnEndretStartdatoer(førsteGrunnlag, andreGrunnlag);
             case UTTALELSE_ENDRET_SLUTTDATO -> finnEndretSluttdatoer(førsteGrunnlag, andreGrunnlag);
             default ->
-                throw new IllegalArgumentException("Ikke gyldig etterlysningstype for endring i programperiode: " + etterlysningType);
+                    throw new IllegalArgumentException("Ikke gyldig etterlysningstype for endring i programperiode: " + etterlysningType);
         };
     }
 
