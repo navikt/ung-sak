@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
@@ -18,7 +18,7 @@ import java.util.Objects;
 public abstract class KlageVurderingResultatAksjonspunktDto extends BekreftetAksjonspunktDto {
 
     @NotNull
-    private KlageVurdering klageVurdering;
+    private KlageVurderingType klageVurderingType;
 
     @Size(max = 100000)
     @Pattern(regexp = TekstValideringRegex.FRITEKST)
@@ -50,7 +50,7 @@ public abstract class KlageVurderingResultatAksjonspunktDto extends BekreftetAks
 
     public KlageVurderingResultatAksjonspunktDto( // NOSONAR
             String begrunnelse,
-            KlageVurdering klageVurdering,
+            KlageVurderingType klageVurderingType,
             KlageMedholdÅrsak klageMedholdArsak,
             KlageAvvistÅrsak klageAvvistArsak,
             LocalDate vedtaksdatoPaklagdBehandling,
@@ -59,7 +59,7 @@ public abstract class KlageVurderingResultatAksjonspunktDto extends BekreftetAks
             KlageVurderingOmgjør klageVurderingOmgjoer,
             boolean erGodkjentAvMedunderskriver) {
         super(begrunnelse);
-        this.klageVurdering = klageVurdering;
+        this.klageVurderingType = klageVurderingType;
         this.begrunnelse = Objects.requireNonNull(begrunnelse, "begrunnelse");
         this.fritekstTilBrev = fritekstTilBrev;
         this.klageHjemmel = klageHjemmel;
@@ -70,8 +70,8 @@ public abstract class KlageVurderingResultatAksjonspunktDto extends BekreftetAks
         this.erGodkjentAvMedunderskriver = erGodkjentAvMedunderskriver;
     }
 
-    public KlageVurdering getKlageVurdering() {
-        return klageVurdering;
+    public KlageVurderingType getKlageVurdering() {
+        return klageVurderingType;
     }
 
     @Override
@@ -115,10 +115,10 @@ public abstract class KlageVurderingResultatAksjonspunktDto extends BekreftetAks
             super();
         }
 
-        public KlageVurderingResultatNfpAksjonspunktDto(String begrunnelse, KlageVurdering klageVurdering,
+        public KlageVurderingResultatNfpAksjonspunktDto(String begrunnelse, KlageVurderingType klageVurderingType,
                                                         KlageMedholdÅrsak klageMedholdÅrsak, KlageAvvistÅrsak klageAvvistÅrsak,
                                                         LocalDate vedtaksdatoPaklagdBehandling, String fritekstTilBrev, String klageHjemmel, KlageVurderingOmgjør klageVurderingOmgjoer) {
-            super(begrunnelse, klageVurdering, klageMedholdÅrsak, klageAvvistÅrsak, vedtaksdatoPaklagdBehandling, fritekstTilBrev, klageHjemmel, klageVurderingOmgjoer, false);
+            super(begrunnelse, klageVurderingType, klageMedholdÅrsak, klageAvvistÅrsak, vedtaksdatoPaklagdBehandling, fritekstTilBrev, klageHjemmel, klageVurderingOmgjoer, false);
         }
 
     }

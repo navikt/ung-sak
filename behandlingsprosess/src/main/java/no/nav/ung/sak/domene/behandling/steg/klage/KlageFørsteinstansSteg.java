@@ -9,8 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
@@ -52,7 +50,10 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
                                    BehandlingStegType sisteSteg) {
         if(!Objects.equals(BehandlingStegType.FATTE_VEDTAK, sisteSteg)) {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-            klageRepository.slettKlageResultat(kontekst.getBehandlingId(), KlageVurdertAv.NAY);
+            var klageutredning = klageRepository.hentKlageUtredning(behandling.getId());
+            klageutredning.nullstillVurdering();
+            klageRepository.lagre(klageutredning);
+
             endreAnsvarligEnhetTilFørsteinstansVedTilbakeføringOgLagreHistorikkinnslag(behandling);
         }
     }

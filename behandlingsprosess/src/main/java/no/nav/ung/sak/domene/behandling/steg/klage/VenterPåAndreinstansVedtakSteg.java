@@ -1,21 +1,21 @@
 package no.nav.ung.sak.domene.behandling.steg.klage;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @BehandlingStegRef(BehandlingStegType.OVERFØRT_NK)
 @BehandlingTypeRef
@@ -46,9 +46,12 @@ public class VenterPåAndreinstansVedtakSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        var klageVurdering = klageRepository.hentVurdering(behandling.getId(), KlageVurdertAv.NAY);
-        if (klageVurdering.isPresent() &&
-            klageVurdering.get().getKlageresultat().getKlageVurdering().equals(KlageVurdering.MEDHOLD_I_KLAGE)) {
+        var klageVurdering = klageRepository.hentKlageUtredning(behandling.getId());
+        var harMedholdFraFørsteinstans = klageVurdering.getKlageVurderingType(KlageVurdertAv.NAY)
+            .map(KlageVurderingType.MEDHOLD_I_KLAGE::equals)
+            .orElse(false);
+
+        if (harMedholdFraFørsteinstans) {
             // Medhold går utenom NK og direkte til vedtak
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }

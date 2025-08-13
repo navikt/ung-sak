@@ -5,7 +5,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 
 import java.util.Objects;
@@ -18,7 +18,7 @@ public class Vurderingresultat {
 
     @Convert(converter = KlageVurderingKodeverdiConverter.class)
     @Column(name = "klagevurdering", nullable = false)
-    private KlageVurdering klageVurdering = KlageVurdering.UDEFINERT;
+    private KlageVurderingType klageVurdering = KlageVurderingType.UDEFINERT;
 
     @Convert(converter = KlageMedholdÅrsakKodeverdiConverter.class)
     @Column(name = "klage_omgjoer_aarsak", nullable = false)
@@ -48,22 +48,22 @@ public class Vurderingresultat {
     }
 
     public void verifyState() {
-        if (klageVurdering.equals(KlageVurdering.MEDHOLD_I_KLAGE)) {
+        if (klageVurdering.equals(KlageVurderingType.MEDHOLD_I_KLAGE)) {
             Objects.requireNonNull(klageOmgjørÅrsak, "klageOmgjørÅrsak");
             Objects.requireNonNull(klageVurderingOmgjør, "klageVurderingOmgjør");
         }
     }
 
-    public KlageVurdering getKlageVurdering() {
-        return klageVurdering;
+    public Optional<KlageVurderingType> getKlageVurdering() {
+        return Optional.ofNullable((klageVurdering == KlageVurderingType.UDEFINERT) ? null : klageVurdering);
     }
 
-    public KlageMedholdÅrsak getKlageOmgjørÅrsak() {
-        return klageOmgjørÅrsak;
+    public Optional<KlageMedholdÅrsak> getKlageOmgjørÅrsak() {
+        return Optional.ofNullable((klageOmgjørÅrsak == KlageMedholdÅrsak.UDEFINERT) ? null : klageOmgjørÅrsak);
     }
 
-    public KlageVurderingOmgjør getKlageVurderingOmgjør() {
-        return klageVurderingOmgjør;
+    public Optional<KlageVurderingOmgjør> getKlageVurderingOmgjør() {
+        return Optional.ofNullable((klageVurderingOmgjør == KlageVurderingOmgjør.UDEFINERT) ? null : klageVurderingOmgjør);
     }
 
     public String getBegrunnelse() {
