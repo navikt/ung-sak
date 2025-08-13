@@ -12,29 +12,34 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -55,7 +60,14 @@ class BigQueryStatistikkRepositoryTest {
     @Inject
     private BehandlingRepository behandlingRepository;
 
+    @Inject
+    private EtterlysningRepository etterlysningRepository;
+
+    @Inject
+    private SaksnummerRepository saksnummerRepository;
+
     private BigQueryStatistikkRepository statistikkRepository;
+
 
     @BeforeEach
     void setup() {
@@ -183,6 +195,27 @@ class BigQueryStatistikkRepositoryTest {
             .anyMatch(rec -> Objects.equals(rec.aksjonspunktDefinisjon(), AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
     }
 
+
+    @Test
+    void skal_kunne_hente_etterlysninger() {
+        Fagsak fagsak = byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.OPPRETTET);
+        lagreFagsaker(List.of(fagsak));
+
+        // Gitt en fagsak med behandling med etterlysning
+        Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
+        lagreBehandling(behandling);
+        etterlysningRepository.lagre(new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningStatus.VENTER));
+
+        // Når vi henter aksjonspunkt statistikken
+        Collection<EtterlysningRecord> etterlysninger = statistikkRepository.etterlysningData();
+        // Og vi skal ha minst ett aksjonspunkt i statistikken
+        assertThat(etterlysninger).isNotEmpty();
+        // Verifiser at etterlysningen er med i statistikken
+        assertThat(etterlysninger)
+            .anyMatch(rec -> Objects.equals(rec.etterlysningType(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO));
+    }
+
+
     private Behandling byggBehandlingForFagsak(Fagsak fagsak, BehandlingType behandlingType, BehandlingStatus behandlingStatus) {
         return Behandling.nyBehandlingFor(fagsak, behandlingType)
             .medBehandlingStatus(behandlingStatus)
@@ -190,7 +223,7 @@ class BigQueryStatistikkRepositoryTest {
     }
 
     private Fagsak byggFagsak(FagsakYtelseType fagsakYtelseType, FagsakStatus status) {
-        return FagsakBuilder.nyFagsak(fagsakYtelseType).medStatus(status).build();
+        return FagsakBuilder.nyFagsak(fagsakYtelseType).medSaksnummer(new Saksnummer(saksnummerRepository.genererNyttSaksnummer())).medStatus(status).build();
     }
 
     private void lagreFagsaker(List<Fagsak> fagsaker) {
