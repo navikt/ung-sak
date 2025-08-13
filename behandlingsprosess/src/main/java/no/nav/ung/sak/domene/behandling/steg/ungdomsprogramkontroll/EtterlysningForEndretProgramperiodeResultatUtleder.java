@@ -86,7 +86,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
             }
             return ResultatType.ERSTATT_EKSISTERENDE_ETTERLYSNING;
         }
-        return ResultatType.BEHOLD_EKSISTERENDE_ETTERLYSNING;
+        return ResultatType.INGEN_ENDRING;
     }
 
     private static List<UngdomsprogramPeriodeTjeneste.EndretDato> finnEndretDatoer(EtterlysningType etterlysningType, UngdomsprogramPeriodeGrunnlag førsteGrunnlag, UngdomsprogramPeriodeGrunnlag andreGrunnlag) {

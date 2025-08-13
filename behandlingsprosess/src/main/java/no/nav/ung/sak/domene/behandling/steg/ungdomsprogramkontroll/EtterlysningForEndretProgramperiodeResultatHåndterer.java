@@ -54,7 +54,7 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
                 opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
             case ERSTATT_EKSISTERENDE_ETTERLYSNING ->
                 erstattEksisterende(behandlingReferanse, etterlysningType, gjeldendeEtterlysning.orElseThrow(() -> new IllegalStateException("Forventer å finne gjeldende etterlysning")), gjeldendeGrunnlag);
-            case BEHOLD_EKSISTERENDE_ETTERLYSNING, INGEN_ENDRING -> {
+            case INGEN_ENDRING -> {
                 // Ingen handling nødvendig, behold eksisterende etterlysning
             }
         }
