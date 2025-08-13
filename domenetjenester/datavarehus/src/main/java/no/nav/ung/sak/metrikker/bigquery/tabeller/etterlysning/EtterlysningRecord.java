@@ -45,7 +45,8 @@ public record EtterlysningRecord(
                 "status", rec.etterlysningStatus().getNavn(),
                 "periode", toRange(rec.periode()),
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
-            )
+            ),
+            true
         );
 
     public static String toRange(DatoIntervallEntitet periode) {

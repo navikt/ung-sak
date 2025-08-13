@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -385,7 +386,7 @@ public class BigQueryStatistikkRepository {
      */
     Collection<EtterlysningRecord> etterlysningData() {
         String sql = """
-            select f.saksnummer, e.type, e.status, e.fom, e.tom
+            select f.saksnummer, e.type, e.status, e.fom, e.tom, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
              from etterlysning e
              inner join behandling b on b.id = e.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
@@ -403,13 +404,14 @@ public class BigQueryStatistikkRepository {
             String status = t.get(2, String.class);
             Date fom = t.get(3, Date.class);
             Date tom = t.get(4, Date.class);
+            Timestamp tidsstempel = t.get(5, Timestamp.class);
 
             return new EtterlysningRecord(
                 new Saksnummer(saksnummer),
                 EtterlysningType.fraKode(type),
                 EtterlysningStatus.fraKode(status),
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom.toLocalDate(), tom.toLocalDate()),
-                ZonedDateTime.now()
+                tidsstempel.toLocalDateTime().atZone(ZoneId.systemDefault())
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
