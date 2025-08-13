@@ -19,6 +19,7 @@ public class BigQueryTabell<T extends BigQueryRecord> {
     private final Schema skjema;
     private final Class<T> dataKlasse;
     private final Function<T, Map<String, Object>> mapperFunksjon;
+    private boolean skalEksisterendeInnholdSlettesFørPublisering = false;
 
     public BigQueryTabell(
         String tabellnavn,
@@ -32,6 +33,21 @@ public class BigQueryTabell<T extends BigQueryRecord> {
         this.mapperFunksjon = mapperFunksjon;
     }
 
+    public BigQueryTabell(
+        String tabellnavn,
+        Schema skjema,
+        Class<T> dataKlasse,
+        Function<T, Map<String, Object>> mapperFunksjon,
+        boolean skalEksisterendeInnholdSlettesFørPublisering
+    ) {
+        this.tabellnavn = tabellnavn;
+        this.skjema = skjema;
+        this.dataKlasse = dataKlasse;
+        this.mapperFunksjon = mapperFunksjon;
+        this.skalEksisterendeInnholdSlettesFørPublisering = skalEksisterendeInnholdSlettesFørPublisering;
+    }
+
+
     public String getTabellnavn() {
         return tabellnavn;
     }
@@ -42,6 +58,10 @@ public class BigQueryTabell<T extends BigQueryRecord> {
 
     public Class<T> getDataKlasse() {
         return dataKlasse;
+    }
+
+    public boolean skalEksisterendeInnholdSlettesFørPublisering() {
+        return skalEksisterendeInnholdSlettesFørPublisering;
     }
 
     /**

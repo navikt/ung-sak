@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -62,6 +63,10 @@ public class AktørRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path("/aktoer-info")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = FeilDto.class))),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = FeilDto.class))),
+    })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {
         AktørInfoDto aktoerInfoDto = new AktørInfoDto();
