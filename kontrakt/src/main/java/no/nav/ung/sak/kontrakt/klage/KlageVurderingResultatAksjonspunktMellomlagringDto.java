@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 
 import java.util.Objects;
@@ -24,7 +24,7 @@ public class KlageVurderingResultatAksjonspunktMellomlagringDto {
     private Long behandlingId;
 
     @JsonProperty(value = "klageVurdering")
-    private KlageVurdering klageVurdering;
+    private KlageVurderingType klageVurdering;
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 100000)
@@ -55,7 +55,7 @@ public class KlageVurderingResultatAksjonspunktMellomlagringDto {
                                                               String kode,
                                                               Long behandlingId,
                                                               String begrunnelse,
-                                                              KlageVurdering klageVurdering,
+                                                              KlageVurderingType klageVurderingType,
                                                               KlageMedholdÅrsak klageMedholdArsak,
                                                               String fritekstTilBrev,
                                                               String hjemmel,
@@ -63,7 +63,7 @@ public class KlageVurderingResultatAksjonspunktMellomlagringDto {
         this.kode = kode;
         this.behandlingId = behandlingId;
         this.begrunnelse = Objects.requireNonNull(begrunnelse, "begrunnelse");
-        this.klageVurdering = klageVurdering;
+        this.klageVurdering = klageVurderingType;
         this.begrunnelse = begrunnelse;
         this.fritekstTilBrev = fritekstTilBrev;
         this.hjemmel = hjemmel;
@@ -71,7 +71,7 @@ public class KlageVurderingResultatAksjonspunktMellomlagringDto {
         this.klageVurderingOmgjoer = klageVurderingOmgjoer;
     }
 
-    public KlageVurdering getKlageVurdering() {
+    public KlageVurderingType getKlageVurdering() {
         return klageVurdering;
     }
 

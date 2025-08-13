@@ -35,6 +35,10 @@ public class KlageFormkravEntitet extends BaseEntitet {
         // Hibernate
     }
 
+    public KlageFormkravEntitet(Long klageutredningId) {
+//        this.klageutredning_id = klageutredningId;
+    }
+
     public Long hentId() {
         return id;
     }
@@ -114,6 +118,7 @@ public class KlageFormkravEntitet extends BaseEntitet {
         }
 
         public void verifyStateForBuild() {
+//            Objects.requireNonNull(klageFormkravEntitetMal.klageutredning_id, "klageutredning_id");
             Objects.requireNonNull(klageFormkravEntitetMal.gjelderVedtak, "gjelderVedtak");
             Objects.requireNonNull(klageFormkravEntitetMal.erKlagerPart, "erKlagerPart");
             Objects.requireNonNull(klageFormkravEntitetMal.erFristOverholdt, "erFristOverholdt");

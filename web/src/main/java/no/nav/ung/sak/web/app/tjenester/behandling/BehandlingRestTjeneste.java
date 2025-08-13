@@ -349,6 +349,11 @@ public class BehandlingRestTjeneste {
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
 
+        } else if (BehandlingType.KLAGE.getKode().equals(dto.getBehandlingType().getKode())) {
+            Behandling behandling = behandlingsoppretterTjeneste.opprettBehandling(fagsak, BehandlingType.KLAGE);
+            String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
+            return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
+
         } else if (BehandlingType.FØRSTEGANGSSØKNAD.getKode().equals(behandlingType.getKode())) {
             throw new UnsupportedOperationException("Ikke implementert støtte for å opprette ny førstegangsbehandling for " + fagsak);
             // ved førstegangssønad opprettes egen task for vurdere denne,
@@ -358,7 +363,6 @@ public class BehandlingRestTjeneste {
         } else {
             throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + behandlingType);
         }
-
     }
 
     private BehandlingResultatType tilHenleggBehandlingResultatType(String årsak) {

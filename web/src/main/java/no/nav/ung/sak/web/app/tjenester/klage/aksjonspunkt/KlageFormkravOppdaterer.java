@@ -5,16 +5,13 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.*;
@@ -29,7 +26,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_NFP;
 
@@ -45,9 +41,8 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
     private AksjonspunktRepository aksjonspunktRepository;
     private BehandlingRepository behandlingRepository;
 
-    KlageFormkravOppdaterer(AksjonspunktRepository aksjonspunktRepository) {
+    KlageFormkravOppdaterer() {
         // for CDI proxy
-        this.aksjonspunktRepository = aksjonspunktRepository;
     }
 
     @Inject
@@ -62,27 +57,14 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
         this.historikkApplikasjonTjeneste = historikkApplikasjonTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
     }
-//
-//    public static PartEntitet mapPartDto(PartDto dto) {
-//        if (dto == null) {
-//            return null;
-//        }
-//
-//        var part = new PartEntitet();
-//        part.identifikasjon = dto.identifikasjon.id;
-//        part.identifikasjonType = dto.identifikasjon.type;
-//        part.rolleType = dto.rolleType;
-//        return part;
-//    }
 
     @Override
     public OppdateringResultat oppdater(KlageFormkravAksjonspunktDto dto, AksjonspunktOppdaterParameter param) {
         var aksjonspunktKode = dto.getKode();
         var klageBehandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var klageUtredning = klageRepository.hentKlageUtredning(klageBehandling.getId());
-        var klageVurdertAv = getKlageVurdertAv(klageBehandling, aksjonspunktKode);
-        var klageFormkrav = klageRepository.hentVurdering(klageBehandling.getId(), klageVurdertAv)
-            .map(KlageVurderingEntitet::getFormkrav);
+
+        var klageFormkrav = klageUtredning.getFormkrav();
         var apDefFormkrav = AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
         var skjermlenkeType = getSkjermlenkeType(aksjonspunktKode);
 
@@ -104,9 +86,9 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
         KlageVurdertAv klageVurdertAv = getKlageVurdertAv(behandling, dto.getKode());
         var påklagdBehandlingInfo = Optional.ofNullable(dto.getPåklagdBehandlingInfo());
         boolean gjelderVedtakPåYtelse = påklagdBehandlingInfo.isPresent();
+
         klageUtredningTjeneste.oppdaterKlageMedPåklagetEksternBehandlingUuid(
             behandling.getId(),
-//            klageVurdertAv == KlageVurdertAv.NAY ? mapPartDto(dto.getValgtKlagePart()) : null,
             påklagdBehandlingInfo.map(PåklagdBehandlingDto::getPåklagBehandlingUuid).orElse(null),
             påklagdBehandlingInfo.map(p -> BehandlingType.fraKode(p.getPåklagBehandlingType())).orElse(null));
 
@@ -148,7 +130,7 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
         KlageVurdertAv klageVurdertAv = erFørsteinstansAksjonspunkt ? KlageVurdertAv.NAY : KlageVurdertAv.NK;
 
         final KlageVurderingAdapter vurderingDto = new KlageVurderingAdapter(
-            KlageVurdering.AVVIS_KLAGE, null, null,
+            KlageVurderingType.AVVIS_KLAGE, null, null,
             null, null, null, klageVurdertAv);
 
         klageVurderingTjeneste.lagreVurdering(klageBehandling, vurderingDto);
@@ -156,7 +138,7 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
 
     private void opprettHistorikkinnslag(Behandling klageBehandling, AksjonspunktDefinisjon aksjonspunktDefinisjon,
                                          KlageFormkravAksjonspunktDto formkravDto, Optional<KlageFormkravAdapter> klageFormkrav,
-                                         KlageUtredning klageUtredning, SkjermlenkeType skjermlenkeType) {
+                                         KlageUtredningEntitet klageUtredning, SkjermlenkeType skjermlenkeType) {
 //        HistorikkinnslagType historikkinnslagType = erFørsteinstansAksjonspunkt(klageBehandling, aksjonspunktDefinisjon) ? HistorikkinnslagType.KLAGE_BEH_NFP
 //            : HistorikkinnslagType.KLAGE_BEH_NK;
 //        HistorikkInnslagTekstBuilder historiebygger = historikkApplikasjonTjeneste.tekstBuilder();
@@ -221,12 +203,12 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
 //        return apKode.equals(VURDERING_AV_FORMKRAV_KLAGE_NFP.getKode()) ? SkjermlenkeType.FORMKRAV_KLAGE_NFP : SkjermlenkeType.FORMKRAV_KLAGE_KA;
     }
 
-    private boolean erVedtakOppdatert(KlageUtredning klageUtredning, KlageFormkravAksjonspunktDto formkravDto) {
-        Optional<UUID> gammelRef = klageUtredning.getPåKlagBehandlingRef();
-        Optional<UUID> oppdatertRef = Optional.ofNullable(formkravDto.hentpåKlagdEksternBehandlingUuId());
-
-        return !gammelRef.equals(oppdatertRef);
-    }
+//    private boolean erVedtakOppdatert(KlageUtredning klageUtredning, KlageFormkravAksjonspunktDto formkravDto) {
+//        Optional<UUID> gammelRef = klageUtredning.getPåKlagetBehandlingRef();
+//        Optional<UUID> oppdatertRef = Optional.ofNullable(formkravDto.hentpåKlagdEksternBehandlingUuId());
+//
+//        return !gammelRef.equals(oppdatertRef);
+//    }
 
     private boolean erFørsteinstansAksjonspunkt(Behandling klageBehandling, AksjonspunktDefinisjon apDef) {
         return Objects.equals(KlageVurdertAv.NAY, getKlageVurdertAv(klageBehandling, apDef.getKode()));

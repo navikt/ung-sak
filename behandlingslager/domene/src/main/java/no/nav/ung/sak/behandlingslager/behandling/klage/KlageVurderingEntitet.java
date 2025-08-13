@@ -1,10 +1,8 @@
 package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 import jakarta.persistence.*;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 import java.util.Objects;
 
@@ -16,8 +14,8 @@ public class KlageVurderingEntitet extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_KLAGE_VURDERING")
     private Long id;
 
-    @Column(name = "klage_behandling_id", nullable = false, updatable = false, unique = true)
-    private Long behandlingId;
+    @Column(name = "klage_utredning_id", nullable = false, updatable = false, unique = true)
+    private Long klageutredning_id;
 
     @Convert(converter = KlageVurdertAvKodeverdiConverter.class)
     @Column(name = "klage_vurdert_av", nullable = false)
@@ -26,9 +24,8 @@ public class KlageVurderingEntitet extends BaseEntitet {
     @Embedded
     private Vurderingresultat klageresultat = Vurderingresultat.TomtResultat;
 
-    @OneToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "klage_formkrav_id")
-    private KlageFormkravEntitet formkravEntitet;
+    @Column(name = "kabal_referanse")
+    private String kabalReferanse;
 
     public KlageVurderingEntitet() {
         // Hibernate
@@ -40,16 +37,6 @@ public class KlageVurderingEntitet extends BaseEntitet {
 
     public KlageVurdertAv getVurdertAvEnhet() {
         return vurdertAvEnhet;
-    }
-
-    public KlageVurdering getKlageVurdering() {
-        if (klageresultat != null) {
-            return klageresultat.getKlageVurdering();
-        }
-        if (formkravEntitet.tilFormkrav().erAvvist()) {
-            return KlageVurdering.AVVIS_KLAGE;
-        }
-        return null;
     }
 
     public void fjernResultat() {
@@ -68,26 +55,6 @@ public class KlageVurderingEntitet extends BaseEntitet {
         this.klageresultat = klageresultat;
     }
 
-    public void slettFormkrav() {
-        this.formkravEntitet = null;
-    }
-
-    public KlageFormkravAdapter getFormkrav() {
-        // Formkrav er ikke tilgjengelig for klagevurdering mottatt fra Kabal
-        return formkravEntitet == null ? null : formkravEntitet.tilFormkrav();
-    }
-
-    public void setFormkrav(KlageFormkravAdapter formkrav) {
-        if (!harFormkrav()) {
-            formkravEntitet = new KlageFormkravEntitet();
-        }
-        formkravEntitet.oppdater(formkrav);
-    }
-
-    public boolean harFormkrav() {
-        return formkravEntitet != null;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -97,12 +64,12 @@ public class KlageVurderingEntitet extends BaseEntitet {
         }
         KlageVurderingEntitet other = (KlageVurderingEntitet) obj;
         return Objects.equals(this.vurdertAvEnhet, other.vurdertAvEnhet)
-            && Objects.equals(this.behandlingId, other.behandlingId);
+            && Objects.equals(this.klageutredning_id, other.klageutredning_id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(vurdertAvEnhet, behandlingId);
+        return Objects.hash(vurdertAvEnhet, klageutredning_id);
     }
 
     public static Builder builder() {
@@ -116,20 +83,13 @@ public class KlageVurderingEntitet extends BaseEntitet {
             klageVurderingMal = new KlageVurderingEntitet();
         }
 
-        public Builder medKlageKlagebehandling(Behandling klageBehandling) {
-            klageVurderingMal.behandlingId = klageBehandling.getId();
-            return this;
-        }
-
         public Builder medKlageVurdertAv(KlageVurdertAv klageVurdertAv) {
             klageVurderingMal.vurdertAvEnhet = klageVurdertAv;
             return this;
         }
 
-        public Builder medFormkrav(KlageFormkravAdapter formkrav) {
-            klageVurderingMal.formkravEntitet = KlageFormkravEntitet.builder()
-                .medFormkrav(formkrav)
-                .build();
+        public Builder medKlageutredningId(Long klageutredningId) {
+            klageVurderingMal.klageutredning_id = klageutredningId;
             return this;
         }
 
@@ -144,8 +104,8 @@ public class KlageVurderingEntitet extends BaseEntitet {
         }
 
         public void verifyStateForBuild() {
-            Objects.requireNonNull(klageVurderingMal.behandlingId, "klageBehandling");
-            Objects.requireNonNull(klageVurderingMal.vurdertAvEnhet, "klageVurdertAv");
+            Objects.requireNonNull(klageVurderingMal.klageutredning_id, "klageutredning_id er null");
+            Objects.requireNonNull(klageVurderingMal.vurdertAvEnhet, "klageVurdertAvEnhet er null");
         }
     }
 

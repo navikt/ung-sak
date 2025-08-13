@@ -2,12 +2,12 @@ package no.nav.ung.sak.web.app.tjenester.klage;
 
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
-import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredning;
+import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingEntitet;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
 import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatDto;
@@ -19,18 +19,18 @@ public class KlageVurderingResultatDtoMapper {
     private KlageVurderingResultatDtoMapper() {
     }
 
-    public static Optional<KlageVurderingResultatDto> mapNFPKlageVurderingResultatDto(Behandling behandling, KlageRepository klageRepository, FritekstRepository fritekstRepository) {
+    public static Optional<KlageVurderingResultatDto> mapFørsteinstansKlageVurderingResultatDto(Behandling behandling, KlageRepository klageRepository, FritekstRepository fritekstRepository) {
         var utredning = klageRepository.hentKlageUtredning(behandling.getId());
-        var vurdering = klageRepository.hentVurdering(behandling.getId(), KlageVurdertAv.NAY);
+        var vurdering = utredning.getKlagevurdering(KlageVurdertAv.NAY);
         var fritekst = fritekstRepository.hentFritekst(behandling.getId(), KlageVurdertAv.NAY.getKode()).orElse("");
 
         return vurdering.map(vurd -> lagDto(utredning, vurd, fritekst));
     }
 
-    public static Optional<KlageVurderingResultatDto> mapNKKlageVurderingResultatDto(Behandling behandling, KlageRepository klageRepository, FritekstRepository fritekstRepository) {
+    public static Optional<KlageVurderingResultatDto> mapAndreinstansKlageVurderingResultatDto(Behandling behandling, KlageRepository klageRepository, FritekstRepository fritekstRepository) {
         var utredning = klageRepository.hentKlageUtredning(behandling.getId());
-        var vurdering = klageRepository.hentVurdering(behandling.getId(), KlageVurdertAv.NK)
-            .or(() -> klageRepository.hentVurdering(behandling.getId(), KlageVurdertAv.NK_KABAL));
+        var vurdering = utredning.getKlagevurdering(KlageVurdertAv.NK)
+            .or(() -> utredning.getKlagevurdering(KlageVurdertAv.NK_KABAL));
 
         var fritekst = vurdering.map(KlageVurderingEntitet::getVurdertAvEnhet)
             .filter(e -> e == KlageVurdertAv.NK)
@@ -40,16 +40,16 @@ public class KlageVurderingResultatDtoMapper {
         return vurdering.map(vurd -> lagDto(utredning, vurd, fritekst));
     }
 
-    private static KlageVurderingResultatDto lagDto(KlageUtredning utredning, KlageVurderingEntitet klageVurdering, String fritekst) {
+    private static KlageVurderingResultatDto lagDto(KlageUtredningEntitet utredning, KlageVurderingEntitet klageVurdering, String fritekst) {
         var klageresultat = klageVurdering.getKlageresultat();
 
-        String klageMedholdArsak = klageresultat.getKlageOmgjørÅrsak().equals(KlageMedholdÅrsak.UDEFINERT) ? null : klageresultat.getKlageOmgjørÅrsak().getKode();
-        String klageMedholdArsakNavn = klageresultat.getKlageOmgjørÅrsak().equals(KlageMedholdÅrsak.UDEFINERT) ? null : klageresultat.getKlageOmgjørÅrsak().getNavn();
-        String klageVurderingOmgjør = klageresultat.getKlageVurderingOmgjør().equals(KlageVurderingOmgjør.UDEFINERT) ? null: klageresultat.getKlageVurderingOmgjør().getKode();
-        String klageUtfall = klageVurdering.getKlageVurdering().equals(KlageVurdering.UDEFINERT) ? null : klageVurdering.getKlageVurdering().getKode();
+        String klageMedholdArsak = klageresultat.getKlageOmgjørÅrsak().map(KlageMedholdÅrsak::getKode).orElse(null);
+        String klageMedholdArsakNavn = klageresultat.getKlageOmgjørÅrsak().map(KlageMedholdÅrsak::getNavn).orElse(null);
+        String klageVurderingOmgjør = klageresultat.getKlageVurderingOmgjør().map(KlageVurderingOmgjør::getKode).orElse(null);
+        String klageUtfall = klageresultat.getKlageVurdering().map(KlageVurderingType::getKode).orElse(null);
         String hjemmel = klageresultat.getHjemmel() == null ? Hjemmel.MANGLER.getKode() : klageresultat.getHjemmel().getKode();
-        KlageVurderingResultatDto dto = new KlageVurderingResultatDto();
 
+        KlageVurderingResultatDto dto = new KlageVurderingResultatDto();
         dto.setHjemmel(hjemmel);
         dto.setKlageVurdering(klageUtfall);
         dto.setKlageVurderingOmgjoer(klageVurderingOmgjør);

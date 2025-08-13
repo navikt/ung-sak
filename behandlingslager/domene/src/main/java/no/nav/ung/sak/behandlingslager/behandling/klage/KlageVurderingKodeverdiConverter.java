@@ -2,17 +2,17 @@ package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 
 @Converter(autoApply = true)
-public class KlageVurderingKodeverdiConverter implements AttributeConverter<KlageVurdering, String> {
+public class KlageVurderingKodeverdiConverter implements AttributeConverter<KlageVurderingType, String> {
     @Override
-    public String convertToDatabaseColumn(KlageVurdering attribute) {
+    public String convertToDatabaseColumn(KlageVurderingType attribute) {
         return attribute == null ? null : attribute.getKode();
     }
 
     @Override
-    public KlageVurdering convertToEntityAttribute(String dbData) {
-        return dbData == null ? null : KlageVurdering.fraKode(dbData);
+    public KlageVurderingType convertToEntityAttribute(String dbData) {
+        return dbData == null ? null : KlageVurderingType.fraKode(dbData);
     }
 }

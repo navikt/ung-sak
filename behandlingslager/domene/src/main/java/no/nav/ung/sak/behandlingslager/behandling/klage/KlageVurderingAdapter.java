@@ -2,13 +2,13 @@ package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 public class KlageVurderingAdapter {
-    private KlageVurdering klageVurdering;
+    private KlageVurderingType klageVurderingType;
     private String begrunnelse;
     private String fritekstTilBrev;
     private Hjemmel hjemmel;
@@ -16,14 +16,14 @@ public class KlageVurderingAdapter {
     private KlageVurderingOmgjør klageVurderingOmgjoer;
     private KlageVurdertAv klageVurdertAv;
 
-    public KlageVurderingAdapter(KlageVurdering klageVurdering,
+    public KlageVurderingAdapter(KlageVurderingType klageVurderingType,
                                  KlageMedholdÅrsak klageMedholdArsakKode,
                                  KlageVurderingOmgjør klageVurderingOmgjør,
                                  String begrunnelse,
                                  String fritekstTilBrev,
                                  Hjemmel hjemmel,
                                  KlageVurdertAv klageVurdertAv) {
-        this.klageVurdering = klageVurdering;
+        this.klageVurderingType = klageVurderingType;
         this.begrunnelse = begrunnelse;
         this.fritekstTilBrev = fritekstTilBrev;
         this.hjemmel = hjemmel;
@@ -32,8 +32,8 @@ public class KlageVurderingAdapter {
         this.klageVurdertAv = klageVurdertAv;
     }
 
-    public KlageVurdering getKlageVurdering() {
-        return klageVurdering;
+    public KlageVurderingType getKlageVurdering() {
+        return klageVurderingType;
     }
 
     public String getBegrunnelse() {
@@ -62,6 +62,6 @@ public class KlageVurderingAdapter {
 
     public boolean skalOversendesTilNK(Behandling behandling) {
         return getKlageVurdertAv() == KlageVurdertAv.NAY &&
-            getKlageVurdering() == KlageVurdering.STADFESTE_YTELSESVEDTAK;
+            getKlageVurdering() == KlageVurderingType.STADFESTE_YTELSESVEDTAK;
     }
 }

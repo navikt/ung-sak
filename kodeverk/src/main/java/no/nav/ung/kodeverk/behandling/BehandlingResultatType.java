@@ -42,6 +42,9 @@ public enum BehandlingResultatType implements Kodeverdi {
     private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD;
     private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER;
     private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, DELVIS_INNVILGET, INNVILGET_ENDRING);
+    private static final Set<BehandlingResultatType> KLAGE_KODER = Set.of(KLAGE_AVVIST, KLAGE_MEDHOLD,
+        KLAGE_YTELSESVEDTAK_OPPHEVET, KLAGE_YTELSESVEDTAK_STADFESTET, KLAGE_TRUKKET, HENLAGT_KLAGE_TRUKKET,
+        DELVIS_MEDHOLD_I_KLAGE, HJEMSENDE_UTEN_OPPHEVE, UGUNST_MEDHOLD_I_KLAGE, FEILREGISTRERT);
 
     private static final Map<String, BehandlingResultatType> KODER = new LinkedHashMap<>();
 
@@ -134,6 +137,10 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     public static Set<BehandlingResultatType> getInnvilgetKoder() {
         return INNVILGET_KODER;
+    }
+
+    public static boolean erKlagekode(BehandlingResultatType behandlingResultatType) {
+        return KLAGE_KODER.contains(behandlingResultatType);
     }
 
     public boolean isBehandlingHenlagt() {

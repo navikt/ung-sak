@@ -2,7 +2,6 @@ package no.nav.ung.kodeverk.klage;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public enum KlageVurdering implements Kodeverdi {
+public enum KlageVurderingType implements Kodeverdi {
 
     OPPHEVE_YTELSESVEDTAK("OPPHEVE_YTELSESVEDTAK", "Ytelsesvedtaket oppheves"),
     STADFESTE_YTELSESVEDTAK("STADFESTE_YTELSESVEDTAK", "Ytelsesvedtaket stadfestes"),
@@ -25,7 +24,7 @@ public enum KlageVurdering implements Kodeverdi {
     FEILREGISTRERT("FEILREGISTRERT", "Feilregistrert av Kabal"),
     UDEFINERT("-", "Udefinert");
 
-    private static final Map<String, KlageVurdering> KODER = new LinkedHashMap<>();
+    private static final Map<String, KlageVurderingType> KODER = new LinkedHashMap<>();
 
     public static final String KODEVERK = "KLAGEVURDERING";
 
@@ -45,16 +44,16 @@ public enum KlageVurdering implements Kodeverdi {
 
     private String kode;
 
-    private KlageVurdering(String kode) {
+    private KlageVurderingType(String kode) {
         this.kode = kode;
     }
 
-    private KlageVurdering(String kode, String navn) {
+    private KlageVurderingType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
-    public static KlageVurdering fraKode(final String kode) {
+    public static KlageVurderingType fraKode(final String kode) {
         if (kode == null) {
             return null;
         }
@@ -65,7 +64,7 @@ public enum KlageVurdering implements Kodeverdi {
         return ad;
     }
 
-    public static Map<String, KlageVurdering> kodeMap() {
+    public static Map<String, KlageVurderingType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
 
@@ -92,7 +91,7 @@ public enum KlageVurdering implements Kodeverdi {
     }
 
     /** Kun til invortes bruk i tester. Ingen garanti for at dette dekker alle konstanter. */
-    public static Map<String, KlageVurdering> getHardkodedeKonstanter() {
+    public static Map<String, KlageVurderingType> getHardkodedeKonstanter() {
         return Set.of(values()).stream().collect(Collectors.toMap(v -> v.getKode(), v -> v));
     }
 }

@@ -23,8 +23,8 @@ public class KlageUtredningTjeneste {
 
     public void oppdaterKlageMedPåklagetEksternBehandlingUuid(Long klageBehandlingId, UUID påklagetBehandlingRef, BehandlingType påklagdBehandlingType) {
         var klageUtredning = klageRepository.hentKlageUtredning(klageBehandlingId);
-        klageUtredning.setPåKlagdBehandlingRef(påklagetBehandlingRef);
-        klageUtredning.setPåKlagdBehandlingType(påklagdBehandlingType);
+//        klageUtredning.setPåKlagdBehandlingRef(påklagetBehandlingRef);
+//        klageUtredning.setPåKlagdBehandlingType(påklagdBehandlingType);
 //        if (valgtPart != null) {
 //            klageUtredning.setKlagendePart(valgtPart);
 //        }
