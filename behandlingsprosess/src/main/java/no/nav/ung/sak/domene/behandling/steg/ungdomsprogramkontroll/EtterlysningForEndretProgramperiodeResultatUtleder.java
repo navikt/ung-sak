@@ -31,7 +31,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         if (gjeldendeEtterlysning.isPresent()) {
             var etterlysningStatus = gjeldendeEtterlysning.get().etterlysningData().status();
             return switch (etterlysningStatus) {
-                case VENTER, OPPRETTET ->
+                case VENTER, OPPRETTET, UTLØPT ->
                     finnResultatForEksisterendeEtterlysningUtenSvar(input.gjeldendePeriodeGrunnlag(), gjeldendeEtterlysning.get());
                 case MOTTATT_SVAR ->
                     finnResultatForEksisterendeEtterlysningMedSvar(input.gjeldendePeriodeGrunnlag(), gjeldendeEtterlysning.get());
