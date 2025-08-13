@@ -25,6 +25,14 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
         this.etterlysningRepository = etterlysningRepository;
     }
 
+    /** Håndterer utledet behov for etterlysning ved å opprette nye etterlysninger og avbryte eksisterende etterlysninger dersom det er aktuelt.
+     * Etterlysninger settes her til OPPRETTET eller SKAL_AVBRYTES og det opprettes så tasker som håndterer endring av status i andre systemer.
+     * @param resultat Utledet behov for nye etterlysninger
+     * @param behandlingReferanse Behandlingref
+     * @param etterlysningType Type etterlysning som skal opprettes eller erstattes
+     * @param gjeldendeEtterlysning Gjeldende etterlysning som skal erstattes, hvis det er aktuelt
+     * @param gjeldendeGrunnlag Gjeldende grunnlag for programperioden som etterlysningen gjelder for
+     */
     void håndterResultat(ResultatType resultat, BehandlingReferanse behandlingReferanse,
                          EtterlysningType etterlysningType,
                          Optional<Etterlysning> gjeldendeEtterlysning,

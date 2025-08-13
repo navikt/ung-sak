@@ -17,9 +17,15 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
     public static final Set<EtterlysningStatus> VENTER_STATUSER = Set.of(EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
 
 
-    static ResultatType finnResultat(EndretUngdomsprogramEtterlysningInput endretUngdomsprogramEtterlysningInput, BehandlingReferanse behandlingReferanse) {
-        validerNøyaktigEnProgramperiode(endretUngdomsprogramEtterlysningInput);
-        return håndterForType(endretUngdomsprogramEtterlysningInput, behandlingReferanse, endretUngdomsprogramEtterlysningInput.etterlysningType());
+    /** Utleder resultat som beskriver behov for etterlysning i forbindelse med endring av ungdomsprogramperiode.
+     * Denne metoden utleder kun hva som skal gjøres i forhold til eksisterende etterlysning, men gjør ikke selve endringen.
+     * @param input Input til utledning, inkluderer eksisterende programperiode, etterlysninger og initielle grunnlag
+     * @param behandlingReferanse Behandlingreferanse
+     * @return
+     */
+    static ResultatType finnResultat(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse) {
+        validerNøyaktigEnProgramperiode(input);
+        return håndterForType(input, behandlingReferanse, input.etterlysningType());
     }
 
     private static ResultatType håndterForType(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
@@ -41,13 +47,13 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         return ResultatType.INGEN_ENDRING;
     }
 
-    private static boolean harEndretPeriodeSidenInitiell(EndretUngdomsprogramEtterlysningInput endretUngdomsprogramEtterlysningInput,
+    private static boolean harEndretPeriodeSidenInitiell(EndretUngdomsprogramEtterlysningInput input,
                                                          UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
                                                          BehandlingReferanse behandlingReferanse,
                                                          EtterlysningType etterlysningType) {
         var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType,
-            endretUngdomsprogramEtterlysningInput.initiellPeriodegrunnlag(),
-            endretUngdomsprogramEtterlysningInput.gjeldendePeriodeGrunnlag()).isEmpty();
+            input.initiellPeriodegrunnlag(),
+            input.gjeldendePeriodeGrunnlag()).isEmpty();
 
         if (erEndringSidenInitiell) {
             return true;
@@ -56,7 +62,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         if (behandlingReferanse.getBehandlingType() == BehandlingType.FØRSTEGANGSSØKNAD) {
             // Dersom det er førstegangssøknad må vi også sjekke om det er endringer i start dato fra det som ble oppgitt da bruker sendte inn søknaden.
             if (etterlysningType == EtterlysningType.UTTALELSE_ENDRET_STARTDATO) {
-                var endringFraOppgitt = UngdomsprogramPeriodeTjeneste.finnEndretStartdatoFraOppgittStartdatoer(endretUngdomsprogramEtterlysningInput.gjeldendePeriodeGrunnlag(), endretUngdomsprogramEtterlysningInput.ungdomsytelseStartdatoGrunnlag());
+                var endringFraOppgitt = UngdomsprogramPeriodeTjeneste.finnEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag());
                 var harEndretStartdato = !endringFraOppgitt.isEmpty();
                 return harEndretStartdato;
             } else if (etterlysningType == EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO) {
@@ -94,9 +100,9 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         return endringTidslinje.isEmpty();
     }
 
-    private static void validerNøyaktigEnProgramperiode(EndretUngdomsprogramEtterlysningInput endretUngdomsprogramEtterlysningInput) {
+    private static void validerNøyaktigEnProgramperiode(EndretUngdomsprogramEtterlysningInput input) {
         // Ekstra validering for å sjekke at det kun er én programperiode i grunnlaget.
-        final var programperioder = endretUngdomsprogramEtterlysningInput.gjeldendePeriodeGrunnlag().getUngdomsprogramPerioder().getPerioder();
+        final var programperioder = input.gjeldendePeriodeGrunnlag().getUngdomsprogramPerioder().getPerioder();
         if (programperioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke flere programperioder");
         }
