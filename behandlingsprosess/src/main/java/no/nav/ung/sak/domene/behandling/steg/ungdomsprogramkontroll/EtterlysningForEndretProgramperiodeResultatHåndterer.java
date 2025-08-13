@@ -37,18 +37,6 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
                          EtterlysningType etterlysningType,
                          Optional<Etterlysning> gjeldendeEtterlysning,
                          UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
-        håndterForType(resultat,
-            behandlingReferanse,
-            etterlysningType,
-            gjeldendeEtterlysning,
-            gjeldendeGrunnlag);
-    }
-
-    private void håndterForType(ResultatType resultat,
-                                BehandlingReferanse behandlingReferanse,
-                                EtterlysningType etterlysningType,
-                                Optional<Etterlysning> gjeldendeEtterlysning,
-                                UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
                 opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
