@@ -18,14 +18,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
 
 
     static ResultatType finnResultat(EndretUngdomsprogramEtterlysningInput endretUngdomsprogramEtterlysningInput, BehandlingReferanse behandlingReferanse) {
-        // Ekstra validering for å sjekke at det kun er én programperiode i grunnlaget.
-        final var programperioder = endretUngdomsprogramEtterlysningInput.gjeldendePeriodeGrunnlag().getUngdomsprogramPerioder().getPerioder();
-        if (programperioder.size() > 1) {
-            throw new IllegalStateException("Støtter ikke flere programperioder");
-        }
-        if (programperioder.isEmpty()) {
-            throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
-        }
+        validerNøyaktigEnProgramperiode(endretUngdomsprogramEtterlysningInput);
         return håndterForType(endretUngdomsprogramEtterlysningInput, behandlingReferanse, endretUngdomsprogramEtterlysningInput.etterlysningType());
     }
 
@@ -99,6 +92,17 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
                                                  UngdomsprogramPeriodeGrunnlag sisteMottatte) {
         final var endringTidslinje = UngdomsprogramPeriodeTjeneste.finnEndretTidslinje(Optional.of(sisteMottatte), Optional.of(gjeldendePeriodeGrunnlag));
         return endringTidslinje.isEmpty();
+    }
+
+    private static void validerNøyaktigEnProgramperiode(EndretUngdomsprogramEtterlysningInput endretUngdomsprogramEtterlysningInput) {
+        // Ekstra validering for å sjekke at det kun er én programperiode i grunnlaget.
+        final var programperioder = endretUngdomsprogramEtterlysningInput.gjeldendePeriodeGrunnlag().getUngdomsprogramPerioder().getPerioder();
+        if (programperioder.size() > 1) {
+            throw new IllegalStateException("Støtter ikke flere programperioder");
+        }
+        if (programperioder.isEmpty()) {
+            throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
+        }
     }
 
 }

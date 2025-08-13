@@ -29,14 +29,6 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
                          EtterlysningType etterlysningType,
                          Optional<Etterlysning> gjeldendeEtterlysning,
                          UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
-        // Ekstra validering for å sjekke at det kun er én programperiode i grunnlaget.
-        final var programperioder = gjeldendeGrunnlag.getUngdomsprogramPerioder().getPerioder();
-        if (programperioder.size() > 1) {
-            throw new IllegalStateException("Støtter ikke flere programperioder");
-        }
-        if (programperioder.isEmpty()) {
-            throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
-        }
         håndterForType(resultat,
             behandlingReferanse,
             etterlysningType,
