@@ -30,10 +30,14 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         if (harEksisterendeEtterlysningOgRelevantEndringIProgramperiode(input)) {
             return utledResultatForEksisterendeEtterlysning(input);
         }
-        if (harEndretPeriodeSidenInitiell(input, input.gjeldendePeriodeGrunnlag(), behandlingReferanse, etterlysningType)) {
+        if (harIngenEtterlysningOgEndringFraInitiell(input, behandlingReferanse, etterlysningType)) {
             return ResultatType.OPPRETT_ETTERLYSNING;
         }
         return ResultatType.INGEN_ENDRING;
+    }
+
+    private static boolean harIngenEtterlysningOgEndringFraInitiell(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
+        return input.gjeldendeEtterlysningOgGrunnlag().isEmpty() && harEndretPeriodeSidenInitiell(input, behandlingReferanse, etterlysningType);
     }
 
     private static ResultatType utledResultatForEksisterendeEtterlysning(EndretUngdomsprogramEtterlysningInput input) {
@@ -50,7 +54,6 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
     }
 
     private static boolean harEndretPeriodeSidenInitiell(EndretUngdomsprogramEtterlysningInput input,
-                                                         UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
                                                          BehandlingReferanse behandlingReferanse,
                                                          EtterlysningType etterlysningType) {
         var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType, input.initiellPeriodegrunnlag(), input.gjeldendePeriodeGrunnlag()).isEmpty();
@@ -63,7 +66,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
             // Dersom det er førstegangssøknad må vi også sjekke om det er endringer i start dato fra det som ble oppgitt da bruker sendte inn søknaden.
             return switch (etterlysningType) {
                 case UTTALELSE_ENDRET_STARTDATO -> harEndretStartdato(input);
-                case UTTALELSE_ENDRET_SLUTTDATO -> harEndretSluttdato(gjeldendePeriodeGrunnlag);
+                case UTTALELSE_ENDRET_SLUTTDATO -> harEndretSluttdato(input.gjeldendePeriodeGrunnlag());
                 default ->
                         throw new IllegalArgumentException("Ugyldig etterlysningstype for endring i programperiode: " + etterlysningType);
             };
