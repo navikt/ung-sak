@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -334,7 +336,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
 
         // Assert
-        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId()).stream().sorted(Comparator.comparing(BaseEntitet::getOpprettetTidspunkt)).toList();
         assertThat(etterlysninger.size()).isEqualTo(2);
         final var gammelEtterlysning = etterlysninger.get(0);
         assertThat(gammelEtterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
