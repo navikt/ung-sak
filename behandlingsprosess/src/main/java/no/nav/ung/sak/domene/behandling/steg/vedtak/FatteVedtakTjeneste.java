@@ -128,6 +128,12 @@ public class FatteVedtakTjeneste {
                     "Utvikler-feil: Vedtak kan ikke fattes for [" + behandling.getType() + "], behandlingsresultat er " // $NON-NLS-1$
                         + (behandlingResultatType.getNavn()));
             }
+        } else if (!behandling.erYtelseBehandling()) {
+            if (!BehandlingResultatType.erKlagekode(behandlingResultatType)) {
+                throw new IllegalStateException(
+                    "Utvikler-feil: Vedtak kan ikke fattes for [" + behandling.getType() + "], behandlingsresultat er " // $NON-NLS-1$
+                        + (behandlingResultatType.getNavn()));
+            }
         } else if (!VEDTAKSTILSTANDER.contains(behandlingResultatType)) {
             throw new IllegalStateException(
                 "Utvikler-feil: Vedtak kan ikke fattes for behandling [" + behandling.getType() + "], behandlingsresultat er " + behandlingResultatType.getNavn());

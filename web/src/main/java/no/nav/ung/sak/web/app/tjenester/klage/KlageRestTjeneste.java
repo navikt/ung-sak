@@ -23,7 +23,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdering;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -138,9 +138,9 @@ public class KlageRestTjeneste {
     private KlagebehandlingDto mapFra(Behandling behandling) {
         KlagebehandlingDto dto = new KlagebehandlingDto();
         Optional<KlageFormkravResultatDto> nfpFormkrav = KlageFormkravResultatDtoMapper.mapNFPKlageFormkravResultatDto(behandling, klageRepository);
-        Optional<KlageVurderingResultatDto> nfpVurdering = KlageVurderingResultatDtoMapper.mapNFPKlageVurderingResultatDto(behandling, klageRepository, fritekstRepository);
-        Optional<KlageFormkravResultatDto> kaFormkrav = KlageFormkravResultatDtoMapper.mapKAKlageFormkravResultatDto(behandling, klageRepository);
-        Optional<KlageVurderingResultatDto> nkVurdering = KlageVurderingResultatDtoMapper.mapNKKlageVurderingResultatDto(behandling, klageRepository, fritekstRepository);
+        Optional<KlageVurderingResultatDto> nfpVurdering = KlageVurderingResultatDtoMapper.mapFørsteinstansKlageVurderingResultatDto(behandling, klageRepository, fritekstRepository);
+        Optional<KlageFormkravResultatDto> kaFormkrav = Optional.empty(); //KlageFormkravResultatDtoMapper.mapKAKlageFormkravResultatDto(behandling, klageRepository);
+        Optional<KlageVurderingResultatDto> nkVurdering = KlageVurderingResultatDtoMapper.mapAndreinstansKlageVurderingResultatDto(behandling, klageRepository, fritekstRepository);
 
         if (nfpVurdering.isPresent() || nkVurdering.isPresent() || nfpFormkrav.isPresent() || kaFormkrav.isPresent()) {
             nfpVurdering.ifPresent(dto::setKlageVurderingResultatNFP);
@@ -168,9 +168,9 @@ public class KlageRestTjeneste {
             super();
         }
 
-        public AbacKlageVurderingResultatAksjonspunktMellomlagringDto(String kode, Long behandlingId, String begrunnelse, KlageVurdering klageVurdering, KlageMedholdÅrsak klageMedholdArsak,
+        public AbacKlageVurderingResultatAksjonspunktMellomlagringDto(String kode, Long behandlingId, String begrunnelse, KlageVurderingType klageVurderingType, KlageMedholdÅrsak klageMedholdArsak,
                                                                       String fritekstTilBrev, String klageHjemmel, KlageVurderingOmgjør klageVurderingOmgjoer) {
-            super(kode, behandlingId, begrunnelse, klageVurdering, klageMedholdArsak, fritekstTilBrev, klageHjemmel, klageVurderingOmgjoer);
+            super(kode, behandlingId, begrunnelse, klageVurderingType, klageMedholdArsak, fritekstTilBrev, klageHjemmel, klageVurderingOmgjoer);
         }
 
         @Override

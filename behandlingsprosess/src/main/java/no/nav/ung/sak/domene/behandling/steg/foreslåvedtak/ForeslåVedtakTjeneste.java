@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -10,6 +11,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.domene.vedtak.impl.KlageVedtakTjeneste;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ class ForeslåVedtakTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
+    private KlageVedtakTjeneste klageVedtakTjeneste;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -35,10 +38,12 @@ class ForeslåVedtakTjeneste {
     @Inject
     ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                          VedtaksbrevTjeneste vedtaksbrevTjeneste) {
+                          VedtaksbrevTjeneste vedtaksbrevTjeneste,
+                          KlageVedtakTjeneste klageVedtakTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
+        this.klageVedtakTjeneste = klageVedtakTjeneste;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -46,8 +51,14 @@ class ForeslåVedtakTjeneste {
         // TODO: Fiks integrering mot k9-tilbake
 //        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
-        Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
-            .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
+        if (BehandlingType.KLAGE.equals(behandling.getType())) {
+            if (klageVedtakTjeneste.erKlageResultatHjemsendt(behandling)) {
+                behandling.nullstillToTrinnsBehandling();
+                return BehandleStegResultat.utførtUtenAksjonspunkter();
+            }
+        }
+
+        Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
         if (vedtakUtenTotrinnskontroll.isPresent()) {
             behandling.nullstillToTrinnsBehandling();
             return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
