@@ -386,7 +386,7 @@ public class BigQueryStatistikkRepository {
      */
     Collection<EtterlysningRecord> etterlysningData() {
         String sql = """
-            select f.saksnummer, e.type, e.status, e.fom, e.tom, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
+            select f.saksnummer, e.type, e.status, e.fom, e.tom, frist, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
              from etterlysning e
              inner join behandling b on b.id = e.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
@@ -404,13 +404,15 @@ public class BigQueryStatistikkRepository {
             String status = t.get(2, String.class);
             Date fom = t.get(3, Date.class);
             Date tom = t.get(4, Date.class);
-            Timestamp tidsstempel = t.get(5, Timestamp.class);
+            Timestamp frist = t.get(5, Timestamp.class);
+            Timestamp tidsstempel = t.get(6, Timestamp.class);
 
             return new EtterlysningRecord(
                 new Saksnummer(saksnummer),
                 EtterlysningType.fraKode(type),
                 EtterlysningStatus.fraKode(status),
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom.toLocalDate(), tom.toLocalDate()),
+                frist.toLocalDateTime().atZone(ZoneId.systemDefault()),
                 tidsstempel.toLocalDateTime().atZone(ZoneId.systemDefault())
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
