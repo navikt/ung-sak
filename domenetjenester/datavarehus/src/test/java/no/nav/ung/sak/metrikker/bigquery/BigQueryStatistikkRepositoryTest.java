@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -205,14 +206,19 @@ class BigQueryStatistikkRepositoryTest {
         Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
         lagreBehandling(behandling);
         etterlysningRepository.lagre(new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningStatus.VENTER));
+        var etterlysningMedFrist = new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningStatus.AVBRUTT);
+        etterlysningMedFrist.setFrist(LocalDateTime.now());
+        etterlysningRepository.lagre(etterlysningMedFrist);
 
-        // Når vi henter aksjonspunkt statistikken
+        // Når vi henter etterlysning statistikken
         Collection<EtterlysningRecord> etterlysninger = statistikkRepository.etterlysningData();
-        // Og vi skal ha minst ett aksjonspunkt i statistikken
+        // Og vi skal ha minst en etterlysning i statistikken
         assertThat(etterlysninger).isNotEmpty();
         // Verifiser at etterlysningen er med i statistikken
-        assertThat(etterlysninger)
-            .anyMatch(rec -> Objects.equals(rec.etterlysningType(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO));
+        var etterlysningUtenFrist = etterlysninger.stream().filter(it -> it.etterlysningType().equals(EtterlysningType.UTTALELSE_ENDRET_STARTDATO)).findFirst().get();
+        assertThat(etterlysningUtenFrist.frist()).isNull();
+        var etterlysningRecordMedFrist = etterlysninger.stream().filter(it -> it.etterlysningType().equals(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)).findFirst().get();
+        assertThat(etterlysningRecordMedFrist.frist()).isNotNull();
     }
 
 

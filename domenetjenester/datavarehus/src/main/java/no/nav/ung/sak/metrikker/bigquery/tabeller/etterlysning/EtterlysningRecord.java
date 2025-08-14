@@ -16,6 +16,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
 import no.nav.ung.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -25,17 +26,19 @@ public record EtterlysningRecord(
     EtterlysningType etterlysningType,
     EtterlysningStatus etterlysningStatus,
     DatoIntervallEntitet periode,
+    ZonedDateTime frist,
     ZonedDateTime opprettetTidspunkt
 ) implements BigQueryRecord {
 
     public static final BigQueryTabell<EtterlysningRecord> ETTERLYSNING_TABELL =
         new BigQueryTabell<>(
-            "aksjonspunkter_status",
+            "etterlysning",
             Schema.of(
                 Field.of("saksnummer", StandardSQLTypeName.STRING),
                 Field.of("type", StandardSQLTypeName.STRING),
                 Field.of("status", StandardSQLTypeName.STRING),
                 Field.of("periode", StandardSQLTypeName.RANGE),
+                Field.of("frist", StandardSQLTypeName.DATETIME),
                 Field.of("opprettetTidspunkt", StandardSQLTypeName.DATETIME)
             ),
             EtterlysningRecord.class,
@@ -44,6 +47,7 @@ public record EtterlysningRecord(
                 "type", rec.etterlysningType().getKode(),
                 "status", rec.etterlysningStatus().getNavn(),
                 "periode", toRange(rec.periode()),
+                "frist", rec.frist(),
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             ),
             true
