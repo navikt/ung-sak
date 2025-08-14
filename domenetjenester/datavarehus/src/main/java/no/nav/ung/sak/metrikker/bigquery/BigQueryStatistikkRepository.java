@@ -412,7 +412,7 @@ public class BigQueryStatistikkRepository {
                 EtterlysningType.fraKode(type),
                 EtterlysningStatus.fraKode(status),
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom.toLocalDate(), tom.toLocalDate()),
-                frist.toLocalDateTime().atZone(ZoneId.systemDefault()),
+                frist == null ? null : frist.toLocalDateTime().atZone(ZoneId.systemDefault()),
                 tidsstempel.toLocalDateTime().atZone(ZoneId.systemDefault())
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
