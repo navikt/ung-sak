@@ -12,12 +12,17 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BigQueryEmulatorContainer;
@@ -25,6 +30,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -122,6 +128,25 @@ class BigQueryKlientTest {
             )
         );
     }
+
+    @Test
+    void publisering_av_ETTERLYSING_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            EtterlysningRecord.ETTERLYSNING_TABELL,
+            List.of(
+                new EtterlysningRecord(
+                    new Saksnummer("SAKEN"),
+                    EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO,
+                    EtterlysningStatus.SKAL_AVBRYTES,
+                    DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)),
+                    ZonedDateTime.now(),
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
 
     private static BigQuery opprettBigQuery() {
         return BigQueryOptions.newBuilder()
