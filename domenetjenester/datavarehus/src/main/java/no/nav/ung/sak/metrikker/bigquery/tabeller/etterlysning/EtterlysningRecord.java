@@ -17,9 +17,12 @@ import no.nav.ung.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+
+import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
 public record EtterlysningRecord(
     Saksnummer saksnummer,
@@ -47,7 +50,7 @@ public record EtterlysningRecord(
                 "type", rec.etterlysningType().getKode(),
                 "status", rec.etterlysningStatus().getNavn(),
                 "periode", toRange(rec.periode()),
-                "frist", rec.frist(),
+                "frist", rec.frist() != null ? rec.frist() : TIDENES_ENDE.atStartOfDay(ZoneId.systemDefault()),
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             ),
             true
