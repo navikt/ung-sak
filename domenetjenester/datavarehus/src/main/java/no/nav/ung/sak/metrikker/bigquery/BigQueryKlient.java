@@ -161,6 +161,12 @@ public class BigQueryKlient {
         if (!tableDef.skalEksisterendeInnholdSlettesFørPublisering()) {
             throw new IllegalArgumentException("Kan ikke slette data fra BigQuery-tabell " + tableDef.getTabellnavn() + " fordi skalEksisterendeInnholdSlettesFørPublisering er satt til false.");
         }
+        Table existing = bigQuery.getTable(TableId.of(dataset.getDatasetNavn(), tableDef.getTabellnavn()));
+        if (existing == null) {
+            log.info("Fant ikke tabell med navn {}, utfører ikke sletting", tableDef.getTabellnavn());
+            return;
+        }
+
         String query = String.format("DELETE FROM `%s.%s` WHERE TRUE", dataset.getDatasetNavn(), tableDef.getTabellnavn());
         QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(query).build();
         try {
