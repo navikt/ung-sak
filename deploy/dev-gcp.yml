@@ -195,7 +195,7 @@ spec:
     - name: DOKDISTFORDELING_URL
       value: https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1
     - name: DOKDISTFORDELING_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.saf/.default
+      value: api://dev-fss.teamdokumenthandtering.dokdistfordeling/.default
     - name: DOKARKIV_URL
       value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1
     - name: DOKARKIV_BASE_URL

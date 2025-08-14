@@ -18,7 +18,7 @@ import no.nav.ung.sak.formidling.dokdist.dto.DistribuerJournalpostResponse;
  *
  */
 @Dependent
-@ScopedRestIntegration(scopeKey = "DOKDISTFORDELING_SCOPE", defaultScope = "api://prod-fss.teamdokumenthandtering.saf/.default")
+@ScopedRestIntegration(scopeKey = "DOKDISTFORDELING_SCOPE", defaultScope = "api://prod-fss.teamdokumenthandtering.dokdistfordeling/.default")
 public class DokDistRestKlientImpl implements DokDistRestKlient {
 
     private final OidcRestClient restClient;
