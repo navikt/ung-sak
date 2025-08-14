@@ -41,10 +41,10 @@
         <k9format.version>12.3.2</k9format.version>
         <jackson.version>2.19.2</jackson.version>
         <asm.version>9.8</asm.version>
-        <kotlin-stdlib.version>2.2.0</kotlin-stdlib.version>
+        <kotlin-stdlib.version>2.2.10</kotlin-stdlib.version>
         <jandex.version>3.4.0</jandex.version>
         <pdfgen-core.version>1.1.57</pdfgen-core.version>
-        <flyway.version>11.10.5</flyway.version>
+        <flyway.version>11.11.1</flyway.version>
         <confluent.platform.version>8.0.0</confluent.platform.version>
         <mockito.version>5.18.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.4.0</ung-deltakelse-opplyser.version>
@@ -154,7 +154,7 @@
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>7.0.0</version>
+                <version>7.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
