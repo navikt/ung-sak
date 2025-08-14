@@ -41,7 +41,7 @@ class VurderVedtaksbrevTaskTest {
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     @Inject
-    private VedtaksbrevResultatRepository vedtaksbrevResultatRepository;
+    private BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository;
 
     @Inject
     private BrevbestillingRepository brevbestillingRepository;
@@ -77,7 +77,7 @@ class VurderVedtaksbrevTaskTest {
         assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
         assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
 
-        var vedtaksbrevResultater = vedtaksbrevResultatRepository.hentForBehandling(behandling.getId());
+        var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
         assertThat(vedtaksbrevResultater).hasSize(1);
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getBrevbestilling().getId()).isEqualTo(bestilling.getId());
@@ -123,7 +123,7 @@ class VurderVedtaksbrevTaskTest {
             });
 
 
-        var vedtaksbrevResultater = vedtaksbrevResultatRepository.hentForBehandling(behandling.getId());
+        var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
         assertThat(vedtaksbrevResultater).hasSize(2);
 
         assertThat(vedtaksbrevResultater)
@@ -162,7 +162,7 @@ class VurderVedtaksbrevTaskTest {
         List<BrevbestillingEntitet> bestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
         assertThat(bestillinger).hasSize(0);
 
-        var vedtaksbrevResultater = vedtaksbrevResultatRepository.hentForBehandling(behandling.getId());
+        var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
         assertThat(vedtaksbrevResultater).hasSize(1);
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getBrevbestilling()).isNull();
@@ -201,7 +201,7 @@ class VurderVedtaksbrevTaskTest {
         List<BrevbestillingEntitet> bestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
         assertThat(bestillinger).hasSize(0);
 
-        var vedtaksbrevResultater = vedtaksbrevResultatRepository.hentForBehandling(behandling.getId());
+        var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
         assertThat(vedtaksbrevResultater).hasSize(1);
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getBrevbestilling()).isNull();
@@ -236,7 +236,7 @@ class VurderVedtaksbrevTaskTest {
         assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.MANUELT_VEDTAK_DOK);
         assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
 
-        var vedtaksbrevResultater = vedtaksbrevResultatRepository.hentForBehandling(behandling.getId());
+        var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
         assertThat(vedtaksbrevResultater).hasSize(1);
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);

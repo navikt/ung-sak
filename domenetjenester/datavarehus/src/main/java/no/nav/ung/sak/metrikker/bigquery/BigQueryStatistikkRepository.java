@@ -12,20 +12,28 @@ import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -82,6 +90,9 @@ public class BigQueryStatistikkRepository {
 
         Collection<BehandslingsresultatStatistikkRecord> behandlingResultatStatistikk = behandlingResultatStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL, behandlingResultatStatistikk));
+
+        Collection<EtterlysningRecord> etterlysningData = etterlysningData();
+        hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
 
         return hyppigRapporterte;
     }
@@ -369,4 +380,43 @@ public class BigQueryStatistikkRepository {
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+
+    /* Henter etterlysning-data for fagsaker.
+     */
+    Collection<EtterlysningRecord> etterlysningData() {
+        String sql = """
+            select f.saksnummer, e.type, e.status, e.fom, e.tom, frist, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
+             from etterlysning e
+             inner join behandling b on b.id = e.behandling_id
+             inner join fagsak f on f.id = b.fagsak_id
+             where f.ytelse_type <> :obsoleteKode
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .getResultStream();
+
+        return stream.map(t -> {
+            String saksnummer = t.get(0, String.class);
+            String type = t.get(1, String.class);
+            String status = t.get(2, String.class);
+            Date fom = t.get(3, Date.class);
+            Date tom = t.get(4, Date.class);
+            Timestamp frist = t.get(5, Timestamp.class);
+            Timestamp tidsstempel = t.get(6, Timestamp.class);
+
+            return new EtterlysningRecord(
+                new Saksnummer(saksnummer),
+                EtterlysningType.fraKode(type),
+                EtterlysningStatus.fraKode(status),
+                DatoIntervallEntitet.fraOgMedTilOgMed(fom.toLocalDate(), tom.toLocalDate()),
+                frist == null ? null : frist.toLocalDateTime().atZone(ZoneId.systemDefault()),
+                tidsstempel.toLocalDateTime().atZone(ZoneId.systemDefault())
+            );
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+
 }
