@@ -30,7 +30,7 @@ public record EtterlysningRecord(
 
     public static final BigQueryTabell<EtterlysningRecord> ETTERLYSNING_TABELL =
         new BigQueryTabell<>(
-            "aksjonspunkter_status",
+            "etterlysninger",
             Schema.of(
                 Field.of("saksnummer", StandardSQLTypeName.STRING),
                 Field.of("type", StandardSQLTypeName.STRING),
