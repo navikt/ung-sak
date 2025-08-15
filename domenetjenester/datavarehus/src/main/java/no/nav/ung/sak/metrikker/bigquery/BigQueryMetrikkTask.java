@@ -58,6 +58,8 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
 
         var sistKjørtTidspunkt = finnSisteKjørtTidspunktForCronTask();
 
+        log.info("Sist kjørt tidspunkt for BigQueryMetrikkTask: {}", sistKjørtTidspunkt);
+
         try {
             List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte(sistKjørtTidspunkt);
 
