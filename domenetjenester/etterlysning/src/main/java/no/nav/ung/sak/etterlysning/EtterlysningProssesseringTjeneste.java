@@ -3,6 +3,7 @@ package no.nav.ung.sak.etterlysning;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -39,7 +40,7 @@ public class EtterlysningProssesseringTjeneste {
         final var etterlysninger = etterlysningRepository.hentUtløpteEtterlysningerSomVenterPåSvar(behandling.getId());
 
         settEttelysningerUtløpt(etterlysninger);
-        etterlysninger.forEach(this::publiser);
+        publiser(etterlysninger);
     }
 
     public void settEttelysningerUtløpt(List<Etterlysning> etterlysninger) {
@@ -60,12 +61,12 @@ public class EtterlysningProssesseringTjeneste {
         });
 
         etterlysningRepository.lagre(etterlysninger);
-        etterlysninger.forEach(this::publiser);
+        publiser(etterlysninger);
     }
 
     public void opprett(Behandling behandling, EtterlysningType etterlysningType) {
         var opprettet = opprettOppgaveTjeneste.opprett(behandling, etterlysningType);
-        opprettet.forEach(this::publiser);
+        publiser(opprettet);
         opprettet.forEach(e -> {
             var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptDersomVenterTask.class);
             prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
@@ -74,9 +75,14 @@ public class EtterlysningProssesseringTjeneste {
         });
     }
 
-    private void publiser(Etterlysning etterlysning) {
-        var prosessTaskData = ProsessTaskData.forProsessTask(PubliserEtterlysningTask.class);
-        prosessTaskData.setProperty(PubliserEtterlysningTask.ETTERLYSNING_ID, etterlysning.getId().toString());
-        prosessTaskTjeneste.lagre(prosessTaskData);
+    private void publiser(List<Etterlysning> etterlysninger) {
+        var gruppe = new ProsessTaskGruppe();
+        etterlysninger.forEach(e -> {
+                var prosessTaskData = ProsessTaskData.forProsessTask(PubliserEtterlysningTask.class);
+                prosessTaskData.setProperty(PubliserEtterlysningTask.ETTERLYSNING_ID, e.getId().toString());
+                gruppe.addNesteSekvensiell(prosessTaskData);
+            }
+        );
+        prosessTaskTjeneste.lagre(gruppe);
     }
 }
