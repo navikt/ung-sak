@@ -162,7 +162,7 @@ class BigQueryStatistikkRepositoryTest {
         ));
 
         // Når vi henter hyppig rapporterte metrikker
-        List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte();
+        List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte(LocalDateTime.now().minusMinutes(1));
 
         // Så skal vi ha minst én metrikk
         assertThat(metrikker).isNotEmpty();
@@ -211,7 +211,7 @@ class BigQueryStatistikkRepositoryTest {
         etterlysningRepository.lagre(etterlysningMedFrist);
 
         // Når vi henter etterlysning statistikken
-        Collection<EtterlysningRecord> etterlysninger = statistikkRepository.etterlysningData();
+        Collection<EtterlysningRecord> etterlysninger = statistikkRepository.etterlysningData(LocalDateTime.now().minusMinutes(1));
         // Og vi skal ha minst en etterlysning i statistikken
         assertThat(etterlysninger).isNotEmpty();
         // Verifiser at etterlysningen er med i statistikken

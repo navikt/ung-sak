@@ -4,16 +4,19 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+
+import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_BEGYNNELSE;
 
 /**
  * Task for publisering av metrikker til BigQuery.
@@ -36,6 +39,8 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
 
     private BigQueryStatistikkRepository statistikkRepository;
 
+    private ProsessTaskTjeneste prosessTaskTjeneste;
+
     BigQueryMetrikkTask() {
         // for proxyd
     }
@@ -51,8 +56,11 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData data) {
         long startTime = System.nanoTime();
 
+        var sistKjørtTidspunkt = prosessTaskTjeneste.finnAlle(BigQueryMetrikkTask.TASKTYPE, ProsessTaskStatus.FERDIG).stream()
+            .map(ProsessTaskData::getSistKjørt)
+            .max(Comparator.naturalOrder()).orElse(TIDENES_BEGYNNELSE.atStartOfDay());
         try {
-            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte();
+            List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte(sistKjørtTidspunkt);
 
             if (bigQueryEnabled && !metrikker.isEmpty()) {
                 publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, metrikker);
@@ -73,10 +81,6 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
         metrikker.forEach(tuple -> {
             BigQueryTabell<BigQueryRecord> tabell = (BigQueryTabell<BigQueryRecord>) tuple.getElement1();
             Collection<BigQueryRecord> records = (Collection<BigQueryRecord>) tuple.getElement2();
-
-            if (tabell.skalEksisterendeInnholdSlettesFørPublisering()) {
-                bigQueryKlient.slettAllData(dataset, tabell);
-            }
 
             bigQueryKlient.publish(dataset, tabell, records);
         });
