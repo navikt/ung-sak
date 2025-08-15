@@ -122,7 +122,7 @@ class BigQueryKlientTest {
 
     private static BigQuery opprettBigQuery() {
         return BigQueryOptions.newBuilder()
-            .setProjectId("test-project")
+            .setProjectId(BIG_QUERY_EMULATOR_CONTAINER.getProjectId())
             .setHost(BIG_QUERY_EMULATOR_CONTAINER.getEmulatorHttpEndpoint())
             .setCredentials(NoCredentials.getInstance())
             .build()
