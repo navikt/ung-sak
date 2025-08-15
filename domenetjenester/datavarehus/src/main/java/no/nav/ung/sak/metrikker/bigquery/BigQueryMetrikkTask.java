@@ -74,10 +74,6 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
             BigQueryTabell<BigQueryRecord> tabell = (BigQueryTabell<BigQueryRecord>) tuple.getElement1();
             Collection<BigQueryRecord> records = (Collection<BigQueryRecord>) tuple.getElement2();
 
-            if (tabell.skalEksisterendeInnholdSlettesFørPublisering()) {
-                bigQueryKlient.slettAllData(dataset, tabell);
-            }
-
             bigQueryKlient.publish(dataset, tabell, records);
         });
     }

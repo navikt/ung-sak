@@ -30,22 +30,6 @@
 
 		<!-- Domenetjenester avhengigheter -->
 		<dependency>
-			<groupId>no.nav.ung.sak</groupId>
-			<artifactId>behandlingskontroll</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.ung.sak</groupId>
-			<artifactId>inngangsvilkar</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.ung.sak</groupId>
-			<artifactId>okonomistotte</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.ung.sak</groupId>
-			<artifactId>vedtak</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>no.nav.k9.felles.integrasjon</groupId>
 			<artifactId>k9-sensu-klient</artifactId>
 		</dependency>
@@ -86,5 +70,13 @@
             <version>${testContainers.version}</version>
             <scope>test</scope>
         </dependency>
-	</dependencies>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingskontroll</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandling</artifactId>
+        </dependency>
+    </dependencies>
 </project>

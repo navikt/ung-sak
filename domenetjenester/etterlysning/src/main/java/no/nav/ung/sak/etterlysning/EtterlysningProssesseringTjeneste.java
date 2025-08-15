@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.etterlysning.publisering.PubliserEtterlysningTask;
 
 import java.util.List;
 
@@ -34,10 +35,11 @@ public class EtterlysningProssesseringTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public void settTilUtløpt(Long behandlingId) {
-        final var etterlysninger = etterlysningRepository.hentUtløpteEtterlysningerSomVenterPåSvar(behandlingId);
+    public void settTilUtløpt(Behandling behandling) {
+        final var etterlysninger = etterlysningRepository.hentUtløpteEtterlysningerSomVenterPåSvar(behandling.getId());
 
         settEttelysningerUtløpt(etterlysninger);
+        etterlysninger.forEach(this::publiser);
     }
 
     public void settEttelysningerUtløpt(List<Etterlysning> etterlysninger) {
@@ -49,8 +51,8 @@ public class EtterlysningProssesseringTjeneste {
         etterlysningRepository.lagre(etterlysninger);
     }
 
-    public void settTilAvbrutt(Long behandlingId) {
-        final var etterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandlingId);
+    public void settTilAvbrutt(Behandling behandling) {
+        final var etterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId());
 
         etterlysninger.forEach(e -> {
             oppgaveKlient.avbrytOppgave(e.getEksternReferanse());
@@ -58,15 +60,23 @@ public class EtterlysningProssesseringTjeneste {
         });
 
         etterlysningRepository.lagre(etterlysninger);
+        etterlysninger.forEach(this::publiser);
     }
 
     public void opprett(Behandling behandling, EtterlysningType etterlysningType) {
         var opprettet = opprettOppgaveTjeneste.opprett(behandling, etterlysningType);
+        opprettet.forEach(this::publiser);
         opprettet.forEach(e -> {
             var prosessTaskData = ProsessTaskData.forProsessTask(SettEtterlysningTilUtløptDersomVenterTask.class);
             prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
             prosessTaskData.setNesteKjøringEtter(e.getFrist());
             prosessTaskTjeneste.lagre(prosessTaskData);
         });
+    }
+
+    private void publiser(Etterlysning etterlysning) {
+        var prosessTaskData = ProsessTaskData.forProsessTask(PubliserEtterlysningTask.class);
+        prosessTaskData.setProperty(PubliserEtterlysningTask.ETTERLYSNING_ID, etterlysning.getId().toString());
+        prosessTaskTjeneste.lagre(prosessTaskData);
     }
 }

@@ -33,7 +33,7 @@ public class AvbrytEtterlysningTask extends UnderBehandlingProsessTask {
 
     @Override
     protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
-        etterlysningProssesseringTjeneste.settTilAvbrutt(behandling.getId());
+        etterlysningProssesseringTjeneste.settTilAvbrutt(behandling);
 
     }
 

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning;
+package no.nav.ung.sak.etterlysning.publisering;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.Schema;
@@ -11,8 +11,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
 import no.nav.ung.sak.typer.Saksnummer;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -23,8 +22,8 @@ public record EtterlysningRecord(
     EtterlysningType etterlysningType,
     EtterlysningStatus etterlysningStatus,
     DatoIntervallEntitet periode,
-    ZonedDateTime frist,
-    ZonedDateTime opprettetTidspunkt
+    LocalDateTime frist,
+    LocalDateTime opprettetTidspunkt
 ) implements BigQueryRecord {
 
     public static final BigQueryTabell<EtterlysningRecord> ETTERLYSNING_TABELL =
@@ -47,9 +46,8 @@ public record EtterlysningRecord(
                 "fom", rec.periode().getFomDato().format(DateTimeFormatter.ISO_LOCAL_DATE),
                 "tom", rec.periode().getTomDato().format(DateTimeFormatter.ISO_LOCAL_DATE),
                 "frist", rec.frist() != null ? rec.frist().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN)) :
-                    TIDENES_ENDE.atStartOfDay(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN)),
+                    TIDENES_ENDE.atStartOfDay().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN)),
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
-            ),
-            true
+            )
         );
 }
