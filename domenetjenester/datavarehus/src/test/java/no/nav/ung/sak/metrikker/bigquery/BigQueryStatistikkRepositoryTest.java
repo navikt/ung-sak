@@ -58,9 +58,6 @@ class BigQueryStatistikkRepositoryTest {
     private BehandlingRepository behandlingRepository;
 
     @Inject
-    private EtterlysningRepository etterlysningRepository;
-
-    @Inject
     private SaksnummerRepository saksnummerRepository;
 
     private BigQueryStatistikkRepository statistikkRepository;
