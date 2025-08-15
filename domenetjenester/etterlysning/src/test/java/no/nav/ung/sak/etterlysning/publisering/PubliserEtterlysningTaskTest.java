@@ -80,7 +80,7 @@ class PubliserEtterlysningTaskTest {
 
     private static BigQuery opprettBigQuery() {
         return BigQueryOptions.newBuilder()
-            .setProjectId("test-project")
+            .setProjectId("test-project-2")
             .setHost(BIG_QUERY_EMULATOR_CONTAINER.getEmulatorHttpEndpoint())
             .setCredentials(NoCredentials.getInstance())
             .build()
