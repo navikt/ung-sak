@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_BEGYNNELSE;
 
@@ -46,19 +45,19 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public BigQueryMetrikkTask(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled, BigQueryKlient bigQueryKlient, BigQueryStatistikkRepository statistikkRepository) {
+    public BigQueryMetrikkTask(@KonfigVerdi(value = "BIGQUERY_ENABLED", required = false, defaultVerdi = "false") boolean bigQueryEnabled, BigQueryKlient bigQueryKlient, BigQueryStatistikkRepository statistikkRepository, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.bigQueryKlient = bigQueryKlient;
         this.statistikkRepository = statistikkRepository;
         this.bigQueryEnabled = bigQueryEnabled;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @Override
     public void doTask(ProsessTaskData data) {
         long startTime = System.nanoTime();
 
-        var sistKjørtTidspunkt = prosessTaskTjeneste.finnAlle(BigQueryMetrikkTask.TASKTYPE, ProsessTaskStatus.FERDIG).stream()
-            .map(ProsessTaskData::getSistKjørt)
-            .max(Comparator.naturalOrder()).orElse(TIDENES_BEGYNNELSE.atStartOfDay());
+        var sistKjørtTidspunkt = finnSisteKjørtTidspunktForCronTask();
+
         try {
             List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker = statistikkRepository.hentHyppigRapporterte(sistKjørtTidspunkt);
 
@@ -75,6 +74,13 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
                 log.warn("Generering av BigQuery metrikker tok : " + varighet);
             }
         }
+    }
+
+    private LocalDateTime finnSisteKjørtTidspunktForCronTask() {
+        var sistKjørtTidspunkt = prosessTaskTjeneste.finnAlle(BigQueryMetrikkTask.TASKTYPE, ProsessTaskStatus.FERDIG).stream()
+            .map(ProsessTaskData::getSistKjørt)
+            .max(Comparator.naturalOrder()).orElse(TIDENES_BEGYNNELSE.atStartOfDay());
+        return sistKjørtTidspunkt;
     }
 
     private void publiserMetrikker(BigQueryDataset dataset, List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker) {
