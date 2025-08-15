@@ -14,11 +14,13 @@ import no.nav.ung.sak.typer.Saksnummer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.UUID;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
 public record EtterlysningRecord(
     Saksnummer saksnummer,
+    UUID eksternreferanse,
     EtterlysningType etterlysningType,
     EtterlysningStatus etterlysningStatus,
     DatoIntervallEntitet periode,
@@ -31,6 +33,7 @@ public record EtterlysningRecord(
             "etterlysning",
             Schema.of(
                 Field.of("saksnummer", StandardSQLTypeName.STRING),
+                Field.of("eksternreferanse", StandardSQLTypeName.STRING),
                 Field.of("type", StandardSQLTypeName.STRING),
                 Field.of("status", StandardSQLTypeName.STRING),
                 Field.of("fom", StandardSQLTypeName.DATE),
@@ -41,6 +44,7 @@ public record EtterlysningRecord(
             EtterlysningRecord.class,
             rec -> Map.of(
                 "saksnummer", rec.saksnummer.getVerdi(),
+                "eksternreferanse", rec.eksternreferanse.toString(),
                 "type", rec.etterlysningType().getKode(),
                 "status", rec.etterlysningStatus().getNavn(),
                 "fom", rec.periode().getFomDato().format(DateTimeFormatter.ISO_LOCAL_DATE),

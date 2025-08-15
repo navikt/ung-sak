@@ -49,6 +49,7 @@ public class PubliserEtterlysningTask implements ProsessTaskHandler {
 
     private void publiser(Behandling behandling, Etterlysning etterlysning) {
         var record = new EtterlysningRecord(behandling.getFagsak().getSaksnummer(),
+            etterlysning.getEksternReferanse(),
             etterlysning.getType(),
             etterlysning.getStatus(),
             etterlysning.getPeriode(),
