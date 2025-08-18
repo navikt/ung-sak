@@ -21,6 +21,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
@@ -89,6 +90,9 @@ public class BigQueryStatistikkRepository {
 
         Collection<EtterlysningRecord> etterlysningData = etterlysningData(sistKjørtTidspunkt);
         hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
+
+        Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
+        hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, behandlingÅrsakData));
 
         return hyppigRapporterte;
     }
@@ -414,6 +418,73 @@ public class BigQueryStatistikkRepository {
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+
+    /**
+     * Henter statistikk for behandlinger gruppert på årsakstype og ferdigbehandlet-status.
+     *
+     * Denne metoden henter antall behandlinger for hver kombinasjon av relevante årsakstyper og om behandlingen er ferdigbehandlet eller ikke.
+     * Resultatet inkluderer alle relevante årsaker, også de med 0 forekomster, for både ferdigbehandlet og ikke-ferdigbehandlet status.
+     *
+     * @return En samling av BehandlingÅrsakRecord for alle relevante årsaker og ferdigbehandlet-status.
+     */
+    Collection<BehandlingÅrsakRecord> behandlingÅrsakStatistikk() {
+
+        var relevanteÅrsaker = Set.of(
+            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+            BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
+            BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
+            BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
+            BehandlingÅrsakType.RE_SATS_REGULERING
+        );
+
+        String sql = """
+            select ba.behandling_årsak_type, b.behandling_status, count(distinct b.id) as antall\
+                  from fagsak f\
+                  inner join behandling b on b.fagsak_id=f.id\
+                  inner join behandling_årsak ba on ba.behandling_id = b.id\
+                  where f.ytelse_type <> :obsoleteKode and ba.behandling_årsak_type in :relevanteÅrsaker \
+                  group by 1, 2 \
+                  order by 1, 2
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("relevanteÅrsaker", relevanteÅrsaker.stream().map(BehandlingÅrsakType::getKode).collect(Collectors.toSet()))
+            .getResultStream();
+
+        // Gruppér på behandling_årsak_type og erFerdigbehandletStatus
+        Map<Tuple<String, Boolean>, Long> grouped = stream.collect(Collectors.groupingBy(
+            t -> new Tuple<>(
+                t.get(0, String.class),
+                BehandlingStatus.fraKode(t.get(1, String.class)).erFerdigbehandletStatus()
+            ),
+            Collectors.summingLong(t -> t.get(2, Long.class))
+        ));
+
+        // Finn alle mulige kombinasjoner av relevanteÅrsaker og erFerdigbehandletStatus (true/false)
+        List<BehandlingÅrsakRecord> result = new ArrayList<>();
+        for (BehandlingÅrsakType årsak : relevanteÅrsaker) {
+            for (boolean ferdig : List.of(true, false)) {
+                Tuple<String, Boolean> key = new Tuple<>(årsak.getKode(), ferdig);
+                Long totaltAntall = grouped.getOrDefault(key, 0L);
+                result.add(new BehandlingÅrsakRecord(
+                    BigDecimal.valueOf(totaltAntall),
+                    årsak,
+                    ferdig,
+                    ZonedDateTime.now()
+                ));
+            }
+        }
+        return result;
+    }
+
 
 
 }

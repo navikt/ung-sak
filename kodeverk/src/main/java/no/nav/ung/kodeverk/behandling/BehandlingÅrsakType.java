@@ -15,8 +15,6 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),
 
     // Manuelt opprettet revurdering (obs: årsakene kan også bli satt på en automatisk opprettet revurdering)
-    RE_KLAGE_UTEN_END_INNTEKT("RE-KLAG-U-INNTK", "Klage/ankebehandling uten endrede inntektsopplysninger"),
-    RE_KLAGE_MED_END_INNTEKT("RE-KLAG-M-INNTK", "Klage/ankebehandling med endrede inntektsopplysninger"),
     RE_OPPLYSNINGER_OM_DØD("RE-DØD", "Nye opplysninger om brukers eller barns dødsfall"),
     ETTER_KLAGE("ETTER_KLAGE", "Ny behandling eller revurdering etter klage eller anke"),
 
@@ -112,6 +110,6 @@ public enum BehandlingÅrsakType implements Kodeverdi {
 
     // Mulig relevant for klage
     public static Set<BehandlingÅrsakType> årsakerEtterKlageBehandling() {
-        return Set.of(ETTER_KLAGE, RE_KLAGE_MED_END_INNTEKT, RE_KLAGE_UTEN_END_INNTEKT);
+        return Set.of(ETTER_KLAGE);
     }
 }
