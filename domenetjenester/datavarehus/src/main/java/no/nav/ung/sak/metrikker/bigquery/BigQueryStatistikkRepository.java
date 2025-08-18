@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -51,7 +52,6 @@ public class BigQueryStatistikkRepository {
     private static final String OBSOLETE_KODE = FagsakYtelseType.OBSOLETE.getKode();
 
     private final EntityManager entityManager;
-    private final Set<String> taskTyper;
 
     @Inject
     public BigQueryStatistikkRepository(
@@ -59,10 +59,6 @@ public class BigQueryStatistikkRepository {
         @Any Instance<ProsessTaskHandler> handlers
     ) {
         this.entityManager = entityManager;
-        this.taskTyper = handlers.stream()
-            .map(this::extractClass)
-            .map(it -> it.getAnnotation(ProsessTask.class).value())
-            .collect(Collectors.toSet());
     }
 
     private Class<?> extractClass(ProsessTaskHandler bean) {
@@ -73,7 +69,7 @@ public class BigQueryStatistikkRepository {
         }
     }
 
-    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte() {
+    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
         Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
@@ -91,7 +87,7 @@ public class BigQueryStatistikkRepository {
         Collection<BehandslingsresultatStatistikkRecord> behandlingResultatStatistikk = behandlingResultatStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandslingsresultatStatistikkRecord.BEHANDLINGSRESULTAT_STATISTIKK_TABELL, behandlingResultatStatistikk));
 
-        Collection<EtterlysningRecord> etterlysningData = etterlysningData();
+        Collection<EtterlysningRecord> etterlysningData = etterlysningData(sistKjørtTidspunkt);
         hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
 
         return hyppigRapporterte;
@@ -384,18 +380,19 @@ public class BigQueryStatistikkRepository {
 
     /* Henter etterlysning-data for fagsaker.
      */
-    Collection<EtterlysningRecord> etterlysningData() {
+    Collection<EtterlysningRecord> etterlysningData(LocalDateTime sistKjørtTidspunkt) {
         String sql = """
             select f.saksnummer, e.type, e.status, e.fom, e.tom, frist, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
              from etterlysning e
              inner join behandling b on b.id = e.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
-             where f.ytelse_type <> :obsoleteKode
+             where f.ytelse_type <> :obsoleteKode and coalesce(e.endret_tid, e.opprettet_tid) > :sistKjørtTidspunkt
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
             .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt)
             .getResultStream();
 
         return stream.map(t -> {

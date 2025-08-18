@@ -49,7 +49,6 @@ public record EtterlysningRecord(
                 "frist", rec.frist() != null ? rec.frist().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN)) :
                     TIDENES_ENDE.atStartOfDay(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN)),
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
-            ),
-            true
+            )
         );
 }
