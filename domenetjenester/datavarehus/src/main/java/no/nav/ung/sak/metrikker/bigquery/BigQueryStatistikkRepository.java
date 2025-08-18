@@ -447,7 +447,7 @@ public class BigQueryStatistikkRepository {
             select ba.behandling_årsak_type, b.behandling_status, count(distinct b.id) as antall\
                   from fagsak f\
                   inner join behandling b on b.fagsak_id=f.id\
-                  inner join behandling_årsak ba on ba.behandling_id = b.id\
+                  inner join behandling_arsak ba on ba.behandling_id = b.id\
                   where f.ytelse_type <> :obsoleteKode and ba.behandling_årsak_type in :relevanteÅrsaker \
                   group by 1, 2 \
                   order by 1, 2
