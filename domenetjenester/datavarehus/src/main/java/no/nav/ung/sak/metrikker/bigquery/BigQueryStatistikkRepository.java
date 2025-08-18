@@ -448,7 +448,7 @@ public class BigQueryStatistikkRepository {
                   from fagsak f\
                   inner join behandling b on b.fagsak_id=f.id\
                   inner join behandling_arsak ba on ba.behandling_id = b.id\
-                  where f.ytelse_type <> :obsoleteKode and ba.behandling_årsak_type in :relevanteÅrsaker \
+                  where f.ytelse_type <> :obsoleteKode and ba.behandling_arsak_type in :relevanteÅrsaker \
                   group by 1, 2 \
                   order by 1, 2
             """;
