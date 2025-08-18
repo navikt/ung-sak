@@ -444,7 +444,7 @@ public class BigQueryStatistikkRepository {
         );
 
         String sql = """
-            select ba.behandling_årsak_type, b.behandling_status, count(distinct b.id) as antall\
+            select ba.behandling_arsak_type, b.behandling_status, count(distinct b.id) as antall\
                   from fagsak f\
                   inner join behandling b on b.fagsak_id=f.id\
                   inner join behandling_arsak ba on ba.behandling_id = b.id\
