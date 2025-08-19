@@ -2,7 +2,10 @@ package no.nav.ung.sak.domene.behandling.steg.initperioder;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.sak.behandling.FagsakTjeneste;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -14,7 +17,9 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,14 +36,20 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseStartdatoRepository startdatoRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private FagsakRepository fagsakRepository;
 
     @Inject
     public InitierPerioderSteg(BehandlingRepository behandlingRepository,
                                UngdomsytelseStartdatoRepository startdatoRepository,
-                               MottatteDokumentRepository mottatteDokumentRepository) {
+                               MottatteDokumentRepository mottatteDokumentRepository,
+                               UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
+                               FagsakRepository fagsakRepository) {
         this.behandlingRepository = behandlingRepository;
         this.startdatoRepository = startdatoRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.fagsakRepository = fagsakRepository;
     }
 
     public InitierPerioderSteg() {
@@ -47,7 +58,24 @@ public class InitierPerioderSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         initierRelevanteSøknader(kontekst);
+        begrensFagsakperiode(kontekst);
+
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void begrensFagsakperiode(BehandlingskontrollKontekst kontekst) {
+        var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(kontekst.getBehandlingId());
+        if (periodeTidslinje.isEmpty()) {
+            // Hvis det ikke finnes noen perioder, så er det ingenting å gjøre
+            return;
+        }
+        var sisteDagIProgrammet = periodeTidslinje.getMaxLocalDate();
+        var fagsak = fagsakRepository.finnEksaktFagsak(kontekst.getFagsakId());
+        if (sisteDagIProgrammet.isBefore(fagsak.getPeriode().getTomDato())) {
+            // Begrenser fagsakperioden til programperioden
+            fagsakRepository.oppdaterPeriode(kontekst.getFagsakId(), fagsak.getPeriode().getFomDato(), sisteDagIProgrammet);
+        }
     }
 
     private void initierRelevanteSøknader(BehandlingskontrollKontekst kontekst) {
