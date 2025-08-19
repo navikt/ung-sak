@@ -70,6 +70,7 @@ import no.nav.ung.sak.typer.AktørId;
 @SqlResultSetMappings(value = {
     @SqlResultSetMapping(name = "PipDataResult", classes = {
         @ConstructorResult(targetClass = PipBehandlingsData.class, columns = {
+            @ColumnResult(name = "behandlingUuid"),
             @ColumnResult(name = "behandligStatus"),
             @ColumnResult(name = "ansvarligSaksbehandler"),
             @ColumnResult(name = "fagsakId"),

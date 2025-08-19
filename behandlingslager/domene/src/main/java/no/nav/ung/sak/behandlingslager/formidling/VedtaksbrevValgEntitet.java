@@ -102,4 +102,16 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
         setRedigert(false);
         setHindret(false);
     }
+
+    @Override
+    public String toString() {
+        return "VedtaksbrevValgEntitet{" +
+            "id=" + id +
+            ", behandlingId=" + behandlingId +
+            ", redigert=" + redigert +
+            ", hindret=" + hindret +
+            ", redigertBrevHtml='" + (redigertBrevHtml != null) + '\'' +
+            ", versjon=" + versjon +
+            '}';
+    }
 }

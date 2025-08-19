@@ -140,7 +140,7 @@ public class Fagsak extends BaseEntitet {
         oppdaterStatus(FagsakStatus.AVSLUTTET);
     }
 
-    void oppdaterStatus(FagsakStatus status) {
+    public void oppdaterStatus(FagsakStatus status) {
         this.setFagsakStatus(status);
     }
 

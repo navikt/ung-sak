@@ -65,7 +65,7 @@ public class DokumentMottakerInntektrapportering implements Dokumentmottaker {
             }
             // Setter dokument til BEHANDLER for at AsyncAbakusLagreOpptjeningTask skal plukke den opp (brukes som idempotens-sjekk for kall mot abakus)
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
-            opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId());
+            opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandling.getId(), dokument.getJournalpostId());
             lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }
     }
@@ -100,8 +100,8 @@ public class DokumentMottakerInntektrapportering implements Dokumentmottaker {
     }
 
 
-    private void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId) {
-        historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(fagsakId, journalpostId);
+    private void opprettHistorikkinnslagForVedlegg(Long fagsakId, Long behandlingId, JournalpostId journalpostId) {
+        historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(fagsakId, behandlingId, journalpostId);
     }
 
     @Override

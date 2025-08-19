@@ -7,7 +7,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -20,7 +19,9 @@ import no.nav.ung.sak.formidling.template.dto.innvilgelse.SatsEndringHendelseDto
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.sak.formidling.template.dto.innvilgelse.beregning.SatsOgBeregningDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.SatsEndring;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
@@ -68,7 +69,10 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var brevfeilSamler = new BrevfeilHåndterer(!ignoreIkkeStøttedeBrev);
         Long behandlingId = behandling.getId();
 
-        var ytelseFom = detaljertResultatTidslinje.getMinLocalDate();
+        var ytelseFom = DetaljertResultat
+            .filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
+            .getMinLocalDate();
+
         var ytelseTom = finnEvtTomDato(detaljertResultatTidslinje, behandlingId, brevfeilSamler);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
@@ -91,7 +95,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
         }
 
-        return new TemplateInnholdResultat(DokumentMalType.INNVILGELSE_DOK, TemplateType.INNVILGELSE,
+        return new TemplateInnholdResultat(TemplateType.INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
                 ytelseTom,
@@ -150,26 +154,20 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var currentSatser = current.getValue();
         var previousSatser = previous.getValue();
 
-        int gjeldendeAntallBarn = currentSatser.antallBarn();
-        int tidligereAntallBarn = previousSatser.antallBarn();
-        var fødselBarn = gjeldendeAntallBarn > tidligereAntallBarn;
-        var dødsfallBarn = gjeldendeAntallBarn < tidligereAntallBarn;
-        var fikkFlereBarn = gjeldendeAntallBarn > tidligereAntallBarn && gjeldendeAntallBarn - tidligereAntallBarn > 1;
-        var overgangTilHøySats = currentSatser.satsType() == UngdomsytelseSatsType.HØY && previousSatser.satsType() == UngdomsytelseSatsType.LAV;
-        var overgangLavSats = currentSatser.satsType() == UngdomsytelseSatsType.LAV && previousSatser.satsType() == UngdomsytelseSatsType.HØY;
+        SatsEndring result = SatsEndring.bestemSatsendring(currentSatser, previousSatser);
 
-        if (overgangLavSats) {
+        if (result.overgangLavSats()) {
             brevfeilHåndterer.registrerFeilmelding("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
         }
 
         return new SatsEndringHendelseDto(
-            overgangTilHøySats,
-            fødselBarn,
-            dødsfallBarn,
+            result.overgangTilHøySats(),
+            result.fødselBarn(),
+            result.dødsfallBarn(),
             current.getFom(),
             Satsberegner.beregnDagsatsInklBarnetillegg(currentSatser),
-            dødsfallBarn ? Satsberegner.beregnBarnetilleggSats(previousSatser) : Satsberegner.beregnBarnetilleggSats(currentSatser),
-            fikkFlereBarn
+            result.dødsfallBarn() ? Satsberegner.beregnBarnetilleggSats(previousSatser) : Satsberegner.beregnBarnetilleggSats(currentSatser),
+            result.fikkFlereBarn()
         );
     }
 
@@ -191,6 +189,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var barnetillegg = nyesteSats.antallBarn() > 0
             ? new BarnetilleggDto(
             Satsberegner.tallTilNorskHunkjønnTekst(nyesteSats.antallBarn()),
+            nyesteSats.antallBarn() > 1,
             Satsberegner.beregnBarnetilleggSats(nyesteSats),
             Satsberegner.beregnDagsatsInklBarnetillegg(nyesteSats))
             : null;

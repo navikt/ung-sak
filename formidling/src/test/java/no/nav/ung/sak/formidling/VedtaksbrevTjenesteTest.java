@@ -1,6 +1,5 @@
 package no.nav.ung.sak.formidling;
 
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -12,84 +11,41 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
+import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+/**
+ * Tester at ulike flyter fra klient funker.
+ */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class VedtaksbrevTjenesteTest {
 
-
-    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private VedtaksbrevRegler vedtaksbrevRegler;
-    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
-    private UngTestRepositories ungTestRepositories;
+    @Inject
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
-
-    PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
-
     @Inject
     private EntityManager entityManager;
+
+    private UngTestRepositories ungTestRepositories;
 
     @BeforeEach
     void setup() {
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        lagBrevgenererOgVedtaksbrevRegler();
-        vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
-        vedtaksbrevTjeneste = new VedtaksbrevTjeneste(
-                vedtaksbrevGenerererTjeneste, vedtaksbrevRegler, vedtaksbrevValgRepository,
-            ungTestRepositories.repositoryProvider().getBehandlingRepository());
-
-    }
-
-    private void lagBrevgenererOgVedtaksbrevRegler() {
-        var repositoryProvider = ungTestRepositories.repositoryProvider();
-        var tilkjentYtelseRepository = ungTestRepositories.tilkjentYtelseRepository();
-
-        var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungTestRepositories.ungdomsprogramPeriodeRepository(), ungTestRepositories.ungdomsytelseStartdatoRepository());
-
-        var endringInnholdBygger = new EndringRapportertInntektInnholdBygger(tilkjentYtelseRepository);
-
-        var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, repositoryProvider.getBehandlingRepository())),
-            tilkjentYtelseRepository, repositoryProvider.getVilkårResultatRepository());
-
-        Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(endringInnholdBygger);
-
-        vedtaksbrevRegler = new VedtaksbrevRegler(repositoryProvider.getBehandlingRepository(), innholdByggere, detaljertResultatUtleder, ungTestRepositories.ungdomsprogramPeriodeRepository());
-
-        vedtaksbrevGenerererTjeneste = new VedtaksbrevGenerererTjenesteImpl(
-            repositoryProvider.getBehandlingRepository(),
-            new PdfGenKlient(),
-            vedtaksbrevRegler,
-            ungTestRepositories.vedtaksbrevValgRepository(),
-            new ManueltVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()),
-            new BrevMottakerTjeneste(new AktørTjeneste(pdlKlient), repositoryProvider.getPersonopplysningRepository()));
     }
 
     @Test
@@ -261,12 +217,14 @@ class VedtaksbrevTjenesteTest {
         assertThat(forhåndsvis(behandling, true)).contains(redigertHtml);
 
         //Ingen brev som brukes av behandling
-        assertThat(forhåndsvis(behandling, null)).isNull();
+        assertThatThrownBy(() -> forhåndsvis(behandling, null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("hindret");
     }
 
 
     private Behandling lagScenarioMedRedigerbarBrev() {
-        UngTestScenario ungTestscenario = BrevScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
@@ -284,10 +242,10 @@ class VedtaksbrevTjenesteTest {
     }
 
     private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
-        GenerertBrev generertBrev = vedtaksbrevTjeneste.forhåndsvis(
-            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true)
+        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(
+            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true, null)
         );
-        return Optional.ofNullable(generertBrev).map(it -> it.dokument().html()).orElse(null);
+        return generertBrev.stream().map(it -> it.dokument().html()).collect(Collectors.joining(",", "[", "]"));
     }
 
 }

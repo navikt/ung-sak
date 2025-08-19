@@ -13,8 +13,12 @@
 	<artifactId>datavarehus</artifactId>
 	<packaging>jar</packaging>
 	<name>ung-sak :: Domenetjenester - Datavarehus</name>
+    <properties>
+        <google-cloud-bigquery.version>2.54.0</google-cloud-bigquery.version>
+        <testContainers.version>1.21.3</testContainers.version>
+    </properties>
 
-	<dependencies>
+    <dependencies>
 		<dependency>
 			<groupId>no.nav.k9.felles.sikkerhet</groupId>
 			<artifactId>k9-felles-sikkerhet</artifactId>
@@ -46,6 +50,12 @@
 			<artifactId>k9-sensu-klient</artifactId>
 		</dependency>
 
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-bigquery</artifactId>
+            <version>${google-cloud-bigquery.version}</version>
+        </dependency>
+
 		<!-- Test avhengigheter -->
 		<dependency>
 			<groupId>no.nav.ung.sak</groupId>
@@ -58,7 +68,23 @@
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>gcloud</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 </project>

@@ -9,10 +9,11 @@ import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,15 +68,15 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
     void setUp() {
         scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.medBehandlingÅrsak(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM).lagre(entityManager);
-        final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         programperiodeendringEtterlysningTjeneste = new ProgramperiodeendringEtterlysningTjeneste(
-            ungdomsprogramPeriodeTjeneste,
             ungdomsprogramPeriodeRepository,
             prosessTaskTjeneste,
             etterlysningRepository,
             new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository),
-            new BehandlingRepository(entityManager)
+            ungdomsytelseStartdatoRepository,
+            new BehandingprosessSporingRepository(entityManager),
+            new EtterlysningForEndretProgramperiodeResultatHåndterer(etterlysningRepository)
         );
     }
 
@@ -311,6 +313,42 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
     }
+
+    @Test
+    void skal_ikke_opprette_ny_etterlysning_for_sluttdato_dersom_sluttdato_er_endret_siden_mottatt_svar_på_endret_startdato() {
+
+        final var fom = LocalDate.now();
+        final var tom = fom.plusDays(10);
+        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(fom, new JournalpostId("1L"))));
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
+        final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+
+        opprettEtterlysningMedMottattSvar(ungdomsprogramPeriodeGrunnlag, fom, tom, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+
+        final var nyTom = LocalDate.now().plusMonths(30);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(
+            new UngdomsprogramPeriode(fom, nyTom)
+        ));
+        final var nyttGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+
+
+        // act
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
+
+        // Assert
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId()).stream().sorted(Comparator.comparing(BaseEntitet::getOpprettetTidspunkt)).toList();
+        assertThat(etterlysninger.size()).isEqualTo(2);
+        final var gammelEtterlysning = etterlysninger.get(0);
+        assertThat(gammelEtterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+        assertThat(gammelEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
+        assertThat(gammelEtterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
+
+        final var nyEtterlysning = etterlysninger.get(1);
+        assertThat(nyEtterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, nyTom));
+        assertThat(nyEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
+        assertThat(nyEtterlysning.getGrunnlagsreferanse()).isEqualTo(nyttGrunnlag.getGrunnlagsreferanse());
+    }
+
 
 
     @Test

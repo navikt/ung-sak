@@ -11,15 +11,15 @@ import java.util.TreeMap;
 import java.util.function.Function;
 
 /** Generer alle kombinasjoner av angitte input data. */
-class CombineLists<T> {
+public class CombineLists<T> {
 
     private Map<String, Collection<T>> namedVectors;
 
-    CombineLists(Map<String, Collection<T>> namedVectors) {
+    public CombineLists(Map<String, Collection<T>> namedVectors) {
         this.namedVectors = new TreeMap<>(namedVectors);
     }
 
-    List<Map<String, T>> toMap() {
+    public List<Map<String, T>> toMap() {
         return toMap(v -> v);
     }
 

@@ -30,7 +30,8 @@ public class PdpRequestMapper {
 
     public static OperasjonDto operasjon(PdpRequest pdpRequest) {
         ResourceType resource = resourceTypeFraKode(pdpRequest.getString(AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE));
-        return new OperasjonDto(resource, actionFraKode(pdpRequest.getString(AbacAttributter.XACML_1_0_ACTION_ACTION_ID)));
+        Set<AksjonspunktType> aksjonspunktTyper = aksjonspunktTyperFraKoder(pdpRequest.getListOfString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE));
+        return new OperasjonDto(resource, actionFraKode(pdpRequest.getString(AbacAttributter.XACML_1_0_ACTION_ACTION_ID)), aksjonspunktTyper);
     }
 
     public static SaksinformasjonDto saksinformasjon(PdpRequest pdpRequest) {
@@ -42,7 +43,7 @@ public class PdpRequestMapper {
             Arrays.stream(AbacFagsakStatus.values())
                 .filter(v -> v.getEksternKode().equals(pdpRequest.getString(AbacAttributter.RESOURCE_SAKSSTATUS)))
                 .findFirst().orElse(null),
-            aksjonspunktTyperFraKoder(pdpRequest.getListOfString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE)));
+            null);
     }
 
     private static Set<AksjonspunktType> aksjonspunktTyperFraKoder(List<String> koder) {

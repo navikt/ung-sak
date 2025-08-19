@@ -14,6 +14,7 @@ import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingEndretKonfliktException;
+import no.nav.ung.sak.web.server.abac.UkjentAbacVerdiException;
 
 public class KnownExceptionMappers {
 
@@ -31,6 +32,7 @@ public class KnownExceptionMappers {
         register(TomtResultatException.class, new TomtResultatExceptionMapper());
         register(UnsupportedOperationException.class, new UnsupportedOperationExceptionMapper());
         register(VLException.class, new VLExceptionMapper());
+        register(UkjentAbacVerdiException.class, new UkjentAbacVerdiExceptionMapper());
         register(Throwable.class, new ThrowableExceptionMapper());
     }
 

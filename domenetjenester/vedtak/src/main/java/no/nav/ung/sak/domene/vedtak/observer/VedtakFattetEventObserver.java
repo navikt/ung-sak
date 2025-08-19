@@ -7,12 +7,11 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
-import no.nav.ung.sak.formidling.bestilling.VedtaksbrevBestillingTask;
+import no.nav.ung.sak.formidling.bestilling.VurderVedtaksbrevTask;
 
 @ApplicationScoped
 public class VedtakFattetEventObserver {
 
-    public static final String BREVBESTILLING_TASKTYPE = "formidling.vedtak.brevbestilling";
     private ProsessTaskTjeneste taskTjeneste;
 
     public VedtakFattetEventObserver() {
@@ -36,9 +35,9 @@ public class VedtakFattetEventObserver {
     }
 
     private static ProsessTaskData opprettTaskForBrevbestilling(BehandlingVedtakEvent event) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class
-        );
-        prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId());
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VurderVedtaksbrevTask.class);
+        prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
+        prosessTaskData.setSaksnummer(event.getBehandling().getFagsak().getSaksnummer().toString());
         return prosessTaskData;
     }
 

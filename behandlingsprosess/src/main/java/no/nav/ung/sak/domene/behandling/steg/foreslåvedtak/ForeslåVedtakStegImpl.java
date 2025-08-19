@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.VedtaksbrevTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 
 import java.util.Optional;
 

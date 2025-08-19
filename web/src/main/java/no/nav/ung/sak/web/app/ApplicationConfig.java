@@ -9,7 +9,9 @@ import jakarta.ws.rs.ApplicationPath;
 import no.nav.openapi.spec.utils.http.DynamicObjectMapperResolverVaryFilter;
 import no.nav.openapi.spec.utils.jackson.DynamicJacksonJsonProvider;
 import no.nav.openapi.spec.utils.openapi.OpenApiSetupHelper;
+import no.nav.openapi.spec.utils.openapi.PrefixStrippingFQNTypeNameResolver;
 import no.nav.ung.sak.web.app.exceptions.KnownExceptionMappers;
+import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 import no.nav.ung.sak.web.server.caching.CacheControlFeature;
@@ -25,14 +27,17 @@ public class ApplicationConfig extends ResourceConfig {
 
     public OpenAPI resolveOpenAPI() {
         final var info = new Info()
-            .title("Ung saksbehandling - Saksbehandling for ungdomsytelse")
-            .version("0.2")
+            .title("Ung saksbehandling - Saksbehandling for ungdomsprogramytelsen")
+            .version("1.0")
             .description("REST grensesnitt for Vedtaksløsningen.");
 
         final var server =new Server().url("/ung/sak");
         final var openapiSetupHelper = new OpenApiSetupHelper(this, info, server);
         openapiSetupHelper.addResourcePackage("no.nav.ung.sak");
         openapiSetupHelper.addResourcePackage("no.nav.k9");
+        // The same classes registered as subtypes in object mapper are registered as subtypes in openapi setup helper:
+        openapiSetupHelper.registerSubTypes(ObjectMapperFactory.allJsonTypeNameClasses());
+        openapiSetupHelper.setTypeNameResolver(new PrefixStrippingFQNTypeNameResolver("no.nav."));
         try {
             return openapiSetupHelper.resolveOpenAPI();
         } catch (OpenApiConfigurationException e) {

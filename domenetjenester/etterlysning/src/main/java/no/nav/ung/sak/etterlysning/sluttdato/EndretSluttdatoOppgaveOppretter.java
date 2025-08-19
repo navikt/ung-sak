@@ -50,7 +50,6 @@ public class EndretSluttdatoOppgaveOppretter {
 
     private LocalDate hentSluttdato(UUID grunnlagsreferanse) {
         return ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(grunnlagsreferanse)
-            .orElseThrow(() -> new IllegalStateException("Forventer å finne grunnlag for etterlysning med grunnlagsreferanse: " + grunnlagsreferanse))
             .getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode().getTomDato();
     }
 }

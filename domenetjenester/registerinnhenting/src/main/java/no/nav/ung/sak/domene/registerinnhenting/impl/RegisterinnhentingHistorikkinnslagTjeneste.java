@@ -40,7 +40,8 @@ public class RegisterinnhentingHistorikkinnslagTjeneste {
     public void opprettHistorikkinnslagForTilbakespoling(Behandling behandling, BehandlingStegType førSteg, BehandlingStegType etterSteg) {
         var nyeRegisteropplysningerInnslagBuilder = new Historikkinnslag.Builder();
         nyeRegisteropplysningerInnslagBuilder.medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        nyeRegisteropplysningerInnslagBuilder.medTittel("Behandlingen er flyttet");
+        nyeRegisteropplysningerInnslagBuilder.medTittel("Behandlingen er automatisk flyttet");
+        nyeRegisteropplysningerInnslagBuilder.addLinje("Behandlingen er flyttet fra " + førSteg.getNavn() + " til " + etterSteg.getNavn());
         nyeRegisteropplysningerInnslagBuilder.medBehandlingId(behandling.getId());
         nyeRegisteropplysningerInnslagBuilder.medFagsakId(behandling.getFagsakId());
         historikkinnslagRepository.lagre(nyeRegisteropplysningerInnslagBuilder.build());

@@ -21,7 +21,7 @@ public enum BehandlingStegType implements Kodeverdi {
     VURDER_SØKNADSFRIST("VURDER_SØKNADSFRIST", "Vurder søknadsfrist", UTREDES),
     INIT_PERIODER("INIT_PERIODER", "Start", UTREDES),
     INIT_VILKÅR("INIT_VILKÅR", "Initier vilkår for behandling", UTREDES),
-    INNHENT_REGISTEROPP("INREG", "Innhent registeropplysninger - innledende oppgaver", UTREDES),
+    INNHENT_REGISTEROPP("INREG", "Innhent registeropplysninger", UTREDES),
     IVERKSETT_VEDTAK("IVEDSTEG", "Iverksett Vedtak", IVERKSETTER_VEDTAK),
     KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT("VURDEROP", "Kontrollerer søkers opplysningsplikt", UTREDES),
     SIMULER_OPPDRAG("SIMOPP", "Simuler oppdrag", UTREDES),

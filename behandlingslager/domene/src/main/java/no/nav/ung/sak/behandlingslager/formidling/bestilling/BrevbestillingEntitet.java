@@ -5,6 +5,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "BrevbestillingEntitet")
@@ -64,7 +65,7 @@ public class BrevbestillingEntitet extends BaseEntitet {
     @Embedded
     private BrevMottaker mottaker;
 
-    @Column(name = "aktiv", nullable = false, updatable = false)
+    @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
     @Version
@@ -83,11 +84,20 @@ public class BrevbestillingEntitet extends BaseEntitet {
         this.vedtaksbrev = dokumentMalType.isVedtaksbrevmal();
     }
 
+    public BrevbestillingEntitet(Long fagsakId, Long behandlingId, DokumentMalType dokumentMalType, BrevbestillingStatusType status) {
+        this.brevbestillingUuid = UUID.randomUUID();
+        this.fagsakId = fagsakId;
+        this.behandlingId = behandlingId;
+        this.dokumentMalType = dokumentMalType;
+        this.status = status;
+        this.vedtaksbrev = dokumentMalType.isVedtaksbrevmal();
+    }
+
     public BrevbestillingEntitet() {
     }
 
-    public static BrevbestillingEntitet nyBrevbestilling(Long fagsakId, Long id, DokumentMalType dokumentMalType, TemplateType templateType, BrevMottaker brevMottaker) {
-        return new BrevbestillingEntitet(fagsakId, id, dokumentMalType, templateType, BrevbestillingStatusType.NY, brevMottaker);
+    public static BrevbestillingEntitet nyBrevbestilling(Long fagsakId, Long behandlingId, DokumentMalType dokumentMalType) {
+        return new BrevbestillingEntitet(fagsakId, behandlingId, dokumentMalType, BrevbestillingStatusType.NY);
     }
 
     public UUID getBrevbestillingUuid() {
@@ -118,8 +128,14 @@ public class BrevbestillingEntitet extends BaseEntitet {
         return vedtaksbrev;
     }
 
-    public void journalført(String journalpostId) {
+    public void journalført(String journalpostId, TemplateType templateType, BrevMottaker brevMottaker) {
+        Objects.requireNonNull(brevMottaker);
+        Objects.requireNonNull(templateType);
+        Objects.requireNonNull(journalpostId);
+
         this.journalpostId = journalpostId;
+        this.templateType = templateType;
+        this.mottaker = brevMottaker;
         status = BrevbestillingStatusType.JOURNALFØRT;
     }
 
@@ -157,7 +173,7 @@ public class BrevbestillingEntitet extends BaseEntitet {
             ", journalpostId='" + journalpostId + '\'' +
             ", dokdistBestillingId='" + dokdistBestillingId + '\'' +
             ", vedtaksbrev=" + vedtaksbrev +
-            ", mottakerType=" + mottaker.getMottakerIdType() +
+            ", mottakerType=" + (mottaker != null ? mottaker.getMottakerIdType() : null) +
             ", versjon=" + versjon +
             '}';
     }

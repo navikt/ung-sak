@@ -18,7 +18,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
+import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.LegacyVenteårsakSomObjekt;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.VenteårsakSomObjekt;
@@ -97,11 +97,8 @@ public class KodeverkRestTjeneste {
             sortert(alle.arbeidTyper()),
             sortert(alle.opptjeningAktivitetTyper()),
             sortert(alle.revurderingVarslingÅrsaker()),
-            sortert(alle.inntektskategorier()),
-            sortert(alle.aktivitetStatuser()),
             sortert(alle.arbeidskategorier()),
             sortert(alle.fagsystemer()),
-            sortert(alle.faktaOmBeregningTilfeller()),
             sortert(alle.skjermlenkeTyper()),
             sortert(alle.historikkOpplysningTyper()),
             sortert(alle.historikkEndretFeltTyper()),
@@ -114,14 +111,12 @@ public class KodeverkRestTjeneste {
             sortert(alle.medlemskapDekningTyper()),
             sortert(alle.medlemskapTyper()),
             sortert(alle.avslagsårsaker()),
-            sortert(alle.konsekvenserForYtelsen()),
             sortert(alle.vilkårTyper()),
             sortert(alle.vurderArbeidsforholdHistorikkinnslag()),
             sortert(alle.tilbakekrevingVidereBehandlinger()),
             sortert(alle.vurderingsÅrsaker()),
             sortert(alle.språkkoder()),
             sortert(alle.vedtakResultatTyper()),
-            sortert(alle.dokumentTypeIder()),
             sortert(alle.årsakerTilVurdering()),
             new TreeMap<>(avslagårsakerGruppertPåVilkårType)
         );
@@ -160,11 +155,8 @@ public class KodeverkRestTjeneste {
             o.arbeidTyper(),
             o.opptjeningAktivitetTyper(),
             o.revurderingVarslingÅrsaker(),
-            o.inntektskategorier(),
-            o.aktivitetStatuser(),
             o.arbeidskategorier(),
             o.fagsystemer(),
-            o.faktaOmBeregningTilfeller(),
             o.skjermlenkeTyper(),
             o.historikkOpplysningTyper(),
             o.historikkEndretFeltTyper(),
@@ -177,14 +169,12 @@ public class KodeverkRestTjeneste {
             o.medlemskapDekningTyper(),
             o.medlemskapTyper(),
             o.avslagsårsaker(),
-            o.konsekvenserForYtelsen(),
             o.vilkårTyper(),
             o.vurderArbeidsforholdHistorikkinnslag(),
             o.tilbakekrevingVidereBehandlinger(),
             o.vurderingsÅrsaker(),
             o.språkkoder(),
             o.vedtakResultatTyper(),
-            o.dokumentTypeIder(),
             o.årsakerTilVurdering()
         );
 
@@ -216,7 +206,7 @@ public class KodeverkRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @Deprecated(forRemoval = true)
     public Response hentGruppertKodeliste() throws IOException {
-        final ObjectMapper om = ObjectMapperFactory.createBaseObjectMapper();
+        final ObjectMapper om = ObjectMapperResolver.getBaseObjectMapperCopy();
 
         String kodelisteJson = om.writeValueAsString(legacyGruppertKodeverdi);
         jakarta.ws.rs.core.CacheControl cc = new jakarta.ws.rs.core.CacheControl();

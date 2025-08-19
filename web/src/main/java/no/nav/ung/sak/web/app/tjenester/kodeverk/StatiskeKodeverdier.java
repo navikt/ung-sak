@@ -1,41 +1,15 @@
 package no.nav.ung.sak.web.app.tjenester.kodeverk;
 
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.behandling.KonsekvensForYtelsen;
-import no.nav.ung.kodeverk.behandling.RevurderingVarslingÅrsak;
+import no.nav.ung.kodeverk.arbeidsforhold.*;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.ung.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
-import no.nav.ung.kodeverk.dokument.DokumentTypeId;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
-import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
-import no.nav.ung.kodeverk.historikk.HistorikkBegrunnelseType;
-import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltVerdiType;
-import no.nav.ung.kodeverk.historikk.HistorikkOpplysningType;
-import no.nav.ung.kodeverk.historikk.HistorikkResultatType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.ung.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag;
+import no.nav.ung.kodeverk.historikk.*;
 import no.nav.ung.kodeverk.medlem.MedlemskapDekningType;
 import no.nav.ung.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.ung.kodeverk.medlem.MedlemskapType;
@@ -46,6 +20,11 @@ import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
+
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public record StatiskeKodeverdier(
     @NotNull Set<RelatertYtelseTilstand> relatertYtelseTilstander,
@@ -61,11 +40,8 @@ public record StatiskeKodeverdier(
     @NotNull Set<ArbeidType> arbeidTyper,
     @NotNull Set<OpptjeningAktivitetType> opptjeningAktivitetTyper,
     @NotNull Set<RevurderingVarslingÅrsak> revurderingVarslingÅrsaker,
-    @NotNull Set<Inntektskategori> inntektskategorier,
-    @NotNull Set<AktivitetStatus> aktivitetStatuser,
     @NotNull Set<Arbeidskategori> arbeidskategorier,
     @NotNull Set<Fagsystem> fagsystemer,
-    @NotNull Set<FaktaOmBeregningTilfelle> faktaOmBeregningTilfeller,
     @NotNull Set<SkjermlenkeType> skjermlenkeTyper,
     @NotNull Set<HistorikkOpplysningType> historikkOpplysningTyper,
     @NotNull Set<HistorikkEndretFeltType> historikkEndretFeltTyper,
@@ -78,14 +54,12 @@ public record StatiskeKodeverdier(
     @NotNull Set<MedlemskapDekningType> medlemskapDekningTyper,
     @NotNull Set<MedlemskapType> medlemskapTyper,
     @NotNull Set<Avslagsårsak> avslagsårsaker,
-    @NotNull Set<KonsekvensForYtelsen> konsekvenserForYtelsen,
     @NotNull Set<VilkårType> vilkårTyper,
     @NotNull Set<VurderArbeidsforholdHistorikkinnslag> vurderArbeidsforholdHistorikkinnslag,
     @NotNull Set<TilbakekrevingVidereBehandling> tilbakekrevingVidereBehandlinger,
     @NotNull Set<VurderÅrsak> vurderingsÅrsaker,
     @NotNull Set<Språkkode> språkkoder,
     @NotNull Set<VedtakResultatType> vedtakResultatTyper,
-    @NotNull Set<DokumentTypeId> dokumentTypeIder,
     @NotNull Set<ÅrsakTilVurdering> årsakerTilVurdering
 ) {
 
@@ -111,11 +85,8 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(ArbeidType.class).stream().filter(v -> v.erAnnenOpptjening()).collect(Collectors.toSet()),
             alleEnumVerdier(OpptjeningAktivitetType.class),
             alleEnumVerdier(RevurderingVarslingÅrsak.class),
-            alleEnumVerdier(Inntektskategori.class),
-            alleEnumVerdier(AktivitetStatus.class),
             alleEnumVerdier(Arbeidskategori.class),
             alleEnumVerdier(Fagsystem.class),
-            alleEnumVerdier(FaktaOmBeregningTilfelle.class),
             alleEnumVerdier(SkjermlenkeType.class),
             alleEnumVerdier(HistorikkOpplysningType.class),
             alleEnumVerdier(HistorikkEndretFeltType.class),
@@ -128,14 +99,12 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(MedlemskapDekningType.class),
             alleEnumVerdier(MedlemskapType.class),
             alleEnumVerdier(Avslagsårsak.class),
-            alleEnumVerdier(KonsekvensForYtelsen.class),
             alleEnumVerdier(VilkårType.class),
             alleEnumVerdier(VurderArbeidsforholdHistorikkinnslag.class),
             alleEnumVerdier(TilbakekrevingVidereBehandling.class),
             alleEnumVerdier(VurderÅrsak.class),
             new HashSet<>(Språkkode.kodeMap().values()),
             alleEnumVerdier(VedtakResultatType.class),
-            alleEnumVerdier(DokumentTypeId.class),
             alleEnumVerdier(ÅrsakTilVurdering.class)
         );
     }

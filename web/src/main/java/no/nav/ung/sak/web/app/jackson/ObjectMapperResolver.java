@@ -13,7 +13,7 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
 
     private static ObjectMapper baseObjectMapper;
 
-    private static ObjectMapper getBaseObjectMapperCopy() {
+    public static ObjectMapper getBaseObjectMapperCopy() {
         if(baseObjectMapper == null) {
             baseObjectMapper = ObjectMapperFactory.createBaseObjectMapper();
         }

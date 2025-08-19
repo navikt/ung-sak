@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class EtterlysningRepository {
@@ -63,6 +64,16 @@ public class EtterlysningRepository {
                                                              "where e.behandlingId = :behandlingId and e.type = :type and status = :status", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("type", type)
+            .setParameter("status", EtterlysningStatus.OPPRETTET)
+            .getResultList();
+        return etterlysninger;
+    }
+
+    public List<Etterlysning> hentOpprettetEtterlysninger(Long behandlingId, EtterlysningType... typer) {
+        final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
+                "where e.behandlingId = :behandlingId and e.type in (:typer) and status = :status", Etterlysning.class)
+            .setParameter("behandlingId", behandlingId)
+            .setParameter("typer", Arrays.stream(typer).map(EtterlysningType::getKode).collect(Collectors.toSet()))
             .setParameter("status", EtterlysningStatus.OPPRETTET)
             .getResultList();
         return etterlysninger;

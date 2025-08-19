@@ -2,6 +2,7 @@ package no.nav.ung.sak.test.util.fagsak;
 
 import java.time.LocalDate;
 
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.typer.AktørId;
@@ -18,6 +19,7 @@ public class FagsakBuilder {
 
     private FagsakYtelseType fagsakYtelseType;
     private AktørId aktørId = AktørId.dummy();
+    private FagsakStatus status;
 
     private FagsakBuilder(FagsakYtelseType fagsakYtelseType) {
         this.fagsakYtelseType = fagsakYtelseType;
@@ -57,12 +59,21 @@ public class FagsakBuilder {
         return this;
     }
 
+    public FagsakBuilder medStatus(FagsakStatus status) {
+        this.status = status;
+        return this;
+    }
+
     public Fagsak build() {
 
         if (fagsak != null) {
             return fagsak;
         } else {
             fagsak = Fagsak.opprettNy(fagsakYtelseType, aktørId, saksnummer, LocalDate.now(), null);
+
+            if (status != null) {
+                fagsak.oppdaterStatus(status);
+            }
             return fagsak;
         }
 

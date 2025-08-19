@@ -1,0 +1,31 @@
+{{#> felles/base}}
+
+    {{#> felles/seksjon/hoved }}
+        <h1>Vi har endret ungdomsprogramytelsen din</h1>
+
+        {{#with endretStartdato}}
+            <p>Fra {{endretTil}} får du penger fordi du er med i ungdomsprogrammet.</p>
+            <p>
+                Du fikk tidligere melding om at du skulle få penger fra og med {{endretFra}},
+                men den datoen gjelder ikke lenger fordi du startet i ungdomsprogrammet {{endretTil}}.
+            </p>
+        {{/with}}
+        {{#with endretSluttdato}}
+            <p>Fra {{opphørStartDato}} får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet.</p>
+            <p>
+                Du fikk tidligere melding om at du skulle få penger til og med {{endretFra}},
+                men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet {{endretTil}}.
+            </p>
+            {{#if sisteUtbetalingsdato}}
+                <p>Den siste utbetalingen får du før den {{sisteUtbetalingsdato}}.</p>
+            {{/if}}
+        {{/with}}
+
+
+
+        <p>Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 6.</p>
+    {{/felles/seksjon/hoved}}
+
+    {{> felles/footer/footer-vedtak }}
+
+{{/felles/base}}

@@ -15,6 +15,7 @@ import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,8 +36,10 @@ public class PdpRequestBuilderTest {
     private static final String DUMMY_ID_TOKEN = "dummyheader.dymmypayload.dummysignaturee";
     private static final String FAGSAK_ABAC_REFERANSE = "no.nav.abac.attributter.k9.fagsak";
 
-    private static final Long FAGSAK_ID = 10001L;
+    private static final Long FAGSAK_ID_1 = 10001L;
     private static final Long FAGSAK_ID_2 = 10002L;
+    private static final Saksnummer SAKSNUMMER_1 = new Saksnummer("AAAA1");
+    private static final Saksnummer SAKSNUMMER_2 = new Saksnummer("AAAA2");
     private static final Long BEHANDLING_ID = 333L;
     private static final JournalpostId JOURNALPOST_ID = new JournalpostId("444");
 
@@ -55,14 +59,13 @@ public class PdpRequestBuilderTest {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
             .leggTil(AppAbacAttributtType.BEHANDLING_ID, BEHANDLING_ID));
 
-        when(pipRepository.fagsakIdForJournalpostId(any())).thenReturn(Collections.singleton(FAGSAK_ID));
+        when(pipRepository.saksnumreForJournalpostId(any())).thenReturn(Collections.singleton(SAKSNUMMER_1));
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
         String behandligStatus = BehandlingStatus.OPPRETTET.getKode();
         String ansvarligSaksbehandler = "Z123456";
-        String saksnummer = "ABC";
         String fagsakStatus = FagsakStatus.UNDER_BEHANDLING.getKode();
         when(pipRepository.hentDataForBehandling(any()))
-            .thenReturn(Optional.of(new PipBehandlingsData(behandligStatus, ansvarligSaksbehandler, BigInteger.valueOf(FAGSAK_ID), fagsakStatus, saksnummer)));
+            .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, ansvarligSaksbehandler, BigInteger.valueOf(FAGSAK_ID_1), fagsakStatus, SAKSNUMMER_1.toString())));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
@@ -76,8 +79,7 @@ public class PdpRequestBuilderTest {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
             .leggTil(AppAbacAttributtType.JOURNALPOST_ID, JOURNALPOST_ID.getVerdi()));
 
-        when(pipRepository.fagsakIdForJournalpostId(any())).thenReturn(Collections.singleton(FAGSAK_ID));
-        when(pipRepository.fagsakIdForSaksnummer(any())).thenReturn(Collections.singleton(FAGSAK_ID));
+        when(pipRepository.saksnumreForJournalpostId(any())).thenReturn(Collections.singleton(SAKSNUMMER_1));
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
@@ -91,10 +93,10 @@ public class PdpRequestBuilderTest {
 
         when(aktørTjeneste.hentAktørIdForPersonIdentSet(any())).thenReturn(Collections.singleton(AKTØR_0));
 
-        Set<Long> fagsakIder = new HashSet<>();
-        fagsakIder.add(FAGSAK_ID);
-        fagsakIder.add(FAGSAK_ID_2);
-        when(pipRepository.fagsakIderForSøker(any())).thenReturn(fagsakIder);
+        Set<Saksnummer> saksnumre = new HashSet<>();
+        saksnumre.add(SAKSNUMMER_1);
+        saksnumre.add(SAKSNUMMER_2);
+        when(pipRepository.saksnumreForSøker(any())).thenReturn(saksnumre);
         Set<AktørId> aktører = new HashSet<>();
         aktører.add(AKTØR_0);
         aktører.add(AKTØR_1);
@@ -143,9 +145,8 @@ public class PdpRequestBuilderTest {
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
     }
 
-    // TODO: FLytt til junit 5
     @Test
-    public void skal_ikke_godta_at_det_sendes_inn_fagsak_id_og_behandling_id_som_ikke_stemmer_overens() {
+    public void skal_ikke_godta_at_det_sendes_inn_fagsak_id_som_ikke_finnes() {
 
         // Arrange
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
@@ -153,7 +154,46 @@ public class PdpRequestBuilderTest {
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
         String saksnummer = "ABC";
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
-            Optional.of(new PipBehandlingsData(BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode(), saksnummer)));
+            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode(), saksnummer)));
+
+        // Assert
+        Assertions.assertThrows(UkjentFagsakException.class, () -> {
+
+            // Act
+            requestBuilder.lagPdpRequest(attributter);
+
+        });
+    }
+
+    @Test
+    public void skal_ikke_godta_at_det_sendes_inn_behandling_id_som_ikke_finnes() {
+
+        // Arrange
+        AbacAttributtSamling attributter = byggAbacAttributtSamling();
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
+        String saksnummer = "ABC";
+        when(pipRepository.hentDataForBehandling(1234L)).thenReturn(Optional.empty());
+
+        // Assert
+        Assertions.assertThrows(UkjentBehandlingException.class, () -> {
+
+            // Act
+            requestBuilder.lagPdpRequest(attributter);
+
+        });
+    }
+
+
+    @Test
+    public void skal_ikke_godta_at_det_sendes_inn_saksnummer_og_behandling_id_som_ikke_stemmer_overens() {
+
+        // Arrange
+        AbacAttributtSamling attributter = byggAbacAttributtSamling();
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer("XXX")));
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
+        String saksnummer = "ABC";
+        when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
+            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode(), saksnummer)));
 
         // Assert
         Assertions.assertThrows(ManglerTilgangException.class, () -> {

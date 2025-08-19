@@ -2,7 +2,7 @@
 
 [![](https://github.com/navikt/ung-sak/workflows/Bygg%20og%20deploy/badge.svg)](https://github.com/navikt/ung-sak/actions?query=workflow%3A%22Bygg+og+deploy%22) [![](https://github.com/navikt/k9-verdikjede/workflows/Tester%20saksbehandling/badge.svg)](https://navikt.github.io/k9-verdikjede)
 
-Dette er repository for kildkode applikasjonen for saksbehandling av ungdomsytelsen
+Dette er repository for kildkode applikasjonen for saksbehandling av ungdomsprogramytelsen
 
 # Utvikling
    

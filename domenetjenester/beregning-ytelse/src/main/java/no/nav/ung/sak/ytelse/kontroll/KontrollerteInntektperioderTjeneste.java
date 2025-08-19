@@ -44,10 +44,11 @@ public class KontrollerteInntektperioderTjeneste {
     }
 
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId,
-                                                              LocalDateInterval vurdertPeriode,
-                                                              Inntektsresultat inntektsresultat) {
-        final var kontrollertePerioder = mapAutomatiskKontrollerteInntektperioder(new LocalDateTimeline<>(vurdertPeriode, true),
-            new LocalDateTimeline<>(vurdertPeriode, new RapportertInntektOgKilde(inntektsresultat.kilde(), inntektsresultat.inntekt())),
+                                                              LocalDateTimeline<Inntektsresultat> inntektsresultat,
+                                                              String input,
+                                                              String sporing) {
+        final var kontrollertePerioder = mapAutomatiskKontrollerteInntektperioder(inntektsresultat.mapValue(it -> true),
+            inntektsresultat.mapValue(it -> new RapportertInntektOgKilde(it.kilde(), it.inntekt())),
             Optional.of(KontrollertInntektKilde.BRUKER)
         );
         LOG.info("Lagrer inntekt fra bruker: {}", kontrollertePerioder);
@@ -55,7 +56,7 @@ public class KontrollerteInntektperioderTjeneste {
 
         final var allePerioder = utvidEksisterendePerioder(behandlingId, kontrollertePerioder);
 
-        tilkjentYtelseRepository.lagre(behandlingId, allePerioder);
+        tilkjentYtelseRepository.lagreKontrollertePerioder(behandlingId, allePerioder, input, sporing);
     }
 
     /**

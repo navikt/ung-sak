@@ -4,10 +4,13 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.saf.*;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.typer.JournalpostId;
 
 import java.util.ArrayList;
@@ -20,8 +23,9 @@ public class HistorikkinnslagTjeneste {
     private static final String SØKNAD = "Søknad";
     private static final String INNSENDING = "Innsending";
     private static final String INNTEKTSRAPPORTERING = "Inntektsrapportering";
-    private static final String OPPGAVEBEKREFTELSE = "Oppgavebekreftelse";
+    private static final String OPPGAVEBEKREFTELSE = "Svar på varsel";
     private HistorikkinnslagRepository historikkinnslagRepository;
+    private EtterlysningRepository etterlysningRepository;
     private SafTjeneste safTjeneste;
 
     HistorikkinnslagTjeneste() {
@@ -30,15 +34,14 @@ public class HistorikkinnslagTjeneste {
 
     @Inject
     public HistorikkinnslagTjeneste(HistorikkinnslagRepository historikkinnslagRepository,
+                                    EtterlysningRepository etterlysningRepository,
                                     SafTjeneste safTjeneste) {
         this.historikkinnslagRepository = historikkinnslagRepository;
+        this.etterlysningRepository = etterlysningRepository;
         this.safTjeneste = safTjeneste;
     }
 
-
-
-
-    private void leggTilHistorikkinnslagDokumentlinker(JournalpostId journalpostId, Historikkinnslag.Builder historikkinnslagBuilder) {
+    private void leggTilHistorikkinnslagDokumentlinker(JournalpostId journalpostId, Long behandlingId, Historikkinnslag.Builder historikkinnslagBuilder) {
         List<HistorikkinnslagDokumentLink> dokumentLinker = new ArrayList<>();
         if (journalpostId != null) {
             var query = new JournalpostQueryRequest();
@@ -50,7 +53,7 @@ public class HistorikkinnslagTjeneste {
             }
             DokumentInfo hoveddokumentJournalMetadata = journalpostIdData.getDokumenter().get(0);
 
-            String linkTekstHoveddokument = finnLinkTekstHoveddokument(hoveddokumentJournalMetadata);
+            String linkTekstHoveddokument = finnLinkTekstHoveddokument(hoveddokumentJournalMetadata, journalpostId, behandlingId);
             dokumentLinker.add(lagHistorikkInnslagDokumentLink(hoveddokumentJournalMetadata, journalpostId, linkTekstHoveddokument));
 
             getVedleggsliste(journalpostIdData).forEach(vedleggJournalMetadata ->
@@ -68,7 +71,7 @@ public class HistorikkinnslagTjeneste {
         return List.of();
     }
 
-    private String finnLinkTekstHoveddokument(DokumentInfo hoveddokumentJournalMetadata) {
+    private String finnLinkTekstHoveddokument(DokumentInfo hoveddokumentJournalMetadata, JournalpostId journalpostId, Long behandlingId) {
         Brevkode brevkode = Brevkode.fraKode(hoveddokumentJournalMetadata.getBrevkode());
         if (brevkode == null) {
             return INNSENDING;
@@ -76,8 +79,14 @@ public class HistorikkinnslagTjeneste {
         if (brevkode.equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)) {
             return INNTEKTSRAPPORTERING;
         }
-        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE)) {
-            return OPPGAVEBEKREFTELSE;
+        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE)) {
+            return etterlysningRepository.hentEtterlysninger(behandlingId).stream()
+                .filter(it -> it.getUttalelse().stream()
+                .anyMatch(u -> u.getSvarJournalpostId().equals(journalpostId)))
+                .findFirst()
+                .map(Etterlysning::getType)
+                .map(EtterlysningType::getNavn)
+                .orElse(OPPGAVEBEKREFTELSE);
         }
         if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
             return SØKNAD;
@@ -93,13 +102,15 @@ public class HistorikkinnslagTjeneste {
         return historikkinnslagDokumentLink;
     }
 
-    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, JournalpostId journalpostId) {
+    public void opprettHistorikkinnslagForVedlegg(Long fagsakId, Long behandlingId, JournalpostId journalpostId) {
         var historikkinnslagBuilder = new Historikkinnslag.Builder();
         historikkinnslagBuilder.medAktør(HistorikkAktør.SØKER);
         historikkinnslagBuilder.medTittel("Vedlegg mottatt");
         historikkinnslagBuilder.medFagsakId(fagsakId);
 
-        leggTilHistorikkinnslagDokumentlinker(journalpostId, historikkinnslagBuilder);
+
+
+        leggTilHistorikkinnslagDokumentlinker(journalpostId, behandlingId, historikkinnslagBuilder);
 
         historikkinnslagRepository.lagre(historikkinnslagBuilder.build());
     }

@@ -20,7 +20,6 @@ import no.nav.ung.sak.typer.JournalpostId;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Dependent
 public class UngdomsytelseSøknadPersisterer {
@@ -42,16 +41,13 @@ public class UngdomsytelseSøknadPersisterer {
     }
 
 
-    // TODO: Trenger vi å lagre ned en egen søknadentitet for ungdomsytelsen? Er relevant dersom vi skal vurdere kompletthet for søknad (f.eks om søknad har kommet inn for tidlig)
-    public void lagreSøknadEntitet(Søknad søknad, JournalpostId journalpostId, Long behandlingId, Optional<Periode> maksSøknadsperiode, LocalDate mottattDato) {
+    public void lagreSøknadEntitet(Søknad søknad, JournalpostId journalpostId, Long behandlingId, LocalDate startdato, LocalDate mottattDato) {
         var søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(maksSøknadsperiode.map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed())).orElse(null))
             .medElektroniskRegistrert(true)
             .medMottattDato(mottattDato)
-            .medErEndringssøknad(false)
             .medJournalpostId(journalpostId)
             .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
-            .medSøknadsdato(maksSøknadsperiode.map(Periode::getFraOgMed).orElse(mottattDato))
+            .medStartdato(startdato)
             .medSpråkkode(getSpraakValg(søknad.getSpråk()));
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);

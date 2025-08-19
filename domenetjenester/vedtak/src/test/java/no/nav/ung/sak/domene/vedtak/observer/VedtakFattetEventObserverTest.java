@@ -11,8 +11,11 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.bestilling.VurderVedtaksbrevTask;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +29,6 @@ import org.mockito.quality.Strictness;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static no.nav.ung.sak.domene.vedtak.observer.VedtakFattetEventObserver.BREVBESTILLING_TASKTYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -64,7 +66,7 @@ public class VedtakFattetEventObserverTest {
         verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
             .map(ProsessTaskData::getTaskType))
-            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, BREVBESTILLING_TASKTYPE);
+            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, VurderVedtaksbrevTask.TASKTYPE);
     }
 
     @Test
@@ -83,7 +85,7 @@ public class VedtakFattetEventObserverTest {
         verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
             .map(ProsessTaskData::getTaskType))
-            .containsExactly(BREVBESTILLING_TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
+            .containsExactly(VurderVedtaksbrevTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
     private Behandling lagBehandling() {
@@ -92,6 +94,10 @@ public class VedtakFattetEventObserverTest {
         when(behandling.getFagsakId()).thenReturn(123L);
         when(behandling.getAktørId()).thenReturn(AktørId.dummy());
         when(behandling.erYtelseBehandling()).thenReturn(true);
+        Fagsak fagsakMock = mock(Fagsak.class);
+        when(fagsakMock.getSaksnummer()).thenReturn(new Saksnummer("123"));
+        when(behandling.getFagsak()).thenReturn(fagsakMock);
+
 
         when(behandlingRepository.hentBehandlingHvisFinnes(123L)).thenReturn(Optional.of(behandling));
         return behandling;

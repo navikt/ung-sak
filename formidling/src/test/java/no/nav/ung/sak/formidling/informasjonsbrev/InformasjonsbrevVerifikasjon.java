@@ -1,14 +1,14 @@
 package no.nav.ung.sak.formidling.informasjonsbrev;
 
-import no.nav.ung.sak.formidling.BrevScenarioer;
 import no.nav.ung.sak.formidling.BrevTestUtils;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 
 import java.time.LocalDate;
 
 public class InformasjonsbrevVerifikasjon {
 
     private static final String STANDARD_HEADER_FOOTER = """
-        Brev for ungdomsytelsen %s \
+        Brev for ungdomsprogramytelsen %s \
         Til: %s \
         Fødselsnummer: %s \
         %s\
@@ -22,7 +22,7 @@ public class InformasjonsbrevVerifikasjon {
         return STANDARD_HEADER_FOOTER
             .formatted(
                 BrevTestUtils.brevDatoString(brevdato),
-                BrevScenarioer.DEFAULT_NAVN,
+                BrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body);
     }

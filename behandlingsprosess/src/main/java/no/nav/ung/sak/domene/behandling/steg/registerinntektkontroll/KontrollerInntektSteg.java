@@ -9,10 +9,12 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     public KontrollerInntektSteg(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
                                  BehandlingRepository behandlingRepository,
                                  KontrollerInntektInputMapper inputMapper,
-                                 @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "100") int akseptertDifferanse) {
+                                 @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.inputMapper = inputMapper;
@@ -60,7 +62,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
         log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
         // Oppretter kontrollerte perioder
-        opprettKontrollerteInntektPerioder(kontekst, kontrollResultat);
+        opprettKontrollerteInntektPerioder(kontekst, kontrollResultat, input);
 
         // Oppretter aksjonspunkt
         final var skalOppretteAksjonspunkt = !kontrollResultat.filterValue(it -> it.type().equals(KontrollResultatType.OPPRETT_AKSJONSPUNKT)).isEmpty();
@@ -83,17 +85,20 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     }
 
     private void opprettKontrollerteInntektPerioder(BehandlingskontrollKontekst kontekst,
-                                                    LocalDateTimeline<Kontrollresultat> kontrollResultat) {
-        kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.FERDIG_KONTROLLERT)
-            .toSegments()
-            .forEach(segment -> {
-                log.info("Bruker inntekt fra bruker eller godkjent inntekt fra register for periode {}", segment.getLocalDateInterval());
-                kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
-                    kontekst.getBehandlingId(),
-                    segment.getLocalDateInterval(),
-                    segment.getValue().inntektsresultat()
-                );
-            });
+                                                    LocalDateTimeline<Kontrollresultat> kontrollResultat,
+                                                    KontrollerInntektInput input) {
+        var ferdigKontrollertTidslinje = kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.FERDIG_KONTROLLERT);
+        log.info("Bruker inntekt fra bruker eller godkjent inntekt fra register for perioder {}", ferdigKontrollertTidslinje);
+        try {
+            kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
+                kontekst.getBehandlingId(),
+                ferdigKontrollertTidslinje.mapValue(Kontrollresultat::inntektsresultat),
+                JsonObjectMapper.getJson(input),
+                JsonObjectMapper.getJson(kontrollResultat)
+            );
+        } catch (IOException e) {
+            throw new IllegalStateException("Kunn ikke serialisere input eller kontrollresultat til JSON", e);
+        }
     }
 
 }

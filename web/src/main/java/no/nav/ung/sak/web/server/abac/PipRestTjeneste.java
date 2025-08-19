@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.kontrakt.abac.PipDto;
 import no.nav.ung.sak.kontrakt.abac.PipDtoV2;
+import no.nav.ung.sak.kontrakt.abac.PipDtoV3;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.typer.AktørId;
@@ -25,6 +26,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.ung.sak.typer.Saksnummer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +42,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 @Transactional
 @Produces(MediaType.APPLICATION_JSON)
 public class PipRestTjeneste {
+
+    private Logger logger = LoggerFactory.getLogger(PipRestTjeneste.class);
 
     private PipRepository pipRepository;
 
@@ -55,7 +62,7 @@ public class PipRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Set<AktørId> hentAktørIdListeTilknyttetSak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
-        Set<AktørId> aktører = pipRepository.hentAktørIdKnyttetTilSaksnummer(saksnummerDto.getVerdi());
+        Set<AktørId> aktører = pipRepository.hentAktørIdKnyttetTilFagsaker(Set.of( saksnummerDto.getVerdi()));
         return aktører;
     }
 
@@ -64,7 +71,9 @@ public class PipRestTjeneste {
     @Operation(description = "Henter aktørIder, fagsak- og behandlingstatus tilknyttet til en behandling", tags = "pip")
     @BeskyttetRessurs(action = READ, resource = PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    @Deprecated(forRemoval = true)
     public PipDto hentAktørIdListeTilknyttetBehandling(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+        logger.info("Kalte på deprekert endepunkt pipdata-for-behandling, bør bytte til pipdata-for-behandling-v3");
         Optional<PipBehandlingsData> pipData = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());
         PipDto pipDto = new PipDto();
         pipData.ifPresent(pip -> {
@@ -80,7 +89,9 @@ public class PipRestTjeneste {
     @Operation(description = "Henter aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling", tags = "pip")
     @BeskyttetRessurs(action = READ, resource = PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    @Deprecated(forRemoval = true)
     public Optional<PipDtoV2> hentPipDataTilknyttetBehandlingV2(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+        logger.info("Kalte på deprekert endepunkt pipdata-for-behandling-v2, bør bytte til pipdata-for-behandling-v3");
         Optional<PipBehandlingsData> pipDataOpt = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());
         if (pipDataOpt.isPresent()) {
             PipBehandlingsData pipData = pipDataOpt.get();
@@ -94,8 +105,28 @@ public class PipRestTjeneste {
         }
     }
 
+    @GET
+    @Path("/pipdata-for-behandling-v3")
+    @Operation(description = "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling", tags = "pip")
+    @BeskyttetRessurs(action = READ, resource = PIP)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Optional<PipDtoV3> hentPipDataTilknyttetBehandlingV3(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+        Optional<PipBehandlingsData> pipDataOpt = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());
+        if (pipDataOpt.isPresent()) {
+            PipBehandlingsData pipData = pipDataOpt.get();
+            Set<AktørId> personer = hentAktørIder(pipData);
+            BehandlingStatus behandlingStatus = BehandlingStatus.fraKode(pipData.getBehandligStatus());
+            FagsakStatus fagsakStatus = FagsakStatus.fraKode(pipData.getFagsakStatus());
+            String ansvarligSaksbehandler = pipData.getAnsvarligSaksbehandler().orElse(null);
+            Saksnummer saksnummer = new Saksnummer(pipData.getSaksnummer());
+            return Optional.of(new PipDtoV3(saksnummer, personer, behandlingStatus, fagsakStatus, ansvarligSaksbehandler));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     private Set<AktørId> hentAktørIder(PipBehandlingsData pipBehandlingsData) {
-        return pipRepository.hentAktørIdKnyttetTilFagsaker(List.of(pipBehandlingsData.getFagsakId()));
+        return pipRepository.hentAktørIdKnyttetTilFagsaker(List.of(new Saksnummer(pipBehandlingsData.getSaksnummer())));
     }
 
 }

@@ -272,7 +272,6 @@ public class BehandlingDtoTjeneste {
 
         if (ytelseMedBeregning) {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
-            dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
             dto.leggTil(getFraMap(KontrollerInntektRestTjeneste.KONTROLL_PERIODER_PATH, "kontroller-inntekt-perioder", uuidQueryParams));
             lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
             lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
