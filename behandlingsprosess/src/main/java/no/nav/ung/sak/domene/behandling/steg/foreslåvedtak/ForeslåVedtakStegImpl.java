@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.FormidlingTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 
 import java.util.Optional;
 
@@ -24,7 +24,7 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
     private Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak;
-    private FormidlingTjeneste formidlingTjeneste;
+    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     ForeslåVedtakStegImpl() {
         // for CDI proxy
@@ -33,11 +33,11 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     @Inject
     ForeslåVedtakStegImpl(BehandlingRepository behandlingRepository,
                           ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                          @Any Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak, FormidlingTjeneste formidlingTjeneste) {
+                          @Any Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
         this.ytelsespesifikkForeslåVedtak = ytelsespesifikkForeslåVedtak;
-        this.formidlingTjeneste = formidlingTjeneste;
+        this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!FORESLÅ_VEDTAK.equals(tilSteg)) {
-            formidlingTjeneste.ryddVedTilbakeHopp(kontekst.getBehandlingId());
+            vedtaksbrevTjeneste.ryddVedTilbakeHopp(kontekst.getBehandlingId());
         }
     }
 }

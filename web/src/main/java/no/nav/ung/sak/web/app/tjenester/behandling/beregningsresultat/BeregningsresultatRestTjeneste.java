@@ -41,8 +41,6 @@ public class BeregningsresultatRestTjeneste {
     static public final String BEREGNINGSRESULTAT_PATH = BASE_PATH;
     public static final String HAR_SAMME_RESULTAT = "/har-samme-resultat";
     static public final String HAR_SAMME_RESULTAT_PATH = BASE_PATH + HAR_SAMME_RESULTAT;
-    public static final String UTBETALT = "/utbetalt";
-    static public final String BEREGNINGSRESULTAT_UTBETALT_PATH = BASE_PATH + UTBETALT;
 
     private BehandlingRepository behandlingRepository;
     private BeregningsresultatTjeneste beregningsresultatTjeneste;
@@ -58,14 +56,14 @@ public class BeregningsresultatRestTjeneste {
         this.beregningsresultatTjeneste = beregningsresultatMedUttaksplanTjeneste;
     }
 
-    // FIXME K9 Erstatt denne tjenesten
+    // Brukes av verdikjede for verifisering av resultat
     @GET
     @Operation(description = "Hent beregningsresultat med uttaksplan fra behandling", summary = ("Returnerer beregningsresultat med uttaksplan for behandling."), tags = "beregningsresultat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public BeregningsresultatDto hentBeregningsresultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        return beregningsresultatTjeneste.lagBeregningsresultatMedUttaksplan(behandling).orElse(null);
+        return beregningsresultatTjeneste.lagBeregningsresultat(behandling).orElse(null);
     }
 
     @GET
@@ -92,13 +90,4 @@ public class BeregningsresultatRestTjeneste {
         return harSammeResultatType;
     }
 
-    @GET
-    @Path(UTBETALT)
-    @Operation(description = "Hent beregningsresultat med uttaksplan for foreldrepenger behandling", summary = ("Returnerer beregningsresultat med uttaksplan for behandling."), tags = "beregningsresultat")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public BeregningsresultatMedUtbetaltePeriodeDto hentBeregningsresultatMedUtbetaling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        return beregningsresultatTjeneste.lagBeregningsresultatMedUtbetaltePerioder(behandling).orElse(null);
-    }
 }

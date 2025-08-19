@@ -2,6 +2,7 @@ package no.nav.ung.sak.formidling;
 
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 
 public record GenerertBrev(
@@ -33,4 +34,15 @@ public record GenerertBrev(
 
 
 ) {
+
+    @Override
+    public String toString() {
+        return "GenerertBrev{" +
+            "dokument=" + (dokument != null) +
+            ", mottaker=" + (mottaker != null)  +
+            ", gjelder=" + (gjelder != null) +
+            ", malType=" + malType +
+            ", templateType=" + templateType +
+            '}';
+    }
 }

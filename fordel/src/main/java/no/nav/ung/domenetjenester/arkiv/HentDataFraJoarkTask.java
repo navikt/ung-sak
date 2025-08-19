@@ -95,7 +95,8 @@ public class HentDataFraJoarkTask extends WrappedProsessTaskHandler {
 
         // Forsikrer oss om at det nå kun er Journalposter av typen 'EndeligJournalført' som nå ikke er håndtert.
         if (hendelsetype.isEmpty() || hendelsetype.get() != JournalføringHendelsetype.ENDELING_JOURNALFØRT) {
-            throw new IllegalStateException("Uhåndtert journalpost[" + journalPostId.getVerdi() + "]");
+            throw new IllegalStateException("Uhåndtert journalpost[" + journalPostId.getVerdi() + "] med brevkode="
+                + journalpostInfo.getBrevkode());
         } else {
             return null;
         }

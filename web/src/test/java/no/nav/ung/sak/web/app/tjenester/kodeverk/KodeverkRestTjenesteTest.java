@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -11,7 +12,6 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
-import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.KodeverdiSomObjekt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,7 +31,7 @@ public class KodeverkRestTjenesteTest {
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     private static <K extends Kodeverdi> void checkResponseSet(final SortedSet<KodeverdiSomObjekt<K>> responseSet, final java.util.Set<K> statiskSet) {
-        assertThat(responseSet.stream().map(ko -> ko.getMadeFrom()).toList()).containsExactlyInAnyOrderElementsOf(statiskSet);
+        assertThat(responseSet.stream().map(ko -> ko.getKilde()).toList()).containsExactlyInAnyOrderElementsOf(statiskSet);
     }
 
     private static List<LinkedHashMap<String, String>> getKodelisteMap(final Map<String, Object> gruppertKodelisteMap, final String kodelisteNavn) {
@@ -73,7 +73,6 @@ public class KodeverkRestTjenesteTest {
         final AlleKodeverdierSomObjektResponse response = tjeneste.alleKodeverdierSomObjekt();
         final var statiske = StatiskeKodeverdier.alle;
         // Sjekk nokon av verdiane. Kan legge til fleire viss ein ønsker.
-        checkResponseSet(response.aktivitetStatuser(), statiske.aktivitetStatuser());
         checkResponseSet(response.arbeidskategorier(), statiske.arbeidskategorier());
         checkResponseSet(response.avslagsårsaker(), statiske.avslagsårsaker());
 
@@ -83,7 +82,7 @@ public class KodeverkRestTjenesteTest {
         checkResponseSet(response.avslagårsakerPrVilkårTypeKode().get(vilkårtype.getKode()), k9Vk3Avslagsårsaker);
 
         // Venteårsak er også litt spesiell
-        final List<Venteårsak> got = response.venteårsaker().stream().map(ko -> ko.getMadeFrom()).toList();
+        final List<Venteårsak> got = response.venteårsaker().stream().map(ko -> ko.getKilde()).toList();
         final List<Venteårsak> expected = statiske.venteårsaker().stream().toList();
         assertThat(got).containsExactlyInAnyOrderElementsOf(expected);
     }

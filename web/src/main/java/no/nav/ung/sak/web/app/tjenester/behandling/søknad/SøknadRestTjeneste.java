@@ -80,7 +80,7 @@ public class SøknadRestTjeneste {
     @Path(SOKNAD_PERIODER_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter søknadsperioder på siste fagsak på ytelse, bruker, og pleieptrengende", tags = "søknad", summary = ("Finner søknadspperioder på siste fagsak"))
+    @Operation(description = "Henter søknadsperioder på siste fagsak for deltaker", tags = "søknad", summary = ("Finner søknadspperioder på siste fagsak"))
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public List<Periode> hentSøknadPerioder(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchHentSøknadAttributter.class) HentSøknadPerioderDto hentSøknadPerioder) {
         return søknadDtoTjeneste.hentSøknadperioderPåFagsak(hentSøknadPerioder.getYtelseType(), hentSøknadPerioder.getBruker());

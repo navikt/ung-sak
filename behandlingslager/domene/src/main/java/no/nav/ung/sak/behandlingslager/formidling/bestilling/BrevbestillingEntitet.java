@@ -1,13 +1,11 @@
 package no.nav.ung.sak.behandlingslager.formidling.bestilling;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "BrevbestillingEntitet")
@@ -21,11 +19,12 @@ public class BrevbestillingEntitet extends BaseEntitet {
     @Column(name = "brevbestilling_uuid", updatable = false, nullable = false)
     private UUID brevbestillingUuid;
 
-    /**
-     * saksnummer bestillingen journalføres på, kan være GENERELL_SAK
-     */
-    @Column(name = "saksnummer", updatable = false, nullable = false)
-    private String saksnummer;
+
+    @Column(name = "fagsak_id", updatable = false, nullable = false)
+    private Long fagsakId;
+
+    @Column(name = "behandling_id", updatable = false, nullable = false)
+    private Long behandlingId;
 
     /**
      * malen bestilt
@@ -49,13 +48,6 @@ public class BrevbestillingEntitet extends BaseEntitet {
     private BrevbestillingStatusType status;
 
     /**
-     * template data som ikke er utledet, f.eks. fritekst
-     */
-    @Column(name = "dokumentdata", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON) //TODO endre til å bruke json subtypes?
-    private JsonNode dokumentdata;
-
-    /**
      * journalpost fra dokarkiv etter journalføring
      */
     @Column(name = "journalpost_id")
@@ -67,10 +59,13 @@ public class BrevbestillingEntitet extends BaseEntitet {
     @Column(name = "dokdist_bestilling_id")
     private String dokdistBestillingId;
 
+    @Column(name = "vedtaksbrev", updatable = false, nullable = false)
+    private boolean vedtaksbrev;
+
     @Embedded
     private BrevMottaker mottaker;
 
-    @Column(name = "aktiv", nullable = false, updatable = false)
+    @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
     @Version
@@ -78,20 +73,31 @@ public class BrevbestillingEntitet extends BaseEntitet {
     private long versjon;
 
 
-    public BrevbestillingEntitet(String saksnummer, DokumentMalType dokumentMalType, BrevbestillingStatusType status, JsonNode dokumentdata, BrevMottaker mottaker) {
+    public BrevbestillingEntitet(Long fagsakId, Long behandlingId, DokumentMalType dokumentMalType, TemplateType templateType, BrevbestillingStatusType status, BrevMottaker mottaker) {
         this.brevbestillingUuid = UUID.randomUUID();
-        this.saksnummer = saksnummer;
+        this.fagsakId = fagsakId;
+        this.behandlingId = behandlingId;
+        this.dokumentMalType = dokumentMalType;
+        this.templateType = templateType;
+        this.status = status;
+        this.mottaker = mottaker;
+        this.vedtaksbrev = dokumentMalType.isVedtaksbrevmal();
+    }
+
+    public BrevbestillingEntitet(Long fagsakId, Long behandlingId, DokumentMalType dokumentMalType, BrevbestillingStatusType status) {
+        this.brevbestillingUuid = UUID.randomUUID();
+        this.fagsakId = fagsakId;
+        this.behandlingId = behandlingId;
         this.dokumentMalType = dokumentMalType;
         this.status = status;
-        this.dokumentdata = dokumentdata;
-        this.mottaker = mottaker;
+        this.vedtaksbrev = dokumentMalType.isVedtaksbrevmal();
     }
 
     public BrevbestillingEntitet() {
     }
 
-    public static BrevbestillingEntitet nyBrevbestilling(String saksnummer, DokumentMalType dokumentMalType, BrevMottaker mottaker) {
-        return new BrevbestillingEntitet(saksnummer, dokumentMalType, BrevbestillingStatusType.NY, null, mottaker);
+    public static BrevbestillingEntitet nyBrevbestilling(Long fagsakId, Long behandlingId, DokumentMalType dokumentMalType) {
+        return new BrevbestillingEntitet(fagsakId, behandlingId, dokumentMalType, BrevbestillingStatusType.NY);
     }
 
     public UUID getBrevbestillingUuid() {
@@ -110,13 +116,26 @@ public class BrevbestillingEntitet extends BaseEntitet {
         return dokdistBestillingId;
     }
 
-    public String getSaksnummer() {
-        return saksnummer;
+    public Long getBehandlingId() {
+        return behandlingId;
     }
 
-    public void generertOgJournalført(TemplateType templateType, String journalpostId) {
+    public Long getFagsakId() {
+        return fagsakId;
+    }
+
+    public boolean isVedtaksbrev() {
+        return vedtaksbrev;
+    }
+
+    public void journalført(String journalpostId, TemplateType templateType, BrevMottaker brevMottaker) {
+        Objects.requireNonNull(brevMottaker);
+        Objects.requireNonNull(templateType);
+        Objects.requireNonNull(journalpostId);
+
         this.journalpostId = journalpostId;
         this.templateType = templateType;
+        this.mottaker = brevMottaker;
         status = BrevbestillingStatusType.JOURNALFØRT;
     }
 
@@ -133,10 +152,6 @@ public class BrevbestillingEntitet extends BaseEntitet {
         return templateType;
     }
 
-    public JsonNode getDokumentData() {
-        return dokumentdata;
-    }
-
     public BrevMottaker getMottaker() {
         return mottaker;
     }
@@ -148,15 +163,18 @@ public class BrevbestillingEntitet extends BaseEntitet {
     @Override
     public String toString() {
         return "BrevbestillingEntitet{" +
-               "id=" + id +
-               ", brevbestillingUuid=" + brevbestillingUuid +
-               ", saksnummer='" + saksnummer + '\'' +
-               ", templateType=" + templateType +
-               ", dokumentMalType=" + dokumentMalType +
-               ", status=" + status +
-               ", journalpostId='" + journalpostId + '\'' +
-               ", dokdistBestillingId='" + dokdistBestillingId + '\'' +
-               ", mottakerType=" + mottaker.getMottakerIdType() +
-               '}';
+            "id=" + id +
+            ", brevbestillingUuid=" + brevbestillingUuid +
+            ", fagsakId=" + fagsakId +
+            ", behandlingId=" + behandlingId +
+            ", dokumentMalType=" + dokumentMalType +
+            ", templateType=" + templateType +
+            ", status=" + status +
+            ", journalpostId='" + journalpostId + '\'' +
+            ", dokdistBestillingId='" + dokdistBestillingId + '\'' +
+            ", vedtaksbrev=" + vedtaksbrev +
+            ", mottakerType=" + (mottaker != null ? mottaker.getMottakerIdType() : null) +
+            ", versjon=" + versjon +
+            '}';
     }
 }

@@ -1,23 +1,13 @@
 package no.nav.ung.sak.formidling;
 
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.formidling.innhold.ManuellVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultatUtlederImpl;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -28,14 +18,16 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
+import java.util.List;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
+ * Har fellestester og noe utility funksjoner for å generere vedtaksbrev.
  * Test for brevtekster. Bruker html for å validere.
- * For manuell verifikasjon av pdf kan env variabel LAGRE_PDF brukes.
+ * For manuell verifikasjon av pdf/html kan env variabel LAGRE settes til PDF eller HTML .
  */
 
 @ExtendWith(CdiAwareExtension.class)
@@ -45,15 +37,20 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     @Inject
     protected EntityManager entityManager;
 
-    private final PdlKlientFake pdlKlient = PdlKlientFake.medTilfeldigFnr();
+    @Inject
+    protected PdlKlientFake pdl;
+
+
     private final int forventetAntallPdfSider;
     private final String forventetPdfHovedoverskrift;
 
     private TestInfo testInfo;
 
-    protected String fnr = pdlKlient.fnr();
+    protected String fnr;
     protected UngTestRepositories ungTestRepositories;
-    protected BrevGenerererTjeneste brevGenerererTjeneste;
+
+    @Inject
+    protected VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     AbstractVedtaksbrevInnholdByggerTest(int forventetAntallPdfSider, String forventetPdfHovedoverskrift) {
         this.forventetAntallPdfSider = forventetAntallPdfSider;
@@ -64,45 +61,19 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     @BeforeEach
     void baseSetup(TestInfo testInfo) {
         this.testInfo = testInfo;
+        this.fnr = pdl.fnr();
         ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        brevGenerererTjeneste = lagBrevGenererTjeneste(lagVedtaksbrevInnholdBygger());
     }
 
-    private BrevGenerererTjeneste lagBrevGenererTjeneste(VedtaksbrevInnholdBygger vedtaksbrevInnholdBygger) {
-        var repositoryProvider = ungTestRepositories.repositoryProvider();
-
-        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = ungTestRepositories.ungdomsprogramPeriodeRepository();
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
-
-        BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-
-        var detaljertResultatUtleder = new DetaljertResultatUtlederImpl(
-            new ProsessTriggerPeriodeUtleder(ungTestRepositories.prosessTriggereRepository(), new UngdomsytelseSøknadsperiodeTjeneste(ungTestRepositories.ungdomsytelseStartdatoRepository(), ungdomsprogramPeriodeTjeneste, behandlingRepository)),
-            ungTestRepositories.tilkjentYtelseRepository(), repositoryProvider.getVilkårResultatRepository());
-
-        Instance<VedtaksbrevInnholdBygger> innholdByggere = new UnitTestLookupInstanceImpl<>(vedtaksbrevInnholdBygger);
-
-        return new BrevGenerererTjenesteImpl(
-            behandlingRepository,
-            new AktørTjeneste(pdlKlient),
-            new PdfGenKlient(),
-            repositoryProvider.getPersonopplysningRepository(),
-            new VedtaksbrevRegler(
-                    behandlingRepository,
-                    innholdByggere,
-                    detaljertResultatUtleder,
-                    ungdomsprogramPeriodeRepository),
-                ungTestRepositories.vedtaksbrevValgRepository(),
-                new ManuellVedtaksbrevInnholdBygger(ungTestRepositories.vedtaksbrevValgRepository()));
-    }
 
     @Test
     @DisplayName("Verifiserer formatering på overskrifter")
     void verifiserOverskrifter() {
         var behandling = lagScenarioForFellesTester();
 
-        Long behandlingId = (behandling.getId());
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), true));
+        assertThat(brev).hasSize(1);
+        GenerertBrev generertBrev = brev.getFirst();
 
         var brevtekst = generertBrev.dokument().html();
 
@@ -114,11 +85,17 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
+    private static VedtaksbrevForhåndsvisRequest lagForhåndsvisInput(Long behandlingId, boolean kunHtml) {
+        return new VedtaksbrevForhåndsvisRequest(behandlingId, null, kunHtml, null);
+    }
+
     @Test
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
-        GenerertBrev generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandling.getId(), false);
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), false));
+        assertThat(brev).hasSize(1);
+        GenerertBrev generertBrev = brev.getFirst();
 
         var pdf = generertBrev.dokument().pdf();
 
@@ -131,23 +108,48 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
-    /**
-     * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
-     */
     final protected GenerertBrev genererVedtaksbrev(Long behandlingId) {
-        if (System.getenv("LAGRE_PDF") != null) {
-            var generertBrev = brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, false);
-            BrevTestUtils.lagrePdf(generertBrev, testInfo);
-            return generertBrev;
-        }
+        return genererVedtaksbrev(behandlingId, testInfo, vedtaksbrevTjeneste);
+    }
 
-        return brevGenerererTjeneste.genererVedtaksbrevForBehandling(behandlingId, true);
+    final protected GenerertBrev genererVedtaksbrevUtenLagring(Long behandlingId) {
+        return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
+    }
+
+    private static GenerertBrev genererVedtaksbrevUtenLagring(Long behandlingId, VedtaksbrevTjeneste vedtaksbrevTjeneste1) {
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste1.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
+        assertThat(forhåndsvis).hasSize(1);
+        return forhåndsvis.getFirst();
     }
 
     /**
-     * Brukes for å lage BrevGenerererTjeneste
+     * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
-    protected abstract VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger();
+    static protected GenerertBrev genererVedtaksbrev(Long behandlingId, TestInfo testInfo, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
+        String lagre = System.getenv("LAGRE");
+
+        if (lagre == null) {
+            return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
+        }
+
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, !lagre.equals("PDF")));
+        assertThat(forhåndsvis).hasSize(1);
+        GenerertBrev generertBrev = forhåndsvis.getFirst();
+
+        switch (lagre) {
+            case "PDF":
+                BrevTestUtils.lagrePdf(generertBrev, testInfo);
+                break;
+            case "HTML":
+                BrevTestUtils.lagreHtml(generertBrev, testInfo);
+                break;
+            default:
+                throw new IllegalArgumentException("Ugyldig verdi for LAGRE: " + lagre + ". Forventet 'PDF' eller 'HTML'.");
+        }
+
+        return generertBrev;
+    }
+
 
     /**
      * Brukes av fellestester i base klasse

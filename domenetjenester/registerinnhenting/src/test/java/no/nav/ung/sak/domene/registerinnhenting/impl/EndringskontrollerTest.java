@@ -1,20 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.HashSet;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-
 import jakarta.enterprise.inject.Instance;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
@@ -29,9 +14,17 @@ import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.iay.modell.Inntekter;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
-import no.nav.ung.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.HashSet;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -42,8 +35,6 @@ public class EndringskontrollerTest {
     private EndringStartpunktTjeneste startpunktTjenesteMock;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjenesteMock;
     private InternalManipulerBehandling internalManipulerBehandling = new InternalManipulerBehandling();
-
-    private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = mock(SkjæringstidspunktTjeneste.class);
 
     @BeforeEach
     public void before() {
@@ -66,8 +57,7 @@ public class EndringskontrollerTest {
 
         var startpunktBeregning = StartpunktType.INIT_PERIODER;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktBeregning);
-        SkjæringstidspunktTjeneste skjæringstidspunktTjeneste = Mockito.mock(SkjæringstidspunktTjeneste.class);
-        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, historikkinnslagTjenesteMock, skjæringstidspunktTjeneste);
+        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, historikkinnslagTjenesteMock);
         when(behandlingskontrollTjenesteMock.finnBehandlingSteg(any(StartpunktType.class), any(FagsakYtelseType.class), any(BehandlingType.class))).thenReturn(BehandlingStegType.INIT_PERIODER);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Long.class), any())).thenReturn(true);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Behandling.class), any())).thenReturn(true);
@@ -91,7 +81,7 @@ public class EndringskontrollerTest {
         var startpunktUdefinert = StartpunktType.UDEFINERT;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktUdefinert);
 
-        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, null, skjæringstidspunktTjeneste);
+        Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null, null);
 
         // Act
         endringskontroller.spolTilStartpunkt(behandling, EndringsresultatDiff.medDiff(Inntekter.class, 1L, 2L));
@@ -111,7 +101,7 @@ public class EndringskontrollerTest {
         var startpunktSrb = StartpunktType.INIT_PERIODER;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktSrb);
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null,
-            historikkinnslagTjenesteMock, skjæringstidspunktTjeneste);
+            historikkinnslagTjenesteMock);
         when(behandlingskontrollTjenesteMock.finnBehandlingSteg(any(StartpunktType.class), any(FagsakYtelseType.class), any(BehandlingType.class))).thenReturn(BehandlingStegType.INIT_PERIODER);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Long.class), any())).thenReturn(false);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Behandling.class), any())).thenReturn(false);
@@ -135,7 +125,7 @@ public class EndringskontrollerTest {
         var startpunktSrb = StartpunktType.INIT_PERIODER;
         when(startpunktTjenesteMock.utledStartpunktForDiffBehandlingsgrunnlag(any(), any(EndringsresultatDiff.class))).thenReturn(startpunktSrb);
         Endringskontroller endringskontroller = new Endringskontroller(behandlingskontrollTjenesteMock, startpunktTjenesteProviderMock, null,
-            historikkinnslagTjenesteMock, skjæringstidspunktTjeneste);
+            historikkinnslagTjenesteMock);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Long.class), any())).thenReturn(false);
         when(behandlingskontrollTjenesteMock.erStegPassert(any(Behandling.class), any())).thenReturn(false);
         when(behandlingskontrollTjenesteMock.sammenlignRekkefølge(any(), any(), any(), any())).thenReturn(-1);

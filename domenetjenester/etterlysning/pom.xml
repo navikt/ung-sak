@@ -44,6 +44,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>arbeidsforhold</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandling-prosessering</artifactId>
+        </dependency>
 
     </dependencies>
 

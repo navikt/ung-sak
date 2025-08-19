@@ -13,16 +13,20 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInputMapper;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +38,7 @@ public class KontrollerInntektEtterlysningOppretter {
     private static final Logger log = LoggerFactory.getLogger(KontrollerInntektEtterlysningOppretter.class);
 
     private EtterlysningRepository etterlysningRepository;
+    private BehandingprosessSporingRepository sporingRepository;
     private EtterlysningTjeneste etterlysningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
@@ -42,12 +47,14 @@ public class KontrollerInntektEtterlysningOppretter {
 
     @Inject
     public KontrollerInntektEtterlysningOppretter(EtterlysningRepository etterlysningRepository,
+                                                  BehandingprosessSporingRepository sporingRepository,
                                                   EtterlysningTjeneste etterlysningTjeneste,
                                                   InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                   ProsessTaskTjeneste prosessTaskTjeneste,
                                                   KontrollerInntektInputMapper inputMapper,
-                                                  @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "100") int akseptertDifferanse) {
+                                                  @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
         this.etterlysningRepository = etterlysningRepository;
+        this.sporingRepository = sporingRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
@@ -58,6 +65,15 @@ public class KontrollerInntektEtterlysningOppretter {
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
         var input = inputMapper.mapInput(behandlingReferanse);
         var opprettEtterlysningResultatTidslinje = new EtterlysningutlederKontrollerInntekt(BigDecimal.valueOf(akseptertDifferanse)).utledBehovForEtterlysninger(input);
+        try {
+            sporingRepository.lagreSporing(new BehandlingprosessSporing(behandlingReferanse.getBehandlingId(),
+                JsonObjectMapper.getJson(input),
+                JsonObjectMapper.getJson(opprettEtterlysningResultatTidslinje),
+                "KontrollerInntektEtterlysningOppretter"));
+        } catch (IOException e) {
+            // Ikke kritisk å lagre sporing for prosess
+            log.warn("Kunne ikke lagre prosessporing for behandling {}: {}", behandlingReferanse.getBehandlingId(), e.getMessage(), e);
+        }
         håndterPeriodisertResultat(behandlingReferanse, opprettEtterlysningResultatTidslinje);
     }
 
@@ -76,7 +92,7 @@ public class KontrollerInntektEtterlysningOppretter {
                 }
                 case NY_ETTERLYSNING_DERSOM_INGEN_FINNES -> {
                     log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
-                    if (!harEksisterendeEtterlysningPåVent(etterlysninger, kontrollSegment.getLocalDateInterval())) {
+                    if (!harEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval())) {
                         etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(behandlingReferanse.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                     }
                 }
@@ -122,9 +138,8 @@ public class KontrollerInntektEtterlysningOppretter {
     }
 
 
-    private static boolean harEksisterendeEtterlysningPåVent(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
-        return etterlysninger.stream().anyMatch(e -> e.getStatus().equals(EtterlysningStatus.VENTER) &&
-                e.getPeriode().toLocalDateInterval().overlaps(periode));
+    private static boolean harEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
+        return etterlysninger.stream().anyMatch(e -> e.getPeriode().toLocalDateInterval().overlaps(periode));
     }
 
     private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateInterval periode, UUID iayRef) {

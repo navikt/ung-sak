@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandling.Skjæringstidspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -17,40 +16,38 @@ public final class AksjonspunktOppdaterParameter {
     private final Behandling behandling;
     private final VilkårResultatBuilder vilkårBuilder;
     private final Optional<Aksjonspunkt> aksjonspunkt;
-    private Skjæringstidspunkt skjæringstidspunkt;
     private BehandlingReferanse ref;
     private final boolean erBegrunnelseEndret;
 
-    private AksjonspunktOppdaterParameter(Behandling behandling, Optional<Aksjonspunkt> aksjonspunkt, Skjæringstidspunkt skjæringstidspunkt, VilkårResultatBuilder vilkårBuilder, String begrunnelse) {
+    private AksjonspunktOppdaterParameter(Behandling behandling, Optional<Aksjonspunkt> aksjonspunkt, VilkårResultatBuilder vilkårBuilder, String begrunnelse) {
         Objects.requireNonNull(behandling, "behandling");
         Objects.requireNonNull(aksjonspunkt, "Optional<Aksjonspunkt> kan ikke selv være null");
         Objects.requireNonNull(vilkårBuilder, "vilkårBuilder");
         this.behandling = behandling;
         this.vilkårBuilder = vilkårBuilder;
         this.aksjonspunkt = aksjonspunkt;
-        this.skjæringstidspunkt = skjæringstidspunkt; // tillater null foreløpig pga tester som ikke har satt
-        this.ref = BehandlingReferanse.fra(behandling, skjæringstidspunkt);
+        this.ref = BehandlingReferanse.fra(behandling);
         this.erBegrunnelseEndret = begrunnelse != null ? aksjonspunkt.map(ap -> !Objects.equals(ap.getBegrunnelse(), begrunnelse)).orElse(Boolean.FALSE) : Boolean.FALSE;
     }
 
-    public AksjonspunktOppdaterParameter(Behandling behandling, Optional<Aksjonspunkt> aksjonspunkt, Skjæringstidspunkt skjæringstidspunkt, VilkårResultatBuilder vilkårBuilder, BekreftetAksjonspunktDto dto) {
-        this(behandling, aksjonspunkt, skjæringstidspunkt, vilkårBuilder, dto.getBegrunnelse());
+    public AksjonspunktOppdaterParameter(Behandling behandling, Optional<Aksjonspunkt> aksjonspunkt, VilkårResultatBuilder vilkårBuilder, BekreftetAksjonspunktDto dto) {
+        this(behandling, aksjonspunkt, vilkårBuilder, dto.getBegrunnelse());
     }
 
     // Test-only
     public AksjonspunktOppdaterParameter(Behandling behandling, Aksjonspunkt aksjonspunkt, BekreftetAksjonspunktDto dto) {
-        this(behandling, Optional.ofNullable(aksjonspunkt), null, Vilkårene.builder(), dto.getBegrunnelse());
+        this(behandling, Optional.ofNullable(aksjonspunkt), Vilkårene.builder(), dto.getBegrunnelse());
 
     }
 
     // Test-only
     public AksjonspunktOppdaterParameter(Behandling behandling, Optional<Aksjonspunkt> aksjonspunkt, BekreftetAksjonspunktDto dto) {
-        this(behandling, aksjonspunkt, null, Vilkårene.builder(), dto.getBegrunnelse());
+        this(behandling, aksjonspunkt, Vilkårene.builder(), dto.getBegrunnelse());
     }
 
     // Test-only
-    public AksjonspunktOppdaterParameter(Behandling behandling, Aksjonspunkt aksjonspunkt, Skjæringstidspunkt skjæringstidspunkt, String begrunnelse) {
-        this(behandling, Optional.ofNullable(aksjonspunkt), skjæringstidspunkt, Vilkårene.builder(), begrunnelse);
+    public AksjonspunktOppdaterParameter(Behandling behandling, Aksjonspunkt aksjonspunkt, String begrunnelse) {
+        this(behandling, Optional.ofNullable(aksjonspunkt), Vilkårene.builder(), begrunnelse);
     }
 
     /**
@@ -63,15 +60,6 @@ public final class AksjonspunktOppdaterParameter {
 
     public Long getBehandlingId() {
         return ref.getBehandlingId();
-    }
-
-    /**
-     * @deprecated Bruk {@link VilkårsPerioderTilVurderingTjeneste} i stedet.
-     */
-    @Deprecated
-    public Skjæringstidspunkt getSkjæringstidspunkt() {
-        Objects.requireNonNull(skjæringstidspunkt, "Utviker-feil: this.skjæringstidspunkt er ikke initialisert");
-        return skjæringstidspunkt;
     }
 
     public Optional<Aksjonspunkt> getAksjonspunkt() {

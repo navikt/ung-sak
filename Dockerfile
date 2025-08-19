@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7.0-labs
-FROM ghcr.io/navikt/sif-baseimages/java-21:2025.06.02.0726Z
+FROM ghcr.io/navikt/sif-baseimages/java-21:2025.08.07.1124Z
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/ung-sak
 

@@ -12,20 +12,20 @@ import java.util.Set;
 public enum Avslagsårsak implements Kodeverdi {
 
     SØKT_FOR_SENT("1007", "Søkt for sent",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "22-13, 3. ledd")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "22-13, 3. ledd")), // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "forskrift om ungdomsprogrammet § 4")),
     SØKER_UNDER_MINSTE_ALDER("1089", "Søker er yngre enn minste tillate alder.",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
     SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "??")),
 
     OPPHØRT_UNGDOMSPROGRAM("2001", "Opphørt ungdomsprogram",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 8")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8")),
     ENDRET_STARTDATO_UNGDOMSPROGRAM("2002", "Endret start av ungdomsprogram",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om ungdomsprogram og ungdomsprogramytelse § 8")),
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8")),
 
     UDEFINERT("-", "Ikke definert",
         Map.of());

@@ -27,25 +27,27 @@ import no.nav.ung.sak.typer.Periode;
 
 class UtledStatusForPerioderPåBehandling {
 
-    public static final Set<BehandlingÅrsakType> RELEVANTE_ÅRSAKER = Set.of(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
+    public static final Set<BehandlingÅrsakType> RELEVANTE_ÅRSAKER = Set.of(
+        BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+        BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
+        BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
+        BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+        BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
 
-    static StatusForPerioderPåBehandling utledStatus(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                                     Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
+    static StatusForPerioderPåBehandling utledStatus(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
                                                      List<Trigger> prosesstriggere) {
-        var mappetPeriodeTilVurdering = mapPerioderTilVurdering(perioderTilVurdering);
         var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere);
         var periodeMedÅrsaker = mapPeriodeMedÅrsaker(årsakstidslinje);
         var årsakerMedPerioder = finnÅrsakerMedPerioder(periodeMedÅrsaker);
-        return new StatusForPerioderPåBehandling(mappetPeriodeTilVurdering,
+        return new StatusForPerioderPåBehandling(
+            periodeMedÅrsaker.stream().map(PeriodeMedÅrsaker::getPeriode).collect(Collectors.toSet()),
             periodeMedÅrsaker,
             årsakerMedPerioder,
             mapKravTilDto(kravdokumenterTilBehandling)
         );
-    }
-
-    private static Set<Periode> mapPerioderTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        return perioderTilVurdering.stream()
-            .map(p -> new Periode(p.getFomDato(), p.getTomDato())).collect(Collectors.toSet());
     }
 
     private static List<PeriodeMedÅrsaker> mapPeriodeMedÅrsaker(LocalDateTimeline<Set<ÅrsakTilVurdering>> årsakstidslinje) {

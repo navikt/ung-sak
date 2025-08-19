@@ -6,5 +6,5 @@ public record EndringHøySatsDto(
     LocalDate fom,
     long nyDagsats,
     int aldersgrense,
-    Long barnetilleggSats) implements TemplateInnholdDto {
+    Long totalBarnetillegg) implements TemplateInnholdDto {
 }

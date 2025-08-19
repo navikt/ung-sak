@@ -108,6 +108,7 @@ public class BehandlingKandidaterRepository {
             " INNER JOIN behandling b on b.id=e.behandling_id " +
             " INNER JOIN fagsak f on f.id=b.fagsak_id" +
             " WHERE e.status = :status " +
+            "   AND b.behandling_status = 'UTRED' " +
             "   AND f.ytelse_type != 'OBSOLETE'" +
             "   AND e.frist < :naa ";
         var query = getEntityManager().createNativeQuery(sql, Behandling.class)

@@ -6,7 +6,4 @@ public interface KantIKantVurderer {
 
     boolean erKantIKant(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2);
 
-    default boolean erKomprimerbar() {
-        return true;
-    }
 }

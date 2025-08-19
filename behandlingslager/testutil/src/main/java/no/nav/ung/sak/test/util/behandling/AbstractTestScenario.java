@@ -421,7 +421,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             var ungdom = getDefaultBrukerAktørId();
             Personas ungdomPersonas = opprettBuilderForRegisteropplysninger()
                 .medPersonas()
-                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn());
+                .ungdom(ungdom, ungTestscenario.fødselsdato(), ungTestscenario.navn(), ungTestscenario.dødsdato());
 
             ungTestscenario.barn().forEach(it -> {
                 opprettBuilderForRegisteropplysninger().leggTilPersonopplysning(it.getPersonopplysninger().getFirst());
@@ -598,7 +598,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     @SuppressWarnings("unchecked")
     public S medSøknadDato(LocalDate søknadsdato) {
-        medSøknad().medSøknadsdato(søknadsdato);
+        medSøknad().medStartdato(søknadsdato);
         return (S) this;
     }
 

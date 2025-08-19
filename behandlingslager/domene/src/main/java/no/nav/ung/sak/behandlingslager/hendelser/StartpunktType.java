@@ -1,21 +1,12 @@
 package no.nav.ung.sak.behandlingslager.hendelser;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
-@JsonFormat(shape = Shape.OBJECT)
-@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum StartpunktType implements Kodeverdi {
 
     INNHENT_REGISTEROPPLYSNINGER("INNHENT_REGISTEROPPLYSNINGER", "Innhent registeropplysninger", 1),
@@ -38,10 +29,8 @@ public enum StartpunktType implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private int rangering;
 
-    @JsonIgnore
     private String navn;
 
     private String kode;
@@ -53,8 +42,7 @@ public enum StartpunktType implements Kodeverdi {
         this.rangering = rangering;
     }
 
-    @JsonCreator
-    public static StartpunktType fraKode(@JsonProperty("kode") String kode) {
+    public static StartpunktType fraKode(String kode) {
         if (kode == null) {
             return null;
         }
@@ -74,13 +62,12 @@ public enum StartpunktType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
+    @JsonValue
     @Override
     public String getKode() {
         return this.kode;
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;

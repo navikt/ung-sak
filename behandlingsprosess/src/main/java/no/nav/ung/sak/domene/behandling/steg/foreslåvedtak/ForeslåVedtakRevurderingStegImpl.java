@@ -8,7 +8,7 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.formidling.FormidlingTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
 
@@ -20,17 +20,17 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
     private BehandlingRepository behandlingRepository;
     private ForeslåVedtakTjeneste foreslåVedtakTjeneste;
-    private FormidlingTjeneste formidlingTjeneste;
+    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     ForeslåVedtakRevurderingStegImpl() {
     }
 
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                                     BehandlingRepositoryProvider repositoryProvider, FormidlingTjeneste formidlingTjeneste) {
+                                     BehandlingRepositoryProvider repositoryProvider, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
-        this.formidlingTjeneste = formidlingTjeneste;
+        this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!FORESLÅ_VEDTAK.equals(tilSteg)) {
-            formidlingTjeneste.ryddVedTilbakeHopp(kontekst.getBehandlingId());
+            vedtaksbrevTjeneste.ryddVedTilbakeHopp(kontekst.getBehandlingId());
         }
     }
 }

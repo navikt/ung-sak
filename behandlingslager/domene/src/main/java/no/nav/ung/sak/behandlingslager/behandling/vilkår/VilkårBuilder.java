@@ -252,9 +252,7 @@ public class VilkårBuilder {
             justereUtfallVedTilbakestilling(periodeneSomFaltBort);
         }
         bygget = true;
-        if (kantIKantVurderer.erKomprimerbar()) {
-            vilkårTidslinje = vilkårTidslinje.compress();
-        }
+        vilkårTidslinje = vilkårTidslinje.compress();
         var vilkårsPerioderRaw = vilkårTidslinje
             .toSegments()
             .stream()
@@ -330,9 +328,7 @@ public class VilkårBuilder {
         var timeline = new LocalDateTimeline<>(vilkårPerioder.stream()
             .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedVilkårPeriode(it)))
             .collect(Collectors.toList()));
-        if (kantIKantVurderer.erKomprimerbar()) {
-            timeline = timeline.compress();
-        }
+        timeline = timeline.compress();
         return timeline.toSegments()
             .stream()
             .filter(it -> it.getValue() != null)

@@ -6,11 +6,9 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
@@ -19,12 +17,11 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Optional;
+import java.util.NavigableSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
-import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 @Dependent
@@ -35,19 +32,16 @@ public class ManglendeKontrollperioderTjeneste {
     private final int rapporteringsfristIMåned;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private BehandlingRepository behandlingRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public ManglendeKontrollperioderTjeneste(BehandlingRepository behandlingRepository,
-                                             MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+    public ManglendeKontrollperioderTjeneste(MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                              ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                              @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristIMåned,
                                              TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapporteringsfristIMåned = rapporteringsfristIMåned;
-        this.behandlingRepository = behandlingRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
@@ -58,34 +52,17 @@ public class ManglendeKontrollperioderTjeneste {
      * @param behandlingId BehandlingId
      * @return
      */
-    public Optional<ProsessTaskData> lagProsesstaskForRevurderingGrunnetManglendeKontrollAvInntekt(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> finnPerioderForManglendeKontroll(Long behandlingId) {
         final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
         final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
         final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
         final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
+        return splittPåMåneder(manglendeKontrollTidslinje, månedsvisYtelsestidslinje).stream()
+            .map(DatoIntervallEntitet::fra)
+            .collect(Collectors.toCollection(TreeSet::new));
 
-        final var perioderMedManglendeKontroll = splittPåMåneder(manglendeKontrollTidslinje, månedsvisYtelsestidslinje);
-
-        if (!perioderMedManglendeKontroll.isEmpty()) {
-            final var behandling = behandlingRepository.hentBehandling(behandlingId);
-            return Optional.of(lagProsesstask(behandling.getFagsakId(), perioderMedManglendeKontroll));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-
-    private ProsessTaskData lagProsesstask(Long fagsakId, Set<LocalDateInterval> perioder) {
-        LOG.info("Oppretter revurdering for fagsak med id {} for perioder {} grunnet manglende kontroll", fagsakId, perioder);
-        ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-        tilVurderingTask.setFagsakId(fagsakId);
-        final var perioderString = perioder.stream().map(it -> it.getFomDato() + "/" + it.getTomDato())
-            .collect(Collectors.joining("|"));
-        tilVurderingTask.setProperty(PERIODER, perioderString);
-        tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.getKode());
-        return tilVurderingTask;
     }
 
 

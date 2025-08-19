@@ -1,9 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
-import static no.nav.k9.felles.feil.LogLevel.INFO;
-
-import java.util.Objects;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
@@ -12,11 +8,8 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
-import no.nav.ung.sak.behandling.revurdering.UnntaksbehandlingOppretter;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -26,11 +19,14 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.typer.Saksnummer;
 
+import java.util.Objects;
+
+import static no.nav.k9.felles.feil.LogLevel.INFO;
+
 @ApplicationScoped
 public class BehandlingsoppretterTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private FagsakRepository fagsakRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     BehandlingsoppretterTjeneste() {
@@ -42,7 +38,6 @@ public class BehandlingsoppretterTjeneste {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
-        this.fagsakRepository = behandlingRepositoryProvider.getFagsakRepository();
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
@@ -68,20 +63,6 @@ public class BehandlingsoppretterTjeneste {
             : revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, enhet);
     }
 
-    public Behandling opprettUnntaksbehandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        var unntaksbehandlingOppretterTjeneste = getUnntaksbehandlingOppretterTjeneste(fagsak.getYtelseType());
-        var kanOppretteUnntaksbehandling = kanOppretteUnntaksbehandling(fagsak.getId());
-        if (!kanOppretteUnntaksbehandling) {
-            throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteUnntaksbehandling(fagsak.getSaksnummer()).toException();
-        }
-
-        var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId())
-            .orElse(null);
-
-        var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return unntaksbehandlingOppretterTjeneste.opprettNyBehandling(fagsak, origBehandling, behandlingÅrsakType, enhet);
-    }
-
     public boolean kanOppretteNyBehandlingAvType(Long fagsakId, BehandlingType type) {
         boolean finnesÅpneBehandlingerAvType = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, type).size() > 0;
         if (finnesÅpneBehandlingerAvType) {
@@ -92,8 +73,6 @@ public class BehandlingsoppretterTjeneste {
                 return kanOppretteFørstegangsbehandling(fagsakId);
             case REVURDERING:
                 return kanOppretteRevurdering(fagsakId);
-            case UNNTAKSBEHANDLING:
-                return kanOppretteUnntaksbehandling(fagsakId);
             default:
                 return false;
         }
@@ -114,25 +93,11 @@ public class BehandlingsoppretterTjeneste {
         return revurderingTjeneste.kanRevurderingOpprettes(behandling.getFagsak());
     }
 
-    private boolean kanOppretteUnntaksbehandling(Long fagsakId) {
-        var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        return FagsakYtelseTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, fagsak.getYtelseType()).map(it -> it.kanNyBehandlingOpprettes(fagsak)).orElse(false);
-    }
-
-    private UnntaksbehandlingOppretter getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType) {
-        return BehandlingTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, ytelseType, BehandlingType.UNNTAKSBEHANDLING)
-            .orElseThrow(() -> new UnsupportedOperationException("Ikke implementert for " + UnntaksbehandlingOppretter.class.getSimpleName() +
-                " for ytelsetype " + ytelseType + " , behandlingstype " + BehandlingType.UNNTAKSBEHANDLING));
-    }
-
     interface BehandlingsoppretterTjenesteFeil extends DeklarerteFeil {
         BehandlingsoppretterTjenesteFeil FACTORY = FeilFactory.create(BehandlingsoppretterTjenesteFeil.class); // NOSONAR
 
         @FunksjonellFeil(feilkode = "FP-663487", feilmelding = "Fagsak med saksnummer %s oppfyller ikke kravene for revurdering", løsningsforslag = "", logLevel = INFO)
         Feil kanIkkeOppretteRevurdering(Saksnummer saksnummer);
-
-        @FunksjonellFeil(feilkode = "FP-407002", feilmelding = "Fagsak med saksnummer %s oppfyller ikke kravene for unntaksbehandling", løsningsforslag = "", logLevel = INFO)
-        Feil kanIkkeOppretteUnntaksbehandling(Saksnummer saksnummer);
 
     }
 

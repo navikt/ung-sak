@@ -21,7 +21,6 @@
         <module>dokumentarkiv</module>
         <module>hendelsemottak</module>
         <module>inngangsvilkar</module>
-        <module>innsyn</module>
         <module>arbeidsforhold</module>
         <module>arbeidsforhold-domene</module>
         <module>mottak</module>
@@ -32,7 +31,6 @@
         <module>vedtak</module>
         <module>ungdomsprogram</module>
         <module>perioder</module>
-        <module>skjaeringstidspunkt</module>
         <module>bom</module>
         <module>grunnbelop</module>
         <module>behandlingskontroll</module>

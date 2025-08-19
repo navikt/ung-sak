@@ -74,11 +74,11 @@ class InntektBekreftelseHåndtererTest {
 
         var bekreftelse = lagBekreftelse(mottattDokument, behandling, new InntektBekreftelse(
             oppgaveId,
-            true,
+            false,
             null));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, mottatteDokumentRepository);
+        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
@@ -91,7 +91,7 @@ class InntektBekreftelseHåndtererTest {
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
         assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isNull();
-        assertThat(oppdatertEtterlysning.getUttalelse().get().harGodtattEndringen()).isTrue();
+        assertThat(oppdatertEtterlysning.getUttalelse().get().harUttalelse()).isFalse();
         assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
@@ -118,11 +118,11 @@ class InntektBekreftelseHåndtererTest {
 
         var bekreftelse = lagBekreftelse(lagMottattDokument(behandling, journalpostId), behandling, new InntektBekreftelse(
             oppgaveId,
-            false,
+            true,
             "en uttalelse"));
 
         // Act
-        var inntektBekreftelseHåndterer = new InntektBekreftelseHåndterer(etterlysningRepository, mottatteDokumentRepository);
+        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
@@ -135,7 +135,7 @@ class InntektBekreftelseHåndtererTest {
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
         assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isEqualTo("en uttalelse");
-        assertThat(oppdatertEtterlysning.getUttalelse().get().harGodtattEndringen()).isFalse();
+        assertThat(oppdatertEtterlysning.getUttalelse().get().harUttalelse()).isTrue();
         assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
@@ -162,7 +162,7 @@ class InntektBekreftelseHåndtererTest {
                 new Søker(NorskIdentitetsnummer.of("12345678910")),
                 inntektBekreftelse
             ),
-            Brevkode.UNGDOMSYTELSE_OPPGAVE_BEKREFTELSE
+            Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE
         );
     }
 }

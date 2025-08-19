@@ -149,7 +149,7 @@ public class BehandlingProsessHendelseMapper {
 
         final List<MottattDokument> dokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(),
             behandling.getId(),
-            List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            List.of(Brevkode.UNGDOMSYTELSE_SOKNAD),
             false);
 
         return dokumenter.stream().anyMatch(md -> {
