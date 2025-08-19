@@ -6,8 +6,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
@@ -49,7 +47,7 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
         var fagsaker = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : aktører) {
-            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, nyFomdato);
+            var relevantFagsak = finnFagsakerForAktørTjeneste.hentNærmesteFagsakForAktørSomSøker(aktør, nyFomdato);
             if (relevantFagsak.isEmpty()) {
                 continue;
             }
