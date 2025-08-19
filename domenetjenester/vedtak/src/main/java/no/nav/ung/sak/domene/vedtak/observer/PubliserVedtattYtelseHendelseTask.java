@@ -36,18 +36,17 @@ import java.util.Properties;
 import java.util.Set;
 
 
-@Deprecated//TODO denne publiserer melding til eksterne om vedtak fattet. Vurder om nødvendig for UNG etterhvert som detaljene for samhandling er landet
+// ung-tilbake lytter på denne for å opprette tilbakekrevingsbehandlinger ved behov
 @ApplicationScoped
 @ProsessTask(PubliserVedtattYtelseHendelseTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "vedtak.publiserHendelse";
-    private static final Logger log = LoggerFactory.getLogger(VurderOmVedtakPåvirkerAndreSakerTask.class);
+    private static final Logger log = LoggerFactory.getLogger(PubliserVedtattYtelseHendelseTask.class);
 
     private BehandlingRepository behandlingRepository;
     private VedtattYtelseTjeneste vedtakTjeneste;
-    private boolean skalPublisereTilFamilieVedtakFattet;
     private GenerellKafkaProducer producer;
     private Validator validator;
 
@@ -64,19 +63,17 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         VedtattYtelseTjeneste vedtakTjeneste,
         ProsessTaskTjeneste taskTjeneste,
         @Any Instance<InformasjonselementerUtleder> informasjonselementer,
-        @KonfigVerdi("kafka.fattevedtak.topic") String topic,
+        @KonfigVerdi(value = "kafka.fattevedtak.ung.topic", defaultVerdi = "k9saksbehandling.ung-vedtakhendelse") String topic,
         @KonfigVerdi(value = "KAFKA_BROKERS") String kafkaBrokers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
-        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
-        @KonfigVerdi(value = "PUBLISER_VEDTAK_FAMILIE", defaultVerdi = "false") boolean skalPublisereTilFamilieVedtakFattet
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword
     ) {
         this.taskTjeneste = taskTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
-        this.skalPublisereTilFamilieVedtakFattet = skalPublisereTilFamilieVedtakFattet;
 
         boolean kjørerIMiljø = Environment.current().isProd() || Environment.current().isDev();
         if (kjørerIMiljø) {
@@ -133,11 +130,8 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
                 log.info("Mottatt ytelse-vedtatt hendelse med ytelse='{}' saksnummer='{}', sjekker behovet for revurdering", fagsakYtelseType, behandling.getFagsak().getSaksnummer());
                 opprettTaskForVurderingAvPåvirkedeSaker(payload);
                 String key = behandling.getFagsak().getSaksnummer().getVerdi();
-                if (skalPublisereTilFamilieVedtakFattet) {
-                    RecordMetadata recordMetadata = producer.sendJsonMedNøkkel(key, payload);
-                    log.info("Sendte melding til  {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
-
-                }
+                RecordMetadata recordMetadata = producer.sendJsonMedNøkkel(key, payload);
+                log.info("Sendte melding til  {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
             }
         }
     }

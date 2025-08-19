@@ -8,9 +8,9 @@ import no.nav.ung.kodeverk.formidling.IdType;
 
 @Embeddable
 public class BrevMottaker {
-    @Column(name = "mottaker_id", updatable = false, nullable = false)
+    @Column(name = "mottaker_id")
     private String mottakerId;
-    @Column(name = "mottaker_id_type", updatable = false, nullable = false)
+    @Column(name = "mottaker_id_type")
     @Enumerated(EnumType.STRING)
     private IdType mottakerIdType;
 

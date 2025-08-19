@@ -32,9 +32,17 @@ public class TotrinnTjeneste {
         return totrinnRepository.hentTotrinnaksjonspunktvurderinger(behandling);
     }
 
+    /** Deaktiverer alle totrinnsvurderinger for en behandling.
+     * @param behandling
+     */
+    public void deaktiverTotrinnaksjonspunktvurderinger(Behandling behandling) {
+        totrinnRepository.lagreOgFlush(behandling, List.of());
+    }
+
     public void settNyeTotrinnaksjonspunktvurderinger(Behandling behandling, List<Totrinnsvurdering> vurderinger) {
         totrinnRepository.lagreOgFlush(behandling, vurderinger);
     }
+
 
     public void lagreNyttTotrinnresultat(Behandling behandling, Totrinnresultatgrunnlag totrinnresultatgrunnlag) {
         totrinnRepository.lagreOgFlush(behandling, totrinnresultatgrunnlag);

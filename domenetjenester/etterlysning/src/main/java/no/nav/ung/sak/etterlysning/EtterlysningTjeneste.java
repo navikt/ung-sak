@@ -43,7 +43,7 @@ public class EtterlysningTjeneste {
         EtterlysningType type) {
         final var gjeldendeEtterlysninger = hentGjeldendeEtterlysninger(behandlingId, fagsakId, type);
         return gjeldendeEtterlysninger.stream()
-            .map(hen -> new LocalDateTimeline<>(hen.getPeriode().toLocalDateInterval(), new EtterlysningData(hen.getStatus(), hen.getFrist(), hen.getGrunnlagsreferanse(), hen.getUttalelse().map(ut -> new UttalelseData(ut.harGodtattEndringen(), ut.getUttalelseBegrunnelse())).orElse(null))))
+            .map(hen -> new LocalDateTimeline<>(hen.getPeriode().toLocalDateInterval(), new EtterlysningData(hen.getStatus(), hen.getFrist(), hen.getGrunnlagsreferanse(), hen.getUttalelse().map(ut -> new UttalelseData(ut.harUttalelse(), ut.getUttalelseBegrunnelse())).orElse(null))))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
     }
@@ -62,7 +62,7 @@ public class EtterlysningTjeneste {
         Long behandlingId,
         Long fagsakId,
         EtterlysningType type) {
-        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingId, type);
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingId, type).stream().filter(it -> !it.getStatus().equals(EtterlysningStatus.AVBRUTT) && !it.getStatus().equals(EtterlysningStatus.SKAL_AVBRYTES)).toList();
         log.info("Fant {} etterlysninger for behandlingId={} og fagsakId={} av type {}", etterlysninger.size(), behandlingId, fagsakId, type);
         final var journalpostIder = etterlysninger.stream().flatMap(it -> it.getUttalelse().stream().map(UttalelseEntitet::getSvarJournalpostId)).collect(Collectors.toSet());
         final var mottattDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder);

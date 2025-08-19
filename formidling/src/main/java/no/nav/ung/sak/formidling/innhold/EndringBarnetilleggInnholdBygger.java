@@ -4,12 +4,12 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.formidling.template.dto.EndringBarnetilleggDto;
-import no.nav.ung.sak.formidling.vedtak.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +32,9 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
 
-        // Min. dato i resultattidslinjen er da nytt barn ble født utledet av prosessTrigger
-        // via DetaljertResultatUtleder
-        LocalDate satsendringsdato = resultatTidslinje.getMinLocalDate();
+        LocalDate satsendringsdato = DetaljertResultat
+            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.ENDRING_BARN_FØDSEL)
+            .getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
                 .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
@@ -47,7 +47,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
         var sats = Satsberegner.beregnBarnetilleggSats(nyeSatser);
 
-        return new TemplateInnholdResultat(DokumentMalType.ENDRING_DOK, TemplateType.ENDRING_BARNETILLEGG,
+        return new TemplateInnholdResultat(TemplateType.ENDRING_BARNETILLEGG,
                 new EndringBarnetilleggDto(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats));
 
     }

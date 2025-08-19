@@ -1,19 +1,21 @@
 package no.nav.ung.sak.domene.vedtak.observer;
 
-import static no.nav.ung.sak.domene.vedtak.observer.VedtakFattetEventObserver.BREVBESTILLING_TASKTYPE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Optional;
-
-import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
+import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.bestilling.VurderVedtaksbrevTask;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,18 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
-import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
-import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.typer.AktørId;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -53,7 +49,7 @@ public class VedtakFattetEventObserverTest {
     private BehandlingVedtakRepository vedtakRepository;
 
     @Captor
-    ArgumentCaptor<ProsessTaskGruppe> prosessTaskGruppeCaptorCaptor;
+    ArgumentCaptor<ProsessTaskData> prosessTaskDataCaptorCaptor;
 
     VedtakFattetEventObserver vedtakFattetEventObserver;
 
@@ -67,11 +63,10 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(1)).lagre(prosessTaskGruppeCaptorCaptor.capture());
-        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
-            .flatMap(Collection::stream)
-            .map(it -> it.getTask().getTaskType()))
-            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, BREVBESTILLING_TASKTYPE);
+        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
+        assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
+            .map(ProsessTaskData::getTaskType))
+            .containsExactlyInAnyOrder(PubliserVedtattYtelseHendelseTask.TASKTYPE, VurderVedtaksbrevTask.TASKTYPE);
     }
 
     @Test
@@ -87,11 +82,10 @@ public class VedtakFattetEventObserverTest {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG);
         vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
 
-        verify(prosessTaskRepository, times(1)).lagre(prosessTaskGruppeCaptorCaptor.capture());
-        assertThat(prosessTaskGruppeCaptorCaptor.getAllValues().stream().map(ProsessTaskGruppe::getTasks)
-            .flatMap(Collection::stream)
-            .map(it -> it.getTask().getTaskType()))
-            .containsExactly(BREVBESTILLING_TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
+        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
+        assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
+            .map(ProsessTaskData::getTaskType))
+            .containsExactly(VurderVedtaksbrevTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
     private Behandling lagBehandling() {
@@ -100,6 +94,10 @@ public class VedtakFattetEventObserverTest {
         when(behandling.getFagsakId()).thenReturn(123L);
         when(behandling.getAktørId()).thenReturn(AktørId.dummy());
         when(behandling.erYtelseBehandling()).thenReturn(true);
+        Fagsak fagsakMock = mock(Fagsak.class);
+        when(fagsakMock.getSaksnummer()).thenReturn(new Saksnummer("123"));
+        when(behandling.getFagsak()).thenReturn(fagsakMock);
+
 
         when(behandlingRepository.hentBehandlingHvisFinnes(123L)).thenReturn(Optional.of(behandling));
         return behandling;

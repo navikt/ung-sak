@@ -1,34 +1,16 @@
 package no.nav.ung.sak.behandlingslager.behandling.søknad;
 
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
+import jakarta.persistence.*;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
-import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.SpråkKodeverdiConverter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity(name = "Søknad")
 @Table(name = "SO_SOEKNAD")
@@ -40,14 +22,16 @@ public class SøknadEntitet extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOEKNAD")
     private Long id;
 
-    @Column(name = "soeknadsdato", nullable = false)
-    private LocalDate søknadsdato;
+    @Column(name = "startdato", nullable = false)
+    private LocalDate startdato;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
-    /** eksern Id for mottatt søknad (ikke fra gr_soeknad). */
+    /**
+     * eksern Id for mottatt søknad (ikke fra gr_soeknad).
+     */
     @Column(name = "soeknad_id")
     private String søknadId;
 
@@ -61,32 +45,12 @@ public class SøknadEntitet extends BaseEntitet {
     @Column(name = "mottatt_dato")
     private LocalDate mottattDato;
 
-    @Column(name = "tilleggsopplysninger")
-    private String tilleggsopplysninger;
-
     @Convert(converter = SpråkKodeverdiConverter.class)
     @Column(name = "sprak_kode", nullable = false)
     private Språkkode språkkode = Språkkode.UDEFINERT;
 
     @Column(name = "begrunnelse_for_sen_innsending")
     private String begrunnelseForSenInnsending;
-
-    @Column(name = "er_endringssoeknad", nullable = false)
-    private boolean erEndringssøknad;
-
-    @Convert(converter = RelasjonsRolleTypeKodeverdiConverter.class)
-    @Column(name = "bruker_rolle", nullable = false)
-    private RelasjonsRolleType brukerRolle = RelasjonsRolleType.UDEFINERT;
-
-    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "søknad")
-    private Set<SøknadAngittPersonEntitet> angittePersoner = new HashSet<>(2);
-
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "fomDato", column = @Column(name = "fom", updatable = false)),
-            @AttributeOverride(name = "tomDato", column = @Column(name = "tom", updatable = false))
-    })
-    private DatoIntervallEntitet periode;
 
     SøknadEntitet() {
         // hibernate
@@ -99,26 +63,22 @@ public class SøknadEntitet extends BaseEntitet {
         this.begrunnelseForSenInnsending = søknadMal.getBegrunnelseForSenInnsending();
         this.elektroniskRegistrert = søknadMal.getElektroniskRegistrert();
         this.mottattDato = søknadMal.getMottattDato();
-        this.søknadsdato = søknadMal.getSøknadsdato();
-        this.erEndringssøknad = søknadMal.erEndringssøknad();
-        this.tilleggsopplysninger = søknadMal.getTilleggsopplysninger();
-        this.periode = søknadMal.getSøknadsperiode();
+        this.startdato = søknadMal.getStartdato();
         if (søknadMal.getSpråkkode() != null) {
             this.språkkode = søknadMal.getSpråkkode();
         }
-        this.brukerRolle = søknadMal.getRelasjonsRolleType();
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalDate getSøknadsdato() {
-        return søknadsdato;
+    public LocalDate getStartdato() {
+        return startdato;
     }
 
-    void setSøknadsdato(LocalDate søknadsdato) {
-        this.søknadsdato = søknadsdato;
+    void setStartdato(LocalDate startdato) {
+        this.startdato = startdato;
     }
 
     public boolean getElektroniskRegistrert() {
@@ -135,18 +95,6 @@ public class SøknadEntitet extends BaseEntitet {
 
     void setMottattDato(LocalDate mottattDato) {
         this.mottattDato = mottattDato;
-    }
-
-    public String getTilleggsopplysninger() {
-        return tilleggsopplysninger;
-    }
-
-    void setTilleggsopplysninger(String tilleggsopplysninger) {
-        this.tilleggsopplysninger = tilleggsopplysninger;
-    }
-
-    public Set<SøknadAngittPersonEntitet> getAngittePersoner() {
-        return angittePersoner;
     }
 
     public Språkkode getSpråkkode() {
@@ -181,30 +129,6 @@ public class SøknadEntitet extends BaseEntitet {
         this.begrunnelseForSenInnsending = begrunnelseForSenInnsending;
     }
 
-    public boolean erEndringssøknad() {
-        return erEndringssøknad;
-    }
-
-    void setErEndringssøknad(boolean endringssøknad) {
-        this.erEndringssøknad = endringssøknad;
-    }
-
-    void setRelasjonsRolleType(RelasjonsRolleType brukerRolle) {
-        this.brukerRolle = brukerRolle;
-    }
-
-    void setSøknadsperiode(DatoIntervallEntitet søknadsperiode) {
-        this.periode = søknadsperiode;
-    }
-
-    public DatoIntervallEntitet getSøknadsperiode() {
-        return periode;
-    }
-
-    public RelasjonsRolleType getRelasjonsRolleType() {
-        return brukerRolle;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -214,14 +138,11 @@ public class SøknadEntitet extends BaseEntitet {
         }
         SøknadEntitet other = (SøknadEntitet) obj;
         return Objects.equals(this.mottattDato, other.mottattDato)
-            && Objects.equals(this.søknadsdato, other.søknadsdato)
+            && Objects.equals(this.startdato, other.startdato)
             && Objects.equals(this.søknadId, other.søknadId)
             && Objects.equals(this.journalpostId, other.journalpostId)
-            && Objects.equals(this.periode, other.periode)
             && Objects.equals(this.begrunnelseForSenInnsending, other.begrunnelseForSenInnsending)
-            && Objects.equals(this.erEndringssøknad, other.erEndringssøknad)
             && Objects.equals(this.språkkode, other.språkkode)
-            && Objects.equals(this.tilleggsopplysninger, other.tilleggsopplysninger)
             && Objects.equals(this.elektroniskRegistrert, other.elektroniskRegistrert);
     }
 
@@ -229,26 +150,20 @@ public class SøknadEntitet extends BaseEntitet {
     public int hashCode() {
         return Objects.hash(elektroniskRegistrert,
             mottattDato,
-            erEndringssøknad,
             journalpostId,
             søknadId,
-            søknadsdato,
-            tilleggsopplysninger,
+            startdato,
             språkkode,
-            periode,
             begrunnelseForSenInnsending);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName() +
-            "<termindato=" + søknadsdato //$NON-NLS-1$
+            "<startdato=" + startdato //$NON-NLS-1$
             + ", elektroniskRegistrert=" + elektroniskRegistrert
             + ", mottattDato=" + mottattDato
-            + ", erEndringssøknad=" + erEndringssøknad
-            + ", tilleggsopplysninger=" + tilleggsopplysninger
             + ", språkkode=" + språkkode
-            + ", søknadperiode=" + periode
             + ", journalpostId=" + journalpostId
             + ", søknadId=" + søknadId
             + ", begrunnelseForSenInnsending=" + begrunnelseForSenInnsending
@@ -280,25 +195,13 @@ public class SøknadEntitet extends BaseEntitet {
             return this;
         }
 
-        public Builder medSøknadsdato(LocalDate søknadsdato) {
-            søknadMal.setSøknadsdato(søknadsdato);
-            return this;
-        }
-
-        public Builder medTilleggsopplysninger(String tilleggsopplysninger) {
-            søknadMal.setTilleggsopplysninger(tilleggsopplysninger);
+        public Builder medStartdato(LocalDate søknadsdato) {
+            søknadMal.setStartdato(søknadsdato);
             return this;
         }
 
         public Builder medSpråkkode(Språkkode språkkode) {
             søknadMal.setSpråkkode(språkkode);
-            return this;
-        }
-
-        public Builder leggTilAngittPerson(SøknadAngittPersonEntitet angitt) {
-            var sve = new SøknadAngittPersonEntitet(angitt);
-            søknadMal.angittePersoner.add(sve);
-            sve.setSøknad(søknadMal);
             return this;
         }
 
@@ -312,21 +215,6 @@ public class SøknadEntitet extends BaseEntitet {
             return this;
         }
 
-        public Builder medRelasjonsRolleType(RelasjonsRolleType relasjonsRolleType) {
-            søknadMal.setRelasjonsRolleType(relasjonsRolleType);
-            return this;
-        }
-
-        public Builder medErEndringssøknad(boolean erEndringssøknad) {
-            søknadMal.setErEndringssøknad(erEndringssøknad);
-            return this;
-        }
-
-        public Builder medSøknadsperiode(DatoIntervallEntitet søknadsperiode) {
-            søknadMal.setSøknadsperiode(søknadsperiode);
-            return this;
-        }
-
         public Builder medSøknadId(String søknadId) {
             søknadMal.setSøknadId(søknadId);
             return this;
@@ -336,9 +224,6 @@ public class SøknadEntitet extends BaseEntitet {
             return søknadMal;
         }
 
-        public Builder medSøknadsperiode(LocalDate fom, LocalDate tom) {
-            return medSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
-        }
     }
 
 }

@@ -598,7 +598,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     @SuppressWarnings("unchecked")
     public S medSøknadDato(LocalDate søknadsdato) {
-        medSøknad().medSøknadsdato(søknadsdato);
+        medSøknad().medStartdato(søknadsdato);
         return (S) this;
     }
 

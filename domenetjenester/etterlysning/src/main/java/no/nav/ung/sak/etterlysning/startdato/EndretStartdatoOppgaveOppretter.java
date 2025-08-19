@@ -68,7 +68,6 @@ public class EndretStartdatoOppgaveOppretter {
 
     private LocalDate hentStartdato(Etterlysning etterlysning) {
         return ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse())
-            .orElseThrow(() -> new IllegalStateException("Forventer å finne startdato for etterlysning med grunnlagsreferanse: " + etterlysning.getGrunnlagsreferanse()))
             .getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode().getFomDato();
     }
 }

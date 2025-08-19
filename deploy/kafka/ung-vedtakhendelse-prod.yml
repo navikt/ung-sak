@@ -19,5 +19,5 @@ spec:
       application: ung-sak
       access: write
     - team: k9saksbehandling
-      application: k9-formidling-dokumentdata
+      application: ung-tilbake
       access: read

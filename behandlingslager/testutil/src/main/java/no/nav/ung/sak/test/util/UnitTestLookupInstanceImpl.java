@@ -4,7 +4,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.util.TypeLiteral;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -69,6 +69,9 @@ public class UnitTestLookupInstanceImpl<T> implements Instance<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return Arrays.asList(get()).iterator();
+        if (get() == null) {
+            return Collections.emptyIterator();
+        }
+        return Collections.singletonList(get()).iterator();
     }
 }

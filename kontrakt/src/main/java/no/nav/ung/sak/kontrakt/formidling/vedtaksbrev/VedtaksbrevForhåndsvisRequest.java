@@ -1,10 +1,12 @@
 package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.abac.AbacAttributt;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
@@ -14,6 +16,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  * @param redigertVersjon Angir om automatisk vedtaksbrev (false) eller lagret redigert brev skal forhåndsvises (true), default er false.
  *                        For fritekstbrev vil den alltid bruke redigert versjon.
  * @param htmlVersjon     Angir om html versjon skal hentes. False eller null henter PDF.
+ * @param dokumentMalType Angier hvilket vedtaksbrev ønskes bestilt, null for default.
  */
 public record VedtaksbrevForhåndsvisRequest(
     @NotNull
@@ -27,6 +30,14 @@ public record VedtaksbrevForhåndsvisRequest(
     Boolean redigertVersjon,
 
     @Valid
-    Boolean htmlVersjon
-) {
+    Boolean htmlVersjon,
+
+    @Valid
+    DokumentMalType dokumentMalType) {
+
+
+    @AssertFalse(message = "Kan ikke be om redigert versjon samtidig med dokumentMalType")
+    public boolean bothRedigertVersjonAndDokumentMalTypeSet() {
+        return dokumentMalType != null && redigertVersjon != null;
+    }
 }

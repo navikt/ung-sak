@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
-import no.nav.ung.kodeverk.dokument.DokumentTypeId;
 import no.nav.ung.kodeverk.dokument.VariantFormat;
 import no.nav.ung.sak.typer.JournalpostId;
 
@@ -21,7 +20,6 @@ public class JournalMetadata {
     private String dokumentId;
     private VariantFormat variantFormat;
     private Journaltilstand journaltilstand;
-    private DokumentTypeId dokumentType;
     private ArkivFilType arkivFilType;
     private boolean erHoveddokument;
     private LocalDate forsendelseMottatt;
@@ -45,10 +43,6 @@ public class JournalMetadata {
 
     public VariantFormat getVariantFormat() {
         return variantFormat;
-    }
-
-    public DokumentTypeId getDokumentType() {
-        return dokumentType;
     }
 
     public ArkivFilType getArkivFilType() {
@@ -78,7 +72,6 @@ public class JournalMetadata {
         private JournalpostId journalpostId;
         private String dokumentId;
         private VariantFormat variantFormat;
-        private DokumentTypeId dokumentType;
         private ArkivFilType arkivFilType;
         private Journaltilstand journaltilstand;
         private boolean erHoveddokument;
@@ -97,11 +90,6 @@ public class JournalMetadata {
 
         public Builder medVariantFormat(VariantFormat variantFormat) {
             this.variantFormat = variantFormat;
-            return this;
-        }
-
-        public Builder medDokumentType(DokumentTypeId dokumentType) {
-            this.dokumentType = dokumentType;
             return this;
         }
 
@@ -135,7 +123,6 @@ public class JournalMetadata {
             jmd.journalpostId = this.journalpostId;
             jmd.dokumentId = this.dokumentId;
             jmd.variantFormat = this.variantFormat;
-            jmd.dokumentType = this.dokumentType;
             jmd.arkivFilType = this.arkivFilType;
             jmd.journaltilstand = this.journaltilstand;
             jmd.erHoveddokument = this.erHoveddokument;

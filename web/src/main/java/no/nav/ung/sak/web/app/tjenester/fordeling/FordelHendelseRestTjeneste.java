@@ -1,9 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.fordeling;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-
-import java.util.stream.Collectors;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -13,9 +11,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -26,8 +21,12 @@ import no.nav.ung.sak.kontrakt.hendelser.HendelseDto;
 import no.nav.ung.sak.kontrakt.hendelser.PåvirkedeSaker;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
+import java.util.stream.Collectors;
+
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+
 /**
- * Mottar hendelser fra k9-fordel
+ * Mottar hendelser
  */
 @Path("")
 @ApplicationScoped

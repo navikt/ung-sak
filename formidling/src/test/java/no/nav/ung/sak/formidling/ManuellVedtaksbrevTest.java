@@ -10,8 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +44,7 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
         LocalDate fom = LocalDate.of(2024, 12, 1);
 
         var behandling = lagScenario(
-            BrevScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+            EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
@@ -99,14 +98,9 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
 
     @Override
-    protected VedtaksbrevInnholdBygger lagVedtaksbrevInnholdBygger() {
-        return new ManueltVedtaksbrevInnholdBygger(vedtaksbrevValgRepository);
-    }
-
-    @Override
     protected Behandling lagScenarioForFellesTester() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        Behandling behandling = lagScenario(BrevScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+        Behandling behandling = lagScenario(EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
