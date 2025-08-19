@@ -48,9 +48,10 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårPeriodeResultatMap);
 
         var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
-            .intersection(samletVilkårTidslinje,
+            .combine(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
-                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue(), behandling.getBehandlingResultatType())));
+                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater != null ? vilkårResultater.getValue() : List.of(), behandlingÅrsaker.getValue(), behandling.getBehandlingResultatType())),
+                JoinStyle.LEFT_JOIN);
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
