@@ -12,7 +12,6 @@ public enum BehandlingResultatType implements Kodeverdi {
     INNVILGET("INNVILGET", "Innvilget"),
     DELVIS_INNVILGET("DELVIS_INNVILGET", "Delvis innvilget"),
     AVSLÅTT("AVSLÅTT", "Avslått"),
-    /** @deprecated OPPHØR brukes ikke lenger, om det er opphør (mot OS) beregnes i k9-oppdrag */
     OPPHØR("OPPHØR", "Opphør"),
     HENLAGT_SØKNAD_TRUKKET("HENLAGT_SØKNAD_TRUKKET", "Henlagt, søknaden er trukket", true),
     HENLAGT_FEILOPPRETTET("HENLAGT_FEILOPPRETTET", "Henlagt, søknaden er feilopprettet", true),
