@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -72,10 +73,9 @@ public class InitierPerioderSteg implements BehandlingSteg {
         }
         var sisteDagIProgrammet = periodeTidslinje.getMaxLocalDate();
         var fagsak = fagsakRepository.finnEksaktFagsak(kontekst.getFagsakId());
-        if (sisteDagIProgrammet.isBefore(fagsak.getPeriode().getTomDato())) {
-            // Begrenser fagsakperioden til programperioden
-            fagsakRepository.oppdaterPeriode(kontekst.getFagsakId(), fagsak.getPeriode().getFomDato(), sisteDagIProgrammet);
-        }
+        // Begrenser fagsakperioden til programperioden
+        var nyFagsakPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeTidslinje.getMinLocalDate(), sisteDagIProgrammet.isBefore(TIDENES_ENDE) ? sisteDagIProgrammet : fagsak.getPeriode().getTomDato());
+        fagsakRepository.oppdaterPeriode(kontekst.getFagsakId(), nyFagsakPeriode.getFomDato(), nyFagsakPeriode.getTomDato());
     }
 
     private void initierRelevanteSøknader(BehandlingskontrollKontekst kontekst) {
