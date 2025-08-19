@@ -7,6 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -49,7 +50,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
             .intersection(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
-                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue())));
+                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue(), behandling.getBehandlingResultatType())));
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
@@ -146,7 +147,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         }
 
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
-            resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
+            resultater.add(endretSluttdatoDetaljertResultat(vilkårsresultatOgBehandlingsårsaker.behandlingResultatType()));
         }
 
         relevanteÅrsaker.stream()
@@ -194,8 +195,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         return Optional.empty();
     }
 
-    private static DetaljertResultatInfo endretSluttdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
-        if (harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
+    private static DetaljertResultatInfo endretSluttdatoDetaljertResultat(BehandlingResultatType behandlingResultatType) {
+        if (erOpphør(behandlingResultatType)) {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphør av ungdomsprogramperiode");
         } else {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphørsdato flyttet fremover");
@@ -242,5 +243,9 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     private static boolean harAvslåttVilkår(Set<DetaljertVilkårResultat> avslåtteVilkår, VilkårType vilkårType) {
         return avslåtteVilkår.stream().anyMatch
             (it -> it.vilkårType() == vilkårType);
+    }
+
+    private static boolean erOpphør(BehandlingResultatType behandlingResultatType) {
+        return behandlingResultatType == BehandlingResultatType.OPPHØR;
     }
 }
