@@ -1,5 +1,18 @@
 package no.nav.ung.sak.behandlingslager.pip;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -9,16 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-import jakarta.persistence.TypedQuery;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Saksnummer;
 
 @Dependent
 public class PipRepository {
@@ -37,7 +40,7 @@ public class PipRepository {
         String sql = """
             SELECT
                b.uuid behandlingUuid,
-               b.behandling_status behandligStatus,
+               b.behandling_status behandlingStatus,
                b.ansvarlig_saksbehandler ansvarligSaksbehandler,
                f.id fagsakId,
                f.fagsak_status fagsakStatus,
@@ -46,19 +49,29 @@ public class PipRepository {
              JOIN FAGSAK f ON b.fagsak_id = f.id
              WHERE b.id = :behandlingId""";
 
-        Query query = entityManager.createNativeQuery(sql, "PipDataResult");
+        Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("behandlingId", behandlingId);
 
         @SuppressWarnings("rawtypes")
-        List resultater = query.getResultList();
+        List<Tuple> resultater = query.getResultList();
         if (resultater.isEmpty()) {
             return Optional.empty();
         } else if (resultater.size() == 1) {
-            return Optional.of((PipBehandlingsData) resultater.get(0));
+            return Optional.of(mapPipBehandlingsDataTuple(resultater.getFirst()));
         } else {
             throw new IllegalStateException(
                 "Forventet 0 eller 1 treff etter søk på behandlingId, fikk flere for behandlingId " + behandlingId);
         }
+    }
+
+    private PipBehandlingsData mapPipBehandlingsDataTuple(Tuple t) {
+        return new PipBehandlingsData(
+            t.get("behandlingUuid", UUID.class),
+            BehandlingStatus.fraKode( t.get("behandlingStatus", String.class)),
+            FagsakStatus.fraKode(t.get("fagsakStatus", String.class)),
+            t.get("ansvarligSaksbehandler", String.class),
+            new Saksnummer(t.get("saksnummer", String.class))
+        );
     }
 
     public Optional<PipBehandlingsData> hentDataForBehandlingUuid(UUID behandlingUuid) {
@@ -67,7 +80,7 @@ public class PipRepository {
         String sql = """
             SELECT
                 b.uuid behandlingUuid,
-                b.behandling_status behandligStatus,
+                b.behandling_status behandlingStatus,
                 b.ansvarlig_saksbehandler ansvarligSaksbehandler,
                 f.id fagsakId,
                 f.fagsak_status fagsakStatus,
@@ -76,7 +89,7 @@ public class PipRepository {
              JOIN FAGSAK f ON b.fagsak_id = f.id
              WHERE b.uuid = :behandlingUuid""";
 
-        Query query = entityManager.createNativeQuery(sql, "PipDataResult");
+        Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("behandlingUuid", behandlingUuid);
 
         @SuppressWarnings("rawtypes")
@@ -84,7 +97,7 @@ public class PipRepository {
         if (resultater.isEmpty()) {
             return Optional.empty();
         } else if (resultater.size() == 1) {
-            return Optional.of((PipBehandlingsData) resultater.get(0));
+            return Optional.of(mapPipBehandlingsDataTuple((Tuple) resultater.getFirst()));
         } else {
             throw new IllegalStateException(
                 "Forventet 0 eller 1 treff etter søk på behandlingId, fikk flere for behandlingUuid "
@@ -109,7 +122,7 @@ public class PipRepository {
              SELECT fag.bruker_aktoer_id
              FROM Fagsak fag
              WHERE fag.saksnummer in (:saksnumre) AND fag.bruker_aktoer_id IS NOT NULL
-             """;
+            """;
 
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("saksnumre", saksnumre.stream().map(Saksnummer::getVerdi).collect(Collectors.toSet()));
@@ -168,14 +181,13 @@ public class PipRepository {
         return result.stream().map(Saksnummer::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    @SuppressWarnings({"unchecked"})
-    public Set<Saksnummer> saksnummerForFagsakId(Collection<Long> fagsakIder) {
-        if (fagsakIder.isEmpty()) {
+    public Set<Saksnummer> finnSaksnumerSomEksisterer(Collection<Saksnummer> saksnumre) {
+        if (saksnumre.isEmpty()) {
             return Collections.emptySet();
         }
-        String sql = "SELECT saksnummer from FAGSAK where id in (:fagsakIder) ";
+        String sql = "SELECT saksnummer from FAGSAK where saksnummer in (:saksnumre) ";
         Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("fagsakIder", fagsakIder);
+        query.setParameter("saksnumre", saksnumre.stream().map(Saksnummer::getVerdi).toList());
         var result = (List<String>) query.getResultList();
         return result.stream().map(Saksnummer::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }

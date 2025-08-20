@@ -4,8 +4,11 @@ import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import no.nav.ung.sak.typer.Saksnummer;
 
 @Dependent
 public class SaksnummerRepository {
@@ -28,4 +31,5 @@ public class SaksnummerRepository {
 
         return Long.toString(tall.longValue(), 36).toUpperCase().replace("O", "o").replace("I", "i");
     }
+
 }

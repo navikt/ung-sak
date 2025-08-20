@@ -1,30 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.NaturalId;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ColumnResult;
-import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -36,8 +13,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
-import jakarta.persistence.SqlResultSetMapping;
-import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.felles.feil.FeilFactory;
@@ -58,27 +33,32 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingResultatKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsystemKodeverkConverter;
-import no.nav.ung.sak.behandlingslager.kodeverk.StartpunktTypeKodeverdiConverter;
-import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.typer.AktørId;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.NaturalId;
 
-@SqlResultSetMappings(value = {
-    @SqlResultSetMapping(name = "PipDataResult", classes = {
-        @ConstructorResult(targetClass = PipBehandlingsData.class, columns = {
-            @ColumnResult(name = "behandlingUuid"),
-            @ColumnResult(name = "behandligStatus"),
-            @ColumnResult(name = "ansvarligSaksbehandler"),
-            @ColumnResult(name = "fagsakId"),
-            @ColumnResult(name = "fagsakStatus"),
-            @ColumnResult(name = "saksnummer")
-        })
-    })
-})
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")
 @DynamicInsert
