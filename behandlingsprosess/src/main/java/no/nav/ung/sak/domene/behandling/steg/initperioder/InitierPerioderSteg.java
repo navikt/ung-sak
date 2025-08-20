@@ -59,23 +59,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         initierRelevanteSøknader(kontekst);
-        begrensFagsakperiode(kontekst);
-
-
         return BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    private void begrensFagsakperiode(BehandlingskontrollKontekst kontekst) {
-        var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(kontekst.getBehandlingId());
-        if (periodeTidslinje.isEmpty()) {
-            // Hvis det ikke finnes noen perioder, så er det ingenting å gjøre
-            return;
-        }
-        var sisteDagIProgrammet = periodeTidslinje.getMaxLocalDate();
-        var fagsak = fagsakRepository.finnEksaktFagsak(kontekst.getFagsakId());
-        // Begrenser fagsakperioden til programperioden
-        var nyFagsakPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeTidslinje.getMinLocalDate(), sisteDagIProgrammet.isBefore(TIDENES_ENDE) ? sisteDagIProgrammet : fagsak.getPeriode().getTomDato());
-        fagsakRepository.oppdaterPeriode(kontekst.getFagsakId(), nyFagsakPeriode.getFomDato(), nyFagsakPeriode.getTomDato());
     }
 
     private void initierRelevanteSøknader(BehandlingskontrollKontekst kontekst) {
