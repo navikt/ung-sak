@@ -79,7 +79,7 @@ public class HistorikkRestTjeneste {
 
             EntityTag etag = historikkinnslag.stream()
                 .max( Comparator.comparing(Historikkinnslag::getOpprettetTidspunkt))
-                .map(h -> h.getBehandlingId() != null ? new EntityTag(behandlingRepository.hentBehandling(h.getBehandlingId()).getUuid().toString()) : null)
+                .map(h -> new EntityTag(h.getUuid().toString()))
                 .get();
 
             var rb = req.evaluatePreconditions(etag);
