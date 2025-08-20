@@ -27,7 +27,6 @@ import jakarta.ws.rs.core.UriBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
@@ -42,16 +41,14 @@ public class HistorikkRestTjeneste {
     public static final String PATH = "/historikk";
 
     private HistorikkTjenesteAdapter historikkTjeneste;
-    private BehandlingRepository behandlingRepository;
 
     public HistorikkRestTjeneste() {
         // Rest CDI
     }
 
     @Inject
-    public HistorikkRestTjeneste(HistorikkTjenesteAdapter historikkTjeneste, BehandlingRepository behandlingRepository) {
+    public HistorikkRestTjeneste(HistorikkTjenesteAdapter historikkTjeneste) {
         this.historikkTjeneste = historikkTjeneste;
-        this.behandlingRepository = behandlingRepository;
     }
 
     @GET
@@ -79,7 +76,7 @@ public class HistorikkRestTjeneste {
 
             EntityTag etag = historikkinnslag.stream()
                 .max( Comparator.comparing(Historikkinnslag::getOpprettetTidspunkt))
-                .map(h -> h.getBehandlingId() != null ? new EntityTag(behandlingRepository.hentBehandling(h.getBehandlingId()).getUuid().toString()) : null)
+                .map(h -> new EntityTag(h.getUuid().toString()))
                 .get();
 
             var rb = req.evaluatePreconditions(etag);
