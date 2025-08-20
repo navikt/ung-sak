@@ -4,8 +4,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
@@ -21,6 +24,7 @@ import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR;
 
@@ -30,10 +34,12 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_UNGDOMSPR
 @ApplicationScoped
 public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
 
+    public static final Set<VilkårType> AVHENGIGE_VILKÅR = Set.of(VilkårType.ALDERSVILKÅR);
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private AvhengigeVilkårJusterer avhengigeVilkårJusterer;
 
     public VurderUngdomsprogramVilkårSteg() {
     }
@@ -42,11 +48,13 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
     public VurderUngdomsprogramVilkårSteg(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                           BehandlingRepository behandlingRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
-                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
+                                          AvhengigeVilkårJusterer avhengigeVilkårJusterer) {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.avhengigeVilkårJusterer = avhengigeVilkårJusterer;
     }
 
 
@@ -59,11 +67,13 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
         var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var perioderTilVurdering = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var ungdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
-        var builders = settOppfyltForPerioderIUngdomsprogrammet(ungdomsprogramTidslinje, perioderTilVurdering, vilkårBuilder);
+        var builders = vurderPerioder(ungdomsprogramTidslinje, perioderTilVurdering, vilkårBuilder);
         builders.forEach(vilkårBuilder::leggTil);
         resultatBuilder.leggTil(vilkårBuilder);
         var resultat = resultatBuilder.build();
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultat);
+        // Justerer perioder for andre vilkår
+        avhengigeVilkårJusterer.fjernAvslåttePerioderForAvhengigeVilkår(kontekst.getBehandlingId(), perioderTilVurdering, AVHENGIGE_VILKÅR, VilkårType.UNGDOMSPROGRAMVILKÅRET);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
@@ -75,16 +85,24 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
      * @param vilkårBuilder           Vilkårbuilder
      * @return Vilkårperiodebuilders
      */
-    private static List<VilkårPeriodeBuilder> settOppfyltForPerioderIUngdomsprogrammet(LocalDateTimeline<Boolean> ungdomsprogramTidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårBuilder vilkårBuilder) {
+    private static List<VilkårPeriodeBuilder> vurderPerioder(LocalDateTimeline<Boolean> ungdomsprogramTidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårBuilder vilkårBuilder) {
         var builders = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering)
-            .intersection(ungdomsprogramTidslinje)
+            .combine(ungdomsprogramTidslinje, VurderUngdomsprogramVilkårSteg::settUtfall, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .toSegments()
             .stream()
-            .map(p ->
-                vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(p.getLocalDateInterval()))
-                    .medUtfall(Utfall.OPPFYLT)
-                    .medRegelInput("{ 'periode': '" + p.getLocalDateInterval() + "' }")).toList();
+            .map(p -> vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(p.getLocalDateInterval()))
+                .medUtfall(p.getValue())
+                .medAvslagsårsak(p.getValue() == Utfall.IKKE_OPPFYLT ? utledAvslagsårsak(p.getLocalDateInterval(), perioderTilVurdering) : null)
+                .medRegelInput("{ 'periode': '" + p.getLocalDateInterval() + "' }")).toList();
         return builders;
+    }
+
+    private static Avslagsårsak utledAvslagsårsak(LocalDateInterval avslåttPeriode, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        return perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(avslåttPeriode.getFomDato())) ? Avslagsårsak.ENDRET_STARTDATO_UNGDOMSPROGRAM : Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM;
+    }
+
+    private static LocalDateSegment<Utfall> settUtfall(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
+        return rhs == null ? new LocalDateSegment<>(di, Utfall.IKKE_OPPFYLT) : new LocalDateSegment<>(di, Utfall.OPPFYLT);
     }
 
 }
