@@ -49,7 +49,7 @@ public class KodeverkRestTjenesteTest {
     public void hentGruppertKodeliste_fungerer_framleis() throws IOException {
         final KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(behandlendeEnhetTjeneste);
         final Response hentGruppertKodelisteResponse = tjeneste.hentGruppertKodeliste();
-        final ObjectMapper om = ObjectMapperFactory.createBaseObjectMapper();
+        final ObjectMapper om = ObjectMapperFactory.getBaseObjectMapperCopy();
         final Map<String, Object> hentGruppertKodelisteObjectMap = om.readValue((String)hentGruppertKodelisteResponse.getEntity(), Map.class);
         final List<LinkedHashMap<String, String>> legacyFagsakYtelseType = getKodelisteMap(hentGruppertKodelisteObjectMap, "FagsakYtelseType");
         final AlleKodeverdierSomObjektResponse alleKodeverdierSomObjektResponse = tjeneste.alleKodeverdierSomObjekt();
