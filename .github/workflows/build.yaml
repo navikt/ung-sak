@@ -69,9 +69,26 @@ jobs:
     needs: build-app
     with:
       tag: ${{ needs.build-app.outputs.build-version }}
-      suites: "ung,ung-tilbake,frontend-ung"
+      suites: "ung,ung-tilbake"
       override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
       image_version: ${{ needs.build-app.outputs.build-version }}
+
+  verdikjede-tester-frontend:
+    name: Verdikjedetester
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
+    if: ${{github.actor != 'dependabot[bot]'}}
+    needs: build-app
+    with:
+      tag: ${{ needs.build-app.outputs.build-version }}
+      suites: "frontend-ung"
+      override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
+      image_version: ${{ needs.build-app.outputs.build-version }}
+
 
 
   deploy-dev:
