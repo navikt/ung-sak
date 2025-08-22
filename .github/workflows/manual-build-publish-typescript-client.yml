@@ -82,7 +82,7 @@ jobs:
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client
-      - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
+      - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v2
         with:
           contentPath: /tmp/ung-sak-typescript-client
           githubToken: ${{ secrets.GITHUB_TOKEN }}
