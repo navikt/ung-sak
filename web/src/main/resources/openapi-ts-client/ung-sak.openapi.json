@@ -1898,6 +1898,23 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto" : {
+        "discriminator" : {
+          "mapping" : {
+            "5015" : "#/components/schemas/ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto",
+            "5016" : "#/components/schemas/ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto",
+            "5018" : "#/components/schemas/ung.sak.kontrakt.vedtak.BekreftVedtakUtenTotrinnskontrollDto",
+            "5025" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.VarselRevurderingEtterkontrollDto",
+            "5028" : "#/components/schemas/ung.sak.kontrakt.vedtak.ForeslaVedtakManueltAksjonspuntDto",
+            "5055" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollerRevurderingsBehandlingDto",
+            "5056" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollAvManueltOpprettetRevurderingsbehandlingDto",
+            "5077" : "#/components/schemas/ung.sak.kontrakt.søknadsfrist.aksjonspunkt.AvklarSøknadsfristDto",
+            "5084" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto",
+            "5085" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto",
+            "5090" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto",
+            "8000" : "#/components/schemas/ung.sak.kontrakt.kontroll.FastsettInntektDto"
+          },
+          "propertyName" : "@type"
+        },
         "oneOf" : [ {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollAvManueltOpprettetRevurderingsbehandlingDto"
         }, {
@@ -1968,6 +1985,12 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto" : {
+        "discriminator" : {
+          "mapping" : {
+            "6006" : "#/components/schemas/ung.sak.kontrakt.søknadsfrist.aksjonspunkt.OverstyrtSøknadsfristDto"
+          },
+          "propertyName" : "@type"
+        },
         "oneOf" : [ {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.søknadsfrist.aksjonspunkt.OverstyrtSøknadsfristDto"
         } ],
@@ -3012,6 +3035,12 @@
       },
       "ung.sak.kontrakt.hendelser.Hendelse" : {
         "discriminator" : {
+          "mapping" : {
+            "DOEDSFALL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.DødsfallHendelse",
+            "FOEDSEL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.FødselHendelse",
+            "UNGDOMSPROGRAM_ENDRET_STARTDATO" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramEndretStartdatoHendelse",
+            "UNGDOMSPROGRAM_OPPHOER" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse"
+          },
           "propertyName" : "type"
         },
         "oneOf" : [ {
@@ -4928,7 +4957,7 @@
   "info" : {
     "description" : "REST grensesnitt for Vedtaksløsningen.",
     "title" : "Ung saksbehandling - Saksbehandling for ungdomsprogramytelsen",
-    "version" : "1.0"
+    "version" : "2.0"
   },
   "openapi" : "3.0.1",
   "paths" : {
