@@ -206,7 +206,7 @@ public class KodeverkRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @Deprecated(forRemoval = true)
     public Response hentGruppertKodeliste() throws IOException {
-        final ObjectMapper om = ObjectMapperResolver.getBaseObjectMapperCopy();
+        final ObjectMapper om = ObjectMapperFactory.getBaseObjectMapperCopy();
 
         String kodelisteJson = om.writeValueAsString(legacyGruppertKodeverdi);
         jakarta.ws.rs.core.CacheControl cc = new jakarta.ws.rs.core.CacheControl();
