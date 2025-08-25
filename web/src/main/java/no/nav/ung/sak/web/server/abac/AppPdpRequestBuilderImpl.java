@@ -9,9 +9,11 @@ import no.nav.k9.felles.konfigurasjon.env.Cluster;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.ung.abac.BeskyttetRessursKoder;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
@@ -25,13 +27,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,16 +61,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         this.aktørTjeneste = aktørTjeneste;
     }
 
-    private static void validerSamsvarBehandlingOgFagsak(Long behandlingId, Saksnummer fagsakId, Set<Saksnummer> fagsakIder) {
-        List<Saksnummer> fagsakerSomIkkeErForventet = fagsakIder.stream()
-            .filter(f -> !fagsakId.equals(f))
-            .collect(Collectors.toList());
-        if (!fagsakerSomIkkeErForventet.isEmpty()) {
-            throw FeilFactory.create(PdpRequestBuilderFeil.class).ugyldigInputManglerSamsvarBehandlingFagsak(behandlingId, fagsakerSomIkkeErForventet)
-                .toException();
-        }
-    }
-
     @Override
     public PdpRequest lagPdpRequest(AbacAttributtSamling attributter) {
         if (BeskyttetRessursKoder.PIP.equals(attributter.getResource())) {
@@ -81,35 +71,49 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet());
         }
 
-        Optional<Long> behandlingId = utledBehandlingIder(attributter);
-        behandlingId.ifPresent(it -> LOG_CONTEXT.add("behandling", it));
+        validerAttributter(attributter);
 
-        Optional<PipBehandlingsData> behandlingData = behandlingId.isPresent()
-            ? pipRepository.hentDataForBehandling(behandlingId.get())
-            : Optional.empty();
-        if (behandlingId.isPresent() && behandlingData.isEmpty()) {
-            throw new UkjentBehandlingException(behandlingId.get());
+        Long behandlingId = utledBehandlingIder(attributter).orElse(null);
+        PipBehandlingsData behandlingData = null;
+        if (behandlingId != null) {
+            LOG_CONTEXT.add("behandling", behandlingId);
+            behandlingData = pipRepository.hentDataForBehandling(behandlingId).orElseThrow(() -> new UkjentBehandlingException(behandlingId));
+            LOG_CONTEXT.add("behandlingUuid", behandlingData.behandlingUuid());
         }
-        Set<Saksnummer> saksnumre = behandlingData.isPresent()
-            ? utledSaksnumre(attributter, behandlingData.get())
-            : utledSaksnumre(attributter);
-
-        behandlingData.ifPresent(pipBehandlingsData -> {
-            validerSamsvarBehandlingOgFagsak(behandlingId.get(), new Saksnummer(pipBehandlingsData.getSaksnummer()), saksnumre);
-            LOG_CONTEXT.add("behandlingUuid", pipBehandlingsData.getBehandlingUuid());
-        });
-
+        Set<Saksnummer> saksnumre = utledSaksnumre(attributter, behandlingData);
+        validerSamsvarBehandlingOgFagsak(behandlingData, saksnumre);
         if (saksnumre.size() == 1) {
             LOG_CONTEXT.add("saksnummer", saksnumre.iterator().next());
         }
-
         Set<AktørId> aktørIder = utledAktørIder(attributter, saksnumre);
-        Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(AppAbacAttributtType.AKSJONSPUNKT_KODE));
-        return behandlingData.isPresent()
-            ? lagPdpRequest(attributter, aktørIder, aksjonspunktType, behandlingData.get())
+        Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(StandardAbacAttributtType.AKSJONSPUNKT_KODE));
+        return behandlingData != null
+            ? lagPdpRequest(attributter, aktørIder, aksjonspunktType, behandlingData)
             : lagPdpRequest(attributter, aktørIder, aksjonspunktType);
     }
 
+    private Set<AktørId> utledAktørIder(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre) {
+        Set<AktørId> aktørIder = new LinkedHashSet<>();
+        aktørIder.addAll(attributter.getVerdier(StandardAbacAttributtType.AKTØR_ID).stream().map(it -> new AktørId((String) it)).toList());
+        aktørIder.addAll(pipRepository.hentAktørIdKnyttetTilFagsaker(saksnumre)); //legger til alle personer på alle saker det er treff mot ved søk
+        return aktørIder;
+    }
+
+    private static void validerSamsvarBehandlingOgFagsak(PipBehandlingsData behandlingData, Set<Saksnummer> saksnumre) {
+        if (behandlingData != null) {
+            if (saksnumre.size() == 1) {
+                Saksnummer saksnummer = saksnumre.iterator().next();
+                if (!saksnummer.equals(behandlingData.saksnummer())) {
+                    throw FeilFactory.create(PdpRequestBuilderFeil.class).ugyldigInputManglerSamsvarBehandlingFagsak(behandlingData.behandlingUuid(), saksnummer.getVerdi())
+                        .toException();
+                }
+            } else {
+                List<String> saksnumreSomString = saksnumre.stream().map(Saksnummer::getVerdi).toList();
+                throw FeilFactory.create(PdpRequestBuilderFeil.class).ugyldigInputHarFlereSaksnumreMedBehandling(behandlingData.behandlingUuid(), saksnumreSomString)
+                    .toException();
+            }
+        }
+    }
 
     @Override
     public boolean internAzureConsumer(String azpName) {
@@ -121,10 +125,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     }
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Collection<String> aksjonspunktType) {
-        Set<String> aktører = aktørIder == null ? Collections.emptySet()
-            : aktørIder.stream().map(AktørId::getId).collect(Collectors.toCollection(TreeSet::new));
-        Set<String> fnrs = attributter.getVerdier(AppAbacAttributtType.FNR);
-
         PdpRequest pdpRequest = new PdpRequest();
         pdpRequest.put(AbacAttributter.RESOURCE_FELLES_DOMENE, ABAC_DOMAIN);
         pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, attributter.getIdToken());
@@ -132,16 +132,24 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         addToPdpRequest(pdpRequest, AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
         addToPdpRequest(pdpRequest, AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
 
-        if (!aktører.isEmpty()) {
-            pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktører);
+        if (!aktørIder.isEmpty()) {
+            pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktørIder.stream().map(AktørId::getAktørId).toList());
         }
-        if (!fnrs.isEmpty()) {
-            pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_FNR, fnrs);
+        Set<String> fødselsnumre = fødselsnumreFraAttributter(attributter);
+        if (!fødselsnumre.isEmpty()) {
+            pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_FNR, fødselsnumre);
         }
         if (!aksjonspunktType.isEmpty()) {
             pdpRequest.put(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE, aksjonspunktType);
         }
         return pdpRequest;
+    }
+
+    private Set<String> fødselsnumreFraAttributter(AbacAttributtSamling attributter) {
+        Set<String> resultat = new LinkedHashSet<>();
+        resultat.addAll(attributter.getVerdier(StandardAbacAttributtType.FNR));
+        resultat.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR));
+        return resultat;
     }
 
     private void addToPdpRequest(PdpRequest pdpRequest, String key, String val) {
@@ -152,19 +160,20 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Collection<String> aksjonspunktType,
                                      PipBehandlingsData behandlingData) {
         PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aksjonspunktType);
-        AbacUtil.oversettBehandlingStatus(behandlingData.getBehandligStatus())
+        AbacUtil.oversettBehandlingStatus(behandlingData.behandligStatus())
             .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_BEHANDLINGSSTATUS, it.getEksternKode()));
-        AbacUtil.oversettFagstatus(behandlingData.getFagsakStatus())
+        AbacUtil.oversettFagstatus(behandlingData.fagsakStatus())
             .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_SAKSSTATUS, it.getEksternKode()));
-        behandlingData.getAnsvarligSaksbehandler()
-            .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER, it));
+        if (behandlingData.ansvarligSaksbehandler() != null) {
+            pdpRequest.put(AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER, behandlingData.ansvarligSaksbehandler());
+        }
         return pdpRequest;
     }
 
     private Optional<Long> utledBehandlingIder(AbacAttributtSamling attributter) {
-        Set<Long> behandlingIdFraAttributter = attributter.<Long>getVerdier(AppAbacAttributtType.BEHANDLING_ID).stream().mapToLong(Long::valueOf).boxed().collect(Collectors.toSet());
+        Set<Long> behandlingIdFraAttributter = attributter.<Long>getVerdier(StandardAbacAttributtType.BEHANDLING_ID).stream().mapToLong(Long::valueOf).boxed().collect(Collectors.toSet());
 
-        Set<UUID> uuids = attributter.getVerdier(AppAbacAttributtType.BEHANDLING_UUID);
+        Set<UUID> uuids = attributter.getVerdier(StandardAbacAttributtType.BEHANDLING_UUID);
         Set<Long> behandlingIdForUuid = pipRepository.behandlingsIdForUuid(uuids);
         if (uuids.size() != behandlingIdForUuid.size()) {
             throw new UkjentBehandlingException(uuids);
@@ -187,38 +196,53 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     private Set<Saksnummer> utledSaksnumre(AbacAttributtSamling attributter, PipBehandlingsData behandlingData) {
         Set<Saksnummer> saksnumre = utledSaksnumre(attributter);
-        saksnumre.add(new Saksnummer(behandlingData.getSaksnummer()));
-        return saksnumre;
-    }
-
-    private Set<Saksnummer> utledSaksnumre(AbacAttributtSamling attributter) {
-        Set<Saksnummer> saksnumre = new LinkedHashSet<>();
-        saksnumre.addAll(attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER));
-        saksnumre.addAll(hentSaksnumreForFagsakIder(attributter));
-        saksnumre.addAll(pipRepository.saksnumreForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
-        saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(AppAbacAttributtType.JOURNALPOST_ID)));
-        return saksnumre;
-    }
-
-    private Set<Saksnummer> hentSaksnumreForFagsakIder(AbacAttributtSamling attributter) {
-        Set<Long> fagsakIder = attributter.getVerdier(AppAbacAttributtType.FAGSAK_ID);
-        Set<Saksnummer> saksnumre = pipRepository.saksnummerForFagsakId(fagsakIder);
-        if (fagsakIder.size() != saksnumre.size()) {
-            throw new UkjentFagsakException(fagsakIder);
+        if (behandlingData != null) {
+            saksnumre.add(behandlingData.saksnummer());
         }
         return saksnumre;
     }
 
-    private Set<AktørId> utledAktørIder(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre) {
-        Set<String> aktørIdVerdier = attributter.getVerdier(AppAbacAttributtType.AKTØR_ID);
-
-        Set<AktørId> aktørIder = new HashSet<>();
-        aktørIder.addAll(aktørIdVerdier.stream().map(AktørId::new).collect(Collectors.toSet()));
-        aktørIder.addAll(pipRepository.hentAktørIdKnyttetTilFagsaker(saksnumre));
-        return aktørIder;
+    private Set<Saksnummer> utledSaksnumre(AbacAttributtSamling attributter) {
+        Set<Saksnummer> saksnumreDirekteFraAttributter = attributter.getVerdier(StandardAbacAttributtType.SAKSNUMMER);
+        Set<Saksnummer> eksisterendeSaksnumreForAttributtsaksnumre = pipRepository.finnSaksnumerSomEksisterer(saksnumreDirekteFraAttributter);
+        if (!eksisterendeSaksnumreForAttributtsaksnumre.containsAll(saksnumreDirekteFraAttributter)) {
+            throw new UkjentFagsakException(saksnumreDirekteFraAttributter.stream().map(Saksnummer::getVerdi).toList());
+        }
+        Set<Saksnummer> saksnumre = new LinkedHashSet<>();
+        saksnumre.addAll(saksnumreDirekteFraAttributter);
+        saksnumre.addAll(pipRepository.saksnumreForSøker(fnrTilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
+        saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(StandardAbacAttributtType.JOURNALPOST_ID)));
+        return saksnumre;
     }
 
-    private Collection<AktørId> tilAktørId(Set<String> fnr) {
+    private static void validerAttributter(AbacAttributtSamling attributter) {
+        Set<AbacAttributtType> tillatteTyper = Set.of(
+            AppAbacAttributtType.SAKER_MED_FNR,
+            AppAbacAttributtType.DOKUMENT_ID,
+            AppAbacAttributtType.OPPGAVE_ID,
+            StandardAbacAttributtType.SAKSNUMMER,
+            StandardAbacAttributtType.BEHANDLING_ID,
+            StandardAbacAttributtType.BEHANDLING_UUID,
+            StandardAbacAttributtType.FNR,
+            StandardAbacAttributtType.AKTØR_ID,
+            StandardAbacAttributtType.JOURNALPOST_ID,
+            StandardAbacAttributtType.AKSJONSPUNKT_KODE
+        );
+        Set<AbacAttributtType> ulovligeTyper = attributter.keySet().stream()
+            .filter(it -> !tillatteTyper.contains(it))
+            .collect(Collectors.toSet());
+        if (!ulovligeTyper.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Fikk abac-attributt-typer som ikke er støttet, endre DTO eller lag støtte for typene: " + ulovligeTyper);
+        }
+
+        if (attributter.keySet().contains(AppAbacAttributtType.DOKUMENT_ID) && ! attributter.keySet().contains(StandardAbacAttributtType.JOURNALPOST_ID)) {
+            //det er journalpostId som brukes for tilgangskontroll, dokumentId er bare med for å kunne havne i auditlogg
+            throw new IllegalArgumentException("Ikke støttet å ha dokumentId som abac-attributt uten å samtidig ha journalpostId.");
+        }
+    }
+
+    private Collection<AktørId> fnrTilAktørId(Set<String> fnr) {
         if (fnr == null || fnr.isEmpty()) {
             return Collections.emptySet();
         }

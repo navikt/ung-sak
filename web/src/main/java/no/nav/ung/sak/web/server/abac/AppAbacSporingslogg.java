@@ -5,9 +5,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.interceptor.Interceptor;
 import no.nav.k9.felles.log.sporingslogg.Sporingsdata;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.DefaultAbacSporingslogg;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 
 /**
  * Egen sporingslogg implementasjon for å utvide med egne felter.
@@ -33,19 +33,49 @@ public class AppAbacSporingslogg extends DefaultAbacSporingslogg {
         setOptionalListValueinAttributeSet(sporingsdata, pdpRequest,
             AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE,
             (index / antallIdenter),
-            AppAbacAttributtType.ABAC_AKSJONSPUNKT_TYPE);
+            SporingsloggAttributtType.ABAC_AKSJONSPUNKT_TYPE);
 
         setOptionalValueinAttributeSet(sporingsdata, pdpRequest,
             AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER,
-            AppAbacAttributtType.ABAC_ANSVALIG_SAKSBEHANDLER);
+            SporingsloggAttributtType.ABAC_ANSVALIG_SAKSBEHANDLER);
 
         setOptionalValueinAttributeSet(sporingsdata, pdpRequest,
             AbacAttributter.RESOURCE_BEHANDLINGSSTATUS,
-            AppAbacAttributtType.ABAC_BEHANDLING_STATUS);
+            SporingsloggAttributtType.ABAC_BEHANDLING_STATUS);
 
         setOptionalValueinAttributeSet(sporingsdata, pdpRequest,
             AbacAttributter.RESOURCE_SAKSSTATUS,
-            AppAbacAttributtType.ABAC_SAK_STATUS);
+            SporingsloggAttributtType.ABAC_SAK_STATUS);
+    }
+
+    /**
+     * attributt-typer som kun brukes i sporingslogg
+     */
+    private enum SporingsloggAttributtType implements AbacAttributtType {
+
+        ABAC_ANSVALIG_SAKSBEHANDLER("ansvarlig_saksbehandler"),
+        ABAC_BEHANDLING_STATUS("behandling_status"),
+        ABAC_SAK_STATUS("sak_status"),
+        ABAC_AKSJONSPUNKT_TYPE("aksjonspunkt_type"),
+        ;
+
+        private final boolean maskerOutput;
+        private final String sporingsloggEksternKode;
+
+        SporingsloggAttributtType(String sporingsloggEksternKode) {
+            this.sporingsloggEksternKode = sporingsloggEksternKode;
+            this.maskerOutput = false;
+        }
+
+        @Override
+        public boolean getMaskerOutput() {
+            return maskerOutput;
+        }
+
+        @Override
+        public String getSporingsloggKode() {
+            return sporingsloggEksternKode;
+        }
     }
 
 }

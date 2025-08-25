@@ -78,8 +78,8 @@ public class PipRestTjeneste {
         PipDto pipDto = new PipDto();
         pipData.ifPresent(pip -> {
             pipDto.setAktørIder(hentAktørIder(pip));
-            pipDto.setBehandlingStatus(AbacUtil.oversettBehandlingStatus(pip.getBehandligStatus()).map(AbacBehandlingStatus::getEksternKode).orElse(null));
-            pipDto.setFagsakStatus(AbacUtil.oversettFagstatus(pip.getFagsakStatus()).map(AbacFagsakStatus::getEksternKode).orElse(null));
+            pipDto.setBehandlingStatus(AbacUtil.oversettBehandlingStatus(pip.behandligStatus()).map(AbacBehandlingStatus::getEksternKode).orElse(null));
+            pipDto.setFagsakStatus(AbacUtil.oversettFagstatus(pip.fagsakStatus()).map(AbacFagsakStatus::getEksternKode).orElse(null));
         });
         return pipDto;
     }
@@ -96,9 +96,9 @@ public class PipRestTjeneste {
         if (pipDataOpt.isPresent()) {
             PipBehandlingsData pipData = pipDataOpt.get();
             Set<AktørId> personer = hentAktørIder(pipData);
-            BehandlingStatus behandlingStatus = BehandlingStatus.fraKode(pipData.getBehandligStatus());
-            FagsakStatus fagsakStatus = FagsakStatus.fraKode(pipData.getFagsakStatus());
-            String ansvarligSaksbehandler = pipData.getAnsvarligSaksbehandler().orElse(null);
+            BehandlingStatus behandlingStatus = pipData.behandligStatus();
+            FagsakStatus fagsakStatus = pipData.fagsakStatus();
+            String ansvarligSaksbehandler = pipData.ansvarligSaksbehandler();
             return Optional.of(new PipDtoV2(personer, behandlingStatus, fagsakStatus, ansvarligSaksbehandler));
         } else {
             return Optional.empty();
@@ -115,10 +115,10 @@ public class PipRestTjeneste {
         if (pipDataOpt.isPresent()) {
             PipBehandlingsData pipData = pipDataOpt.get();
             Set<AktørId> personer = hentAktørIder(pipData);
-            BehandlingStatus behandlingStatus = BehandlingStatus.fraKode(pipData.getBehandligStatus());
-            FagsakStatus fagsakStatus = FagsakStatus.fraKode(pipData.getFagsakStatus());
-            String ansvarligSaksbehandler = pipData.getAnsvarligSaksbehandler().orElse(null);
-            Saksnummer saksnummer = new Saksnummer(pipData.getSaksnummer());
+            BehandlingStatus behandlingStatus = pipData.behandligStatus();
+            FagsakStatus fagsakStatus = pipData.fagsakStatus();
+            String ansvarligSaksbehandler = pipData.ansvarligSaksbehandler();
+            Saksnummer saksnummer = pipData.saksnummer();
             return Optional.of(new PipDtoV3(saksnummer, personer, behandlingStatus, fagsakStatus, ansvarligSaksbehandler));
         } else {
             return Optional.empty();
@@ -126,7 +126,7 @@ public class PipRestTjeneste {
     }
 
     private Set<AktørId> hentAktørIder(PipBehandlingsData pipBehandlingsData) {
-        return pipRepository.hentAktørIdKnyttetTilFagsaker(List.of(new Saksnummer(pipBehandlingsData.getSaksnummer())));
+        return pipRepository.hentAktørIdKnyttetTilFagsaker(List.of(pipBehandlingsData.saksnummer()));
     }
 
 }
