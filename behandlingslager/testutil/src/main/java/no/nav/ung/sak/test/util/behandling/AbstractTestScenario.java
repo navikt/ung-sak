@@ -1,6 +1,7 @@
 package no.nav.ung.sak.test.util.behandling;
 
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -489,7 +490,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
                     .medPeriode(DatoIntervallEntitet.fra(p.getLocalDateInterval())).build())
                 .toList();
             repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), kontrollertePerioder);
-            repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), ungTestscenario.tilkjentYtelsePerioder(), "input", "sporing");
+            repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), ungTestscenario.tilkjentYtelsePerioder(), LocalDateTimeline.empty(), "input", "sporing");
         }
 
         if (ungTestscenario.behandlingTriggere() != null && repositories.prosessTriggereRepository() != null) {
