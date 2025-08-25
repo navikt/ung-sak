@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.KjønnKodeverdiConverter;
@@ -24,7 +25,7 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PO_PERSONOPPLYSNING")
     private Long id;
 
-    @Embedded
+    @Convert(converter = AktørIdConverter.class, attributeName = "aktørId")
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", updatable = false)))
     private AktørId aktørId;
 
@@ -49,10 +50,10 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     @JoinColumn(name = "po_informasjon_id", nullable = false, updatable = false)
     private PersonInformasjonEntitet personopplysningInformasjon;
 
-    PersonopplysningEntitet() {
+    protected PersonopplysningEntitet() {
     }
 
-    PersonopplysningEntitet(PersonopplysningEntitet personopplysning) {
+    protected PersonopplysningEntitet(PersonopplysningEntitet personopplysning) {
         this.aktørId = personopplysning.getAktørId();
         this.navn = personopplysning.getNavn();
         this.brukerKjønn = personopplysning.getKjønn();
