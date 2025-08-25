@@ -18,7 +18,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
+import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.LegacyVenteårsakSomObjekt;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.VenteårsakSomObjekt;
