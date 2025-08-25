@@ -10,11 +10,13 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
 @ApplicationScoped
 @ProsessTask(InnhentUngdomsprogramperioderTask.TASKTYPE)
@@ -48,7 +50,20 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
         ungdomsprogramTjeneste.innhentOpplysninger(behandling);
         final var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
         if (!periodeTidslinje.isEmpty()) {
-            fagsakRepository.utvidPeriode(behandling.getFagsakId(), periodeTidslinje.getMinLocalDate(), FagsakperiodeUtleder.finnTomDato(periodeTidslinje.getMinLocalDate(), periodeTidslinje));
+            begrensFagsakperiode(behandling.getId(), behandling.getFagsakId());
         }
+    }
+
+    private void begrensFagsakperiode(Long behandlingId, Long fagsakId) {
+        var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
+        if (periodeTidslinje.isEmpty()) {
+            // Hvis det ikke finnes noen perioder, så er det ingenting å gjøre
+            return;
+        }
+        var sisteDagIProgrammet = periodeTidslinje.getMaxLocalDate();
+        var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+        // Begrenser fagsakperioden til programperioden
+        var nyFagsakPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periodeTidslinje.getMinLocalDate(), sisteDagIProgrammet.isBefore(TIDENES_ENDE) ? sisteDagIProgrammet : fagsak.getPeriode().getTomDato());
+        fagsakRepository.oppdaterPeriode(fagsakId, nyFagsakPeriode.getFomDato(), nyFagsakPeriode.getTomDato());
     }
 }

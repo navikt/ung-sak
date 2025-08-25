@@ -72,7 +72,7 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
         var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         // Sjekker om det gjelder dødshendelse for søker
-        var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
+        var fagsakForAktør = finnFagsakerForAktørTjeneste.hentOverlappendeFagsakForAktørSomSøker(aktør, aktuellDato);
         if (fagsakForAktør.isPresent()) {
             if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
                 fagsakÅrsakMap.put(fagsakForAktør.get(), new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsakForAktør.get().getPeriode().getTomDato())));

@@ -7,10 +7,11 @@ import jakarta.persistence.Query;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,8 +62,27 @@ public class FinnFagsakerForAktørTjeneste {
         return !query.getResultList().isEmpty();
     }
 
-    public Optional<Fagsak> hentRelevantFagsakForAktørSomSøker(AktørId aktør, LocalDate relevantDato) {
-        return fagsakRepository.hentForBruker(aktør).stream().filter(f -> f.getPeriode().overlapper(relevantDato, AbstractLocalDateInterval.TIDENES_ENDE)).findFirst();
+    public Optional<Fagsak> hentNærmesteFagsakForAktørSomSøker(AktørId aktør, LocalDate relevantDato) {
+        return fagsakRepository.hentForBruker(aktør).stream()
+            .min(Comparator.comparing(it -> dagerMellom(it.getPeriode(), relevantDato)));
+    }
+
+
+    public Optional<Fagsak> hentOverlappendeFagsakForAktørSomSøker(AktørId aktør, LocalDate relevantDato) {
+        return fagsakRepository.hentForBruker(aktør).stream()
+            .filter(it -> it.getPeriode().inkluderer(relevantDato))
+            .findFirst();
+    }
+
+
+    private int dagerMellom(DatoIntervallEntitet periode, LocalDate relevantDato) {
+        if (periode.getFomDato().isAfter(relevantDato)) {
+            return relevantDato.until(periode.getFomDato()).getDays();
+        }
+        if (periode.getTomDato().isBefore(relevantDato)) {
+            return periode.getTomDato().until(relevantDato).getDays();
+        }
+        return 0;
     }
 
     private boolean finnesSakMedSøker(AktørId søkerAktørId) {

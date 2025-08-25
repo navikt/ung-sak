@@ -66,7 +66,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
         var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : forelderAktørIder) {
-            Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
+            Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentOverlappendeFagsakForAktørSomSøker(aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
                     if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId)) {
