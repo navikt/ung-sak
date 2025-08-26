@@ -16,10 +16,8 @@ import java.util.Map;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum KlageVurdertAv implements Kodeverdi {
 
-    NFP("NFP", "NAV Familie- og Pensjonsytelser"),
-    NAY("NAY", "NAV Arbeid og ytelser"),
-    NK("NK", "NAV Klageenhet K9"),
-    NK_KABAL("NKK", "NAV Klageenhet Kabal"),
+    VEDTAKSINSTANS("VI", "NAV Vedtaksinstans"),
+    KLAGEINSTANS("NK", "NAV Klageenhet"),
     UDEFINERT("Udefinert", "Udenfinert");
 
     private static final Map<String, KlageVurdertAv> KODER = new LinkedHashMap<>();
@@ -82,6 +80,6 @@ public enum KlageVurdertAv implements Kodeverdi {
     }
 
     public boolean erKlageenhet() {
-        return this == NK || this == NK_KABAL;
+        return this == KLAGEINSTANS;
     }
 }

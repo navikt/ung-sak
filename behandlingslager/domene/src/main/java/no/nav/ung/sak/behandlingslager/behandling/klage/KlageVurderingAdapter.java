@@ -60,8 +60,21 @@ public class KlageVurderingAdapter {
         return klageVurdertAv;
     }
 
-    public boolean skalOversendesTilNK(Behandling behandling) {
-        return getKlageVurdertAv() == KlageVurdertAv.NAY &&
+    public boolean skalOversendesTilNK() {
+        return getKlageVurdertAv() == KlageVurdertAv.VEDTAKSINSTANS &&
             getKlageVurdering() == KlageVurderingType.STADFESTE_YTELSESVEDTAK;
+    }
+
+    public static class Templates {
+        public static final KlageVurderingAdapter AVVIST_VURDERING_VEDTAKSINSTANS =
+            new KlageVurderingAdapter(
+                KlageVurderingType.AVVIS_KLAGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                KlageVurdertAv.VEDTAKSINSTANS
+            );
     }
 }

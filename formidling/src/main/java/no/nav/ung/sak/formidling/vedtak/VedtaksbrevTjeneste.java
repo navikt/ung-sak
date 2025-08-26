@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
@@ -26,16 +27,16 @@ import java.util.stream.Collectors;
 public class VedtaksbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
-    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private final VedtaksbrevRegler vedtaksbrevRegler;
+    private final VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste;
+    private final VedtaksbrevReglerUng vedtaksbrevRegler;
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
 
     @Inject
     public VedtaksbrevTjeneste(
-        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler,
+        @Any VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste,
+        @Any VedtaksbrevReglerUng vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
@@ -163,7 +164,6 @@ public class VedtaksbrevTjeneste {
                 .collect(Collectors.joining(", ", "[", "]")));
         }
 
-
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
 
         if (dto.redigertVersjon() == null) {
@@ -208,9 +208,6 @@ private List<GenerertBrev> genererAutomatiskVedtaksbrev(boolean kunHtml, Behandl
 
         vedtaksbrevValgEntitet.tilbakestillVedTilbakehopp();
         vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
-
     }
-
-
 }
 

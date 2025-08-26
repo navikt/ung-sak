@@ -5,18 +5,13 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
-import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,21 +33,16 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
 
     private BehandlingRepository behandlingRepository;
-    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste;
-    private VedtaksbrevRegler vedtaksbrevRegler;
     private BrevbestillingRepository brevbestillingRepository;
 
     @Inject
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
-        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler, BrevbestillingRepository brevbestillingRepository) {
+        BrevbestillingRepository brevbestillingRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
-        this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.brevbestillingRepository = brevbestillingRepository;
     }
 
@@ -68,30 +58,18 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
         Behandling behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
+        var vedtaksbrevGenerererTjeneste = hentVedtaksbrevGenererer(behandling);
 
-        if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
-            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
-            journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
-            return;
-        }
-
-        genererOgJournalførAutomatiskBrev(behandling, brevbestilling);
-
-    }
-
-    private void genererOgJournalførAutomatiskBrev(Behandling behandling, BrevbestillingEntitet brevbestilling) {
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
-
-        DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
-        Vedtaksbrev vedtaksbrev = totalresultater.vedtaksbrevResultater().stream()
-            .filter(it -> it.dokumentMalType() == dokumentMalType)
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
-
-        var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
-            new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
+        var generertBrev = (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) ?
+            vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false) :
+                vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(behandling, dokumentMalType, false);
 
         journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
     }
 
+
+    private VedtaksbrevGenerererTjeneste hentVedtaksbrevGenererer(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(VedtaksbrevGenerererTjeneste.class, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() -> new UnsupportedOperationException("VedtaksbrevGenerererTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+    }
 }

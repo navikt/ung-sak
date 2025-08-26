@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.bestilling.VedtaksbrevbestillingTjeneste;
 import no.nav.ung.sak.formidling.bestilling.VurderVedtaksbrevTask;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -53,15 +54,18 @@ public class VedtakFattetEventObserverTest {
 
     VedtakFattetEventObserver vedtakFattetEventObserver;
 
+    VedtaksbrevbestillingTjeneste vedtaksbrevbestillingTjeneste;
+
     @BeforeEach
     public void setup() {
         vedtakFattetEventObserver = new VedtakFattetEventObserver(prosessTaskRepository);
+        vedtaksbrevbestillingTjeneste = new VedtaksbrevbestillingTjeneste(prosessTaskRepository);
     }
 
     @Test
     public void publisererVedtakForIverksatteVedtak() {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET);
-        vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
+        observerBehandlingVedtak(behandlingVedtakEvent);
 
         verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
@@ -72,7 +76,7 @@ public class VedtakFattetEventObserverTest {
     @Test
     public void publisererIkkeVedtakFørIverksatt() {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IKKE_IVERKSATT, VedtakResultatType.INNVILGET);
-        vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
+        observerBehandlingVedtak(behandlingVedtakEvent);
 
         verify(prosessTaskRepository, never()).lagre(any(ProsessTaskGruppe.class));
     }
@@ -80,12 +84,12 @@ public class VedtakFattetEventObserverTest {
     @Test
     public void publisererKunGenereltVedtakseventVedAvslag() {
         var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG);
-        vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
+        observerBehandlingVedtak(behandlingVedtakEvent);
 
         verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
         assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
             .map(ProsessTaskData::getTaskType))
-            .containsExactly(VurderVedtaksbrevTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
+            .containsExactlyInAnyOrder(VurderVedtaksbrevTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
     private Behandling lagBehandling() {
@@ -114,5 +118,10 @@ public class VedtakFattetEventObserverTest {
         when(vedtakRepository.hentBehandlingVedtakForBehandlingId(any())).thenReturn(Optional.of(vedtak));
 
         return new BehandlingVedtakEvent(vedtak, lagBehandling());
+    }
+
+    private void observerBehandlingVedtak(BehandlingVedtakEvent behandlingVedtakEvent) {
+        vedtakFattetEventObserver.observerBehandlingVedtak(behandlingVedtakEvent);
+        vedtaksbrevbestillingTjeneste.observerBehandlingVedtak(behandlingVedtakEvent);
     }
 }

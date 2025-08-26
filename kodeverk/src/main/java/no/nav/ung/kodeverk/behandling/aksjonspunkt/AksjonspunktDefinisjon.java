@@ -101,15 +101,15 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
 
-    VURDERING_AV_FORMKRAV_KLAGE_NFP(
+    VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS(
         AksjonspunktKodeDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_KODE, AksjonspunktType.MANUELL, "Vurder formkrav (Vedtaksinstans)",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS, UTEN_VILKÅR,
-        SkjermlenkeType.FORMKRAV_KLAGE_NFP, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        SkjermlenkeType.FORMKRAV_KLAGE_VEDTAKSINSTANS, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
-    MANUELL_VURDERING_AV_KLAGE_NFP(
+    MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS(
         AksjonspunktKodeDefinisjon.MANUELL_VURDERING_AV_KLAGE_KODE, AksjonspunktType.MANUELL, "Manuell vurdering av klage (Vedtaksinstans)",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KLAGE_FØRSTEINSTANS, UTEN_VILKÅR,
-        SkjermlenkeType.KLAGE_BEH_NFP, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        SkjermlenkeType.KLAGE_BEH_VEDTAKSINSTANS, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
     AUTO_OVERFØRT_NK(
         AksjonspunktKodeDefinisjon.AUTO_OVERFØRT_NK_KODE, AksjonspunktType.AUTOPUNKT, "Venter på vedtak fra Klageinstans",
