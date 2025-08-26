@@ -19,10 +19,12 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjenesteKlage;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
@@ -45,15 +47,22 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 public class FormidlingRestTjeneste {
 
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
+    private VedtaksbrevTjenesteKlage vedtaksbrevTjenesteKlage;
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
 
     @Inject
-    public FormidlingRestTjeneste(VedtaksbrevTjeneste vedtaksbrevTjeneste, InformasjonsbrevTjeneste informasjonsbrevTjeneste) {
+    public FormidlingRestTjeneste(VedtaksbrevTjeneste vedtaksbrevTjeneste,
+                                  VedtaksbrevTjenesteKlage vedtaksbrevTjenesteKlage,
+                                  InformasjonsbrevTjeneste informasjonsbrevTjeneste,
+                                  BehandlingRepository behandlingRepository) {
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
+        this.vedtaksbrevTjenesteKlage = vedtaksbrevTjenesteKlage;
         this.informasjonsbrevTjeneste = informasjonsbrevTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     FormidlingRestTjeneste() {
@@ -108,10 +117,13 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisRequest dto,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto);
-
-        return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
-
+        var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
+        if (behandling.getType().erYtelseBehandlingType()) {
+            var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto);
+            return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
+        } else {
+            return lagForhåndsvisResponse(dto.behandlingId(), request, vedtaksbrevTjenesteKlage.forhåndsvis(behandling));
+        }
     }
 
     @GET

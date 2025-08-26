@@ -91,6 +91,11 @@ public class OppdateringResultat {
             return this;
         }
 
+        public Builder medSteg(BehandlingStegType håndtertISteg) {
+            resultat.nesteSteg = håndtertISteg;
+            return this;
+        }
+
         public OppdateringResultat build() {
             return resultat;
         }

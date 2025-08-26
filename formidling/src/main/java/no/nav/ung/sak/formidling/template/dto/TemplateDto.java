@@ -13,7 +13,7 @@ import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 public record TemplateDto(
     FellesDto felles,
     //inliner feltene fordi det er enklere å jobbe med i templatefiler
-    @JsonUnwrapped TemplateInnholdDto templateDataDto
+    @JsonUnwrapped Object templateDataDto
     )
 {
 }

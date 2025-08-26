@@ -16,37 +16,32 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.AbacDto;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.felles.sikkerhet.abac.*;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
-import no.nav.ung.sak.klage.KlageVurderingTjeneste;
+import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.klage.KlageFormkravResultatDto;
 import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatAksjonspunktMellomlagringDto;
 import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatDto;
 import no.nav.ung.sak.kontrakt.klage.KlagebehandlingDto;
-import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
 import java.util.Optional;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.UPDATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType.FAGSAK;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -139,14 +134,12 @@ public class KlageRestTjeneste {
         KlagebehandlingDto dto = new KlagebehandlingDto();
         Optional<KlageFormkravResultatDto> nfpFormkrav = KlageFormkravResultatDtoMapper.mapNFPKlageFormkravResultatDto(behandling, klageRepository);
         Optional<KlageVurderingResultatDto> nfpVurdering = KlageVurderingResultatDtoMapper.mapFørsteinstansKlageVurderingResultatDto(behandling, klageRepository, fritekstRepository);
-        Optional<KlageFormkravResultatDto> kaFormkrav = Optional.empty(); //KlageFormkravResultatDtoMapper.mapKAKlageFormkravResultatDto(behandling, klageRepository);
         Optional<KlageVurderingResultatDto> nkVurdering = KlageVurderingResultatDtoMapper.mapAndreinstansKlageVurderingResultatDto(behandling, klageRepository, fritekstRepository);
 
-        if (nfpVurdering.isPresent() || nkVurdering.isPresent() || nfpFormkrav.isPresent() || kaFormkrav.isPresent()) {
+        if (nfpVurdering.isPresent() || nkVurdering.isPresent() || nfpFormkrav.isPresent()) {
             nfpVurdering.ifPresent(dto::setKlageVurderingResultatNFP);
             nkVurdering.ifPresent(dto::setKlageVurderingResultatNK);
             nfpFormkrav.ifPresent(dto::setKlageFormkravResultatNFP);
-            kaFormkrav.ifPresent(dto::setKlageFormkravResultatKA);
             return dto;
         } else {
             return null;
@@ -154,12 +147,10 @@ public class KlageRestTjeneste {
     }
 
     private KlageVurderingAdapter mapDto(Behandling behandling, KlageVurderingResultatAksjonspunktMellomlagringDto apDto) {
-        boolean erFørsteinstansAp = apDto.getKode().equals(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_NFP.getKode());
-        KlageVurdertAv klageVurdertAv = erFørsteinstansAp ? KlageVurdertAv.NAY : KlageVurdertAv.NK;
         Hjemmel hjemmel = Hjemmel.fraKode(apDto.getHjemmel());
 
         return new KlageVurderingAdapter(apDto.getKlageVurdering(), apDto.getKlageMedholdArsak(), apDto.getKlageVurderingOmgjoer(),
-            apDto.getBegrunnelse(), apDto.getFritekstTilBrev(), hjemmel, klageVurdertAv);
+            apDto.getBegrunnelse(), apDto.getFritekstTilBrev(), hjemmel, null, KlageVurdertAv.VEDTAKSINSTANS);
     }
 
     public static class AbacKlageVurderingResultatAksjonspunktMellomlagringDto extends KlageVurderingResultatAksjonspunktMellomlagringDto implements AbacDto {
@@ -176,7 +167,7 @@ public class KlageRestTjeneste {
         @Override
         public AbacDataAttributter abacAttributter() {
             return AbacDataAttributter.opprett()
-                .leggTil(AppAbacAttributtType.BEHANDLING_ID, getBehandlingId());
+                .leggTil(StandardAbacAttributtType.BEHANDLING_ID, getBehandlingId());
         }
 
     }

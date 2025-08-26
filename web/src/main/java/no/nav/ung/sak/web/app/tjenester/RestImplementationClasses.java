@@ -32,6 +32,7 @@ import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningProduksjonsstyrin
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.klage.KlageRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.microsoftgraph.ForvaltningTestRestTjeneste;
@@ -84,6 +85,8 @@ public class RestImplementationClasses {
         classes.add(KontrollerInntektRestTjeneste.class);
         classes.add(EtterlysningRestTjeneste.class);
         classes.add(OppdragProxyRestTjeneste.class);
+
+        classes.add(KlageRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);

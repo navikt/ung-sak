@@ -17,6 +17,7 @@ public enum BehandlingType implements Kodeverdi {
     FØRSTEGANGSSØKNAD("BT-002", "Førstegangsbehandling", "ae0034", 6, true),
     REVURDERING("BT-004", "Revurdering", "ae0028", 6, false),
     KLAGE("BT-003", "Klage", "ae0058", 10, false),
+    ANKE("BT-008", "Anke", "ae0046", 10, false),
 
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;

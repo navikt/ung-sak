@@ -6,6 +6,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -16,16 +17,20 @@ public class BrevMottakerTjeneste {
 
     private AktørTjeneste aktørTjeneste;
     private PersonopplysningRepository personopplysningRepository;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
-    public BrevMottakerTjeneste(AktørTjeneste aktørTjeneste, PersonopplysningRepository personopplysningRepository) {
+    public BrevMottakerTjeneste(AktørTjeneste aktørTjeneste, PersonopplysningRepository personopplysningRepository, BehandlingRepository behandlingRepository) {
         this.aktørTjeneste = aktørTjeneste;
         this.personopplysningRepository = personopplysningRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public PdlPerson hentMottaker(Behandling behandling) {
+        PersonopplysningGrunnlagEntitet personopplysningGrunnlagEntitet =
+            personopplysningRepository.hentPersonOpplysningerForOppgittBehandlingEllerSisteYtelsebehandling(behandling);
+
         AktørId aktørId = behandling.getAktørId();
-        PersonopplysningGrunnlagEntitet personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandling.getId());
         PersonopplysningEntitet personopplysning = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getPersonopplysning(aktørId);
 
         String navn = personopplysning.getNavn();

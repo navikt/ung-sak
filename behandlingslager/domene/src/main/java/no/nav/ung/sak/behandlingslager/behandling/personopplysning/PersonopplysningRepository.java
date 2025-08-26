@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.hibernate.jpa.QueryHints;
 
 import jakarta.enterprise.context.Dependent;
@@ -75,6 +76,15 @@ public class PersonopplysningRepository {
     private DiffEntity personopplysningDiffer() {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
         return new DiffEntity(traverser);
+    }
+
+    public PersonopplysningGrunnlagEntitet hentPersonOpplysningerForOppgittBehandlingEllerSisteYtelsebehandling(Behandling behandling) {
+        var behandlingBruktForPersonopplysninger = behandling.erYtelseBehandling() ?
+            behandling :
+            behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(behandling.getFagsak().getId())
+                .orElseThrow(() -> new IllegalStateException("Forventer å finne en ytelsebehandling for fagsak " + behandling.getFagsak().getSaksnummer()));
+
+        return hentPersonopplysninger(behandlingBruktForPersonopplysninger.getId());
     }
 
     public PersonopplysningGrunnlagEntitet hentPersonopplysninger(Long behandlingId) {

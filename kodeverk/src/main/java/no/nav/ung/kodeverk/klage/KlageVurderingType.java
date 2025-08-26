@@ -42,6 +42,7 @@ public enum KlageVurderingType implements Kodeverdi {
     @JsonIgnore
     private String navn;
 
+    @JsonValue
     private String kode;
 
     private KlageVurderingType(String kode) {
@@ -73,13 +74,11 @@ public enum KlageVurderingType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
     @Override
     public String getKode() {
         return kode;

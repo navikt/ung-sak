@@ -1,12 +1,12 @@
 package no.nav.ung.sak.web.app.tjenester.klage.aksjonspunkt;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -14,12 +14,15 @@ import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
-import no.nav.ung.sak.behandlingslager.behandling.klage.*;
+import no.nav.ung.sak.behandlingslager.behandling.klage.KlageFormkravAdapter;
+import no.nav.ung.sak.behandlingslager.behandling.klage.KlageFormkravEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
+import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.part.PartEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.ung.sak.klage.KlageUtredningTjeneste;
-import no.nav.ung.sak.klage.KlageVurderingTjeneste;
+import no.nav.ung.sak.kontrakt.behandling.part.PartDto;
 import no.nav.ung.sak.kontrakt.klage.KlageFormkravAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.klage.KlageresultatEndretEvent;
 import no.nav.ung.sak.kontrakt.klage.PåklagdBehandlingDto;
 
 import java.time.LocalDate;
@@ -27,35 +30,34 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_NFP;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS;
 
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = KlageFormkravAksjonspunktDto.class, adapter = AksjonspunktOppdaterer.class)
 public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageFormkravAksjonspunktDto> {
 
-    private KlageUtredningTjeneste klageUtredningTjeneste;
-    private HistorikkTjenesteAdapter historikkApplikasjonTjeneste;
-    private KlageVurderingTjeneste klageVurderingTjeneste;
+    private KlageHistorikkinnslagTjeneste klageHistorikkinnslag;
     private KlageRepository klageRepository;
     private AksjonspunktRepository aksjonspunktRepository;
     private BehandlingRepository behandlingRepository;
+    private Event<KlageresultatEndretEvent> klageresultatEndretEvent;
 
     KlageFormkravOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public KlageFormkravOppdaterer(KlageUtredningTjeneste klageUtredningTjeneste, KlageVurderingTjeneste klageVurderingTjeneste,
-                                   HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
+    public KlageFormkravOppdaterer(KlageHistorikkinnslagTjeneste klageHistorikkinnslag,
                                    BehandlingRepository behandlingRepository,
-                                   KlageRepository klageRepository, AksjonspunktRepository aksjonspunktRepository) {
+                                   KlageRepository klageRepository,
+                                   AksjonspunktRepository aksjonspunktRepository,
+                                   Event<KlageresultatEndretEvent> klageresultatEndretEvent) {
+        this.klageHistorikkinnslag = klageHistorikkinnslag;
         this.klageRepository = klageRepository;
         this.behandlingRepository = behandlingRepository;
-        this.klageUtredningTjeneste = klageUtredningTjeneste;
-        this.klageVurderingTjeneste = klageVurderingTjeneste;
-        this.historikkApplikasjonTjeneste = historikkApplikasjonTjeneste;
         this.aksjonspunktRepository = aksjonspunktRepository;
+        this.klageresultatEndretEvent = klageresultatEndretEvent;
     }
 
     @Override
@@ -64,16 +66,19 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
         var klageBehandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var klageUtredning = klageRepository.hentKlageUtredning(klageBehandling.getId());
 
-        var klageFormkrav = klageUtredning.getFormkrav();
+        var klageFormkrav = klageUtredning.getFormkrav().map(KlageFormkravEntitet::tilFormkrav);
         var apDefFormkrav = AksjonspunktDefinisjon.fraKode(aksjonspunktKode);
-        var skjermlenkeType = getSkjermlenkeType(aksjonspunktKode);
 
-        opprettHistorikkinnslag(klageBehandling, apDefFormkrav, dto, klageFormkrav, klageUtredning, skjermlenkeType);
-        Optional<KlageAvvistÅrsak> optionalAvvistÅrsak = vurderOgLagreFormkrav(dto, klageBehandling);
+        klageHistorikkinnslag.opprettHistorikkinnslagFormkrav(klageBehandling, dto, klageFormkrav, klageUtredning, null, dto.getBegrunnelse());
+
+        Optional<KlageAvvistÅrsak> optionalAvvistÅrsak = oppdaterFormkrav(dto, klageUtredning);
+        klageRepository.lagre(klageUtredning);
+        klageresultatEndretEvent.fire(new KlageresultatEndretEvent(klageBehandling.getId()));
+
         if (optionalAvvistÅrsak.isPresent()) {
-            lagreKlageVurderingResultatMedAvvistKlage(klageBehandling, dto);
-//            return OppdateringResultat.medFremoverHoppTotrinn(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_VEDTAK);
+            return OppdateringResultat.builder().medTotrinn().build();
         }
+
         klageBehandling.getAksjonspunkter().stream()
             .filter(ap -> ap.getAksjonspunktDefinisjon().equals(apDefFormkrav))
             .findFirst()
@@ -82,58 +87,38 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
         return OppdateringResultat.builder().build();
     }
 
-    private Optional<KlageAvvistÅrsak> vurderOgLagreFormkrav(KlageFormkravAksjonspunktDto dto, Behandling behandling) {
-        KlageVurdertAv klageVurdertAv = getKlageVurdertAv(behandling, dto.getKode());
+    private Optional<KlageAvvistÅrsak> oppdaterFormkrav(KlageFormkravAksjonspunktDto dto, KlageUtredningEntitet utredning) {
         var påklagdBehandlingInfo = Optional.ofNullable(dto.getPåklagdBehandlingInfo());
         boolean gjelderVedtakPåYtelse = påklagdBehandlingInfo.isPresent();
 
-        klageUtredningTjeneste.oppdaterKlageMedPåklagetEksternBehandlingUuid(
-            behandling.getId(),
-            påklagdBehandlingInfo.map(PåklagdBehandlingDto::getPåklagBehandlingUuid).orElse(null),
-            påklagdBehandlingInfo.map(p -> BehandlingType.fraKode(p.getPåklagBehandlingType())).orElse(null));
+        utredning.setKlagendePart(mapPartDto(dto.getValgtKlagePart()));
+        utredning.setpåklagdBehandlingRef(påklagdBehandlingInfo.map(PåklagdBehandlingDto::getPåklagBehandlingUuid).orElse(null));
+        utredning.setpåklagdBehandlingType(påklagdBehandlingInfo.map(p -> BehandlingType.fraKode(p.getPåklagBehandlingType())).orElse(null));
 
-        KlageFormkravAdapter adapter = new KlageFormkravAdapter(
+        KlageFormkravAdapter adapter = mapKlageFormkravAdapter(dto, gjelderVedtakPåYtelse);
+        return utredning.setFormkrav(adapter);
+    }
+
+    private static KlageFormkravAdapter mapKlageFormkravAdapter(KlageFormkravAksjonspunktDto dto, boolean gjelderVedtakPåYtelse) {
+        return new KlageFormkravAdapter(
             dto.erKlagerPart(),
             dto.erFristOverholdt(),
             dto.erKonkret(),
             dto.erSignert(),
             gjelderVedtakPåYtelse,
-            dto.getBegrunnelse(),
-            behandling.getId(),
-            klageVurdertAv);
-
-        klageVurderingTjeneste.lagreFormkrav(behandling, adapter);
-        return utledAvvistÅrsak(dto, gjelderVedtakPåYtelse);    // TODO: Bytt ut med metode laget domeneobjekt
+            dto.getBegrunnelse());
     }
 
-    private Optional<KlageAvvistÅrsak> utledAvvistÅrsak(KlageFormkravAksjonspunktDto dto, boolean gjelderVedtakPåYtelse) {
-        if (!gjelderVedtakPåYtelse) {
-            return Optional.of(KlageAvvistÅrsak.IKKE_PAKLAGD_VEDTAK);
+    public static PartEntitet mapPartDto(PartDto dto) {
+        if (dto == null) {
+            return null;
         }
-        if (!dto.erKlagerPart()) {
-            return Optional.of(KlageAvvistÅrsak.KLAGER_IKKE_PART);
-        }
-        if (!dto.erFristOverholdt()) {
-            return Optional.of(KlageAvvistÅrsak.KLAGET_FOR_SENT);
-        }
-        if (!dto.erKonkret()) {
-            return Optional.of(KlageAvvistÅrsak.IKKE_KONKRET);
-        }
-        if (!dto.erSignert()) {
-            return Optional.of(KlageAvvistÅrsak.IKKE_SIGNERT);
-        }
-        return Optional.empty();
-    }
 
-    private void lagreKlageVurderingResultatMedAvvistKlage(Behandling klageBehandling, KlageFormkravAksjonspunktDto dto) {
-        boolean erFørsteinstansAksjonspunkt = VURDERING_AV_FORMKRAV_KLAGE_NFP.getKode().equals(dto.getKode());
-        KlageVurdertAv klageVurdertAv = erFørsteinstansAksjonspunkt ? KlageVurdertAv.NAY : KlageVurdertAv.NK;
-
-        final KlageVurderingAdapter vurderingDto = new KlageVurderingAdapter(
-            KlageVurderingType.AVVIS_KLAGE, null, null,
-            null, null, null, klageVurdertAv);
-
-        klageVurderingTjeneste.lagreVurdering(klageBehandling, vurderingDto);
+        var part = new PartEntitet();
+        part.identifikasjon = dto.identifikasjon.id;
+        part.identifikasjonType = dto.identifikasjon.type;
+        part.rolleType = dto.rolleType;
+        return part;
     }
 
     private void opprettHistorikkinnslag(Behandling klageBehandling, AksjonspunktDefinisjon aksjonspunktDefinisjon,
@@ -195,23 +180,23 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
 
 
     private KlageVurdertAv getKlageVurdertAv(Behandling klageBehandling, String apKode) {
-        return apKode.equals(VURDERING_AV_FORMKRAV_KLAGE_NFP.getKode()) ? KlageVurdertAv.NAY : KlageVurdertAv.NK;
+        return apKode.equals(VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS.getKode()) ? KlageVurdertAv.VEDTAKSINSTANS : KlageVurdertAv.KLAGEINSTANS;
     }
 
     private SkjermlenkeType getSkjermlenkeType(String apKode) {
-        return  SkjermlenkeType.FORMKRAV_KLAGE_NFP;
+        return  SkjermlenkeType.FORMKRAV_KLAGE_VEDTAKSINSTANS;
 //        return apKode.equals(VURDERING_AV_FORMKRAV_KLAGE_NFP.getKode()) ? SkjermlenkeType.FORMKRAV_KLAGE_NFP : SkjermlenkeType.FORMKRAV_KLAGE_KA;
     }
 
 //    private boolean erVedtakOppdatert(KlageUtredning klageUtredning, KlageFormkravAksjonspunktDto formkravDto) {
-//        Optional<UUID> gammelRef = klageUtredning.getPåKlagetBehandlingRef();
+//        Optional<UUID> gammelRef = klageUtredning.getpåklagdBehandlingRef();
 //        Optional<UUID> oppdatertRef = Optional.ofNullable(formkravDto.hentpåKlagdEksternBehandlingUuId());
 //
 //        return !gammelRef.equals(oppdatertRef);
 //    }
 
     private boolean erFørsteinstansAksjonspunkt(Behandling klageBehandling, AksjonspunktDefinisjon apDef) {
-        return Objects.equals(KlageVurdertAv.NAY, getKlageVurdertAv(klageBehandling, apDef.getKode()));
+        return Objects.equals(KlageVurdertAv.VEDTAKSINSTANS, getKlageVurdertAv(klageBehandling, apDef.getKode()));
     }
 
     private String formatDato(LocalDate dato) {

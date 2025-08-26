@@ -1,11 +1,14 @@
 package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.part.PartEntitet;
+import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;
 
 import java.util.*;
 
@@ -19,8 +22,13 @@ public class KlageUtredningEntitet extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
-    @Column(name = "paaklaget_behandling_id", nullable = false, updatable = false, unique = true)
-    private Long påklagetBehandlingId;
+
+    @Column(name = "paaklagd_behandling_uuid", nullable = false, updatable = false, unique = true)
+    private UUID påklagdBehandlingUuid;
+
+    @Convert(converter = BehandlingTypeKodeverdiConverter.class)
+    @Column(name = "paaklagd_behandling_type")
+    private BehandlingType påklagdBehandlingType;
 
     @Column(name = "behandlende_enhet")
     private String opprinneligBehandlendeEnhet;
@@ -34,7 +42,7 @@ public class KlageUtredningEntitet extends BaseEntitet {
 
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "klage_utredning_id")
-    private Set<KlageVurderingEntitet> klagevurderinger;
+    private Set<KlageVurderingEntitet> klagevurderinger = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "part_id")
@@ -48,21 +56,21 @@ public class KlageUtredningEntitet extends BaseEntitet {
         return new Builder();
     }
 
-//    public Optional<UUID> getPåKlagBehandlingRef() {
-//        return Optional.ofNullable(påKlagdBehandlingRef);
-//    }
-//
-//    public void setPåKlagdBehandlingRef(UUID påKlagdBehandlingRef) {
-//        this.påKlagdBehandlingRef = påKlagdBehandlingRef;
-//    }
-//
-//    public Optional<BehandlingType> getPåKlagdBehandlingType() {
-//        return Optional.ofNullable(påKlagdBehandlingType);
-//    }
-//
-//    public void setPåKlagdBehandlingType(BehandlingType påKlagdBehandlingType) {
-//        this.påKlagdBehandlingType = påKlagdBehandlingType;
-//    }
+    public Optional<UUID> getpåklagdBehandlingRef() {
+        return Optional.ofNullable(påklagdBehandlingUuid);
+    }
+
+    public void setpåklagdBehandlingRef(UUID påklagdBehandlingUuid) {
+        this.påklagdBehandlingUuid = påklagdBehandlingUuid;
+    }
+
+    public Optional<BehandlingType> getpåklagdBehandlingType() {
+        return Optional.ofNullable(påklagdBehandlingType);
+    }
+
+    public void setpåklagdBehandlingType(BehandlingType påklagdBehandlingType) {
+        this.påklagdBehandlingType = påklagdBehandlingType;
+    }
 
     public boolean isGodkjentAvMedunderskriver() {
         return godkjentAvMedunderskriver;
@@ -72,30 +80,38 @@ public class KlageUtredningEntitet extends BaseEntitet {
         this.godkjentAvMedunderskriver = godkjentAvMedunderskriver;
     }
 
-    public Optional<KlageFormkravAdapter> getFormkrav() {
+    public Optional<KlageFormkravEntitet> getFormkrav() {
         // Formkrav er ikke tilgjengelig for klagevurdering mottatt fra Kabal
-        return Optional.ofNullable(formkrav == null ? null : formkrav.tilFormkrav());
+        return Optional.ofNullable(formkrav);
     }
 
-    public void setFormkrav(KlageFormkravAdapter formkravAdapter) {
+    public Optional<KlageAvvistÅrsak> setFormkrav(KlageFormkravAdapter formkravAdapter) {
         if (!harFormkrav()) {
             formkrav = new KlageFormkravEntitet();
         }
         formkrav.oppdater(formkravAdapter);
+        if (!formkrav.hentAvvistÅrsaker().isEmpty()) {
+            setKlagevurdering(KlageVurderingAdapter.Templates.AVVIST_VURDERING_VEDTAKSINSTANS);
+        }
+        return formkrav.utledAvvistÅrsak();
     }
 
     public boolean erKlageHjemsendt() {
         return KlageVurderingType.HJEMSENDE_UTEN_Å_OPPHEVE.equals(hentGjeldendeKlagevurderingType());
     }
 
+    public boolean erKlageAvvist() {
+        return KlageVurderingType.AVVIS_KLAGE.equals(hentGjeldendeKlagevurderingType());
+    }
+
     public KlageVurderingType hentGjeldendeKlagevurderingType() {
-        return getKlageVurderingType(KlageVurdertAv.NK_KABAL).or(() ->
-            getKlageVurderingType(KlageVurdertAv.NAY)
+        return getKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).or(() ->
+            getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
         ).orElse(null);
     }
 
     public Optional<KlageVurderingType> getKlageVurderingType(KlageVurdertAv klageVurdertAv) {
-        var klagevurdering = getKlagevurdering(klageVurdertAv);
+        var klagevurdering = hentKlagevurdering(klageVurdertAv);
         return klagevurdering
             .map(kv -> kv.getKlageresultat().getKlageVurdering())
             .orElseGet(() -> formkrav.tilFormkrav().erAvvist() ? Optional.of(KlageVurderingType.AVVIS_KLAGE) : Optional.empty());
@@ -136,7 +152,7 @@ public class KlageUtredningEntitet extends BaseEntitet {
 
     public void setKlagevurdering(KlageVurderingAdapter adapter) {
         Vurderingresultat nyVurdering = new Vurderingresultat(adapter);
-        var klagevurdering = getKlagevurdering(adapter.getKlageVurdertAv());
+        var klagevurdering = hentKlagevurdering(adapter.getKlageVurdertAv());
         klagevurdering.ifPresentOrElse(kv ->
             kv.setKlageresultat(nyVurdering),
             () -> {
@@ -149,9 +165,9 @@ public class KlageUtredningEntitet extends BaseEntitet {
         );
     }
 
-    public void nullstillVurdering() {
-        formkrav = null;
-        klagevurderinger = null;
+    public void fjernKlageVurderingVedtaksinstans() {
+        klagevurderinger.removeIf((vurdering) ->
+            KlageVurdertAv.VEDTAKSINSTANS.equals(vurdering.getVurdertAvEnhet()));
     }
 
     public Optional<PartEntitet> getKlagendePart() {
@@ -179,8 +195,8 @@ public class KlageUtredningEntitet extends BaseEntitet {
             return this;
         }
 
-        public Builder medPåklagetBehandlingId(Long påklagetBehandlingId) {
-            klageUtredningMal.påklagetBehandlingId = påklagetBehandlingId;
+        public Builder medpåklagdBehandlingId(UUID påklagdBehandlingUuid) {
+            klageUtredningMal.påklagdBehandlingUuid = påklagdBehandlingUuid;
             return this;
         }
 
@@ -188,6 +204,11 @@ public class KlageUtredningEntitet extends BaseEntitet {
             klageUtredningMal.formkrav = KlageFormkravEntitet.builder()
                 .medFormkrav(formkrav)
                 .build();
+            return this;
+        }
+
+        public Builder medId(Long id) {
+            klageUtredningMal.id = id;
             return this;
         }
 
@@ -201,7 +222,7 @@ public class KlageUtredningEntitet extends BaseEntitet {
         }
     }
 
-    public Optional<KlageVurderingEntitet> getKlagevurdering(KlageVurdertAv klageVurdertAv) {
+    public Optional<KlageVurderingEntitet> hentKlagevurdering(KlageVurdertAv klageVurdertAv) {
         return klagevurderinger.stream()
             .filter(klageVurderingEntitet -> klageVurdertAv.equals(klageVurderingEntitet.getVurdertAvEnhet()))
             .findFirst();

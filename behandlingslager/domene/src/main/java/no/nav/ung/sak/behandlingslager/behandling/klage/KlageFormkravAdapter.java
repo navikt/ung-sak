@@ -1,9 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 
-
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +14,6 @@ public class KlageFormkravAdapter {
     private boolean erSignert;
     private boolean gjelderVedtak;
     private String begrunnelse;
-    private Long klageBehandlingId;
-    private KlageVurdertAv klageVurdertAv;
 
     public KlageFormkravAdapter(KlageFormkravEntitet klageFormkrav) {
         this.erKlagerPart = klageFormkrav.erKlagerPart();
@@ -26,8 +22,6 @@ public class KlageFormkravAdapter {
         this.erSignert = klageFormkrav.erSignert();
         this.gjelderVedtak = klageFormkrav.hentGjelderVedtak();
         this.begrunnelse = klageFormkrav.hentBegrunnelse();
-//        this.klageVurdertAv = klageFormkrav.getKlageVurdertAv();
-//        this.klageBehandlingId = klageFormkrav.hentKlageResultat().getKlageBehandling().getId();
     }
 
     public KlageFormkravAdapter(boolean erKlagerPart,
@@ -35,24 +29,20 @@ public class KlageFormkravAdapter {
                                 boolean erKonkret,
                                 boolean erSignert,
                                 boolean gjelderVedtak,
-                                String begrunnelse,
-                                Long klageBehandlingId,
-                                KlageVurdertAv klageVurdertAv) {
+                                String begrunnelse) {
         this.erKlagerPart = erKlagerPart;
         this.erFristOverholdt = erFristOverholdt;
         this.erKonkret = erKonkret;
         this.erSignert = erSignert;
         this.gjelderVedtak = gjelderVedtak;
         this.begrunnelse = begrunnelse;
-        this.klageBehandlingId = klageBehandlingId;
-        this.klageVurdertAv = klageVurdertAv;
     }
 
     public boolean isErKlagerPart() {
         return erKlagerPart;
     }
 
-    public boolean isErFristOverholdt() {
+    public boolean isFristOverholdt() {
         return erFristOverholdt;
     }
 
@@ -94,13 +84,5 @@ public class KlageFormkravAdapter {
 
     public String getBegrunnelse() {
         return begrunnelse;
-    }
-
-    public Long getKlageBehandlingId() {
-        return klageBehandlingId;
-    }
-
-    public KlageVurdertAv getKlageVurdertAvKode() {
-        return klageVurdertAv;
     }
 }

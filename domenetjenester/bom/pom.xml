@@ -72,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>klage</artifactId>
+            <artifactId>kabal</artifactId>
         </dependency>
     </dependencies>
 </project>

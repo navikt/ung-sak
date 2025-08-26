@@ -1,11 +1,8 @@
 package no.nav.ung.kodeverk.klage;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.Collections;
@@ -47,11 +44,11 @@ public enum KlageAvvistÅrsak implements Kodeverdi {
         }
     }
 
-    @JsonIgnore
     private String navn;
 
+    @JsonValue
     private String kode;
-    @JsonIgnore
+
     private String lovHjemmel;
 
     private KlageAvvistÅrsak(String kode) {
@@ -84,13 +81,11 @@ public enum KlageAvvistÅrsak implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;
     }
 
-    @JsonProperty
     @Override
     public String getKode() {
         return kode;

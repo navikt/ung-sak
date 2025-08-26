@@ -115,16 +115,17 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         }
 
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
-
-        ProsessTaskData registerdataOppdatererTask = ProsessTaskData.forProsessTask(OppfriskingAvBehandlingTask.class);
-        registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        gruppe.addNesteSekvensiell(registerdataOppdatererTask);
-        if (innhentRegisterdataFørst) {
-            log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, true);
-        } else {
-            log.info("Sjekker om det har tilkommet nye søknader/inntektsmeldinger og annet for behandling: {}", behandling.getId());
-            leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
+        if (behandling.erYtelseBehandling()) {
+            ProsessTaskData registerdataOppdatererTask = ProsessTaskData.forProsessTask(OppfriskingAvBehandlingTask.class);
+            registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+            gruppe.addNesteSekvensiell(registerdataOppdatererTask);
+            if (innhentRegisterdataFørst) {
+                log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
+                leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, true);
+            } else {
+                log.info("Sjekker om det har tilkommet nye søknader/inntektsmeldinger og annet for behandling: {}", behandling.getId());
+                leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
+            }
         }
         ProsessTaskData fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
@@ -240,12 +241,14 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         gjenopptaBehandlingTask.setBehandling(fagsakId, behandlingId, behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(gjenopptaBehandlingTask);
 
-        if (forceInnhentingAvRegisterdata || skalHenteInnRegisterData(behandling)) {
-            log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
-            leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, skalUtledeÅrsaker);
-        } else {
-            log.info("Sjekker om det har tilkommet nye inntektsmeldinger for behandling: {}", behandlingId);
-            leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
+        if (behandling.erYtelseBehandling()) {
+            if (forceInnhentingAvRegisterdata || skalHenteInnRegisterData(behandling)) {
+                log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandlingId);
+                leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, skalUtledeÅrsaker);
+            } else {
+                log.info("Sjekker om det har tilkommet nye inntektsmeldinger for behandling: {}", behandlingId);
+                leggTilTaskForDiffOgReposisjoner(behandling, gruppe, skalUtledeÅrsaker);
+            }
         }
 
         var fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
