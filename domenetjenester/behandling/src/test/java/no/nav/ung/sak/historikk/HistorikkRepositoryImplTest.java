@@ -1,27 +1,24 @@
 package no.nav.ung.sak.historikk;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

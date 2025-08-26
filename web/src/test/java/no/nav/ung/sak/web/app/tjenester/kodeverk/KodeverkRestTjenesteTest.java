@@ -73,7 +73,6 @@ public class KodeverkRestTjenesteTest {
         final AlleKodeverdierSomObjektResponse response = tjeneste.alleKodeverdierSomObjekt();
         final var statiske = StatiskeKodeverdier.alle;
         // Sjekk nokon av verdiane. Kan legge til fleire viss ein ønsker.
-        checkResponseSet(response.arbeidskategorier(), statiske.arbeidskategorier());
         checkResponseSet(response.avslagsårsaker(), statiske.avslagsårsaker());
 
         // Sjekk spesialtilfelle i respons, Avslagsprsaker gruppert pr vilkårtype.

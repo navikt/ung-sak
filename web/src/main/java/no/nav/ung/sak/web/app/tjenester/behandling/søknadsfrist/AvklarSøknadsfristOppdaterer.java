@@ -1,16 +1,8 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.søknadsfrist;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -21,6 +13,10 @@ import no.nav.ung.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsf
 import no.nav.ung.sak.behandlingslager.behandling.søknadsfrist.KravDokumentHolder;
 import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.kontrakt.søknadsfrist.aksjonspunkt.AvklarSøknadsfristDto;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarSøknadsfristDto.class, adapter = AksjonspunktOppdaterer.class)
