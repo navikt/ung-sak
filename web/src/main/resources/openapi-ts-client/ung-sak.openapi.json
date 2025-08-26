@@ -690,42 +690,6 @@
         "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.arbeidsforhold.Arbeidskategori" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.Arbeidskategori"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.arbeidsforhold.RelatertYtelseTilstand" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
       "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.behandling.BehandlingResultatType" : {
         "properties" : {
           "kilde" : {
@@ -942,222 +906,6 @@
         "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkBegrunnelseType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkBegrunnelseType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkEndretFeltType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkEndretFeltType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkEndretFeltVerdiType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkEndretFeltVerdiType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkOpplysningType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkOpplysningType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkResultatType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkResultatType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkinnslagType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkinnslagType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.medlem.MedlemskapDekningType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.medlem.MedlemskapDekningType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.medlem.MedlemskapManuellVurderingType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.medlem.MedlemskapManuellVurderingType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.medlem.MedlemskapType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.medlem.MedlemskapType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
-      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.opptjening.OpptjeningAktivitetType" : {
-        "properties" : {
-          "kilde" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.opptjening.OpptjeningAktivitetType"
-          },
-          "kode" : {
-            "type" : "string"
-          },
-          "kodeverk" : {
-            "type" : "string"
-          },
-          "navn" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
-        "type" : "object"
-      },
       "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.produksjonsstyring.OppgaveÅrsak" : {
         "properties" : {
           "kilde" : {
@@ -1271,16 +1019,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER_MED_MER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "SELVSTENDIG_NÆRINGSDRIVENDE", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "UDEFINERT" ]
       },
-      "ung.kodeverk.arbeidsforhold.Arbeidskategori" : {
-        "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "UDEFINERT" ]
-      },
-      "ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand" : {
-        "enum" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKESTARTET" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKE_STARTET" ]
-      },
       "ung.kodeverk.behandling.BehandlingResultatType" : {
         "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
         "type" : "string",
@@ -1391,70 +1129,10 @@
         "type" : "string",
         "x-enum-varnames" : [ "BESLUTTER", "SAKSBEHANDLER", "SØKER", "ARBEIDSGIVER", "VEDTAKSLØSNINGEN", "UDEFINERT" ]
       },
-      "ung.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType" : {
-        "enum" : [ "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UDEFINERT" ]
-      },
-      "ung.kodeverk.historikk.HistorikkBegrunnelseType" : {
-        "enum" : [ "-", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UDEFINIERT", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ]
-      },
-      "ung.kodeverk.historikk.HistorikkEndretFeltType" : {
-        "enum" : [ "AKTIVITET", "AKTIVITET_PERIODE", "OPPTJENINGSVILKARET", "ARBEIDSFORHOLD", "DAGPENGER_INNTEKT", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "AVKLARSAKSOPPLYSNINGER", "BEHANDLENDE_ENHET", "BEHANDLING", "OVERSTYRT_VURDERING", "SOKERSOPPLYSNINGSPLIKT", "SOKNADSFRISTVILKARET", "ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "FRILANSVIRKSOMHET", "FRILANS_INNTEKT", "INNTEKTSKATEGORI", "INNTEKT_FRA_ARBEIDSFORHOLD", "LØNNSENDRING_I_PERIODEN", "MILITÆR_ELLER_SIVIL", "MOTTAR_YTELSE_ARBEID", "MOTTAR_YTELSE_FRILANS", "SELVSTENDIG_NAERINGSDRIVENDE", "VURDER_ETTERLØNN_SLUTTPAKKE", "ENDRING_NAERING", "BRUTTO_NAERINGSINNTEKT", "KOMPLETTHET", "NY_STARTDATO_REFUSJON", "VURDER_NYTT_INNTEKTSFORHOLD", "BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "DELVIS_REFUSJON_FØR_STARTDATO", "PERIODE_TOM", "ER_SOKER_BOSATT_I_NORGE", "GYLDIG_MEDLEM_FOLKETRYGDEN", "OPPHOLDSRETT_EOS", "OPPHOLDSRETT_IKKE_EOS", "UTLAND", "UTTAK_OVERSTYRT_PERIODE", "UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "UTTAK_OVERSTYRT_UTBETALINGSGRAD", "OVST_UTTAK_FJERNET", "TILKJENT_YTELSE", "ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "FASTSETT_VIDERE_BEHANDLING", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "TILBAKETREKK", "OMSORG_FOR", "FARESIGNALER", "NYTT_REFUSJONSKRAV", "NY_REFUSJONSFRIST", "OPPHOER_REFUSJON", "UTVIDETRETT", "ALENE_OM_OMSORG", "MIDLERTIDIG_ALENE", "ALDERSVILKAR_BARN", "VALG", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "AKTIVITET", "AKTIVITET_PERIODE", "OPPTJENINGSVILKARET", "ARBEIDSFORHOLD", "DAGPENGER_INNTEKT", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "AVKLARSAKSOPPLYSNINGER", "BEHANDLENDE_ENHET", "BEHANDLING", "OVERSTYRT_VURDERING", "SOKERSOPPLYSNINGSPLIKT", "SOKNADSFRISTVILKARET", "ENDRING_TIDSBEGRENSET_ARBEIDSFORHOLD", "FRILANSVIRKSOMHET", "FRILANS_INNTEKT", "INNTEKTSKATEGORI", "INNTEKT_FRA_ARBEIDSFORHOLD", "LØNNSENDRING_I_PERIODEN", "MILITÆR_ELLER_SIVIL", "MOTTAR_YTELSE_ARBEID", "MOTTAR_YTELSE_FRILANS", "SELVSTENDIG_NÆRINGSDRIVENDE", "VURDER_ETTERLØNN_SLUTTPAKKE", "ENDRING_NÆRING", "BRUTTO_NAERINGSINNTEKT", "KOMPLETTHET", "NY_STARTDATO_REFUSJON", "VURDER_NYTT_INNTEKTSFORHOLD", "BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "DELVIS_REFUSJON_FØR_STARTDATO", "PERIODE_TOM", "ER_SOKER_BOSATT_I_NORGE", "GYLDIG_MEDLEM_FOLKETRYGDEN", "OPPHOLDSRETT_EOS", "OPPHOLDSRETT_IKKE_EOS", "UTLAND", "UTTAK_OVERSTYRT_PERIODE", "UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "UTTAK_OVERSTYRT_UTBETALINGSGRAD", "OVST_UTTAK_FJERNET", "TILKJENT_YTELSE", "ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "FASTSETT_VIDERE_BEHANDLING", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "TILBAKETREKK", "OMSORG_FOR", "FARESIGNALER", "NYTT_REFUSJONSKRAV", "NY_REFUSJONSFRIST", "OPPHØR_REFUSJON", "UTVIDETRETT", "ALENE_OM_OMSORG", "MIDLERTIDIG_ALENE", "ALDERSVILKÅR_BARN", "VALG", "UDEFINERT" ]
-      },
-      "ung.kodeverk.historikk.HistorikkEndretFeltVerdiType" : {
-        "enum" : [ "BOSATT_I_NORGE", "BOSATT_UTLAND", "EØS_BOSATT_NORGE", "IKKE_BOSATT_I_NORGE", "IKKE_LOVLIG_OPPHOLD", "IKKE_OPPHOLDSRETT", "LOVLIG_OPPHOLD", "OPPHOLDSRETT", "NASJONAL", "FORTSETT_BEHANDLING", "HENLEGG_BEHANDLING", "HINDRE_TILBAKETREKK", "UTFØR_TILBAKETREKK", "IKKE_NY_I_ARBEIDSLIVET", "IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "NY_I_ARBEIDSLIVET", "TIDSBEGRENSET_ARBEIDSFORHOLD", "VARIG_ENDRET_NAERING", "INGEN_VARIG_ENDRING_NAERING", "NYOPPSTARTET", "IKKE_NYOPPSTARTET", "BENYTT", "IKKE_BENYTT", "VILKAR_IKKE_OPPFYLT", "VILKAR_OPPFYLT", "IKKE_OPPFYLT", "OPPFYLT", "OPPFYLT_8_47_A", "OPPFYLT_8_47_B", "INGEN_INNVIRKNING", "INNVIRKNING", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "BOSATT_I_NORGE", "BOSATT_UTLAND", "EØS_BOSATT_NORGE", "IKKE_BOSATT_I_NORGE", "IKKE_LOVLIG_OPPHOLD", "IKKE_OPPHOLDSRETT", "LOVLIG_OPPHOLD", "OPPHOLDSRETT", "NASJONAL", "FORTSETT_BEHANDLING", "HENLEGG_BEHANDLING", "HINDRE_TILBAKETREKK", "UTFØR_TILBAKETREKK", "IKKE_NY_I_ARBEIDSLIVET", "IKKE_TIDSBEGRENSET_ARBEIDSFORHOLD", "NY_I_ARBEIDSLIVET", "TIDSBEGRENSET_ARBEIDSFORHOLD", "VARIG_ENDRET_NAERING", "INGEN_VARIG_ENDRING_NAERING", "NYOPPSTARTET", "IKKE_NYOPPSTARTET", "BENYTT", "IKKE_BENYTT", "VILKAR_IKKE_OPPFYLT", "VILKAR_OPPFYLT", "IKKE_OPPFYLT", "OPPFYLT", "OPPFYLT_8_47_A", "OPPFYLT_8_47_B", "INGEN_INNVIRKNING", "INNVIRKNING", "UDEFINERT" ]
-      },
-      "ung.kodeverk.historikk.HistorikkOpplysningType" : {
-        "enum" : [ "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UDEFINIERT" ]
-      },
-      "ung.kodeverk.historikk.HistorikkResultatType" : {
-        "enum" : [ "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UDEFINIERT" ]
-      },
-      "ung.kodeverk.historikk.HistorikkinnslagType" : {
-        "enum" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKR_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNE", "OVST_UTTAK_OPPDATERE", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "BREV_SENT", "MERKNAD_NY", "MERKNAD_FJERNET", "BREV_BESTILT", "BEH_STARTET_PÅ_NYTT", "BEH_STARTET", "BEH_OPPDATERT_NYE_OPPL", "BEH_MAN_GJEN", "BEH_GJEN", "BEH_AVBRUTT_VUR", "BEH_AVBRUTT_OVERLAPP", "VRS_REV_IKKE_SNDT", "VEDLEGG_MOTTATT", "SPOLT_TILBAKE", "REVURD_OPPR", "NYE_REGOPPLYSNINGER", "MIGRERT_FRA_INFOTRYGD_FJERNET", "MIGRERT_FRA_INFOTRYGD", "MANGELFULL_SØKNAD", "KØET_BEH_GJEN", "SØKNADSFRIST_VURDERT", "FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "VEDTAK_FATTET", "UENDRET_UTFALL", "TILBAKEKREVING_VIDEREBEHANDLING", "REGISTRER_OM_VERGE", "FORSLAG_VEDTAK_UTEN_TOTRINN", "FORSLAG_VEDTAK", "VIRKNINGSDATO_UTTAK_NYE_REGLER", "SAK_RETUR", "SAK_GODKJENT", "FJERNET_VERGE", "IVERKSETTELSE_VENT", "BEH_VENT", "BEH_KØET", "AVBRUTT_BEH", "UTTAK", "FAKTA_ENDRET", "BYTT_ENHET", "NY_INFO_FRA_TPS", "OVERSTYRT", "FJERNET_OVERSTYRING", "OPPTJENING", "OVST_UTTAK_SPLITT", "FASTSATT_UTTAK_SPLITT", "FASTSATT_UTTAK", "OVST_UTTAK", "OVST_UTTAK_NY", "OVST_UTTAK_FJERNET", "OVST_UTTAK_OPPDATERT", "UDEFINERT" ]
-      },
-      "ung.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag" : {
-        "enum" : [ "-", "MANGLENDE_OPPLYSNINGER", "LAGT_TIL_AV_SAKSBEHANDLER" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UDEFINERT", "MANGLENDE_OPPLYSNINGER", "LAGT_TIL_AV_SAKSBEHANDLER" ]
-      },
-      "ung.kodeverk.medlem.MedlemskapDekningType" : {
-        "enum" : [ "FTL_2_6", "FTL_2_7_a", "FTL_2_7_b", "FTL_2_9_1_a", "FTL_2_9_1_b", "FTL_2_9_1_c", "FTL_2_9_2_a", "FTL_2_9_2_c", "FULL", "IHT_AVTALE", "OPPHOR", "UNNTATT", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "FTL_2_6", "FTL_2_7_a", "FTL_2_7_b", "FTL_2_9_1_a", "FTL_2_9_1_b", "FTL_2_9_1_c", "FTL_2_9_2_a", "FTL_2_9_2_c", "FULL", "IHT_AVTALE", "OPPHOR", "UNNTATT", "UDEFINERT" ]
-      },
-      "ung.kodeverk.medlem.MedlemskapManuellVurderingType" : {
-        "enum" : [ "-", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "OPPHOR_PGA_ENDRING_I_TPS" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UDEFINERT", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS" ]
-      },
-      "ung.kodeverk.medlem.MedlemskapType" : {
-        "enum" : [ "ENDELIG", "FORELOPIG", "AVKLARES", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ENDELIG", "FORELOPIG", "UNDER_AVKLARING", "UDEFINERT" ]
-      },
       "ung.kodeverk.notat.NotatGjelderType" : {
         "enum" : [ "FAGSAK" ],
         "type" : "string",
         "x-enum-varnames" : [ "FAGSAK" ]
-      },
-      "ung.kodeverk.opptjening.OpptjeningAktivitetType" : {
-        "enum" : [ "AAP", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "-" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ARBEIDSAVKLARING", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "UDEFINERT" ]
       },
       "ung.kodeverk.person.Diskresjonskode" : {
         "enum" : [ "UDEF", "URIK", "UFB", "SVAL", "SPSF", "SPFO", "PEND", "MILI", "KLIE" ],
@@ -4488,32 +4166,20 @@
       },
       "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb" : {
         "properties" : {
-          "arbeidsforhold" : {
-            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkArbeidsforhold"
-          },
           "behandling" : {
             "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkBehandling"
           },
           "fagsystem" : {
             "$ref" : "#/components/schemas/ung.kodeverk.Fagsystem"
           },
-          "historikk" : {
-            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkHistorikk"
-          },
           "iaygrunnlag" : {
             "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.AbakusKodeverkIaygrunnlag"
-          },
-          "medlem" : {
-            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkMedlem"
-          },
-          "opptjening" : {
-            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkOpptjening"
           },
           "vilkårtype" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
           }
         },
-        "required" : [ "arbeidsforhold", "behandling", "fagsystem", "historikk", "iaygrunnlag", "medlem", "opptjening", "vilkårtype" ],
+        "required" : [ "behandling", "fagsystem", "iaygrunnlag", "vilkårtype" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.AbakusKodeverkIaygrunnlag" : {
@@ -4523,21 +4189,6 @@
           }
         },
         "required" : [ "virksomhetType" ],
-        "type" : "object"
-      },
-      "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkArbeidsforhold" : {
-        "properties" : {
-          "arbeidType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.ArbeidType"
-          },
-          "arbeidskategori" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.Arbeidskategori"
-          },
-          "relatertYtelseTilstand" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand"
-          }
-        },
-        "required" : [ "arbeidType", "arbeidskategori", "relatertYtelseTilstand" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkBehandling" : {
@@ -4570,47 +4221,11 @@
         "required" : [ "venteårsak" ],
         "type" : "object"
       },
-      "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkHistorikk" : {
-        "properties" : {
-          "historikkBegrunnelseType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkBegrunnelseType"
-          }
-        },
-        "required" : [ "historikkBegrunnelseType" ],
-        "type" : "object"
-      },
-      "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkMedlem" : {
-        "properties" : {
-          "medlemskapManuellVurderingType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.medlem.MedlemskapManuellVurderingType"
-          }
-        },
-        "required" : [ "medlemskapManuellVurderingType" ],
-        "type" : "object"
-      },
-      "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkOpptjening" : {
-        "properties" : {
-          "opptjeningAktivitetType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.opptjening.OpptjeningAktivitetType"
-          }
-        },
-        "required" : [ "opptjeningAktivitetType" ],
-        "type" : "object"
-      },
       "ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse" : {
         "properties" : {
           "arbeidTyper" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.arbeidsforhold.ArbeidType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "arbeidskategorier" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.arbeidsforhold.Arbeidskategori"
             },
             "maxItems" : 1000,
             "minItems" : 1,
@@ -4708,117 +4323,9 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "historikkAvklartSoeknadsperiodeTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "historikkBegrunnelseTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkBegrunnelseType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "historikkEndretFeltTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkEndretFeltType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "historikkEndretFeltVerdiTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkEndretFeltVerdiType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "historikkOpplysningTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkOpplysningType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "historikkResultatTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkResultatType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "historikkinnslagTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.HistorikkinnslagType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "medlemskapDekningTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.medlem.MedlemskapDekningType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "medlemskapManuellVurderingTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.medlem.MedlemskapManuellVurderingType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "medlemskapTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.medlem.MedlemskapType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "oppgaveÅrsaker" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.produksjonsstyring.OppgaveÅrsak"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "opptjeningAktivitetTyper" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.opptjening.OpptjeningAktivitetType"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
-          "relatertYtelseTilstander" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.arbeidsforhold.RelatertYtelseTilstand"
             },
             "maxItems" : 1000,
             "minItems" : 1,
@@ -4888,15 +4395,6 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "vurderArbeidsforholdHistorikkinnslag" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.historikk.VurderArbeidsforholdHistorikkinnslag"
-            },
-            "maxItems" : 1000,
-            "minItems" : 1,
-            "type" : "array",
-            "uniqueItems" : true
-          },
           "vurderingsÅrsaker" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.behandling.aksjonspunkt.VurderÅrsak"
@@ -4916,7 +4414,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "arbeidTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "arbeidTyper", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "oppgaveÅrsaker", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.kodeverk.dto.VenteårsakSomObjekt" : {
