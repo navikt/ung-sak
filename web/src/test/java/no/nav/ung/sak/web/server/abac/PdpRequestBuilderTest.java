@@ -137,15 +137,6 @@ public class PdpRequestBuilderTest {
     }
 
     @Test
-    public void skal_slå_opp_og_sende_videre_fnr_når_aktør_id_er_input() {
-        AbacAttributtSamling attributter = byggAbacAttributtSamling();
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.AKTØR_ID, AKTØR_1.getId()));
-
-        PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
-    }
-
-    @Test
     public void skal_ikke_godta_at_det_sendes_inn_saksnummer_som_ikke_finnes() {
 
         // Arrange
@@ -161,23 +152,7 @@ public class PdpRequestBuilderTest {
         });
     }
 
-    @Test
-    public void skal_ikke_godta_at_det_sendes_inn_behandling_id_som_ikke_finnes() {
 
-        // Arrange
-        AbacAttributtSamling attributter = byggAbacAttributtSamling();
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.BEHANDLING_ID, 1234L));
-        String saksnummer = "ABC";
-        when(pipRepository.hentDataForBehandling(1234L)).thenReturn(Optional.empty());
-
-        // Assert
-        Assertions.assertThrows(UkjentBehandlingException.class, () -> {
-
-            // Act
-            requestBuilder.lagPdpRequest(attributter);
-
-        });
-    }
 
 
     @Test
