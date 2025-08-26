@@ -1,7 +1,6 @@
 package no.nav.ung.sak.kontrakt.ungdomsytelse;
 
 import no.nav.ung.kontrakt.JsonUtil;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

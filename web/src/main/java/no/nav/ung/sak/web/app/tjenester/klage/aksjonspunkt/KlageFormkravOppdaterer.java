@@ -2,6 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.klage.aksjonspunkt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -12,13 +13,16 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.ung.sak.klage.KlageUtredningTjeneste;
-import no.nav.ung.sak.klage.KlageVurderingTjeneste;
+import no.nav.ung.sak.klage.domenetjenester.KlageUtredningTjeneste;
+import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.klage.KlageFormkravAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.klage.PåklagdBehandlingDto;
 
@@ -27,7 +31,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_NFP;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS;
+import static no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_VEDTAK;
 
 
 @ApplicationScoped
@@ -46,10 +51,12 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
     }
 
     @Inject
-    public KlageFormkravOppdaterer(KlageUtredningTjeneste klageUtredningTjeneste, KlageVurderingTjeneste klageVurderingTjeneste,
+    public KlageFormkravOppdaterer(KlageUtredningTjeneste klageUtredningTjeneste,
+                                   KlageVurderingTjeneste klageVurderingTjeneste,
                                    HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
                                    BehandlingRepository behandlingRepository,
-                                   KlageRepository klageRepository, AksjonspunktRepository aksjonspunktRepository) {
+                                   KlageRepository klageRepository,
+                                   AksjonspunktRepository aksjonspunktRepository) {
         this.klageRepository = klageRepository;
         this.behandlingRepository = behandlingRepository;
         this.klageUtredningTjeneste = klageUtredningTjeneste;
@@ -72,8 +79,13 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
         Optional<KlageAvvistÅrsak> optionalAvvistÅrsak = vurderOgLagreFormkrav(dto, klageBehandling);
         if (optionalAvvistÅrsak.isPresent()) {
             lagreKlageVurderingResultatMedAvvistKlage(klageBehandling, dto);
-//            return OppdateringResultat.medFremoverHoppTotrinn(FellesTransisjoner.FREMHOPP_TIL_FORESLÅ_VEDTAK);
+            return OppdateringResultat
+                .builder()
+                .medTotrinn()
+                .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+                .build();
         }
+
         klageBehandling.getAksjonspunkter().stream()
             .filter(ap -> ap.getAksjonspunktDefinisjon().equals(apDefFormkrav))
             .findFirst()
@@ -126,12 +138,9 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
     }
 
     private void lagreKlageVurderingResultatMedAvvistKlage(Behandling klageBehandling, KlageFormkravAksjonspunktDto dto) {
-        boolean erFørsteinstansAksjonspunkt = VURDERING_AV_FORMKRAV_KLAGE_NFP.getKode().equals(dto.getKode());
-        KlageVurdertAv klageVurdertAv = erFørsteinstansAksjonspunkt ? KlageVurdertAv.NAY : KlageVurdertAv.NK;
-
         final KlageVurderingAdapter vurderingDto = new KlageVurderingAdapter(
             KlageVurderingType.AVVIS_KLAGE, null, null,
-            null, null, null, klageVurdertAv);
+            null, null, null, KlageVurdertAv.VEDTAKSINSTANS);
 
         klageVurderingTjeneste.lagreVurdering(klageBehandling, vurderingDto);
     }
@@ -195,11 +204,11 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
 
 
     private KlageVurdertAv getKlageVurdertAv(Behandling klageBehandling, String apKode) {
-        return apKode.equals(VURDERING_AV_FORMKRAV_KLAGE_NFP.getKode()) ? KlageVurdertAv.NAY : KlageVurdertAv.NK;
+        return apKode.equals(VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS.getKode()) ? KlageVurdertAv.VEDTAKSINSTANS : KlageVurdertAv.KLAGEINSTANS;
     }
 
     private SkjermlenkeType getSkjermlenkeType(String apKode) {
-        return  SkjermlenkeType.FORMKRAV_KLAGE_NFP;
+        return  SkjermlenkeType.FORMKRAV_KLAGE_VEDTAKSINSTANS;
 //        return apKode.equals(VURDERING_AV_FORMKRAV_KLAGE_NFP.getKode()) ? SkjermlenkeType.FORMKRAV_KLAGE_NFP : SkjermlenkeType.FORMKRAV_KLAGE_KA;
     }
 
@@ -211,7 +220,7 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
 //    }
 
     private boolean erFørsteinstansAksjonspunkt(Behandling klageBehandling, AksjonspunktDefinisjon apDef) {
-        return Objects.equals(KlageVurdertAv.NAY, getKlageVurdertAv(klageBehandling, apDef.getKode()));
+        return Objects.equals(KlageVurdertAv.VEDTAKSINSTANS, getKlageVurdertAv(klageBehandling, apDef.getKode()));
     }
 
     private String formatDato(LocalDate dato) {

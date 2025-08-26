@@ -13,7 +13,7 @@ public record BehandlingVedtaksbrevResultat(
     boolean harBrev,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
     List<Vedtaksbrev> vedtaksbrevResultater,
-    List<IngenBrev> ingenBrevResultater) {
+    List<IngenBrev> ingenBrevResultater) implements FellesVedtaksbrevresultat  {
 
     public BehandlingVedtaksbrevResultat {
         // Valider at kun en av vedtaksbrevResultater og ingenBrevResultater har elementer
@@ -43,6 +43,5 @@ public record BehandlingVedtaksbrevResultat(
             ", ingenBrevResultater=" + ingenBrevResultater +
             '}';
     }
-
 }
 

@@ -11,5 +11,4 @@ public record IngenBrev(
         Objects.requireNonNull(ingenBrevÅrsakType);
         Objects.requireNonNull(forklaring);
     }
-
 }

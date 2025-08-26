@@ -18,6 +18,7 @@
         <module>behandlingsprosess</module>
         <module>formidling</module>
         <module>fordel</module>
+        <module>klage</module>
 
         <!-- Web klient og server -->
         <module>web</module>
@@ -358,6 +359,11 @@
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>klage</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>kabal</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -1,8 +1,11 @@
 package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Table(name = "KLAGE_FORMKRAV")
@@ -66,6 +69,27 @@ public class KlageFormkravEntitet extends BaseEntitet {
     public String hentBegrunnelse() {
         return begrunnelse;
     }
+
+    public List<KlageAvvistÅrsak> hentAvvistÅrsaker() {
+        List<KlageAvvistÅrsak> avvistÅrsaker = new ArrayList<>();
+        if (!gjelderVedtak) {
+            avvistÅrsaker.add(KlageAvvistÅrsak.IKKE_PAKLAGD_VEDTAK);
+        }
+        if (!erFristOverholdt) {
+            avvistÅrsaker.add(KlageAvvistÅrsak.KLAGET_FOR_SENT);
+        }
+        if (!erKlagerPart) {
+            avvistÅrsaker.add(KlageAvvistÅrsak.KLAGER_IKKE_PART);
+        }
+        if (!erKonkret) {
+            avvistÅrsaker.add(KlageAvvistÅrsak.IKKE_KONKRET);
+        }
+        if (!erSignert) {
+            avvistÅrsaker.add(KlageAvvistÅrsak.IKKE_SIGNERT);
+        }
+        return avvistÅrsaker;
+    }
+
 
     public void oppdater(KlageFormkravAdapter formkrav) {
         this.erFristOverholdt = formkrav.isErFristOverholdt();

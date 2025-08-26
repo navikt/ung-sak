@@ -23,15 +23,15 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
-import no.nav.ung.sak.klage.KlageVurderingTjeneste;
+import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.klage.KlageFormkravResultatDto;
 import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatAksjonspunktMellomlagringDto;
@@ -56,6 +56,7 @@ public class KlageRestTjeneste {
     public static final String KLAGE_V2_PATH = "/klage-v2";
     private static final String MELLOMLAGRE_PART_PATH = "/klage-v2/mellomlagre-klage";
     private static final String MELLOMLAGRE_GJENAPNE_KLAGE_PART_PATH = "/klage-v2/mellomlagre-gjennapne-klage";
+    public static final String FORHAANDSVIS = "/klage-v2/forhaandsvis";
 
     private BehandlingRepository behandlingRepository;
     private KlageRepository klageRepository;
@@ -154,8 +155,8 @@ public class KlageRestTjeneste {
     }
 
     private KlageVurderingAdapter mapDto(Behandling behandling, KlageVurderingResultatAksjonspunktMellomlagringDto apDto) {
-        boolean erFørsteinstansAp = apDto.getKode().equals(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_NFP.getKode());
-        KlageVurdertAv klageVurdertAv = erFørsteinstansAp ? KlageVurdertAv.NAY : KlageVurdertAv.NK;
+        boolean erFørsteinstansAp = apDto.getKode().equals(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS.getKode());
+        KlageVurdertAv klageVurdertAv = erFørsteinstansAp ? KlageVurdertAv.VEDTAKSINSTANS : KlageVurdertAv.KLAGEINSTANS;
         Hjemmel hjemmel = Hjemmel.fraKode(apDto.getHjemmel());
 
         return new KlageVurderingAdapter(apDto.getKlageVurdering(), apDto.getKlageMedholdArsak(), apDto.getKlageVurderingOmgjoer(),

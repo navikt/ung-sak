@@ -61,7 +61,7 @@ public class KlageVurderingAdapter {
     }
 
     public boolean skalOversendesTilNK(Behandling behandling) {
-        return getKlageVurdertAv() == KlageVurdertAv.NAY &&
+        return getKlageVurdertAv() == KlageVurdertAv.VEDTAKSINSTANS &&
             getKlageVurdering() == KlageVurderingType.STADFESTE_YTELSESVEDTAK;
     }
 }

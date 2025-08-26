@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak;
 
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -7,6 +8,8 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
@@ -19,7 +22,7 @@ import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.scenarioer.*;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevReglerUng;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -46,7 +49,8 @@ class VedtaksbrevReglerTest {
     private UngTestRepositories ungTestRepositories;
 
     @Inject
-    private VedtaksbrevRegler vedtaksbrevRegler;
+    @Any
+    private VedtaksbrevReglerUng vedtaksbrevRegler;
 
 
     @BeforeEach

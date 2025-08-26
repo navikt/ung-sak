@@ -34,7 +34,7 @@ public class KlageUtredningEntitet extends BaseEntitet {
 
     @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "klage_utredning_id")
-    private Set<KlageVurderingEntitet> klagevurderinger;
+    private Set<KlageVurderingEntitet> klagevurderinger = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "part_id")
@@ -89,13 +89,13 @@ public class KlageUtredningEntitet extends BaseEntitet {
     }
 
     public KlageVurderingType hentGjeldendeKlagevurderingType() {
-        return getKlageVurderingType(KlageVurdertAv.NK_KABAL).or(() ->
-            getKlageVurderingType(KlageVurdertAv.NAY)
+        return getKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).or(() ->
+            getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
         ).orElse(null);
     }
 
     public Optional<KlageVurderingType> getKlageVurderingType(KlageVurdertAv klageVurdertAv) {
-        var klagevurdering = getKlagevurdering(klageVurdertAv);
+        var klagevurdering = hentKlagevurdering(klageVurdertAv);
         return klagevurdering
             .map(kv -> kv.getKlageresultat().getKlageVurdering())
             .orElseGet(() -> formkrav.tilFormkrav().erAvvist() ? Optional.of(KlageVurderingType.AVVIS_KLAGE) : Optional.empty());
@@ -136,7 +136,7 @@ public class KlageUtredningEntitet extends BaseEntitet {
 
     public void setKlagevurdering(KlageVurderingAdapter adapter) {
         Vurderingresultat nyVurdering = new Vurderingresultat(adapter);
-        var klagevurdering = getKlagevurdering(adapter.getKlageVurdertAv());
+        var klagevurdering = hentKlagevurdering(adapter.getKlageVurdertAv());
         klagevurdering.ifPresentOrElse(kv ->
             kv.setKlageresultat(nyVurdering),
             () -> {
@@ -191,6 +191,11 @@ public class KlageUtredningEntitet extends BaseEntitet {
             return this;
         }
 
+        public Builder medId(Long id) {
+            klageUtredningMal.id = id;
+            return this;
+        }
+
         public KlageUtredningEntitet build() {
             verifyStateForBuild();
             return klageUtredningMal;
@@ -201,7 +206,7 @@ public class KlageUtredningEntitet extends BaseEntitet {
         }
     }
 
-    public Optional<KlageVurderingEntitet> getKlagevurdering(KlageVurdertAv klageVurdertAv) {
+    public Optional<KlageVurderingEntitet> hentKlagevurdering(KlageVurdertAv klageVurdertAv) {
         return klagevurderinger.stream()
             .filter(klageVurderingEntitet -> klageVurdertAv.equals(klageVurderingEntitet.getVurdertAvEnhet()))
             .findFirst();

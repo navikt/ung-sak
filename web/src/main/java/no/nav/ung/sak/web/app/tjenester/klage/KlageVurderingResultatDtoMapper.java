@@ -21,20 +21,19 @@ public class KlageVurderingResultatDtoMapper {
 
     public static Optional<KlageVurderingResultatDto> mapFørsteinstansKlageVurderingResultatDto(Behandling behandling, KlageRepository klageRepository, FritekstRepository fritekstRepository) {
         var utredning = klageRepository.hentKlageUtredning(behandling.getId());
-        var vurdering = utredning.getKlagevurdering(KlageVurdertAv.NAY);
-        var fritekst = fritekstRepository.hentFritekst(behandling.getId(), KlageVurdertAv.NAY.getKode()).orElse("");
+        var vurdering = utredning.hentKlagevurdering(KlageVurdertAv.VEDTAKSINSTANS);
+        var fritekst = fritekstRepository.hentFritekst(behandling.getId(), KlageVurdertAv.VEDTAKSINSTANS.getKode()).orElse("");
 
         return vurdering.map(vurd -> lagDto(utredning, vurd, fritekst));
     }
 
     public static Optional<KlageVurderingResultatDto> mapAndreinstansKlageVurderingResultatDto(Behandling behandling, KlageRepository klageRepository, FritekstRepository fritekstRepository) {
         var utredning = klageRepository.hentKlageUtredning(behandling.getId());
-        var vurdering = utredning.getKlagevurdering(KlageVurdertAv.NK)
-            .or(() -> utredning.getKlagevurdering(KlageVurdertAv.NK_KABAL));
+        var vurdering = utredning.hentKlagevurdering(KlageVurdertAv.KLAGEINSTANS);
 
         var fritekst = vurdering.map(KlageVurderingEntitet::getVurdertAvEnhet)
-            .filter(e -> e == KlageVurdertAv.NK)
-            .flatMap(e -> fritekstRepository.hentFritekst(behandling.getId(), KlageVurdertAv.NK.getKode()))
+            .filter(e -> e == KlageVurdertAv.KLAGEINSTANS)
+            .flatMap(e -> fritekstRepository.hentFritekst(behandling.getId(), KlageVurdertAv.KLAGEINSTANS.getKode()))
             .orElse("");
 
         return vurdering.map(vurd -> lagDto(utredning, vurd, fritekst));
