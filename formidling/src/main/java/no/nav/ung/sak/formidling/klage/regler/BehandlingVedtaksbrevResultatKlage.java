@@ -1,0 +1,37 @@
+package no.nav.ung.sak.formidling.klage.regler;
+
+import no.nav.ung.sak.formidling.vedtak.regler.*;
+
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Vedtaksbrevresultat for hele behandlingen. Vet om det er flere vedtaksbrev.
+ */
+public record BehandlingVedtaksbrevResultatKlage(
+    boolean harBrev,
+    List<Vedtaksbrev> vedtaksbrevResultater,
+    List<IngenBrev> ingenBrevResultater)  implements FellesVedtaksbrevresultat {
+
+    public BehandlingVedtaksbrevResultatKlage {
+        // Valider at kun en av vedtaksbrevResultater og ingenBrevResultater har elementer
+        boolean harVedtaksbrev = !vedtaksbrevResultater.isEmpty();
+        boolean harIngenBrev = !ingenBrevResultater.isEmpty();
+        if (harVedtaksbrev == harIngenBrev) {
+            throw new IllegalArgumentException("Kun en av vedtaksbrevResultater eller ingenBrevResultater må ha elementer. Har vedtaksbrevResultater: " + vedtaksbrevResultater.size() + ", ingenBrevResultater: " + ingenBrevResultater.size());
+        }
+    }
+
+    public static BehandlingVedtaksbrevResultatKlage medBrev(List<Vedtaksbrev> vedtaksbrevResultater) {
+        return new BehandlingVedtaksbrevResultatKlage(true, vedtaksbrevResultater, Collections.emptyList());
+    }
+
+    public String safePrint() {
+        return "BehandlingVedtaksbrevResultat{" +
+            "harBrev=" + harBrev +
+            ", vedtaksbrevResultater=" + vedtaksbrevResultater +
+            ", ingenBrevResultater=" + ingenBrevResultater +
+            '}';
+    }
+}
+

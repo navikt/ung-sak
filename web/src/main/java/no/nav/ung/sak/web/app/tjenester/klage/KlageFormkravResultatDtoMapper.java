@@ -13,8 +13,8 @@ class KlageFormkravResultatDtoMapper {
     }
 
     static Optional<KlageFormkravResultatDto> mapNFPKlageFormkravResultatDto(Behandling behandling, KlageRepository klageRepository) {
-        var klageFormkrav = klageRepository.hentKlageUtredning(behandling.getId()).getFormkrav();
         KlageUtredningEntitet klageUtredning = klageRepository.hentKlageUtredning(behandling.getId());
+        var klageFormkrav = klageUtredning.getFormkrav();
 
         return klageFormkrav.map((KlageFormkravAdapter formkrav) -> lagDto(formkrav, klageUtredning));
     }

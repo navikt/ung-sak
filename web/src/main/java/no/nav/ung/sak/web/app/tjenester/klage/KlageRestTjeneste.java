@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -31,7 +32,9 @@ import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
-import no.nav.ung.sak.klage.KlageVurderingTjeneste;
+import no.nav.ung.sak.formidling.klage.regler.VedtaksbrevReglerKlage;
+import no.nav.ung.sak.formidling.klage.vedtak.VedtaksbrevGenerererTjenesteKlage;
+import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.klage.KlageFormkravResultatDto;
 import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatAksjonspunktMellomlagringDto;
@@ -56,11 +59,14 @@ public class KlageRestTjeneste {
     public static final String KLAGE_V2_PATH = "/klage-v2";
     private static final String MELLOMLAGRE_PART_PATH = "/klage-v2/mellomlagre-klage";
     private static final String MELLOMLAGRE_GJENAPNE_KLAGE_PART_PATH = "/klage-v2/mellomlagre-gjennapne-klage";
+    public static final String FORHAANDSVIS = "/klage-v2/forhaandsvis";
 
     private BehandlingRepository behandlingRepository;
     private KlageRepository klageRepository;
     private KlageVurderingTjeneste klageVurderingTjeneste;
     private FritekstRepository fritekstRepository;
+    private VedtaksbrevGenerererTjenesteKlage vedtaksbrevGenerererTjenesteKlage;
+    private VedtaksbrevReglerKlage vedtaksbrevReglerKlage;
 
     public KlageRestTjeneste() {
         // for CDI proxy
@@ -70,11 +76,15 @@ public class KlageRestTjeneste {
     public KlageRestTjeneste(BehandlingRepository behandlingRepository,
                              KlageRepository klageRepository,
                              KlageVurderingTjeneste klageVurderingTjeneste,
-                             FritekstRepository fritekstRepository) {
+                             FritekstRepository fritekstRepository,
+                             @Any VedtaksbrevGenerererTjenesteKlage vedtaksbrevGenerererTjenesteKlage,
+                             @Any VedtaksbrevReglerKlage vedtaksbrevReglerKlage) {
         this.behandlingRepository = behandlingRepository;
         this.klageRepository = klageRepository;
         this.klageVurderingTjeneste = klageVurderingTjeneste;
         this.fritekstRepository = fritekstRepository;
+        this.vedtaksbrevGenerererTjenesteKlage = vedtaksbrevGenerererTjenesteKlage;
+        this.vedtaksbrevReglerKlage = vedtaksbrevReglerKlage;
     }
 
     @GET

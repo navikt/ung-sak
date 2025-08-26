@@ -25,7 +25,11 @@ public class VedtakFattetEventObserver {
     public void observerBehandlingVedtak(@Observes BehandlingVedtakEvent event) {
         if (IverksettingStatus.IVERKSATT.equals(event.getVedtak().getIverksettingStatus())) {
            //TODO flytt til formidling pakke
-            taskTjeneste.lagre(opprettTaskForBrevbestilling(event));
+            if (event.getBehandling().erYtelseBehandling()) {
+                taskTjeneste.lagre(opprettTaskForBrevbestilling(event));
+            } else {
+                taskTjeneste.lagre(opprettTaskForBrevbestillingForKlage(event));
+            }
 
             if (erBehandlingAvRettTypeForAbakus(event)) {
                 taskTjeneste.lagre(opprettTaskForPubliseringAvVedtakMedYtelse(event));
@@ -35,6 +39,13 @@ public class VedtakFattetEventObserver {
     }
 
     private static ProsessTaskData opprettTaskForBrevbestilling(BehandlingVedtakEvent event) {
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VurderVedtaksbrevTask.class);
+        prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
+        prosessTaskData.setSaksnummer(event.getBehandling().getFagsak().getSaksnummer().toString());
+        return prosessTaskData;
+    }
+
+    private static ProsessTaskData opprettTaskForBrevbestillingForKlage(BehandlingVedtakEvent event) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VurderVedtaksbrevTask.class);
         prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
         prosessTaskData.setSaksnummer(event.getBehandling().getFagsak().getSaksnummer().toString());

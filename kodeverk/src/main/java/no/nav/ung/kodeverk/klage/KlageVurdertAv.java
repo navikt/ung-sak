@@ -16,7 +16,6 @@ import java.util.Map;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum KlageVurdertAv implements Kodeverdi {
 
-    NFP("NFP", "NAV Familie- og Pensjonsytelser"),
     NAY("NAY", "NAV Arbeid og ytelser"),
     NK("NK", "NAV Klageenhet K9"),
     NK_KABAL("NKK", "NAV Klageenhet Kabal"),

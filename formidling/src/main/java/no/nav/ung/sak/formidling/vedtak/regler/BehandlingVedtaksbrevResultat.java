@@ -1,10 +1,12 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Vedtaksbrevresultat for hele behandlingen. Vet om det er flere vedtaksbrev.
@@ -13,7 +15,7 @@ public record BehandlingVedtaksbrevResultat(
     boolean harBrev,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
     List<Vedtaksbrev> vedtaksbrevResultater,
-    List<IngenBrev> ingenBrevResultater) {
+    List<IngenBrev> ingenBrevResultater)  implements FellesVedtaksbrevresultat  {
 
     public BehandlingVedtaksbrevResultat {
         // Valider at kun en av vedtaksbrevResultater og ingenBrevResultater har elementer
@@ -43,6 +45,5 @@ public record BehandlingVedtaksbrevResultat(
             ", ingenBrevResultater=" + ingenBrevResultater +
             '}';
     }
-
 }
 

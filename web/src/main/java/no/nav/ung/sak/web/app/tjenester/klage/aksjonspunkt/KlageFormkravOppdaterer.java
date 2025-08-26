@@ -17,8 +17,8 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepos
 import no.nav.ung.sak.behandlingslager.behandling.klage.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.ung.sak.klage.KlageUtredningTjeneste;
-import no.nav.ung.sak.klage.KlageVurderingTjeneste;
+import no.nav.ung.sak.klage.domenetjenester.KlageUtredningTjeneste;
+import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.klage.KlageFormkravAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.klage.PåklagdBehandlingDto;
 
