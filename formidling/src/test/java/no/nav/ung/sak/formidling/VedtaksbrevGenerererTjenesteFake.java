@@ -2,9 +2,9 @@ package no.nav.ung.sak.formidling;
 
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.mottaker.PdlPerson;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -22,9 +22,8 @@ public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTje
         );
     }
 
-
     @Override
-    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
+    public GenerertBrev genererAutomatiskVedtaksbrev(Behandling behandling, DokumentMalType dokumentMalType, boolean kunHtml) {
         return resultat;
     }
 

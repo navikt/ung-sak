@@ -5,7 +5,6 @@ import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 public class KlageVurderingAdapter {
     private KlageVurderingType klageVurderingType;
@@ -13,6 +12,7 @@ public class KlageVurderingAdapter {
     private String fritekstTilBrev;
     private Hjemmel hjemmel;
     private KlageMedholdÅrsak klageMedholdArsakKode;
+    private String kabalReferanse;
     private KlageVurderingOmgjør klageVurderingOmgjoer;
     private KlageVurdertAv klageVurdertAv;
 
@@ -22,6 +22,7 @@ public class KlageVurderingAdapter {
                                  String begrunnelse,
                                  String fritekstTilBrev,
                                  Hjemmel hjemmel,
+                                 String kabalReferanse,
                                  KlageVurdertAv klageVurdertAv) {
         this.klageVurderingType = klageVurderingType;
         this.begrunnelse = begrunnelse;
@@ -29,6 +30,7 @@ public class KlageVurderingAdapter {
         this.hjemmel = hjemmel;
         this.klageMedholdArsakKode = klageMedholdArsakKode;
         this.klageVurderingOmgjoer = klageVurderingOmgjør;
+        this.kabalReferanse = kabalReferanse;
         this.klageVurdertAv = klageVurdertAv;
     }
 
@@ -60,8 +62,26 @@ public class KlageVurderingAdapter {
         return klageVurdertAv;
     }
 
-    public boolean skalOversendesTilNK(Behandling behandling) {
-        return getKlageVurdertAv() == KlageVurdertAv.NAY &&
+    public boolean skalOversendesTilNK() {
+        return getKlageVurdertAv() == KlageVurdertAv.VEDTAKSINSTANS &&
             getKlageVurdering() == KlageVurderingType.STADFESTE_YTELSESVEDTAK;
+    }
+
+    public String getKabalReferanse() {
+        return kabalReferanse;
+    }
+
+    public static class Templates {
+        public static final KlageVurderingAdapter AVVIST_VURDERING_VEDTAKSINSTANS =
+            new KlageVurderingAdapter(
+                KlageVurderingType.AVVIS_KLAGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                KlageVurdertAv.VEDTAKSINSTANS
+            );
     }
 }

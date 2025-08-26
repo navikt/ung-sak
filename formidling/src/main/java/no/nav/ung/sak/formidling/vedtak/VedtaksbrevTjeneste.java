@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
@@ -9,7 +10,7 @@ import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevReglerUng;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
@@ -27,16 +28,16 @@ import java.util.stream.Stream;
 public class VedtaksbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
-    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private final VedtaksbrevRegler vedtaksbrevRegler;
+    private final VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste;
+    private final VedtaksbrevReglerUng vedtaksbrevRegler;
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
 
     @Inject
     public VedtaksbrevTjeneste(
-        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler,
+        @Any VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste,
+        @Any VedtaksbrevReglerUng vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
@@ -257,7 +258,5 @@ public class VedtaksbrevTjeneste {
 
 
     }
-
-
 }
 

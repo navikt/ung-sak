@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.behandling.part.PartDto;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -41,9 +42,9 @@ public abstract class KlageFormkravAksjonspunktDto extends BekreftetAksjonspunkt
     @Pattern(regexp = TekstValideringRegex.FRITEKST)
     private String begrunnelse;
 
-//    @Valid
-//    @JsonProperty("valgtKlagePart")
-//    private PartDto valgtKlagePart;
+    @Valid
+    @JsonProperty("valgtKlagePart")
+    private PartDto valgtKlagePart;
 
 
     KlageFormkravAksjonspunktDto() { // NOSONAR
@@ -55,7 +56,7 @@ public abstract class KlageFormkravAksjonspunktDto extends BekreftetAksjonspunkt
                                         boolean erKonkret,
                                         boolean erSignert,
                                         String begrunnelse,
-//                                        PartDto valgtKlagePart,
+                                        PartDto valgtKlagePart,
                                         boolean erTilbakekreving,
                                         PåklagdBehandlingDto påklagdBehandlingInfo) {
         super(begrunnelse);
@@ -65,7 +66,7 @@ public abstract class KlageFormkravAksjonspunktDto extends BekreftetAksjonspunkt
         this.erSignert = erSignert;
         this.erTilbakekreving = erTilbakekreving;
         this.påklagdBehandlingInfo = påklagdBehandlingInfo;
-//        this.valgtKlagePart = valgtKlagePart;
+        this.valgtKlagePart = valgtKlagePart;
         this.begrunnelse = Objects.requireNonNull(begrunnelse, "begrunnelse");
     }
 
@@ -85,7 +86,7 @@ public abstract class KlageFormkravAksjonspunktDto extends BekreftetAksjonspunkt
         return erSignert;
     }
 
-    public UUID hentpåKlagdEksternBehandlingUuId() {
+    public UUID hentPåklagdBehandlingUuid() {
         return påklagdBehandlingInfo != null ? påklagdBehandlingInfo.getPåklagBehandlingUuid() : null;
     }
 
@@ -101,14 +102,14 @@ public abstract class KlageFormkravAksjonspunktDto extends BekreftetAksjonspunkt
     public PåklagdBehandlingDto getPåklagdBehandlingInfo() {
         return påklagdBehandlingInfo;
     }
-//
-//    public PartDto getValgtKlagePart() {
-//        return valgtKlagePart;
-//    }
-//
-//    public void setValgtKlagePart(PartDto valgtKlagePart) {
-//        this.valgtKlagePart = valgtKlagePart;
-//    }
+
+    public PartDto getValgtKlagePart() {
+        return valgtKlagePart;
+    }
+
+    public void setValgtKlagePart(PartDto valgtKlagePart) {
+        this.valgtKlagePart = valgtKlagePart;
+    }
 
     @JsonTypeName(AksjonspunktKodeDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_KODE)
     public static class KlageFormkravNfpAksjonspunktDto extends KlageFormkravAksjonspunktDto {
@@ -123,10 +124,10 @@ public abstract class KlageFormkravAksjonspunktDto extends BekreftetAksjonspunkt
                                                boolean erKonkret,
                                                boolean erSignert,
                                                String begrunnelse,
-//                                               PartDto valgtKlagepart,
+                                               PartDto valgtKlagepart,
                                                boolean erTilbakekreving,
                                                PåklagdBehandlingDto påklagdBehandling) {
-            super(erKlagerPart, erFristOverholdt, erKonkret, erSignert, begrunnelse, erTilbakekreving, påklagdBehandling);
+            super(erKlagerPart, erFristOverholdt, erKonkret, erSignert, begrunnelse, valgtKlagepart, erTilbakekreving, påklagdBehandling);
         }
     }
 }

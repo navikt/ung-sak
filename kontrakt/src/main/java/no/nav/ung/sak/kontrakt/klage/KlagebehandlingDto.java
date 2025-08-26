@@ -12,7 +12,6 @@ public class KlagebehandlingDto {
     private KlageVurderingResultatDto klageVurderingResultatNFP;
     private KlageVurderingResultatDto klageVurderingResultatNK;
     private KlageFormkravResultatDto klageFormkravResultatNFP;
-    private KlageFormkravResultatDto klageFormkravResultatKA;
 
 
     public KlagebehandlingDto() {
@@ -28,8 +27,6 @@ public class KlagebehandlingDto {
 
     public KlageFormkravResultatDto getKlageFormkravResultatNFP() { return klageFormkravResultatNFP; }
 
-    public KlageFormkravResultatDto getKlageFormkravResultatKA() { return klageFormkravResultatKA;}
-
     public void setKlageVurderingResultatNFP(KlageVurderingResultatDto klageVurderingResultatNFP) {
         this.klageVurderingResultatNFP = klageVurderingResultatNFP;
     }
@@ -40,9 +37,5 @@ public class KlagebehandlingDto {
 
     public void setKlageFormkravResultatNFP(KlageFormkravResultatDto klageFormkravResultatNFP) {
         this.klageFormkravResultatNFP = klageFormkravResultatNFP;
-    }
-
-    public void setKlageFormkravResultatKA(KlageFormkravResultatDto klageFormkravResultatKA) {
-        this.klageFormkravResultatKA = klageFormkravResultatKA;
     }
 }

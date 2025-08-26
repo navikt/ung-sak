@@ -11,6 +11,9 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.historikk.*;
+import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
+import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -43,6 +46,9 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<VedtakResultatType>> vedtakResultatTyper,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<ÅrsakTilVurdering>> årsakerTilVurdering,
     // avslagsårsakerPrVilkårTypeKode er eit spesialtilfelle der ein returnerer mapping frå VilkårType til tilknytta Avslagsårsak
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedMap<String, SortedSet<KodeverdiSomObjekt<Avslagsårsak>>> avslagårsakerPrVilkårTypeKode
+    @NotNull @Valid @Size(min = 1, max = 1000) SortedMap<String, SortedSet<KodeverdiSomObjekt<Avslagsårsak>>> avslagårsakerPrVilkårTypeKode,
+    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KlageMedholdÅrsak>> klageMedholdÅrsak,
+    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KlageAvvistÅrsak>> klageAvvistÅrsaker,
+    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KlageVurderingType>> klagevurderingType
 ) {
 }

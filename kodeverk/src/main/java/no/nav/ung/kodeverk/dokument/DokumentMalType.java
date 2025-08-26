@@ -23,8 +23,14 @@ public enum DokumentMalType implements Kodeverdi {
     OPPHØR_DOK("OPPHOR", "Opphør brev", true),
     AVSLAG__DOK("AVSLAG", "Avslagsbrev", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekst vedtaksbrev", true),
-    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false);
+    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false),
 //    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst", false);
+
+
+    KLAGE_AVVIST_DOK("KLAGAV", "Vedtak om avvist klage", true),
+    KLAGE_OVERSENDT_KLAGEINSTANS("KLAGOV", "Overføring til NAV Klageinstans", false),
+    KLAGE_VEDTAK_MEDHOLD("VEDMED", "Vedtak om medhold", true),
+;
 
 
     private static final Map<String, DokumentMalType> KODER = new LinkedHashMap<>();
