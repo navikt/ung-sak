@@ -14,9 +14,11 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -31,13 +33,16 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -219,6 +224,42 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(etterlysningUtenFrist.frist()).isNull();
         var etterlysningRecordMedFrist = etterlysninger.stream().filter(it -> it.etterlysningType().equals(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)).findFirst().get();
         assertThat(etterlysningRecordMedFrist.frist()).isNotNull();
+    }
+
+
+    @Test
+    void skal_kunne_hente_alder_og_kjønn_statistikk() {
+        AktørId aktørId = AktørId.dummy();
+        var fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE)
+            .medBruker(aktørId)
+            .medSaksnummer(new Saksnummer(saksnummerRepository.genererNyttSaksnummer())).medStatus(FagsakStatus.LØPENDE).build();
+        lagreFagsaker(List.of(fagsak));
+
+        // Gitt en fagsak med behandling med etterlysning
+        Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
+        lagreBehandling(behandling);
+
+        PersonInformasjonBuilder pibuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+        leggTilAktør(pibuilder, aktørId, 20, NavBrukerKjønn.MANN);
+        leggTilAktør(pibuilder, AktørId.dummy(), 20, NavBrukerKjønn.KVINNE);
+
+        new PersonopplysningRepository(entityManager).lagre(behandling.getId(), pibuilder);
+
+        var alderOgKjønnStatistikk = statistikkRepository.alderOgKjønnStatistikk();
+        // Og vi skal ha en bruker i statistikken
+        assertThat(alderOgKjønnStatistikk.size()).isEqualTo(1);
+        AlderOgKjønnRecord next = alderOgKjønnStatistikk.iterator().next();
+        assertThat(next.alder()).isEqualTo(20);
+        assertThat(next.navBrukerKjønn()).isEqualTo(NavBrukerKjønn.MANN);
+        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
+    }
+
+    private static void leggTilAktør(PersonInformasjonBuilder pibuilder, AktørId aktørId, int alder, NavBrukerKjønn kjønn) {
+        PersonInformasjonBuilder.PersonopplysningBuilder poBuilder = pibuilder.getPersonopplysningBuilder(aktørId);
+        poBuilder.medFødselsdato(LocalDate.now().minusYears(alder));
+        poBuilder.medNavn("Ola Nordmann");
+        poBuilder.medKjønn(kjønn);
+        pibuilder.leggTil(poBuilder);
     }
 
 

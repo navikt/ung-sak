@@ -14,6 +14,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
@@ -24,6 +25,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
@@ -70,7 +72,17 @@ public class BigQueryStatistikkRepository {
         }
     }
 
-    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
+    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentDagligRapporterte() {
+        List<Tuple<BigQueryTabell<?>, Collection<?>>> dagligRapporterte = new ArrayList<>();
+
+        Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk();
+        dagligRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL, alderOgKjønn));
+
+        return dagligRapporterte;
+    }
+
+
+        public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
         Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
@@ -93,6 +105,10 @@ public class BigQueryStatistikkRepository {
 
         Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, behandlingÅrsakData));
+
+        Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk();
+        hyppigRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL, alderOgKjønn));
+
 
         return hyppigRapporterte;
     }
@@ -470,6 +486,34 @@ public class BigQueryStatistikkRepository {
         return result;
     }
 
+
+    Collection<AlderOgKjønnRecord> alderOgKjønnStatistikk() {
+        String sql = """
+            select po.bruker_kjoenn,  extract(YEAR from AGE(current_date, po.foedselsdato)),  count(*) as antall
+                     from fagsak f
+                     inner join behandling b on b.fagsak_id = f.id
+                     inner join gr_personopplysning gr on gr.behandling_id = b.id
+                    inner join po_informasjon pi on pi.id = gr.registrert_informasjon_id
+                     inner join PO_PERSONOPPLYSNING po on po.po_informasjon_id = pi.id and po.aktoer_id = f.bruker_aktoer_id
+                     where f.ytelse_type <> :obsoleteKode and gr.aktiv is true and b.behandling_type = 'BT-002'
+                     group by 1,2
+                     order by 1,2
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .getResultStream();
+
+        return stream.map(t -> {
+            String kjønnKode = t.get(0, String.class);
+            var kjønn = NavBrukerKjønn.fraKode(kjønnKode);
+            BigDecimal alder = t.get(1, BigDecimal.class);
+            Long antall = t.get(2, Long.class);
+
+            return new AlderOgKjønnRecord(BigDecimal.valueOf(antall), alder.intValue(), kjønn, ZonedDateTime.now());
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 
 
 }
