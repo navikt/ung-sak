@@ -50,8 +50,6 @@ import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
 @Dependent
 public class BigQueryStatistikkRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(BigQueryStatistikkRepository.class);
-
     private static final String OBSOLETE_KODE = FagsakYtelseType.OBSOLETE.getKode();
 
     private final EntityManager entityManager;
@@ -62,14 +60,6 @@ public class BigQueryStatistikkRepository {
         @Any Instance<ProsessTaskHandler> handlers
     ) {
         this.entityManager = entityManager;
-    }
-
-    private Class<?> extractClass(ProsessTaskHandler bean) {
-        if (!bean.getClass().isAnnotationPresent(ProsessTask.class) && bean instanceof TargetInstanceProxy<?> tip) {
-            return tip.weld_getTargetInstance().getClass();
-        } else {
-            return bean.getClass();
-        }
     }
 
     public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentDagligRapporterte() {
@@ -491,7 +481,7 @@ public class BigQueryStatistikkRepository {
                      inner join gr_personopplysning gr on gr.behandling_id = b.id
                     inner join po_informasjon pi on pi.id = gr.registrert_informasjon_id
                      inner join PO_PERSONOPPLYSNING po on po.po_informasjon_id = pi.id and po.aktoer_id = f.bruker_aktoer_id
-                     where f.ytelse_type <> :obsoleteKode and gr.aktiv is true and b.behandling_type = 'BT-002'
+                     where f.ytelse_type <> :obsoleteKode and gr.aktiv is true and b.behandling_type = :førstegangsbehandling
                      group by 1,2
                      order by 1,2
             """;
@@ -499,6 +489,7 @@ public class BigQueryStatistikkRepository {
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
             .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("førstegangsbehandling", BehandlingType.FØRSTEGANGSSØKNAD.getKode())
             .getResultStream();
 
         return stream.map(t -> {
