@@ -106,10 +106,6 @@ public class BigQueryStatistikkRepository {
         Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, behandlingÅrsakData));
 
-        Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk();
-        hyppigRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL, alderOgKjønn));
-
-
         return hyppigRapporterte;
     }
 
