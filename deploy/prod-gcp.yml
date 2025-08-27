@@ -76,26 +76,30 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: ung-sak
-        - application : sif-abac-pdp
+        - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
+        - application: ung-sak
+        #kommenter inn når ung-tilbake er i prod
+        #- application: ung-tilbake
       external:
         - host: "dokarkiv.prod-fss-pub.nais.io"
         - host: "k9-abakus.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
         - host: "norg2.prod-fss-pub.nais.io"
+        - host: "oppgave.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
-        - host: "oppgave.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: sif-abac-pdp
+        - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
-        - application: ung-deltakelse-opplyser
+        #kommenter inn når ung-tilbake er i prod
+        #- application: ung-tilbake
   gcp:
     sqlInstances:
       - type: POSTGRES_16

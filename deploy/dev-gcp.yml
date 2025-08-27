@@ -83,18 +83,19 @@ spec:
         - host: "k9-abakus.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
         - host: "norg2.dev-fss-pub.nais.io"
+        - host: "oppgave.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
-        - host: "oppgave.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: dev-fss
         - application: sif-abac-pdp
+        - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
-        - application: ung-deltakelse-opplyser
+        - application: ung-tilbake
   gcp:
     sqlInstances:
       - type: POSTGRES_16
