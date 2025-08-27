@@ -210,7 +210,7 @@ spec:
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
     - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
-      value: "/ung/tilbake,api://dev-gcp.ungsaksbehandling.ung-tilbake/.default"
+      value: "/ung/tilbake,api://dev-gcp.k9saksbehandling.ung-tilbake/.default"
 
 
     - name: SENSU_HOST
