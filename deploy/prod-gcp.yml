@@ -217,6 +217,9 @@ spec:
       value: "api://prod-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
+    #kommenter inn når ung-tilbake er i prod
+    #- name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+    #  value: "/ung/tilbake,api://prod-gcp.ungsaksbehandling.ung-tilbake/.default"
 
     - name: SENSU_HOST
       value: "sensu.nais"
