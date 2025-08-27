@@ -6,7 +6,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -27,11 +26,9 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
-import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -67,6 +64,9 @@ public class BigQueryStatistikkRepository {
 
         Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk();
         dagligRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL, alderOgKjønn));
+
+        Collection<DagerIProgrammetRecord> dagerIProgrammet = dagerIProgrammet();
+        dagligRapporterte.add(new Tuple<>(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, dagerIProgrammet));
 
         return dagligRapporterte;
     }
@@ -501,6 +501,36 @@ public class BigQueryStatistikkRepository {
             return new AlderOgKjønnRecord(BigDecimal.valueOf(antall), alder.intValue(), kjønn, ZonedDateTime.now());
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    Collection<DagerIProgrammetRecord> dagerIProgrammet() {
+
+        String sql = """
+            select dager_i_programmet, count(*) as antall from (select f.id, sum(extract(DAY from AGE(LEAST(periode.tom  + INTERVAL '1 day', current_date), periode.fom))) as dager_i_programmet
+                     from fagsak f
+                     inner join behandling b on b.fagsak_id = f.id
+                     inner join UNG_GR_UNGDOMSPROGRAMPERIODE gr on gr.behandling_id = b.id
+                    inner join UNG_UNGDOMSPROGRAMPERIODER perioder on perioder.id = gr.ung_ungdomsprogramperioder_id
+                     inner join UNG_UNGDOMSPROGRAMPERIODE periode on periode.ung_ungdomsprogramperioder_id = perioder.id
+                     where f.ytelse_type <> :obsoleteKode and gr.aktiv is true
+                       and b.opprettet_tid = (SELECT max(b2.opprettet_tid) FROM Behandling b2 WHERE b2.fagsak_id = f.id) -- siste behandling for fagsaken
+                     group by 1
+            ) group by dager_i_programmet
+            order by dager_i_programmet
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .getResultStream();
+
+        return stream.map(t -> {
+            BigDecimal antallDager = t.get(0, BigDecimal.class);
+            Long antall = t.get(1, Long.class);
+
+            return new DagerIProgrammetRecord(BigDecimal.valueOf(antall), antallDager.longValue(), ZonedDateTime.now());
+        }).toList();
+    }
+
 
 
 }

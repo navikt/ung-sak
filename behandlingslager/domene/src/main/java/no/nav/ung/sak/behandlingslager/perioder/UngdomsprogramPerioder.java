@@ -1,24 +1,13 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import jakarta.persistence.*;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "UngdomsprogramPerioder")
 @Table(name = "UNG_UNGDOMSPROGRAMPERIODER")

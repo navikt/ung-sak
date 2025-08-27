@@ -18,13 +18,17 @@ import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -34,6 +38,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -47,7 +52,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -71,6 +78,9 @@ class BigQueryStatistikkRepositoryTest {
 
     @Inject
     private SaksnummerRepository saksnummerRepository;
+
+    @Inject
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     private BigQueryStatistikkRepository statistikkRepository;
 
@@ -252,6 +262,88 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(next.alder()).isEqualTo(20);
         assertThat(next.navBrukerKjønn()).isEqualTo(NavBrukerKjønn.MANN);
         assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
+    }
+
+    @Test
+    void skal_telle_antall_dager_til_dagens_dato() {
+        lagFagsakOgBehandlingMedUngdomsprogram(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), TIDENES_ENDE));
+
+        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
+
+        assertThat(dagerIProgrammet.size()).isEqualTo(1);
+        DagerIProgrammetRecord next = dagerIProgrammet.iterator().next();
+        assertThat(next.dagerIProgrammet()).isEqualTo(10);
+        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
+    }
+
+    @Test
+    void skal_telle_antall_dager_til_sluttdato_dersom_før_dagens_dato() {
+        lagFagsakOgBehandlingMedUngdomsprogram(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(2)));
+
+        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
+
+        assertThat(dagerIProgrammet.size()).isEqualTo(1);
+        DagerIProgrammetRecord next = dagerIProgrammet.iterator().next();
+        assertThat(next.dagerIProgrammet()).isEqualTo(9);
+        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
+    }
+
+
+    @Test
+    void skal_telle_antall_dager_for_flere_perioder() {
+        lagFagsakOgBehandlingMedUngdomsprogram(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
+
+        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
+
+        assertThat(dagerIProgrammet.size()).isEqualTo(1);
+        DagerIProgrammetRecord next = dagerIProgrammet.iterator().next();
+        assertThat(next.dagerIProgrammet()).isEqualTo(12);
+        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
+    }
+
+    @Test
+    void skal_telle_antall_dager_for_flere_perioder_og_flere_fagsaker() {
+        lagFagsakOgBehandlingMedUngdomsprogram(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
+
+        lagFagsakOgBehandlingMedUngdomsprogram(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
+
+        lagFagsakOgBehandlingMedUngdomsprogram(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
+
+
+        lagFagsakOgBehandlingMedUngdomsprogram(
+            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), TIDENES_ENDE));
+
+        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
+
+        assertThat(dagerIProgrammet.size()).isEqualTo(2);
+        Iterator<DagerIProgrammetRecord> iterator = dagerIProgrammet.iterator();
+        DagerIProgrammetRecord e1 = iterator.next();
+        assertThat(e1.dagerIProgrammet()).isEqualTo(12);
+        assertThat(e1.antall()).isEqualByComparingTo(BigDecimal.valueOf(3));
+
+        DagerIProgrammetRecord e2 = iterator.next();
+        assertThat(e2.dagerIProgrammet()).isEqualTo(20);
+        assertThat(e2.antall()).isEqualByComparingTo(BigDecimal.valueOf(1));
+    }
+
+    private void lagFagsakOgBehandlingMedUngdomsprogram(DatoIntervallEntitet... perioder) {
+        var fagsak1 = byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.LØPENDE);
+        lagreFagsaker(List.of(fagsak1));
+
+        // Gitt en fagsak med behandling med etterlysning
+        Behandling behandling = byggBehandlingForFagsak(fagsak1, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
+        lagreBehandling(behandling);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), Stream.of(perioder).map(UngdomsprogramPeriode::new).toList());
     }
 
     private static void leggTilAktør(PersonInformasjonBuilder pibuilder, AktørId aktørId, int alder, NavBrukerKjønn kjønn) {
