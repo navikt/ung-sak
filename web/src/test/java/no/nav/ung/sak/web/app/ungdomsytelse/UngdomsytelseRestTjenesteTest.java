@@ -111,14 +111,16 @@ class UngdomsytelseRestTjenesteTest {
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
             List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
         tilkjentYtelseRepository.lagre(behandling.getId(), List.of(
-            TilkjentYtelsePeriode.ny()
-                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.with(TemporalAdjusters.lastDayOfMonth())))
-                .medRedusertBeløp(BigDecimal.TEN)
-                .medDagsats(BigDecimal.TEN)
-                .medReduksjon(BigDecimal.ZERO)
-                .medUredusertBeløp(BigDecimal.TEN)
-                .build()
-        ), "test", "test");
+                TilkjentYtelsePeriode.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.with(TemporalAdjusters.lastDayOfMonth())))
+                    .medRedusertBeløp(BigDecimal.TEN)
+                    .medDagsats(BigDecimal.TEN)
+                    .medReduksjon(BigDecimal.ZERO)
+                    .medUredusertBeløp(BigDecimal.TEN)
+                    .build()
+            ),
+            List.of(),
+            "test", "test");
 
         var revurdering = TestScenarioBuilder.builderMedSøknad()
             .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
