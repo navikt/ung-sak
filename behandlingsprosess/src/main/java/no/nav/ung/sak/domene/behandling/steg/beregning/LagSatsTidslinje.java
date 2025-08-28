@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 public class LagSatsTidslinje {
 
     static LocalDateTimeline<Sats> lagSatsTidslinje(LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats, LocalDate førsteDagMedYtelsen) {
-        var førsteMuligeDato = fødselsdato.plusYears(LAV.getFomAlder()).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+        var førsteMuligeDato = fødselsdato.plusYears(LAV.getFomAlder());
         LocalDate tjuefemårsdagen = fødselsdato.plusYears(HØY.getFomAlder());
         var datoForEndringAvSats = tjuefemårsdagen;
 
