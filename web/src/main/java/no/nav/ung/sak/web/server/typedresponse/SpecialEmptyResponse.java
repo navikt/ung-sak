@@ -31,6 +31,6 @@ public final class SpecialEmptyResponse<T> implements TypedResponse<T> {
 
     @Override
     public T getEntity() {
-        throw new IllegalCallerException("SpecialEmptyResponse does not have entity. Implements TypedDefaultResponse to be compatible, but it is expected that the response is filtered and replaced before this is called.");
+        throw new IllegalCallerException("SpecialEmptyResponse does not have entity. Implements TypedResponse to be compatible, but it is expected that the response is filtered and replaced before this is called.");
     }
 }
