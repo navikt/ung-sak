@@ -86,7 +86,7 @@ public class AntallDagerStatistikk {
 
         String sql = """
             WITH periode_dager AS (
-                -- Første CTE: Beregn arbeidsdager for hver enkelt periode
+                -- Første CTE: Beregn virkedager for hver enkelt periode
                 SELECT f.id as fagsak_id,
                        periode.fom,
                        LEAST(periode.tom, CAST(:dagensDato AS date) - INTERVAL '1 day') as tom_adjusted,
@@ -97,30 +97,30 @@ public class AntallDagerStatistikk {
                             '1 day'::interval
                         ) AS d
                         WHERE EXTRACT(DOW FROM d) IN (1, 2, 3, 4, 5)  -- Kun mandag(1) til fredag(5)
-                       ) as weekdays
+                       ) as virkedager
                 FROM fagsak f
                 INNER JOIN behandling b ON b.fagsak_id = f.id
                 INNER JOIN UNG_GR_UNGDOMSPROGRAMPERIODE gr ON gr.behandling_id = b.id
                 INNER JOIN UNG_UNGDOMSPROGRAMPERIODER perioder ON perioder.id = gr.ung_ungdomsprogramperioder_id
                 INNER JOIN UNG_UNGDOMSPROGRAMPERIODE periode ON periode.ung_ungdomsprogramperioder_id = perioder.id
-                WHERE f.ytelse_type <> :obsoleteKode  -- Ekskluder utdaterte ytelse-typer
+                WHERE f.ytelse_type <> :obsoleteKode  -- Ekskluder obsolete ytelse-typer
                   AND gr.aktiv = true                 -- Kun aktive grunnlag
                   AND b.opprettet_tid = (SELECT max(b2.opprettet_tid) FROM behandling b2 WHERE b2.fagsak_id = f.id)  -- Siste behandling
                   AND periode.fom <= CAST(:dagensDato AS date) - INTERVAL '1 day'  -- Periode har startet
             ),
             fagsak_totaler AS (
-                -- Andre CTE: Summer opp alle arbeidsdager per fagsak
-                SELECT fagsak_id, SUM(weekdays) as total_weekdays
+                -- Andre CTE: Summer opp alle virkedater per fagsak
+                SELECT fagsak_id, SUM(virkedager) as total_virkedager
                 FROM periode_dager
-                WHERE weekdays > 0  -- Kun perioder med faktiske arbeidsdager
+                WHERE virkedager > 0  -- Kun perioder med faktiske virkedager
                 GROUP BY fagsak_id
             )
-            -- Hovedspørring: Grupper fagsaker etter totalt antall arbeidsdager
-            SELECT total_weekdays as dager_i_programmet, COUNT(*) as antall
+            -- Hovedspørring: Grupper fagsaker etter totalt antall virkedager
+            SELECT total_virkedager as dager_i_programmet, COUNT(*) as antall
             FROM fagsak_totaler
-            WHERE total_weekdays > 0  -- Ekskluder fagsaker uten arbeidsdager
-            GROUP BY total_weekdays
-            ORDER BY total_weekdays
+            WHERE total_virkedager > 0  -- Ekskluder fagsaker uten programperiode
+            GROUP BY total_virkedager
+            ORDER BY total_virkedager
             """;
 
         // Opprett og kjør SQL-spørringen
