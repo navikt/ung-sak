@@ -1,39 +1,22 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.BarnetilleggSatsTidslinje;
-import no.nav.ung.sak.typer.AktørId;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.function.Function;
 
 import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 
 /**
  * Finner tidslinje for barnetillegg.
  */
-@Dependent
 public class LagBarnetilleggTidslinje {
 
-
-    private final PersonopplysningRepository personopplysningRepository;
-
-    @Inject
-    public LagBarnetilleggTidslinje(PersonopplysningRepository personopplysningRepository) {
-        this.personopplysningRepository = personopplysningRepository;
-    }
 
     /**
      * Utleder tidslinje for utbetaling av barnetillegg
@@ -42,27 +25,14 @@ public class LagBarnetilleggTidslinje {
      * Dette betyr barns død påvirker utbetaling først to kalendermåneder etter dødsdato.
      * Barnetillegg utbetales alltid for hele måneder gitt at alle andre vilkår er oppfylt for måneden.
      *
-     * @param behandlingReferanse Behandlingreferanse
+     * @param fødselOgDødInfos
      * @return Resultat med tidslinje for barnetillegg der dagsats overstiger 0
      */
-    public BarnetilleggVurdering lagTidslinje(BehandlingReferanse behandlingReferanse, LocalDateTimeline<Boolean> perioder) {
-        var personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandlingReferanse.getBehandlingId());
-        var barnAvSøkerAktørId = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getRelasjoner()
-            .stream().filter(r -> r.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
-            .map(PersonRelasjonEntitet::getTilAktørId)
-            .toList();
-
-        final var relevantPersonInfo = barnAvSøkerAktørId.stream().map(mapFødselOgDødInformasjonForAktør(personopplysningGrunnlagEntitet)).toList();
-        return beregnBarnetillegg(perioder, relevantPersonInfo);
-
+    public static BarnetilleggVurdering lagTidslinje(LocalDateTimeline<Boolean> perioder, List<FødselOgDødInfo> fødselOgDødInfos) {
+        return beregnBarnetillegg(perioder, fødselOgDødInfos);
     }
 
-    private static Function<AktørId, FødselOgDødInfo> mapFødselOgDødInformasjonForAktør(PersonopplysningGrunnlagEntitet personopplysningGrunnlagEntitet) {
-        return aktørId -> {
-            final var personopplysning = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getPersonopplysning(aktørId);
-            return new FødselOgDødInfo(aktørId, personopplysning.getFødselsdato(), personopplysning.getDødsdato());
-        };
-    }
+
 
     static BarnetilleggVurdering beregnBarnetillegg(LocalDateTimeline<Boolean> perioder, List<FødselOgDødInfo> relevantPersonInfoBarn) {
         var antallBarnGrunnlagTidslinje = relevantPersonInfoBarn.stream()

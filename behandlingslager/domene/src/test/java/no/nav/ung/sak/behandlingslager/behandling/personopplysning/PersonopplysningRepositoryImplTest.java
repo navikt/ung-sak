@@ -78,7 +78,7 @@ public class PersonopplysningRepositoryImplTest {
     }
 
     private PersonopplysningerAggregat tilAggregat(Behandling behandling, PersonopplysningGrunnlagEntitet grunnlag) {
-        return new PersonopplysningerAggregat(grunnlag, behandling.getAktørId(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()));
+        return new PersonopplysningerAggregat(grunnlag, behandling.getAktørId());
     }
 
     private Personinfo lagPerson() {

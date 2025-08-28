@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LagSatsTidslinjeTest {
 
@@ -16,7 +16,13 @@ class LagSatsTidslinjeTest {
         LocalDate tjuefemårsdag = LocalDate.now().plusDays(10);
         LocalDate fødselsdato = tjuefemårsdag.minusYears(25);
 
-        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(fødselsdato, LocalDate.now(), false, tjuefemårsdag.plusDays(1));
+        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(
+            new UtledSatsInput(fødselsdato,
+                false,
+                false,
+                tjuefemårsdag.plusDays(1)
+            )
+        );
 
         assertEquals(2, satsTidslinje.size());
     }
@@ -27,7 +33,13 @@ class LagSatsTidslinjeTest {
         LocalDate tjuefemårsdag = LocalDate.now().plusDays(10);
         LocalDate fødselsdato = tjuefemårsdag.minusYears(25);
 
-        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(fødselsdato, LocalDate.now(), false, tjuefemårsdag.minusDays(1));
+        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(
+            new UtledSatsInput(
+                fødselsdato,
+                false,
+                false,
+                tjuefemårsdag.minusDays(1))
+        );
 
         assertEquals(1, satsTidslinje.size());
     }
@@ -38,7 +50,7 @@ class LagSatsTidslinjeTest {
         LocalDate tjuefemårsdag = LocalDate.now().plusDays(10);
         LocalDate fødselsdato = tjuefemårsdag.minusYears(25);
 
-        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(fødselsdato, LocalDate.now(), false, tjuefemårsdag);
+        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(new UtledSatsInput(fødselsdato, false, false, tjuefemårsdag));
 
         assertEquals(2, satsTidslinje.size());
     }

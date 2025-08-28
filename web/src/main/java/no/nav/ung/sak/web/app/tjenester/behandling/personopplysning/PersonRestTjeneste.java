@@ -66,7 +66,7 @@ public class PersonRestTjeneste {
     public PersonopplysningDto getPersonopplysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingsprosessApplikasjonTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         Long behandlingId = getBehandlingsId(new BehandlingIdDto(behandling.getId()));
-        Optional<PersonopplysningDto> personopplysningDto = personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId, LocalDate.now());
+        Optional<PersonopplysningDto> personopplysningDto = personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId);
         if (personopplysningDto.isPresent()) {
             PersonopplysningDto pers = personopplysningDto.get();
             personopplysningFnrFinder.oppdaterMedPersonIdent(pers);

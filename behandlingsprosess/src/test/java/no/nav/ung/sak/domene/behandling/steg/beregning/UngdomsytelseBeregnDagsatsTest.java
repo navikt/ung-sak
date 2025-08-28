@@ -3,9 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.beregning;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BarnetilleggVurdering;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
-import org.junit.jupiter.api.BeforeEach;
+import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BeregnDagsatsInput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -14,23 +12,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
 class UngdomsytelseBeregnDagsatsTest {
-
-    private UngdomsytelseBeregnDagsats tjeneste;
-    private LagBarnetilleggTidslinje lagBarnetilleggTidslinje = mock(LagBarnetilleggTidslinje.class);
-
-
-    @BeforeEach
-    void setUp() {
-        tjeneste = new UngdomsytelseBeregnDagsats(lagBarnetilleggTidslinje);
-        when(lagBarnetilleggTidslinje.lagTidslinje(any(), any())).thenReturn(new BarnetilleggVurdering(LocalDateTimeline.empty(), List.of()));
-    }
 
 
     @Test
@@ -39,7 +24,8 @@ class UngdomsytelseBeregnDagsatsTest {
         var tom = LocalDate.of(2024, 4, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var fødselsdag = fom.minusYears(18).minusDays(1);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdag, LocalDate.now(), false);
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(
+            lagInput(perioder, fødselsdag));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(1);
@@ -59,7 +45,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var tom = LocalDate.of(2024, 5, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var fødselsdag = fom.minusYears(18).minusDays(1);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdag, LocalDate.now(), false);
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(lagInput(perioder, fødselsdag));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
@@ -87,7 +73,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 15);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, tjuefemårsdag.minusDays(1), false);
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(lagInput(perioder, fødselsdato));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(1);
@@ -109,7 +95,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 15);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, tjuefemårsdag.plusDays(1), false);
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(lagInput(perioder, fødselsdato));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(3);
@@ -146,7 +132,8 @@ class UngdomsytelseBeregnDagsatsTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 15);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, tjuefemårsdag.minusDays(1), true);
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(
+            lagInput(perioder, fødselsdato, true));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(3);
@@ -185,7 +172,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 1);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, LocalDate.now(), true);
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(lagInput(perioder, fødselsdato, true));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(3);
@@ -222,7 +209,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 5, 1);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato, LocalDate.now(), true);
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(lagInput(perioder, fødselsdato, true));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
@@ -242,5 +229,14 @@ class UngdomsytelseBeregnDagsatsTest {
         assertThat(second.getValue().grunnbeløpFaktor()).isEqualByComparingTo(BigDecimal.valueOf(2.041));
         assertThat(second.getValue().grunnbeløp()).isEqualByComparingTo(BigDecimal.valueOf(124028));
         assertThat(second.getValue().dagsats()).isEqualByComparingTo(BigDecimal.valueOf(973.62));
+    }
+
+    private static BeregnDagsatsInput lagInput(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdag) {
+        boolean harTriggerBeregnHøySats = false;
+        return lagInput(perioder, fødselsdag, harTriggerBeregnHøySats);
+    }
+
+    private static BeregnDagsatsInput lagInput(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdag, boolean harTriggerBeregnHøySats) {
+        return new BeregnDagsatsInput(perioder, fødselsdag, harTriggerBeregnHøySats, false, List.of());
     }
 }
