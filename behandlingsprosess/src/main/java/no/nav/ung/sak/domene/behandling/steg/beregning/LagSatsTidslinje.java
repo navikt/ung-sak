@@ -13,14 +13,14 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 
 public class LagSatsTidslinje {
 
-    static LocalDateTimeline<Sats> lagSatsTidslinje(LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
+    static LocalDateTimeline<Sats> lagSatsTidslinje(LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats, LocalDate førsteDagMedYtelsen) {
         var førsteMuligeDato = fødselsdato.plusYears(LAV.getFomAlder()).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
         LocalDate tjuefemårsdagen = fødselsdato.plusYears(HØY.getFomAlder());
         var datoForEndringAvSats = tjuefemårsdagen;
-        var sisteMuligeDato = fødselsdato.plusYears(HØY.getTomAlder()).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
 
-        var regnUtHøySats = harTriggerBeregnHøySats || beregningsdato.isAfter(tjuefemårsdagen);
+        var regnUtHøySats = harTriggerBeregnHøySats || !beregningsdato.isBefore(tjuefemårsdagen) || !tjuefemårsdagen.isAfter(førsteDagMedYtelsen);
         if (regnUtHøySats) {
+            var sisteMuligeDato = fødselsdato.plusYears(HØY.getTilAlder()).minusDays(1);
             return new LocalDateTimeline<>(
                 List.of(
                     new LocalDateSegment<>(
@@ -31,9 +31,9 @@ public class LagSatsTidslinje {
                         datoForEndringAvSats,
                         sisteMuligeDato,
                         HØY)
-
                 ));
         } else {
+            var sisteMuligeDato = fødselsdato.plusYears(LAV.getTilAlder()).minusDays(1);
             return new LocalDateTimeline<>(førsteMuligeDato, sisteMuligeDato, LAV);
         }
     }

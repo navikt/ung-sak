@@ -61,7 +61,10 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
         var beregningsdato = LocalDate.now();
         var harTriggerBeregnHøySats = behandling.getBehandlingÅrsaker().stream().anyMatch(it->it.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
-        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(BehandlingReferanse.fra(behandling), oppfyltVilkårTidslinje, fødselsdato, beregningsdato, harTriggerBeregnHøySats);
+        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(BehandlingReferanse.fra(behandling),
+            oppfyltVilkårTidslinje,
+            fødselsdato,
+            beregningsdato, harTriggerBeregnHøySats);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
