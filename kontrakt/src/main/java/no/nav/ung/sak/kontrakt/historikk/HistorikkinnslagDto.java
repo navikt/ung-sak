@@ -1,22 +1,37 @@
 package no.nav.ung.sak.kontrakt.historikk;
 
+import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 
-public record HistorikkinnslagDto(UUID historikkinnslagUuid,
-                                  UUID behandlingUuid,
-                                  HistorikkAktørDto aktør,
+public record HistorikkinnslagDto(@NotNull UUID historikkinnslagUuid,
+                                  @NotNull UUID behandlingUuid,
+                                  @NotNull HistorikkAktørDto aktør,
                                   SkjermlenkeType skjermlenke,
-                                  LocalDateTime opprettetTidspunkt,
-                                  List<HistorikkInnslagDokumentLinkDto> dokumenter,
+                                  @NotNull LocalDateTime opprettetTidspunkt,
+                                  @NotNull List<HistorikkInnslagDokumentLinkDto> dokumenter,
                                   String tittel,
-                                  List<Linje> linjer) implements Comparable<HistorikkinnslagDto> {
+                                  @NotNull List<Linje> linjer) implements Comparable<HistorikkinnslagDto> {
+
+    public HistorikkinnslagDto {
+        Objects.requireNonNull(historikkinnslagUuid);
+        Objects.requireNonNull(behandlingUuid);
+        Objects.requireNonNull(aktør);
+        Objects.requireNonNull(opprettetTidspunkt);
+        if(dokumenter == null) {
+            dokumenter = List.of();
+        }
+        if(linjer == null) {
+            linjer = List.of();
+        }
+    }
 
     public record HistorikkAktørDto(HistorikkAktør type, String ident) {
 
