@@ -12,19 +12,17 @@ import java.util.UUID;
 
 
 public record HistorikkinnslagDto(@NotNull UUID historikkinnslagUuid,
-                                  @NotNull UUID behandlingUuid,
+                                  UUID behandlingUuid,
                                   @NotNull HistorikkAktørDto aktør,
                                   SkjermlenkeType skjermlenke,
-                                  @NotNull LocalDateTime opprettetTidspunkt,
+                                  LocalDateTime opprettetTidspunkt,
                                   @NotNull List<HistorikkInnslagDokumentLinkDto> dokumenter,
                                   String tittel,
                                   @NotNull List<Linje> linjer) implements Comparable<HistorikkinnslagDto> {
 
     public HistorikkinnslagDto {
         Objects.requireNonNull(historikkinnslagUuid);
-        Objects.requireNonNull(behandlingUuid);
         Objects.requireNonNull(aktør);
-        Objects.requireNonNull(opprettetTidspunkt);
         if(dokumenter == null) {
             dokumenter = List.of();
         }

@@ -2880,6 +2880,7 @@
             "type" : "string"
           }
         },
+        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.historikk.HistorikkinnslagDto.HistorikkAktørDto" : {
