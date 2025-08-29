@@ -119,7 +119,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
     }
 
     private static Function<AktørId, FødselOgDødInfo> mapFødselOgDødInformasjonForAktør(PersonopplysningerAggregat personopplysningerAggregat) {
-        return aktørId -> new FødselOgDødInfo(aktørId, personopplysningerAggregat.getSøker().getFødselsdato(), personopplysningerAggregat.getSøker().getDødsdato());
+        return aktørId -> new FødselOgDødInfo(aktørId, personopplysningerAggregat.getPersonopplysning(aktørId).getFødselsdato(), personopplysningerAggregat.getPersonopplysning(aktørId).getDødsdato());
     }
 
 
