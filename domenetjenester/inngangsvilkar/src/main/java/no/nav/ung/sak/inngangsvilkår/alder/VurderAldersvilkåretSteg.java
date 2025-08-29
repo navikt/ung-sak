@@ -6,6 +6,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
@@ -59,7 +60,7 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR);
-        var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(BehandlingReferanse.fra(behandling));
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
         vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato);
         resultatBuilder.leggTil(vilkårBuilder);
