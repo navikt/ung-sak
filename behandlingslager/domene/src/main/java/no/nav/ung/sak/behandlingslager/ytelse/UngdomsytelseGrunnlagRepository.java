@@ -3,7 +3,6 @@ package no.nav.ung.sak.behandlingslager.ytelse;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,17 +45,17 @@ public class UngdomsytelseGrunnlagRepository {
         }
     }
 
-    public void deaktiverSatsPerioder(Long behandlingId) {
+    /**
+     * Deaktiverer grunnlag for en gitt behandlingId hvis det finnes et aktivt grunnlag.
+     * Logger informasjon om deaktivering.
+     *
+     * @param behandlingId Id til behandlingen hvor grunnlaget skal deaktiveres
+     */
+    public void deaktiverGrunnlag(Long behandlingId) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
-        var aktivtGrunnlag = grunnlagOptional.orElse(new UngdomsytelseGrunnlag());
-        var builder = new UngdomsytelseGrunnlagBuilder(aktivtGrunnlag);
-        builder.medSatsPerioder(LocalDateTimeline.empty(), null, null);
-        var differ = differ();
-        if (builder.erForskjellig(aktivtGrunnlag, differ)) {
-            grunnlagOptional.ifPresent(this::deaktiverEksisterende);
-            lagre(builder, behandlingId);
-        } else {
-            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
+        if (grunnlagOptional.isPresent()) {
+            log.info("Deaktiverer eksisterende sats perioder for behandlingId={}", behandlingId);
+            deaktiverEksisterende(grunnlagOptional.get());
         }
     }
 

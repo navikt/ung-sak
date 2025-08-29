@@ -56,7 +56,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(kontekst.getBehandlingId());
         var oppfyltVilkårTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.OPPFYLT)).mapValue(it -> true);
         if (oppfyltVilkårTidslinje.isEmpty()) {
-            ungdomsytelseGrunnlagRepository.deaktiverSatsPerioder(kontekst.getBehandlingId());
+            ungdomsytelseGrunnlagRepository.deaktiverGrunnlag(kontekst.getBehandlingId());
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
