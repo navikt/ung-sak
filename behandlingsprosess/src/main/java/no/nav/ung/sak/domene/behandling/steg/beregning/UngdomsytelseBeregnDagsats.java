@@ -18,7 +18,6 @@ import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.Periode;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,7 +29,7 @@ public class UngdomsytelseBeregnDagsats {
         var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
         var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(mapTilSatsInput(input));
         var satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
-        var barnetilleggResultat = LagBarnetilleggTidslinje.lagTidslinje(input.perioder(), input.barnsFødselOgDødInformasjon());
+        var barnetilleggResultat = LagBarnetilleggTidslinje.lagTidslinje(input.barnsFødselOgDødInformasjon());
 
         var satsTidslinje = input.perioder()
             .intersection(satsOgGrunnbeløpfaktorTidslinje, StandardCombinators::rightOnly)

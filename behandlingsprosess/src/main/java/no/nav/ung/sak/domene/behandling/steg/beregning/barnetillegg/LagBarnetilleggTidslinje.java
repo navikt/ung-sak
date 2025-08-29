@@ -28,20 +28,18 @@ public class LagBarnetilleggTidslinje {
      * @param fødselOgDødInfos
      * @return Resultat med tidslinje for barnetillegg der dagsats overstiger 0
      */
-    public static BarnetilleggVurdering lagTidslinje(LocalDateTimeline<Boolean> perioder, List<FødselOgDødInfo> fødselOgDødInfos) {
-        return beregnBarnetillegg(perioder, fødselOgDødInfos);
+    public static BarnetilleggVurdering lagTidslinje(List<FødselOgDødInfo> fødselOgDødInfos) {
+        return beregnBarnetillegg(fødselOgDødInfos);
     }
 
-    static BarnetilleggVurdering beregnBarnetillegg(LocalDateTimeline<Boolean> perioder, List<FødselOgDødInfo> relevantPersonInfoBarn) {
+    static BarnetilleggVurdering beregnBarnetillegg(List<FødselOgDødInfo> relevantPersonInfoBarn) {
         var antallBarnGrunnlagTidslinje = relevantPersonInfoBarn.stream()
             .map(info -> new LocalDateTimeline<>(info.fødselsdato(), getTilDato(info), 1))
             .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::sum))
             .orElse(LocalDateTimeline.empty());
 
-        var relevantBarnetilleggTidslinje = antallBarnGrunnlagTidslinje.intersection(perioder)
-            .combine(BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS, barnetilleggCombinator(), LocalDateTimeline.JoinStyle.LEFT_JOIN);
-
-        return new BarnetilleggVurdering(relevantBarnetilleggTidslinje, relevantPersonInfoBarn);
+        var barnetilleggTidslinje = antallBarnGrunnlagTidslinje.combine(BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS, barnetilleggCombinator(), LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        return new BarnetilleggVurdering(barnetilleggTidslinje);
     }
 
     private static LocalDateSegmentCombinator<Integer, BigDecimal, Barnetillegg> barnetilleggCombinator() {
