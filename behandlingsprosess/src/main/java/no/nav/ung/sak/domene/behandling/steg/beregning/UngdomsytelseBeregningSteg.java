@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.beregning;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -10,6 +11,7 @@ import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -58,22 +60,36 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
+        var satsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(beregnDagsatsInput);
+        ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private BeregnDagsatsInput lagInput(Behandling behandling, LocalDateTimeline<Boolean> oppfyltVilkårTidslinje) {
         BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling);
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(behandlingReferanse);
-        var harTriggerBeregnHøySats = behandling.getBehandlingÅrsaker().stream().anyMatch(it -> it.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
-        var harBeregnetHøySatsTidligere = behandling.getOriginalBehandlingId().flatMap(
-                ungdomsytelseGrunnlagRepository::hentGrunnlag
-            ).map(it -> it.getSatsPerioder().getPerioder().stream().anyMatch(p -> p.getSatsType().equals(UngdomsytelseSatsType.HØY)))
-            .orElse(false);
+        var harTriggerBeregnHøySats = harProsesstriggerForBeregnHøySats(behandling);
+        var harBeregnetHøySatsTidligere = harHøySatsIOriginalBehandling(behandling);
+
         var beregnDagsatsInput = new BeregnDagsatsInput(
             oppfyltVilkårTidslinje,
             personopplysningerAggregat.getSøker().getFødselsdato(),
             harTriggerBeregnHøySats,
             harBeregnetHøySatsTidligere,
             uledRelevantPersoninfo(personopplysningerAggregat));
-        var satsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(beregnDagsatsInput);
-        ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+        return beregnDagsatsInput;
+    }
+
+    private Boolean harHøySatsIOriginalBehandling(Behandling behandling) {
+        return behandling.getOriginalBehandlingId().flatMap(
+                ungdomsytelseGrunnlagRepository::hentGrunnlag
+            ).map(it -> it.getSatsPerioder().getPerioder().stream().anyMatch(p -> p.getSatsType().equals(UngdomsytelseSatsType.HØY)))
+            .orElse(false);
+    }
+
+    private static boolean harProsesstriggerForBeregnHøySats(Behandling behandling) {
+        return behandling.getBehandlingÅrsaker().stream().anyMatch(it -> it.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
     }
 
     private static List<FødselOgDødInfo> uledRelevantPersoninfo(PersonopplysningerAggregat personopplysningerAggregat) {
