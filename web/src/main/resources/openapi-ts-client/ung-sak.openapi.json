@@ -2892,6 +2892,7 @@
             "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkAktør"
           }
         },
+        "required" : [ "type" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.historikk.HistorikkinnslagDto.Linje" : {
@@ -2903,6 +2904,7 @@
             "$ref" : "#/components/schemas/ung.sak.kontrakt.historikk.HistorikkinnslagDto.Linje.Type"
           }
         },
+        "required" : [ "type" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.historikk.HistorikkinnslagDto.Linje.Type" : {

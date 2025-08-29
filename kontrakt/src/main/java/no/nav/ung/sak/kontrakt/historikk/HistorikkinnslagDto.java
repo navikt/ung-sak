@@ -31,7 +31,12 @@ public record HistorikkinnslagDto(@NotNull UUID historikkinnslagUuid,
         }
     }
 
-    public record HistorikkAktørDto(HistorikkAktør type, String ident) {
+    public record HistorikkAktørDto(@NotNull HistorikkAktør type, String ident) {
+        public HistorikkAktørDto {
+            if(type == null) {
+                type = HistorikkAktør.UDEFINERT;
+            }
+        }
 
         public static HistorikkAktørDto fra(HistorikkAktør aktør, String opprettetAv) {
             if (Set.of(HistorikkAktør.SAKSBEHANDLER, HistorikkAktør.BESLUTTER).contains(aktør)) {
@@ -46,7 +51,10 @@ public record HistorikkinnslagDto(@NotNull UUID historikkinnslagUuid,
         return this.opprettetTidspunkt.compareTo(o.opprettetTidspunkt);
     }
 
-    public record Linje(Type type, String tekst) {
+    public record Linje(@NotNull Type type, String tekst) {
+        public Linje {
+            Objects.requireNonNull(type);
+        }
 
         public static Linje tekstlinje(String tekst) {
             return new Linje(Type.TEKST, tekst);
