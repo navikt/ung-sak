@@ -32,8 +32,6 @@ public class LagBarnetilleggTidslinje {
         return beregnBarnetillegg(perioder, fødselOgDødInfos);
     }
 
-
-
     static BarnetilleggVurdering beregnBarnetillegg(LocalDateTimeline<Boolean> perioder, List<FødselOgDødInfo> relevantPersonInfoBarn) {
         var antallBarnGrunnlagTidslinje = relevantPersonInfoBarn.stream()
             .map(info -> new LocalDateTimeline<>(info.fødselsdato(), getTilDato(info), 1))

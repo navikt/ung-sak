@@ -88,14 +88,14 @@ class UngdomsytelseBeregnDagsatsTest {
     }
 
     @Test
-    void skal_beregne_lav_og_høy_dagsats_for_en_perioder_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_25_år_midt_i_april_når_det_beregnes_når_bruker_har_blitt_25_år() {
+    void skal_beregne_lav_og_høy_dagsats_for_en_perioder_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_25_år_midt_i_april_når_det_beregnes_når_bruker_har_fått_høy_sats_tidligere() {
         var fom = LocalDate.of(2024, 3, 1);
         var tom = LocalDate.of(2024, 5, 30);
         var datoForGRegulering = LocalDate.of(2024, 5, 1);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 15);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(lagInput(perioder, fødselsdato));
+        var dagsatsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(new BeregnDagsatsInput(perioder, fødselsdato, false, true, List.of()));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(3);
