@@ -66,38 +66,56 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
+    /**
+     * Lager input til dagsatsberegning basert på behandling og oppfylt vilkår-tidslinje.
+     * @param behandling Behandlingen det skal beregnes for
+     * @param oppfyltVilkårTidslinje Tidslinje for oppfylte vilkår
+     * @return BeregnDagsatsInput med relevante parametre
+     */
     private BeregnDagsatsInput lagInput(Behandling behandling, LocalDateTimeline<Boolean> oppfyltVilkårTidslinje) {
-        BehandlingReferanse behandlingReferanse = BehandlingReferanse.fra(behandling);
+        var behandlingReferanse = BehandlingReferanse.fra(behandling);
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(behandlingReferanse);
-        var harTriggerBeregnHøySats = harProsesstriggerForBeregnHøySats(behandling);
-        var harBeregnetHøySatsTidligere = harHøySatsIOriginalBehandling(behandling);
-
-        var beregnDagsatsInput = new BeregnDagsatsInput(
+        return new BeregnDagsatsInput(
             oppfyltVilkårTidslinje,
             personopplysningerAggregat.getSøker().getFødselsdato(),
-            harTriggerBeregnHøySats,
-            harBeregnetHøySatsTidligere,
-            uledRelevantPersoninfo(personopplysningerAggregat));
-        return beregnDagsatsInput;
+            harProsesstriggerForBeregnHøySats(behandling),
+            harHøySatsIOriginalBehandling(behandling),
+            utledBarnsFødselOgDødInformasjon(personopplysningerAggregat)
+        );
     }
 
-    private Boolean harHøySatsIOriginalBehandling(Behandling behandling) {
-        return behandling.getOriginalBehandlingId().flatMap(
-                ungdomsytelseGrunnlagRepository::hentGrunnlag
-            ).map(it -> it.getSatsPerioder().getPerioder().stream().anyMatch(p -> p.getSatsType().equals(UngdomsytelseSatsType.HØY)))
+    /**
+     * Sjekker om det finnes høy sats i original behandling.
+     * @param behandling Behandlingen som skal sjekkes
+     * @return true hvis minst én periode har høy sats, ellers false
+     */
+    private boolean harHøySatsIOriginalBehandling(Behandling behandling) {
+        return behandling.getOriginalBehandlingId()
+            .flatMap(ungdomsytelseGrunnlagRepository::hentGrunnlag)
+            .map(grunnlag -> grunnlag.getSatsPerioder().getPerioder().stream()
+                .anyMatch(p -> p.getSatsType() == UngdomsytelseSatsType.HØY))
             .orElse(false);
     }
 
+    /**
+     * Sjekker om det finnes prosesstrigger for beregning av høy sats.
+     */
     private static boolean harProsesstriggerForBeregnHøySats(Behandling behandling) {
-        return behandling.getBehandlingÅrsaker().stream().anyMatch(it -> it.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
+        return behandling.getBehandlingÅrsaker().stream()
+            .anyMatch(a -> a.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
     }
 
-    private static List<FødselOgDødInfo> uledRelevantPersoninfo(PersonopplysningerAggregat personopplysningerAggregat) {
-        var barnAvSøkerAktørId = personopplysningerAggregat.getRelasjoner()
-            .stream().filter(r -> r.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
+    /**
+     * Henter ut fødsels- og dødsinformasjon for alle barn av søker.
+     * @param personopplysningerAggregat Personopplysninger for behandlingen
+     * @return Liste med FødselOgDødInfo for alle barn
+     */
+    private static List<FødselOgDødInfo> utledBarnsFødselOgDødInformasjon(PersonopplysningerAggregat personopplysningerAggregat) {
+        return personopplysningerAggregat.getRelasjoner().stream()
+            .filter(r -> r.getRelasjonsrolle() == RelasjonsRolleType.BARN)
             .map(PersonRelasjonEntitet::getTilAktørId)
+            .map(mapFødselOgDødInformasjonForAktør(personopplysningerAggregat))
             .toList();
-        return barnAvSøkerAktørId.stream().map(mapFødselOgDødInformasjonForAktør(personopplysningerAggregat)).toList();
     }
 
     private static Function<AktørId, FødselOgDødInfo> mapFødselOgDødInformasjonForAktør(PersonopplysningerAggregat personopplysningerAggregat) {

@@ -64,16 +64,26 @@ public class UngdomsytelseBeregnDagsats {
         };
     }
 
+    /**
+     * Kombinerer barnetillegg inn i satsbyggeren. Null-sikker og tydelig builder-bruk.
+     */
     private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, Barnetillegg, UngdomsytelseSatser.Builder> leggTilBarnetillegg() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue().kopi();
-            return new LocalDateSegment<>(di,
-                rhs == null ?
-                    builder.medAntallBarn(0).medBarnetilleggDagsats(0) :
-                    builder.medAntallBarn(rhs.getValue().antallBarn()).medBarnetilleggDagsats(rhs.getValue().dagsats()));
+            if (rhs == null) {
+                builder.medAntallBarn(0).medBarnetilleggDagsats(0);
+            } else {
+                var barnetillegg = rhs.getValue();
+                builder.medAntallBarn(barnetillegg.antallBarn())
+                       .medBarnetilleggDagsats(barnetillegg.dagsats());
+            }
+            return new LocalDateSegment<>(di, builder);
         };
     }
 
+    /**
+     * Lager serialisert regelinput for sporing og dokumentasjon.
+     */
     private static String lagRegelInput(
         LocalDateTimeline<Boolean> perioder,
         LocalDate fødselsdato,
