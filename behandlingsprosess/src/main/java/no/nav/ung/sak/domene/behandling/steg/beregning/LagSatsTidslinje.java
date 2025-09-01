@@ -27,7 +27,9 @@ public class LagSatsTidslinje {
         var datoForEndringAvSats = tjuefemårsdagen;
         // Dersom 25 års dagen er før eller lik første dag med ytelse, så skal det være høy sats fra start
         boolean skalHaHøySatsFraStart = !tjuefemårsdagen.isAfter(input.førsteDagMedYtelse());
-        var regnUtHøySats = input.harTriggerBeregnHøySats() || input.harBeregnetHøySatsTidligere()|| skalHaHøySatsFraStart;
+        // Dersom tjuefemårsdagen har passert i dag, så skal det være høy sats
+        boolean harPassertTjuefemårsdagen = tjuefemårsdagen.isBefore(LocalDate.now());
+        var regnUtHøySats = input.harTriggerBeregnHøySats() || input.harBeregnetHøySatsTidligere()|| skalHaHøySatsFraStart || harPassertTjuefemårsdagen;
         if (regnUtHøySats) {
             var sisteMuligeDato = input.fødselsdato().plusYears(HØY.getTilAlder()).minusDays(1);
             return new LocalDateTimeline<>(
