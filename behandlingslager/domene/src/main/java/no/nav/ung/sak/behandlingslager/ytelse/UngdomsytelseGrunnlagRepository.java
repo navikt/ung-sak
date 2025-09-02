@@ -45,6 +45,21 @@ public class UngdomsytelseGrunnlagRepository {
         }
     }
 
+    /**
+     * Deaktiverer grunnlag for en gitt behandlingId hvis det finnes et aktivt grunnlag.
+     * Logger informasjon om deaktivering.
+     *
+     * @param behandlingId Id til behandlingen hvor grunnlaget skal deaktiveres
+     */
+    public void deaktiverGrunnlag(Long behandlingId) {
+        var grunnlagOptional = hentGrunnlag(behandlingId);
+        if (grunnlagOptional.isPresent()) {
+            log.info("Deaktiverer eksisterende sats perioder for behandlingId={}", behandlingId);
+            deaktiverEksisterende(grunnlagOptional.get());
+        }
+    }
+
+
     public void lagre(Long behandlingId, UngdomsytelseUttakPerioder uttakperioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new UngdomsytelseGrunnlag());
