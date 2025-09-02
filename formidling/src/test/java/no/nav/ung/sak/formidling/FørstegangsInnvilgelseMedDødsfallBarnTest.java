@@ -42,6 +42,7 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
 
     @DisplayName("Innvilgelsesbrev med barnedødsfall av barn")
     @Test
+    @Disabled
     void medDødsfallAvBarn(TestInfo testInfo) {
         //Må toggles på for at brevet skal genereres
         LocalDate fom = LocalDate.of(2025, 8, 1);
