@@ -21,9 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(JpaExtension.class)
 public class FørstegangsInnvilgelseMedDødsfallBarnTest {
 
-    private static final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
-
-
     @Inject
     PdlKlientFake pdlKlientFake;
 
@@ -36,14 +33,11 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
     @BeforeAll
     static void beforeAll() {
         System.setProperty("ENABLE_AUTO_BREV_BARN_DØDSFALL", "true");
-        System.setProperty("BREV_DAGENS_DATO_TEST", DAGENS_DATO.toString());
     }
 
     @AfterAll
     static void afterAll() {
         System.clearProperty("ENABLE_AUTO_BREV_BARN_DØDSFALL");
-        System.clearProperty("BREV_DAGENS_DATO_TEST");
-
     }
 
     @DisplayName("Innvilgelsesbrev med barnedødsfall av barn")
