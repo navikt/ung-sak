@@ -63,7 +63,7 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
                 Du får ungdomsprogramytelse \
                 Fra 1. august 2025 får du ungdomsprogramytelse på 718 kroner per dag, utenom lørdag og søndag. \
                 Fordi du mistet barn 16. august 2025, får du ikke barnetillegg på 37 kroner fra denne datoen. Da får du 681 kroner per dag, utenom lørdag og søndag. \
-                Pengene får du utbetalt én gang i måneden før den 10. i måneden. \
+                Pengene får du utbetalt én gang i måneden før den 12. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
