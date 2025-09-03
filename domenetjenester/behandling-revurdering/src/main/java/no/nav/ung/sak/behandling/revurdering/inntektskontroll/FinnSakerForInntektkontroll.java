@@ -10,11 +10,15 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -25,12 +29,15 @@ import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_KONTROLL_RE
 @ApplicationScoped
 public class FinnSakerForInntektkontroll {
 
+    private static final Logger LOG = LoggerFactory.getLogger(FinnSakerForInntektkontroll.class);
+
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private VilkårTjeneste vilkårTjeneste;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     FinnSakerForInntektkontroll() {
     }
@@ -41,37 +48,34 @@ public class FinnSakerForInntektkontroll {
                                        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                        ProsessTriggereRepository prosessTriggereRepository,
                                        VilkårTjeneste vilkårTjeneste,
-                                       UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
+                                       UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
     List<Fagsak> finnFagsaker(LocalDate fom, LocalDate tom) {
         var fagsaker = fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom);
 
-        var behandlinger = fagsaker.stream().map(Fagsak::getId).map(fagsakId -> {
-            var avsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-            if (avsluttetBehandling.isPresent()) {
-                return avsluttetBehandling;
-            }
-            return behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
-        }).flatMap(Optional::stream).toList();
+        var behandlinger = fagsaker.stream().map(Fagsak::getId).map(fagsakId -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId)).flatMap(Optional::stream).toList();
 
         /* Filtrere ut behandlinger som skal ha inntektskontroll:
             - Har ikke allerede opprettet trigger for inntektskontroll
             - Har programdeltagelse og den startet ikke forrige måned. Og slutter ikke i inneværende måned
             - Har ikke avslåtte vilkår, men kan ha vilkår som er til vurdering
             - Har ikke avslått uttak, men kan ha uttak som er til vurdering
+            - Har ikke utført kontroll for perioden tidligere
          */
         var behandlingerTilKontroll = behandlinger.stream()
             .filter(behandling -> harIkkeOpprettetTrigger(behandling, fom, tom))
             .filter(behandling -> harProgramdeltagelseSomGirInntektskontroll(behandling, fom, tom))
             .filter(behandling -> harIkkeAvslåtteVilkår(behandling, fom, tom))
             .filter(behandling -> harIkkeAvslåttUttak(behandling, fom, tom))
+            .filter(behandling -> harIkkeUtførtKontroll(behandling, fom, tom))
             .toList();
         return behandlingerTilKontroll.stream().map(Behandling::getFagsak).toList();
     }
@@ -80,6 +84,7 @@ public class FinnSakerForInntektkontroll {
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId());
         if (ungdomsytelseGrunnlag.isEmpty()) {
             // Hvis ikke vurdert uttak
+            LOG.warn("Behandling {} for Fagsak {} har ikke ungdomsytelse grunnlag, oppretter likevel kontroll av inntekt", behandling.getId(), behandling.getFagsak().getId());
             return true;
         }
         return ungdomsytelseGrunnlag.get().getAvslagstidslinjeFraUttak().filterValue(it -> it.avslagsårsak() != null).intersection(new LocalDateInterval(fom, tom)).isEmpty();
@@ -89,7 +94,8 @@ public class FinnSakerForInntektkontroll {
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(behandling.getId()).intersection(new LocalDateInterval(fom, tom));
         var harVilkårSomIkkeErVurdert = samletResultat.toSegments().stream().anyMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_VURDERT));
         if (samletResultat.isEmpty() || harVilkårSomIkkeErVurdert) {
-            //førstegangsbehandling som ikke har fått behandlet vilkår
+            //behandling som ikke har fått behandlet vilkår
+            LOG.warn("Behandling {} for Fagsak {} har ikke vilkår vurdert i perioden, oppretter likevel kontroll av inntekt", behandling.getId(), behandling.getFagsak().getId());
             return true;
         }
         return erInnvilget(samletResultat);
@@ -103,6 +109,8 @@ public class FinnSakerForInntektkontroll {
     private boolean harProgramdeltagelseSomGirInntektskontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
         if (ungdomsprogramPeriodeGrunnlag.isEmpty()) {
+
+            LOG.warn("Behandling {} for Fagsak {} har ikke ungdomsprogram periode grunnlag, oppretter ikke kontroll av inntekt", behandling.getId(), behandling.getFagsak().getId());
             return false;
         }
 
@@ -119,4 +127,10 @@ public class FinnSakerForInntektkontroll {
         return prosessTriggereRepository.hentGrunnlag(behandling.getId()).stream().flatMap(it -> it.getTriggere().stream()).noneMatch(it -> it.getÅrsak().equals(RE_KONTROLL_REGISTER_INNTEKT) && it.getPeriode().overlapper(fom, tom));
     }
 
-}
+    private boolean harIkkeUtførtKontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
+        LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
+        return kontrollertInntektTidslinje.intersection(new LocalDateInterval(fom, tom)).isEmpty();
+    }
+
+
+    }

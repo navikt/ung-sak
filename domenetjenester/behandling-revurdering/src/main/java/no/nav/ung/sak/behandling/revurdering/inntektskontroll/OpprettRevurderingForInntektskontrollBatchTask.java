@@ -20,10 +20,10 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
 /**
  * Batchtask som starter kontroll av inntekt fra a-inntekt
  * <p>
- * Kjører den sjette i måneden kl 07:00.
+ * Kjører den åttende i måneden kl 07:00.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 6 * *", maxFailedRuns = 1)
+@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 8 * *", maxFailedRuns = 1)
 public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettRevurderingForInntektskontrollBatch";
