@@ -38,7 +38,7 @@ class MånedsvisningDtoMapperTest {
         final var satser = new UngdomsytelseSatser(dagsats, BigDecimal.valueOf(100_000), BigDecimal.valueOf(2), UngdomsytelseSatsType.HØY, antallBarn, dagsatsBarnetillegg);
 
         final var månedstidslinje = new LocalDateTimeline<>(fom, tom, YearMonth.of(2025, 1));
-        final var tilkjentYtelseTidslinje = new LocalDateTimeline<>(fom, tom, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100));
+        final var tilkjentYtelseTidslinje = new LocalDateTimeline<>(fom, tom, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100, BigDecimal.TEN ));
         final var kontrollTidslinje = new LocalDateTimeline<BigDecimal>(List.of());
         final var satsperioder = new UngdomsytelseSatsPerioder(List.of(new UngdomsytelseSatsPeriode(new LocalDateInterval(fom, tom), satser)), "", "");
         var avsluttetTid = LocalDateTime.now();
@@ -92,13 +92,13 @@ class MånedsvisningDtoMapperTest {
         var satser = new UngdomsytelseSatser(dagsats, BigDecimal.valueOf(100_000), BigDecimal.valueOf(2), UngdomsytelseSatsType.HØY, antallBarn, dagsatsBarnetillegg);
 
         var fomMåned1 = fom;
-        var tomMåned1 = fom.withDayOfMonth(fom.lengthOfMonth());
+        var tomMåned1 = fom.with(TemporalAdjusters.lastDayOfMonth());
         var fomMåned2 = tomMåned1.plusDays(1);
         var tomMåned2 = fomMåned2.with(TemporalAdjusters.lastDayOfMonth());
         final var månedstidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fomMåned1, tomMåned1, YearMonth.of(2025, 1)), new LocalDateSegment<>(fomMåned2, tomMåned2, YearMonth.of(2025, 2))));
         final var tilkjentYtelseTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fomMåned1, tomMåned1, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100)),
-            new LocalDateSegment<>(fomMåned2, tomMåned2, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100))));
+            new LocalDateSegment<>(fomMåned1, tomMåned1, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100, BigDecimal.TEN)),
+            new LocalDateSegment<>(fomMåned2, tomMåned2, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100, BigDecimal.TEN))));
         final var kontrollTidslinje = new LocalDateTimeline<>(fomMåned2, tomMåned2, BigDecimal.ZERO);
         final var satsperioder = new UngdomsytelseSatsPerioder(List.of(new UngdomsytelseSatsPeriode(new LocalDateInterval(fom, tom), satser)), "", "");
         var avsluttetTid = LocalDateTime.now();
@@ -175,7 +175,7 @@ class MånedsvisningDtoMapperTest {
         var satser2 = new UngdomsytelseSatser(dagsats, BigDecimal.valueOf(100_000), BigDecimal.valueOf(2), UngdomsytelseSatsType.HØY, antallBarn2, dagsatsBarnetillegg2);
 
         var fomMåned1 = fom;
-        var tomMåned1 = fom.withDayOfMonth(fom.lengthOfMonth());
+        var tomMåned1 = fom.with(TemporalAdjusters.lastDayOfMonth());
         var fomMåned2 = tomMåned1.plusDays(1);
         var tomMåned2 = fomMåned2.with(TemporalAdjusters.lastDayOfMonth());
         final var satsendringDato = fomMåned2.plusDays(11);
@@ -184,8 +184,8 @@ class MånedsvisningDtoMapperTest {
             new LocalDateSegment<>(fomMåned1, tomMåned1, YearMonth.of(2025, 1)),
             new LocalDateSegment<>(fomMåned2, tomMåned2, YearMonth.of(2025, 2))));
         final var tilkjentYtelseTidslinje = new LocalDateTimeline<TilkjentYtelseVerdi>(List.of(
-            new LocalDateSegment<>(fomMåned1, tomMåned1, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100)),
-            new LocalDateSegment<>(fomMåned2, tomMåned2, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100))));
+            new LocalDateSegment<>(fomMåned1, tomMåned1, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100, BigDecimal.TEN   )),
+            new LocalDateSegment<>(fomMåned2, tomMåned2, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, 100, BigDecimal.TEN  ))));
         final var kontrollTidslinje = new LocalDateTimeline<BigDecimal>(fomMåned2, tomMåned2, BigDecimal.ZERO);
         final var satsperioder = new UngdomsytelseSatsPerioder(List.of(
             new UngdomsytelseSatsPeriode(new LocalDateInterval(fom, fomMåned2.plusDays(10)), satser),
