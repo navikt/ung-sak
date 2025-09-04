@@ -66,7 +66,7 @@ public record UngdomsytelseSatser(BigDecimal dagsats, BigDecimal grunnbeløp, Bi
 
         public UngdomsytelseSatser build() {
             BigDecimal dagsats = grunnbeløpFaktor.multiply(grunnbeløp)
-                .divide(BigDecimal.valueOf(VIRKEDAGER_I_ET_ÅR), 2, RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(VIRKEDAGER_I_ET_ÅR), 10, RoundingMode.HALF_UP);
             Objects.requireNonNull(antallBarn);
             Objects.requireNonNull(dagsatsBarnetillegg);
             Objects.requireNonNull(satsType);
