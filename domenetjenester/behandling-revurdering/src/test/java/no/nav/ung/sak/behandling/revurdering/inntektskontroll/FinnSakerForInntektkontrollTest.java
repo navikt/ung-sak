@@ -69,8 +69,6 @@ class FinnSakerForInntektkontrollTest {
 
     @BeforeEach
     void setUp() {
-
-
         finnSakerForInntektkontroll = new FinnSakerForInntektkontroll(
             behandlingRepository,
             fagsakRepository,
@@ -83,8 +81,6 @@ class FinnSakerForInntektkontrollTest {
 
         behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .lagre(entityManager);
-
-
     }
 
     @Test
