@@ -33,6 +33,10 @@ import java.util.Set;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tester for å finne fagsaker som skal kontrolleres for inntekt i ulike scenarier.
+ * Verifiserer at fagsaker blir funnet eller ikke funnet avhengig av programperiode og triggere.
+ */
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
 class FinnSakerForInntektkontrollTest {
@@ -163,6 +167,26 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(1, fagsaker.size());
     }
 
+    /**
+     * Skal finne fagsak for kontroll av måned innenfor en programperiode som slutter i oktober.
+     * Forventer at én fagsak blir funnet.
+     */
+    @Test
+    void skal_finne_fagsak_for_kontroll_av_måned_i_programperiode() {
+        // Arrange
+        opprettProgramperiode(LANGT_BAK, MIDT_I_OKTOBER);
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert
+        assertEquals(1, fagsaker.size());
+    }
+
+    /**
+     * Skal finne fagsak for kontroll av måned i en ubegrenset programperiode.
+     * Forventer at én fagsak blir funnet.
+     */
     @Test
     void skal_finne_fagsak_for_kontroll_av_måned_i_ubegrenset_programperiode() {
         // Arrange
@@ -175,6 +199,10 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(1, fagsaker.size());
     }
 
+    /**
+     * Skal ikke finne fagsak dersom siste behandling har trigger for inntektskontroll.
+     * Forventer at ingen fagsaker blir funnet.
+     */
     @Test
     void skal_ikke_finne_fagsak_dersom_siste_behandling_har_trigger_for_inntektskontroll() {
         // Arrange
@@ -188,6 +216,10 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
+    /**
+     * Skal finne fagsak dersom siste behandling har trigger som ikke gjelder inntektskontroll.
+     * Forventer at én fagsak blir funnet.
+     */
     @Test
     void skal_finne_fagsak_dersom_siste_behandling_har_trigger_som_ikke_gjelder_inntektskontroll() {
         // Arrange
@@ -201,6 +233,11 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(1, fagsaker.size());
     }
 
+    /**
+     * Skal finne fagsak dersom siste behandling har trigger for inntektskontroll i en annen måned enn kontrollmåneden.
+     * Tester at fagsaken blir funnet selv om det finnes en inntektskontroll-trigger, så lenge den ikke gjelder kontrollmåneden (september).
+     * Forventer at én fagsak blir funnet.
+     */
     @Test
     void skal_finne_fagsak_dersom_siste_behandling_har_trigger_for_inntektskontroll_i_en_annen_måned() {
         // Arrange
