@@ -85,86 +85,112 @@ class FinnSakerForInntektkontrollTest {
 
     @Test
     void skal_ikke_finne_fagsak_uten_programperiode() {
+        // Arrange
+        // Ingen programperiode opprettes
+
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(0, fagsaker.size());
     }
 
     @Test
     void skal_ikke_finne_fagsak_for_kontroll_av_første_måned_i_programperiode() {
+        // Arrange
         opprettProgramperiode(FØRSTE_SEPTEMBER, LANGT_FRAM);
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(0, fagsaker.size());
     }
 
     @Test
     void skal_finne_fagsak_for_kontroll_av_andre_måned_i_programperiode() {
+        // Arrange
         opprettProgramperiode(FØRSTE_AUGUST, LANGT_FRAM);
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(1, fagsaker.size());
     }
 
     @Test
     void skal_ikke_finne_fagsak_for_kontroll_av_siste_måned_i_programperiode() {
+        // Arrange
         opprettProgramperiode(LANGT_BAK, MIDT_I_SEPTEMBER);
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(0, fagsaker.size());
     }
 
     @Test
     void skal_finne_fagsak_for_kontroll_av_nest_siste_måned_i_programperiode() {
+        // Arrange
         opprettProgramperiode(LANGT_BAK, MIDT_I_OKTOBER);
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(1, fagsaker.size());
     }
 
     @Test
     void skal_finne_fagsak_for_kontroll_av_måned_i_ubegrenset_programperiode() {
+        // Arrange
         opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(1, fagsaker.size());
     }
 
     @Test
     void skal_ikke_finne_fagsak_dersom_siste_behandling_har_trigger_for_inntektskontroll() {
+        // Arrange
         opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
-
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))));
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(0, fagsaker.size());
     }
 
     @Test
     void skal_finne_fagsak_dersom_siste_behandling_har_trigger_som_ikke_gjelder_inntektskontroll() {
+        // Arrange
         opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
-
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))));
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(1, fagsaker.size());
     }
 
     @Test
     void skal_finne_fagsak_dersom_siste_behandling_har_trigger_for_inntektskontroll_i_en_annen_måned() {
+        // Arrange
         opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
-
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_AUGUST, FØRSTE_AUGUST.with(TemporalAdjusters.lastDayOfMonth())))));
 
+        // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
+        // Assert
         assertEquals(1, fagsaker.size());
     }
 
