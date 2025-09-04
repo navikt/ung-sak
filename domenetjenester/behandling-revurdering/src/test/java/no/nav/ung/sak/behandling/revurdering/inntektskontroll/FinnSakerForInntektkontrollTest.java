@@ -83,6 +83,10 @@ class FinnSakerForInntektkontrollTest {
             .lagre(entityManager);
     }
 
+    /**
+     * Skal ikke finne fagsak uten programperiode.
+     * Tester at ingen fagsaker returneres når det ikke finnes noen programperiode.
+     */
     @Test
     void skal_ikke_finne_fagsak_uten_programperiode() {
         // Arrange
@@ -95,6 +99,10 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
+    /**
+     * Skal ikke finne fagsak for kontroll av første måned i programperiode.
+     * Tester at ingen fagsaker returneres når programperioden starter i september.
+     */
     @Test
     void skal_ikke_finne_fagsak_for_kontroll_av_første_måned_i_programperiode() {
         // Arrange
@@ -107,6 +115,10 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
+    /**
+     * Skal finne fagsak for kontroll av andre måned i programperiode.
+     * Tester at én fagsak returneres når programperioden starter i august og september er andre måned.
+     */
     @Test
     void skal_finne_fagsak_for_kontroll_av_andre_måned_i_programperiode() {
         // Arrange
@@ -119,6 +131,10 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(1, fagsaker.size());
     }
 
+    /**
+     * Skal ikke finne fagsak for kontroll av siste måned i programperiode.
+     * Tester at ingen fagsaker returneres når programperioden slutter i september.
+     */
     @Test
     void skal_ikke_finne_fagsak_for_kontroll_av_siste_måned_i_programperiode() {
         // Arrange
@@ -131,6 +147,10 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
+    /**
+     * Skal finne fagsak for kontroll av nest siste måned i programperiode.
+     * Tester at én fagsak returneres når programperioden slutter i oktober og september er nest siste måned.
+     */
     @Test
     void skal_finne_fagsak_for_kontroll_av_nest_siste_måned_i_programperiode() {
         // Arrange
