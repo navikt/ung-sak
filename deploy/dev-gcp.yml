@@ -214,11 +214,6 @@ spec:
       value: "/ung/tilbake,api://dev-gcp.k9saksbehandling.ung-tilbake/.default"
 
 
-    - name: SENSU_HOST
-      value: "sensu.nais"
-    - name: SENSU_PORT
-      value: "3030"
-
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
