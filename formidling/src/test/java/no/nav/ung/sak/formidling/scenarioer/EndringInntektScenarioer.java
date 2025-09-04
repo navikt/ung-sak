@@ -94,7 +94,7 @@ public class EndringInntektScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             triggere,
-            opptjening, Collections.emptyList(), null);
+            Collections.emptyList(), null);
     }
 
     @Test

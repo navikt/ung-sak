@@ -137,7 +137,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             resultater.add(kontrollerInntektDetaljertResultat(tilkjentYtelse));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE) || relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)
+            || relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
             resultater.add(nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
 

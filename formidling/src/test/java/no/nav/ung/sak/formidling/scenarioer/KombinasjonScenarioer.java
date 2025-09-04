@@ -70,7 +70,6 @@ public class KombinasjonScenarioer {
                 new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode)),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))
             ),
-            null,
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ), null);
@@ -125,7 +124,6 @@ public class KombinasjonScenarioer {
                 new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(rapportertInntektPeriode)),
                 new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, p.getTomDato()))
             ),
-            null,
             Collections.emptyList(),
             null);
     }
@@ -164,7 +162,6 @@ public class KombinasjonScenarioer {
             fødselsdato,
             ungTestScenario.søknadStartDato(),
             triggere,
-            null,
             ungTestScenario.barn(),
             null);
     }
@@ -201,7 +198,6 @@ public class KombinasjonScenarioer {
             ungTestScenario.fødselsdato(),
             ungTestScenario.søknadStartDato(),
             triggere,
-            null,
             ungTestScenario.barn(),
             null);
     }
@@ -239,7 +235,6 @@ public class KombinasjonScenarioer {
             fom.minusYears(19).plusDays(42),
             ungTestScenario.søknadStartDato(),
             triggere,
-            null,
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ),

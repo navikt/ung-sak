@@ -496,13 +496,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             repositories.prosessTriggereRepository().leggTil(behandling1.getId(), ungTestscenario.behandlingTriggere());
         }
 
-        if (ungTestscenario.abakusInntekt() != null) {
-            repositories.abakusInMemoryInntektArbeidYtelseTjeneste().lagreOppgittOpptjening(
-                behandling1.getId(),
-                ungTestscenario.abakusInntekt()
-            );
-        }
-
     }
 
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {

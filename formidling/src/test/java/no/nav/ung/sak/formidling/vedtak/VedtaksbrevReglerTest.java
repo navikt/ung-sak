@@ -15,10 +15,12 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.scenarioer.*;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -68,10 +70,7 @@ class VedtaksbrevReglerTest {
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
         assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
-        assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
+        assertAutomatiskBrevEgenskaper(vedtaksbrevEgenskaper);
     }
 
     @Test
@@ -190,6 +189,38 @@ class VedtaksbrevReglerTest {
 
         assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
 
+    }
+
+    /**
+     * RE_ENDRET_SATS brukes for å manuelt trigge førstegansbehandling etter en feilretting.
+     */
+    @Test
+    void skal_gi_førstegangsinnvilgelse_ved_re_endret_sats() {
+        UngTestScenario grunnlag = FørstegangsbehandlingScenarioer.rekjøringVedFeil(LocalDate.of(2024, 12, 1));
+
+        var behandling = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(grunnlag).buildOgLagreMedUng(ungTestRepositories);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
+
+        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
+
+        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(FørstegangsInnvilgelseInnholdBygger.class);
+        assertAutomatiskBrevEgenskaper(vedtaksbrevEgenskaper);
+    }
+
+    private static void assertAutomatiskBrevEgenskaper(VedtaksbrevEgenskaper vedtaksbrevEgenskaper) {
+        assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
     }
 
 
