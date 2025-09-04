@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak.resultat;
 
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 
@@ -13,7 +14,8 @@ import java.util.stream.Collectors;
  *
  */
 public record SamletVilkårResultatOgBehandlingÅrsaker(List<DetaljertVilkårResultat> vilkårsresultater,
-                                                      Set<BehandlingÅrsakType> behandlingÅrsaker) {
+                                                      Set<BehandlingÅrsakType> behandlingÅrsaker,
+                                                      BehandlingResultatType behandlingResultatType) {
 
     public Set<Utfall> utfall() {
         return vilkårsresultater.stream().map(DetaljertVilkårResultat::utfall).collect(Collectors.toSet());
