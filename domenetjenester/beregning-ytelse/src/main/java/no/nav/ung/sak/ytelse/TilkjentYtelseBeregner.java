@@ -65,7 +65,8 @@ public class TilkjentYtelseBeregner {
             reduksjon,
             redusertBeløp,
             dagsats,
-            utbetalingsgrad);
+            utbetalingsgrad,
+            dagsats.multiply(BigDecimal.valueOf(antallVirkedager)));
         return new TilkjentYtelsePeriodeResultat(tilkjentYtelseVerdi, sporing);
     }
 

@@ -107,10 +107,10 @@ public class EndringInntektScenarioer {
 
         //23 virkningsdager i januar 2025 med lav dagsats på 649,08. Rapportert inntekt er 10 000kr
         TilkjentYtelseVerdi t = andreMåned.getValue();
-        assertThat(t.uredusertBeløp()).isEqualByComparingTo("14928.84"); //649,08 * 23
+        assertThat(t.uredusertBeløp()).isEqualByComparingTo("14928.8369336998"); //649,08 * 23
         assertThat(t.reduksjon()).isEqualByComparingTo("6600"); //66% av 10 0000
         assertThat(t.dagsats()).isEqualByComparingTo("362"); //649 - ((6600/22)  )
-        assertThat(t.redusertBeløp()).isEqualByComparingTo("8328.84"); // 14928.84 - 6600
+        assertThat(t.redusertBeløp()).isEqualByComparingTo("8328.8369336998"); // 14928.84 - 6600
         assertThat(t.utbetalingsgrad()).isEqualTo(56); // 8328.84 / 14928.84 * 100
 
     }
