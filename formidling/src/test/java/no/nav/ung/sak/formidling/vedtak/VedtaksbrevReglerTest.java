@@ -195,11 +195,12 @@ class VedtaksbrevReglerTest {
      * RE_ENDRET_SATS brukes for å manuelt trigge førstegansbehandling etter en feilretting.
      */
     @Test
-    void skal_gi_førstegangsinnvilgelse_ved_re_endret_sats() {
-        UngTestScenario grunnlag = FørstegangsbehandlingScenarioer.rekjøringVedFeil(LocalDate.of(2024, 12, 1));
+    void skal_gi_førstegangsinnvilgelse_ved_manuell_re_endret_sats() {
+        UngTestScenario grunnlag = FørstegangsbehandlingScenarioer.endret_sats(LocalDate.of(2024, 12, 1));
 
         var behandling = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
+            .medManuellOpprettet()
             .medUngTestGrunnlag(grunnlag).buildOgLagreMedUng(ungTestRepositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();

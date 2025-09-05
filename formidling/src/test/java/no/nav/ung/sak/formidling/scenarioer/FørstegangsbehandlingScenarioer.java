@@ -238,8 +238,10 @@ public class FørstegangsbehandlingScenarioer {
     }
 
 
-
-    public static UngTestScenario rekjøringVedFeil(LocalDate fom) {
+    /**
+     * Manuelt endret sats med RE_SATS_ENDRING
+     */
+    public static UngTestScenario endret_sats(LocalDate fom) {
         UngTestScenario ungTestScenario = innvilget24årBle25årførsteMåned(fom);
         var p = ungTestScenario.programPerioder().getFirst().getPeriode();
         return new UngTestScenario(
