@@ -97,6 +97,18 @@ public class Etterlysning extends BaseEntitet {
         this.status = status;
     }
 
+    public Etterlysning(Etterlysning other) {
+        this.behandlingId = other.behandlingId;
+        this.grunnlagsreferanse = other.grunnlagsreferanse;
+        this.eksternReferanse = other.eksternReferanse;
+        this.periode = other.periode;
+        this.type = other.type;
+        this.status = other.status;
+        this.frist = other.frist;
+        this.uttalelse = other.uttalelse;
+    }
+
+
     @Override
     public String toString() {
         return "Etterlysning{" +

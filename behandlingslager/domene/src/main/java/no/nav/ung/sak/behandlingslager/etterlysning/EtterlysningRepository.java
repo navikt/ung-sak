@@ -8,9 +8,7 @@ import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
 import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -26,6 +24,29 @@ public class EtterlysningRepository {
     public EtterlysningRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
+
+    public void leggTil(long behandlingId, List<Etterlysning> nyeEtterlysninger) {
+
+        var eksisterende = hentGrunnlag(behandlingId);
+
+        List<Etterlysning> etterlysninger = new ArrayList<>(nyeEtterlysninger);
+
+        eksisterende.ifPresent(it -> etterlysninger.addAll(it.getEtterlysninger()));
+
+        if (!Objects.equals(etterlysninger, eksisterende.map(EtterlysningGrunnlagEntitet::getEtterlysninger).orElse(List.of()))) {
+            eksisterende.ifPresent(this::deaktiver);
+
+            var oppdatert = new EtterlysningGrunnlagEntitet(behandlingId, new Etterlysninger(etterlysninger.stream()
+                .map(Etterlysning::new)
+                .toList()));
+
+            entityManager.persist(oppdatert.getEtterlysningerEnitet());
+            entityManager.persist(oppdatert);
+            entityManager.flush();
+        }
+    }
+
+
 
     public Etterlysning lagre(Etterlysning etterlysning) {
         if (etterlysning.getUttalelse().isPresent()) {
@@ -47,6 +68,13 @@ public class EtterlysningRepository {
             .setParameter("behandlingId", behandlingId)
             .getResultList();
         return etterlysninger;
+    }
+
+    public Optional<EtterlysningGrunnlagEntitet> hentGrunnlag(Long behandlingId) {
+        var query =  entityManager.createQuery("select e from EtterlysningGrunnlag e " +
+                "where e.behandlingId = :behandlingId", EtterlysningGrunnlagEntitet.class)
+            .setParameter("behandlingId", behandlingId);
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     public List<Etterlysning> hentEtterlysninger(Long behandlingId, EtterlysningType ...type) {
@@ -127,4 +155,12 @@ public class EtterlysningRepository {
                 .setParameter("id", id)
         );
     }
+
+
+    private void deaktiver(EtterlysningGrunnlagEntitet it) {
+        it.deaktiver();
+        entityManager.persist(it);
+        entityManager.flush();
+    }
+
 }
