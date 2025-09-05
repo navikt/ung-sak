@@ -253,6 +253,42 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(1, fagsaker.size());
     }
 
+    // Test for at fagsak ikke blir funnet dersom det allerede finnes en kontrollert inntekt periode for september
+    @Test
+    void skal_ikke_finne_fagsak_dersom_det_allerede_finnes_kontrollert_inntekt_for_september() {
+        // Arrange
+        opprettProgramperiode(LANGT_BAK,TIDENES_ENDE);
+        List<KontrollertInntektPeriode> kontrollertInntektForSeptember = List.of(KontrollertInntektPeriode.ny()
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))
+            .medKilde(KontrollertInntektKilde.BRUKER)
+            .medInntekt(BigDecimal.valueOf(1000))
+            .build());
+        tilkjentYtelseRepository.lagre(behandling.getId(), kontrollertInntektForSeptember);
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert
+        assertEquals(0, fagsaker.size());
+    }
+
+    @Test
+    void skal_finne_fagsak_dersom_det_allerede_finnes_kontrollert_inntekt_for_annen_måned() {
+        // Arrange
+        opprettProgramperiode(LANGT_BAK,TIDENES_ENDE);
+        List<KontrollertInntektPeriode> kontrollertInntektForAugust = List.of(KontrollertInntektPeriode.ny()
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_AUGUST, FØRSTE_AUGUST.with(TemporalAdjusters.lastDayOfMonth())))
+            .medKilde(KontrollertInntektKilde.BRUKER)
+            .medInntekt(BigDecimal.valueOf(1000))
+            .build());
+        tilkjentYtelseRepository.lagre(behandling.getId(), kontrollertInntektForAugust);
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert
+        assertEquals(1, fagsaker.size());
+    }
 
     private void opprettProgramperiode(LocalDate fomDato, LocalDate tomDato) {
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato))));
