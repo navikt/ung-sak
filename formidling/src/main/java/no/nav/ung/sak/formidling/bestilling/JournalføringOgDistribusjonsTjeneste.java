@@ -43,8 +43,24 @@ public class JournalføringOgDistribusjonsTjeneste {
     }
 
 
+    /**
+     * Journalfører og lager distribusjonstask.
+     */
     public BrevbestillingResultat journalførOgDistribuer(Behandling behandling, BrevbestillingEntitet bestilling, GenerertBrev generertBrev) {
+        ProsessTaskData distribusjonstaskMal = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
+        return journalførOgDistribuer(behandling, bestilling, generertBrev, distribusjonstaskMal);
+    }
 
+    /**
+     *
+     * Sørger for at distribuert etter evt. tidligere brev i samme fagsak.
+     */
+    public BrevbestillingResultat journalførOgDistribuerISekvens(Behandling behandling, BrevbestillingEntitet bestilling, GenerertBrev generertBrev) {
+        ProsessTaskData distTaskMal = BrevbestillingTaskGenerator.formidlingProsessTaskIGruppe(BrevdistribusjonTask.class, behandling.getFagsakId());
+        return journalførOgDistribuer(behandling, bestilling, generertBrev, distTaskMal);
+    }
+
+    private BrevbestillingResultat journalførOgDistribuer(Behandling behandling, BrevbestillingEntitet bestilling, GenerertBrev generertBrev, ProsessTaskData distTaskMal) {
         var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);
         var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
 
@@ -54,14 +70,13 @@ public class JournalføringOgDistribusjonsTjeneste {
             new BrevMottaker(generertBrev.mottaker().aktørId().getAktørId(), IdType.AKTØRID));
 
         brevbestillingRepository.lagre(bestilling);
-        var distTask = ProsessTaskData.forProsessTask(BrevdistribusjonTask.class);
-        distTask.setBehandling(bestilling.getFagsakId(), bestilling.getBehandlingId());
-        distTask.setSaksnummer(behandling.getFagsak().getSaksnummer().toString());
-        distTask.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
-        distTask.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, bestilling.isVedtaksbrev() ?
+        distTaskMal.setBehandling(bestilling.getFagsakId(), bestilling.getBehandlingId());
+        distTaskMal.setSaksnummer(behandling.getFagsak().getSaksnummer().toString());
+        distTaskMal.setProperty(BREVBESTILLING_ID_PARAM, bestilling.getId().toString());
+        distTaskMal.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, bestilling.isVedtaksbrev() ?
             DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name() : DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
-        prosessTaskTjeneste.lagre(distTask);
-        distTask.setCallIdFraEksisterende();
+        prosessTaskTjeneste.lagre(distTaskMal);
+        distTaskMal.setCallIdFraEksisterende();
 
         LOG.info("Brevbestilling med id={} journalført med journalpostId={}", bestilling.getId(), bestilling.getJournalpostId());
         return new BrevbestillingResultat(new JournalpostId(bestilling.getJournalpostId()));

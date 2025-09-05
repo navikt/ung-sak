@@ -71,7 +71,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
             GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
-            journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
+            journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
             return;
         }
 
@@ -91,7 +91,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
             new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
 
-        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
     }
 
 }
