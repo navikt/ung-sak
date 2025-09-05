@@ -29,7 +29,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
-                "Du får 8 329 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Du får 8 326 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
                 "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
                 "Pengene får du utbetalt før den 10. denne måneden. " +
                 "Når du har en inntekt, får du mindre penger i ungdomsprogramytelse. " +
@@ -60,7 +60,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
-                "Du får 14 710 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
+                "Du får 14 706 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 28. februar 2025. " +
                 "Det er fordi du har hatt en inntekt på 20 000 kroner i denne perioden. " +
                 "Pengene får du utbetalt før den 10. denne måneden. " +
                 "Vi har registrert følgende inntekter på deg: " +
