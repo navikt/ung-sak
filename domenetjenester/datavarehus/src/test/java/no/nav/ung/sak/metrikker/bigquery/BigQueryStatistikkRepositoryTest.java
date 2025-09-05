@@ -1,12 +1,9 @@
 package no.nav.ung.sak.metrikker.bigquery;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
@@ -38,7 +35,6 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingSta
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
-import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -54,7 +50,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet.fraOgMedTilOgMed;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -63,9 +59,6 @@ class BigQueryStatistikkRepositoryTest {
 
     @Inject
     private EntityManager entityManager;
-
-    @Inject
-    private @Any Instance<ProsessTaskHandler> handlers;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -87,7 +80,7 @@ class BigQueryStatistikkRepositoryTest {
 
     @BeforeEach
     void setup() {
-        statistikkRepository = new BigQueryStatistikkRepository(entityManager, handlers);
+        statistikkRepository = new BigQueryStatistikkRepository(entityManager, null);
     }
 
     @Test
@@ -220,8 +213,8 @@ class BigQueryStatistikkRepositoryTest {
         // Gitt en fagsak med behandling med etterlysning
         Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
         lagreBehandling(behandling);
-        etterlysningRepository.lagre(new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningStatus.VENTER));
-        var etterlysningMedFrist = new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningStatus.AVBRUTT);
+        etterlysningRepository.lagre(new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningStatus.VENTER));
+        var etterlysningMedFrist = new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningStatus.AVBRUTT);
         etterlysningMedFrist.setFrist(LocalDateTime.now());
         etterlysningRepository.lagre(etterlysningMedFrist);
 
@@ -262,78 +255,6 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(next.alder()).isEqualTo(20);
         assertThat(next.navBrukerKjønn()).isEqualTo(NavBrukerKjønn.MANN);
         assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
-    }
-
-    @Test
-    void skal_telle_antall_dager_til_dagens_dato() {
-        lagFagsakOgBehandlingMedUngdomsprogram(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), TIDENES_ENDE));
-
-        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
-
-        assertThat(dagerIProgrammet.size()).isEqualTo(1);
-        DagerIProgrammetRecord next = dagerIProgrammet.iterator().next();
-        assertThat(next.dagerIProgrammet()).isEqualTo(10);
-        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
-    }
-
-    @Test
-    void skal_telle_antall_dager_til_sluttdato_dersom_før_dagens_dato() {
-        lagFagsakOgBehandlingMedUngdomsprogram(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().minusDays(2)));
-
-        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
-
-        assertThat(dagerIProgrammet.size()).isEqualTo(1);
-        DagerIProgrammetRecord next = dagerIProgrammet.iterator().next();
-        assertThat(next.dagerIProgrammet()).isEqualTo(9);
-        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
-    }
-
-
-    @Test
-    void skal_telle_antall_dager_for_flere_perioder() {
-        lagFagsakOgBehandlingMedUngdomsprogram(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
-
-        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
-
-        assertThat(dagerIProgrammet.size()).isEqualTo(1);
-        DagerIProgrammetRecord next = dagerIProgrammet.iterator().next();
-        assertThat(next.dagerIProgrammet()).isEqualTo(12);
-        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
-    }
-
-    @Test
-    void skal_telle_antall_dager_for_flere_perioder_og_flere_fagsaker() {
-        lagFagsakOgBehandlingMedUngdomsprogram(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
-
-        lagFagsakOgBehandlingMedUngdomsprogram(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
-
-        lagFagsakOgBehandlingMedUngdomsprogram(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), LocalDate.now().minusDays(10)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(2), LocalDate.now().minusDays(2)));
-
-
-        lagFagsakOgBehandlingMedUngdomsprogram(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(20), TIDENES_ENDE));
-
-        var dagerIProgrammet = statistikkRepository.dagerIProgrammet();
-
-        assertThat(dagerIProgrammet.size()).isEqualTo(2);
-        Iterator<DagerIProgrammetRecord> iterator = dagerIProgrammet.iterator();
-        DagerIProgrammetRecord e1 = iterator.next();
-        assertThat(e1.dagerIProgrammet()).isEqualTo(12);
-        assertThat(e1.antall()).isEqualByComparingTo(BigDecimal.valueOf(3));
-
-        DagerIProgrammetRecord e2 = iterator.next();
-        assertThat(e2.dagerIProgrammet()).isEqualTo(20);
-        assertThat(e2.antall()).isEqualByComparingTo(BigDecimal.valueOf(1));
     }
 
     private void lagFagsakOgBehandlingMedUngdomsprogram(DatoIntervallEntitet... perioder) {
