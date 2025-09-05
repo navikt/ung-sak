@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
@@ -214,6 +215,7 @@ class VedtaksbrevReglerTest {
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
         assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(FørstegangsInnvilgelseInnholdBygger.class);
+        assertThat(regelResulat.dokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
         assertAutomatiskBrevEgenskaper(vedtaksbrevEgenskaper);
     }
 
