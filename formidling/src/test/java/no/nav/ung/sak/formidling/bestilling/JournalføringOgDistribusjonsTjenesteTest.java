@@ -85,7 +85,7 @@ class JournalføringOgDistribusjonsTjenesteTest {
             generertBrev.malType()
         );
 
-        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling1, generertBrev);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, bestilling1, generertBrev);
 
 
         var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
@@ -127,7 +127,7 @@ class JournalføringOgDistribusjonsTjenesteTest {
             generertBrev.malType()
         );
 
-        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling1, generertBrev);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, bestilling1, generertBrev);
 
 
         var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
