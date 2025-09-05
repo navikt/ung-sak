@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
  *
  */
 public record SamletVilkårResultatOgBehandlingÅrsaker(List<DetaljertVilkårResultat> vilkårsresultater,
-                                                      Set<BehandlingÅrsakType> behandlingÅrsaker) {
+                                                      Set<BehandlingÅrsakType> behandlingÅrsaker,
+                                                      boolean manuellOpprettetBehandling) {
 
     public Set<Utfall> utfall() {
         return vilkårsresultater.stream().map(DetaljertVilkårResultat::utfall).collect(Collectors.toSet());

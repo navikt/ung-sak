@@ -49,7 +49,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
             .intersection(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
-                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue())));
+                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue(), behandling.erManueltOpprettet())));
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
@@ -137,7 +137,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             resultater.add(kontrollerInntektDetaljertResultat(tilkjentYtelse));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)
+            || vilkårsresultatOgBehandlingsårsaker.manuellOpprettetBehandling() && relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
             resultater.add(nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
 
@@ -216,10 +217,10 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
                 return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslått inngangsvilkår for ny periode");
             }
 
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE);
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_KUN_VILKÅR);
         }
 
-        return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE);
+        return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING);
     }
 
     @NotNull

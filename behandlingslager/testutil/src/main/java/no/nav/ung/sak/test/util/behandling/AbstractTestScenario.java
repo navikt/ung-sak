@@ -41,6 +41,7 @@ import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personas;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
+import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -496,13 +497,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             repositories.prosessTriggereRepository().leggTil(behandling1.getId(), ungTestscenario.behandlingTriggere());
         }
 
-        if (ungTestscenario.abakusInntekt() != null) {
-            repositories.abakusInMemoryInntektArbeidYtelseTjeneste().lagreOppgittOpptjening(
-                behandling1.getId(),
-                ungTestscenario.abakusInntekt()
-            );
-        }
-
     }
 
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {
@@ -675,6 +669,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         if (behandlingÅrsakType != null) {
             behandlingBuilder.medBehandlingÅrsak(
                 BehandlingÅrsak.builder(behandlingÅrsakType).medManueltOpprettet(manueltOpprettet));
+        } else if (ungTestscenario != null && !ungTestscenario.behandlingTriggere().isEmpty()) {
+            var årsakerFraTriggere = ungTestscenario.behandlingTriggere().stream()
+                .map(Trigger::getÅrsak)
+                .toList();
+            behandlingBuilder.medBehandlingÅrsak(
+                BehandlingÅrsak.builder(årsakerFraTriggere).medManueltOpprettet(manueltOpprettet));
         }
 
         if (behandlingstidFrist != null) {
@@ -868,6 +868,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     public S medOriginalBehandling(Behandling originalBehandling, BehandlingÅrsakType behandlingÅrsakType) {
         return medOriginalBehandling(originalBehandling, behandlingÅrsakType, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public S medManuellOpprettet() {
+        manueltOpprettet = true;
+        return (S) this;
     }
 
     @SuppressWarnings("unchecked")

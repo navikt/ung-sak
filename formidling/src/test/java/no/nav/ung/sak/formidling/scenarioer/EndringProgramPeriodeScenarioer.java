@@ -52,8 +52,7 @@ public class EndringProgramPeriodeScenarioer {
                 new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), sluttdato)),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(sluttdato.plusDays(1), fagsakPeriode.getTomDato()))
             ),
-            null,
-            Collections.emptyList(),
+                Collections.emptyList(),
             null);
     }
 
@@ -96,8 +95,7 @@ public class EndringProgramPeriodeScenarioer {
                         DatoIntervallEntitet.fra(nySluttdato.plusDays(1), opprinneligProgramPeriode.getTomDato()) :
                         DatoIntervallEntitet.fra(opprinneligProgramPeriode.getTomDato().plusDays(1), nySluttdato))
             ),
-            null,
-            Collections.emptyList(),
+                Collections.emptyList(),
             null);
     }
 
@@ -145,8 +143,7 @@ public class EndringProgramPeriodeScenarioer {
                         DatoIntervallEntitet.fra(opprinneligProgramPeriode.getFomDato(), nyStartdato.minusDays(1)) :
                         DatoIntervallEntitet.fra(fom, fagsakPeriode.getTomDato()))
             ),
-            null,
-            Collections.emptyList(),
+                Collections.emptyList(),
             null);
     }
 
@@ -179,8 +176,7 @@ public class EndringProgramPeriodeScenarioer {
                 new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(fom, dødsdato.minusDays(1))),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(dødsdato, fagsakPeriode.getTomDato()))
             ),
-            null,
-            Collections.emptyList(),
+                Collections.emptyList(),
             dødsdato);
     }
 }

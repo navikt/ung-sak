@@ -13,6 +13,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     NY_SØKT_PROGRAM_PERIODE("RE-END-FRA-BRUKER", "Endring fra deltaker"),
     RE_ANNET("RE-ANNET", "Annet"),
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),
+    RE_SATS_ENDRING("RE-SATS-ENDRING", "Generelle endringer som påvirker sats og barnetillegg"),
 
     // Manuelt opprettet revurdering (obs: årsakene kan også bli satt på en automatisk opprettet revurdering)
     RE_OPPLYSNINGER_OM_DØD("RE-DØD", "Nye opplysninger om brukers eller barns dødsfall"),
