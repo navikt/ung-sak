@@ -243,8 +243,8 @@ spec:
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1H"
-    - name: RAPPORTERINGSFRIST_DAG_I_MAANED
-      value: "5"
+    - name: INNTEKTSKONTROLL_DAG_I_MAANED
+      value: "8"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE

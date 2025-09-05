@@ -119,11 +119,11 @@ class ManglendeKontrollperioderTjenesteTest {
     }
 
     @Test
-    void skal_ikke_ulede_manglende_kontroll_dersom_ikke_passert_rapporteringsfrist() {
+    void skal_ikke_ulede_manglende_kontroll_dersom_ikke_passert_kontrolldato() {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
-        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth(), tilkjentYtelseRepository);
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth() + 1, tilkjentYtelseRepository);
 
 
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
@@ -134,9 +134,8 @@ class ManglendeKontrollperioderTjenesteTest {
         assertThat(perioder.isEmpty()).isTrue();
     }
 
-
     @Test
-    void skal_ulede_manglende_kontroll_dersom_passert_rapporteringsfrist_med_en_dag() {
+    void skal_ulede_manglende_kontroll_dersom_passert_kontrolldato_med_en_dag() {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
@@ -152,6 +151,27 @@ class ManglendeKontrollperioderTjenesteTest {
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1).withDayOfMonth(1), LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
         assertThat(perioder.iterator().next()).isEqualTo(månedNrTre);
     }
+
+
+    @Test
+    void skal_ulede_manglende_kontroll_dersom_dagens_dato_er_lik_kontrolldato() {
+        final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
+        final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+
+        var manglendeKontrollperioderTjeneste = new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, LocalDate.now().getDayOfMonth(), tilkjentYtelseRepository);
+
+
+        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
+
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+
+        assertThat(perioder.size()).isEqualTo(1);
+        final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1).withDayOfMonth(1), LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
+        assertThat(perioder.iterator().next()).isEqualTo(månedNrTre);
+    }
+
+
 
     @Test
     void skal_ikke_ulede_manglende_kontroll_dersom_allerede_kontrollert() {
