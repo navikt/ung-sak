@@ -2814,6 +2814,104 @@
         "required" : [ "hendelseInfo", "opphørsdato" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.historikk.HistorikkInnslagDokumentLinkDto" : {
+        "properties" : {
+          "dokumentId" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Alnum}]+$",
+            "type" : "string"
+          },
+          "journalpostId" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Alnum}]+$",
+            "type" : "string"
+          },
+          "tag" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "url" : {
+            "format" : "uri",
+            "type" : "string"
+          },
+          "utgått" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.historikk.HistorikkinnslagDto" : {
+        "properties" : {
+          "aktør" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.historikk.HistorikkinnslagDto.HistorikkAktørDto"
+          },
+          "behandlingUuid" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "dokumenter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.historikk.HistorikkInnslagDokumentLinkDto"
+            },
+            "type" : "array"
+          },
+          "historikkinnslagUuid" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "linjer" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.historikk.HistorikkinnslagDto.Linje"
+            },
+            "type" : "array"
+          },
+          "opprettetTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "skjermlenke" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType"
+          },
+          "tittel" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.historikk.HistorikkinnslagDto.HistorikkAktørDto" : {
+        "properties" : {
+          "ident" : {
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.historikk.HistorikkAktør"
+          }
+        },
+        "required" : [ "type" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.historikk.HistorikkinnslagDto.Linje" : {
+        "properties" : {
+          "tekst" : {
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.historikk.HistorikkinnslagDto.Linje.Type"
+          }
+        },
+        "required" : [ "type" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.historikk.HistorikkinnslagDto.Linje.Type" : {
+        "enum" : [ "TEKST", "LINJESKIFT" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "TEKST", "LINJESKIFT" ]
+      },
       "ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg" : {
         "enum" : [ "BRUK_BRUKERS_INNTEKT", "BRUK_REGISTER_INNTEKT", "MANUELT_FASTSATT" ],
         "type" : "string",
@@ -6743,7 +6841,14 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json;charset=utf-8" : { }
+              "application/json;charset=utf-8" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.historikk.HistorikkinnslagDto"
+                  },
+                  "type" : "array"
+                }
+              }
             },
             "description" : "default response"
           }
