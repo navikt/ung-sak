@@ -53,7 +53,9 @@ public class TilkjentYtelseBeregner {
         final var antallVirkedager = Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato());
         sporing.put("antallVirkedager", String.valueOf(antallVirkedager));
         final var dagsats = antallVirkedager == 0 ?  BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, RoundingMode.HALF_UP);
+        BigDecimal tilkjentBeløp = dagsats.multiply(BigDecimal.valueOf(antallVirkedager));
         sporing.put("dagsats", dagsats.toString());
+        sporing.put("tilkjentBeløp", tilkjentBeløp.toString());
 
         // Beregner utbetalingsgrad
         final var utbetalingsgrad = finnUtbetalingsgrad(redusertBeløp, sats.grunnsats(), dagsats);
@@ -66,7 +68,7 @@ public class TilkjentYtelseBeregner {
             redusertBeløp,
             dagsats,
             utbetalingsgrad,
-            dagsats.multiply(BigDecimal.valueOf(antallVirkedager)));
+            tilkjentBeløp);
         return new TilkjentYtelsePeriodeResultat(tilkjentYtelseVerdi, sporing);
     }
 

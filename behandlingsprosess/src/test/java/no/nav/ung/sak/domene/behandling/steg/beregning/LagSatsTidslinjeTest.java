@@ -30,6 +30,23 @@ class LagSatsTidslinjeTest {
     }
 
     @Test
+    void skal_gi_høy_sats_dersom_25_år_før_dagens_dato_og_etter_start() {
+
+        LocalDate tjuefemårsdag = LocalDate.now().minusDays(10);
+        LocalDate fødselsdato = tjuefemårsdag.minusYears(25);
+
+        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(
+            new UtledSatsInput(fødselsdato,
+                false,
+                false,
+                tjuefemårsdag.minusDays(10)
+            )
+        );
+
+        assertEquals(2, satsTidslinje.size());
+    }
+
+    @Test
     void skal_gi_lav_sats_dersom_25_år_etter_start() {
 
         LocalDate tjuefemårsdag = LocalDate.now().plusDays(10);

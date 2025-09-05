@@ -58,7 +58,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         var utbetalingSum = relevantTilkjentYtelse.toSegments().stream()
-            .map(it -> it.getValue().redusertBeløp())
+            .map(it -> it.getValue().tilkjentBeløp())
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         var rapportertInntektSum = kontrollertInntektPerioderTidslinje.toSegments().stream()
