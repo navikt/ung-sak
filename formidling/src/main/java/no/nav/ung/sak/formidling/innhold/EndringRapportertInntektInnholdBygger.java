@@ -57,20 +57,8 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             EndringRapportertInntektInnholdBygger::mapTilPeriodeDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        var utbetalingSum = relevantTilkjentYtelse.toSegments().stream()
-            .map(it -> it.getValue().tilkjentBeløp())
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        var rapportertInntektSum = kontrollertInntektPerioderTidslinje.toSegments().stream()
-            .map(LocalDateSegment::getValue)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         EndringRapportertInntektDto dto = new EndringRapportertInntektDto(
-            new PeriodeDto(periodeDtoTidslinje.getMinLocalDate(), periodeDtoTidslinje.getMaxLocalDate()),
-            tilHeltall(rapportertInntektSum),
-            tilHeltall(utbetalingSum),
             REDUSJON_PROSENT,
-            periodeDtoTidslinje.size() > 1,
             periodeDtoTidslinje.toSegments().stream()
                 .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
                 .map(LocalDateSegment::getValue)
