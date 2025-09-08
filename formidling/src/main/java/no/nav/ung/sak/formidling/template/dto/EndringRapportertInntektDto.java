@@ -10,7 +10,7 @@ public record EndringRapportertInntektDto(
     long totalRapportertInntekt,
     long totalUtbetalingBeløp,
     int reduksjonssats,
-    boolean harRapportertFlerePerioder,
+    boolean harRapportertFlerePerioder, //bort
     List<EndringRapportertInntektPeriodeDto> perioder
     ) implements TemplateInnholdDto {
 }

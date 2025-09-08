@@ -91,7 +91,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             new EndringRapportertInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
                 tilHeltall(rhs.getValue()),
-                tilHeltall(ty.redusertBeløp()),
+                tilHeltall(ty.tilkjentBeløp()),
                 REDUSJON_PROSENT
             )
         );
