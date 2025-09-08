@@ -1,7 +1,7 @@
 package no.nav.ung.sak.uttalelse;
 
 
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningStatus;
 
 import java.util.Objects;
 

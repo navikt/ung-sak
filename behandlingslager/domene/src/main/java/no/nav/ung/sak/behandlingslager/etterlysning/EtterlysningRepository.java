@@ -4,8 +4,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningType;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -33,10 +33,10 @@ public class EtterlysningRepository {
 
         eksisterende.ifPresent(it -> etterlysninger.addAll(it.getEtterlysninger()));
 
-        if (!Objects.equals(etterlysninger, eksisterende.map(EtterlysningGrunnlagEntitet::getEtterlysninger).orElse(List.of()))) {
+        if (!Objects.equals(etterlysninger, eksisterende.map(ForhåndsvarselGrunnlagEntitet::getEtterlysninger).orElse(List.of()))) {
             eksisterende.ifPresent(this::deaktiver);
 
-            var oppdatert = new EtterlysningGrunnlagEntitet(behandlingId, new Etterlysninger(etterlysninger.stream()
+            var oppdatert = new ForhåndsvarselGrunnlagEntitet(behandlingId, new Etterlysninger(etterlysninger.stream()
                 .map(Etterlysning::new)
                 .toList()));
 
@@ -70,9 +70,9 @@ public class EtterlysningRepository {
         return etterlysninger;
     }
 
-    public Optional<EtterlysningGrunnlagEntitet> hentGrunnlag(Long behandlingId) {
+    public Optional<ForhåndsvarselGrunnlagEntitet> hentGrunnlag(Long behandlingId) {
         var query =  entityManager.createQuery("select e from EtterlysningGrunnlag e " +
-                "where e.behandlingId = :behandlingId", EtterlysningGrunnlagEntitet.class)
+                "where e.behandlingId = :behandlingId", ForhåndsvarselGrunnlagEntitet.class)
             .setParameter("behandlingId", behandlingId);
         return HibernateVerktøy.hentUniktResultat(query);
     }
@@ -157,7 +157,7 @@ public class EtterlysningRepository {
     }
 
 
-    private void deaktiver(EtterlysningGrunnlagEntitet it) {
+    private void deaktiver(ForhåndsvarselGrunnlagEntitet it) {
         it.deaktiver();
         entityManager.persist(it);
         entityManager.flush();

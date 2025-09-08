@@ -1,4 +1,4 @@
-package no.nav.ung.kodeverk.etterlysning;
+package no.nav.ung.kodeverk.forhåndsvarsel;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
@@ -8,14 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
-public enum EtterlysningStatus implements Kodeverdi {
+public enum EtterlysningType implements Kodeverdi {
 
-    OPPRETTET("OPPRETTET", "Opprettet, ikke sendt ut"),
-    VENTER("VENTER", "Sendt og venter på svar"),
-    MOTTATT_SVAR("MOTTATT_SVAR", "Mottatt svar"),
-    SKAL_AVBRYTES("SKAL_AVBRYTES", "Skal avbrytes"),
-    AVBRUTT("AVBRUTT", "Avbrutt"),
-    UTLØPT("UTLOPT", "Utløpt"),
+    UTTALELSE_KONTROLL_INNTEKT("UTTALELSE_KONTROLL_INNTEKT", "Svar på varsel: Avvik i registerinntekt"),
+    UTTALELSE_ENDRET_STARTDATO("UTTALELSE_ENDRET_STARTDATO", "Svar på varsel: Endret startdato"),
+    UTTALELSE_ENDRET_SLUTTDATO("UTTALELSE_ENDRET_SLUTTDATO", "Svar på varsel: Endret sluttdato"),
+
     ;
 
     @JsonValue
@@ -23,7 +21,7 @@ public enum EtterlysningStatus implements Kodeverdi {
     private final String navn;
 
 
-    private static final Map<String, EtterlysningStatus> KODER = new LinkedHashMap<>();
+    private static final Map<String, EtterlysningType> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -34,12 +32,12 @@ public enum EtterlysningStatus implements Kodeverdi {
     }
 
 
-    EtterlysningStatus(String kode, String navn) {
+    EtterlysningType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
-    public static EtterlysningStatus fraKode(String kode) {
+    public static EtterlysningType fraKode(String kode) {
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent EtterlysningType: " + kode);

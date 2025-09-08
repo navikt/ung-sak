@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-@Entity(name = "Etterlysning")
-@Table(name = "ETTERLYSNING")
-public class Etterlysning extends BaseEntitet {
+@Entity(name = "Forhåndsvarsel")
+@Table(name = "FORHANDSVARSEL")
+public class Forhåndsvarsel extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ETTERLYSNING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_FORHANDSVARSEL")
     private Long id;
 
     @Column(name = "behandling_id", updatable = false, nullable = false)
@@ -47,17 +47,17 @@ public class Etterlysning extends BaseEntitet {
     @JoinColumn(name = "uttalelse_id", unique = true)
     private UttalelseEntitet uttalelse;
 
-    Etterlysning() {
+    Forhåndsvarsel() {
         // Hibernate
     }
 
-    public static Etterlysning forInntektKontrollUttalelse(
+    public static Forhåndsvarsel forInntektKontrollUttalelse(
         Long behandlingId,
         UUID grunnlagsreferanse,
         UUID eksternReferanse,
         DatoIntervallEntitet periode) {
 
-        return new Etterlysning(
+        return new Forhåndsvarsel(
             behandlingId,
             grunnlagsreferanse,
             eksternReferanse,
@@ -66,14 +66,14 @@ public class Etterlysning extends BaseEntitet {
             EtterlysningStatus.OPPRETTET);
     }
 
-    public static Etterlysning opprettForType(
+    public static Forhåndsvarsel opprettForType(
         Long behandlingId,
         UUID grunnlagsreferanse,
         UUID eksternReferanse,
         DatoIntervallEntitet periode,
         EtterlysningType type
     ) {
-        return new Etterlysning(
+        return new Forhåndsvarsel(
             behandlingId,
             grunnlagsreferanse,
             eksternReferanse,
@@ -83,12 +83,12 @@ public class Etterlysning extends BaseEntitet {
         );
     }
 
-    public Etterlysning(Long behandlingId,
-                        UUID grunnlagsreferanse,
-                        UUID eksternReferanse,
-                        DatoIntervallEntitet periode,
-                        EtterlysningType type,
-                        EtterlysningStatus status) {
+    public Forhåndsvarsel(Long behandlingId,
+                          UUID grunnlagsreferanse,
+                          UUID eksternReferanse,
+                          DatoIntervallEntitet periode,
+                          EtterlysningType type,
+                          EtterlysningStatus status) {
         this.behandlingId = behandlingId;
         this.grunnlagsreferanse = grunnlagsreferanse;
         this.eksternReferanse = eksternReferanse;
@@ -97,7 +97,7 @@ public class Etterlysning extends BaseEntitet {
         this.status = status;
     }
 
-    public Etterlysning(Etterlysning other) {
+    public Forhåndsvarsel(Forhåndsvarsel other) {
         this.behandlingId = other.behandlingId;
         this.grunnlagsreferanse = other.grunnlagsreferanse;
         this.eksternReferanse = other.eksternReferanse;

@@ -12,7 +12,7 @@ import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;

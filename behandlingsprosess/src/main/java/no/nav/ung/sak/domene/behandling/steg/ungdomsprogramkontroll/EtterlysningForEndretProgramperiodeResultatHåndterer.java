@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;

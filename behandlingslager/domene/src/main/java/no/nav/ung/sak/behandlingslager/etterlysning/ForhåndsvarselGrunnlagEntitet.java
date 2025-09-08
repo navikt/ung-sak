@@ -7,12 +7,12 @@ import org.hibernate.annotations.Immutable;
 import java.util.List;
 import java.util.Objects;
 
-@Entity(name = "EtterlysningGrunnlag")
-@Table(name = "GR_ETTERLYSNING")
-public class EtterlysningGrunnlagEntitet {
+@Entity(name = "ForhåndsvarselGrunnlag")
+@Table(name = "GR_FORHANDSVARSEL")
+public class ForhåndsvarselGrunnlagEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_ETTERLYSNING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_FORHANDSVARSEL")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
@@ -21,22 +21,22 @@ public class EtterlysningGrunnlagEntitet {
     @ChangeTracked
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "etterlysninger_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "varslinger_id", nullable = false, updatable = false, unique = true)
     private Etterlysninger etterlysninger;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
 
-    EtterlysningGrunnlagEntitet() {
+    ForhåndsvarselGrunnlagEntitet() {
     }
 
-    EtterlysningGrunnlagEntitet(Long behandlingId, Etterlysninger etterlysninger) {
+    ForhåndsvarselGrunnlagEntitet(Long behandlingId, Etterlysninger etterlysninger) {
         this.behandlingId = behandlingId;
         this.etterlysninger = etterlysninger;
     }
 
-    EtterlysningGrunnlagEntitet(Etterlysninger etterlysninger) {
+    ForhåndsvarselGrunnlagEntitet(Etterlysninger etterlysninger) {
         this.etterlysninger = etterlysninger;
     }
 
@@ -60,7 +60,7 @@ public class EtterlysningGrunnlagEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        EtterlysningGrunnlagEntitet that = (EtterlysningGrunnlagEntitet) o;
+        ForhåndsvarselGrunnlagEntitet that = (ForhåndsvarselGrunnlagEntitet) o;
         return Objects.equals(etterlysninger, that.etterlysninger);
     }
 

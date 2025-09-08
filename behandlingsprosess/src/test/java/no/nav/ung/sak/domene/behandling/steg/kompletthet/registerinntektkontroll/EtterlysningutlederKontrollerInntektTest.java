@@ -4,7 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;

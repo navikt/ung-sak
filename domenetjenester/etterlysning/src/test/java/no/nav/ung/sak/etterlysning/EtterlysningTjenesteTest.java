@@ -4,7 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;

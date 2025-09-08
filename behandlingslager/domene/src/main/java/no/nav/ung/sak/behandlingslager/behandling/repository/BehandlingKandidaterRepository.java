@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.hibernate.jpa.QueryHints;
 

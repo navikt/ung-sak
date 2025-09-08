@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.oppgave.bekreftelse.Bekreftelse;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;

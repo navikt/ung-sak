@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.UttalelseEntitet;

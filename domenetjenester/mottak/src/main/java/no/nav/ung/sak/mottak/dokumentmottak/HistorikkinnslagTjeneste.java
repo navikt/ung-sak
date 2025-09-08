@@ -4,7 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.saf.*;
 import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.forhåndsvarsel.EtterlysningType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
