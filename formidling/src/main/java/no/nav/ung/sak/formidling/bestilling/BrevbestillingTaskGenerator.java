@@ -5,6 +5,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 
 public class BrevbestillingTaskGenerator {
 
+    static final String FORMIDLING_GRUPPE_PREFIX = "formidling-";
+
     public static ProsessTaskData formidlingProsessTaskIGruppe(Class<? extends ProsessTaskHandler> taskKlasse, Long fagsakId) {
         return formidlingProsessTaskIGruppe(taskKlasse, fagsakId, 0);
     }
@@ -14,7 +16,7 @@ public class BrevbestillingTaskGenerator {
         String nesteSekvens = String.format("%d-%d", System.currentTimeMillis(), indeks);
         prosessTaskData
             .medSekvens(nesteSekvens)
-            .medGruppe(("formidling-%d").formatted(fagsakId));
+            .medGruppe((FORMIDLING_GRUPPE_PREFIX + "%d").formatted(fagsakId));
         return prosessTaskData;
     }
 
