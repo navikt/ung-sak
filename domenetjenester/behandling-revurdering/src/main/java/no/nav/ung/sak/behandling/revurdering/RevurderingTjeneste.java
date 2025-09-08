@@ -18,6 +18,10 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
+
+import java.util.Set;
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
@@ -28,6 +32,7 @@ public class RevurderingTjeneste {
     private RevurderingTjenesteFelles revurderingTjenesteFelles;
     private Instance<GrunnlagKopierer> grunnlagKopierere;
     private HistorikkinnslagRepository historikkinnslagRepository;
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     public RevurderingTjeneste() {
         // for CDI proxy
@@ -37,22 +42,22 @@ public class RevurderingTjeneste {
     public RevurderingTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                RevurderingTjenesteFelles revurderingTjenesteFelles,
                                @Any Instance<GrunnlagKopierer> grunnlagKopierere,
-                               HistorikkinnslagRepository historikkinnslagRepository) {
+                               HistorikkinnslagRepository historikkinnslagRepository, ProsessTriggereRepository prosessTriggereRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.grunnlagKopierere = grunnlagKopierere;
         this.historikkinnslagRepository = historikkinnslagRepository;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
         validerTilstand(origBehandling);
         Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
+        prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(new Trigger(revurderingsÅrsak, revurdering.getFagsak().getPeriode())));
 
         var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
         grunnlagKopierer.kopierGrunnlagVedManuellOpprettelse(origBehandling, revurdering);
 
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
-        behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, grunnlagKopierer.getApForManuellRevurdering());
         return revurdering;
     }
 
