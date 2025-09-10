@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
 import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.Virkedager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -177,15 +178,20 @@ public class TilkjentYtelseRepository {
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> mapTilTidslinje(List<TilkjentYtelsePeriode> perioder) {
         List<LocalDateSegment<TilkjentYtelseVerdi>> segments = perioder.stream()
-            .map(p -> new LocalDateSegment<>(
-                p.getPeriode().getFomDato(),
-                p.getPeriode().getTomDato(),
-                new TilkjentYtelseVerdi(
-                    p.getUredusertBeløp(),
-                    p.getReduksjon(),
-                    p.getRedusertBeløp(),
-                    p.getDagsats(),
-                    p.getUtbetalingsgrad())))
+            .map(p -> {
+                var antallVirkedager = BigDecimal.valueOf(Virkedager
+                    .beregnAntallVirkedager(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()));
+                return new LocalDateSegment<>(
+                    p.getPeriode().getFomDato(),
+                    p.getPeriode().getTomDato(),
+                    new TilkjentYtelseVerdi(
+                        p.getUredusertBeløp(),
+                        p.getReduksjon(),
+                        p.getRedusertBeløp(),
+                        p.getDagsats(),
+                        p.getUtbetalingsgrad(),
+                        p.getDagsats().multiply(antallVirkedager)));
+            })
             .collect(Collectors.toList());
 
         return new LocalDateTimeline<>(segments);
