@@ -191,7 +191,7 @@ public class ForeslåVedtakTjenesteTest {
     }
 
     @Test
-    public void utførerMedAksjonspunktForeslåVedtakManueltHvisRevurderingOpprettetManueltOgIkkeTotrinnskontroll() {
+    public void utførerUtenAksjonspunktHvisRevurderingOpprettetManueltOgIkkeTotrinnskontroll() {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
@@ -207,8 +207,7 @@ public class ForeslåVedtakTjenesteTest {
 
         // Assert
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        assertThat(stegResultat.getAksjonspunktListe()).hasSize(1);
-        assertThat(stegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(0);
     }
 
     @Test
@@ -226,7 +225,7 @@ public class ForeslåVedtakTjenesteTest {
     }
 
     @Test
-    public void utførerMedAksjonspunktForeslåVedtakManueltHvisRevurderingOpprettetManueltOgIkkeTotrinnskontrollBehandling2TrinnIkkeReset() {
+    public void utførerUtenAksjonspunktHvisRevurderingOpprettetManueltOgIkkeTotrinnskontrollBehandling2TrinnIkkeReset() {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
@@ -243,8 +242,7 @@ public class ForeslåVedtakTjenesteTest {
 
         // Assert
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        assertThat(stegResultat.getAksjonspunktListe()).hasSize(1);
-        assertThat(stegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(0);
     }
 
     @Test
