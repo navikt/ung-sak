@@ -66,9 +66,6 @@ public class ForeslåVedtakTjenesteTest {
     @Inject
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
-    @Inject
-    private @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
-
     @Mock
     private OppgaveTjeneste oppgaveTjeneste;
 
