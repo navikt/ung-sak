@@ -29,18 +29,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SqlResultSetMappings(value = {
-    @SqlResultSetMapping(name = "PipDataResult", classes = {
-        @ConstructorResult(targetClass = PipBehandlingsData.class, columns = {
-            @ColumnResult(name = "behandlingUuid"),
-            @ColumnResult(name = "behandligStatus"),
-            @ColumnResult(name = "ansvarligSaksbehandler"),
-            @ColumnResult(name = "fagsakId"),
-            @ColumnResult(name = "fagsakStatus"),
-            @ColumnResult(name = "saksnummer")
-        })
-    })
-})
 @Entity(name = "Behandling")
 @Table(name = "BEHANDLING")
 @DynamicInsert
