@@ -43,7 +43,6 @@ public class RegisterdataEndringshåndterer {
     private EndringsresultatSjekker endringsresultatSjekker;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste;
     private BehandlingÅrsakTjeneste behandlingÅrsakTjeneste;
-    private BehandlingProsess
 
     RegisterdataEndringshåndterer() {
         // for CDI proxy
