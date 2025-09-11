@@ -313,7 +313,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
             if (tasks.isEmpty()) {
                 log.info("Henter ikke inn nye registerdata");
-
+                return;
             }
 
             tasks.forEach(gruppe::addNesteSekvensiell);
