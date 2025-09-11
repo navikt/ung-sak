@@ -1,24 +1,42 @@
 package no.nav.ung.sak.kontrakt.historikk;
 
+import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 
-public record HistorikkinnslagDto(UUID historikkinnslagUuid,
+public record HistorikkinnslagDto(@NotNull UUID historikkinnslagUuid,
                                   UUID behandlingUuid,
-                                  HistorikkAktørDto aktør,
+                                  @NotNull HistorikkAktørDto aktør,
                                   SkjermlenkeType skjermlenke,
                                   LocalDateTime opprettetTidspunkt,
-                                  List<HistorikkInnslagDokumentLinkDto> dokumenter,
+                                  @NotNull List<HistorikkInnslagDokumentLinkDto> dokumenter,
                                   String tittel,
-                                  List<Linje> linjer) implements Comparable<HistorikkinnslagDto> {
+                                  @NotNull List<Linje> linjer) implements Comparable<HistorikkinnslagDto> {
 
-    public record HistorikkAktørDto(HistorikkAktør type, String ident) {
+    public HistorikkinnslagDto {
+        Objects.requireNonNull(historikkinnslagUuid);
+        Objects.requireNonNull(aktør);
+        if(dokumenter == null) {
+            dokumenter = List.of();
+        }
+        if(linjer == null) {
+            linjer = List.of();
+        }
+    }
+
+    public record HistorikkAktørDto(@NotNull HistorikkAktør type, String ident) {
+        public HistorikkAktørDto {
+            if(type == null) {
+                type = HistorikkAktør.UDEFINERT;
+            }
+        }
 
         public static HistorikkAktørDto fra(HistorikkAktør aktør, String opprettetAv) {
             if (Set.of(HistorikkAktør.SAKSBEHANDLER, HistorikkAktør.BESLUTTER).contains(aktør)) {
@@ -33,7 +51,10 @@ public record HistorikkinnslagDto(UUID historikkinnslagUuid,
         return this.opprettetTidspunkt.compareTo(o.opprettetTidspunkt);
     }
 
-    public record Linje(Type type, String tekst) {
+    public record Linje(@NotNull Type type, String tekst) {
+        public Linje {
+            Objects.requireNonNull(type);
+        }
 
         public static Linje tekstlinje(String tekst) {
             return new Linje(Type.TEKST, tekst);

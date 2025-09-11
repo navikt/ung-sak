@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,8 +49,8 @@ public class PersonopplysningTjenesteImplTest {
     }
 
     @Test
-    public void skal_hente_gjeldende_personinformasjon_på_tidspunkt() {
-        LocalDate tidspunkt = LocalDate.now();
+    public void skal_hente_gjeldende_personinformasjon() {
+
 
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
 
@@ -65,8 +66,7 @@ public class PersonopplysningTjenesteImplTest {
         Behandling behandling = scenario.lagre(repositoryProvider);
 
         // Act
-        PersonopplysningerAggregat personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(),
-            behandling.getAktørId(), tidspunkt);
+        PersonopplysningerAggregat personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(BehandlingReferanse.fra(behandling));
         // Assert
         assertThat(personopplysningerAggregat.getRelasjoner()).isNotEmpty();
     }

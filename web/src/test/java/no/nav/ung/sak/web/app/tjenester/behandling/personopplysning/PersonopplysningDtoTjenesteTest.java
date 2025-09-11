@@ -48,7 +48,7 @@ public class PersonopplysningDtoTjenesteTest {
         LocalDate enTilfeldigDato = LocalDate.of(1989, 9, 29);
         Behandling behandling = lagBehandling();
 
-        Optional<PersonopplysningDto> personopplysningDto = tjeneste.lagPersonopplysningDto(behandling.getId(), enTilfeldigDato);
+        Optional<PersonopplysningDto> personopplysningDto = tjeneste.lagPersonopplysningDto(behandling.getId());
 
         assertThat(personopplysningDto).isPresent();
     }
