@@ -140,6 +140,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         }
 
         return behandlingskontrollTjeneste.erStegPassert(behandling, BehandlingStegType.INNHENT_REGISTEROPP)
+            && !utledRegisterinnhentingTaskTyper(behandling).isEmpty()
             && registerdataEndringshåndterer.skalInnhenteRegisteropplysningerPåNytt(behandling);
     }
 
@@ -311,7 +312,8 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
                 .toList();
 
             if (tasks.isEmpty()) {
-                throw new UnsupportedOperationException("Utvikler-feil: Håpet på å hente inn noe registerdata for ytelseType=" + behandling.getFagsakYtelseType());
+                log.info("Henter ikke inn nye registerdata");
+                return;
             }
 
             tasks.forEach(gruppe::addNesteSekvensiell);
@@ -334,22 +336,34 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var tasks = new ArrayList<String>();
         // Rekkefølgen her viktig
         // Innhenting av ungdomsprogramperioder må komme før annen innhenting siden denne påvirker opplysningsperioden
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
-            .ifPresent(u -> tasks.add(InnhentUngdomsprogramperioderTask.TASKTYPE));
+        if (skalInnhenteProgramperioder(behandling)) {
+            EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
+                .ifPresent(u -> tasks.add(InnhentUngdomsprogramperioderTask.TASKTYPE));
+        }
 
-        EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())
-            .ifPresent(u -> tasks.add(InnhentPersonopplysningerTask.TASKTYPE));
+        if (skalInnhentePersonopplysningerPåNytt(behandling)) {
+            EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())
+                .ifPresent(u -> tasks.add(InnhentPersonopplysningerTask.TASKTYPE));
+        }
 
         EndringStartpunktUtleder.finnUtleder(startpunktUtledere, InntektArbeidYtelseGrunnlag.class, behandling.getFagsakYtelseType()).ifPresent(u -> {
-            if (skalInnhenteAbakus(behandling)) {
+            if (skalInnhenteInntektOgYtelser(behandling)) {
                 tasks.add(InnhentIAYIAbakusTask.TASKTYPE);
             }
         });
         return tasks;
     }
 
-    private boolean skalInnhenteAbakus(Behandling behandling) {
-        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)) {
+    private boolean skalInnhentePersonopplysningerPåNytt(Behandling behandling) {
+        return !behandling.erRevurdering() || BehandlingÅrsakType.årsakerForInnhentingAvPersonopplysninger().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
+    }
+
+    private boolean skalInnhenteProgramperioder(Behandling behandling) {
+        return !behandling.erRevurdering() || BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
+    }
+
+    private boolean skalInnhenteInntektOgYtelser(Behandling behandling) {
+        if (BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains)) {
             var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
             Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
             return registerdata != null && !(registerdata.isEmpty());
