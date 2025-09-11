@@ -85,7 +85,7 @@ class JournalføringOgDistribusjonsTjenesteTest {
             generertBrev.malType()
         );
 
-        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling1, generertBrev);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, bestilling1, generertBrev);
 
 
         var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
@@ -101,6 +101,8 @@ class JournalføringOgDistribusjonsTjenesteTest {
         var disttask = distTasker.getFirst();
         assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_ID_PARAM)).isEqualTo(bestilling.getId().toString());
         assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE)).isEqualTo(DistribuerJournalpostRequest.DistribusjonsType.VEDTAK.name());
+        assertThat(disttask.getGruppe()).isEqualTo(BrevbestillingTaskGenerator.FORMIDLING_GRUPPE_PREFIX + behandling.getFagsakId());
+        assertThat(disttask.getSekvens()).endsWith("-0");
 
     }
 
@@ -121,13 +123,13 @@ class JournalføringOgDistribusjonsTjenesteTest {
             TemplateType.GENERELT_FRITEKSTBREV
         );
 
-        var bestilling1 = BrevbestillingEntitet.nyBrevbestilling(
+        var bestillingReq = BrevbestillingEntitet.nyBrevbestilling(
             behandling.getFagsakId(),
             behandling.getId(),
             generertBrev.malType()
         );
 
-        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling1, generertBrev);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestillingReq, generertBrev);
 
 
         var bestilling = brevbestillingRepository.hentForBehandling(behandling.getId()).getFirst();
@@ -153,6 +155,11 @@ class JournalføringOgDistribusjonsTjenesteTest {
         var disttask = distTasker.getFirst();
         assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_ID_PARAM)).isEqualTo(bestilling.getId().toString());
         assertThat(disttask.getPropertyValue(BrevdistribusjonTask.BREVBESTILLING_DISTRIBUSJONSTYPE)).isEqualTo(DistribuerJournalpostRequest.DistribusjonsType.VIKTIG.name());
+
+        //Skal ikke være en del av formidling gruppa og heller ikke ha egenkomponert sekvensnr.
+        assertThat(disttask.getGruppe()).doesNotContain(BrevbestillingTaskGenerator.FORMIDLING_GRUPPE_PREFIX);
+        assertThat(disttask.getGruppe()).doesNotContain(bestilling.getFagsakId().toString());
+        assertThat(disttask.getSekvens()).doesNotEndWith("-0");
 
     }
 

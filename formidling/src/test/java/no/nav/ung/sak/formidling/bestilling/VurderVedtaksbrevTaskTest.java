@@ -87,7 +87,13 @@ class VurderVedtaksbrevTaskTest {
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(1);
         var task = tasker.getFirst();
+        assertBestillingTask(task, bestilling);
+    }
+
+    private static void assertBestillingTask(ProsessTaskData task, BrevbestillingEntitet bestilling) {
         assertThat(task.getPropertyValue(VedtaksbrevBestillingTask.BREVBESTILLING_ID)).isEqualTo(bestilling.getId().toString());
+        assertThat(task.getGruppe()).contains(BrevbestillingTaskGenerator.FORMIDLING_GRUPPE_PREFIX);
+        assertThat(task.getSekvens()).endsWith("-0");
     }
 
     @Test
@@ -143,6 +149,15 @@ class VurderVedtaksbrevTaskTest {
         assertThat(tasker).hasSize(2);
         assertThat(tasker).extracting(it -> Long.valueOf(it.getPropertyValue(VedtaksbrevBestillingTask.BREVBESTILLING_ID)))
             .containsExactlyInAnyOrder(bestillinger.get(0).getId(), bestillinger.get(1).getId());
+
+        assertThat(tasker).extracting(ProsessTaskData::getSekvens)
+            .anyMatch(it -> it.endsWith("-0"));
+        assertThat(tasker).extracting(ProsessTaskData::getSekvens)
+            .anyMatch(it -> it.endsWith("-1"));
+
+        assertThat(tasker).allSatisfy(pt -> {
+            assertThat(pt.getGruppe()).contains(BrevbestillingTaskGenerator.FORMIDLING_GRUPPE_PREFIX);
+        });
     }
 
     @Test
@@ -245,7 +260,7 @@ class VurderVedtaksbrevTaskTest {
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(1);
         var task = tasker.getFirst();
-        assertThat(task.getPropertyValue(VedtaksbrevBestillingTask.BREVBESTILLING_ID)).isEqualTo(bestilling.getId().toString());
+        assertBestillingTask(task, bestilling);
     }
 
     @NotNull
