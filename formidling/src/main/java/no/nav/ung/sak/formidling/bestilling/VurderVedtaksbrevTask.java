@@ -18,6 +18,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -83,7 +84,11 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
         }
 
-        resultat.vedtaksbrevResultater().forEach(it -> bestill(behandling, it));
+        List<Vedtaksbrev> vedtaksbrevResultater = resultat.vedtaksbrevResultater();
+        for (int brevNr = 0; brevNr < vedtaksbrevResultater.size(); brevNr++) {
+            Vedtaksbrev it = vedtaksbrevResultater.get(brevNr);
+            bestill(behandling, it, brevNr);
+        }
 
     }
 
@@ -105,7 +110,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         }
     }
 
-    public void bestill(Behandling behandling, Vedtaksbrev vedtaksbrev) {
+    public void bestill(Behandling behandling, Vedtaksbrev vedtaksbrev, int brevNr) {
         validerBrevbestillingForespørsel(behandling, vedtaksbrev.dokumentMalType());
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
@@ -118,7 +123,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         var vedtaksbrevResultatEntitet = BehandlingVedtaksbrev.medBestilling(bestilling, vedtaksbrev.forklaring(), VedtaksbrevResultatType.BESTILT);
         behandlingVedtaksbrevRepository.lagre(vedtaksbrevResultatEntitet);
 
-        prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId()));
+        prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId(), brevNr));
         LOG.info("Opprettet vedtaksbrev bestilling med id: {} og mal {}", bestilling.getId(), bestilling.getDokumentMalType().getKode());
 
     }
@@ -147,14 +152,15 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
                 DokumentMalType.MANUELT_VEDTAK_DOK);
             brevbestillingRepository.lagre(bestilling);
             behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev.medBestilling(bestilling, "Redigert vedtaksbrev", VedtaksbrevResultatType.BESTILT));
-            prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId()));
+            prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId(), 0));
 
         }
 
     }
 
-    private static ProsessTaskData lagBestillingTask(Behandling behandling, Long brevbestillingId) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
+    private static ProsessTaskData lagBestillingTask(Behandling behandling, Long brevbestillingId, int brevNr) {
+        ProsessTaskData prosessTaskData = BrevbestillingTaskGenerator
+            .formidlingProsessTaskIGruppe(VedtaksbrevBestillingTask.class, behandling.getFagsakId(), brevNr);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
         prosessTaskData.setSaksnummer(behandling.getFagsak().getSaksnummer().toString());
         prosessTaskData.setProperty(VedtaksbrevBestillingTask.BREVBESTILLING_ID, brevbestillingId.toString());
