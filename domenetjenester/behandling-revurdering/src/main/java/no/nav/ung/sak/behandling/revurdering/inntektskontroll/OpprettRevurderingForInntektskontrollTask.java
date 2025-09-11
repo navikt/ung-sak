@@ -43,7 +43,7 @@ public class OpprettRevurderingForInntektskontrollTask implements ProsessTaskHan
     public OpprettRevurderingForInntektskontrollTask(
         ProsessTaskTjeneste prosessTaskTjeneste,
         FinnSakerForInntektkontroll finnRelevanteFagsaker,
-        @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "1") int inntektskontrollDagIMåned) {
+        @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int inntektskontrollDagIMåned) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.finnRelevanteFagsaker = finnRelevanteFagsaker;
         this.inntektskontrollDagIMåned = inntektskontrollDagIMåned;
