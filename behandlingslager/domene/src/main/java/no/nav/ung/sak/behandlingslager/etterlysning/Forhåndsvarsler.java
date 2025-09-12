@@ -1,14 +1,29 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
+import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Immutable;
 
 import java.util.Objects;
 import java.util.Set;
 
+
+@Entity(name = "Forhåndsvarsler")
+@Table(name = "FORH_VARSLER")
+@Immutable
 public class Forhåndsvarsler extends BaseEntitet {
+
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.SEQUENCE, generator = "SEQ_FORH_VARSLER")
     private Long id;
 
+    @ChangeTracked
+    @BatchSize(size = 20)
+    @JoinColumn(name = "forhåndsvarsler_id", nullable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<Etterlysning> varsler;
 
     public Forhåndsvarsler() {
