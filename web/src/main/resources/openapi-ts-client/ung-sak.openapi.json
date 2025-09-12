@@ -1104,16 +1104,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "INN", "UT", "NOTAT" ]
       },
-      "ung.kodeverk.etterlysning.EtterlysningStatus" : {
-        "enum" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLOPT" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ]
-      },
-      "ung.kodeverk.etterlysning.EtterlysningType" : {
-        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ]
-      },
       "ung.kodeverk.formidling.IdType" : {
         "enum" : [ "ORGNR", "AKTØRID" ],
         "type" : "string",
@@ -1181,6 +1171,16 @@
         "enum" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ],
         "type" : "string",
         "x-enum-varnames" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ]
+      },
+      "ung.kodeverk.varsel.EtterlysningStatus" : {
+        "enum" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLOPT" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ]
+      },
+      "ung.kodeverk.varsel.EtterlysningType" : {
+        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ]
       },
       "ung.kodeverk.vedtak.VedtakResultatType" : {
         "enum" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "-" ],
@@ -2373,10 +2373,10 @@
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "status" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.etterlysning.EtterlysningStatus"
+            "$ref" : "#/components/schemas/ung.kodeverk.varsel.EtterlysningStatus"
           },
           "type" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.etterlysning.EtterlysningType"
+            "$ref" : "#/components/schemas/ung.kodeverk.varsel.EtterlysningType"
           }
         },
         "type" : "object"
