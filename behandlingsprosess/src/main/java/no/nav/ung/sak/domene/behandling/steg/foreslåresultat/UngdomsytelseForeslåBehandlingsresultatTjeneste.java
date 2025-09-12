@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -54,6 +55,12 @@ public class UngdomsytelseForeslåBehandlingsresultatTjeneste extends ForeslåBe
             return behandling.getFagsak().getPeriode();
         }
         return DatoIntervallEntitet.fraOgMedTilOgMed(timeline.getMinLocalDate(), timeline.getMaxLocalDate());
+    }
+
+
+    @Override
+    protected boolean skalBehandlingenSettesTilOpphørt(BehandlingReferanse ref, Vilkårene vilkårene) {
+        return behandlingRepository.hentBehandling(ref.getBehandlingId()).getBehandlingÅrsakerTyper().stream().anyMatch(it -> it == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
     }
 
     @Override

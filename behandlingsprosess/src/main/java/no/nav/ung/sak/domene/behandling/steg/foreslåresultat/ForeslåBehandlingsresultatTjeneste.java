@@ -46,6 +46,9 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
 
         if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
+        } else if (skalBehandlingenSettesTilOpphørt(ref, vilkårene)) {
+            behandling.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
+            log.info("Behandling {} opphørt", ref.getBehandlingId());
         } else if (skalBehandlingenSettesTilDelvisInnvilget(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.DELVIS_INNVILGET);
             log.info("Behandling {} delvis innvilget", ref.getBehandlingId());
@@ -59,6 +62,10 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
     }
 
     protected boolean skalBehandlingenSettesTilDelvisInnvilget(BehandlingReferanse ref, Vilkårene vilkårene) {
+        return false;
+    }
+
+    protected boolean skalBehandlingenSettesTilOpphørt(BehandlingReferanse ref, Vilkårene vilkårene) {
         return false;
     }
 

@@ -50,7 +50,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         var fagsaker = new HashMap<Fagsak, ÅrsakOgPeriode>();
 
         for (AktørId aktør : aktører) {
-            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, opphørsdatoFraHendelse);
+            var relevantFagsak = finnFagsakerForAktørTjeneste.hentNærmesteFagsakForAktørSomSøker(aktør, opphørsdatoFraHendelse);
             if (relevantFagsak.isEmpty()) {
                 continue;
             }
