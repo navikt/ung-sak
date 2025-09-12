@@ -1,4 +1,4 @@
-package no.nav.ung.kodeverk.etterlysning;
+package no.nav.ung.kodeverk.varsel;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;
@@ -8,14 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @LegacyKodeverdiJsonValue // Serialiserast som kode string i default object mapper
-public enum EtterlysningStatus implements Kodeverdi {
+public enum EndringType implements Kodeverdi {
 
-    OPPRETTET("OPPRETTET", "Opprettet, ikke sendt ut"),
-    VENTER("VENTER", "Sendt og venter på svar"),
-    MOTTATT_SVAR("MOTTATT_SVAR", "Mottatt svar"),
-    SKAL_AVBRYTES("SKAL_AVBRYTES", "Skal avbrytes"),
-    AVBRUTT("AVBRUTT", "Avbrutt"),
-    UTLØPT("UTLOPT", "Utløpt"),
+    ENDRET_INNTEKT("ENDRET_INNTEKT", "Endret registerinntekt"),
+    ENDRET_STARTDATO("ENDRET_STARTDATO", "Endret startdato"),
+    ENDRET_SLUTTDATO("ENDRET_SLUTTDATO", "Endret sluttdato"),
+
     ;
 
     @JsonValue
@@ -23,7 +21,7 @@ public enum EtterlysningStatus implements Kodeverdi {
     private final String navn;
 
 
-    private static final Map<String, EtterlysningStatus> KODER = new LinkedHashMap<>();
+    private static final Map<String, EndringType> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -34,15 +32,15 @@ public enum EtterlysningStatus implements Kodeverdi {
     }
 
 
-    EtterlysningStatus(String kode, String navn) {
+    EndringType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
     }
 
-    public static EtterlysningStatus fraKode(String kode) {
+    public static EndringType fraKode(String kode) {
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent EtterlysningType: " + kode);
+            throw new IllegalArgumentException("Ukjent EndringType: " + kode);
         }
         return ad;
     }
@@ -59,7 +57,7 @@ public enum EtterlysningStatus implements Kodeverdi {
 
     @Override
     public String getKodeverk() {
-        return "ETTERLYSNING_TYPE";
+        return "ENDRING_TYPE";
     }
 
     @Override

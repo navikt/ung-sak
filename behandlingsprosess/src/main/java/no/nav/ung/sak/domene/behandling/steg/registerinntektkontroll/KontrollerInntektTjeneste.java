@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
 import no.nav.ung.sak.ytelse.RapportertInntekt;

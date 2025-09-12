@@ -1,4 +1,4 @@
-package no.nav.ung.kodeverk.etterlysning;
+package no.nav.ung.kodeverk.varsel;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.LegacyKodeverdiJsonValue;

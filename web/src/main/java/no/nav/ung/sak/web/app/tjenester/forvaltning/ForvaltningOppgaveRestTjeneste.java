@@ -19,9 +19,8 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.SettOppgaveUtløptForInntektsrapporteringTask;
@@ -40,7 +39,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Optional;
 import java.util.UUID;
 
 import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
