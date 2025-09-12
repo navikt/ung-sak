@@ -14,9 +14,9 @@
     <name>ung-sak :: Webapp</name>
 
     <properties>
-        <swagger-ui.version>5.27.1</swagger-ui.version>
-        <jetty.version>12.1.0</jetty.version>
-        <metrics.version>4.2.33</metrics.version>
+        <swagger-ui.version>5.28.1</swagger-ui.version>
+        <jetty.version>12.1.1</jetty.version>
+        <metrics.version>4.2.36</metrics.version>
     </properties>
 
 

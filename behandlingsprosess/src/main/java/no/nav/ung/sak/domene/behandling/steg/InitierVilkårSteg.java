@@ -1,33 +1,24 @@
 package no.nav.ung.sak.domene.behandling.steg;
 
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.stream.Collectors;
 
 @BehandlingStegRef(value = BehandlingStegType.INIT_VILKÅR)
 @BehandlingTypeRef
@@ -72,15 +63,10 @@ public class InitierVilkårSteg implements BehandlingSteg {
 
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
         int utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
-        var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId());
-        VilkårBuilder fullstendigTidslinje = fullstendigTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fullstendigePerioder);
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utledRådataTilUtledningAvVilkårsperioder(behandling.getId());
-        var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
-
         vilkårBuilder.medMaksMellomliggendePeriodeAvstand(utledetAvstand)
-            .medFullstendigTidslinje(fullstendigTidslinje)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
-            .leggTilIkkeVurderteVilkår(vilkårPeriodeMap, perioderSomSkalTilbakestilles);
+            .leggTilIkkeVurderteVilkår(vilkårPeriodeMap);
         var vilkårResultat = vilkårBuilder.build();
 
         validerResultat(vilkårResultat, vilkårPeriodeMap);
@@ -95,29 +81,6 @@ public class InitierVilkårSteg implements BehandlingSteg {
                 + vilkårPeriodeMap.keySet()
                 + ", vilkårResultat" + vilkårResultat);
         }
-    }
-
-    /**
-     * Utleder tidslinje for hele fagsaken med vilkårsreglene
-     *
-     * @param utledetAvstand    avstand for mellomliggende perioder
-     * @param kantIKantVurderer kant i kant vurderer
-     * @param allePerioder      alle vilkårsperioder for fagsaken
-     * @return dummy vilkårsbuilder for, null for ikke implemterte ytelser
-     */
-    private VilkårBuilder fullstendigTidslinje(int utledetAvstand, KantIKantVurderer kantIKantVurderer, NavigableSet<DatoIntervallEntitet> allePerioder) {
-        if (allePerioder == null) {
-            return null;
-        }
-        var vb = new VilkårBuilder()
-            .somDummy()
-            .medKantIKantVurderer(kantIKantVurderer)
-            .medMaksMellomliggendePeriodeAvstand(utledetAvstand);
-        for (DatoIntervallEntitet datoIntervallEntitet : allePerioder) {
-            vb.leggTil(vb.hentBuilderFor(datoIntervallEntitet)
-                .medUtfall(Utfall.IKKE_VURDERT));
-        }
-        return vb;
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {

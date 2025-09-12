@@ -113,4 +113,19 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     public static Set<BehandlingÅrsakType> årsakerEtterKlageBehandling() {
         return Set.of(ETTER_KLAGE);
     }
+
+    public static Set<BehandlingÅrsakType> årsakerForInnhentingAvProgramperiode() {
+        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+    }
+
+    public static Set<BehandlingÅrsakType> årsakerForInnhentingAvPersonopplysninger() {
+        return Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
+            BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
+    }
+
+    public static Set<BehandlingÅrsakType> årsakerForInnhentingAvInntektOgYtelse() {
+        return Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+    }
+
 }

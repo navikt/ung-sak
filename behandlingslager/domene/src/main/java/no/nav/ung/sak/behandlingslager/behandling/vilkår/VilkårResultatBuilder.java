@@ -138,13 +138,12 @@ public class VilkårResultatBuilder {
         return this;
     }
 
-    public VilkårResultatBuilder leggTilIkkeVurderteVilkår(Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårPeriodeMap, NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
+    public VilkårResultatBuilder leggTilIkkeVurderteVilkår(Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårPeriodeMap) {
         vilkårPeriodeMap.forEach((k, v) -> {
             var builder = hentBuilderFor(k)
                 .medType(k)
                 .medMaksMellomliggendePeriodeAvstand(mellomliggendePeriodeAvstand)
-                .medKantIKantVurderer(kantIKantVurderer)
-                .tilbakestill(perioderSomSkalTilbakestilles);
+                .medKantIKantVurderer(kantIKantVurderer);
             v.forEach(periode -> builder.leggTil(builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT)));
             leggTil(builder);
         });
