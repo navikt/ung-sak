@@ -29,7 +29,7 @@ public class UttalelseV2 extends BaseEntitet {
     private EndringType type;
 
     @Column(name = "grunnlag_ref", nullable = false)
-    private UUID grunnlagsreferanse;
+    private Long grunnlagsreferanse;
 
 
     @Embedded
@@ -40,7 +40,7 @@ public class UttalelseV2 extends BaseEntitet {
         // Hibernate
     }
 
-    public UttalelseV2(boolean harUttalelse, String uttalelseBegrunnelse, DatoIntervallEntitet periode, JournalpostId svarJournalpostId, EndringType type, UUID grunnlagsreferanse) {
+    public UttalelseV2(boolean harUttalelse, String uttalelseBegrunnelse, DatoIntervallEntitet periode, JournalpostId svarJournalpostId, EndringType type, Long grunnlagsreferanse) {
         this.uttalelseBegrunnelse = uttalelseBegrunnelse;
         this.harUttalelse = harUttalelse;
         this.periode = periode;
@@ -73,7 +73,7 @@ public class UttalelseV2 extends BaseEntitet {
         return svarJournalpostId;
     }
 
-    public UUID getGrunnlagsreferanse() {
+    public Long getGrunnlagsreferanse() {
         return grunnlagsreferanse;
     }
 
