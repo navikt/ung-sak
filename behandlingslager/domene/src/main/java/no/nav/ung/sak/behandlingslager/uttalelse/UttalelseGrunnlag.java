@@ -8,7 +8,6 @@ import org.hibernate.annotations.Immutable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity(name = "UttalelseGrunnlag")
 @Table(name = "GR_UTTALELSE")
@@ -27,9 +26,6 @@ public class UttalelseGrunnlag extends BaseEntitet {
     @JoinColumn(name = "uttalelse_id", nullable = false)
     private Uttalelser uttalelser;
 
-    @Column(name = "grunnlagsreferanse", updatable = false, unique = true)
-    private UUID grunnlagsreferanse;
-
     @Column(name = "aktiv", nullable = false)
     private Boolean aktiv = true;
 
@@ -38,13 +34,11 @@ public class UttalelseGrunnlag extends BaseEntitet {
 
     public UttalelseGrunnlag(Long behandlingId) {
         this.id = behandlingId;
-        this.grunnlagsreferanse = UUID.randomUUID();
     }
 
     public UttalelseGrunnlag(Long behandlingId, UttalelseGrunnlag grunnlag) {
         this.id = behandlingId;
         this.uttalelser = grunnlag.uttalelser;
-        this.grunnlagsreferanse = UUID.randomUUID();
     }
 
     public Uttalelser getUttalelser() { return uttalelser;}

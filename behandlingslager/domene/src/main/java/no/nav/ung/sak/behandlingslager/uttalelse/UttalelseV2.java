@@ -16,7 +16,7 @@ public class UttalelseV2 extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UTTALELSE_V2")
     private Long id;
 
-    @Column(name = "uttalelse_begrunnelse", updatable = false)
+    @Column(name = "begrunnelse", updatable = false)
     private String uttalelseBegrunnelse;
 
     @Column(name = "har_uttalelse", updatable = false, nullable = false)
@@ -25,7 +25,7 @@ public class UttalelseV2 extends BaseEntitet {
     @Embedded
     private DatoIntervallEntitet periode;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "endring_type", nullable = false)
     private EndringType type;
 
     @Column(name = "grunnlag_ref", nullable = false)
