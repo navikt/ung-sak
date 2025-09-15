@@ -16,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -171,7 +170,7 @@ class VurderUngdomsprogramVilkårStegTest {
     private void initierVilkår(DatoIntervallEntitet periode) {
         final var vilkåreneBuilder = Vilkårene.builder();
         vilkåreneBuilder.leggTilIkkeVurderteVilkår(
-            Map.of(VilkårType.UNGDOMSPROGRAMVILKÅRET, new TreeSet<>(Set.of(periode))), new TreeSet<>());
+            Map.of(VilkårType.UNGDOMSPROGRAMVILKÅRET, new TreeSet<>(Set.of(periode))));
         vilkårResultatRepository.lagre(behandling.getId(), vilkåreneBuilder.build());
     }
 

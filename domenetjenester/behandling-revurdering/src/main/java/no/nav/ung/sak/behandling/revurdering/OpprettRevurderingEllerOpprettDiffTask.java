@@ -2,7 +2,9 @@ package no.nav.ung.sak.behandling.revurdering;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -43,12 +45,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     public static final String PERIODER = "perioder";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
-    public static final Set<BehandlingÅrsakType> REGISTERINNHENTING_ÅRSAKER = Set.of(
-        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
-        BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
-        BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
-        BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
-        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+    public static final Set<BehandlingÅrsakType> REGISTERINNHENTING_ÅRSAKER = Stream.of(
+        BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().stream(),
+        BehandlingÅrsakType.årsakerForInnhentingAvPersonopplysninger().stream(),
+        BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream()
+    ).flatMap(Function.identity()).collect(Collectors.toSet());
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private ProsessTriggereRepository prosessTriggereRepository;

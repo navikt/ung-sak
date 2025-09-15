@@ -13,6 +13,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     NY_SØKT_PROGRAM_PERIODE("RE-END-FRA-BRUKER", "Endring fra deltaker"),
     RE_ANNET("RE-ANNET", "Annet"),
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),
+    RE_SATS_ENDRING("RE-SATS-ENDRING", "Generelle endringer som påvirker sats og barnetillegg"),
 
     // Manuelt opprettet revurdering (obs: årsakene kan også bli satt på en automatisk opprettet revurdering)
     RE_OPPLYSNINGER_OM_DØD("RE-DØD", "Nye opplysninger om brukers eller barns dødsfall"),
@@ -112,4 +113,19 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     public static Set<BehandlingÅrsakType> årsakerEtterKlageBehandling() {
         return Set.of(ETTER_KLAGE);
     }
+
+    public static Set<BehandlingÅrsakType> årsakerForInnhentingAvProgramperiode() {
+        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+    }
+
+    public static Set<BehandlingÅrsakType> årsakerForInnhentingAvPersonopplysninger() {
+        return Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
+            BehandlingÅrsakType.RE_HENDELSE_FØDSEL);
+    }
+
+    public static Set<BehandlingÅrsakType> årsakerForInnhentingAvInntektOgYtelse() {
+        return Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+    }
+
 }

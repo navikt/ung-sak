@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,9 @@ public class RevurderingTjenesteImplTest {
     @Inject
     private HistorikkinnslagRepository historikkRepository;
 
+    @Inject
+    private ProsessTriggereRepository prosessTriggereRepository;
+
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
@@ -79,7 +83,7 @@ public class RevurderingTjenesteImplTest {
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
         var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste,
-            revurderingTjenesteFelles, grunnlagKopierer, historikkRepository);
+            revurderingTjenesteFelles, grunnlagKopierer, historikkRepository, prosessTriggereRepository);
 
         // Act
         Behandling revurdering = revurderingTjeneste

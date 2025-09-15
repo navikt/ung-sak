@@ -19,6 +19,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BeregnDagsatsInput;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
+import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 
@@ -54,16 +55,32 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(kontekst.getBehandlingId());
+        validerKunVurdertePerioder(samletResultat);
         var oppfyltVilkårTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.OPPFYLT)).mapValue(it -> true);
         if (oppfyltVilkårTidslinje.isEmpty()) {
             ungdomsytelseGrunnlagRepository.deaktiverGrunnlag(kontekst.getBehandlingId());
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
+
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
         var satsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(beregnDagsatsInput);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    /**
+         * Validerer at alle perioder i tidslinjen er vurdert.
+         * Kaster IllegalStateException hvis noen periode ikke er vurdert.
+         *
+         * @param samletResultat Tidslinje med vurderte vilkår
+         */
+    private static void validerKunVurdertePerioder(LocalDateTimeline<VilkårUtfallSamlet> samletResultat) {
+        var ikkeVurdertTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.IKKE_VURDERT)).mapValue(it -> true);
+
+        if (!ikkeVurdertTidslinje.isEmpty()){
+            throw new IllegalStateException("Fant segmenter som ikke var vurdert: " + ikkeVurdertTidslinje.getLocalDateIntervals());
+        }
     }
 
     /**

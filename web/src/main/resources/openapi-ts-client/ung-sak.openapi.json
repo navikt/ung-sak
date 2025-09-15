@@ -1045,9 +1045,9 @@
         "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingÅrsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.FagsakStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
@@ -1378,34 +1378,26 @@
         "required" : [ "systemNavn" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.abac.PipDto" : {
+      "ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDto" : {
         "properties" : {
-          "aktørIder" : {
+          "aktørIderForSporingslogg" : {
             "items" : {
               "type" : "string"
             },
-            "maxItems" : 50,
-            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
-          "behandlingStatus" : {
-            "maxLength" : 50,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}\\p{Space}]+$",
-            "type" : "string"
-          },
-          "fagsakStatus" : {
-            "maxLength" : 50,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}\\p{Space}]+$",
-            "type" : "string"
+          "aktørIderForTilgangskontroll" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
           }
         },
-        "required" : [ "aktørIder" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.abac.PipDtoV2" : {
+      "ung.sak.kontrakt.abac.PipDtoV3" : {
         "properties" : {
           "aktørIder" : {
             "items" : {
@@ -1422,13 +1414,23 @@
           },
           "fagsakStatus" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
+          },
+          "saksnummer" : {
+            "type" : "string"
           }
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.abac.PipDtoV3" : {
+      "ung.sak.kontrakt.abac.PipDtoV4" : {
         "properties" : {
           "aktørIder" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "aktørIderForSporingslogg" : {
             "items" : {
               "type" : "string"
             },
@@ -7390,17 +7392,16 @@
         "tags" : [ "pip" ]
       }
     },
-    "/api/pip/pipdata-for-behandling" : {
+    "/api/pip/aktoer-for-sak-med-sporingslogghint" : {
       "get" : {
-        "deprecated" : true,
-        "description" : "Henter aktørIder, fagsak- og behandlingstatus tilknyttet til en behandling",
-        "operationId" : "hentAktørIdListeTilknyttetBehandling",
+        "description" : "Henter aktørId'er tilknyttet en fagsak",
+        "operationId" : "hentAktørIdListeTilknyttetSakMedSporingslogghint",
         "parameters" : [ {
           "in" : "query",
-          "name" : "behandlingUuid",
+          "name" : "saksnummer",
           "required" : true,
           "schema" : {
-            "type" : "string"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
           }
         } ],
         "responses" : {
@@ -7408,38 +7409,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "pip" ]
-      }
-    },
-    "/api/pip/pipdata-for-behandling-v2" : {
-      "get" : {
-        "deprecated" : true,
-        "description" : "Henter aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
-        "operationId" : "hentPipDataTilknyttetBehandlingV2",
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV2"
-                  } ],
-                  "nullable" : true
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDto"
                 }
               }
             },
@@ -7468,6 +7438,36 @@
                 "schema" : {
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV3"
+                  } ],
+                  "nullable" : true
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-behandling-v4" : {
+      "get" : {
+        "description" : "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
+        "operationId" : "hentPipDataTilknyttetBehandlingV4",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV4"
                   } ],
                   "nullable" : true
                 }
