@@ -24,6 +24,7 @@ create table if not exists UTTALELSE_V2
     ENDRET_TID              TIMESTAMP(3)
     );
 create index IDX_UTTALELSE_V2_ENDRING_TYPE on UTTALELSE_V2 (ENDRING_TYPE);
+create index IDX_UTTALELSE_V2_JOURNALPOST on UTTALELSE_V2 (UTTALELSER_ID);
 create sequence if not exists SEQ_UTTALELSER increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UTTALSELSE_V2 increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_GR_UTTALELSE increment by 50 minvalue 1000000;
