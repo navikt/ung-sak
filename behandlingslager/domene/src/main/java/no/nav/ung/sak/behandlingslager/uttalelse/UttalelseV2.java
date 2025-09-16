@@ -6,7 +6,6 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 
-import java.util.UUID;
 
 @Entity(name = "UttalelseV2")
 @Table(name = "UTTALELSE_V2")

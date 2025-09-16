@@ -31,7 +31,7 @@ public class UttalelseGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @ChangeTracked
-    @JoinColumn(name = "uttalelse_id", nullable = false)
+    @JoinColumn(name = "uttalelser_id", nullable = false)
     private Uttalelser uttalelser;
 
     @Column(name = "aktiv", nullable = false)
