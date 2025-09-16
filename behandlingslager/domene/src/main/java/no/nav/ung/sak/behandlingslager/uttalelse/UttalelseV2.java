@@ -6,6 +6,8 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 
+import java.util.Objects;
+
 
 @Entity(name = "UttalelseV2")
 @Table(name = "UTTALELSE_V2")
@@ -46,6 +48,17 @@ public class UttalelseV2 extends BaseEntitet {
         this.svarJournalpostId = svarJournalpostId;
         this.type = type;
         this.grunnlagsreferanse = grunnlagsreferanse;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof UttalelseV2 that)) return false;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     @Override
