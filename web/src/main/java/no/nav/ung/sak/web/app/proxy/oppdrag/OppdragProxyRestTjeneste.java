@@ -11,6 +11,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.oppdrag.kontrakt.oppsummering.OppsummeringDto;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringDto;
 import no.nav.ung.abac.BeskyttetRessursKoder;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -27,6 +28,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 public class OppdragProxyRestTjeneste {
 
     public static final String SIMULERING_RESULTAT_URL = "/proxy/oppdrag/simulering/detaljert-resultat";
+    public static final String OPPSUMMERING_URL = "/proxy/oppdrag/oppsummering/v2/oppsummering";
 
     private K9OppdragRestKlient restKlient;
 
@@ -45,6 +47,15 @@ public class OppdragProxyRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursKoder.FAGSAK)
     public Optional<SimuleringDto> hentSimuleringResultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         return restKlient.hentDetaljertSimuleringResultat(behandlingIdDto.getBehandlingUuid());
+    }
+
+
+    @GET
+    @Path("/simulering/oppsummering/v2/oppsummering")
+    @Operation(description = "Viser oppsummering av hva som sendes til OS. Både totalt opp til og med behandlingen, og differanse mot hva som fantes før behandlingen", summary = ("Oppsummering av hva som sendes til OS"), tags = "oppsummering")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursKoder.FAGSAK)
+    public OppsummeringDto hentOppdragOppsummering(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        return restKlient.hentOppsummering(behandlingIdDto.getBehandlingUuid());
     }
 
 }
