@@ -48,4 +48,16 @@ public class UttalelseGrunnlag extends BaseEntitet {
         varsler.addAll(uttalelser);
         this.uttalelser = new Uttalelser(varsler);
     }
+
+    public void setAktiv(Boolean aktiv) {
+        this.aktiv = aktiv;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getBehandlingId() {
+        return behandlingId;
+    }
 }
