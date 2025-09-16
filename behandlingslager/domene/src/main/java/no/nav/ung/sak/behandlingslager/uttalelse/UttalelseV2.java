@@ -52,13 +52,19 @@ public class UttalelseV2 extends BaseEntitet {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof UttalelseV2 that)) return false;
-        return Objects.equals(id, that.id);
+        if (o == null || getClass() != o.getClass()) return false;
+        UttalelseV2 that = (UttalelseV2) o;
+        return harUttalelse == that.harUttalelse &&
+            Objects.equals(uttalelseBegrunnelse, that.uttalelseBegrunnelse) &&
+            Objects.equals(periode, that.periode) &&
+            type == that.type &&
+            Objects.equals(grunnlagsreferanse, that.grunnlagsreferanse) &&
+            Objects.equals(svarJournalpostId, that.svarJournalpostId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(uttalelseBegrunnelse, harUttalelse, periode, type, grunnlagsreferanse, svarJournalpostId);
     }
 
     @Override
