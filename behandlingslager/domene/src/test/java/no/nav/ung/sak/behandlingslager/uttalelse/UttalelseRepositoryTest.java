@@ -76,7 +76,7 @@ public class UttalelseRepositoryTest {
             EndringType.ENDRET_INNTEKT,
             uttalelsegrunnlag.getId());
         uttalelsegrunnlag.leggTilUttalelser(List.of(uttalelse1));
-        repository.lagre(uttalelsegrunnlag);
+        repository.lagre(uttalelsegrunnlag.getId(), List.of(uttalelse1));
         return uttalelsegrunnlag;
     }
 }
