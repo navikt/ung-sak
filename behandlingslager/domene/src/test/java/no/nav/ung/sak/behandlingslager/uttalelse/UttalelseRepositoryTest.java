@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,11 +74,12 @@ public class UttalelseRepositoryTest {
             DatoIntervallEntitet.fraOgMedTilOgMed(
                 LocalDate.of(2025,8,1),
                 LocalDate.of(2025,8,31)),
-            null,
+            new JournalpostId(1245L),
             EndringType.ENDRET_INNTEKT,
-            uttalelsegrunnlag.getId());
+            123345L
+            );
         uttalelsegrunnlag.leggTilUttalelser(List.of(uttalelse1));
-        repository.lagre(uttalelsegrunnlag.getId(), List.of(uttalelse1));
+        repository.lagre(uttalelsegrunnlag.getBehandlingId(), List.of(uttalelse1));
         return uttalelsegrunnlag;
     }
 }
