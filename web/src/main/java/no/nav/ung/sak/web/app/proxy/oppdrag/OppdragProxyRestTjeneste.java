@@ -51,7 +51,7 @@ public class OppdragProxyRestTjeneste {
 
 
     @GET
-    @Path("/simulering/oppsummering/v2/oppsummering")
+    @Path("/oppsummering/v2/oppsummering")
     @Operation(description = "Viser oppsummering av hva som sendes til OS. Både totalt opp til og med behandlingen, og differanse mot hva som fantes før behandlingen", summary = ("Oppsummering av hva som sendes til OS"), tags = "oppsummering")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursKoder.FAGSAK)
     public OppsummeringDto hentOppdragOppsummering(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
