@@ -42,6 +42,7 @@ public class UttalelseRepositoryTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling.getId()));
     }
 
+
     @Test
     void skal_hente_grunnlag_bassert_på_behandling_id() {
         UttalelseGrunnlag uttalelseGrunnlag = lagreUttalelseGrunnlag();
