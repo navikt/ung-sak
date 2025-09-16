@@ -13,14 +13,6 @@ import java.util.Set;
 @Table(name = "GR_UTTALELSE")
 public class UttalelseGrunnlag extends BaseEntitet {
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getBehandlingId() {
-        return behandlingId;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_UTTALELSE")
     private Long id;
@@ -59,5 +51,13 @@ public class UttalelseGrunnlag extends BaseEntitet {
 
     public void setAktiv(Boolean aktiv) {
         this.aktiv = aktiv;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getBehandlingId() {
+        return behandlingId;
     }
 }
