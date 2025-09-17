@@ -18,6 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -41,12 +42,14 @@ class InntektBekreftelseHåndtererTest {
     private EntityManager em;
     private EtterlysningRepository etterlysningRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private UttalelseRepository uttalelseRepository;
 
 
     @BeforeEach
     void setup() {
         etterlysningRepository = new EtterlysningRepository(em);
         mottatteDokumentRepository = new MottatteDokumentRepository(em);
+        uttalelseRepository = new UttalelseRepository(em);
     }
 
     @Test
@@ -78,7 +81,7 @@ class InntektBekreftelseHåndtererTest {
             null));
 
         // Act
-        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository);
+        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository, uttalelseRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
@@ -93,6 +96,13 @@ class InntektBekreftelseHåndtererTest {
         assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isNull();
         assertThat(oppdatertEtterlysning.getUttalelse().get().harUttalelse()).isFalse();
         assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
+
+        var uttalelser = uttalelseRepository.hentEksisterendeGrunnlag(behandling.getId()).get().getUttalelser().getUttalelser();
+        assertThat(uttalelser).hasSize(1);
+        var uttalelse = uttalelser.iterator().next();
+        assertThat(uttalelse.getUttalelseBegrunnelse()).isNull();
+        assertThat(uttalelse.harUttalelse()).isFalse();
+        assertThat(uttalelse.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
     @Test
@@ -122,7 +132,7 @@ class InntektBekreftelseHåndtererTest {
             "en uttalelse"));
 
         // Act
-        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository);
+        var inntektBekreftelseHåndterer = new GenerellOppgaveBekreftelseHåndterer(mottatteDokumentRepository, etterlysningRepository, uttalelseRepository);
         inntektBekreftelseHåndterer.håndter(bekreftelse);
         em.flush();
 
@@ -137,6 +147,13 @@ class InntektBekreftelseHåndtererTest {
         assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isEqualTo("en uttalelse");
         assertThat(oppdatertEtterlysning.getUttalelse().get().harUttalelse()).isTrue();
         assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
+
+        var uttalelser = uttalelseRepository.hentEksisterendeGrunnlag(behandling.getId()).get().getUttalelser().getUttalelser();
+        assertThat(uttalelser).hasSize(1);
+        var uttalelse = uttalelser.iterator().next();
+        assertThat(uttalelse.getUttalelseBegrunnelse()).isEqualTo("en uttalelse");
+        assertThat(uttalelse.harUttalelse()).isTrue();
+        assertThat(uttalelse.getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
     }
 
     private MottattDokument lagMottattDokument(Behandling behandling, long journalpostId) {
