@@ -5,9 +5,8 @@ import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
-
 import java.util.Objects;
-
+import java.util.UUID;
 
 @Entity(name = "UttalelseV2")
 @Table(name = "UTTALELSE_V2")
@@ -30,8 +29,7 @@ public class UttalelseV2 extends BaseEntitet {
     private EndringType type;
 
     @Column(name = "grunnlag_ref", nullable = false)
-    private Long grunnlagsreferanse;
-
+    private UUID grunnlagsreferanse;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "svar_journalpost_id")))
@@ -41,7 +39,7 @@ public class UttalelseV2 extends BaseEntitet {
         // Hibernate
     }
 
-    public UttalelseV2(boolean harUttalelse, String uttalelseBegrunnelse, DatoIntervallEntitet periode, JournalpostId svarJournalpostId, EndringType type, Long grunnlagsreferanse) {
+    public UttalelseV2(boolean harUttalelse, String uttalelseBegrunnelse, DatoIntervallEntitet periode, JournalpostId svarJournalpostId, EndringType type, UUID grunnlagsreferanse) {
         this.uttalelseBegrunnelse = uttalelseBegrunnelse;
         this.harUttalelse = harUttalelse;
         this.periode = periode;
@@ -91,7 +89,7 @@ public class UttalelseV2 extends BaseEntitet {
         return svarJournalpostId;
     }
 
-    public Long getGrunnlagsreferanse() {
+    public UUID getGrunnlagsreferanse() {
         return grunnlagsreferanse;
     }
 
