@@ -120,6 +120,9 @@ public class BehandlingDtoTjeneste {
         }
         dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER, "behandling-perioder-årsak", uuidQueryParams));
         dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER_MED_VILKÅR, "behandling-perioder-årsak-med-vilkår", uuidQueryParams));
+        if (behandling.erYtelseBehandling()){
+            dto.leggTil(get(OppdragProxyRestTjeneste.OPPSUMMERING_URL, "oppdrag-oppsummering", uuidQueryParams));
+        }
     }
 
     private void leggTilHandlingerResourceLinks(Behandling behandling, BehandlingDto dto) {
