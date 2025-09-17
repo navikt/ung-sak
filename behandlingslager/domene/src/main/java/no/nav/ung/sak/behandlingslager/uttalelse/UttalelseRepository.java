@@ -13,11 +13,11 @@ import java.util.Optional;
 @ApplicationScoped
 public class UttalelseRepository {
 
-    @Inject
     private EntityManager entityManager;
 
     public UttalelseRepository() {}
 
+    @Inject
     public UttalelseRepository(EntityManager entityManager) { this.entityManager = entityManager; }
 
     public void lagre(Long behandlingsId, Collection<UttalelseV2> uttalelser) {
@@ -26,7 +26,7 @@ public class UttalelseRepository {
         persister(hentEksisterendeGrunnlag(behandlingsId), nyttGrunnlag);
     }
 
-    public void persister(Optional <UttalelseGrunnlag> eksisterendeGrunnlag, UttalelseGrunnlag nyttGrunnlag) {
+    private void persister(Optional <UttalelseGrunnlag> eksisterendeGrunnlag, UttalelseGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
         if (nyttGrunnlag.getUttalelser() != null) {
             entityManager.persist(nyttGrunnlag.getUttalelser());
@@ -51,16 +51,4 @@ public class UttalelseRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    public Optional<UttalelseGrunnlag> hentUttalelseBasertPåId(Long behandlingId){
-        final var query = entityManager.createQuery(
-            "select ug from UttalelseGrunnlag ug " +
-                "where ug.behandlingId = :behandlingId", UttalelseGrunnlag.class);
-        query.setParameter("behandlingId", behandlingId);
-
-        return HibernateVerktøy.hentUniktResultat(query);
-    }
-
-    public UttalelseV2 hentUttalelse(Long id){
-        return entityManager.find(UttalelseV2.class, id);
-    }
 }

@@ -47,7 +47,7 @@ public class UttalelseRepositoryTest {
     @Test
     void skal_hente_grunnlag_basert_på_behandling_id() {
         // Arrange
-        final var uttalelseGrunnlag = lagreUttalelseGrunnlag();
+        lagreUttalelseGrunnlag(behandling.getId());
 
         // Act
         Optional<UttalelseGrunnlag> resultat = repository.hentEksisterendeGrunnlag(behandling.getId());
@@ -55,26 +55,11 @@ public class UttalelseRepositoryTest {
         // Assert
         assertThat(resultat).isPresent();
         assertThat(resultat.get().getId()).isNotNull();
-        assertThat(resultat.get().getBehandlingId()).isEqualTo(uttalelseGrunnlag.getBehandlingId());
-    }
-
-    @Test
-    void skal_hente_uttalelse_basert_på_behandling_id() {
-        // Arrange
-        final var uttalelseGrunnlag = lagreUttalelseGrunnlag();
-
-        // Act
-        Optional<UttalelseGrunnlag> resultat = repository.hentUttalelseBasertPåId(behandling.getId());
-
-        // Assert
-        assertThat(resultat).isPresent();
-        assertThat(resultat.get().getId()).isNotNull();
-        assertThat(resultat.get().getBehandlingId()).isEqualTo(uttalelseGrunnlag.getBehandlingId());
+        assertThat(resultat.get().getBehandlingId()).isEqualTo(behandling.getId());
     }
 
 
-    private UttalelseGrunnlag lagreUttalelseGrunnlag() {
-        final var uttalelsegrunnlag = new UttalelseGrunnlag(behandling.getId());
+    private void lagreUttalelseGrunnlag(Long behandlingId) {
         var uttalelse1 = new UttalelseV2(
             true,
             "Begrunnelse 1",
@@ -85,8 +70,7 @@ public class UttalelseRepositoryTest {
             EndringType.ENDRET_INNTEKT,
             123345L
             );
-        uttalelsegrunnlag.leggTilUttalelser(List.of(uttalelse1));
-        repository.lagre(uttalelsegrunnlag.getBehandlingId(), List.of(uttalelse1));
-        return uttalelsegrunnlag;
+        List<UttalelseV2> uttalelser = List.of(uttalelse1);
+        repository.lagre(behandlingId, uttalelser);
     }
 }
