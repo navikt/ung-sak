@@ -9,6 +9,7 @@ import no.nav.k9.oppdrag.kontrakt.BehandlingReferanseDomene;
 import no.nav.k9.oppdrag.kontrakt.Domene;
 import no.nav.k9.oppdrag.kontrakt.SaksnummerDomene;
 import no.nav.k9.oppdrag.kontrakt.aktørbytte.ByttAktørRequest;
+import no.nav.k9.oppdrag.kontrakt.oppsummering.OppsummeringDto;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringDto;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
@@ -41,6 +42,7 @@ public class K9OppdragRestKlient {
     private URI uriAlleOppdragXmler;
     private URI uriDetaljertSimuleringResultat;
     private URI uriKansellerSimulering;
+    private URI uriOppsummering;
 
     public K9OppdragRestKlient() {
     }
@@ -57,6 +59,7 @@ public class K9OppdragRestKlient {
         this.uriAlleOppdragXmler = tilUri(urlK9Oppdrag, "iverksett/forvaltning/hent-oppdrag-xmler");
         this.uriDetaljertSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/v2/detaljert-resultat");
         this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/v2/kanseller");
+        this.uriOppsummering = tilUri(urlK9Oppdrag, "oppsummering/v2/oppsummering");
 
         //avviker fra @Inject av OidcRestClient fordi det trengs lenger timeout enn normalt mot k9-oppdrag pga simuleringer som tar lang tid (over 20 sekunder) når det er mange perioder
         restClient = new K9OppdragRestClientConfig().createOidcRestClient(tokenProvider, k9OppdragScope);
@@ -98,6 +101,12 @@ public class K9OppdragRestKlient {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
         BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, DOMENE);
         restClient.post(uriKansellerSimulering, behandlingReferanseDomene);
+    }
+
+    public OppsummeringDto hentOppsummering(UUID behandlingUuid) {
+        BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
+        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, DOMENE);
+        return restClient.post(uriOppsummering, behandlingReferanseDomene, OppsummeringDto.class);
     }
 
     public List<OppdragXmlDto> alleOppdragXmler(Saksnummer saksnummer) {

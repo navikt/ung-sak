@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
-
+import java.util.Objects;
 
 @Entity(name = "UttalelseV2")
 @Table(name = "UTTALELSE_V2")
@@ -46,6 +46,23 @@ public class UttalelseV2 extends BaseEntitet {
         this.svarJournalpostId = svarJournalpostId;
         this.type = type;
         this.grunnlagsreferanse = grunnlagsreferanse;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UttalelseV2 that = (UttalelseV2) o;
+        return harUttalelse == that.harUttalelse &&
+            Objects.equals(uttalelseBegrunnelse, that.uttalelseBegrunnelse) &&
+            Objects.equals(periode, that.periode) &&
+            type == that.type &&
+            Objects.equals(grunnlagsreferanse, that.grunnlagsreferanse) &&
+            Objects.equals(svarJournalpostId, that.svarJournalpostId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uttalelseBegrunnelse, harUttalelse, periode, type, grunnlagsreferanse, svarJournalpostId);
     }
 
     @Override

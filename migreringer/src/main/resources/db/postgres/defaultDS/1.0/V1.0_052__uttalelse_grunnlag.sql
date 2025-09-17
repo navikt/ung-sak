@@ -10,7 +10,7 @@ create table if not exists UTTALELSER
 create table if not exists UTTALELSE_V2
 (
     ID                      BIGINT                                  NOT NULL PRIMARY KEY,
-    GRUNNLAG_REF            BIGINT                                  NOT NULL,
+    GRUNNLAG_REF            UUID                                    NOT NULL,
     SVAR_JOURNALPOST_ID     VARCHAR(20)                             NOT NULL,
     UTTALELSER_ID BIGINT    REFERENCES                              UTTALELSER (id),
     ENDRING_TYPE            VARCHAR(50)                             NOT NULL,
