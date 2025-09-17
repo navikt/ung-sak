@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -41,15 +42,15 @@ class VedtaksbrevValgRepositoryTest {
 
         var vedtaksbrevValgEntitet = new VedtaksbrevValgEntitet(
             behandling.getId(),
+            DokumentMalType.ENDRING_INNTEKT,
             true,
             false,
-            "<h1>Et redigert brev</h1>"
-        );
+            "<h1>Et redigert brev</h1>");
 
         vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
         entityManager.flush();
 
-        VedtaksbrevValgEntitet resultat = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId()).get();
+        VedtaksbrevValgEntitet resultat = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId(), DokumentMalType.ENDRING_INNTEKT).get();
 
         assertThat(resultat.getId()).isNotNull();
         assertThat(resultat.getBehandlingId()).isEqualTo(behandling.getId());
@@ -68,10 +69,10 @@ class VedtaksbrevValgRepositoryTest {
 
         var original = new VedtaksbrevValgEntitet(
             behandling.getId(),
+            DokumentMalType.ENDRING_INNTEKT,
             false,
             false,
-            null
-        );
+            null);
 
         original = vedtaksbrevValgRepository.lagre(original);
         entityManager.flush();
@@ -79,7 +80,7 @@ class VedtaksbrevValgRepositoryTest {
         assertThat(original.getVersjon()).isEqualTo(0);
 
         //klient 1 endrer før lagring
-        VedtaksbrevValgEntitet kopi1 = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId()).get();
+        VedtaksbrevValgEntitet kopi1 = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId(), DokumentMalType.ENDRING_INNTEKT).get();
         kopi1.rensOgSettRedigertHtml("Vil feile");
         kopi1.setRedigert(true);
         entityManager.detach(kopi1);
@@ -87,7 +88,7 @@ class VedtaksbrevValgRepositoryTest {
         assertThat(kopi1.getVersjon()).isEqualTo(0);
 
         //klient 2 endrer og rekker å lagre
-        VedtaksbrevValgEntitet kopi2 = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId()).get();
+        VedtaksbrevValgEntitet kopi2 = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId(), DokumentMalType.ENDRING_INNTEKT).get();
         kopi2.rensOgSettRedigertHtml("Vil gå bra");
         kopi2.setRedigert(true);
         kopi2 = vedtaksbrevValgRepository.lagre(kopi2);

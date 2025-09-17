@@ -73,14 +73,15 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             return;
         }
 
-        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
-        boolean harSaksbehandlerHindretEllerRedigertBrev = vedtaksbrevValgEntitet != null && (vedtaksbrevValgEntitet.isHindret() || vedtaksbrevValgEntitet.isRedigert());
+        //TODO håndter flere vedtaksbrev
+        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
+        boolean harSaksbehandlerHindretEllerRedigertBrev = !vedtaksbrevValgEntitet.isEmpty() && (vedtaksbrevValgEntitet.getFirst().isHindret() || vedtaksbrevValgEntitet.getFirst().isRedigert());
         if (harSaksbehandlerHindretEllerRedigertBrev) {
-            håndterSaksbehandlerValg(behandling, vedtaksbrevValgEntitet, resultat);
+            håndterSaksbehandlerValg(behandling, vedtaksbrevValgEntitet.getFirst(), resultat);
             return;
         }
 
-        if (vedtaksbrevValgEntitet != null) {
+        if (!vedtaksbrevValgEntitet.isEmpty()) {
             LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
         }
 

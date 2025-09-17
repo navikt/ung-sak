@@ -218,8 +218,7 @@ class VedtaksbrevTjenesteTest {
 
         //Ingen brev som brukes av behandling
         assertThatThrownBy(() -> forhåndsvis(behandling, null))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("hindret");
+            .isInstanceOf(IllegalStateException.class);
     }
 
 

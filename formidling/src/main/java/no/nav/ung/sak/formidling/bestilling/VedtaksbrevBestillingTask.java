@@ -70,7 +70,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
 
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
-            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
+            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), dokumentMalType, false);
             journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
             return;
         }

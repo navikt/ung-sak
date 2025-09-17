@@ -21,7 +21,8 @@ public class ManueltVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())
+        //TODO endre til å få inn valg fra input?
+        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId()).stream().findFirst()
             .orElseThrow(() -> new IllegalStateException("Ingen lagrede valg for behandling"));
 
         if (valg.getRedigertBrevHtml() == null || valg.getRedigertBrevHtml().isBlank()) {

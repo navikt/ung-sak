@@ -3,6 +3,7 @@ package no.nav.ung.sak.formidling;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -48,12 +49,12 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
+            DokumentMalType.MANUELT_VEDTAK_DOK,
             true,
             false,
             "<h1>Du får ungdomsprogramytelse</h1>" +
                 "<p>Du skal få penger, men du har tjent for mye og vi vil derfor kreve tilbake et beløp.</p>" +
-                "<p>Du får mer informasjon om dette i nærmeste fremtid.</p>"
-        ));
+                "<p>Du får mer informasjon om dette i nærmeste fremtid.</p>"));
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
             "Du får ungdomsprogramytelse " +
@@ -104,10 +105,10 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
+            DokumentMalType.MANUELT_VEDTAK_DOK,
             true,
             false,
-            "<h1>Manuell skrevet overskrift</h1>"
-        ));
+            "<h1>Manuell skrevet overskrift</h1>"));
         return behandling;
     }
 }

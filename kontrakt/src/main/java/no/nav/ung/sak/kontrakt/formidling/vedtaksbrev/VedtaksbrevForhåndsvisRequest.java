@@ -1,7 +1,6 @@
 package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -32,12 +31,7 @@ public record VedtaksbrevForhåndsvisRequest(
     @Valid
     Boolean htmlVersjon,
 
-    @Valid
+    @Valid //TODO hør med Hallvard om ok å gjøre denne påkrevt
     DokumentMalType dokumentMalType) {
 
-
-    @AssertFalse(message = "Kan ikke be om redigert versjon samtidig med dokumentMalType")
-    public boolean bothRedigertVersjonAndDokumentMalTypeSet() {
-        return dokumentMalType != null && redigertVersjon != null;
-    }
 }

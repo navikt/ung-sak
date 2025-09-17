@@ -1,7 +1,9 @@
 package no.nav.ung.sak.behandlingslager.formidling;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.bestilling.DokumentMalTypeKodeverdiConverter;
 import org.slf4j.Logger;
 
 @Entity(name = "VedtaksbrevValgEntitet")
@@ -18,6 +20,10 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
     @Column(name = "behandling_id", updatable = false, nullable = false)
     private Long behandlingId;
 
+    @Column(name = "dokumentmal_type", updatable = false, nullable = false)
+    @Convert(converter = DokumentMalTypeKodeverdiConverter.class)
+    private DokumentMalType dokumentMalType;
+
     @Column(name = "redigert", nullable = false)
     private boolean redigert;
 
@@ -33,21 +39,22 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
 
     VedtaksbrevValgEntitet() {}
 
-    public VedtaksbrevValgEntitet(Long behandlingId, boolean redigert, boolean hindret, String redigertBrevHtml) {
+    public VedtaksbrevValgEntitet(Long behandlingId, DokumentMalType dokumentMalType, boolean redigert, boolean hindret, String redigertBrevHtml) {
         this.behandlingId = behandlingId;
+        this.dokumentMalType = dokumentMalType;
         this.redigert = redigert;
         this.hindret = hindret;
         this.redigertBrevHtml = sanitizeHtml(redigertBrevHtml);
 
     }
 
-    public static VedtaksbrevValgEntitet ny(Long behandlingId) {
+    public static VedtaksbrevValgEntitet ny(Long behandlingId, DokumentMalType dokumentMalType) {
         return new VedtaksbrevValgEntitet(
             behandlingId,
+            dokumentMalType,
             false,
             false,
-            null
-        );
+            null);
     }
 
     public Long getId() {
@@ -56,6 +63,10 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
 
     public Long getBehandlingId() {
         return behandlingId;
+    }
+
+    public DokumentMalType getDokumentMalType() {
+        return dokumentMalType;
     }
 
     public boolean isRedigert() {
@@ -81,6 +92,7 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
     public void setHindret(boolean hindret) {
         this.hindret = hindret;
     }
+
 
     public void rensOgSettRedigertHtml(String redigertBrevHtml) {
         if ((redigertBrevHtml == null || redigertBrevHtml.isBlank()) && this.redigertBrevHtml != null && !this.redigertBrevHtml.isBlank()) {

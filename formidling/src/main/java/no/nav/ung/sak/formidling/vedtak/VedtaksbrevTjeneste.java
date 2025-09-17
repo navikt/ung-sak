@@ -3,7 +3,6 @@ package no.nav.ung.sak.formidling.vedtak;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Dependent
 public class VedtaksbrevTjeneste {
@@ -49,7 +49,6 @@ public class VedtaksbrevTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var erAvsluttet = behandling.erAvsluttet();
 
-        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
 
         BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Regel resultater: {}", totalResultat.safePrint());
@@ -58,8 +57,12 @@ public class VedtaksbrevTjeneste {
             return mapIngenBrevResponse(totalResultat);
         }
 
+        var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
         var vedtaksbrevValg = totalResultat.vedtaksbrevResultater().stream()
-            .map(it -> mapVedtaksbrev(it.vedtaksbrevEgenskaper(), valg, erAvsluttet, it))
+            .map(it -> {
+                var malValg = valg.stream().filter(v -> v.getDokumentMalType() == it.dokumentMalType()).findFirst();
+                return mapVedtaksbrev(it.vedtaksbrevEgenskaper(), malValg, erAvsluttet, it);
+            })
             .toList();
 
         VedtaksbrevValg førsteValg = vedtaksbrevValg.getFirst();
@@ -88,7 +91,7 @@ public class VedtaksbrevTjeneste {
             !erAvsluttet && egenskaper.kanOverstyreRediger(),
             resultat.forklaring(),
             valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null)
-            );
+        );
     }
 
     private static VedtaksbrevValgResponse mapIngenBrevResponse(BehandlingVedtaksbrevResultat totalResultat) {
@@ -119,6 +122,7 @@ public class VedtaksbrevTjeneste {
             );
     }
 
+    //TODO utvide med dokumentMalType for å redigere riktig brev.
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
@@ -132,8 +136,8 @@ public class VedtaksbrevTjeneste {
 
         var resultat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId())
-            .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId()));
+        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId(), resultat.dokumentMalType())
+            .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId(), resultat.dokumentMalType()));
 
         //TODO håndtere flere resultater
         var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
@@ -155,59 +159,85 @@ public class VedtaksbrevTjeneste {
     }
 
     public List<GenerertBrev> forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
+        List<GenerertBrev> genererteBrev = doForhåndsvis(dto);
+        if (genererteBrev.isEmpty()) {
+            throw new IllegalStateException("Ingen vedtaksbrev generert for behandling. Request: " + dto);
+        }
+        return genererteBrev;
+    }
 
+    @NotNull
+    private List<GenerertBrev> doForhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(dto.behandlingId());
         if (!totalresultater.harBrev()) {
-            throw new IllegalArgumentException("Ingen vedtaksbrev resultater for behandling. Årsak: "+ totalresultater.ingenBrevResultater().stream()
+            throw new IllegalArgumentException("Ingen vedtaksbrev resultater for behandling. Årsak: " + totalresultater.ingenBrevResultater().stream()
                 .map(IngenBrev::forklaring)
                 .collect(Collectors.joining(", ", "[", "]")));
         }
 
 
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
+        var relevanteVedtaksbrev = totalresultater.vedtaksbrevResultater().stream()
+            .filter(v -> dto.dokumentMalType() == null || v.dokumentMalType() == dto.dokumentMalType())
+            .toList();
 
         if (dto.redigertVersjon() == null) {
-            var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()).orElse(null);
-            if (valg != null) {
-                if (valg.isHindret()) {
-                    throw new IllegalArgumentException("Vedtaksbrev er manuelt hindret.");
-                }
-                if (valg.isRedigert()) {
-                    LOG.info("Vedtaksbrev er manuelt redigert - genererer manuell brev");
-                    return List.of(vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml));
-                }
-            }
+            var relevanteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()).stream()
+                .filter(it -> dto.dokumentMalType() == null || it.getDokumentMalType() == dto.dokumentMalType())
+                .toList();
 
-            return genererAutomatiskVedtaksbrev(kunHtml, totalresultater, dto.behandlingId(), dto.dokumentMalType());
+            var manuelleBrev = relevanteValg.stream()
+                .filter(it1 -> !it1.isHindret())
+                .filter(VedtaksbrevValgEntitet::isRedigert)
+                .map(it1 -> vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), it1.getDokumentMalType(), kunHtml))
+                .toList();
+
+            var redigerteEllerHindredeBrev = relevanteValg.stream()
+                .filter(it -> it.isHindret() || it.isRedigert())
+                .map(VedtaksbrevValgEntitet::getDokumentMalType)
+                .toList();
+
+            var automatiske = redigerteEllerHindredeBrev.isEmpty() ? relevanteVedtaksbrev : relevanteVedtaksbrev.stream()
+                .filter(vedtaksbrev -> !redigerteEllerHindredeBrev.contains(vedtaksbrev.dokumentMalType()))
+                .toList();
+
+            var automatiskeBrev = genererAutomatiskeBrev(dto, automatiske, totalresultater, kunHtml);
+
+            return Stream.concat(manuelleBrev.stream(), automatiskeBrev.stream()).toList();
+
         }
+
         if (dto.redigertVersjon()) {
-            return List.of(vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), kunHtml));
+            if (dto.dokumentMalType() != null) {
+                return List.of(vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), dto.dokumentMalType(), kunHtml));
+            }
+            return totalresultater.vedtaksbrevResultater().stream()
+                .map(it -> vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), it.dokumentMalType(), kunHtml))
+                .toList();
         }
 
-        return genererAutomatiskVedtaksbrev(kunHtml, totalresultater, dto.behandlingId(), dto.dokumentMalType());
+        return genererAutomatiskeBrev(dto, relevanteVedtaksbrev, totalresultater, kunHtml);
     }
 
-private List<GenerertBrev> genererAutomatiskVedtaksbrev(boolean kunHtml, BehandlingVedtaksbrevResultat totalresultater, Long behandlingId, DokumentMalType dokumentMalType) {
-    return totalresultater.vedtaksbrevResultater().stream()
-        .filter(vedtaksbrev -> dokumentMalType == null || vedtaksbrev.dokumentMalType() == dokumentMalType)
-        .map(vedtaksbrev -> vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
-            new VedtaksbrevGenerererInput(
-                behandlingId,
-                vedtaksbrev,
-                totalresultater.detaljertResultatTimeline(),
-                kunHtml
-            )))
-        .toList();
-}
+    private List<GenerertBrev> genererAutomatiskeBrev(VedtaksbrevForhåndsvisRequest dto, List<Vedtaksbrev> vedtaksbrev, BehandlingVedtaksbrevResultat totalresultater, boolean kunHtml) {
+        return vedtaksbrev.stream()
+            .map(v -> vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
+                new VedtaksbrevGenerererInput(
+                    dto.behandlingId(),
+                    v,
+                    totalresultater.detaljertResultatTimeline(),
+                    kunHtml
+                )))
+            .toList();
+    }
 
     public void ryddVedTilbakeHopp(Long behandlingId) {
-        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
-        if (vedtaksbrevValgEntitet == null) {
-            return;
-        }
+        vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId)
+            .forEach(valg -> {
+                valg.tilbakestillVedTilbakehopp();
+                vedtaksbrevValgRepository.lagre(valg);
+            });
 
-        vedtaksbrevValgEntitet.tilbakestillVedTilbakehopp();
-        vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }
 

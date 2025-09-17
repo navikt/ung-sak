@@ -204,7 +204,7 @@ class VurderVedtaksbrevTaskTest {
         var behandling = scenarioBuilder.getBehandling();
 
         vedtaksbrevValgRepository.lagre(
-            new VedtaksbrevValgEntitet(behandling.getId(), false, true, null)
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT, false, true, null)
         );
 
         var prosessTaskData = lagTask(behandling);
@@ -236,7 +236,7 @@ class VurderVedtaksbrevTaskTest {
         var behandling = lagAvsluttetBehandlingMedAksjonspunkt(scenarioBuilder, ungTestRepositories);
 
         vedtaksbrevValgRepository.lagre(
-            new VedtaksbrevValgEntitet(behandling.getId(), true, false, "tekst")
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT , true, false, "tekst")
         );
 
         var prosessTaskData = lagTask(behandling);
