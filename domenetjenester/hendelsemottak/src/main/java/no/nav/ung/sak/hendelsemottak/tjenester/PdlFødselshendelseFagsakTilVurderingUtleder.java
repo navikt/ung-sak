@@ -28,12 +28,11 @@ import java.util.*;
 public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
     private static final Logger logger = LoggerFactory.getLogger(PdlFødselshendelseFagsakTilVurderingUtleder.class);
-    public static final Set<ForelderBarnRelasjonRolle> AKTUELLE_RELASJONSROLLER = Set.of(ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.MEDMOR);
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
     private PersonopplysningRepository personopplysningRepository;
-    private PdlKlient pdlKlient;
+    private Pdl pdlKlient;
 
     public PdlFødselshendelseFagsakTilVurderingUtleder() {
         // For CDI
@@ -44,7 +43,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
                                                        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                                        FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
                                                        PersonopplysningRepository personopplysningRepository,
-                                                       PdlKlient pdlKlient) {
+                                                       Pdl pdlKlient) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
@@ -54,13 +53,30 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
 
 
     @Override
+    /**
+     * Finner og returnerer et kart \(`Map`\) over relevante `Fagsak`-instanser med tilhørende årsak og periode for vurdering,
+     * basert på en gitt fødselshendelse \(`Hendelse`\). Metoden sjekker gyldige aktørIder, henter informasjon om barnet,
+     * finner aktuell dato, og vurderer hver forelder-aktør sin fagsak for om den skal vurderes og om det er ny informasjon.
+     *
+     * @param hendelse fødselshendelsen som inneholder informasjon om barn og foreldre
+     * @return et kart over `Fagsak` til `ÅrsakOgPeriode` for saker som skal vurderes for revurdering
+     */
     public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
         FødselHendelse fødselsHendelse = (FødselHendelse) hendelse;
         String hendelseId = fødselsHendelse.getHendelseInfo().getHendelseId();
 
         List<AktørId> forelderAktørIder = fødselsHendelse.getHendelseInfo().getAktørIder();
-        PersonIdent barnIdent = fødselsHendelse.getBarnIdent();
-        Person barnInfo = hentPersonInformasjon(barnIdent.getIdent());
+
+        PersonIdent barnIdentPersonIdent = fødselsHendelse.getBarnIdent();
+        String barnIdent = barnIdentPersonIdent.getIdent();
+        Optional<AktørId> aktørIdBarn = pdlKlient.hentAktørIdForPersonIdent(barnIdent).map(AktørId::new);
+        if (aktørIdBarn.isEmpty()) {
+            logger.warn("Fødselshendelse med hendelseId={} har barn uten gyldig aktørId. Ignorerer hendelse.", hendelseId);
+            return Collections.emptyMap();
+        }
+
+        Person barnInfo = hentPersonInformasjon(barnIdent);
+
         LocalDate aktuellDato = finnAktuellDato(barnInfo);
 
         var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
@@ -69,7 +85,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
             Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
-                    if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktør, aktuellDato, hendelseId)) {
+                    if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktørIdBarn.get(), aktuellDato, hendelseId)) {
                         fagsakÅrsakMap.put(f, new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato())));
                     }
                 }
@@ -84,7 +100,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
      * idempotens-sjekk for å hindre at det opprettes flere revurderinger fra samme hendelse.
      * hindrer også revurdering hvis hendelsen kommer etter at behandlingen er oppdatert med ny data.
      */
-    private boolean erNyInformasjonIHendelsen(Fagsak fagsak, AktørId aktør, LocalDate fødselsdato, String hendelseId) {
+    private boolean erNyInformasjonIHendelsen(Fagsak fagsak, AktørId barnAktørId, LocalDate fødselsdato, String hendelseId) {
         Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandlingOpt.isEmpty()) {
             logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
@@ -95,8 +111,9 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
         PersonopplysningGrunnlagEntitet personopplysninger = personopplysningRepository.hentPersonopplysninger(behandling.getId());
         if (personopplysninger != null) {
             for (PersonopplysningEntitet personopplysning : personopplysninger.getGjeldendeVersjon().getPersonopplysninger()) {
-                if (aktør.equals(personopplysning.getAktørId()) && Objects.equals(fødselsdato, personopplysning.getFødselsdato())) {
-                    logger.info("Persondata på behandling {} for {} var allerede oppdatert med riktig dødsdato. Trigget av hendelse {}.", behandling.getUuid(), fagsak.getSaksnummer(), hendelseId);
+                // Sjekker om behandlingen allerede har registrert barn med samme aktørId og fødselsdato
+                if (barnAktørId.equals(personopplysning.getAktørId()) && Objects.equals(fødselsdato, personopplysning.getFødselsdato())) {
+                    logger.info("Persondata på behandling {} for {} var allerede oppdatert med riktig fødselsdato. Trigget av hendelse {}.", behandling.getUuid(), fagsak.getSaksnummer(), hendelseId);
                     return false;
                 }
             }
