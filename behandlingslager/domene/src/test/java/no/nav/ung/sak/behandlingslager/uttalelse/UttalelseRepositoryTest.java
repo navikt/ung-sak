@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,7 +69,7 @@ public class UttalelseRepositoryTest {
                 LocalDate.of(2025,8,31)),
             new JournalpostId(1245L),
             EndringType.ENDRET_INNTEKT,
-            123345L
+            UUID.randomUUID()
             );
         List<UttalelseV2> uttalelser = List.of(uttalelse1);
         repository.lagre(behandlingId, uttalelser);
