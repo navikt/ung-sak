@@ -51,7 +51,7 @@ public class UttalelseRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    public Optional<UttalelseGrunnlag> hentUttalelseBassertPåId(Long behandlingId){
+    public Optional<UttalelseGrunnlag> hentUttalelseBasertPåId(Long behandlingId){
         final var query = entityManager.createQuery(
             "select ug from UttalelseGrunnlag ug " +
                 "where ug.behandlingId = :behandlingId", UttalelseGrunnlag.class);

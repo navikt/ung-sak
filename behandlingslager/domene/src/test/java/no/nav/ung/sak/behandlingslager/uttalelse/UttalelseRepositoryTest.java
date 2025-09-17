@@ -45,26 +45,33 @@ public class UttalelseRepositoryTest {
 
 
     @Test
-    void skal_hente_grunnlag_bassert_på_behandling_id() {
-        UttalelseGrunnlag uttalelseGrunnlag = lagreUttalelseGrunnlag();
+    void skal_hente_grunnlag_basert_på_behandling_id() {
+        // Arrange
+        final var uttalelseGrunnlag = lagreUttalelseGrunnlag();
 
-        Optional<UttalelseGrunnlag> resultat = repository.hentUttalelseBassertPåId(behandling.getId());
+        // Act
+        Optional<UttalelseGrunnlag> resultat = repository.hentEksisterendeGrunnlag(behandling.getId());
 
+        // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().getId()).isEqualTo(uttalelseGrunnlag.getId());
+        assertThat(resultat.get().getId()).isNotNull();
+        assertThat(resultat.get().getBehandlingId()).isEqualTo(uttalelseGrunnlag.getBehandlingId());
     }
 
     @Test
-    void skal_ikke_sette_id(){
-        UttalelseGrunnlag uttalelseGrunnlag = new UttalelseGrunnlag(behandling.getId());
-        assertThat(uttalelseGrunnlag.getBehandlingId()).isNotNull();
-        assertThat(uttalelseGrunnlag.getId()).isNull();
+    void skal_hente_uttalelse_basert_på_behandling_id() {
+        // Arrange
+        final var uttalelseGrunnlag = lagreUttalelseGrunnlag();
+
+        // Act
+        Optional<UttalelseGrunnlag> resultat = repository.hentUttalelseBasertPåId(behandling.getId());
+
+        // Assert
+        assertThat(resultat).isPresent();
+        assertThat(resultat.get().getId()).isNotNull();
+        assertThat(resultat.get().getBehandlingId()).isEqualTo(uttalelseGrunnlag.getBehandlingId());
     }
 
-    @Test
-    void skal_lagre_uttalelse(){
-        lagreUttalelseGrunnlag();
-    }
 
     private UttalelseGrunnlag lagreUttalelseGrunnlag() {
         final var uttalelsegrunnlag = new UttalelseGrunnlag(behandling.getId());
