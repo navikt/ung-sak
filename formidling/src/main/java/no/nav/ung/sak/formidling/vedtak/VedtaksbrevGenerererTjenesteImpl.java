@@ -90,7 +90,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     @WithSpan
     private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, null);
+        var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, originalDokumentMalType);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
