@@ -16,6 +16,7 @@ import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -26,8 +27,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tester at ulike flyter fra klient funker.
@@ -53,8 +54,10 @@ class VedtaksbrevTjenesteTest {
         var behandling = lagScenarioMedRedigerbarBrev();
 
         //Initielle valg - kun automatisk brev
-        var valg = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
-        assertThat(valg.harBrev()).isTrue();
+        VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
+        assertThat(response.vedtaksbrevValg()).hasSize(1);
+        var valg = response.vedtaksbrevValg().getFirst();
+        assertThat(response.harBrev()).isTrue();
         assertThat(valg.enableRediger()).isTrue();
         assertThat(valg.redigert()).isFalse();
         assertThat(valg.kanOverstyreRediger()).isTrue();
@@ -88,8 +91,10 @@ class VedtaksbrevTjenesteTest {
             )
         );
 
-        var valgEtterRedigering1 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
-        assertThat(valgEtterRedigering1.harBrev()).isTrue();
+        VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
+        assertThat(response.vedtaksbrevValg()).hasSize(1);
+        var valgEtterRedigering1 = response.vedtaksbrevValg().getFirst();
+        assertThat(response.harBrev()).isTrue();
         assertThat(valgEtterRedigering1.enableRediger()).isTrue();
         assertThat(valgEtterRedigering1.redigert()).isTrue();
         assertThat(valgEtterRedigering1.kanOverstyreRediger()).isTrue();
@@ -135,8 +140,10 @@ class VedtaksbrevTjenesteTest {
             )
         );
 
-        var valgEtterRedigering2 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
-        assertThat(valgEtterRedigering2.harBrev()).isTrue();
+        VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
+        assertThat(response.vedtaksbrevValg()).hasSize(1);
+        var valgEtterRedigering2 = response.vedtaksbrevValg().getFirst();
+        assertThat(response.harBrev()).isTrue();
         assertThat(valgEtterRedigering2.enableRediger()).isTrue();
         assertThat(valgEtterRedigering2.redigert()).isFalse();
         assertThat(valgEtterRedigering2.kanOverstyreRediger()).isTrue();
@@ -172,13 +179,15 @@ class VedtaksbrevTjenesteTest {
 
         //Tilbakestiller
         vedtaksbrevTjeneste.ryddVedTilbakeHopp(behandling.getId());
-        var valgEtterRedigering3 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
-        assertThat(valgEtterRedigering3.harBrev()).isTrue();
-        assertThat(valgEtterRedigering3.enableRediger()).isTrue();
-        assertThat(valgEtterRedigering3.redigert()).isFalse();
-        assertThat(valgEtterRedigering3.kanOverstyreRediger()).isTrue();
+        VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
+        assertThat(response.vedtaksbrevValg()).hasSize(1);
+        var valgEtterRedigering = response.vedtaksbrevValg().getFirst();
+        assertThat(response.harBrev()).isTrue();
+        assertThat(valgEtterRedigering.enableRediger()).isTrue();
+        assertThat(valgEtterRedigering.redigert()).isFalse();
+        assertThat(valgEtterRedigering.kanOverstyreRediger()).isTrue();
         //Beholder teksten
-        assertThat(valgEtterRedigering3.redigertBrevHtml()).isEqualTo(redigertHtml);
+        assertThat(valgEtterRedigering.redigertBrevHtml()).isEqualTo(redigertHtml);
 
         //Brevet behandlingen kommer til å bruke skal være automatisk brev
         assertThat(forhåndsvis(behandling, null)).contains(automatiskBrevHtmlSnippet);
@@ -204,8 +213,10 @@ class VedtaksbrevTjenesteTest {
             )
         );
 
-        var valgEtterRedigering1 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
-        assertThat(valgEtterRedigering1.harBrev()).isTrue();
+        VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
+        assertThat(response.vedtaksbrevValg()).hasSize(1);
+        var valgEtterRedigering1 = response.vedtaksbrevValg().getFirst();
+        assertThat(response.harBrev()).isTrue();
         assertThat(valgEtterRedigering1.enableHindre()).isTrue();
         assertThat(valgEtterRedigering1.hindret()).isTrue();
         assertThat(valgEtterRedigering1.kanOverstyreHindre()).isTrue();
