@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntit
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
@@ -87,6 +88,10 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
             .filter(it -> it.dokumentMalType() == dokumentMalType)
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
+
+        if (vedtaksbrev.vedtaksbrevBygger().getClass().equals(TomVedtaksbrevInnholdBygger.class)) {
+            throw new IllegalStateException("Kan ikke bestille tom vedtaksbrev!");
+        }
 
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
             new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
