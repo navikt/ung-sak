@@ -26,6 +26,12 @@ public class UttalelseRepository {
         persister(hentEksisterendeGrunnlag(behandlingsId), nyttGrunnlag);
     }
 
+    public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(eksisterendeBehandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UttalelseGrunnlag(nyBehandlingId, it));
+        nyttGrunnlag.ifPresent(gr -> persister(Optional.empty(), gr));
+    }
+
     private void persister(Optional <UttalelseGrunnlag> eksisterendeGrunnlag, UttalelseGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
         if (nyttGrunnlag.getUttalelser() != null) {
