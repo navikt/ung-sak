@@ -49,7 +49,7 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
                 Satsberegner.beregnDagsatsInklBarnetillegg(nyeSatser),
                 Sats.HØY.getFomAlder(),
                 totalBarnetillegg > 0 ? totalBarnetillegg : null
-            ));
+            ), true);
     }
 
 }

@@ -182,29 +182,7 @@ public class VedtaksbrevTjeneste {
             .toList();
 
         if (dto.redigertVersjon() == null) {
-            var relevanteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()).stream()
-                .filter(it -> dto.dokumentMalType() == null || it.getDokumentMalType() == dto.dokumentMalType())
-                .toList();
-
-            var manuelleBrev = relevanteValg.stream()
-                .filter(it1 -> !it1.isHindret())
-                .filter(VedtaksbrevValgEntitet::isRedigert)
-                .map(it1 -> vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), it1.getDokumentMalType(), kunHtml))
-                .toList();
-
-            var redigerteEllerHindredeBrev = relevanteValg.stream()
-                .filter(it -> it.isHindret() || it.isRedigert())
-                .map(VedtaksbrevValgEntitet::getDokumentMalType)
-                .toList();
-
-            var automatiske = redigerteEllerHindredeBrev.isEmpty() ? relevanteVedtaksbrev : relevanteVedtaksbrev.stream()
-                .filter(vedtaksbrev -> !redigerteEllerHindredeBrev.contains(vedtaksbrev.dokumentMalType()))
-                .toList();
-
-            var automatiskeBrev = genererAutomatiskeBrev(dto, automatiske, totalresultater, kunHtml);
-
-            return Stream.concat(manuelleBrev.stream(), automatiskeBrev.stream()).toList();
-
+            return genererFraValg(dto, kunHtml, relevanteVedtaksbrev, totalresultater);
         }
 
         if (dto.redigertVersjon()) {
@@ -217,6 +195,32 @@ public class VedtaksbrevTjeneste {
         }
 
         return genererAutomatiskeBrev(dto, relevanteVedtaksbrev, totalresultater, kunHtml);
+    }
+
+    @NotNull
+    private List<GenerertBrev> genererFraValg(VedtaksbrevForhåndsvisRequest dto, boolean kunHtml, List<Vedtaksbrev> relevanteVedtaksbrev, BehandlingVedtaksbrevResultat totalresultater) {
+        var relevanteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()).stream()
+            .filter(it -> dto.dokumentMalType() == null || it.getDokumentMalType() == dto.dokumentMalType())
+            .toList();
+
+        var manuelleBrev = relevanteValg.stream()
+            .filter(it1 -> !it1.isHindret())
+            .filter(VedtaksbrevValgEntitet::isRedigert)
+            .map(it1 -> vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), it1.getDokumentMalType(), kunHtml))
+            .toList();
+
+        var redigerteEllerHindredeBrev = relevanteValg.stream()
+            .filter(it -> it.isHindret() || it.isRedigert())
+            .map(VedtaksbrevValgEntitet::getDokumentMalType)
+            .toList();
+
+        var automatiske = redigerteEllerHindredeBrev.isEmpty() ? relevanteVedtaksbrev : relevanteVedtaksbrev.stream()
+            .filter(vedtaksbrev -> !redigerteEllerHindredeBrev.contains(vedtaksbrev.dokumentMalType()))
+            .toList();
+
+        var automatiskeBrev = genererAutomatiskeBrev(dto, automatiske, totalresultater, kunHtml);
+
+        return Stream.concat(manuelleBrev.stream(), automatiskeBrev.stream()).toList();
     }
 
     private List<GenerertBrev> genererAutomatiskeBrev(VedtaksbrevForhåndsvisRequest dto, List<Vedtaksbrev> vedtaksbrev, BehandlingVedtaksbrevResultat totalresultater, boolean kunHtml) {

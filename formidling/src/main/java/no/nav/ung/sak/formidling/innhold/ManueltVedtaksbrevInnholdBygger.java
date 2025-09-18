@@ -34,7 +34,7 @@ public class ManueltVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger
 
         return new TemplateInnholdResultat(
                 TemplateType.MANUELT_VEDTAKSBREV,
-            new ManuellVedtaksbrevDto(tekst)
-        );
+            new ManuellVedtaksbrevDto(tekst),
+            false);
     }
 }
