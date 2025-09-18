@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.kodeverk.SkjermlenkeTypeKodeverdiConverter;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class Historikkinnslag extends BaseEntitet {
     @Column(name = "aktoer", nullable = false)
     private HistorikkAktør aktør;
 
-    @Convert(converter = SkjermlenkeType.KodeverdiConverter.class)
+    @Convert(converter = SkjermlenkeTypeKodeverdiConverter.class)
     @Column(name = "skjermlenke")
     private SkjermlenkeType skjermlenke;
 
