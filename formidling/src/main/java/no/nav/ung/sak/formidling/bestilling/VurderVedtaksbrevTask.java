@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.*;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,15 +94,19 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     }
 
-    private void validerBrevbestillingForespørsel(Behandling behandling, DokumentMalType dokumentMalType) {
+    private void validerBrevbestillingForespørsel(Behandling behandling, Vedtaksbrev vedtaksbrev) {
         if (!behandling.erAvsluttet()) {
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+        }
+
+        if (vedtaksbrev.vedtaksbrevBygger().getClass().equals(TomVedtaksbrevInnholdBygger.class)) {
+            throw new IllegalStateException("Kan ikke bestille vedtaksbrev der bygger er TomVedtaksbrevInnholdBygger");
         }
 
         var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
         var tidligereVedtaksbrev = tidligereBestillinger.stream()
             .filter(BrevbestillingEntitet::isVedtaksbrev)
-            .filter(it -> it.getDokumentMalType() == dokumentMalType)
+            .filter(it -> it.getDokumentMalType() == vedtaksbrev.dokumentMalType())
             .toList();
         if (!tidligereVedtaksbrev.isEmpty()) {
             String collect = tidligereVedtaksbrev.stream()
@@ -112,7 +117,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
     public void bestill(Behandling behandling, Vedtaksbrev vedtaksbrev, int brevNr) {
-        validerBrevbestillingForespørsel(behandling, vedtaksbrev.dokumentMalType());
+        validerBrevbestillingForespørsel(behandling, vedtaksbrev);
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
             behandling.getFagsakId(),

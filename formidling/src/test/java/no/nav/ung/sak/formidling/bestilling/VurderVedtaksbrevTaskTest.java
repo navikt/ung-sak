@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -261,6 +262,25 @@ class VurderVedtaksbrevTaskTest {
         assertThat(tasker).hasSize(1);
         var task = tasker.getFirst();
         assertBestillingTask(task, bestilling);
+    }
+
+    @Test
+    void skalFeilHvisTomManuellBrevIkkeErRedigert() {
+        // Arrange
+        UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
+        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestScenario);
+        var behandling = lagAvsluttetBehandlingMedAksjonspunkt(scenarioBuilder, ungTestRepositories);
+
+        vedtaksbrevValgRepository.lagre(
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.MANUELT_VEDTAK_DOK , false, false, "tekst")
+        );
+
+        var prosessTaskData = lagTask(behandling);
+
+        // Act
+        assertThatThrownBy(() -> task.prosesser(prosessTaskData)).isInstanceOf(IllegalStateException.class).hasMessageContaining("TomVedtaksbrevInnholdBygger");
+
     }
 
     @NotNull

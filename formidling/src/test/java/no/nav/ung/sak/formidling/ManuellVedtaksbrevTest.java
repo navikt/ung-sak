@@ -23,8 +23,6 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-// TODO test som først får automatisk brev som redigeres.
-
 class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
