@@ -122,7 +122,6 @@ public class VedtaksbrevTjeneste {
             );
     }
 
-    //TODO utvide med dokumentMalType for å redigere riktig brev.
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
@@ -134,13 +133,17 @@ public class VedtaksbrevTjeneste {
             throw new BadRequestException("Ingen vedtaksbrev resultater for behandling");
         }
 
-        var resultat = totalresultater.vedtaksbrevResultater().getFirst();
+        var resultat = totalresultater.vedtaksbrevResultater();
 
-        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId(), resultat.dokumentMalType())
-            .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId(), resultat.dokumentMalType()));
+        Vedtaksbrev vedtaksbrev = resultat.stream()
+            .filter(it -> it.dokumentMalType() == dto.dokumentMalType())
+            .findFirst()
+            .orElseThrow(() -> new BadRequestException("Ingen vedtaksbrev med mal " + dto.dokumentMalType() + " for behandling " + dto.behandlingId()));
 
-        //TODO håndtere flere resultater
-        var vedtaksbrevEgenskaper = resultat.vedtaksbrevEgenskaper();
+        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId(), vedtaksbrev.dokumentMalType())
+            .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId(), vedtaksbrev.dokumentMalType()));
+
+        var vedtaksbrevEgenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
 
         if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
             throw new BadRequestException("Brevet kan ikke redigeres.");
@@ -153,7 +156,6 @@ public class VedtaksbrevTjeneste {
         vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
         vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
         vedtaksbrevValgEntitet.rensOgSettRedigertHtml(dto.redigertHtml());
-
         return vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }

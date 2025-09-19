@@ -245,7 +245,7 @@ class VedtaksbrevTjenesteTest {
             .isInstanceOf(IllegalStateException.class);
     }
 
-    @Test //Flere brev test
+    @Test
     void redigere_flere_brev() {
         UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_endringMedInntektOgFødselAvBarn((LocalDate.of(2025, 8, 1)));
         var behandling = lagBehandlingMedAksjonspunkt(ungTestscenario);
@@ -300,7 +300,7 @@ class VedtaksbrevTjenesteTest {
             .isInstanceOf(IllegalStateException.class);
 
 
-        //Brevet behandlingen kommer til å bruke skal være manuell brev
+        //Brevet behandlingen kommer til å bruke skal være manuell brev for den redigerte
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, null)).contains(redigertHtml);
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskInntekstbrevSnippet);
     }
