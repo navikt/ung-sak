@@ -14,6 +14,7 @@ public enum StartpunktType implements Kodeverdi {
     BEREGNING("BEREGNING", "Beregning", 25),
     KONTROLLER_INNTEKT("KONTROLLER_INNTEKT", "Kontroller inntekt", 30),
     UTTAK("UTTAK", "Uttak", 40),
+    VURDER_KOMPLETTHET("VURDER_KOMPLETTHET", "Vurder kompletthet", 50),
 
     UDEFINERT("-", "Ikke definert", 99),
     ;
