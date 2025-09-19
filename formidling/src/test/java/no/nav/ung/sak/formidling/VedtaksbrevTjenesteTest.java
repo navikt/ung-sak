@@ -58,7 +58,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valg.redigert()).isFalse();
         assertThat(valg.kanOverstyreRediger()).isTrue();
         assertThat(valg.redigertBrevHtml()).isNull();
-        assertThat(valg.tidligereRedigertTekst()).isNull();
+        assertThat(valg.tidligereRedigertBrevHtml()).isNull();
 
         //Forhåndsviser automatisk brev
         String automatiskBrevHtmlSnippet = "<h1>";
@@ -98,7 +98,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering1.redigert()).isTrue();
         assertThat(valgEtterRedigering1.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterRedigering1.redigertBrevHtml()).isEqualTo(redigertHtml);
-        assertThat(valgEtterRedigering1.tidligereRedigertTekst()).isNull();
+        assertThat(valgEtterRedigering1.tidligereRedigertBrevHtml()).isNull();
 
         //Forhåndsviser automatisk brev - skal fortsått gå bra
         assertThat(forhåndsvis(behandling, false)).contains(automatiskBrevHtmlSnippet);
@@ -150,7 +150,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering2.redigert()).isFalse();
         assertThat(valgEtterRedigering2.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterRedigering2.redigertBrevHtml()).isNull();
-        assertThat(valgEtterRedigering2.tidligereRedigertTekst()).isNull();
+        assertThat(valgEtterRedigering2.tidligereRedigertBrevHtml()).isNull();
 
 
         //Forhåndsviser automatisk brev
@@ -192,7 +192,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterTilbakehopp.redigert()).isFalse();
         assertThat(valgEtterTilbakehopp.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterTilbakehopp.redigertBrevHtml()).isNull();
-        assertThat(valgEtterTilbakehopp.tidligereRedigertTekst()).isEqualTo(redigertHtml);
+        assertThat(valgEtterTilbakehopp.tidligereRedigertBrevHtml()).isEqualTo(redigertHtml);
 
         //Brevet behandlingen kommer til å bruke skal være automatisk brev
         assertThat(forhåndsvis(behandling, null)).contains(automatiskBrevHtmlSnippet);
@@ -223,7 +223,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterTilbakehopp2.redigert()).isTrue();
         assertThat(valgEtterTilbakehopp2.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterTilbakehopp2.redigertBrevHtml()).isEqualTo(nyttRedigertBrev);
-        assertThat(valgEtterTilbakehopp2.tidligereRedigertTekst()).isNull();
+        assertThat(valgEtterTilbakehopp2.tidligereRedigertBrevHtml()).isNull();
     }
 
     @Test

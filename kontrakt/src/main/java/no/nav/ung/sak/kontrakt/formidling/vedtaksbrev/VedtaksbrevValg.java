@@ -19,7 +19,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
  * @param kanOverstyreRediger       true hvis det er mulig å redigere et automatisk brev.
  * @param forklaring                en forklaring av resultatet
  * @param redigertBrevHtml
- * @param tidligereRedigertTekst    redigert tekst før tilbakehopp
+ * @param tidligereRedigertBrevHtml redigert tekst før tilbakehopp
  */
 public record VedtaksbrevValg(
     DokumentMalType dokumentMalType,
@@ -31,6 +31,6 @@ public record VedtaksbrevValg(
     boolean kanOverstyreRediger,
     String forklaring,
     String redigertBrevHtml,
-    String tidligereRedigertTekst) {
+    String tidligereRedigertBrevHtml) {
 
 }
