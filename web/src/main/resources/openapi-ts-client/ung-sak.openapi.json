@@ -2682,6 +2682,9 @@
           },
           "redigertBrevHtml" : {
             "type" : "string"
+          },
+          "tidligereRedigertTekst" : {
+            "type" : "string"
           }
         },
         "type" : "object"
