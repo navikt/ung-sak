@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.UttalelseEntitet;
+import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.uttalelse.EtterlysningInfo;
 import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
@@ -46,12 +47,12 @@ public class KontrollerInntektInputMapper {
     }
 
 
-    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnGjeldendeEtterlysningTidslinje(List<Etterlysning> etterlysninger, BehandlingReferanse behandlingReferanse) {
+    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnGjeldendeEtterlysningTidslinje(List<EtterlysningData> etterlysninger, BehandlingReferanse behandlingReferanse) {
         var etterlysningsperioder = etterlysninger.stream()
             .map(it -> new EtterlysningsPeriode(
-                it.getPeriode().toLocalDateInterval(),
-                new EtterlysningInfo(it.getStatus(), it.getUttalelse().map(UttalelseEntitet::harUttalelse).orElse(null)),
-                it.getGrunnlagsreferanse())).toList();
+                it.periode().toLocalDateInterval(),
+                new EtterlysningInfo(it.status(), it.uttalelseData() != null ? it.uttalelseData().harUttalelse() : null),
+                it.grunnlagsreferanse())).toList();
         return rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingReferanse.getBehandlingId(), etterlysningsperioder);
     }
 
