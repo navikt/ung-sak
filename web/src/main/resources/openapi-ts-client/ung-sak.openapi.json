@@ -2626,6 +2626,9 @@
             "minimum" : 0,
             "type" : "integer"
           },
+          "dokumentMalType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.dokument.DokumentMalType"
+          },
           "emptyRedigertTekstAndRedigertTrue" : {
             "type" : "boolean"
           },
