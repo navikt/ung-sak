@@ -21,8 +21,10 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -72,7 +74,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
             ungdomsprogramPeriodeRepository,
             prosessTaskTjeneste,
             etterlysningRepository,
-            new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository),
+            new EtterlysningTjeneste(mottatteDokumentRepository, new EtterlysningOgUttalelseTjeneste(etterlysningRepository, new UttalelseRepository(entityManager))),
             ungdomsytelseStartdatoRepository,
             new BehandingprosessSporingRepository(entityManager),
             new EtterlysningForEndretProgramperiodeResultatHåndterer(etterlysningRepository)

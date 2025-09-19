@@ -21,6 +21,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
+import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import org.slf4j.Logger;
@@ -79,7 +80,9 @@ public class KontrollerInntektEtterlysningOppretter {
 
     private void håndterPeriodisertResultat(BehandlingReferanse behandlingReferanse,
                                             LocalDateTimeline<EtterlysningBehov> resultat) {
-        var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        var etterlysningOgUttalelse = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
         var grunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getBehandlingId());
@@ -87,17 +90,17 @@ public class KontrollerInntektEtterlysningOppretter {
             switch (kontrollSegment.getValue()) {
                 case ERSTATT_EKSISTERENDE -> {
                     log.info("Oppretter ny etterlysning med utvidet frist for periode {}", kontrollSegment.getLocalDateInterval());
-                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval()));
+                    etterlysningerSomSkalAvbrytes.addAll(avbrytDersomEksisterendeEtterlysning(etterlysninger, etterlysningOgUttalelse, kontrollSegment.getLocalDateInterval()));
                     etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(behandlingReferanse.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                 }
                 case NY_ETTERLYSNING_DERSOM_INGEN_FINNES -> {
                     log.info("Oppretter etterlysning hvis ikke finnes for periode {}", kontrollSegment.getLocalDateInterval());
-                    if (!harEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval())) {
+                    if (!harEksisterendeEtterlysning(etterlysningOgUttalelse, kontrollSegment.getLocalDateInterval())) {
                         etterlysningerSomSkalOpprettes.add(opprettNyEtterlysning(behandlingReferanse.getBehandlingId(), kontrollSegment.getLocalDateInterval(), grunnlag.orElseThrow(() -> new IllegalStateException("Forventer å finne iaygrunnlag")).getEksternReferanse()));
                     }
                 }
                 case INGEN_ETTERLYSNING -> {
-                    var etterlysningerForPeriode = avbrytDersomEksisterendeEtterlysning(etterlysninger, kontrollSegment.getLocalDateInterval());
+                    var etterlysningerForPeriode = avbrytDersomEksisterendeEtterlysning(etterlysninger, etterlysningOgUttalelse, kontrollSegment.getLocalDateInterval());
                     if (!etterlysningerForPeriode.isEmpty()) {
                         log.info("Avbryter etterlysninger {}  for periode {}", etterlysningerForPeriode, kontrollSegment.getLocalDateInterval());
                         etterlysningerSomSkalAvbrytes.addAll(etterlysningerForPeriode);
@@ -138,25 +141,28 @@ public class KontrollerInntektEtterlysningOppretter {
     }
 
 
-    private static boolean harEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
-        return etterlysninger.stream().anyMatch(e -> e.getPeriode().toLocalDateInterval().overlaps(periode));
+    private static boolean harEksisterendeEtterlysning(List<EtterlysningData> etterlysninger, LocalDateInterval periode) {
+        return etterlysninger.stream().anyMatch(e -> e.periode().toLocalDateInterval().overlaps(periode));
     }
 
     private Etterlysning opprettNyEtterlysning(Long behandlingId, LocalDateInterval periode, UUID iayRef) {
         UUID bestillingsId = UUID.randomUUID();
         final var etterlysning = Etterlysning.forInntektKontrollUttalelse(behandlingId,
-                iayRef,
-                bestillingsId,
-                DatoIntervallEntitet.fra(periode.getFomDato(), periode.getTomDato()));
+            iayRef,
+            bestillingsId,
+            DatoIntervallEntitet.fra(periode.getFomDato(), periode.getTomDato()));
         return etterlysning;
     }
 
-    private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, LocalDateInterval periode) {
-        var etterlysningerSomSkalAvbrytes = etterlysninger.stream()
-                .filter(etterlysning ->
-                        etterlysning.getPeriode().toLocalDateInterval().overlaps(periode))
-                .filter(e -> e.getStatus().equals(EtterlysningStatus.VENTER))
-                .toList();
+    private List<Etterlysning> avbrytDersomEksisterendeEtterlysning(List<Etterlysning> etterlysninger, List<EtterlysningData> etterlysningOgUttalelse, LocalDateInterval periode) {
+        var etterlysningerSomSkalAvbrytes = etterlysningOgUttalelse.stream()
+            .filter(etterlysning ->
+                etterlysning.periode().toLocalDateInterval().overlaps(periode))
+            .filter(e -> e.status().equals(EtterlysningStatus.VENTER))
+            .map(it -> etterlysninger.stream().filter(e -> e.getPeriode().equals(it.periode()) && e.getGrunnlagsreferanse().equals(it.grunnlagsreferanse())).findFirst().orElseThrow(() -> new IllegalStateException("Fant ikke etterlysning")))
+            .toList();
+
+
         etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
 
         return etterlysningerSomSkalAvbrytes;
