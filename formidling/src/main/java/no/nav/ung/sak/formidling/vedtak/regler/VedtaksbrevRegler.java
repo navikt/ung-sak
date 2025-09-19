@@ -8,7 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -28,18 +28,18 @@ public class VedtaksbrevRegler {
     private final BehandlingRepository behandlingRepository;
     private final DetaljertResultatUtleder detaljertResultatUtleder;
     private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
-    private final ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
+    private final TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger;
 
     @Inject
     public VedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         DetaljertResultatUtleder detaljertResultatUtleder,
         @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies,
-        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger) {
+        TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger) {
         this.behandlingRepository = behandlingRepository;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
         this.innholdbyggerStrategies = innholdbyggerStrategies;
-        this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
+        this.tomVedtaksbrevInnholdBygger = tomVedtaksbrevInnholdBygger;
     }
 
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
@@ -84,7 +84,7 @@ public class VedtaksbrevRegler {
             // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
             return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat,
                 List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
-                    manueltVedtaksbrevInnholdBygger,
+                    tomVedtaksbrevInnholdBygger,
                     "Tom fritekstbrev pga manuelle aksjonspunkter: " + redigerRegelResultat.forklaring()))
             );
         }
@@ -112,7 +112,7 @@ public class VedtaksbrevRegler {
             return BehandlingVedtaksbrevResultat.medBrev(
                 detaljertResultat,
                 List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
-                    manueltVedtaksbrevInnholdBygger,
+                    tomVedtaksbrevInnholdBygger,
                     forklaring
                 )));
         }

@@ -5,6 +5,6 @@ import no.nav.ung.sak.formidling.template.dto.TemplateInnholdDto;
 
 public record TemplateInnholdResultat(
     TemplateType templateType,
-    TemplateInnholdDto templateInnholdDto
-) {
+    TemplateInnholdDto templateInnholdDto,
+    boolean automatiskGenerertFooter) {
 }

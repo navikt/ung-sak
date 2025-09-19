@@ -70,7 +70,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
 
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
-            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
+            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), dokumentMalType, false);
             journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
             return;
         }
@@ -83,9 +83,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
 
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
-        Vedtaksbrev vedtaksbrev = totalresultater.vedtaksbrevResultater().stream()
-            .filter(it -> it.dokumentMalType() == dokumentMalType)
-            .findFirst()
+        Vedtaksbrev vedtaksbrev = totalresultater.finnVedtaksbrev(dokumentMalType)
             .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
 
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(

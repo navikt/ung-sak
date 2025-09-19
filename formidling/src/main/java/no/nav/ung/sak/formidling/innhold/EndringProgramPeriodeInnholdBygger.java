@@ -63,7 +63,7 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
             new EndringProgramPeriodeDto(
                 endretStartdato, endretSluttdato,
                 false
-            ));
+            ), true);
     }
 
     private EndretSluttDato bestemEndretSluttdato(LocalDateSegment<Boolean> denneProgramperiode, LocalDateSegment<Boolean> forrigeProgramperiode) {

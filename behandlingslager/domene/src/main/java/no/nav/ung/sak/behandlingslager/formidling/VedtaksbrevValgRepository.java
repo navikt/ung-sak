@@ -6,7 +6,9 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 
+import java.util.List;
 import java.util.Optional;
 
 @Dependent
@@ -25,10 +27,28 @@ public class VedtaksbrevValgRepository {
         return vedtaksbrevValgEntitet;
     }
 
-    public Optional<VedtaksbrevValgEntitet> finnVedtakbrevValg(Long behandlingId) {
+    public List<VedtaksbrevValgEntitet> finnVedtakbrevValg(Long behandlingId) {
         TypedQuery<VedtaksbrevValgEntitet> query = entityManager.createQuery(
-                "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.behandlingId = :behandlingId", VedtaksbrevValgEntitet.class)
+                "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.behandlingId = :behandlingId and aktiv = true", VedtaksbrevValgEntitet.class)
             .setParameter("behandlingId", behandlingId);
+        return query.getResultList();
+    }
+
+    public Optional<VedtaksbrevValgEntitet> finnVedtakbrevValg(Long behandlingId, DokumentMalType dokumentMalType) {
+        TypedQuery<VedtaksbrevValgEntitet> query = entityManager.createQuery(
+                "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.behandlingId = :behandlingId and v.dokumentMalType = :dokumentMalType and aktiv = true", VedtaksbrevValgEntitet.class)
+            .setParameter("behandlingId", behandlingId)
+            .setParameter("dokumentMalType", dokumentMalType);
         return HibernateVerktøy.hentUniktResultat(query);
     }
+
+    public List<VedtaksbrevValgEntitet> finnNyesteDeaktiverteVedtakbrevValg(Long behandlingId) {
+        TypedQuery<VedtaksbrevValgEntitet> query = entityManager.createQuery(
+                "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.behandlingId = :behandlingId AND v.aktiv = false AND v.opprettetTidspunkt = (" +
+                    "SELECT MAX(v2.opprettetTidspunkt) FROM VedtaksbrevValgEntitet v2 WHERE v2.behandlingId = :behandlingId AND v2.aktiv = false AND v2.dokumentMalType = v.dokumentMalType" +
+                    ")", VedtaksbrevValgEntitet.class)
+            .setParameter("behandlingId", behandlingId);
+        return query.getResultList();
+    }
 }
+

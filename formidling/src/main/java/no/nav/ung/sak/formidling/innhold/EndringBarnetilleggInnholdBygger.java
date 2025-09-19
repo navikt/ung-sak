@@ -48,7 +48,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
         var sats = Satsberegner.beregnBarnetilleggSats(nyeSatser);
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_BARNETILLEGG,
-                new EndringBarnetilleggDto(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats));
+                new EndringBarnetilleggDto(satsendringsdato, nyeSatser.dagsatsBarnetillegg(), sats), true);
 
     }
 

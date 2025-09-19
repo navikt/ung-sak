@@ -62,7 +62,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.automatisk(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), resultat.automatiskGenerertFooter()),
                 resultat.templateInnholdDto()
             )
         );
@@ -83,18 +83,18 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
      */
     @WithSpan
     @Override
-    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, kunHtml));
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, originalDokumentMalType, kunHtml));
     }
 
     @WithSpan
-    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, boolean kunHtml) {
+    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, null);
+        var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, originalDokumentMalType);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.manuell(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr())),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false),
                 resultat.templateInnholdDto()
             )
         );
