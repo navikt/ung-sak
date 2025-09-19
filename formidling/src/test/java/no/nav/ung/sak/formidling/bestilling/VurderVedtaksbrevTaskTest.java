@@ -376,7 +376,7 @@ class VurderVedtaksbrevTaskTest {
         var prosessTaskData = lagTask(behandling);
 
         // Act
-        assertThatThrownBy(() -> task.prosesser(prosessTaskData)).isInstanceOf(IllegalStateException.class).hasMessageContaining("Fant valg på mal som ikke er mulig");
+        assertThatThrownBy(() -> task.prosesser(prosessTaskData)).isInstanceOf(IllegalStateException.class).hasMessageContaining("valg");
 
     }
 

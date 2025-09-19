@@ -19,7 +19,6 @@ import no.nav.ung.sak.formidling.vedtak.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -78,14 +77,11 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .filter(it -> it.isHindret() || it.isRedigert())
             .toList();
 
+        hindredeEllerRedigerteValg.forEach(it -> håndterSaksbehandlerValg(behandling, it, resultat));
+
         var hindredeEllerRedigerteMaler = hindredeEllerRedigerteValg.stream()
             .map(VedtaksbrevValgEntitet::getDokumentMalType)
             .collect(Collectors.toSet());
-
-        valider(resultat, hindredeEllerRedigerteMaler);
-
-        hindredeEllerRedigerteValg.forEach(it -> håndterSaksbehandlerValg(behandling, it, resultat));
-
 
         var vedtaksbrevResultater = hindredeEllerRedigerteMaler.isEmpty() ?
             resultat.vedtaksbrevResultater() :
@@ -98,16 +94,6 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             bestill(behandling, it, brevNr);
         }
 
-    }
-
-    private static void valider(BehandlingVedtaksbrevResultat resultat, Set<DokumentMalType> hindredeEllerRedigerteMaler) {
-        var gyldigeVedtaksbrevMaler = resultat.vedtaksbrevResultater().stream()
-            .map(Vedtaksbrev::dokumentMalType)
-            .collect(Collectors.toSet());
-
-        if (!gyldigeVedtaksbrevMaler.containsAll(hindredeEllerRedigerteMaler)) {
-            throw new IllegalStateException("Fant valg på mal som ikke er mulig. Gyldige maler= " + gyldigeVedtaksbrevMaler + ", valg maler=" + hindredeEllerRedigerteMaler);
-        }
     }
 
     private void validerBrevbestillingForespørsel(Behandling behandling, Vedtaksbrev vedtaksbrev) {
@@ -155,6 +141,9 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         Long behandlingId = behandling.getId();
         Long fagsakId = behandling.getFagsakId();
 
+        var vedtaksbrev = resultat.finnVedtaksbrev(vedtaksbrevValg.getDokumentMalType())
+            .orElseThrow(() -> new IllegalStateException("Har valg for vedtaksbrev mal " + vedtaksbrevValg.getDokumentMalType() + ", men malen er ikke tillatt for behandlingen. "));
+
         if (vedtaksbrevValg.isHindret()) {
             LOG.info("Vedtaksbrev er manuelt stoppet - bestiller ikke brev");
 
@@ -164,10 +153,9 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
         if (vedtaksbrevValg.isRedigert()) {
             LOG.info("Vedtaksbrev er manuelt redigert - bestiller manuell brev");
-            if (resultat.vedtaksbrevResultater().stream().noneMatch(it -> it.vedtaksbrevEgenskaper().kanRedigere())) {
+            if (!vedtaksbrev.vedtaksbrevEgenskaper().kanRedigere()) {
                 throw new IllegalStateException("Redigering ikke tilatt, men er redigert. " + vedtaksbrevValg);
             }
-            //TODO håndtere flere vedtaksbrev
             var bestilling = BrevbestillingEntitet.nyBrevbestilling(
                 behandling.getFagsakId(),
                 behandling.getId(),

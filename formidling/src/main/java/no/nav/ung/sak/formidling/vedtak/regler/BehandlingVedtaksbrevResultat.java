@@ -1,10 +1,12 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Vedtaksbrevresultat for hele behandlingen. Vet om det er flere vedtaksbrev.
@@ -24,6 +26,11 @@ public record BehandlingVedtaksbrevResultat(
         }
     }
 
+    public Optional<Vedtaksbrev> finnVedtaksbrev(DokumentMalType dokumentMalType) {
+        return vedtaksbrevResultater.stream().filter(it -> it.dokumentMalType().equals(dokumentMalType)).findFirst();
+
+    }
+
     public static BehandlingVedtaksbrevResultat medBrev(
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
         List<Vedtaksbrev> vedtaksbrevResultater) {
@@ -34,6 +41,7 @@ public record BehandlingVedtaksbrevResultat(
                                                          List<IngenBrev> ingenBrevResultater) {
                 return new BehandlingVedtaksbrevResultat(false, detaljertResultatTimeline, Collections.emptyList() , ingenBrevResultater );
     }
+
 
     public String safePrint() {
         return "BehandlingVedtaksbrevResultat{" +

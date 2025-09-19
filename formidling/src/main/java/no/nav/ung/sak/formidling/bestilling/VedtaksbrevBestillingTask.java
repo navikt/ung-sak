@@ -83,9 +83,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
 
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
-        Vedtaksbrev vedtaksbrev = totalresultater.vedtaksbrevResultater().stream()
-            .filter(it -> it.dokumentMalType() == dokumentMalType)
-            .findFirst()
+        Vedtaksbrev vedtaksbrev = totalresultater.finnVedtaksbrev(dokumentMalType)
             .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
 
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
