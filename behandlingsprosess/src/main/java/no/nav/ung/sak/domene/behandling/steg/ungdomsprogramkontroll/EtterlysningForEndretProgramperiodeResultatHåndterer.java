@@ -7,6 +7,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.etterlysning.EtterlysningData;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,17 +36,24 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
      */
     void håndterResultat(ResultatType resultat, BehandlingReferanse behandlingReferanse,
                          EtterlysningType etterlysningType,
-                         Optional<Etterlysning> gjeldendeEtterlysning,
+                         Optional<EtterlysningData> gjeldendeEtterlysning,
                          UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
+        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingReferanse.getBehandlingId(), etterlysningType);
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
                 opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
             case ERSTATT_EKSISTERENDE_ETTERLYSNING ->
-                erstattEksisterende(behandlingReferanse, etterlysningType, gjeldendeEtterlysning.orElseThrow(() -> new IllegalStateException("Forventer å finne gjeldende etterlysning")), gjeldendeGrunnlag);
+                erstattEksisterende(behandlingReferanse, etterlysningType, finnEtterlysning(etterlysninger, gjeldendeEtterlysning), gjeldendeGrunnlag);
             case INGEN_ENDRING -> {
                 // Ingen handling nødvendig, behold eksisterende etterlysning
             }
         }
+    }
+
+    private static Etterlysning finnEtterlysning(List<Etterlysning> etterlysninger, Optional<EtterlysningData> gjeldendeEtterlysning) {
+        EtterlysningData gjeldende = gjeldendeEtterlysning.orElseThrow(() -> new IllegalStateException("Forventer å finne gjeldende etterlysning"));
+        return etterlysninger.stream().filter(it -> it.getPeriode().equals(gjeldende.periode()) && it.getGrunnlagsreferanse().equals(gjeldende.grunnlagsreferanse())).findFirst()
+            .orElseThrow(() -> new IllegalStateException("Forventer å finne gjeldende etterlysning i repository"));
     }
 
     private void erstattEksisterende(BehandlingReferanse behandlingReferanse,

@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
+import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
 
         var input = new EndretUngdomsprogramEtterlysningInput(
             etterlysningType,
-            gjeldendeEtterlysning.map(it -> new EtterlysningOgGrunnlag(new EtterlysningStatusOgType(it.getStatus(), it.getType()), ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(it.getGrunnlagsreferanse()))),
+            gjeldendeEtterlysning.map(it -> new EtterlysningOgGrunnlag(new EtterlysningStatusOgType(it.status(), etterlysningType), ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(it.grunnlagsreferanse()))),
             ungdomsprogramPeriodeGrunnlag,
             initiellPeriodegrunnlag,
             ungdomsytelseStartdatoRepository.hentGrunnlag(behandlingReferanse.getBehandlingId())
@@ -96,7 +97,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         }
     }
 
-    private Optional<Etterlysning> finnGjeldendeEtterlysning(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
+    private Optional<EtterlysningData> finnGjeldendeEtterlysning(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
         var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), etterlysningType);
         if (gjeldendeEtterlysninger.size() > 1) {
             throw new IllegalStateException("Forventet å finne maksimalt en etterlysning for type " + etterlysningType + " , fant " + gjeldendeEtterlysninger.size());
