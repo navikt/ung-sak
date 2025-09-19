@@ -3,15 +3,8 @@ package no.nav.ung.sak.formidling;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
@@ -21,9 +14,7 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +47,7 @@ class VedtaksbrevTjenesteTest {
     void skal_bruke_automatisk_brev_hvis_ikke_overstyrt() {
         UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
-        var behandling = lagBehandlingMedAksjonspunkt(ungTestscenario);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
 
         //Initielle valg - kun automatisk brev
         VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
@@ -84,7 +75,7 @@ class VedtaksbrevTjenesteTest {
     void skal_bruke_manuell_brev_hvis_redigert() {
         UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
-        var behandling = lagBehandlingMedAksjonspunkt(ungTestscenario);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
         String automatiskBrevHtmlSnippet = "<h1>";
 
         //Lager redigert tekst
@@ -122,7 +113,7 @@ class VedtaksbrevTjenesteTest {
     void endrer_fra_rediger_tilbake_til_automatisk() {
         UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
-        var behandling = lagBehandlingMedAksjonspunkt(ungTestscenario);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
         String automatiskBrevHtmlSnippet = "<h1>";
 
         //Lager redigert tekst
@@ -175,7 +166,7 @@ class VedtaksbrevTjenesteTest {
     void skal_beholde_redigert_tekst_ved_tilbakehopp() {
         UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
-        var behandling = lagBehandlingMedAksjonspunkt(ungTestscenario);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
         String automatiskBrevHtmlSnippet = "<h1>";
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
 
@@ -212,7 +203,7 @@ class VedtaksbrevTjenesteTest {
     void skal_ikke_lage_brev_hvis_hindret() {
         UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
-        var behandling = lagBehandlingMedAksjonspunkt(ungTestscenario);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
         String automatiskBrevHtmlSnippet = "<h1>";
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
 
@@ -248,7 +239,7 @@ class VedtaksbrevTjenesteTest {
     @Test
     void redigere_flere_brev() {
         UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_endringMedInntektOgFødselAvBarn((LocalDate.of(2025, 8, 1)));
-        var behandling = lagBehandlingMedAksjonspunkt(ungTestscenario);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
         String automatiskInntekstbrevSnippet = "inntekt";
         String automatiskBarnetilleggSnippet = "du har fått barn";
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
@@ -305,23 +296,6 @@ class VedtaksbrevTjenesteTest {
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskInntekstbrevSnippet);
     }
 
-
-    @NotNull
-    private Behandling lagBehandlingMedAksjonspunkt(UngTestScenario ungTestscenario) {
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
-            .medUngTestGrunnlag(ungTestscenario);
-
-        scenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT);
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
-        new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
-        BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        return behandling;
-    }
 
     private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
         var generertBrev = vedtaksbrevTjeneste.forhåndsvis(

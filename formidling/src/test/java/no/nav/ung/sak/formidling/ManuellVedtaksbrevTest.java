@@ -1,19 +1,11 @@
 package no.nav.ung.sak.formidling;
 
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,8 +34,9 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
     void standardManuellBrev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
 
-        var behandling = lagScenario(
-            EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+        var behandling = EndringInntektScenarioer
+            .lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories);
+        behandling.avsluttBehandling();
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
@@ -74,32 +67,14 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
-    private Behandling lagScenario(UngTestScenario ungTestscenario, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.REVURDERING)
-            .medUngTestGrunnlag(ungTestscenario);
-
-        scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, null);
-
-
-        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
-        new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
-        BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-
-        behandling.avsluttBehandling();
-
-        return behandling;
-    }
-
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        Behandling behandling = lagScenario(EndringInntektScenarioer.endring0KrInntekt_19år(fom), AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+        var behandling = EndringInntektScenarioer
+            .lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories);
+
+        behandling.avsluttBehandling();
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),

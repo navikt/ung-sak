@@ -4,14 +4,10 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
@@ -77,7 +73,10 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_kunne_redigere_automatisk_brev_ved_aksjonspunkt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(EndringInntektScenarioer.endringMedInntektPå10k_19år(fom), BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+        UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_19år(fom);
+        var behandling = EndringInntektScenarioer
+            .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestGrunnlag, ungTestRepositories);
+        behandling.avsluttBehandling();
 
         var totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
@@ -173,7 +172,8 @@ class VedtaksbrevReglerTest {
     void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
-        var behandling = lagBehandling(EndringInntektScenarioer.endring0KrInntekt_19år(fom), null, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories);
+        behandling.avsluttBehandling();
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
@@ -231,7 +231,8 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_lage_to_brev_ved_kontroller_inntekt_og_andre_hendelser() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
-        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_endringMedInntektOgFødselAvBarn(fom), BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(KombinasjonScenarioer.kombinasjon_endringMedInntektOgFødselAvBarn(fom), ungTestRepositories);
+        behandling.avsluttBehandling();
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
@@ -262,28 +263,12 @@ class VedtaksbrevReglerTest {
 
 
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
-        return lagBehandling(ungTestGrunnlag, null, null);
-    }
-
-    private Behandling lagBehandling(UngTestScenario ungTestGrunnlag, BehandlingStegType behandlingStegType, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestGrunnlag);
 
-        if (aksjonspunktDefinisjon != null) {
-            scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, behandlingStegType);
-        }
-
         var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-
-        if (aksjonspunktDefinisjon != null) {
-            Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
-            new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
-            BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-            behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
-        }
-
 
         behandling.avsluttBehandling();
 
