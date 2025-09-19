@@ -27,16 +27,8 @@ public class EtterlysningOgUttalelseTjeneste {
 
     public List<EtterlysningData> hentEtterlysningerOgUttalelser(Long behandlingId, EtterlysningType... typer) {
         // TODO: Hent ut etterlysninger og uttalelser og map til EtterlysningData
-        return null;
+        return List.of();
     }
-
-
-    public List<EtterlysningData> hentEtterlysningerOgUttalelser(BehandlingReferanse behandlingReferanse) {
-        // TODO: Hent ut etterlysninger og uttalelser og map til EtterlysningData
-        return null;
-    }
-
-
 
 
 }
