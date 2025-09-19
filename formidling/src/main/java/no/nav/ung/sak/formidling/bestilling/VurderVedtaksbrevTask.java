@@ -19,7 +19,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -74,24 +74,40 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             return;
         }
 
-        //TODO håndter flere vedtaksbrev
-        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
-        boolean harSaksbehandlerHindretEllerRedigertBrev = !vedtaksbrevValgEntitet.isEmpty() && (vedtaksbrevValgEntitet.getFirst().isHindret() || vedtaksbrevValgEntitet.getFirst().isRedigert());
-        if (harSaksbehandlerHindretEllerRedigertBrev) {
-            håndterSaksbehandlerValg(behandling, vedtaksbrevValgEntitet.getFirst(), resultat);
-            return;
-        }
+        var hindredeEllerRedigerteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).stream()
+            .filter(it -> it.isHindret() || it.isRedigert())
+            .toList();
 
-        if (!vedtaksbrevValgEntitet.isEmpty()) {
-            LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
-        }
+        var hindredeEllerRedigerteMaler = hindredeEllerRedigerteValg.stream()
+            .map(VedtaksbrevValgEntitet::getDokumentMalType)
+            .collect(Collectors.toSet());
 
-        List<Vedtaksbrev> vedtaksbrevResultater = resultat.vedtaksbrevResultater();
+        valider(resultat, hindredeEllerRedigerteMaler);
+
+        hindredeEllerRedigerteValg.forEach(it -> håndterSaksbehandlerValg(behandling, it, resultat));
+
+
+        var vedtaksbrevResultater = hindredeEllerRedigerteMaler.isEmpty() ?
+            resultat.vedtaksbrevResultater() :
+            resultat.vedtaksbrevResultater().stream()
+                .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
+                .toList();
+
         for (int brevNr = 0; brevNr < vedtaksbrevResultater.size(); brevNr++) {
             Vedtaksbrev it = vedtaksbrevResultater.get(brevNr);
             bestill(behandling, it, brevNr);
         }
 
+    }
+
+    private static void valider(BehandlingVedtaksbrevResultat resultat, Set<DokumentMalType> hindredeEllerRedigerteMaler) {
+        var gyldigeVedtaksbrevMaler = resultat.vedtaksbrevResultater().stream()
+            .map(Vedtaksbrev::dokumentMalType)
+            .collect(Collectors.toSet());
+
+        if (!gyldigeVedtaksbrevMaler.containsAll(hindredeEllerRedigerteMaler)) {
+            throw new IllegalStateException("Fant valg på mal som ikke er mulig. Gyldige maler= " + gyldigeVedtaksbrevMaler + ", valg maler=" + hindredeEllerRedigerteMaler);
+        }
     }
 
     private void validerBrevbestillingForespørsel(Behandling behandling, Vedtaksbrev vedtaksbrev) {

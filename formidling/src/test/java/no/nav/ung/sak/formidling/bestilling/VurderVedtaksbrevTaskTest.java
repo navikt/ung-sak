@@ -159,6 +159,7 @@ class VurderVedtaksbrevTaskTest {
 
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);
+        behandling.avsluttBehandling();
 
         String redigertBrevHtml = "<h1>redigert</h1>";
         vedtaksbrevValgRepository.lagre(
@@ -195,8 +196,7 @@ class VurderVedtaksbrevTaskTest {
             .kombinasjon_endringMedInntektOgFødselAvBarn(LocalDate.of(2025, 11, 1));
 
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        var behandling = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestScenario)
-            .buildOgLagreMedUng(ungTestRepositories);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);
 
         behandling.avsluttBehandling();
 
@@ -271,7 +271,7 @@ class VurderVedtaksbrevTaskTest {
         var behandling = scenarioBuilder.getBehandling();
 
         vedtaksbrevValgRepository.lagre(
-            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT, false, true, null)
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.INNVILGELSE_DOK, false, true, null)
         );
 
         var prosessTaskData = lagTask(behandling);
@@ -298,7 +298,7 @@ class VurderVedtaksbrevTaskTest {
     void manuellBrevHvisRedigert() {
         // Arrange
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+        UngTestScenario ungTestScenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2025, 11, 1));
 
         var behandling = EndringInntektScenarioer
             .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);
@@ -351,6 +351,32 @@ class VurderVedtaksbrevTaskTest {
 
         // Act
         assertThatThrownBy(() -> task.prosesser(prosessTaskData)).isInstanceOf(IllegalStateException.class).hasMessageContaining("TomVedtaksbrevInnholdBygger");
+
+    }
+
+    @Test
+    void skalFeileHvisForsøkerÅBestilleBrevSomIkkeErMulig() {
+        // Arrange
+        UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
+        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+
+        var behandling = EndringInntektScenarioer
+            .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);
+        behandling.avsluttBehandling();
+
+        vedtaksbrevValgRepository.lagre(
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT , true, false, "<h1>gammelt brev</h1>")
+        );
+
+        vedtaksbrevValgRepository.lagre(
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.MANUELT_VEDTAK_DOK , true, false, "<h1>Nytt brev</h1>")
+        );
+
+
+        var prosessTaskData = lagTask(behandling);
+
+        // Act
+        assertThatThrownBy(() -> task.prosesser(prosessTaskData)).isInstanceOf(IllegalStateException.class).hasMessageContaining("Fant valg på mal som ikke er mulig");
 
     }
 

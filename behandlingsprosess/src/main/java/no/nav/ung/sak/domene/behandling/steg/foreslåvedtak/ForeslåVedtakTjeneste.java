@@ -53,6 +53,8 @@ class ForeslåVedtakTjeneste {
             return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
         }
 
+        //TODO resett brevvalg! Slett gamle tekster og kopier over hvis fortsatt relevante.
+
         if (skalUtføreTotrinnsbehandling(behandling)) {
             håndterTotrinn(behandling, aksjonspunktDefinisjoner);
         } else {
