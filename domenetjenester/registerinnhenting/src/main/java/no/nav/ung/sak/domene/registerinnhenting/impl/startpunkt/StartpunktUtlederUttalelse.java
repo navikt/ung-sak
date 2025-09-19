@@ -40,7 +40,7 @@ class StartpunktUtlederUttalelse implements EndringStartpunktUtleder {
             return StartpunktType.UDEFINERT;
         }
         log.info("Fant endringer i uttalelser. Flytter til init perioder.");
-        return StartpunktType.VURDER_KOMPLETTHET;
+        return StartpunktType.INNHENT_REGISTEROPPLYSNINGER;
     }
 
     private Set<JournalpostId> hentJournalpostIderForUttalelser(Long nyeste) {
