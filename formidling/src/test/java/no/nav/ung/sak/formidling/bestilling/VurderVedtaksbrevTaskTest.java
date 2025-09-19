@@ -117,33 +117,30 @@ class VurderVedtaksbrevTaskTest {
         List<BrevbestillingEntitet> bestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
         assertThat(bestillinger).hasSize(2);
 
-        assertThat(bestillinger)
-            .anySatisfy(bestilling -> {
-                assertThat(bestilling.getBehandlingId()).isEqualTo(behandling.getId());
-                assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.ENDRING_INNTEKT);
-                assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
-            })
-            .anySatisfy(bestilling -> {
-                assertThat(bestilling.getBehandlingId()).isEqualTo(behandling.getId());
-                assertThat(bestilling.getDokumentMalType()).isEqualTo(DokumentMalType.ENDRING_BARNETILLEGG);
-                assertThat(bestilling.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
-            });
+        var bestilling1 = bestillinger.stream()
+            .filter(b -> b.getDokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .findFirst()
+            .orElseThrow();
+        assertThat(bestilling1.getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(bestilling1.getDokumentMalType()).isEqualTo(DokumentMalType.ENDRING_INNTEKT);
+        assertThat(bestilling1.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
+
+        var bestilling2 = bestillinger.stream()
+            .filter(b -> b.getDokumentMalType().equals(DokumentMalType.ENDRING_BARNETILLEGG))
+            .findFirst()
+            .orElseThrow();
+        assertThat(bestilling2.getBehandlingId()).isEqualTo(behandling.getId());
+        assertThat(bestilling2.getDokumentMalType()).isEqualTo(DokumentMalType.ENDRING_BARNETILLEGG);
+        assertThat(bestilling2.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
 
 
         var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
-        assertThat(vedtaksbrevResultater).hasSize(2);
-
-        assertThat(vedtaksbrevResultater)
-            .anySatisfy(resultat -> {
-                assertThat(resultat.getBrevbestilling().getId()).isEqualTo(bestillinger.getFirst().getId());
-                assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);
-                assertThat(resultat.getBeskrivelse()).isNotNull();
-            })
-            .anySatisfy(resultat -> {
-                assertThat(resultat.getBrevbestilling().getId()).isEqualTo(bestillinger.get(1).getId());
-                assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);
-                assertThat(resultat.getBeskrivelse()).isNotNull();
-            });
+        assertThat(vedtaksbrevResultater).extracting(it -> it.getBrevbestilling().getId())
+            .containsExactlyInAnyOrder(bestillinger.get(0).getId(), bestillinger.get(1).getId());
+        assertThat(vedtaksbrevResultater).extracting(BehandlingVedtaksbrev::getResultatType)
+            .containsExactly(VedtaksbrevResultatType.BESTILT, VedtaksbrevResultatType.BESTILT);
+        assertThat(vedtaksbrevResultater).extracting(BehandlingVedtaksbrev::getBeskrivelse)
+            .isNotNull();
 
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
