@@ -93,7 +93,7 @@ class ManueltVedtaksbrevInnholdByggerTest {
 
     @Test
     void skalKasteFeilHvisIngenValgFunnet() {
-        byggOgAssertFeil("Ingen lagrede valg for originalDokumentMalType");
+        byggOgAssertFeil("Ingen lagrede valg for dokumentMaltype");
     }
 
     private void byggOgAssertFeil(String Ingen_lagrede_valg_for_originalDokumentMalType) {

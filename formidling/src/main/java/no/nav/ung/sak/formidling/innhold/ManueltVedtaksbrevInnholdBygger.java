@@ -24,7 +24,7 @@ public class ManueltVedtaksbrevInnholdBygger {
 
     public TemplateInnholdResultat bygg(Behandling behandling, DokumentMalType originalDokumentMalType) {
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId(), originalDokumentMalType)
-            .orElseThrow(() -> new IllegalStateException("Ingen lagrede valg for originalDokumentMalType " + originalDokumentMalType));
+            .orElseThrow(() -> new IllegalStateException("Ingen lagrede valg for dokumentMaltype " + originalDokumentMalType));
 
         valider(originalDokumentMalType, valg.getRedigertBrevHtml());
 

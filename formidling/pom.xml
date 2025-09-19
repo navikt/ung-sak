@@ -54,6 +54,10 @@
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
 
 		<!-- Test avhengigheter -->
 		<dependency>
@@ -61,10 +65,6 @@
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

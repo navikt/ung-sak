@@ -2,7 +2,6 @@ package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.BadRequestException;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -125,16 +124,16 @@ public class VedtaksbrevTjeneste {
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
-            throw new BadRequestException("Kan ikke endre vedtaksbrev på avsluttet behandling");
+            throw new IllegalArgumentException("Kan ikke endre vedtaksbrev på avsluttet behandling");
         }
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(dto.behandlingId());
         if (!totalresultater.harBrev()) {
-            throw new BadRequestException("Ingen vedtaksbrev resultater for behandling");
+            throw new IllegalArgumentException("Ingen vedtaksbrev resultater for behandling");
         }
 
         Vedtaksbrev vedtaksbrev = totalresultater.finnVedtaksbrev(dto.dokumentMalType())
-            .orElseThrow(() -> new BadRequestException("Ingen vedtaksbrev med mal " + dto.dokumentMalType() + " for behandling " + dto.behandlingId()));
+            .orElseThrow(() -> new IllegalArgumentException("Ingen vedtaksbrev med mal " + dto.dokumentMalType() + " for behandling " + dto.behandlingId()));
 
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId(), vedtaksbrev.dokumentMalType())
             .orElse(VedtaksbrevValgEntitet.ny(dto.behandlingId(), vedtaksbrev.dokumentMalType()));
@@ -142,11 +141,11 @@ public class VedtaksbrevTjeneste {
         var vedtaksbrevEgenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
 
         if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
-            throw new BadRequestException("Brevet kan ikke redigeres.");
+            throw new IllegalArgumentException("Brevet kan ikke redigeres.");
         }
 
         if (!vedtaksbrevEgenskaper.kanHindre() && dto.hindret() != null) {
-            throw new BadRequestException("Brevet kan ikke hindres. ");
+            throw new IllegalArgumentException("Brevet kan ikke hindres. ");
         }
 
         vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
@@ -159,7 +158,7 @@ public class VedtaksbrevTjeneste {
     public List<GenerertBrev> forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         List<GenerertBrev> genererteBrev = doForhåndsvis(dto);
         if (genererteBrev.isEmpty()) {
-            throw new BadRequestException("Ingen vedtaksbrev generert for behandling. Request: " + dto);
+            throw new IllegalArgumentException("Ingen vedtaksbrev generert for behandling. Request: " + dto);
         }
         return genererteBrev;
     }
@@ -193,7 +192,7 @@ public class VedtaksbrevTjeneste {
 
     private static void validerHarBrev(BehandlingVedtaksbrevResultat totalresultater) {
         if (!totalresultater.harBrev()) {
-            throw new BadRequestException("Ingen vedtaksbrev resultater for behandling. Årsak: " + totalresultater.ingenBrevResultater().stream()
+            throw new IllegalArgumentException("Ingen vedtaksbrev resultater for behandling. Årsak: " + totalresultater.ingenBrevResultater().stream()
                 .map(IngenBrev::forklaring)
                 .collect(Collectors.joining(", ", "[", "]")));
         }
