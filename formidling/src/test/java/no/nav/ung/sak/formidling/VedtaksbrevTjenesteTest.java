@@ -58,6 +58,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valg.redigert()).isFalse();
         assertThat(valg.kanOverstyreRediger()).isTrue();
         assertThat(valg.redigertBrevHtml()).isNull();
+        assertThat(valg.tidligereRedigertTekst()).isNull();
 
         //Forhåndsviser automatisk brev
         String automatiskBrevHtmlSnippet = "<h1>";
@@ -97,6 +98,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering1.redigert()).isTrue();
         assertThat(valgEtterRedigering1.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterRedigering1.redigertBrevHtml()).isEqualTo(redigertHtml);
+        assertThat(valgEtterRedigering1.tidligereRedigertTekst()).isNull();
 
         //Forhåndsviser automatisk brev - skal fortsått gå bra
         assertThat(forhåndsvis(behandling, false)).contains(automatiskBrevHtmlSnippet);
@@ -148,6 +150,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering2.redigert()).isFalse();
         assertThat(valgEtterRedigering2.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterRedigering2.redigertBrevHtml()).isNull();
+        assertThat(valgEtterRedigering2.tidligereRedigertTekst()).isNull();
 
 
         //Forhåndsviser automatisk brev
@@ -163,7 +166,7 @@ class VedtaksbrevTjenesteTest {
     }
 
     @Test
-    void skal_beholde_redigert_tekst_ved_tilbakehopp() {
+    void skal_deaktivere_ved_tilbakehopp() {
         UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
@@ -183,20 +186,44 @@ class VedtaksbrevTjenesteTest {
         vedtaksbrevTjeneste.ryddVedTilbakeHopp(behandling.getId());
         VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(response.vedtaksbrevValg()).hasSize(1);
-        var valgEtterRedigering = response.vedtaksbrevValg().getFirst();
+        var valgEtterTilbakehopp = response.vedtaksbrevValg().getFirst();
         assertThat(response.harBrev()).isTrue();
-        assertThat(valgEtterRedigering.enableRediger()).isTrue();
-        assertThat(valgEtterRedigering.redigert()).isFalse();
-        assertThat(valgEtterRedigering.kanOverstyreRediger()).isTrue();
-        //Beholder teksten
-        assertThat(valgEtterRedigering.redigertBrevHtml()).isEqualTo(redigertHtml);
+        assertThat(valgEtterTilbakehopp.enableRediger()).isTrue();
+        assertThat(valgEtterTilbakehopp.redigert()).isFalse();
+        assertThat(valgEtterTilbakehopp.kanOverstyreRediger()).isTrue();
+        assertThat(valgEtterTilbakehopp.redigertBrevHtml()).isNull();
+        assertThat(valgEtterTilbakehopp.tidligereRedigertTekst()).isEqualTo(redigertHtml);
 
         //Brevet behandlingen kommer til å bruke skal være automatisk brev
         assertThat(forhåndsvis(behandling, null)).contains(automatiskBrevHtmlSnippet);
 
-        //Forhåndsviser redigert brev - skal bruke den gamle teksten
-        assertThat(forhåndsvis(behandling, true)).contains(redigertHtml);
+        //Forhåndsviser redigert brev - skal feile
+        assertThatThrownBy(() -> forhåndsvis(behandling, true))
+            .isInstanceOf(IllegalStateException.class);
 
+
+        // Redigerer på nytt - tidligereRedigertTekst skal være null
+        var nyttRedigertBrev = "<h1>Ny redigert tekst</h1>";
+
+        vedtaksbrevTjeneste.lagreVedtaksbrev(
+            new VedtaksbrevValgRequest(
+                behandling.getId(),
+                false,
+                true,
+                nyttRedigertBrev,
+                DokumentMalType.ENDRING_INNTEKT)
+        );
+
+
+        VedtaksbrevValgResponse response2 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
+        assertThat(response2.vedtaksbrevValg()).hasSize(1);
+        var valgEtterTilbakehopp2 = response2.vedtaksbrevValg().getFirst();
+        assertThat(response2.harBrev()).isTrue();
+        assertThat(valgEtterTilbakehopp2.enableRediger()).isTrue();
+        assertThat(valgEtterTilbakehopp2.redigert()).isTrue();
+        assertThat(valgEtterTilbakehopp2.kanOverstyreRediger()).isTrue();
+        assertThat(valgEtterTilbakehopp2.redigertBrevHtml()).isEqualTo(nyttRedigertBrev);
+        assertThat(valgEtterTilbakehopp2.tidligereRedigertTekst()).isNull();
     }
 
     @Test

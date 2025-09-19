@@ -6,7 +6,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.sak.formidling.vedtak.regler.*;
+import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
+import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
@@ -57,12 +60,8 @@ public class VedtaksbrevTjeneste {
         }
 
         var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId);
-        var vedtaksbrevValg = totalResultat.vedtaksbrevResultater().stream()
-            .map(it -> {
-                var malValg = valg.stream().filter(v -> v.getDokumentMalType() == it.dokumentMalType()).findFirst();
-                return mapVedtaksbrev(it.vedtaksbrevEgenskaper(), malValg, erAvsluttet, it);
-            })
-            .toList();
+        var deaktiverteValg = vedtaksbrevValgRepository.finnNyesteDeaktiverteVedtakbrevValg(behandlingId);
+        var vedtaksbrevValg = mapVedtaksbrevValg(totalResultat, valg, deaktiverteValg, erAvsluttet);
 
         VedtaksbrevValg førsteValg = vedtaksbrevValg.getFirst();
 
@@ -80,7 +79,25 @@ public class VedtaksbrevTjeneste {
     }
 
     @NotNull
-    private static VedtaksbrevValg mapVedtaksbrev(VedtaksbrevEgenskaper egenskaper, Optional<VedtaksbrevValgEntitet> valg, boolean erAvsluttet, Vedtaksbrev resultat) {
+    private static List<VedtaksbrevValg> mapVedtaksbrevValg(BehandlingVedtaksbrevResultat totalResultat, List<VedtaksbrevValgEntitet> valg, List<VedtaksbrevValgEntitet> deaktiverteValg, boolean erAvsluttet) {
+        return totalResultat.vedtaksbrevResultater().stream()
+            .map(vedtaksbrev -> {
+                var malValg = valg.stream().filter(v -> v.getDokumentMalType() == vedtaksbrev.dokumentMalType()).findFirst();
+                var deaktivertValg = deaktiverteValg.stream().filter(v -> v.getDokumentMalType() == vedtaksbrev.dokumentMalType()).findFirst();
+                return mapVedtaksbrevValg(vedtaksbrev, malValg, deaktivertValg, erAvsluttet);
+            })
+            .toList();
+    }
+
+    @NotNull
+    private static VedtaksbrevValg mapVedtaksbrevValg(Vedtaksbrev resultat, Optional<VedtaksbrevValgEntitet> valg, Optional<VedtaksbrevValgEntitet> deaktivertValg, boolean erAvsluttet) {
+        var egenskaper = resultat.vedtaksbrevEgenskaper();
+        String redigertBrevHtml = valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null);
+
+        var tidligereRedigertTekst = redigertBrevHtml == null ? deaktivertValg
+            .map(VedtaksbrevValgEntitet::getRedigertBrevHtml)
+            .orElse(null) : null;
+
         return new VedtaksbrevValg(
             resultat.dokumentMalType(), egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
@@ -89,8 +106,8 @@ public class VedtaksbrevTjeneste {
             valg.map(VedtaksbrevValgEntitet::isRedigert).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreRediger(),
             resultat.forklaring(),
-            valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null)
-        );
+            redigertBrevHtml,
+            tidligereRedigertTekst);
     }
 
     private static VedtaksbrevValgResponse mapIngenBrevResponse(BehandlingVedtaksbrevResultat totalResultat) {
@@ -239,7 +256,7 @@ public class VedtaksbrevTjeneste {
     public void ryddVedTilbakeHopp(Long behandlingId) {
         vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId)
             .forEach(valg -> {
-                valg.tilbakestillVedTilbakehopp();
+                valg.deaktiver();
                 vedtaksbrevValgRepository.lagre(valg);
             });
 

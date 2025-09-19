@@ -14,8 +14,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -59,6 +60,62 @@ class VedtaksbrevValgRepositoryTest {
         assertThat(resultat.getRedigertBrevHtml()).isEqualTo("<h1>Et redigert brev</h1>");
         assertThat(resultat.getVersjon()).isEqualTo(0);
 
+    }
+
+    @Test
+    void skalHenteNyesteDeaktiverteValg() {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
+        scenarioBuilder.lagre(repositoryProvider);
+        var behandling = scenarioBuilder.getBehandling();
+
+        var v1 = new VedtaksbrevValgEntitet(
+            behandling.getId(),
+            DokumentMalType.ENDRING_INNTEKT,
+            true,
+            false,
+            "første");
+
+        var v2 = new VedtaksbrevValgEntitet(
+            behandling.getId(),
+            DokumentMalType.MANUELT_VEDTAK_DOK,
+            true,
+            false,
+            "<h1>Et annet brev</h1>");
+
+        var v3 = new VedtaksbrevValgEntitet(
+            behandling.getId(),
+            DokumentMalType.ENDRING_INNTEKT,
+            true,
+            false,
+            "andre");
+
+        var v4 = new VedtaksbrevValgEntitet(
+            behandling.getId(),
+            DokumentMalType.ENDRING_INNTEKT,
+            true,
+            false,
+            "tredje");
+
+
+        v1.deaktiver();
+        v2.deaktiver();
+        v3.deaktiver();
+        v4.deaktiver();
+
+        vedtaksbrevValgRepository.lagre(v1);
+        vedtaksbrevValgRepository.lagre(v2);
+        vedtaksbrevValgRepository.lagre(v3);
+        vedtaksbrevValgRepository.lagre(v4);
+        entityManager.flush();
+
+        var resultat = vedtaksbrevValgRepository.finnNyesteDeaktiverteVedtakbrevValg(behandling.getId());
+
+        assertThat(resultat).hasSize(2);
+        var manueltBrev = resultat.stream().filter(v -> v.getDokumentMalType() == DokumentMalType.MANUELT_VEDTAK_DOK).findFirst().orElseThrow();
+        assertThat(manueltBrev.getRedigertBrevHtml()).isEqualTo("<h1>Et annet brev</h1>");
+
+        var endringInntektBrev = resultat.stream().filter(v -> v.getDokumentMalType() == DokumentMalType.ENDRING_INNTEKT).findFirst().orElseThrow();
+        assertThat(endringInntektBrev.getRedigertBrevHtml()).isEqualTo("tredje");
     }
 
     @Test

@@ -33,6 +33,9 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
     @Column(name = "redigert_brev_html")
     private String redigertBrevHtml;
 
+    @Column(name = "aktiv", nullable = false)
+    private boolean aktiv = true;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -109,10 +112,8 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
         return new XhtmlBrevRenser().rens(redigertBrevHtml);
     }
 
-    public void tilbakestillVedTilbakehopp() {
-        //Fjerner ikke redigert tekst i tilfelle saksbehandler ønsker å bruke den
-        setRedigert(false);
-        setHindret(false);
+    public void deaktiver() {
+        aktiv = false;
     }
 
     @Override
