@@ -135,6 +135,74 @@
         "type" : "string",
         "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "UDEFINERT" ]
       },
+      "k9.oppdrag.kontrakt.oppsummering.Mottaker" : {
+        "properties" : {
+          "mottakerNummer" : {
+            "type" : "string"
+          },
+          "mottakerType" : {
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.kodeverk.MottakerType"
+          }
+        },
+        "required" : [ "mottakerType" ],
+        "type" : "object"
+      },
+      "k9.oppdrag.kontrakt.oppsummering.OppsummeringDto" : {
+        "properties" : {
+          "differanseIverksatt" : {
+            "items" : {
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.oppsummering.OppsummeringForMottakerDto"
+            },
+            "type" : "array"
+          },
+          "totaltIverksatt" : {
+            "items" : {
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.oppsummering.OppsummeringForMottakerDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "k9.oppdrag.kontrakt.oppsummering.OppsummeringForMottakerDto" : {
+        "properties" : {
+          "mottaker" : {
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.oppsummering.Mottaker"
+          },
+          "perioderMedBeløp" : {
+            "items" : {
+              "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.oppsummering.PeriodeMedBeløpDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "mottaker", "perioderMedBeløp" ],
+        "type" : "object"
+      },
+      "k9.oppdrag.kontrakt.oppsummering.PeriodeMedBeløpDto" : {
+        "properties" : {
+          "periode" : {
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.Periode"
+          },
+          "sats" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "satsType" : {
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.kodeverk.SatsType"
+          },
+          "utbetalingType" : {
+            "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.oppsummering.UtbetalingType"
+          }
+        },
+        "required" : [ "periode", "sats", "satsType", "utbetalingType" ],
+        "type" : "object"
+      },
+      "k9.oppdrag.kontrakt.oppsummering.UtbetalingType" : {
+        "enum" : [ "YTELSE", "FERIEPENGER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "YTELSE", "FERIEPENGER" ]
+      },
       "k9.oppdrag.kontrakt.simulering.v1.DetaljertSimuleringResultatDto" : {
         "properties" : {
           "ingenPerioderMedAvvik" : {
@@ -1104,16 +1172,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "INN", "UT", "NOTAT" ]
       },
-      "ung.kodeverk.etterlysning.EtterlysningStatus" : {
-        "enum" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLOPT" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ]
-      },
-      "ung.kodeverk.etterlysning.EtterlysningType" : {
-        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ]
-      },
       "ung.kodeverk.formidling.IdType" : {
         "enum" : [ "ORGNR", "AKTØRID" ],
         "type" : "string",
@@ -1181,6 +1239,16 @@
         "enum" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ],
         "type" : "string",
         "x-enum-varnames" : [ "IKKE_NOK_DAGER", "SØKERS_DØDSFALL" ]
+      },
+      "ung.kodeverk.varsel.EtterlysningStatus" : {
+        "enum" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLOPT" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ]
+      },
+      "ung.kodeverk.varsel.EtterlysningType" : {
+        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ]
       },
       "ung.kodeverk.vedtak.VedtakResultatType" : {
         "enum" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "-" ],
@@ -2375,10 +2443,10 @@
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "status" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.etterlysning.EtterlysningStatus"
+            "$ref" : "#/components/schemas/ung.kodeverk.varsel.EtterlysningStatus"
           },
           "type" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.etterlysning.EtterlysningType"
+            "$ref" : "#/components/schemas/ung.kodeverk.varsel.EtterlysningType"
           }
         },
         "type" : "object"
@@ -7624,6 +7692,35 @@
           }
         },
         "tags" : [ "prosesstask" ]
+      }
+    },
+    "/api/proxy/oppdrag/oppsummering/v2/oppsummering" : {
+      "get" : {
+        "description" : "Viser oppsummering av hva som sendes til OS. Både totalt opp til og med behandlingen, og differanse mot hva som fantes før behandlingen",
+        "operationId" : "hentOppdragOppsummering",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.oppsummering.OppsummeringDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Oppsummering av hva som sendes til OS",
+        "tags" : [ "oppsummering" ]
       }
     },
     "/api/proxy/oppdrag/simulering/detaljert-resultat" : {
