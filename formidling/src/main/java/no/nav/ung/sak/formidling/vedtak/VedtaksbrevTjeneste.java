@@ -133,11 +133,7 @@ public class VedtaksbrevTjeneste {
             throw new BadRequestException("Ingen vedtaksbrev resultater for behandling");
         }
 
-        var resultat = totalresultater.vedtaksbrevResultater();
-
-        Vedtaksbrev vedtaksbrev = resultat.stream()
-            .filter(it -> it.dokumentMalType() == dto.dokumentMalType())
-            .findFirst()
+        Vedtaksbrev vedtaksbrev = totalresultater.finnVedtaksbrev(dto.dokumentMalType())
             .orElseThrow(() -> new BadRequestException("Ingen vedtaksbrev med mal " + dto.dokumentMalType() + " for behandling " + dto.behandlingId()));
 
         var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId(), vedtaksbrev.dokumentMalType())
@@ -163,7 +159,7 @@ public class VedtaksbrevTjeneste {
     public List<GenerertBrev> forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         List<GenerertBrev> genererteBrev = doForhåndsvis(dto);
         if (genererteBrev.isEmpty()) {
-            throw new IllegalStateException("Ingen vedtaksbrev generert for behandling. Request: " + dto);
+            throw new BadRequestException("Ingen vedtaksbrev generert for behandling. Request: " + dto);
         }
         return genererteBrev;
     }
@@ -171,11 +167,7 @@ public class VedtaksbrevTjeneste {
     @NotNull
     private List<GenerertBrev> doForhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(dto.behandlingId());
-        if (!totalresultater.harBrev()) {
-            throw new IllegalArgumentException("Ingen vedtaksbrev resultater for behandling. Årsak: " + totalresultater.ingenBrevResultater().stream()
-                .map(IngenBrev::forklaring)
-                .collect(Collectors.joining(", ", "[", "]")));
-        }
+        validerHarBrev(totalresultater);
 
 
         var kunHtml = Boolean.TRUE.equals(dto.htmlVersjon());
@@ -199,6 +191,14 @@ public class VedtaksbrevTjeneste {
         return genererAutomatiskeBrev(dto, relevanteVedtaksbrev, totalresultater, kunHtml);
     }
 
+    private static void validerHarBrev(BehandlingVedtaksbrevResultat totalresultater) {
+        if (!totalresultater.harBrev()) {
+            throw new BadRequestException("Ingen vedtaksbrev resultater for behandling. Årsak: " + totalresultater.ingenBrevResultater().stream()
+                .map(IngenBrev::forklaring)
+                .collect(Collectors.joining(", ", "[", "]")));
+        }
+    }
+
     @NotNull
     private List<GenerertBrev> genererFraValg(VedtaksbrevForhåndsvisRequest dto, boolean kunHtml, List<Vedtaksbrev> relevanteVedtaksbrev, BehandlingVedtaksbrevResultat totalresultater) {
         var relevanteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()).stream()
@@ -206,9 +206,9 @@ public class VedtaksbrevTjeneste {
             .toList();
 
         var manuelleBrev = relevanteValg.stream()
-            .filter(it1 -> !it1.isHindret())
+            .filter(it -> !it.isHindret())
             .filter(VedtaksbrevValgEntitet::isRedigert)
-            .map(it1 -> vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), it1.getDokumentMalType(), kunHtml))
+            .map(it -> vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(dto.behandlingId(), it.getDokumentMalType(), kunHtml))
             .toList();
 
         var redigerteEllerHindredeBrev = relevanteValg.stream()
@@ -216,7 +216,7 @@ public class VedtaksbrevTjeneste {
             .map(VedtaksbrevValgEntitet::getDokumentMalType)
             .toList();
 
-        var automatiske = redigerteEllerHindredeBrev.isEmpty() ? relevanteVedtaksbrev : relevanteVedtaksbrev.stream()
+        var automatiske = relevanteVedtaksbrev.stream()
             .filter(vedtaksbrev -> !redigerteEllerHindredeBrev.contains(vedtaksbrev.dokumentMalType()))
             .toList();
 

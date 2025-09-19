@@ -83,9 +83,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .map(VedtaksbrevValgEntitet::getDokumentMalType)
             .collect(Collectors.toSet());
 
-        var vedtaksbrevResultater = hindredeEllerRedigerteMaler.isEmpty() ?
-            resultat.vedtaksbrevResultater() :
-            resultat.vedtaksbrevResultater().stream()
+        var vedtaksbrevResultater = resultat.vedtaksbrevResultater().stream()
                 .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
                 .toList();
 
