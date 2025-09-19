@@ -4,14 +4,16 @@ package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import no.nav.ung.abac.AbacAttributt;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
  * @param behandlingId
- * @param hindret      - hindre sending av brev
- * @param redigert     - overstyre eller skrive fritekst vedtaksbrev
- * @param redigertHtml - html med tekst som skal overstyre
+ * @param hindret         - hindre sending av brev
+ * @param redigert        - overstyre eller skrive fritekst vedtaksbrev
+ * @param redigertHtml    - html med tekst som skal overstyre
+ * @param dokumentMalType - malen valgene gjelder for
  */
 public record VedtaksbrevValgRequest(
     @NotNull
@@ -24,8 +26,8 @@ public record VedtaksbrevValgRequest(
     Boolean redigert,
 
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    String redigertHtml
-) {
+    String redigertHtml,
+    DokumentMalType dokumentMalType) {
 
     @AssertTrue(message = "Redigert tekst kan ikke være tom samtidig som redigert er true")
     public boolean isEmptyRedigertTekstAndRedigertTrue() {
