@@ -34,8 +34,8 @@ class StartpunktUtlederUttalelse implements EndringStartpunktUtleder {
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object nyeste, Object eldste) {
-        var eldsteUttalelser = hentUttalelser((Long) eldste);
-        var nyesteUttalelser = hentUttalelser((Long) nyeste);
+        var eldsteUttalelser = hentJournalpostIderForUttalelser((Long) eldste);
+        var nyesteUttalelser = hentJournalpostIderForUttalelser((Long) nyeste);
         if (nyesteUttalelser.equals(eldsteUttalelser)) {
             return StartpunktType.UDEFINERT;
         }
@@ -43,7 +43,7 @@ class StartpunktUtlederUttalelse implements EndringStartpunktUtleder {
         return StartpunktType.INIT_PERIODER;
     }
 
-    private Set<JournalpostId> hentUttalelser(Long nyeste) {
+    private Set<JournalpostId> hentJournalpostIderForUttalelser(Long nyeste) {
         return uttalelseRepository.hentGrunnlagBasertPåId(nyeste)
             .stream()
             .map(UttalelseGrunnlag::getUttalelser)

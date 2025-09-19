@@ -54,8 +54,7 @@ public class UttalelseRepository {
     public Optional<UttalelseGrunnlag> hentGrunnlagBasertPåId(Long id) {
         final var query = entityManager.createQuery(
             "select ug from UttalelseGrunnlag ug " +
-                "where ug.id = :id " +
-                "and ug.aktiv = true", UttalelseGrunnlag.class);
+                "where ug.id = :id " , UttalelseGrunnlag.class);
         query.setParameter("id", id);
 
         return HibernateVerktøy.hentUniktResultat(query);
