@@ -16,5 +16,13 @@ public record EtterlysningData(
     LocalDateTime opprettetTidspunkt,
     UttalelseData uttalelseData
 ) {
+    public static EtterlysningData utenUttalelse(
+        EtterlysningStatus status,
+        LocalDateTime frist,
+        UUID grunnlagsreferanse,
+        DatoIntervallEntitet periode,
+        LocalDateTime opprettetTidspunkt) {
+        return new EtterlysningData(status, frist, grunnlagsreferanse, periode, opprettetTidspunkt, null);
+    }
 
 }

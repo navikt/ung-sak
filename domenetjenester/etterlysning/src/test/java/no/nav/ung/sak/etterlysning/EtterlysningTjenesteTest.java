@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -11,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumen
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -239,11 +241,22 @@ class EtterlysningTjenesteTest {
     }
 
     private Etterlysning lagEtterlysningMedSvar(DatoIntervallEntitet periode, JournalpostId svarJournalpostId) {
-        final var etterlysning = Etterlysning.opprettForType(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(),
+        UUID grunnlagsreferanse = UUID.randomUUID();
+        final var etterlysning = Etterlysning.opprettForType(behandling.getId(), grunnlagsreferanse, UUID.randomUUID(),
             periode,
             EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysning.vent(LocalDateTime.now());
-        etterlysning.mottaSvar(svarJournalpostId, false, "Uttalelse");
+        boolean harUttalelse = false;
+        String uttalelse = "Uttalelse";
+        etterlysning.mottaSvar(svarJournalpostId, harUttalelse, uttalelse);
+        uttalelseRepository.lagre(behandling.getId(), List.of(new UttalelseV2(
+            harUttalelse,
+            uttalelse,
+            periode,
+            svarJournalpostId,
+            EndringType.ENDRET_STARTDATO,
+            grunnlagsreferanse
+        )));
         return etterlysning;
     }
 }
