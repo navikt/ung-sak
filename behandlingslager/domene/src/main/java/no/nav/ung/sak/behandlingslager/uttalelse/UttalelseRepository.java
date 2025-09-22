@@ -26,6 +26,12 @@ public class UttalelseRepository {
         persister(hentEksisterendeGrunnlag(behandlingsId), nyttGrunnlag);
     }
 
+    public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(eksisterendeBehandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UttalelseGrunnlag(nyBehandlingId, it));
+        nyttGrunnlag.ifPresent(gr -> persister(Optional.empty(), gr));
+    }
+
     private void persister(Optional <UttalelseGrunnlag> eksisterendeGrunnlag, UttalelseGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
         if (nyttGrunnlag.getUttalelser() != null) {
@@ -47,6 +53,15 @@ public class UttalelseRepository {
                 "where ug.behandlingId = :behandlingId " +
                 "and ug.aktiv = true", UttalelseGrunnlag.class);
         query.setParameter("behandlingId", behandlingId);
+
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public Optional<UttalelseGrunnlag> hentGrunnlagBasertPåId(Long id) {
+        final var query = entityManager.createQuery(
+            "select ug from UttalelseGrunnlag ug " +
+                "where ug.id = :id " , UttalelseGrunnlag.class);
+        query.setParameter("id", id);
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
