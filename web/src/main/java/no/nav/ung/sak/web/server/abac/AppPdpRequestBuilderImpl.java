@@ -93,7 +93,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
         Set<AktørId> aktørIder = utledAktørIder(attributter, saksnumre);
         Set<AktørId> aktørIderSporingslogg = utledAktørIderForSporingslogg(attributter, saksnumre);
-        Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(AppAbacAttributtType.AKSJONSPUNKT_KODE));
+        Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(StandardAbacAttributtType.AKSJONSPUNKT_KODE));
 
         PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aktørIderSporingslogg, aksjonspunktType);
         if (behandlingData != null) {
@@ -120,7 +120,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Set<AktørId> aktørIderForSporingslogg, Set<String> aksjonspunktType) {
         Set<String> aktører = aktørIder.stream().map(AktørId::getId).collect(Collectors.toCollection(TreeSet::new));
-        Set<String> fnrs = attributter.getVerdier(AppAbacAttributtType.FNR);
+        Set<String> fnrs = attributter.getVerdier(StandardAbacAttributtType.FNR);
 
         PdpRequestMedBerørtePersonerForAuditlogg pdpRequest = new PdpRequestMedBerørtePersonerForAuditlogg();
         pdpRequest.setActionType(attributter.getActionType());
@@ -162,9 +162,9 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     }
 
     private Optional<Long> utledBehandlingIder(AbacAttributtSamling attributter) {
-        Set<Long> behandlingIdFraAttributter = attributter.<Long>getVerdier(AppAbacAttributtType.BEHANDLING_ID).stream().mapToLong(Long::valueOf).boxed().collect(Collectors.toSet());
+        Set<Long> behandlingIdFraAttributter = attributter.<Long>getVerdier(StandardAbacAttributtType.BEHANDLING_ID).stream().mapToLong(Long::valueOf).boxed().collect(Collectors.toSet());
 
-        Set<UUID> uuids = attributter.getVerdier(AppAbacAttributtType.BEHANDLING_UUID);
+        Set<UUID> uuids = attributter.getVerdier(StandardAbacAttributtType.BEHANDLING_UUID);
         Set<Long> behandlingIdForUuid = pipRepository.behandlingsIdForUuid(uuids);
         if (uuids.size() != behandlingIdForUuid.size()) {
             throw new UkjentBehandlingException(uuids);
@@ -216,14 +216,14 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             throw new UkjentFagsakException(saksnumreDirekteFraAttributter.stream().map(Saksnummer::getVerdi).toList());
         }
         Set<Saksnummer> saksnumre = new LinkedHashSet<>();
-        saksnumre.addAll(attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER));
+        saksnumre.addAll(attributter.getVerdier(StandardAbacAttributtType.SAKSNUMMER));
         saksnumre.addAll(pipRepository.saksnumreForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
-        saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(AppAbacAttributtType.JOURNALPOST_ID)));
+        saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(StandardAbacAttributtType.JOURNALPOST_ID)));
         return saksnumre;
     }
 
     private Set<AktørId> utledAktørIder(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre) {
-        Set<String> aktørIdVerdier = attributter.getVerdier(AppAbacAttributtType.AKTØR_ID);
+        Set<String> aktørIdVerdier = attributter.getVerdier(StandardAbacAttributtType.AKTØR_ID);
 
         Set<AktørId> aktørIder = new HashSet<>();
         aktørIder.addAll(aktørIdVerdier.stream().map(AktørId::new).collect(Collectors.toSet()));

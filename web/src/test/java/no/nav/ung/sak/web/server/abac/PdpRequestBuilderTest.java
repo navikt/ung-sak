@@ -56,7 +56,7 @@ public class PdpRequestBuilderTest {
     @Test
     public void skal_hente_saksstatus_og_behandlingsstatus_når_behandlingId_er_input() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
-            .leggTil(AppAbacAttributtType.BEHANDLING_ID, BEHANDLING_ID));
+            .leggTil(StandardAbacAttributtType.BEHANDLING_ID, BEHANDLING_ID));
 
         when(pipRepository.saksnumreForJournalpostId(any())).thenReturn(Collections.singleton(SAKSNUMMER_1));
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
@@ -76,7 +76,7 @@ public class PdpRequestBuilderTest {
     @Test
     public void skal_angi_aktørId_gitt_journalpost_id_som_input() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling().leggTil(AbacDataAttributter.opprett()
-            .leggTil(AppAbacAttributtType.JOURNALPOST_ID, JOURNALPOST_ID.getVerdi()));
+            .leggTil(StandardAbacAttributtType.JOURNALPOST_ID, JOURNALPOST_ID.getVerdi()));
 
         when(pipRepository.saksnumreForJournalpostId(any())).thenReturn(Collections.singleton(SAKSNUMMER_1));
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
@@ -112,7 +112,7 @@ public class PdpRequestBuilderTest {
     @Test
     public void skal_bare_sende_fnr_vider_til_pdp() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.FNR, PERSON_0));
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.FNR, PERSON_0));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getFødselsnumre()).containsOnly(new Fnr(PERSON_0));
@@ -122,8 +122,8 @@ public class PdpRequestBuilderTest {
     public void skal_ta_inn_aksjonspunkt_id_og_sende_videre_aksjonspunkt_typer() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett()
-            .leggTil(AppAbacAttributtType.AKSJONSPUNKT_KODE, "0000")
-            .leggTil(AppAbacAttributtType.AKSJONSPUNKT_KODE, "0001"));
+            .leggTil(StandardAbacAttributtType.AKSJONSPUNKT_KODE, "0000")
+            .leggTil(StandardAbacAttributtType.AKSJONSPUNKT_KODE, "0001"));
 
         Set<String> koder = new HashSet<>();
         koder.add("0000");
@@ -140,7 +140,7 @@ public class PdpRequestBuilderTest {
     @Test
     public void skal_slå_opp_og_sende_videre_fnr_når_aktør_id_er_input() {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.AKTØR_ID, AKTØR_1.getId()));
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.AKTØR_ID, AKTØR_1.getId()));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getAktørIder()).containsOnly(new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_1.getId()));
@@ -168,7 +168,7 @@ public class PdpRequestBuilderTest {
 
         // Arrange
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.BEHANDLING_ID, 1234L));
         String saksnummer = "ABC";
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(Optional.empty());
 
@@ -187,8 +187,8 @@ public class PdpRequestBuilderTest {
 
         // Arrange
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer("XXX")));
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer("XXX")));
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.BEHANDLING_ID, 1234L));
         Saksnummer saksnummer = new Saksnummer("ABC");
         when(pipRepository.finnSaksnumerSomEksisterer(any())).thenReturn(Set.of(new Saksnummer("XXX")));
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
