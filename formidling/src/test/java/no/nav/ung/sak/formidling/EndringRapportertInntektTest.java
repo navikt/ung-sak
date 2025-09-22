@@ -102,6 +102,61 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             );
     }
 
+    @DisplayName("Endringsbrev med 0 kr utbetaling pga for mye inntekt")
+    @Test
+    void melder_inntekt_0_utbetaling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntekt0krUtbetaling(fom);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret ungdomsprogramytelsen din " +
+                "Du får 0 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Det er fordi du har hatt en inntekt på 23 000 kroner i denne perioden. " +
+                standardTekstEndringInntekt());
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+            );
+    }
+
+    @DisplayName("Endringsbrev med flere perioder der det ikke er utbetaling i midten")
+    @Test
+    void melder_inntekt_for_flere_mnd_med_0_utbetaling_i_midten() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektReduksjonOgIngenUtbetalingKombinasjon(fom);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret ungdomsprogramytelsen din " +
+                "Du får 8 326 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Du får 0 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
+                "Det er fordi du har hatt en inntekt på 23 000 kroner i denne perioden. " +
+                "Du får 7 035 kroner i ungdomsprogramytelse for perioden fra 1. mars 2025 til 31. mars 2025. " +
+                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                standardTekstEndringInntekt());
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+            );
+    }
+
+    @NotNull
     private static String standardTekstEndringInntekt() {
         return """
             Pengene får du utbetalt før den 10. denne måneden. \

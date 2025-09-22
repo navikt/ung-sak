@@ -29,7 +29,9 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
-            && resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON);
+            && (resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
+            || resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING)
+        );
     }
 
 }
