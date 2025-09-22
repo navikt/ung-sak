@@ -4,18 +4,15 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.threeten.extra.Interval;
 
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
@@ -26,7 +23,7 @@ public class PersonopplysningerAggregat {
     private final List<PersonopplysningEntitet> allePersonopplysninger;
     private final List<PersonRelasjonEntitet> alleRelasjoner;
 
-    public PersonopplysningerAggregat(PersonopplysningGrunnlagEntitet grunnlag, AktørId aktørId, DatoIntervallEntitet forPeriode) {
+    public PersonopplysningerAggregat(PersonopplysningGrunnlagEntitet grunnlag, AktørId aktørId) {
         this.søkerAktørId = aktørId;
         if (grunnlag.getRegisterVersjon().isPresent()) {
             this.alleRelasjoner = grunnlag.getRegisterVersjon().get().getRelasjoner();
@@ -35,14 +32,6 @@ public class PersonopplysningerAggregat {
             this.alleRelasjoner = Collections.emptyList();
             this.allePersonopplysninger = Collections.emptyList();
         }
-    }
-
-    private boolean erGyldigIPeriode(DatoIntervallEntitet forPeriode, DatoIntervallEntitet periode) {
-        return periode.tilIntervall().overlaps(forPeriode.tilIntervall());
-    }
-
-    private boolean erIkkeSøker(AktørId aktørId, AktørId aktuellAktør) {
-        return !aktuellAktør.equals(aktørId);
     }
 
     public List<PersonopplysningEntitet> getPersonopplysninger() {

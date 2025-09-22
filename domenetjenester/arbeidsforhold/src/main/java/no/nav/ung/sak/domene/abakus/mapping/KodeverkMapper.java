@@ -3,13 +3,10 @@ package no.nav.ung.sak.domene.abakus.mapping;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektPeriodeType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
-import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
@@ -28,41 +25,6 @@ public final class KodeverkMapper {
     private static String getFpsakYtelseTypeFraAbakus(String kode) {
         // gjør mapping for å sjekke konsistens
         return FagsakYtelseType.fraKode(kode).getKode();
-    }
-
-    static RelatertYtelseTilstand getFpsakRelatertYtelseTilstandForAbakusYtelseStatus(YtelseStatus dto) {
-        if (dto == null)
-            return null;
-
-        String kode = dto.getKode();
-        switch (kode) {
-            case "OPPR":
-                return RelatertYtelseTilstand.IKKE_STARTET;
-            case "UBEH":
-                return RelatertYtelseTilstand.ÅPEN;
-            case "AVSLU":
-                return RelatertYtelseTilstand.AVSLUTTET;
-            case "LOP":
-                return RelatertYtelseTilstand.LØPENDE;
-            default:
-                throw new IllegalArgumentException("Ukjent YtelseStatus: " + dto);
-        }
-    }
-
-    static no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus getAbakusYtelseStatusForFpsakRelatertYtelseTilstand(RelatertYtelseTilstand tilstand) {
-        var kode = tilstand.getKode();
-        switch (kode) {
-            case "IKKESTARTET":
-                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.OPPRETTET;
-            case "ÅPEN":
-                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.UNDER_BEHANDLING;
-            case "AVSLUTTET":
-                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.AVSLUTTET;
-            case "LØPENDE":
-                return no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus.LØPENDE;
-            default:
-                throw new IllegalArgumentException("Ukjent RelatertYtelseTilstand: " + kode);
-        }
     }
 
     static InntektYtelseType mapUtbetaltYtelseTypeTilGrunnlag(no.nav.abakus.iaygrunnlag.kodeverk.InntektYtelseType type) {
@@ -86,18 +48,6 @@ public final class KodeverkMapper {
         return kode == null || Fagsystem.UDEFINERT.equals(kode)
             ? null
             : no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem.fraKode(kode.getKode());
-    }
-
-    static no.nav.abakus.iaygrunnlag.kodeverk.InntektPeriodeType mapInntektPeriodeTypeTilDto(InntektPeriodeType hyppighet) {
-        return hyppighet == null || InntektPeriodeType.UDEFINERT.equals(hyppighet)
-            ? null
-            : no.nav.abakus.iaygrunnlag.kodeverk.InntektPeriodeType.fraKode(hyppighet.getKode());
-    }
-
-    static no.nav.abakus.iaygrunnlag.kodeverk.Arbeidskategori mapArbeidskategoriTilDto(Arbeidskategori kode) {
-        return kode == null || Arbeidskategori.UDEFINERT.equals(kode)
-            ? null
-            : no.nav.abakus.iaygrunnlag.kodeverk.Arbeidskategori.fraKode(kode.getKode());
     }
 
     static no.nav.abakus.iaygrunnlag.kodeverk.ArbeidType mapArbeidTypeTilDto(ArbeidType arbeidType) {
@@ -154,18 +104,6 @@ public final class KodeverkMapper {
         return dto == null
             ? InntektspostType.UDEFINERT
             : InntektspostType.fraKode(dto.getKode());
-    }
-
-    static Arbeidskategori mapArbeidskategoriFraDto(no.nav.abakus.iaygrunnlag.kodeverk.Arbeidskategori dto) {
-        return dto == null
-            ? Arbeidskategori.UDEFINERT
-            : Arbeidskategori.fraKode(dto.getKode());
-    }
-
-    static InntektPeriodeType mapInntektPeriodeTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.InntektPeriodeType dto) {
-        return dto == null
-            ? InntektPeriodeType.UDEFINERT
-            : InntektPeriodeType.fraKode(dto.getKode());
     }
 
     public static no.nav.abakus.iaygrunnlag.kodeverk.YtelseType mapFagsakYtelseTypeTilDto(FagsakYtelseType ytelseType) {

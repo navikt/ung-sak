@@ -65,7 +65,7 @@ public class BigQueryKlient {
 
         // 1) map
         if (records == null || records.isEmpty()) {
-            log.warn("Ingen data å publisere til BigQuery-tabell {}", tableDef.getTabellnavn());
+            log.info("Ingen data å publisere til BigQuery-tabell {}", tableDef.getTabellnavn());
             return;
         }
         List<InsertAllRequest.RowToInsert> rader = records.stream().map(tableDef::tilRowInsert).toList();

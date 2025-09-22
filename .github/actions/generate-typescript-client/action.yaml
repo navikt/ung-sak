@@ -21,12 +21,11 @@ runs:
       run: echo "resultDir=web/target/ts-client" >> $GITHUB_OUTPUT
     - name: Typescript generate
       id: typescript-generate
-      uses: navikt/openapi-ts-clientmaker@v1
+      uses: navikt/openapi-ts-clientmaker@v2
       with:
         openapi-spec-file: web/src/main/resources/openapi-ts-client/ung-sak.openapi.json
         package-json-file: web/src/main/resources/openapi-ts-client/package.json
         package-json-version: "${{ env.PACKAGE_JSON_VERSION }}"
         out-dir: "${{ steps.set-output.outputs.resultDir }}"
-        client-name: UngSakClient
       env:
         PACKAGE_JSON_VERSION: "${{ inputs.openapiVersion }}.${{ inputs.patchVersion }}"

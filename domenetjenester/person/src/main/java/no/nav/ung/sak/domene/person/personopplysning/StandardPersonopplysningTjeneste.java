@@ -11,30 +11,12 @@ import no.nav.ung.sak.typer.AktørId;
 public interface StandardPersonopplysningTjeneste {
 
     /**
-     * Gir personopplysningene på utledet skjæringstidspunktet
+     * Gi de gjeldende  personopplysningene
+     *
      * @return personopplysninger
      */
-    PersonopplysningerAggregat hentPersonopplysninger(BehandlingReferanse ref, LocalDate vurderingspunkt);
+    PersonopplysningerAggregat hentPersonopplysninger(BehandlingReferanse ref);
 
-    /**
-     * Gir personopplysningene på utledet skjæringstidspunktet
-     * @return personopplysninger hvis finnes
-     */
-    Optional<PersonopplysningerAggregat> hentPersonopplysningerHvisEksisterer(BehandlingReferanse ref, LocalDate vurderingspunkt);
-
-    /**
-     * Filtrerer, og gir personopplysning-historikk som er gyldig for på gitt tidspunkt.
-     */
-    PersonopplysningerAggregat hentGjeldendePersoninformasjonPåTidspunkt(Long behandlingId, AktørId aktørId, LocalDate tidspunkt);
-
-    /**
-     * Filtrerer, og gir personopplysning-historikk som er gyldig for gitt tidspunkt.
-     */
-    Optional<PersonopplysningerAggregat> hentGjeldendePersoninformasjonPåTidspunktHvisEksisterer(Long behandlingId, AktørId aktørId, LocalDate tidspunkt);
-
-    /**
-     * Filtrerer, og gir personopplysning-historikk som er gyldig for angitt intervall.
-     */
-    Optional<PersonopplysningerAggregat> hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(Long behandlingId, AktørId aktørId, DatoIntervallEntitet forPeriode);
+    Optional<PersonopplysningerAggregat> hentPersonopplysningerHvisEksisterer(BehandlingReferanse ref);
 
 }

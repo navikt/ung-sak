@@ -1,8 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -10,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
@@ -28,7 +25,6 @@ class ForeslåVedtakTjeneste {
     private static final Logger logger = LoggerFactory.getLogger(ForeslåVedtakTjeneste.class);
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
 
@@ -39,10 +35,8 @@ class ForeslåVedtakTjeneste {
     @Inject
     ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
                           VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
     }
@@ -90,22 +84,9 @@ class ForeslåVedtakTjeneste {
         behandling.nullstillToTrinnsBehandling();
         logger.info("To-trinn fjernet på behandling={}", behandling.getId());
         settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
-        if (skalOppretteForeslåVedtakManuelt(behandling)) {
+        if (vedtaksbrevTjeneste.måSkriveBrev(behandling.getId())) {
             aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
         }
-    }
-
-    private boolean skalOppretteForeslåVedtakManuelt(Behandling behandling) {
-        if (vedtaksbrevTjeneste.måSkriveBrev(behandling.getId())) {
-            return true;
-        }
-        return finnForeslåVedtakManueltUtleder(behandling).skalOppretteForeslåVedtakManuelt(behandling);
-    }
-
-    private ForeslåVedtakManueltUtleder finnForeslåVedtakManueltUtleder(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(foreslåVedtakManueltUtledere, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + ForeslåVedtakManueltUtleder.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
     private boolean skalUtføreTotrinnsbehandling(Behandling behandling) {

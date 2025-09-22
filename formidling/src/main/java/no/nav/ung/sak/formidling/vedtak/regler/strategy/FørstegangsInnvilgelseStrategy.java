@@ -28,7 +28,6 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater
-            .innholder(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE);
+        return resultater.innholder(DetaljertResultatType.INNVILGELSE_UTBETALING);
     }
 }

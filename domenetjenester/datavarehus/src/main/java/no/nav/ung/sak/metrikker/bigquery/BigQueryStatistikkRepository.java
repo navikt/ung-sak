@@ -1,19 +1,16 @@
 package no.nav.ung.sak.metrikker.bigquery;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.MetrikkUtils;
@@ -21,14 +18,14 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
-import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -47,29 +44,35 @@ import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
 @Dependent
 public class BigQueryStatistikkRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(BigQueryStatistikkRepository.class);
-
     private static final String OBSOLETE_KODE = FagsakYtelseType.OBSOLETE.getKode();
 
     private final EntityManager entityManager;
 
+    private final AntallDagerStatistikk antallDagerStatistikk;
+
     @Inject
     public BigQueryStatistikkRepository(
         EntityManager entityManager,
-        @Any Instance<ProsessTaskHandler> handlers
+        AntallDagerStatistikk antallDagerStatistikk
     ) {
         this.entityManager = entityManager;
+        this.antallDagerStatistikk = antallDagerStatistikk;
     }
 
-    private Class<?> extractClass(ProsessTaskHandler bean) {
-        if (!bean.getClass().isAnnotationPresent(ProsessTask.class) && bean instanceof TargetInstanceProxy<?> tip) {
-            return tip.weld_getTargetInstance().getClass();
-        } else {
-            return bean.getClass();
-        }
+    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentDagligRapporterte() {
+        List<Tuple<BigQueryTabell<?>, Collection<?>>> dagligRapporterte = new ArrayList<>();
+
+        Collection<AlderOgKjønnRecord> alderOgKjønn = alderOgKjønnStatistikk();
+        dagligRapporterte.add(new Tuple<>(AlderOgKjønnRecord.ALDER_OG_KJØNN_BIG_QUERY_TABELL, alderOgKjønn));
+
+        Collection<DagerIProgrammetRecord> dagerIProgrammet = antallDagerStatistikk.dagerIProgrammet();
+        dagligRapporterte.add(new Tuple<>(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, dagerIProgrammet));
+
+        return dagligRapporterte;
     }
 
-    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
+
+        public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
         Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
@@ -89,6 +92,9 @@ public class BigQueryStatistikkRepository {
 
         Collection<EtterlysningRecord> etterlysningData = etterlysningData(sistKjørtTidspunkt);
         hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
+
+        Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
+        hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, behandlingÅrsakData));
 
         return hyppigRapporterte;
     }
@@ -414,6 +420,90 @@ public class BigQueryStatistikkRepository {
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+
+    /**
+     * Henter statistikk for behandlinger gruppert på årsakstype og ferdigbehandlet-status.
+     *
+     * Denne metoden henter antall behandlinger for hver kombinasjon av relevante årsakstyper og om behandlingen er ferdigbehandlet eller ikke.
+     * Resultatet inkluderer alle relevante årsaker, også de med 0 forekomster, for både ferdigbehandlet og ikke-ferdigbehandlet status.
+     *
+     * @return En samling av BehandlingÅrsakRecord for alle relevante årsaker og ferdigbehandlet-status.
+     */
+    Collection<BehandlingÅrsakRecord> behandlingÅrsakStatistikk() {
+        String sql = """
+            select ba.behandling_arsak_type, b.behandling_status, count(distinct b.id) as antall\
+                  from fagsak f\
+                  inner join behandling b on b.fagsak_id=f.id\
+                  inner join behandling_arsak ba on ba.behandling_id = b.id\
+                  where f.ytelse_type <> :obsoleteKode \
+                  group by 1, 2 \
+                  order by 1, 2
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .getResultStream();
+
+        // Gruppér på behandling_årsak_type og erFerdigbehandletStatus
+        Map<Tuple<String, Boolean>, Long> grouped = stream.collect(Collectors.groupingBy(
+            t -> new Tuple<>(
+                t.get(0, String.class),
+                BehandlingStatus.fraKode(t.get(1, String.class)).erFerdigbehandletStatus()
+            ),
+            Collectors.summingLong(t -> t.get(2, Long.class))
+        ));
+
+        // Finn alle mulige kombinasjoner av relevanteÅrsaker og erFerdigbehandletStatus (true/false)
+        List<BehandlingÅrsakRecord> result = new ArrayList<>();
+        for (BehandlingÅrsakType årsak : BehandlingÅrsakType.values()) {
+            for (boolean ferdig : List.of(true, false)) {
+                Tuple<String, Boolean> key = new Tuple<>(årsak.getKode(), ferdig);
+                Long totaltAntall = grouped.getOrDefault(key, 0L);
+                result.add(new BehandlingÅrsakRecord(
+                    BigDecimal.valueOf(totaltAntall),
+                    årsak,
+                    ferdig,
+                    ZonedDateTime.now()
+                ));
+            }
+        }
+        return result;
+    }
+
+
+    Collection<AlderOgKjønnRecord> alderOgKjønnStatistikk() {
+        String sql = """
+            select po.bruker_kjoenn,  extract(YEAR from AGE(current_date, po.foedselsdato)),  count(*) as antall
+                     from fagsak f
+                     inner join behandling b on b.fagsak_id = f.id
+                     inner join gr_personopplysning gr on gr.behandling_id = b.id
+                    inner join po_informasjon pi on pi.id = gr.registrert_informasjon_id
+                     inner join PO_PERSONOPPLYSNING po on po.po_informasjon_id = pi.id and po.aktoer_id = f.bruker_aktoer_id
+                     where f.ytelse_type <> :obsoleteKode and gr.aktiv is true and b.behandling_type = :førstegangsbehandling
+                     group by 1,2
+                     order by 1,2
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("førstegangsbehandling", BehandlingType.FØRSTEGANGSSØKNAD.getKode())
+            .getResultStream();
+
+        return stream.map(t -> {
+            String kjønnKode = t.get(0, String.class);
+            var kjønn = NavBrukerKjønn.fraKode(kjønnKode);
+            BigDecimal alder = t.get(1, BigDecimal.class);
+            Long antall = t.get(2, Long.class);
+
+            return new AlderOgKjønnRecord(BigDecimal.valueOf(antall), alder.intValue(), kjønn, ZonedDateTime.now());
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+
+
 
 
 }

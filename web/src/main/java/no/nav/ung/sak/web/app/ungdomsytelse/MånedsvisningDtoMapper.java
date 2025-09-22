@@ -69,7 +69,7 @@ public class MånedsvisningDtoMapper {
 
     private static BigDecimal finnUtbetaltBeløp(LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseForMåned) {
         return tilkjentYtelseForMåned.toSegments().stream().map(LocalDateSegment::getValue)
-            .map(TilkjentYtelseVerdi::redusertBeløp)
+            .map(TilkjentYtelseVerdi::tilkjentBeløp)
             .reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 

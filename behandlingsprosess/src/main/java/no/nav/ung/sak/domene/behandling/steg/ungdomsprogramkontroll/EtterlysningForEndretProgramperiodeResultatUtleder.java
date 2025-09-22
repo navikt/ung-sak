@@ -1,8 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll;
 
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
