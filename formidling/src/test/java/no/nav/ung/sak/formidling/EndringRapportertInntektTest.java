@@ -156,7 +156,6 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             );
     }
 
-    @NotNull
     private static String standardTekstEndringInntekt() {
         return """
             Pengene får du utbetalt før den 10. denne måneden. \
