@@ -87,6 +87,50 @@ public class EndringInntektScenarioer {
         return endringMedInntekt_19år(fom, rapportertInntektTimeline);
     }
 
+
+    /**
+     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre og tredje måned på 10 000 kroner.
+     * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
+     */
+    public static UngTestScenario endringMedInntekt0krUtbetaling(LocalDate fom) {
+        LocalDate førsteIMåneden = fom.withDayOfMonth(1);
+        var rapportertInntektTimeline = new LocalDateTimeline<>(
+            List.of(
+                new LocalDateSegment<>(
+                    førsteIMåneden.plusMonths(1),
+                    førsteIMåneden.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
+                    BigDecimal.valueOf(23000))
+            ));
+
+        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+    }
+
+    /**
+     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre og tredje måned på 10 000 kroner.
+     * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
+     */
+    public static UngTestScenario endringMedInntektReduksjonOgIngenUtbetalingKombinasjon(LocalDate fom) {
+        LocalDate førsteIMåneden = fom.withDayOfMonth(1);
+        var rapportertInntektTimeline = new LocalDateTimeline<>(
+            List.of(
+                new LocalDateSegment<>(
+                    førsteIMåneden.plusMonths(1),
+                    førsteIMåneden.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
+                    BigDecimal.valueOf(10000)),
+                new LocalDateSegment<>(
+                    førsteIMåneden.plusMonths(2),
+                    førsteIMåneden.plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()),
+                    BigDecimal.valueOf(23000)), //Vil gi 0 kr utbetaling
+                new LocalDateSegment<>(
+                    førsteIMåneden.plusMonths(3),
+                    førsteIMåneden.plusMonths(3).with(TemporalAdjusters.lastDayOfMonth()),
+                    BigDecimal.valueOf(10000))
+
+            ));
+
+        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+    }
+
     /**
      * 19 år ungdom med full ungdomsperiode uten inntekt og rapporterer ingen inntekt
      */
