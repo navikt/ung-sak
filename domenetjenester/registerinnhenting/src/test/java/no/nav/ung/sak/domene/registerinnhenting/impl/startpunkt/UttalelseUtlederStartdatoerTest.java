@@ -89,7 +89,7 @@ class UttalelseUtlederStartdatoerTest {
     }
 
     private Long lagGrunnlagMedJournalpostIder(int... journalpostIder) {
-        var utalelser = Arrays.stream(journalpostIder).mapToObj(it ->
+        var uttalelser = Arrays.stream(journalpostIder).mapToObj(it ->
                 new UttalelseV2(
                     false,
                     "begrunnelse 1",
@@ -100,7 +100,7 @@ class UttalelseUtlederStartdatoerTest {
                     EndringType.ENDRET_INNTEKT,
                     UUID.randomUUID()
                     )).toList();
-        uttalelseRepository.lagre(behandling.getId(), utalelser);
+        uttalelser.forEach(it -> uttalelseRepository.lagre(behandling.getId(), it));
         return uttalelseRepository.hentEksisterendeGrunnlag(behandling.getId()).get().getId();
     }
 }

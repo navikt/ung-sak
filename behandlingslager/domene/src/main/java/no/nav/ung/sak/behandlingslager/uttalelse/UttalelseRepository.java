@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 
 import java.util.Collection;
@@ -20,10 +21,11 @@ public class UttalelseRepository {
     @Inject
     public UttalelseRepository(EntityManager entityManager) { this.entityManager = entityManager; }
 
-    public void lagre(Long behandlingsId, Collection<UttalelseV2> uttalelser) {
-        var nyttGrunnlag = new UttalelseGrunnlag(behandlingsId);
-        nyttGrunnlag.leggTilUttalelser(uttalelser);
-        persister(hentEksisterendeGrunnlag(behandlingsId), nyttGrunnlag);
+    public void lagre(Long behandlingId, UttalelseV2 uttalelse) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UttalelseGrunnlag(behandlingId, it)).orElse(new UttalelseGrunnlag(behandlingId));
+        nyttGrunnlag.leggTilUttalelser(List.of(uttalelse));
+        persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
@@ -55,6 +57,18 @@ public class UttalelseRepository {
         query.setParameter("behandlingId", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public List<UttalelseV2> hentUttalelser(Long behandlingId, EndringType... typer) {
+        final var query = entityManager.createQuery(
+            "select ug from UttalelseGrunnlag ug " +
+                "where ug.behandlingId = :behandlingId " +
+                "and ug.aktiv = true", UttalelseGrunnlag.class);
+        query.setParameter("behandlingId", behandlingId);
+
+        return HibernateVerktøy.hentUniktResultat(query).stream().map(UttalelseGrunnlag::getUttalelser).map(Uttalelser::getUttalelser).flatMap(Collection::stream)
+            .filter(u -> List.of(typer).contains(u.getType()))
+            .toList();
     }
 
     public Optional<UttalelseGrunnlag> hentGrunnlagBasertPåId(Long id) {

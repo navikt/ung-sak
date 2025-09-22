@@ -76,7 +76,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
                 mapTilEndringsType(etterlysning.getType()),
                 etterlysning.getGrunnlagsreferanse()
             );
-            uttalelseRepository.lagre(etterlysning.getBehandlingId(), List.of(nyUttalelse));
+            uttalelseRepository.lagre(etterlysning.getBehandlingId(), nyUttalelse);
 
         }
 

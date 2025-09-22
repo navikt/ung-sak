@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.saf.*;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
@@ -11,9 +12,15 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDoku
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseGrunnlag;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
+import no.nav.ung.sak.behandlingslager.uttalelse.Uttalelser;
+import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.typer.JournalpostId;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Dependent
@@ -25,7 +32,7 @@ public class HistorikkinnslagTjeneste {
     private static final String INNTEKTSRAPPORTERING = "Inntektsrapportering";
     private static final String OPPGAVEBEKREFTELSE = "Svar på varsel";
     private HistorikkinnslagRepository historikkinnslagRepository;
-    private EtterlysningRepository etterlysningRepository;
+    private UttalelseRepository uttalelseRepository;
     private SafTjeneste safTjeneste;
 
     HistorikkinnslagTjeneste() {
@@ -34,10 +41,10 @@ public class HistorikkinnslagTjeneste {
 
     @Inject
     public HistorikkinnslagTjeneste(HistorikkinnslagRepository historikkinnslagRepository,
-                                    EtterlysningRepository etterlysningRepository,
+                                    UttalelseRepository uttalelseRepository,
                                     SafTjeneste safTjeneste) {
         this.historikkinnslagRepository = historikkinnslagRepository;
-        this.etterlysningRepository = etterlysningRepository;
+        this.uttalelseRepository = uttalelseRepository;
         this.safTjeneste = safTjeneste;
     }
 
@@ -80,18 +87,28 @@ public class HistorikkinnslagTjeneste {
             return INNTEKTSRAPPORTERING;
         }
         if (brevkode.equals(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE)) {
-            return etterlysningRepository.hentEtterlysninger(behandlingId).stream()
-                .filter(it -> it.getUttalelse().stream()
-                .anyMatch(u -> u.getSvarJournalpostId().equals(journalpostId)))
+            return uttalelseRepository.hentEksisterendeGrunnlag(behandlingId).stream()
+                .map(UttalelseGrunnlag::getUttalelser)
+                .map(Uttalelser::getUttalelser)
+                .flatMap(Collection::stream)
+                .filter(it -> it.getSvarJournalpostId().equals(journalpostId))
                 .findFirst()
-                .map(Etterlysning::getType)
-                .map(EtterlysningType::getNavn)
+                .map(UttalelseV2::getType)
+                .map(this::mapTilBekreftelseNavn)
                 .orElse(OPPGAVEBEKREFTELSE);
         }
         if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
             return SØKNAD;
         }
         return INNSENDING;
+    }
+
+    private String mapTilBekreftelseNavn(EndringType it) {
+        return switch (it) {
+            case ENDRET_INNTEKT -> "Svar på varsel: Avvik i registerinntekt";
+            case ENDRET_STARTDATO -> "Svar på varsel: Endret startdato";
+            case ENDRET_SLUTTDATO -> "Svar på varsel: Endret sluttdato";
+        };
     }
 
     private HistorikkinnslagDokumentLink lagHistorikkInnslagDokumentLink(DokumentInfo journalMetadata, JournalpostId journalpostId, String linkTekst) {
@@ -107,7 +124,6 @@ public class HistorikkinnslagTjeneste {
         historikkinnslagBuilder.medAktør(HistorikkAktør.SØKER);
         historikkinnslagBuilder.medTittel("Vedlegg mottatt");
         historikkinnslagBuilder.medFagsakId(fagsakId);
-
 
 
         leggTilHistorikkinnslagDokumentlinker(journalpostId, behandlingId, historikkinnslagBuilder);

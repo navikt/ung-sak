@@ -4,12 +4,15 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -33,6 +36,8 @@ class EtterlysningTjenesteTest {
     private MottatteDokumentRepository mottatteDokumentRepository;
     @Inject
     private EtterlysningRepository etterlysningRepository;
+    @Inject
+    private UttalelseRepository uttalelseRepository;
 
     @Inject
     private EntityManager entityManager;
@@ -46,7 +51,11 @@ class EtterlysningTjenesteTest {
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
         etterlysningTjeneste = new EtterlysningTjeneste(
             mottatteDokumentRepository,
-            etterlysningRepository);
+            new EtterlysningOgUttalelseTjeneste(
+                etterlysningRepository,
+                uttalelseRepository
+            )
+        );
     }
 
     @Test
@@ -96,7 +105,7 @@ class EtterlysningTjenesteTest {
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
         final var faktisk = gjeldendeEtterlysninger.get(0);
-        assertThat(faktisk.getPeriode()).isEqualTo(periode2);
+        assertThat(faktisk.periode()).isEqualTo(periode2);
     }
 
     @Test
@@ -119,7 +128,7 @@ class EtterlysningTjenesteTest {
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
         final var faktisk = gjeldendeEtterlysninger.get(0);
-        assertThat(faktisk.getPeriode()).isEqualTo(periode3);
+        assertThat(faktisk.periode()).isEqualTo(periode3);
     }
 
     @Test
@@ -142,9 +151,9 @@ class EtterlysningTjenesteTest {
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(2);
         final var faktisk1 = gjeldendeEtterlysninger.get(0);
-        assertThat(faktisk1.getPeriode()).isEqualTo(periode2);
+        assertThat(faktisk1.periode()).isEqualTo(periode2);
         final var faktisk2 = gjeldendeEtterlysninger.get(1);
-        assertThat(faktisk2.getPeriode()).isEqualTo(periode3);
+        assertThat(faktisk2.periode()).isEqualTo(periode3);
     }
 
     @Test
@@ -170,7 +179,7 @@ class EtterlysningTjenesteTest {
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
         final var faktisk = gjeldendeEtterlysninger.get(0);
-        assertThat(faktisk.getPeriode()).isEqualTo(periode3);
+        assertThat(faktisk.periode()).isEqualTo(periode3);
     }
 
 
@@ -202,7 +211,7 @@ class EtterlysningTjenesteTest {
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
         final var faktisk = gjeldendeEtterlysninger.get(0);
-        assertThat(faktisk.getPeriode()).isEqualTo(periode2);
+        assertThat(faktisk.periode()).isEqualTo(periode2);
     }
 
     private void opprettMottattDokument(JournalpostId svarJournalpostId, LocalDateTime innsendingstidspunkt) {
@@ -232,11 +241,22 @@ class EtterlysningTjenesteTest {
     }
 
     private Etterlysning lagEtterlysningMedSvar(DatoIntervallEntitet periode, JournalpostId svarJournalpostId) {
-        final var etterlysning = Etterlysning.opprettForType(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(),
+        UUID grunnlagsreferanse = UUID.randomUUID();
+        final var etterlysning = Etterlysning.opprettForType(behandling.getId(), grunnlagsreferanse, UUID.randomUUID(),
             periode,
             EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysning.vent(LocalDateTime.now());
-        etterlysning.mottaSvar(svarJournalpostId, false, "Uttalelse");
+        boolean harUttalelse = false;
+        String uttalelse = "Uttalelse";
+        etterlysning.mottaSvar(svarJournalpostId, harUttalelse, uttalelse);
+        uttalelseRepository.lagre(behandling.getId(), new UttalelseV2(
+            harUttalelse,
+            uttalelse,
+            periode,
+            svarJournalpostId,
+            EndringType.ENDRET_STARTDATO,
+            grunnlagsreferanse
+        ));
         return etterlysning;
     }
 }
