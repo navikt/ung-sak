@@ -32,31 +32,28 @@ public class EtterlysningOgUttalelseTjeneste {
         List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingId, typer);
         List<UttalelseV2> uttalelser = uttalelseRepository.hentUttalelser(behandlingId, Arrays.stream(typer).map(this::mapTilEndringsType).toArray(EndringType[]::new));
 
-        List<EtterlysningData> etterlysningerOgUttalelser =
-            etterlysninger.stream()
-                .map(e -> {
-                    EndringType mappedType = mapTilEndringsType(e.getType());
-                    return uttalelser.stream()
-                        .filter(u -> samsvarerMedEtterlysning(e, mappedType, u))
-                        .findFirst()
-                        .map(u -> new EtterlysningData(
-                            e.getStatus(),
-                            e.getFrist(),
-                            e.getGrunnlagsreferanse(),
-                            e.getPeriode(),
-                            e.getOpprettetTidspunkt(),
-                            new UttalelseData(
-                                u.harUttalelse(),
-                                u.getUttalelseBegrunnelse(),
-                                u.getSvarJournalpostId()
-                            )
-                        ))
-                        .orElse(null);
-                })
-                .filter(Objects::nonNull)
-                .toList();
-
-        return etterlysningerOgUttalelser;
+        return etterlysninger.stream()
+            .map(e -> {
+                EndringType mappedType = mapTilEndringsType(e.getType());
+                UttalelseData uttalelseData = uttalelser.stream()
+                    .filter(u -> samsvarerMedEtterlysning(e, mappedType, u))
+                    .findFirst()
+                    .map(u -> new UttalelseData(
+                        u.harUttalelse(),
+                        u.getUttalelseBegrunnelse(),
+                        u.getSvarJournalpostId()
+                    ))
+                    .orElse(null);
+                return new EtterlysningData(
+                    e.getStatus(),
+                    e.getFrist(),
+                    e.getGrunnlagsreferanse(),
+                    e.getPeriode(),
+                    e.getOpprettetTidspunkt(),
+                    uttalelseData
+                );
+            })
+            .toList();
     }
 
     private boolean samsvarerMedEtterlysning(Etterlysning e, EndringType mappedType, UttalelseV2 u) {
