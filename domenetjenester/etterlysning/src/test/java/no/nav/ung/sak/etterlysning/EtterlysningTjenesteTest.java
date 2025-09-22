@@ -249,14 +249,14 @@ class EtterlysningTjenesteTest {
         boolean harUttalelse = false;
         String uttalelse = "Uttalelse";
         etterlysning.mottaSvar(svarJournalpostId, harUttalelse, uttalelse);
-        uttalelseRepository.lagre(behandling.getId(), List.of(new UttalelseV2(
+        uttalelseRepository.lagre(behandling.getId(), new UttalelseV2(
             harUttalelse,
             uttalelse,
             periode,
             svarJournalpostId,
             EndringType.ENDRET_STARTDATO,
             grunnlagsreferanse
-        )));
+        ));
         return etterlysning;
     }
 }

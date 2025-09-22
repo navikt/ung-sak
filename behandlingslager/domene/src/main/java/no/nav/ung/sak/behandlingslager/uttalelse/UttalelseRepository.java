@@ -21,10 +21,10 @@ public class UttalelseRepository {
     @Inject
     public UttalelseRepository(EntityManager entityManager) { this.entityManager = entityManager; }
 
-    public void lagre(Long behandlingId, Collection<UttalelseV2> uttalelser) {
+    public void lagre(Long behandlingId, UttalelseV2 uttalelse) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UttalelseGrunnlag(behandlingId, it)).orElse(new UttalelseGrunnlag(behandlingId));
-        nyttGrunnlag.leggTilUttalelser(uttalelser);
+        nyttGrunnlag.leggTilUttalelser(List.of(uttalelse));
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 

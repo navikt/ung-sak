@@ -71,7 +71,6 @@ public class UttalelseRepositoryTest {
             EndringType.ENDRET_INNTEKT,
             UUID.randomUUID()
             );
-        List<UttalelseV2> uttalelser = List.of(uttalelse1);
-        repository.lagre(behandlingId, uttalelser);
+        repository.lagre(behandlingId, uttalelse1);
     }
 }
