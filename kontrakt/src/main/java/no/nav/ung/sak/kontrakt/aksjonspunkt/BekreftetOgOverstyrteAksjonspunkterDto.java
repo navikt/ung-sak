@@ -21,7 +21,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -63,12 +64,12 @@ public class BekreftetOgOverstyrteAksjonspunkterDto {
         return dto;
     }
 
-    @AbacAttributt("behandlingId")
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
     public Long getBehandlingId() {
         return behandlingId.getBehandlingId();
     }
 
-    @AbacAttributt("behandlingUuid")
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_UUID)
     public UUID getBehandlingUuid() {
         return behandlingId.getBehandlingUuid();
     }
@@ -85,7 +86,7 @@ public class BekreftetOgOverstyrteAksjonspunkterDto {
         return Collections.unmodifiableCollection(bekreftedeAksjonspunktDtoer);
     }
 
-    @AbacAttributt("aksjonspunktKode")
+    @StandardAbacAttributt(StandardAbacAttributtType.AKSJONSPUNKT_KODE)
     public Set<String> getAksjonspunktKoder() {
         var koder = overstyrteAksjonspunktDtoer.stream().map(OverstyringAksjonspunktDto::getKode).collect(Collectors.toCollection(HashSet::new));
         koder.addAll(bekreftedeAksjonspunktDtoer.stream().map(BekreftetAksjonspunktDto::getKode).collect(Collectors.toSet()));

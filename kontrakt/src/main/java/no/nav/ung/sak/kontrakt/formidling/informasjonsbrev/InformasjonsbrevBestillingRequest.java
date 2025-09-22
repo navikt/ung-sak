@@ -5,7 +5,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
@@ -20,7 +21,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 public record InformasjonsbrevBestillingRequest(
     @NotNull
     @Valid
-    @AbacAttributt(BehandlingIdDto.NAME)
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
     @Min(0)
     @Max(Long.MAX_VALUE)
     Long behandlingId,

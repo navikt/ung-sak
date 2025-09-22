@@ -10,11 +10,12 @@ import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
-import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
+import no.nav.k9.felles.sikkerhet.abac.BerørtePersonerForAuditlogg;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequestMedBerørtePersonerForAuditlogg;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.BeskyttetRessursKoder;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
@@ -30,7 +31,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -65,12 +65,12 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     @Override
     public PdpRequest lagPdpRequest(AbacAttributtSamling attributter) {
-        if (BeskyttetRessursKoder.PIP.equals(attributter.getResource())) {
+        if (BeskyttetRessursResourceType.PIP == attributter.getResourceType()) {
             //lager dummy PDP request, siden
             // 1. det er unødvendig å lage en ordentlig, da det uansett ikke kan gjøres sjekk i PDP for request mot PIP-tjenesten (siden den brukes fra PDP-en) (se også PepImpl) tilgang istedet er styrt med tilgangslister i applikasjonen
             // 2. PDP requesten brukes også til logging, men ikke for servicebrukere (og det er kun servicebrukere som får kalle PIP-tjenesten)
             // 3. å lage en ekte PDP-request tar tid siden det gjør oppslag mot databasen for å hente ut data
-            return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet());
+            return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
         }
 
 
@@ -92,16 +92,17 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         }
 
         Set<AktørId> aktørIder = utledAktørIder(attributter, saksnumre);
+        Set<AktørId> aktørIderSporingslogg = utledAktørIderForSporingslogg(attributter, saksnumre);
         Set<String> aksjonspunktType = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(attributter.getVerdier(AppAbacAttributtType.AKSJONSPUNKT_KODE));
 
-        PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aksjonspunktType);
+        PdpRequest pdpRequest = lagPdpRequest(attributter, aktørIder, aktørIderSporingslogg, aksjonspunktType);
         if (behandlingData != null) {
             AbacUtil.oversettBehandlingStatus(behandlingData.behandligStatus())
-                .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_BEHANDLINGSSTATUS, it.getEksternKode()));
+                .ifPresent(it -> pdpRequest.setBehandlingStatusEksternKode(it.getEksternKode()));
             AbacUtil.oversettFagstatus(behandlingData.fagsakStatus())
-                .ifPresent(it -> pdpRequest.put(AbacAttributter.RESOURCE_SAKSSTATUS, it.getEksternKode()));
+                .ifPresent(it -> pdpRequest.setFagsakStatusEksternKode(it.getEksternKode()));
             if (behandlingData.ansvarligSaksbehandler() != null) {
-                pdpRequest.put(AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER, behandlingData.ansvarligSaksbehandler());
+                pdpRequest.setAnsvarligSaksbehandler(behandlingData.ansvarligSaksbehandler());
             }
         }
         return pdpRequest;
@@ -117,26 +118,18 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         return match;
     }
 
-    private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Collection<String> aksjonspunktType) {
+    private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Set<AktørId> aktørIderForSporingslogg, Set<String> aksjonspunktType) {
         Set<String> aktører = aktørIder.stream().map(AktørId::getId).collect(Collectors.toCollection(TreeSet::new));
         Set<String> fnrs = attributter.getVerdier(AppAbacAttributtType.FNR);
 
-        PdpRequest pdpRequest = new PdpRequest();
-        pdpRequest.put(AbacAttributter.RESOURCE_FELLES_DOMENE, ABAC_DOMAIN);
-        pdpRequest.put(PdpKlient.ENVIRONMENT_AUTH_TOKEN, attributter.getIdToken());
+        PdpRequestMedBerørtePersonerForAuditlogg pdpRequest = new PdpRequestMedBerørtePersonerForAuditlogg();
+        pdpRequest.setActionType(attributter.getActionType());
+        pdpRequest.setResourceType(attributter.getResourceType());
+        pdpRequest.setAktørIderStr(aktører);
+        pdpRequest.setFødselsnumreStr(fnrs);
+        pdpRequest.setAksjonspunktTypeEksternKode(aksjonspunktType);
+        pdpRequest.setBerørtePersonerForAuditlogg(BerørtePersonerForAuditlogg.medAktørIder(aktørIderForSporingslogg, aktørid -> new no.nav.k9.felles.sikkerhet.abac.AktørId(aktørid.getAktørId())));
 
-        addToPdpRequest(pdpRequest, AbacAttributter.XACML_1_0_ACTION_ACTION_ID, attributter.getActionType().getEksternKode());
-        addToPdpRequest(pdpRequest, AbacAttributter.RESOURCE_FELLES_RESOURCE_TYPE, attributter.getResource());
-
-        if (!aktører.isEmpty()) {
-            pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktører);
-        }
-        if (!fnrs.isEmpty()) {
-            pdpRequest.put(AbacAttributter.RESOURCE_FELLES_PERSON_FNR, fnrs);
-        }
-        if (!aksjonspunktType.isEmpty()) {
-            pdpRequest.put(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE, aksjonspunktType);
-        }
         return pdpRequest;
     }
 
@@ -166,11 +159,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             //det er journalpostId som brukes for tilgangskontroll, dokumentId er bare med for å kunne havne i auditlogg
             throw new IllegalArgumentException("Ikke støttet å ha dokumentId som abac-attributt uten å samtidig ha journalpostId.");
         }
-    }
-
-    private void addToPdpRequest(PdpRequest pdpRequest, String key, String val) {
-        String v = val == null || (val = val.trim()).isEmpty() ? null : val;
-        pdpRequest.put(key, Objects.requireNonNull(v, "Fikk null eller empty verdi for : " + key));
     }
 
     private Optional<Long> utledBehandlingIder(AbacAttributtSamling attributter) {
@@ -240,6 +228,13 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         Set<AktørId> aktørIder = new HashSet<>();
         aktørIder.addAll(aktørIdVerdier.stream().map(AktørId::new).collect(Collectors.toSet()));
         aktørIder.addAll(pipRepository.hentAktørIdKnyttetTilFagsaker(saksnumre));
+        return aktørIder;
+    }
+
+    private Set<AktørId> utledAktørIderForSporingslogg(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre) {
+        Set<AktørId> aktørIder = new LinkedHashSet<>();
+        aktørIder.addAll(attributter.getVerdier(StandardAbacAttributtType.AKTØR_ID).stream().map(it -> new AktørId((String) it)).toList());
+        aktørIder.addAll(pipRepository.hentAktørIdForSporingslogg(saksnumre)); //legger til søker og evt. pleietrengende fra aktuelle saker
         return aktørIder;
     }
 

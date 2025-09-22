@@ -1,11 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.saksbehandler;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -15,6 +9,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.ung.sak.kontrakt.ResourceLink;
 import no.nav.ung.sak.kontrakt.behandling.InitLinksDto;
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
@@ -24,6 +19,11 @@ import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 
 @Path("/init-fetch")
@@ -47,7 +47,7 @@ public class InitielleLinksRestTjeneste {
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Returnerer ", tags = "init-fetch")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON)
     public InitLinksDto hentInitielleRessurser() {
         List<ResourceLink> lenkene = new ArrayList<>();
         lenkene.add(get(NavAnsattRestTjeneste.NAV_ANSATT_PATH, "nav-ansatt"));

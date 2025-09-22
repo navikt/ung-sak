@@ -2,17 +2,6 @@ package no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.TilbakekrevingValgDto;
-import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.VarseltekstDto;
-import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
-import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -23,11 +12,22 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.TilbakekrevingValgDto;
+import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.VarseltekstDto;
+import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
+
 import java.util.Optional;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 import static no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste.BASE_PATH;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path(BASE_PATH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -60,7 +60,7 @@ public class TilbakekrevingRestTjeneste {
 
     @GET
     @Operation(description = "Hent tilbakekrevingsvalg for behandlingen", tags = "tilbakekrevingsvalg")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(POSTPATH_VALG)
     public TilbakekrevingValgDto hentTilbakekrevingValg(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandlingId = behandlingUuid.getBehandlingUuid();
@@ -75,7 +75,7 @@ public class TilbakekrevingRestTjeneste {
 
     @GET
     @Operation(description = "Henter varseltekst for tilbakekreving", tags = "tilbakekrevingsvalg")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(POSTPATH_VARSELTEKST)
     public VarseltekstDto hentVarseltekst(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());

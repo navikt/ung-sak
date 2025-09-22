@@ -1,15 +1,14 @@
 package no.nav.ung.sak.web.server.abac;
 
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.ung.abac.AppAbacAttributt;
+import no.nav.ung.abac.StandardAbacAttributt;
+
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
-
-import no.nav.ung.abac.AbacAttributt;
-import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 
 /**
  * Mapper om dtoer som har @AbacAttributt for å angi Abac nøkler for sporing, etc.
@@ -32,8 +31,6 @@ import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
  * </pre>
  */
 public class AbacAttributtSupplier implements Function<Object, AbacDataAttributter> {
-
-    private static final Class<AbacAttributt> ANNOTATION_CLASS = AbacAttributt.class;
 
     @Override
     public AbacDataAttributter apply(Object obj) {
@@ -59,54 +56,58 @@ public class AbacAttributtSupplier implements Function<Object, AbacDataAttributt
             if (m.getParameterCount() > 0) {
                 continue;
             }
-            var ann = m.getAnnotation(ANNOTATION_CLASS);
-            if (ann == null) {
-                continue;
+            var standardAbacAttributtAnnotering = m.getAnnotation(StandardAbacAttributt.class);
+            if (standardAbacAttributtAnnotering != null) {
+                erLagtTil |= leggTilStandardAbacAttributtVerdier(obj, abac, m, standardAbacAttributtAnnotering);
             }
-
-            var rt = m.getReturnType();
-            try {
-                var key = Objects.requireNonNull(ann.value(), "abac key");
-
-                var resultat = m.invoke(obj);
-                if (resultat != null) {
-                    var abacAttributtType = toAbacAttributtType(key);
-                    if (Collection.class.isAssignableFrom(rt)) {
-                        abac.leggTil(abacAttributtType, (Collection) resultat);
-                    } else {
-                        abac.leggTil(abacAttributtType, resultat);
-                    }
-                    erLagtTil = true;
-                }
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new IllegalStateException("Kunne ikke hente ut abac attributter fra " + obj, e);
+            var appAbacAttributtAnnotering = m.getAnnotation(AppAbacAttributt.class);
+            if (appAbacAttributtAnnotering != null) {
+                erLagtTil |= leggTilAppAbacAttributtVerdier(obj, abac, m, appAbacAttributtAnnotering);
             }
         }
         if (!erLagtTil) {
-            throw new IllegalStateException("Ingen abac attributter lagt til fra " + cls + ", mangler annotasjoner? " + ANNOTATION_CLASS);
+            throw new IllegalStateException("Ingen abac attributter lagt til fra " + cls + ", mangler annotasjoner? " + StandardAbacAttributt.class + " eller " + AppAbacAttributt.class);
         }
         return erLagtTil;
     }
 
-    private static final AbacAttributtType toAbacAttributtType(String key) {
-        /*
-         * XXX: Implementasjoner av AbacAttributtType mangler equals og hashcode. Flere steder, slik
-         * som "AbacDataAttributter.getVerdier", bruker equals+hashCode for sjekk av om et gitt
-         * attributt er satt. Inntil dette er ryddet opp i må kun én instans per key benyttes.
-         */
-
-        for (AbacAttributtType type : StandardAbacAttributtType.values()) {
-            if (type.getSporingsloggKode().equals(key)) {
-                return type;
+    private static boolean leggTilStandardAbacAttributtVerdier(Object obj, AbacDataAttributter abac, Method m, StandardAbacAttributt standardAbacAttributtAnnotering) {
+        var rt = m.getReturnType();
+        try {
+            var abacAttributtType = Objects.requireNonNull(standardAbacAttributtAnnotering.value(), "attibuttype var null");
+            var resultat = m.invoke(obj);
+            if (resultat != null) {
+                if (Collection.class.isAssignableFrom(rt)) {
+                    abac.leggTil(abacAttributtType, (Collection) resultat);
+                } else {
+                    abac.leggTil(abacAttributtType, resultat);
+                }
+                return true;
             }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Kunne ikke hente ut abac attributter fra " + obj, e);
         }
-        for (AbacAttributtType type : AppAbacAttributtType.values()) {
-            if (type.getSporingsloggKode().equals(key)) {
-                return type;
-            }
-        }
-
-        throw new IllegalStateException("Ukjent ABAC-attributt.");
+        return false; //la til ingen verdier
     }
+
+    private static boolean leggTilAppAbacAttributtVerdier(Object obj, AbacDataAttributter abac, Method m, AppAbacAttributt appAbacAttributtAnnotering) {
+        var rt = m.getReturnType();
+        try {
+            var abacAttributtType = Objects.requireNonNull(appAbacAttributtAnnotering.value(), "attibuttype var null");
+            var resultat = m.invoke(obj);
+            if (resultat != null) {
+                if (Collection.class.isAssignableFrom(rt)) {
+                    abac.leggTil(abacAttributtType, (Collection) resultat);
+                } else {
+                    abac.leggTil(abacAttributtType, resultat);
+                }
+                return true;
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Kunne ikke hente ut abac attributter fra " + obj, e);
+        }
+        return false; //la til ingen verdier
+    }
+
 
 }

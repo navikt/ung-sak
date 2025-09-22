@@ -3,7 +3,9 @@ package no.nav.ung.sak.web.server.abac;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.Fnr;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
@@ -34,10 +36,7 @@ import static org.mockito.Mockito.when;
 public class PdpRequestBuilderTest {
 
     private static final String DUMMY_ID_TOKEN = "dummyheader.dymmypayload.dummysignaturee";
-    private static final String FAGSAK_ABAC_REFERANSE = "no.nav.abac.attributter.k9.fagsak";
 
-    private static final Long FAGSAK_ID_1 = 10001L;
-    private static final Long FAGSAK_ID_2 = 10002L;
     private static final Saksnummer SAKSNUMMER_1 = new Saksnummer("AAAA1");
     private static final Saksnummer SAKSNUMMER_2 = new Saksnummer("AAAA2");
     private static final Long BEHANDLING_ID = 333L;
@@ -68,10 +67,10 @@ public class PdpRequestBuilderTest {
             .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, fagsakStatus, ansvarligSaksbehandler, SAKSNUMMER_1)));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
-        assertThat(request.getString(AbacAttributter.RESOURCE_ANSVARLIG_SAKSBEHANDLER)).isEqualTo(ansvarligSaksbehandler);
-        assertThat(request.getString(AbacAttributter.RESOURCE_BEHANDLINGSSTATUS)).isEqualTo(AbacBehandlingStatus.OPPRETTET.getEksternKode());
-        assertThat(request.getString(AbacAttributter.RESOURCE_SAKSSTATUS)).isEqualTo(AbacFagsakStatus.UNDER_BEHANDLING.getEksternKode());
+        assertThat(request.getAktørIder()).containsOnly(new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_1.getId()));
+        assertThat(request.getAnsvarligSaksbehandler()).isEqualTo(ansvarligSaksbehandler);
+        assertThat(request.getBehandlingStatusEksternKode()).isEqualTo(AbacBehandlingStatus.OPPRETTET.getEksternKode());
+        assertThat(request.getFagsakStatusEksternKode()).isEqualTo(AbacFagsakStatus.UNDER_BEHANDLING.getEksternKode());
     }
 
     @Test
@@ -83,7 +82,7 @@ public class PdpRequestBuilderTest {
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
+        assertThat(request.getAktørIder()).containsOnly(new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_1.getId()));
     }
 
     @Test
@@ -104,8 +103,10 @@ public class PdpRequestBuilderTest {
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(aktører);
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_0.getId(), AKTØR_1.getId(),
-            AKTØR_2.getId());
+        assertThat(request.getAktørIder()).containsOnly(
+            new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_0.getId()),
+            new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_1.getId()),
+            new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_2.getId()));
     }
 
     @Test
@@ -114,7 +115,7 @@ public class PdpRequestBuilderTest {
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.FNR, PERSON_0));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_FNR)).containsOnly(PERSON_0);
+        assertThat(request.getFødselsnumre()).containsOnly(new Fnr(PERSON_0));
     }
 
     @Test
@@ -133,7 +134,7 @@ public class PdpRequestBuilderTest {
         Mockito.when(pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(koder)).thenReturn(svar);
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_AKSJONSPUNKT_TYPE)).containsOnly("Overstyring", "Manuell");
+        assertThat(request.getAksjonspunktTypeEksternKode()).containsOnly("Overstyring", "Manuell");
     }
 
     @Test
@@ -142,7 +143,7 @@ public class PdpRequestBuilderTest {
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.AKTØR_ID, AKTØR_1.getId()));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
-        assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
+        assertThat(request.getAktørIder()).containsOnly(new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_1.getId()));
     }
 
     @Test
@@ -204,8 +205,8 @@ public class PdpRequestBuilderTest {
 
     private AbacAttributtSamling byggAbacAttributtSamling() {
         AbacAttributtSamling attributtSamling = AbacAttributtSamling.medJwtToken(DUMMY_ID_TOKEN);
-        attributtSamling.setActionType(BeskyttetRessursActionAttributt.READ);
-        attributtSamling.setResource(FAGSAK_ABAC_REFERANSE);
+        attributtSamling.setActionType(BeskyttetRessursActionType.READ);
+        attributtSamling.setResourceType(BeskyttetRessursResourceType.FAGSAK);
         return attributtSamling;
     }
 

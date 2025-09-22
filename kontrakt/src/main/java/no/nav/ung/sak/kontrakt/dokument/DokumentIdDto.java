@@ -1,8 +1,8 @@
 package no.nav.ung.sak.kontrakt.dokument;
 
 import jakarta.validation.constraints.Digits;
-
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 
 public class DokumentIdDto {
     @Digits(integer = 18, fraction = 0)
@@ -12,7 +12,7 @@ public class DokumentIdDto {
         this.dokumentId = dokumentId;
     }
 
-    @AbacAttributt("dokumentId")
+    @StandardAbacAttributt(StandardAbacAttributtType.DOKUMENT_DATA_ID)
     public String getDokumentId() {
         return dokumentId;
     }

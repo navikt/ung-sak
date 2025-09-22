@@ -1,12 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.aktør;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +17,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -37,6 +31,12 @@ import no.nav.ung.sak.kontrakt.person.AktørInfoDto;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @ApplicationScoped
 @Transactional
@@ -61,7 +61,7 @@ public class AktørRestTjeneste {
     @Operation(description = "Henter informasjon om en aktøer", tags = "aktoer", responses = {
             @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i ung-sak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path("/aktoer-info")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = FeilDto.class))),

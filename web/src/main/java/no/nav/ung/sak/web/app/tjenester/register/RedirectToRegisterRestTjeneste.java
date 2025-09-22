@@ -1,15 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.register;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.io.IOException;
-import java.net.URI;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.message.BasicHeader;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,12 +16,21 @@ import no.nav.k9.felles.integrasjon.rest.NoAuthRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
+
+import java.io.IOException;
+import java.net.URI;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @ApplicationScoped
 @Transactional
@@ -69,7 +68,7 @@ public class RedirectToRegisterRestTjeneste {
     @Operation(description = "Redirecter til aa-reg for arbeidstakeren", tags = "aktoer", responses = {
         @ApiResponse(responseCode = "307", description = "Redirecter til aa-reg for arbeidstakeren")
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(AA_REG_POSTFIX)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAktoerInfo(
@@ -99,7 +98,7 @@ public class RedirectToRegisterRestTjeneste {
     @Operation(description = "Redirecter til a-inntekt for arbeidstakeren", tags = "aktoer", responses = {
         @ApiResponse(responseCode = "307", description = "Redirecter til a-inntekt for arbeidstakeren")
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(AINNTEKT_REG_POSTFIX)
     public Response getAInntektUrl(
         @NotNull

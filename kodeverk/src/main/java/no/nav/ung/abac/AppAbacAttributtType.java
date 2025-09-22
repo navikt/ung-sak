@@ -1,10 +1,10 @@
-package no.nav.ung.sak.sikkerhet.abac;
+package no.nav.ung.abac;
 
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 
 /**
- * AbacAttributtTyper som er i bruk for sporingslogg / PDP (Policy Decision Point)
+ * AbacAttributtTyper brukes i applikasjonen for å utlede hva som er relevant å sende til PDP for tilgangskontroll
  */
 public enum AppAbacAttributtType implements AbacAttributtType {
 
@@ -36,7 +36,7 @@ public enum AppAbacAttributtType implements AbacAttributtType {
 
     public static AbacAttributtType SAKSNUMMER = StandardAbacAttributtType.SAKSNUMMER;
 
-    private final boolean maskerOutput;;
+    private final boolean maskerOutput;
 
     AppAbacAttributtType() {
         this.maskerOutput = false;
