@@ -62,7 +62,7 @@ public class EtterlysningOgUttalelseTjeneste {
                 u.getUttalelseBegrunnelse(),
                 u.getSvarJournalpostId()
             ))
-            .orElseThrow(()-> new IllegalStateException("Forventer å finne uttalelse for etterlysning med status MOTTATT_SVAR og type " + e.getType()));
+            .orElseThrow(() -> new IllegalStateException("Forventer å finne uttalelse for etterlysning med status MOTTATT_SVAR og type " + e.getType()));
         return uttalelseData;
     }
 
