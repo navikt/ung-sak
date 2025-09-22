@@ -14,11 +14,11 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.*;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -73,18 +73,20 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             return;
         }
 
-        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
-        boolean harSaksbehandlerHindretEllerRedigertBrev = vedtaksbrevValgEntitet != null && (vedtaksbrevValgEntitet.isHindret() || vedtaksbrevValgEntitet.isRedigert());
-        if (harSaksbehandlerHindretEllerRedigertBrev) {
-            håndterSaksbehandlerValg(behandling, vedtaksbrevValgEntitet, resultat);
-            return;
-        }
+        var hindredeEllerRedigerteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).stream()
+            .filter(it -> it.isHindret() || it.isRedigert())
+            .toList();
 
-        if (vedtaksbrevValgEntitet != null) {
-            LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
-        }
+        hindredeEllerRedigerteValg.forEach(it -> håndterSaksbehandlerValg(behandling, it, resultat));
 
-        List<Vedtaksbrev> vedtaksbrevResultater = resultat.vedtaksbrevResultater();
+        var hindredeEllerRedigerteMaler = hindredeEllerRedigerteValg.stream()
+            .map(VedtaksbrevValgEntitet::getDokumentMalType)
+            .collect(Collectors.toSet());
+
+        var vedtaksbrevResultater = resultat.vedtaksbrevResultater().stream()
+                .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
+                .toList();
+
         for (int brevNr = 0; brevNr < vedtaksbrevResultater.size(); brevNr++) {
             Vedtaksbrev it = vedtaksbrevResultater.get(brevNr);
             bestill(behandling, it, brevNr);
@@ -92,15 +94,19 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     }
 
-    private void validerBrevbestillingForespørsel(Behandling behandling, DokumentMalType dokumentMalType) {
+    private void validerBrevbestillingForespørsel(Behandling behandling, Vedtaksbrev vedtaksbrev) {
         if (!behandling.erAvsluttet()) {
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+        }
+
+        if (vedtaksbrev.vedtaksbrevBygger().getClass().equals(TomVedtaksbrevInnholdBygger.class)) {
+            throw new IllegalStateException("Kan ikke bestille vedtaksbrev der bygger er TomVedtaksbrevInnholdBygger");
         }
 
         var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
         var tidligereVedtaksbrev = tidligereBestillinger.stream()
             .filter(BrevbestillingEntitet::isVedtaksbrev)
-            .filter(it -> it.getDokumentMalType() == dokumentMalType)
+            .filter(it -> it.getDokumentMalType() == vedtaksbrev.dokumentMalType())
             .toList();
         if (!tidligereVedtaksbrev.isEmpty()) {
             String collect = tidligereVedtaksbrev.stream()
@@ -111,7 +117,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
     public void bestill(Behandling behandling, Vedtaksbrev vedtaksbrev, int brevNr) {
-        validerBrevbestillingForespørsel(behandling, vedtaksbrev.dokumentMalType());
+        validerBrevbestillingForespørsel(behandling, vedtaksbrev);
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
             behandling.getFagsakId(),
@@ -133,6 +139,9 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         Long behandlingId = behandling.getId();
         Long fagsakId = behandling.getFagsakId();
 
+        var vedtaksbrev = resultat.finnVedtaksbrev(vedtaksbrevValg.getDokumentMalType())
+            .orElseThrow(() -> new IllegalStateException("Har valg for vedtaksbrev mal " + vedtaksbrevValg.getDokumentMalType() + ", men malen er ikke tillatt for behandlingen. "));
+
         if (vedtaksbrevValg.isHindret()) {
             LOG.info("Vedtaksbrev er manuelt stoppet - bestiller ikke brev");
 
@@ -142,10 +151,9 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
         if (vedtaksbrevValg.isRedigert()) {
             LOG.info("Vedtaksbrev er manuelt redigert - bestiller manuell brev");
-            if (resultat.vedtaksbrevResultater().stream().noneMatch(it -> it.vedtaksbrevEgenskaper().kanRedigere())) {
+            if (!vedtaksbrev.vedtaksbrevEgenskaper().kanRedigere()) {
                 throw new IllegalStateException("Redigering ikke tilatt, men er redigert. " + vedtaksbrevValg);
             }
-            //TODO håndtere flere vedtaksbrev
             var bestilling = BrevbestillingEntitet.nyBrevbestilling(
                 behandling.getFagsakId(),
                 behandling.getId(),

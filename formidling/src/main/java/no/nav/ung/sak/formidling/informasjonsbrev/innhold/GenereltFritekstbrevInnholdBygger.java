@@ -21,6 +21,6 @@ public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnhol
             new GenereltFritekstBrevTemplateDto(
                 innhold.overskrift(),
                 MarkdownParser.markdownTilHtml(innhold.brødtekst())
-            ));
+            ), false);
     }
 }

@@ -105,7 +105,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 brevfeilSamler.samletFeiltekst(),
                 erEtterbetaling,
                 satsEndringHendelseDtos.isEmpty(),
-                sisteUtbetalingsdato));
+                sisteUtbetalingsdato), true);
     }
 
     private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, BrevfeilHåndterer brevfeilSamler) {

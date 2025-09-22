@@ -15,19 +15,11 @@ public record FellesDto(
     boolean automatiskBehandlet,
     FooterDto footer
 ) {
-    public static FellesDto automatisk(MottakerDto mottakerDto) {
+    public static FellesDto lag(MottakerDto mottakerDto, boolean automatiskBehandletFooter) {
         return new FellesDto(LocalDate.now(),
             mottakerDto,
             FagsakYtelseType.UNGDOMSYTELSE.getKode(),
-            true,
-            new FooterDto(true));
-    }
-
-    public static FellesDto manuell(MottakerDto mottakerDto) {
-        return new FellesDto(LocalDate.now(),
-            mottakerDto,
-            FagsakYtelseType.UNGDOMSYTELSE.getKode(),
-            false,
+            automatiskBehandletFooter,
             new FooterDto(true));
     }
 

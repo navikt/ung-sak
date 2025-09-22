@@ -3,7 +3,6 @@ package no.nav.ung.sak.formidling;
 import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
@@ -82,14 +81,14 @@ public class BrevTestUtils {
         document.traverse(new NodeVisitor() {
 
             @Override
-            public void head(@NotNull Node node, int depth) {
+            public void head(Node node, int depth) {
                 if (node.nodeName().equals("#comment")) {
                     node.remove();
                 }
             }
 
             @Override
-            public void tail(@NotNull Node node, int depth) {
+            public void tail(Node node, int depth) {
                 // Do nothing on tail visit
             }
         });
