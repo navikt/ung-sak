@@ -14,7 +14,6 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisReq
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +77,6 @@ public class VedtaksbrevTjeneste {
             vedtaksbrevValg);
     }
 
-    @NotNull
     private static List<VedtaksbrevValg> mapVedtaksbrevValg(BehandlingVedtaksbrevResultat totalResultat, List<VedtaksbrevValgEntitet> valg, List<VedtaksbrevValgEntitet> deaktiverteValg, boolean erAvsluttet) {
         return totalResultat.vedtaksbrevResultater().stream()
             .map(vedtaksbrev -> {
@@ -89,7 +87,6 @@ public class VedtaksbrevTjeneste {
             .toList();
     }
 
-    @NotNull
     private static VedtaksbrevValg mapVedtaksbrevValg(Vedtaksbrev resultat, Optional<VedtaksbrevValgEntitet> valg, Optional<VedtaksbrevValgEntitet> deaktivertValg, boolean erAvsluttet) {
         var egenskaper = resultat.vedtaksbrevEgenskaper();
         String redigertBrevHtml = valg.map(VedtaksbrevValgEntitet::getRedigertBrevHtml).orElse(null);
@@ -180,7 +177,6 @@ public class VedtaksbrevTjeneste {
         return genererteBrev;
     }
 
-    @NotNull
     private List<GenerertBrev> doForhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(dto.behandlingId());
         validerHarBrev(totalresultater);
@@ -215,7 +211,6 @@ public class VedtaksbrevTjeneste {
         }
     }
 
-    @NotNull
     private List<GenerertBrev> genererFraValg(VedtaksbrevForhåndsvisRequest dto, boolean kunHtml, List<Vedtaksbrev> relevanteVedtaksbrev, BehandlingVedtaksbrevResultat totalresultater) {
         var relevanteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(dto.behandlingId()).stream()
             .filter(it -> dto.dokumentMalType() == null || it.getDokumentMalType() == dto.dokumentMalType())

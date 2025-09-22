@@ -15,7 +15,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -223,7 +222,6 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING);
     }
 
-    @NotNull
     private static DetaljertResultatInfo kontrollerInntektDetaljertResultat(TilkjentYtelseVerdi tilkjentYtelse) {
         if (tilkjentYtelse == null) {
             // Usikker om dette er mulig

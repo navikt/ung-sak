@@ -8,7 +8,6 @@ import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -103,7 +102,6 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             );
     }
 
-    @NotNull
     private static String standardTekstEndringInntekt() {
         return """
             Pengene får du utbetalt før den 10. denne måneden. \

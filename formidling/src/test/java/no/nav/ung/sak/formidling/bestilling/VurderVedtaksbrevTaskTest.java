@@ -20,7 +20,6 @@ import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -255,7 +254,6 @@ class VurderVedtaksbrevTaskTest {
         assertThat(tasker).hasSize(0);
     }
 
-    @NotNull
     private static ProsessTaskData lagTask(Behandling behandling) {
         var prosessTaskData = ProsessTaskData.forProsessTask(VurderVedtaksbrevTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
