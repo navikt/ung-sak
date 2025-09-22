@@ -1,11 +1,9 @@
 package no.nav.ung.sak.etterlysning;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 public record EtterlysningData(
