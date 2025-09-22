@@ -31,7 +31,7 @@ jobs:
       contents: write
     needs: build-app # Only really needed to get the build-version output. Could instead generate that without building if we want to speed things up.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: navikt/sif-gha-workflows/.github/actions/maven/generate-openapi@main
         id: generate-openapi
         with:
@@ -60,7 +60,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client
@@ -78,7 +78,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client

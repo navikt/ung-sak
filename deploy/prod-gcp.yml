@@ -76,26 +76,30 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: ung-sak
-        - application : sif-abac-pdp
+        - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
+        - application: ung-sak
+        #kommenter inn når ung-tilbake er i prod
+        #- application: ung-tilbake
       external:
         - host: "dokarkiv.prod-fss-pub.nais.io"
         - host: "k9-abakus.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
         - host: "norg2.prod-fss-pub.nais.io"
+        - host: "oppgave.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
-        - host: "oppgave.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: sif-abac-pdp
+        - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
-        - application: ung-deltakelse-opplyser
+        #kommenter inn når ung-tilbake er i prod
+        #- application: ung-tilbake
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -107,6 +111,13 @@ spec:
         databases:
           - name: ung-sak
             envVarPrefix: DB
+        flags:
+          - name: "cloudsql.enable_pgaudit"
+            value: "on"
+          - name: "pgaudit.log"
+            value: "all"
+          - name: "pgaudit.log_parameter"
+            value: "on"
     bigQueryDatasets:
       - name: ung_sak_statistikk_dataset
         description: Inneholder tabeller for ung-sak ment for statistikk
@@ -210,6 +221,9 @@ spec:
       value: "api://prod-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
+    #kommenter inn når ung-tilbake er i prod
+    #- name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+    #  value: "/ung/tilbake,api://prod-gcp.k9saksbehandling.ung-tilbake/.default"
 
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
@@ -224,8 +238,8 @@ spec:
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1H"
-    - name: RAPPORTERINGSFRIST_DAG_I_MAANED
-      value: "5"
+    - name: INNTEKTSKONTROLL_DAG_I_MAANED
+      value: "8"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE

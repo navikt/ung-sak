@@ -77,23 +77,25 @@ spec:
       rules:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
+        - application: ung-tilbake
       external:
         - host: "dokarkiv-q2.dev-fss-pub.nais.io"
         - host: "k9-abakus.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
         - host: "norg2.dev-fss-pub.nais.io"
+        - host: "oppgave.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
-        - host: "oppgave.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: dev-fss
         - application: sif-abac-pdp
+        - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
-        - application: ung-deltakelse-opplyser
+        - application: ung-tilbake
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -208,6 +210,9 @@ spec:
       value: "api://dev-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+      value: "/ung/tilbake,api://dev-gcp.k9saksbehandling.ung-tilbake/.default"
+
 
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
@@ -222,8 +227,8 @@ spec:
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1M"
-    - name: RAPPORTERINGSFRIST_DAG_I_MAANED
-      value: "5"
+    - name: INNTEKTSKONTROLL_DAG_I_MAANED
+      value: "8"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE

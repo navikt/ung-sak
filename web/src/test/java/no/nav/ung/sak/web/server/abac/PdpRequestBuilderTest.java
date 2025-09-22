@@ -5,6 +5,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -61,11 +61,11 @@ public class PdpRequestBuilderTest {
 
         when(pipRepository.saksnumreForJournalpostId(any())).thenReturn(Collections.singleton(SAKSNUMMER_1));
         when(pipRepository.hentAktørIdKnyttetTilFagsaker(any())).thenReturn(Collections.singleton(AKTØR_1));
-        String behandligStatus = BehandlingStatus.OPPRETTET.getKode();
+        BehandlingStatus behandligStatus = BehandlingStatus.OPPRETTET;
         String ansvarligSaksbehandler = "Z123456";
-        String fagsakStatus = FagsakStatus.UNDER_BEHANDLING.getKode();
+        FagsakStatus fagsakStatus = FagsakStatus.UNDER_BEHANDLING;
         when(pipRepository.hentDataForBehandling(any()))
-            .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, ansvarligSaksbehandler, BigInteger.valueOf(FAGSAK_ID_1), fagsakStatus, SAKSNUMMER_1.toString())));
+            .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, fagsakStatus, ansvarligSaksbehandler, SAKSNUMMER_1)));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getListOfString(AbacAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE)).containsOnly(AKTØR_1.getId());
@@ -146,15 +146,12 @@ public class PdpRequestBuilderTest {
     }
 
     @Test
-    public void skal_ikke_godta_at_det_sendes_inn_fagsak_id_som_ikke_finnes() {
+    public void skal_ikke_godta_at_det_sendes_inn_saksnummer_som_ikke_finnes() {
 
         // Arrange
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.FAGSAK_ID, 123L));
-        attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
-        String saksnummer = "ABC";
-        when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
-            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode(), saksnummer)));
+        attributter.leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer("ABC")));
+
 
         // Assert
         Assertions.assertThrows(UkjentFagsakException.class, () -> {
@@ -191,9 +188,10 @@ public class PdpRequestBuilderTest {
         AbacAttributtSamling attributter = byggAbacAttributtSamling();
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, new Saksnummer("XXX")));
         attributter.leggTil(AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.BEHANDLING_ID, 1234L));
-        String saksnummer = "ABC";
+        Saksnummer saksnummer = new Saksnummer("ABC");
+        when(pipRepository.finnSaksnumerSomEksisterer(any())).thenReturn(Set.of(new Saksnummer("XXX")));
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
-            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET.getKode(), "Z1234", BigInteger.valueOf(666), FagsakStatus.OPPRETTET.getKode(), saksnummer)));
+            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET, FagsakStatus.OPPRETTET, "Z1234", saksnummer)));
 
         // Assert
         Assertions.assertThrows(ManglerTilgangException.class, () -> {

@@ -65,7 +65,7 @@ public class BigQueryKlient {
 
         // 1) map
         if (records == null || records.isEmpty()) {
-            log.warn("Ingen data å publisere til BigQuery-tabell {}", tableDef.getTabellnavn());
+            log.info("Ingen data å publisere til BigQuery-tabell {}", tableDef.getTabellnavn());
             return;
         }
         List<InsertAllRequest.RowToInsert> rader = records.stream().map(tableDef::tilRowInsert).toList();
@@ -136,7 +136,7 @@ public class BigQueryKlient {
      *
      * @param response    Responsen fra BigQuery etter innsetting av data.
      * @param antallRader Antall rader som ble forsøkt satt inn.
-     * @param tabellnavn Navnet på tabellen som data ble forsøkt satt inn i.
+     * @param tabellnavn  Navnet på tabellen som data ble forsøkt satt inn i.
      */
     private static void håndterResponse(InsertAllResponse response, int antallRader, String tabellnavn) {
         if (response.hasErrors()) {
@@ -146,39 +146,5 @@ public class BigQueryKlient {
                 });
             throw new RuntimeException("BigQuery insert feilet for noen rader: " + response.getInsertErrors().size());
         } else log.info("BigQuery skrev {} rader inn i {}.", antallRader, tabellnavn);
-    }
-
-    /**
-     * Sletter all data fra en spesifisert BigQuery-tabell.
-     *
-     * @param dataset  Datasettet som tabellen tilhører.
-     * @param tableDef Tabellen som skal tømmes.
-     */
-    public <T extends BigQueryRecord> void slettAllData(BigQueryDataset dataset, BigQueryTabell<T> tableDef) {
-        if (bigQuery == null) {
-            throw new IllegalStateException("Utviklerfeil: BigQuery er ikke instansiert. {} ");
-        }
-        if (!tableDef.skalEksisterendeInnholdSlettesFørPublisering()) {
-            throw new IllegalArgumentException("Kan ikke slette data fra BigQuery-tabell " + tableDef.getTabellnavn() + " fordi skalEksisterendeInnholdSlettesFørPublisering er satt til false.");
-        }
-        Table existing = bigQuery.getTable(TableId.of(dataset.getDatasetNavn(), tableDef.getTabellnavn()));
-        if (existing == null) {
-            log.info("Fant ikke tabell med navn {}, utfører ikke sletting", tableDef.getTabellnavn());
-            return;
-        }
-
-        String query = String.format("DELETE FROM `%s.%s` WHERE TRUE", dataset.getDatasetNavn(), tableDef.getTabellnavn());
-        QueryJobConfiguration queryConfig = QueryJobConfiguration.newBuilder(query).build();
-        try {
-            bigQuery.query(queryConfig);
-            log.info("Slettet all data fra BigQuery-tabell {}.{}", dataset.getDatasetNavn(), tableDef.getTabellnavn());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("Sletting av data fra BigQuery-tabell {}.{} ble avbrutt", dataset.getDatasetNavn(), tableDef.getTabellnavn(), e);
-            throw new RuntimeException("Sletting av data fra BigQuery-tabell ble avbrutt", e);
-        } catch (BigQueryException e) {
-            log.error("Feil ved sletting av data fra BigQuery-tabell {}.{}: {}", dataset.getDatasetNavn(), tableDef.getTabellnavn(), e.getMessage(), e);
-            throw new RuntimeException("Feil ved sletting av data fra BigQuery-tabell", e);
-        }
     }
 }

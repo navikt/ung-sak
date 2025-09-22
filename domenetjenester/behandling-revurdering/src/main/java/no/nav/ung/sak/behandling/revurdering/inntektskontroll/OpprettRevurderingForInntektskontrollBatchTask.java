@@ -20,26 +20,21 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
 /**
  * Batchtask som starter kontroll av inntekt fra a-inntekt
  * <p>
- * Kjører den sjette i måneden kl 07:00.
+ * Kjører den åttende i måneden kl 07:00.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 6 * *", maxFailedRuns = 1)
+@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 8 * *", maxFailedRuns = 1)
 public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettRevurderingForInntektskontrollBatch";
-
-    private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingForInntektskontrollBatchTask.class);
-
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private FinnSakerForInntektkontroll finnRelevanteFagsaker;
 
     OpprettRevurderingForInntektskontrollBatchTask() {
     }
 
     @Inject
-    public OpprettRevurderingForInntektskontrollBatchTask(ProsessTaskTjeneste prosessTaskTjeneste, FinnSakerForInntektkontroll finnRelevanteFagsaker) {
+    public OpprettRevurderingForInntektskontrollBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.finnRelevanteFagsaker = finnRelevanteFagsaker;
     }
 
 
@@ -47,49 +42,10 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
     public void doTask(ProsessTaskData prosessTaskData) {
         var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
         var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
-        final var fagsaker = finnRelevanteFagsaker.finnFagsaker(fom, tom);
-        opprettProsessTaskerForÅSetteInntektrapporteringTilUtløpt(fagsaker, fom, tom);
-        opprettKontrollProsessTasker(fagsaker, fom, tom);
+        ProsessTaskData kontrollTask = ProsessTaskData.forProsessTask(OpprettRevurderingForInntektskontrollTask.class);
+        kontrollTask.setProperty(PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        kontrollTask.setProperty(PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        prosessTaskTjeneste.lagre(kontrollTask);
     }
-
-
-    private void opprettKontrollProsessTasker(List<Fagsak> fagsakerForKontroll, LocalDate fom, LocalDate tom) {
-        ProsessTaskGruppe taskGruppeTilRevurderinger = new ProsessTaskGruppe();
-
-        var revurderTasker = fagsakerForKontroll
-            .stream()
-            .map(fagsak -> {
-                log.info("Oppretter revurdering for fagsak med saksnummer {} for inntektskontroll av periode {} - {}", fagsak.getSaksnummer(), fom, tom);
-
-                ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-                tilVurderingTask.setFagsakId(fagsak.getId());
-                tilVurderingTask.setProperty(PERIODER, fom + "/" + tom);
-                tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.getKode());
-                return tilVurderingTask;
-            }).toList();
-
-        taskGruppeTilRevurderinger.addNesteParallell(revurderTasker);
-        prosessTaskTjeneste.lagre(taskGruppeTilRevurderinger);
-    }
-
-
-    private void opprettProsessTaskerForÅSetteInntektrapporteringTilUtløpt(List<Fagsak> fagsakerForKontroll, LocalDate fom, LocalDate tom) {
-        ProsessTaskGruppe taskGruppeTilRevurderinger = new ProsessTaskGruppe();
-
-        var revurderTasker = fagsakerForKontroll
-            .stream()
-            .map(fagsak -> {
-                log.info("Setter inntektrapportering til utløpt for fagsak med saksnummer {} og periode {} - {}", fagsak.getSaksnummer(), fom, tom);
-                ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(SettOppgaveUtløptForInntektsrapporteringTask.class);
-                tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
-                tilVurderingTask.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
-                tilVurderingTask.setProperty(SettOppgaveUtløptForInntektsrapporteringTask.PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
-                return tilVurderingTask;
-            }).toList();
-
-        taskGruppeTilRevurderinger.addNesteParallell(revurderTasker);
-        prosessTaskTjeneste.lagre(taskGruppeTilRevurderinger);
-    }
-
 
 }

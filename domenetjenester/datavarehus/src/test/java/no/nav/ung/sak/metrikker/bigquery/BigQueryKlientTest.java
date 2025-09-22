@@ -4,20 +4,22 @@ import com.google.cloud.NoCredentials;
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.DatasetInfo;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsresultat.BehandslingsresultatStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingsårsak.BehandlingÅrsakRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BigQueryEmulatorContainer;
@@ -25,6 +27,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -122,6 +125,41 @@ class BigQueryKlientTest {
             )
         );
     }
+
+    @Test
+    void publisering_av_ETTERLYSING_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            EtterlysningRecord.ETTERLYSNING_TABELL,
+            List.of(
+                new EtterlysningRecord(
+                    new Saksnummer("SAKEN"),
+                    EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO,
+                    EtterlysningStatus.SKAL_AVBRYTES,
+                    DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)),
+                    ZonedDateTime.now(),
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
+    @Test
+    void publisering_av_BEHANDLING_ÅRSAK_fungerer() {
+        bigQueryKlient.publish(
+            BigQueryDataset.UNG_SAK_STATISTIKK_DATASET,
+            BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL,
+            List.of(
+                new BehandlingÅrsakRecord(
+                    BigDecimal.TEN,
+                    BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+                    true,
+                    ZonedDateTime.now()
+                )
+            )
+        );
+    }
+
 
     private static BigQuery opprettBigQuery() {
         return BigQueryOptions.newBuilder()
