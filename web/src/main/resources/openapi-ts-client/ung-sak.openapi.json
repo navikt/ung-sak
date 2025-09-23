@@ -2169,6 +2169,9 @@
           "nyBehandlingEtterKlage" : {
             "type" : "boolean"
           },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
           "saksnummer" : {
             "type" : "string"
           }
