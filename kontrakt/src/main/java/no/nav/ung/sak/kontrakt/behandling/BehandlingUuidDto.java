@@ -1,18 +1,18 @@
 package no.nav.ung.sak.kontrakt.behandling;
 
-import java.util.Objects;
-import java.util.UUID;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 
-import no.nav.ung.abac.AbacAttributt;
+import java.util.Objects;
+import java.util.UUID;
+
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
@@ -54,7 +54,7 @@ public class BehandlingUuidDto {
         return Objects.equals(this.behandlingUuid, other.behandlingUuid);
     }
 
-    @AbacAttributt(NAME)
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_UUID)
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }

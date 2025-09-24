@@ -11,7 +11,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -29,7 +30,7 @@ public record EndreNotatDto(
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     String notatTekst,
 
-    @AbacAttributt("saksnummer")
+    @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
     @JsonProperty(value = SaksnummerDto.NAME, required = true)
     @NotNull
     @Valid

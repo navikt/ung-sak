@@ -13,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.ung.abac.AbacAttributt;
+
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.Patterns;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -39,7 +41,7 @@ public abstract class BekreftetAksjonspunktDto implements AksjonspunktKode {
         return begrunnelse;
     }
 
-    @AbacAttributt("aksjonspunktKode")
+    @StandardAbacAttributt(StandardAbacAttributtType.AKSJONSPUNKT_KODE)
     @Override
     public String getKode() {
         if (this.getClass().isAnnotationPresent(JsonTypeName.class)) {

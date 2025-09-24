@@ -9,10 +9,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.ung.sak.web.server.abac.NavAnsatttRestKlient;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("/nav-ansatt")
 @ApplicationScoped
@@ -38,7 +38,7 @@ public class NavAnsattRestTjeneste {
         tags = "nav-ansatt",
         summary = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.")
     )
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     public no.nav.sif.abac.kontrakt.abac.InnloggetAnsattDto innloggetBruker() {
         return navAnsattRestKlient.tilangerForInnloggetBruker();
     }

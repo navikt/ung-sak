@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class EndreFristRequest {
         //
     }
 
-    @AbacAttributt("behandlingId")
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
     public Long getBehandlingId() {
         return behandlingId.getBehandlingId();
     }

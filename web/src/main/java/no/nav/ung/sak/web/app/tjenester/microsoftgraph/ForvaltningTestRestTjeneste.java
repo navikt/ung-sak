@@ -1,6 +1,10 @@
 package no.nav.ung.sak.web.app.tjenester.microsoftgraph;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -17,13 +21,13 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 
 import java.util.Optional;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 
 @Path("/forvaltning/saksbehandler")
@@ -45,7 +49,7 @@ public class ForvaltningTestRestTjeneste {
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/saksbehandlernavn")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response finnNavnPåSakbehandler(@Parameter(description = "saksbehandleIdent") @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) @Valid SaksbehandlerIdentDto saksbehandler) {
         if (Environment.current().isProd()) {

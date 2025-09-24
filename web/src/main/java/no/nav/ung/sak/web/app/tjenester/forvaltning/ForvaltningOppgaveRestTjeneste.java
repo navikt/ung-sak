@@ -8,14 +8,19 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -41,8 +46,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.UUID;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
 
@@ -78,7 +81,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Path("opprett-inntektsrapportering")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Oppretter oppgave for inntektsrapportering for gitt sak", summary = ("Oppretter oppgave for inntektsrapportering"), tags = "oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response opprettInntektsrapportering(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                                 @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedForRapportering måned) {
         if (isProd) {
@@ -132,7 +135,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Path("start-inntektskontroll")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Starter inntektskontroll for sak", summary = ("Starter inntektskontroll for sak"), tags = "oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response startInntektskontroll(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                           @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedForRapportering måned) {
         if (isProd) {
@@ -162,7 +165,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Path("fjern-uttalelse")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling", summary = ("Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling"), tags = "oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.DELETE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.DELETE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response fjernUttalelser(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         if (isProd) {
             throw new IllegalArgumentException("Kan ikke kjøre denne tjenesten i prod");
@@ -196,7 +199,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Path("hent-etterlysninger")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter etterlysninger for behandling", summary = ("Henter etterlysninger for behandling"), tags = "oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     public Response hentEtterlysninger(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingIdDto.getBehandlingId());
         final var mappetEtterlysninger = etterlysninger.stream().map(it -> new EtterlysningDto(
@@ -213,7 +216,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @Path("avbryt-etterlysning")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Avbryter feilopprettet etterlysning.", summary = ("Avbryter feilopprettet etterlysning"), tags = "oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response avbrytEtterlysning(@NotNull @QueryParam("etterlysningId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) Long etterlysningId) {
         final var etterlysning = etterlysningRepository.hentEtterlysning(etterlysningId);
         if (etterlysning.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {

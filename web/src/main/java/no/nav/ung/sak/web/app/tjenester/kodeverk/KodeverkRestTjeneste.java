@@ -6,10 +6,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.api.Kodeverdi;
@@ -26,11 +31,17 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("/kodeverk")
 @ApplicationScoped
@@ -56,7 +67,7 @@ public class KodeverkRestTjeneste {
     @GET
     @Path("/ung-sak/kodeverk/typer")
     @Operation(description = "Ikkje reell implementasjon for bruk. Kun for openapi type generering av ung-sak kodeverkstyper", tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     public KodeverkWeb getUngSakKodeverkTyper() {
         return new KodeverkWeb();
     }
@@ -64,7 +75,7 @@ public class KodeverkRestTjeneste {
     @GET
     @Path("/behandlende-enheter")
     @Operation(description = "Henter liste over behandlende enheter", tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<OrganisasjonsEnhet> hentBehandlendeEnheter(@QueryParam("ytelseType") @DefaultValue(value = "OMP") @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FagsakYtelseType ytelseType) {
         return behandlendeEnhetTjeneste.hentEnhetListe(ytelseType);
@@ -110,7 +121,7 @@ public class KodeverkRestTjeneste {
 
     @GET
     @Path("/alle/objekt")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @Operation(description = "Alle statisk kodeverdier som objekt", tags = "kodeverk")
     @CacheControl(maxAge = 60)
     public AlleKodeverdierSomObjektResponse alleKodeverdierSomObjekt() {
@@ -174,7 +185,7 @@ public class KodeverkRestTjeneste {
      */
     @GET
     @Operation(description = "Henter kodeliste", deprecated = true, tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @Deprecated(forRemoval = true)
     public Response hentGruppertKodeliste() throws IOException {

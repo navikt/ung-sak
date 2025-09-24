@@ -14,6 +14,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -42,8 +43,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
 @Path("")
@@ -83,7 +83,7 @@ public class UngdomsytelseRestTjeneste {
 
     @GET
     @Operation(description = "Henter innvilgede satser for en ungdomsytelsebehandling", tags = "ung")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(SATSER_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<UngdomsytelseSatsPeriodeDto> getUngdomsytelseInnvilgetSats(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
@@ -98,7 +98,7 @@ public class UngdomsytelseRestTjeneste {
 
     @GET
     @Operation(description = "Henter månedsvis satser og utbetaling", tags = "ung")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(MÅNEDSVIS_SATS_OG_UTBETALING_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<UngdomsytelseUtbetaltMånedDto> getSatsOgUtbetalingPerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
@@ -124,7 +124,7 @@ public class UngdomsytelseRestTjeneste {
 
     @GET
     @Operation(description = "Henter uttaksperioder for en ungdomsytelsebehandling", tags = "ung")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(UTTAK_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<UngdomsytelseUttakPeriodeDto> getUngdomsytelseUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
@@ -142,7 +142,7 @@ public class UngdomsytelseRestTjeneste {
 
     @GET
     @Operation(description = "Henter informasjon om deltakelse i ungdomsprogram", tags = "ung")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(UNGDOMSPROGRAM_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public UngdomsprogramInformasjonDto getUngdomsprogramInformasjon(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {

@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.typer.Saksnummer;
 
@@ -24,7 +25,7 @@ public record SkjulNotatDto(
     @JsonProperty(value = "skjul", required = true)
     boolean skjul,
 
-    @AbacAttributt("saksnummer")
+    @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
     @JsonProperty(value = SaksnummerDto.NAME, required = true)
     @NotNull
     @Valid

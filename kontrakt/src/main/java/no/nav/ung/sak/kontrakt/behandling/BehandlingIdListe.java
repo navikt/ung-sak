@@ -19,7 +19,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -41,7 +42,7 @@ public class BehandlingIdListe {
         return Collections.unmodifiableList(behandlinger);
     }
 
-    @AbacAttributt(value = "behandlingUuid")
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_UUID)
     public List<UUID> getBehandlingUuid() {
         return behandlinger.stream().map(BehandlingIdDto::getBehandlingUuid).collect(Collectors.toList());
     }
