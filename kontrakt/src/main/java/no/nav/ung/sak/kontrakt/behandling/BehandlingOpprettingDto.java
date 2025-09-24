@@ -42,7 +42,7 @@ public class BehandlingOpprettingDto {
         return kanOppretteBehandling;
     }
 
-    public Map<BehandlingÅrsakType, List<Periode>> getgyldigePerioderPerÅrsak() {
+    public Map<BehandlingÅrsakType, List<Periode>> getGyldigePerioderPerÅrsak() {
         return gyldigePerioderPerÅrsak;
     }
 }
