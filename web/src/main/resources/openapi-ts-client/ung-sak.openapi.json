@@ -1992,6 +1992,15 @@
           },
           "kanOppretteBehandling" : {
             "type" : "boolean"
+          },
+          "perioderGyldigeForInntektsavkorting" : {
+            "additionalProperties" : {
+              "items" : {
+                "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+              },
+              "type" : "array"
+            },
+            "type" : "object"
           }
         },
         "required" : [ "behandlingType" ],
