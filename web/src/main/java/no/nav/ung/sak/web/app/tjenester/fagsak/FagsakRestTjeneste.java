@@ -200,8 +200,9 @@ public class FagsakRestTjeneste {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         var fagsakId = fagsak.map(Fagsak::getId).orElseThrow();
+        var perioderMedGjennomførtKontroll = behandlingsoppretterTjeneste.perioderMedGjennomførtKontroll(fagsakId);
         var oppretting = BehandlingType.getYtelseBehandlingTyper().stream()
-            .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt)))
+            .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt), perioderMedGjennomførtKontroll))
             .collect(Collectors.toList());
 
         var dto = new SakRettigheterDto(oppretting, List.of());

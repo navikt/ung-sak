@@ -16,9 +16,14 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static no.nav.k9.felles.feil.LogLevel.INFO;
@@ -28,16 +33,18 @@ public class BehandlingsoppretterTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
 
     BehandlingsoppretterTjeneste() {
         // CDI
     }
 
     @Inject
-    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
+    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste, TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
@@ -76,6 +83,24 @@ public class BehandlingsoppretterTjeneste {
             default:
                 return false;
         }
+    }
+
+    public Map<BehandlingÅrsakType, List<Periode>> perioderMedGjennomførtKontroll(Long fagsakId) {
+        var behandling = behandlingRepository.finnSisteInnvilgetBehandling(fagsakId).orElse(null);
+        if (behandling == null) {
+            return Map.of();
+        }
+        if (!behandling.erYtelseBehandling()) {
+            throw new IllegalStateException("Behandling må være av ytelsestype for å kunne hente perioder med kontrollert inntekt");
+        }
+        List<Periode> kontrollertInntektPerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId())
+            .get()
+            .getPerioder()
+            .stream()
+            .map(KontrollertInntektPeriode::getPeriode)
+            .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
+            .toList();
+        return Map.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, kontrollertInntektPerioder);
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
