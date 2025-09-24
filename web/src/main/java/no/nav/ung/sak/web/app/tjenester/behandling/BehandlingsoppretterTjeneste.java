@@ -90,7 +90,7 @@ public class BehandlingsoppretterTjeneste {
     public Map<BehandlingÅrsakType, List<Periode>> perioderMedGjennomførtKontroll(Long fagsakId) {
         var behandling = behandlingRepository.finnSisteInnvilgetBehandling(fagsakId).orElse(null);
         if (behandling == null) {
-            return Map.of();
+            return Map.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, List.of());
         }
         if (!behandling.erYtelseBehandling()) {
             throw new IllegalStateException("Behandling må være av ytelsestype for å kunne hente perioder med kontrollert inntekt");

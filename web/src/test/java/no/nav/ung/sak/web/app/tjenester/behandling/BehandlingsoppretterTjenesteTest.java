@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
@@ -52,6 +53,9 @@ class BehandlingsoppretterTjenesteTest {
     @Inject
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
+    @Inject
+    TilkjentYtelseRepository tilkjentYtelseRepository;
+
     private Behandling behandling;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
@@ -60,7 +64,7 @@ class BehandlingsoppretterTjenesteTest {
         opprettRevurderingsKandidat();
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any())).thenReturn(new OrganisasjonsEnhet("1234", "Nav Test"));
-        this.behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste);
+        this.behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, tilkjentYtelseRepository);
     }
 
     @Test
@@ -75,7 +79,7 @@ class BehandlingsoppretterTjenesteTest {
 
         Set<Trigger> triggere = prosessTriggere.get().getTriggere();
         assertEquals(1, triggere.size());
-        assertEquals(triggere.iterator().next().getPeriode(),periode);
+        assertEquals(triggere.iterator().next().getPeriode(), periode);
     }
 
     @Test
@@ -89,7 +93,15 @@ class BehandlingsoppretterTjenesteTest {
 
         Set<Trigger> triggere = prosessTriggere.get().getTriggere();
         assertEquals(1, prosessTriggere.get().getTriggere().size());
-        assertEquals(triggere.iterator().next().getPeriode(),fagsak.getPeriode());
+        assertEquals(triggere.iterator().next().getPeriode(), fagsak.getPeriode());
+    }
+
+    @Test
+    void skalReturnerePerioderMedGjennomfortKontroll() {
+        Fagsak fagsak = behandling.getFagsak();
+        var perioderMedGjennomfortKontroll = behandlingsoppretterTjeneste.perioderMedGjennomførtKontroll(fagsak.getId());
+        assertNotNull(perioderMedGjennomfortKontroll);
+        assertTrue(perioderMedGjennomfortKontroll.containsKey(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
     }
 
     private Behandling opprettRevurderingsKandidat() {
