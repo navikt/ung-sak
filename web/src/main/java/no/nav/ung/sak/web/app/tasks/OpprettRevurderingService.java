@@ -66,7 +66,7 @@ public class OpprettRevurderingService {
         final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         if (revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
             final Behandling behandling = manuell
-                ? behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType)
+                ? behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, Optional.empty())
                 : behandlingsoppretterTjeneste.opprettAutomatiskRevurdering(fagsak, behandlingÅrsakType);
             behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
         } else {
