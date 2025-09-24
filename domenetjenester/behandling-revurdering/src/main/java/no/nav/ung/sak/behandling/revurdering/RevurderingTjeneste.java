@@ -18,9 +18,11 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
+import java.util.Optional;
 import java.util.Set;
 
 @FagsakYtelseTypeRef
@@ -50,10 +52,13 @@ public class RevurderingTjeneste {
         this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
-    public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet) {
+    public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet, Optional<DatoIntervallEntitet> periode) {
         validerTilstand(origBehandling);
         Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
-        prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(new Trigger(revurderingsÅrsak, revurdering.getFagsak().getPeriode())));
+
+        DatoIntervallEntitet revurderingPeriode = periode.orElse(revurdering.getFagsak().getPeriode());
+        prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(new Trigger(revurderingsÅrsak, revurderingPeriode)));
+
 
         var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
         grunnlagKopierer.kopierGrunnlagVedManuellOpprettelse(origBehandling, revurdering);
