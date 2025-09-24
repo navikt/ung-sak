@@ -90,6 +90,10 @@ public class UttalelseV2 extends BaseEntitet {
             '}';
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getUttalelseBegrunnelse() {
         return uttalelseBegrunnelse;
     }

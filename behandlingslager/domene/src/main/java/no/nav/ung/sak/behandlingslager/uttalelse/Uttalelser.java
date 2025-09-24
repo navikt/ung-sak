@@ -33,6 +33,10 @@ public class Uttalelser extends BaseEntitet {
             .collect(Collectors.toSet());
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public Set<UttalelseV2> getUttalelser() {
         return uttalelser;
     }
