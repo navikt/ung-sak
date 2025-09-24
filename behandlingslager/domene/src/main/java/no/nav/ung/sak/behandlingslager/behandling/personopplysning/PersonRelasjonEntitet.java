@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -36,12 +37,12 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PO_RELASJON")
     private Long id;
 
-    @Embedded
+    @Convert(converter = AktørIdConverter.class, attributeName = "aktørId")
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "fra_aktoer_id", updatable = false, nullable = false)))
     @ChangeTracked
     private AktørId fraAktørId;
 
-    @Embedded
+    @Convert(converter = AktørIdConverter.class, attributeName = "aktørId")
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "til_aktoer_id", updatable = false, nullable = false)))
     @ChangeTracked
     private AktørId tilAktørId;

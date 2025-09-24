@@ -11,7 +11,8 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.k9.søknad.felles.type.Periode;
 
 
@@ -41,7 +42,7 @@ public class ManuellSøknadDto {
         this.periode = periode;
     }
 
-    @AbacAttributt(value = "fnr", masker = true)
+    @StandardAbacAttributt(StandardAbacAttributtType.FNR)
     public String getFnr() {
         return fnr;
     }

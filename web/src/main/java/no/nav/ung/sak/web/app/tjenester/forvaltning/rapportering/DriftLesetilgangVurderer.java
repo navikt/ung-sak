@@ -1,18 +1,17 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering;
 
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.Pep;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
-import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
+import no.nav.ung.sak.typer.Saksnummer;
 
 /**
  * Brukes for å manuelt sjekke om kaller har tilgang til en sak, typisk ved rapportgenerering
@@ -32,8 +31,8 @@ public class DriftLesetilgangVurderer {
 
     public boolean harTilgang(String saksnummer) {
         final AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(tokenProvider.getToken().getToken());
-        attributter.setActionType(BeskyttetRessursActionAttributt.READ);
-        attributter.setResource(DRIFT);
+        attributter.setActionType(BeskyttetRessursActionType.READ);
+        attributter.setResourceType(BeskyttetRessursResourceType.DRIFT);
 
         // Package private:
         //attributter.setAction(restApiPath);

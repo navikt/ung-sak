@@ -6,7 +6,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.typer.Saksnummer;
 
@@ -54,7 +55,7 @@ public class RevurderPeriodeFraStegDto {
         return tom;
     }
 
-    @AbacAttributt("saksnummer")
+    @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
     public Saksnummer getSaksnummer() {
         return saksnummer;
     }

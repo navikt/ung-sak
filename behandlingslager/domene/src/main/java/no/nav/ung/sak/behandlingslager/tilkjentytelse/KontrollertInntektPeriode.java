@@ -2,9 +2,9 @@ package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
-import no.nav.ung.kodeverk.hjemmel.HjemmelKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
-import no.nav.ung.kodeverk.kontroll.KontrollertInntektKildeKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.KontrollertInntektKildeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;

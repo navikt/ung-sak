@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -56,7 +57,7 @@ public class JournalpostMottakOpprettSakDto extends JournalpostMottakDto {
         return periode;
     }
 
-    @AbacAttributt(value = "aktorId", masker = true)
+    @StandardAbacAttributt(StandardAbacAttributtType.AKTØR_ID)
     public String getAktørId() {
         return aktørId;
     }

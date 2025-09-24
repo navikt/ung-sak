@@ -12,6 +12,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
@@ -31,8 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.PIP;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("/pip")
 @ApplicationScoped
@@ -56,7 +56,7 @@ public class PipRestTjeneste {
     @GET
     @Path("/aktoer-for-sak")
     @Operation(description = "Henter aktørId'er tilknyttet en fagsak", tags = "pip")
-    @BeskyttetRessurs(action = READ, resource = PIP)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Set<AktørId> hentAktørIdListeTilknyttetSak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         return pipRepository.hentAktørIdKnyttetTilFagsaker(Set.of(saksnummerDto.getVerdi()));
@@ -65,7 +65,7 @@ public class PipRestTjeneste {
     @GET
     @Path("/aktoer-for-sak-med-sporingslogghint")
     @Operation(description = "Henter aktørId'er tilknyttet en fagsak", tags = "pip")
-    @BeskyttetRessurs(action = READ, resource = PIP)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public PipAktørerMedSporingslogghintDto hentAktørIdListeTilknyttetSakMedSporingslogghint(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
         Set<AktørId> aktørerTilTilgangskontroll = pipRepository.hentAktørIdKnyttetTilFagsaker(Set.of(saksnummerDto.getVerdi()));
@@ -76,7 +76,7 @@ public class PipRestTjeneste {
     @GET
     @Path("/pipdata-for-behandling-v3")
     @Operation(description = "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling", tags = "pip")
-    @BeskyttetRessurs(action = READ, resource = PIP)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Optional<PipDtoV3> hentPipDataTilknyttetBehandlingV3(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Optional<PipBehandlingsData> pipDataOpt = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());
@@ -96,7 +96,7 @@ public class PipRestTjeneste {
     @GET
     @Path("/pipdata-for-behandling-v4")
     @Operation(description = "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling", tags = "pip")
-    @BeskyttetRessurs(action = READ, resource = PIP)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Optional<PipDtoV4> hentPipDataTilknyttetBehandlingV4(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         Optional<PipBehandlingsData> pipDataOpt = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());

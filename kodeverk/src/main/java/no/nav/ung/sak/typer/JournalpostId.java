@@ -13,7 +13,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.api.IndexKey;
 
 /**
@@ -62,7 +63,7 @@ public class JournalpostId implements Serializable, IndexKey {
         return journalpostId;
     }
 
-    @AbacAttributt("journalpostId")
+    @StandardAbacAttributt(StandardAbacAttributtType.JOURNALPOST_ID)
     public JournalpostId getJournalpostId() {
         return this;
     }
