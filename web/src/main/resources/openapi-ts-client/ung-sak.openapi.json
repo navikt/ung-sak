@@ -1990,10 +1990,7 @@
           "behandlingType" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingType"
           },
-          "kanOppretteBehandling" : {
-            "type" : "boolean"
-          },
-          "perioderGyldigeForInntektsavkorting" : {
+          "gyldigePerioderPerÅrsak" : {
             "additionalProperties" : {
               "items" : {
                 "$ref" : "#/components/schemas/ung.sak.typer.Periode"
@@ -2001,6 +1998,9 @@
               "type" : "array"
             },
             "type" : "object"
+          },
+          "kanOppretteBehandling" : {
+            "type" : "boolean"
           }
         },
         "required" : [ "behandlingType" ],
