@@ -11,7 +11,6 @@ import java.util.Set;
 
 @Entity(name = "Uttalelser")
 @Table(name = "UTTALELSER")
-@Immutable
 public class Uttalelser extends BaseEntitet {
 
     @Id
