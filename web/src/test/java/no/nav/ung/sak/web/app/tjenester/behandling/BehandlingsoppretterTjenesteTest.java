@@ -13,18 +13,18 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
+import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -64,7 +64,7 @@ class BehandlingsoppretterTjenesteTest {
         opprettRevurderingsKandidat();
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any())).thenReturn(new OrganisasjonsEnhet("1234", "Nav Test"));
-        this.behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, tilkjentYtelseRepository);
+        this.behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, new UnitTestLookupInstanceImpl<>(new GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder(tilkjentYtelseRepository, behandlingRepository)));
     }
 
     @Test
@@ -99,7 +99,7 @@ class BehandlingsoppretterTjenesteTest {
     @Test
     void skalReturnerePerioderMedGjennomfortKontroll() {
         Fagsak fagsak = behandling.getFagsak();
-        var perioderMedGjennomfortKontroll = behandlingsoppretterTjeneste.perioderMedGjennomførtKontroll(fagsak.getId());
+        var perioderMedGjennomfortKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
         assertNotNull(perioderMedGjennomfortKontroll);
         assertTrue(perioderMedGjennomfortKontroll.containsKey(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
     }

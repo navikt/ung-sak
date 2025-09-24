@@ -1,6 +1,8 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
@@ -16,17 +18,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.feil.LogLevel.INFO;
 
@@ -35,18 +32,19 @@ public class BehandlingsoppretterTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
 
     BehandlingsoppretterTjeneste() {
         // CDI
     }
 
     @Inject
-    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste, TilkjentYtelseRepository tilkjentYtelseRepository) {
+    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
+                                        @Any Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
+        this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
-        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
@@ -87,22 +85,9 @@ public class BehandlingsoppretterTjeneste {
         }
     }
 
-    public Map<BehandlingÅrsakType, List<Periode>> perioderMedGjennomførtKontroll(Long fagsakId) {
-        var behandling = behandlingRepository.finnSisteInnvilgetBehandling(fagsakId).orElse(null);
-        if (behandling == null) {
-            return Map.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, List.of());
-        }
-        if (!behandling.erYtelseBehandling()) {
-            throw new IllegalStateException("Behandling må være av ytelsestype for å kunne hente perioder med kontrollert inntekt");
-        }
-        List<Periode> kontrollertInntektPerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId())
-            .get()
-            .getPerioder()
-            .stream()
-            .map(KontrollertInntektPeriode::getPeriode)
-            .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-            .toList();
-        return Map.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, kontrollertInntektPerioder);
+    public Map<BehandlingÅrsakType, List<Periode>> finnGyldigeVurderingsperioderPrÅrsak(Long fagsakId) {
+        return gyldigePerioderForRevurderingUtledere.stream().map(utleder -> utleder.utledPerioder(fagsakId))
+            .collect(Collectors.groupingBy(ÅrsakOgPerioder::behandlingÅrsakType, Collectors.flatMapping(it -> it.perioder().stream(), Collectors.toList())));
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
