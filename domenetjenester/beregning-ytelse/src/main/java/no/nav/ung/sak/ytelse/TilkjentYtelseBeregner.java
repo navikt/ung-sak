@@ -50,15 +50,18 @@ public class TilkjentYtelseBeregner {
         sporing.put("redusertBeløp", redusertBeløp.toString());
 
         // Beregner dagsats utifra antall virkedager i perioden
-        final var antallVirkedager = Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato());
+        BigDecimal antallVirkedager = BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato()));
         sporing.put("antallVirkedager", String.valueOf(antallVirkedager));
-        final var dagsats = antallVirkedager == 0 ?  BigDecimal.ZERO : redusertBeløp.divide(BigDecimal.valueOf(antallVirkedager), 0, RoundingMode.HALF_UP);
-        BigDecimal tilkjentBeløp = dagsats.multiply(BigDecimal.valueOf(antallVirkedager));
-        sporing.put("dagsats", dagsats.toString());
+
+        final var avrundetDagsats = antallVirkedager.equals(BigDecimal.ZERO) ?  BigDecimal.ZERO : redusertBeløp.divide(antallVirkedager, 0, RoundingMode.HALF_UP);
+        BigDecimal tilkjentBeløp = avrundetDagsats.multiply(antallVirkedager);
+        sporing.put("dagsats", avrundetDagsats.toString());
         sporing.put("tilkjentBeløp", tilkjentBeløp.toString());
 
         // Beregner utbetalingsgrad
-        final var utbetalingsgrad = finnUtbetalingsgrad(redusertBeløp, sats.grunnsats(), dagsats);
+        // Beregner avrundet grunnsats for perioden tilsvarende tilkjentBeløp slik at de kan sammenlignes.
+        BigDecimal avrundetGrunnsats = antallVirkedager.equals(BigDecimal.ZERO) ?  BigDecimal.ZERO : sats.grunnsats().divide(antallVirkedager, 0, RoundingMode.HALF_UP).multiply(antallVirkedager);
+        final var utbetalingsgrad = finnUtbetalingsgrad(tilkjentBeløp, avrundetGrunnsats, avrundetDagsats);
         sporing.put("utbetalingsgrad", String.valueOf(utbetalingsgrad));
 
         sporing.put("periode", periode.toString());
@@ -66,7 +69,7 @@ public class TilkjentYtelseBeregner {
             uredusertBeløp,
             reduksjon,
             redusertBeløp,
-            dagsats,
+            avrundetDagsats,
             utbetalingsgrad,
             tilkjentBeløp);
         return new TilkjentYtelsePeriodeResultat(tilkjentYtelseVerdi, sporing);
@@ -74,26 +77,27 @@ public class TilkjentYtelseBeregner {
 
 
     /**
-     * Beregner utbetalingsgrad basert på redusert beløp, grunnsats og dagsats.
+     * Beregner utbetalingsgrad basert på tilkjent redusert beløp, avrundet grunnsats og dagsats.
      *
-     * @param redusertBeløp det reduserte beløpet etter fratrekk av rapportert inntekt
-     * @param grunnsats grunnsatsen for ytelsen
-     * @param dagsats dagsatsen beregnet utifra antall virkedager
+     * @param tilkjentBeløp     det reduserte beløpet etter fratrekk av rapportert inntekt
+     * @param avrundetGrunnsats avrundet grunnsats uten reduksjon eller barnetrygd
+     * @param dagsats           dagsatsen beregnet utifra antall antallVirkerdager
      * @return utbetalingsgraden som en prosentverdi
      */
-    private static int finnUtbetalingsgrad(BigDecimal redusertBeløp, BigDecimal grunnsats, BigDecimal dagsats) {
+    private static int finnUtbetalingsgrad(BigDecimal tilkjentBeløp, BigDecimal avrundetGrunnsats, BigDecimal dagsats) {
         // Utbetalingsgrad regnes utifra grunnsats, barnetillegg er ikke inkludert
 
         // Dersom ingenting utbetales er utbetalingsgrad 0
-        if (dagsats.compareTo(BigDecimal.ZERO) == 0 || redusertBeløp.compareTo(BigDecimal.ZERO) == 0) {
+        if (dagsats.compareTo(BigDecimal.ZERO) == 0 || tilkjentBeløp.compareTo(BigDecimal.ZERO) == 0) {
             return 0;
         }
-        // Dersom redusert beløp er høyere enn grunnsats sier vi at det er full utbetaling (selv om det faktisk kan vere en reduksjon)
-        if (redusertBeløp.compareTo(grunnsats) > 0) {
+
+        // Dersom tilkjent beløp er høyere enn grunnsats sier vi at det er full utbetaling (selv om det faktisk kan vere en reduksjon)
+        if (tilkjentBeløp.compareTo(avrundetGrunnsats) > 0) {
             return 100;
         }
         // Regner ut prosentvis utbetalingsgrad
-        return redusertBeløp.multiply(BigDecimal.valueOf(100)).divide(grunnsats, 0, BigDecimal.ROUND_HALF_UP).intValue();
+        return tilkjentBeløp.multiply(BigDecimal.valueOf(100)).divide(avrundetGrunnsats, 0, RoundingMode.HALF_UP).intValue();
     }
 
     public static <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(
