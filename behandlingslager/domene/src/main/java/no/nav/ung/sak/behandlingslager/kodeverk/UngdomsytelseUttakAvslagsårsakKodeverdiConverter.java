@@ -1,4 +1,4 @@
-package no.nav.ung.kodeverk.ungdomsytelse;
+package no.nav.ung.sak.behandlingslager.kodeverk;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
