@@ -25,13 +25,13 @@ public class BehandlingOpprettingDto {
     @JsonProperty(value = "kanOppretteBehandling")
     private boolean kanOppretteBehandling;
 
-    @JsonProperty(value = "perioderGyldigeForInntektsavkorting")
-    private Map<BehandlingÅrsakType, List<Periode>> perioderGyldigeForInntektsavkorting;
+    @JsonProperty(value = "gyldigePerioderPerÅrsak")
+    private Map<BehandlingÅrsakType, List<Periode>> gyldigePerioderPerÅrsak;
 
-    public BehandlingOpprettingDto(BehandlingType behandlingType, boolean kanOppretteBehandling, Map<BehandlingÅrsakType, List<Periode>> perioderGyldigeForInntektsavkorting) {
+    public BehandlingOpprettingDto(BehandlingType behandlingType, boolean kanOppretteBehandling, Map<BehandlingÅrsakType, List<Periode>> gyldigePerioderPerÅrsak) {
         this.behandlingType = behandlingType;
         this.kanOppretteBehandling = kanOppretteBehandling;
-        this.perioderGyldigeForInntektsavkorting = perioderGyldigeForInntektsavkorting;
+        this.gyldigePerioderPerÅrsak = gyldigePerioderPerÅrsak;
     }
 
     public BehandlingType getBehandlingType() {
@@ -42,7 +42,7 @@ public class BehandlingOpprettingDto {
         return kanOppretteBehandling;
     }
 
-    public Map<BehandlingÅrsakType, List<Periode>> getPerioderGyldigeForInntektsavkorting() {
-        return perioderGyldigeForInntektsavkorting;
+    public Map<BehandlingÅrsakType, List<Periode>> getgyldigePerioderPerÅrsak() {
+        return gyldigePerioderPerÅrsak;
     }
 }
