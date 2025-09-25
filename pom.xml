@@ -36,7 +36,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>7.0.0</felles.version>
-        <swagger.version>2.2.36</swagger.version>
+        <swagger.version>2.2.37</swagger.version>
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.5.7</k9format.version>
         <jackson.version>2.20.0</jackson.version>
@@ -44,15 +44,15 @@
         <kotlin-stdlib.version>2.2.20</kotlin-stdlib.version>
         <jandex.version>3.5.0</jandex.version>
         <pdfgen-core.version>1.1.60</pdfgen-core.version>
-        <flyway.version>11.12.0</flyway.version>
+        <flyway.version>11.13.1</flyway.version>
         <confluent.platform.version>8.0.0</confluent.platform.version>
-        <mockito.version>5.19.0</mockito.version>
+        <mockito.version>5.20.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.4.0</ung-deltakelse-opplyser.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.31</openhtmltopdf.version>
         <jsoup.version>1.21.2</jsoup.version>
-        <commonmark.version>0.25.1</commonmark.version>
+        <commonmark.version>0.26.0</commonmark.version>
 
     </properties>
 
@@ -179,7 +179,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.19.0</version>
+                <version>2.20.1</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -554,7 +554,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.7</version>
+                <version>42.7.8</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
@@ -701,7 +701,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.0</version>
+                    <version>3.14.1</version>
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
@@ -728,7 +728,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.3</version>
+                    <version>3.5.4</version>
                     <configuration>
                         <argLine>
                             -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
@@ -738,7 +738,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.3</version>
+                    <version>3.5.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -748,7 +748,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>1.7.3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
