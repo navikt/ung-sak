@@ -21,14 +21,13 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements ProsessTa
     private static final Logger log = LoggerFactory.getLogger(OppfriskInntektForBehandlingerPåVentBatchTask.class);
 
     public static final String TASKTYPE = "ung.oppfrisk.inntekt.påvent";
-    private final boolean oppfriskKontrollbehandlingEnabled;
+    private boolean oppfriskKontrollbehandlingEnabled;
 
     private EntityManager entityManager;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
 
-    public OppfriskInntektForBehandlingerPåVentBatchTask(@KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled) {
-        this.oppfriskKontrollbehandlingEnabled = oppfriskKontrollbehandlingEnabled;
+    public OppfriskInntektForBehandlingerPåVentBatchTask() {
     }
 
     @Inject
