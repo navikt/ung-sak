@@ -39,15 +39,16 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements ProsessTa
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         // finn alle behandlinger som er på vent og ikke har blitt oppfrisket de siste 24 timene
-        final Query q = entityManager.createNativeQuery("select b.* from behandling b " +
-            "inner join fagsak f on f.id = b.fagsak_id " +
-            "inner join behandling_arsak ba on ba.behandling_id = b.id " +
-            "inner join aksjonspunkt ap on ap.behandling_id = b.id " +
-            "where b.behandling_status = 'UTRED' " +
-            "and ba.behandling_arsak_type = 'RE_KONTROLL_REGISTER_INNTEKT' " +
-            "and ap.aksjonspunkt_status = 'OPPRE' " +
-            "and ap.vent_aarsak = 'AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE'",
-            Behandling.class);
+        final Query q = entityManager.createNativeQuery("select b.* " +
+                    "from behandling b " +
+                    "inner join behandling_arsak ba on ba.behandling_id = b.id " +
+                    "inner join aksjonspunkt ap on ap.behandling_id = b.id " +
+                    "where behandling_status = 'UTRED' " +
+                    "and behandling_arsak_type = 'RE-KONTROLL-REGISTER-INNTEKT' " +
+                    "and aksjonspunkt_def = '7040' " +
+                    "and aksjonspunkt_status = 'OPPRE' " +
+                    "and vent_aarsak = 'VENTER_ETTERLYS_INNTEKT_UTTALELSE'",
+                    Behandling.class);
         final List<Behandling> behandlinger = q.getResultList();
 
         // opprett oppfrisk-tasker for alle behandlingene funnet
