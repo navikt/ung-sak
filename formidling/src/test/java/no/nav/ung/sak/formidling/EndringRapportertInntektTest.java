@@ -24,7 +24,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
 
     @DisplayName("Endringsbrev med periode, innrapportert inntekt, reduksjon og utbetaling")
     @Test
-    void standardEndringRapportertInntekt() {
+    void standard_endring_inntekt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
@@ -49,9 +49,9 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             );
     }
 
-    @DisplayName("Endringsbrev med flere perioder")
+    @DisplayName("Endringsbrev med reduksjon for flere perioder")
     @Test
-    void melder_inntekt_for_flere_mnd() {
+    void inntekt_reduksjon_flere_mnd() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
@@ -81,7 +81,7 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
 
     @DisplayName("Endringsbrev med flere perioder med ingen reduksjon i midten")
     @Test
-    void melder_inntekt_for_flere_mnd_med_0_inntekt_i_midten() {
+    void inntekt_for_flere_mnd_med_0_inntekt_i_midten() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_utenom_mnd_2(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
@@ -109,11 +109,11 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             );
     }
 
-    @DisplayName("Endringsbrev med 0 kr utbetaling pga for mye inntekt")
+    @DisplayName("Endringsbrev med ingen utbetaling pga for mye inntekt")
     @Test
-    void melder_inntekt_0_utbetaling() {
+    void inntekt_ingen_utbetaling() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntekt0krUtbetaling(fom);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektIngenUtbetaling(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
@@ -136,12 +136,41 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
     }
 
 
-
-    @DisplayName("Endringsbrev med flere perioder der det ikke er utbetaling i midten")
+    @DisplayName("Endringsbrev med reduksjon og ingen utbetaling")
     @Test
-    void melder_inntekt_for_flere_mnd_med_0_utbetaling_i_midten() {
+    void inntekt_reduksjon_og_ingen_utbetaling() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektAlleKombinasjoner(fom);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringInntektRedusertOgIngenUtbetaling(fom);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret ungdomsprogramytelsen din " +
+                "Du får 6 380 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
+                "Pengene får du utbetalt innen fire dager. " +
+                "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
+                "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
+                standardTekstIngenUtbetalingEndringInntekt());
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>",
+                "<h2>Hvorfor får du ingen utbetaling?</h2>"
+            );
+    }
+
+    @DisplayName("Endringsbrev med flere perioder med full, redusert og ingen utbetaling")
+    @Test
+    void inntekt_for_flere_mnd_med_full_redusert_og_ingen_utbetaling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringInntektAlleKombinasjoner(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
             "Du får 6 380 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +

@@ -92,7 +92,7 @@ public class EndringInntektScenarioer {
      * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre og tredje måned på 10 000 kroner.
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
-    public static UngTestScenario endringMedInntekt0krUtbetaling(LocalDate fom) {
+    public static UngTestScenario endringMedInntektIngenUtbetaling(LocalDate fom) {
         LocalDate førsteIMåneden = fom.withDayOfMonth(1);
         var rapportertInntektTimeline = new LocalDateTimeline<>(
             List.of(
@@ -109,11 +109,8 @@ public class EndringInntektScenarioer {
      * 19 år ungdom med
      * 1. mnd: 0 kr utbetaling med for høy inntekt
      * 2. mnd: redusert utbetaling
-     * 3. mnd: full utbetaling pga ingen inntekt
-     * 4. mnd: 0 kr utbetaling pga for høy inntekt
-     * 5. mnd: redusert utbetaling
      */
-    public static UngTestScenario endringMedInntektAlleKombinasjoner(LocalDate fom) {
+    public static UngTestScenario endringInntektRedusertOgIngenUtbetaling(LocalDate fom) {
         LocalDate førsteIMåneden = fom.withDayOfMonth(1);
         var rapportertInntektTimeline = new LocalDateTimeline<>(
             List.of(
@@ -124,7 +121,32 @@ public class EndringInntektScenarioer {
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(2),
                     førsteIMåneden.plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()),
-                    BigDecimal.valueOf(10000)), //Vil gi 0 kr utbetaling
+                    BigDecimal.valueOf(10000))
+            ));
+
+        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+    }
+
+    /**
+     * 19 år ungdom med
+     * 1. mnd: 0 kr utbetaling med for høy inntekt
+     * 2. mnd: redusert utbetaling
+     * 3. mnd: full utbetaling pga ingen inntekt
+     * 4. mnd: 0 kr utbetaling pga for høy inntekt
+     * 5. mnd: redusert utbetaling
+     */
+    public static UngTestScenario endringInntektAlleKombinasjoner(LocalDate fom) {
+        LocalDate førsteIMåneden = fom.withDayOfMonth(1);
+        var rapportertInntektTimeline = new LocalDateTimeline<>(
+            List.of(
+                new LocalDateSegment<>(
+                    førsteIMåneden.plusMonths(1),
+                    førsteIMåneden.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
+                    BigDecimal.valueOf(23000)),
+                new LocalDateSegment<>(
+                    førsteIMåneden.plusMonths(2),
+                    førsteIMåneden.plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()),
+                    BigDecimal.valueOf(10000)),
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(3),
                     førsteIMåneden.plusMonths(3).with(TemporalAdjusters.lastDayOfMonth()),
