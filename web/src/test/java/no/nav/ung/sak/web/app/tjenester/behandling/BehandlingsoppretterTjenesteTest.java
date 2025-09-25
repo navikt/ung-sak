@@ -101,7 +101,7 @@ class BehandlingsoppretterTjenesteTest {
         Fagsak fagsak = behandling.getFagsak();
         var perioderMedGjennomfortKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
         assertNotNull(perioderMedGjennomfortKontroll);
-        assertTrue(perioderMedGjennomfortKontroll.containsKey(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        assertTrue(perioderMedGjennomfortKontroll.stream().anyMatch(it -> it.årsak() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
     }
 
     private Behandling opprettRevurderingsKandidat() {

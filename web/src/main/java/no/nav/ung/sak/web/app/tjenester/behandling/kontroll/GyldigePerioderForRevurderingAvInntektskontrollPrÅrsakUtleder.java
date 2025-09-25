@@ -8,7 +8,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.behandling.GyldigePerioderForRevurderingPrÅrsakUtleder;
-import no.nav.ung.sak.web.app.tjenester.behandling.ÅrsakOgPerioder;
+import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 
 import java.util.List;
 
@@ -29,9 +29,9 @@ public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder impl
     }
 
     @Override
-    public ÅrsakOgPerioder utledPerioder(long fagsakId) {
+    public ÅrsakOgPerioderDto utledPerioder(long fagsakId) {
         var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
-        return new ÅrsakOgPerioder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, behandling.map(value -> tilkjentYtelseRepository.hentKontrollertInntektPerioder(value.getId())
+        return new ÅrsakOgPerioderDto(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, behandling.map(value -> tilkjentYtelseRepository.hentKontrollertInntektPerioder(value.getId())
             .stream()
             .flatMap(it -> it.getPerioder().stream())
             .map(KontrollertInntektPeriode::getPeriode)

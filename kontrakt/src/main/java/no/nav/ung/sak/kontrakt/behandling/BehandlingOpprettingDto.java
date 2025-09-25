@@ -26,9 +26,9 @@ public class BehandlingOpprettingDto {
     private boolean kanOppretteBehandling;
 
     @JsonProperty(value = "gyldigePerioderPerÅrsak")
-    private Map<BehandlingÅrsakType, List<Periode>> gyldigePerioderPerÅrsak;
+    private List<ÅrsakOgPerioderDto> gyldigePerioderPerÅrsak;
 
-    public BehandlingOpprettingDto(BehandlingType behandlingType, boolean kanOppretteBehandling, Map<BehandlingÅrsakType, List<Periode>> gyldigePerioderPerÅrsak) {
+    public BehandlingOpprettingDto(BehandlingType behandlingType, boolean kanOppretteBehandling, List<ÅrsakOgPerioderDto> gyldigePerioderPerÅrsak) {
         this.behandlingType = behandlingType;
         this.kanOppretteBehandling = kanOppretteBehandling;
         this.gyldigePerioderPerÅrsak = gyldigePerioderPerÅrsak;
@@ -42,7 +42,7 @@ public class BehandlingOpprettingDto {
         return kanOppretteBehandling;
     }
 
-    public Map<BehandlingÅrsakType, List<Periode>> getGyldigePerioderPerÅrsak() {
+    public List<ÅrsakOgPerioderDto> getGyldigePerioderPerÅrsak() {
         return gyldigePerioderPerÅrsak;
     }
 }

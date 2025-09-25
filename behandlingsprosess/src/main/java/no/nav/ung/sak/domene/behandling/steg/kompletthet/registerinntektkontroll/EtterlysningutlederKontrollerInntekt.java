@@ -24,6 +24,7 @@ public class EtterlysningutlederKontrollerInntekt {
         this.akseptertDifferanse = akseptertDifferanse;
     }
 
+    // Denne logikken er utelukkende  avhengig av Etterlysning og trenger ikke uttalelse
     public LocalDateTimeline<EtterlysningBehov> utledBehovForEtterlysninger(
         KontrollerInntektInput input) {
         var relevantTidslinje = input.relevantTidslinje();
@@ -55,8 +56,8 @@ public class EtterlysningutlederKontrollerInntekt {
     private static LocalDateTimeline<EtterlysningBehov> finnNyeEtterlysningerGrunnetRegisterendring(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
                                                                                                     LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
                                                                                                     LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
-        var etterlysningUtenInnvendinger = etterlysningTidslinje.intersection(tidslinjeRelevanteÅrsaker);
-        var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, etterlysningUtenInnvendinger);
+        var relevanteEtterlysninger = etterlysningTidslinje.intersection(tidslinjeRelevanteÅrsaker);
+        var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, relevanteEtterlysninger);
         return endringsresultatEtterlysninger.filterValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.ENDRING)
             .mapValue(it -> EtterlysningBehov.ERSTATT_EKSISTERENDE);
     }
@@ -65,9 +66,9 @@ public class EtterlysningutlederKontrollerInntekt {
     private static LocalDateTimeline<EtterlysningBehov> finnTidslinjeForMottatteSvarUtenRegisterendring(LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
                                                                                                         LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje,
                                                                                                         LocalDateTimeline<Boolean> tidslinjeRelevanteÅrsaker) {
-        var godkjentUttalelse = etterlysningTidslinje
+        var mottattSvarTidslinje = etterlysningTidslinje
                 .filterValue(it -> it.etterlysning().etterlysningStatus() == EtterlysningStatus.MOTTATT_SVAR).intersection(tidslinjeRelevanteÅrsaker);
-        var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, godkjentUttalelse);
+        var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, mottattSvarTidslinje);
         return endringsresultatEtterlysninger.filterValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.INGEN_ENDRING)
                 .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING);
     }
