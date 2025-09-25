@@ -57,12 +57,15 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             EndringRapportertInntektInnholdBygger::mapTilPeriodeDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
+        var harKunEnPeriode = periodeDtoTidslinje.size() == 1;
         EndringRapportertInntektDto dto = new EndringRapportertInntektDto(
             REDUSJON_PROSENT,
             periodeDtoTidslinje.toSegments().stream()
                 .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
                 .map(LocalDateSegment::getValue)
-                .collect(Collectors.toList())
+                .collect(Collectors.toList()),
+            harKunEnPeriode
+
         );
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto, true);
