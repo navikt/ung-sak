@@ -161,8 +161,7 @@ public class EndringInntektScenarioer {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
-        var sats = BrevScenarioerUtils.lavSatsBuilder(fom).build();
-        var satser = new LocalDateTimeline<>(p, sats);
+        var satser = BrevScenarioerUtils.lavSatsBuilder(p);
 
         var tilkjentPeriode = new LocalDateInterval(rapportertInntektTimeline.getMinLocalDate(), rapportertInntektTimeline.getMaxLocalDate());
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);

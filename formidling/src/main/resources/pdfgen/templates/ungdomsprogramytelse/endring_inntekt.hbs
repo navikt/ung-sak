@@ -3,17 +3,30 @@
 
     {{#> felles/seksjon/hoved }}
         <h1>Vi har endret ungdomsprogramytelsen din</h1>
-        {{#each perioder}}
+        {{#each utbetalingsperioder}}
             <p>Du får {{> felles/beløp utbetalingBeløp}} i ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.</p>
-            {{#if harKunEnPeriode}}<p>Pengene får du utbetalt innen fire dager.</p>{{/if}}
+            {{#unless harFlereUtbetalinger}}<p>Pengene får du utbetalt innen fire dager.</p>{{/unless}}
             <p>
                 Du får dette beløpet siden du hadde en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.
                 Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din.
             </p>
         {{/each}}
 
-        {{#unless harKunEnPeriode}}<p>Pengene får du utbetalt innen fire dager. </p>{{/unless}}
+        {{#if harFlereUtbetalinger}}
+            <p>Pengene får du utbetalt innen fire dager. </p>
+        {{/if}}
 
+        {{#if harIngenUtbetalinger}}
+            {{#each ingenUtbetalingPerioder}}
+                <p>Du får ikke utbetalt ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.</p>
+                <p>Det er fordi du hadde en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.</p>
+            {{/each}}
+
+            <h2>Hvorfor får du ingen utbetaling?</h2>
+            <p>Når du har en inntekt, får du mindre penger i ungdomsprogramytelse.
+                Vi regnet ut hva {{reduksjonssats}} prosent av inntekten din var for denne perioden, og så trakk vi dette beløpet fra pengene du får i ungdomsprogramytelsen.</p>
+            <p>Siden 66 prosent av inntekten din var høyere enn det du ville fått utbetalt i ungdomsprogramytelse for denne perioden, får du ingen utbetaling.</p>
+        {{/if}}
 
         <p>Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 11. </p>
 

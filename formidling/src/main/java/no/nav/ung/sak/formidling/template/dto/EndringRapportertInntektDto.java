@@ -6,6 +6,8 @@ import java.util.List;
 
 public record EndringRapportertInntektDto(
     int reduksjonssats,
-    List<EndringRapportertInntektPeriodeDto> perioder,
-    boolean harKunEnPeriode) implements TemplateInnholdDto {
+    List<EndringRapportertInntektPeriodeDto> utbetalingsperioder,
+    List<EndringRapportertInntektPeriodeDto> ingenUtbetalingPerioder,
+    boolean harFlereUtbetalinger,
+    boolean harIngenUtbetalinger) implements TemplateInnholdDto {
 }
