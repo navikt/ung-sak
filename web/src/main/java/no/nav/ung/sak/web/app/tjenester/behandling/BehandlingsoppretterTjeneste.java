@@ -1,6 +1,8 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
@@ -20,8 +22,8 @@ import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjenest
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.feil.LogLevel.INFO;
 
@@ -30,14 +32,17 @@ public class BehandlingsoppretterTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+    private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
 
     BehandlingsoppretterTjeneste() {
         // CDI
     }
 
     @Inject
-    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
+    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
+                                        @Any Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
+        this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
     }
@@ -78,6 +83,11 @@ public class BehandlingsoppretterTjeneste {
             default:
                 return false;
         }
+    }
+
+    public Map<BehandlingÅrsakType, List<Periode>> finnGyldigeVurderingsperioderPrÅrsak(Long fagsakId) {
+        return gyldigePerioderForRevurderingUtledere.stream().map(utleder -> utleder.utledPerioder(fagsakId))
+            .collect(Collectors.groupingBy(ÅrsakOgPerioder::behandlingÅrsakType, Collectors.flatMapping(it -> it.perioder().stream(), Collectors.toList())));
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
