@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
-@ProsessTask(value = OppfriskInntektForBehandlingerPåVentBatchTask.TASKTYPE, cronExpression = "0 0 20 * * MON-FRI")
+@ProsessTask(value = OppfriskInntektForBehandlingerPåVentBatchTask.TASKTYPE, cronExpression = "0 0 12 * * *")
 public class OppfriskInntektForBehandlingerPåVentBatchTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskInntektForBehandlingerPåVentBatchTask.class);
