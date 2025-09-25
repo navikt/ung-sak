@@ -18,12 +18,11 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.feil.LogLevel.INFO;
 
@@ -85,9 +84,9 @@ public class BehandlingsoppretterTjeneste {
         }
     }
 
-    public Map<BehandlingÅrsakType, List<Periode>> finnGyldigeVurderingsperioderPrÅrsak(Long fagsakId) {
+    public List<ÅrsakOgPerioderDto> finnGyldigeVurderingsperioderPrÅrsak(Long fagsakId) {
         return gyldigePerioderForRevurderingUtledere.stream().map(utleder -> utleder.utledPerioder(fagsakId))
-            .collect(Collectors.groupingBy(ÅrsakOgPerioder::behandlingÅrsakType, Collectors.flatMapping(it -> it.perioder().stream(), Collectors.toList())));
+            .toList();
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {

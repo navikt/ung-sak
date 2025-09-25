@@ -1,8 +1,10 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
+import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
+
 public interface GyldigePerioderForRevurderingPrÅrsakUtleder {
 
 
-    ÅrsakOgPerioder utledPerioder(long fagsakId);
+    ÅrsakOgPerioderDto utledPerioder(long fagsakId);
 
 }
