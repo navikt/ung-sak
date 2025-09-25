@@ -1991,13 +1991,10 @@
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingType"
           },
           "gyldigePerioderPerÅrsak" : {
-            "additionalProperties" : {
-              "items" : {
-                "$ref" : "#/components/schemas/ung.sak.typer.Periode"
-              },
-              "type" : "array"
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto"
             },
-            "type" : "object"
+            "type" : "array"
           },
           "kanOppretteBehandling" : {
             "type" : "boolean"
@@ -2318,6 +2315,20 @@
           }
         },
         "required" : [ "fritekst", "sendVarsel" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+            },
+            "type" : "array"
+          },
+          "årsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingÅrsakType"
+          }
+        },
         "type" : "object"
       },
       "ung.sak.kontrakt.beregningsresultat.BeregningsresultatDto" : {
