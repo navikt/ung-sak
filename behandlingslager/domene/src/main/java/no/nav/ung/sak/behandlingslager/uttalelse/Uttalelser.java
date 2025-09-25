@@ -8,6 +8,7 @@ import org.hibernate.annotations.Immutable;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity(name = "Uttalelser")
 @Table(name = "UTTALELSER")
@@ -27,7 +28,13 @@ public class Uttalelser extends BaseEntitet {
     }
 
     public Uttalelser(Set<UttalelseV2> uttalelser) {
-        this.uttalelser = uttalelser;
+        this.uttalelser = uttalelser.stream()
+            .map(UttalelseV2::new)
+            .collect(Collectors.toSet());
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Set<UttalelseV2> getUttalelser() {

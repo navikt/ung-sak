@@ -5,11 +5,14 @@ import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
+import org.hibernate.annotations.Immutable;
+
 import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "UttalelseV2")
 @Table(name = "UTTALELSE_V2")
+@Immutable
 public class UttalelseV2 extends BaseEntitet {
 
     @Id
@@ -38,6 +41,16 @@ public class UttalelseV2 extends BaseEntitet {
     public UttalelseV2() {
         // Hibernate
     }
+
+    public UttalelseV2(UttalelseV2 eksisterende) {
+        this.uttalelseBegrunnelse = eksisterende.uttalelseBegrunnelse;
+        this.harUttalelse = eksisterende.harUttalelse;
+        this.periode = eksisterende.periode;
+        this.svarJournalpostId = eksisterende.svarJournalpostId;
+        this.type = eksisterende.type;
+        this.grunnlagsreferanse = eksisterende.grunnlagsreferanse;
+    }
+
 
     public UttalelseV2(boolean harUttalelse, String uttalelseBegrunnelse, DatoIntervallEntitet periode, JournalpostId svarJournalpostId, EndringType type, UUID grunnlagsreferanse) {
         this.uttalelseBegrunnelse = uttalelseBegrunnelse;
@@ -75,6 +88,10 @@ public class UttalelseV2 extends BaseEntitet {
             ", grunnlagsreferanse=" + grunnlagsreferanse +
             ", id=" + id +
             '}';
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getUttalelseBegrunnelse() {

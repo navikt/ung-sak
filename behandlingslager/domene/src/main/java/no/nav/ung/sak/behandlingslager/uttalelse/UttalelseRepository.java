@@ -31,12 +31,18 @@ public class UttalelseRepository {
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(eksisterendeBehandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UttalelseGrunnlag(nyBehandlingId, it));
-        nyttGrunnlag.ifPresent(gr -> persister(Optional.empty(), gr));
+        nyttGrunnlag.ifPresent(gr -> {
+            entityManager.persist(gr);
+            entityManager.flush();
+        });
     }
 
     private void persister(Optional <UttalelseGrunnlag> eksisterendeGrunnlag, UttalelseGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
         if (nyttGrunnlag.getUttalelser() != null) {
+            if (nyttGrunnlag.getUttalelser().getId() == null && nyttGrunnlag.getUttalelser().getUttalelser().stream().anyMatch(it -> it.getId() != null)) {
+                throw new IllegalStateException("Forsøk på å gjenbruke eksisterende uttalelse i nytt aggregat");
+            }
             entityManager.persist(nyttGrunnlag.getUttalelser());
         }
         entityManager.persist(nyttGrunnlag);
