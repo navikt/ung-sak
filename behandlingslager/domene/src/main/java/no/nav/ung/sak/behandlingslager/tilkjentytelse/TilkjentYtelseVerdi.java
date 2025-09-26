@@ -6,6 +6,6 @@ public record TilkjentYtelseVerdi(BigDecimal uredusertBeløp,
                                   BigDecimal reduksjon,
                                   BigDecimal redusertBeløp,
                                   BigDecimal dagsats,
-                                  int utbetalingsgrad,
+                                  BigDecimal utbetalingsgrad,
                                   BigDecimal tilkjentBeløp) {
 }
