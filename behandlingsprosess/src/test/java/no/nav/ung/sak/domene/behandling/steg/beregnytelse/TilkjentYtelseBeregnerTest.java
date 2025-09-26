@@ -105,7 +105,7 @@ class TilkjentYtelseBeregnerTest {
         final var resultat = beregn(helMåned, sats, BigDecimal.valueOf(rapporertinntekt));
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(670));
-        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(67));
+        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(66.6666666667));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(30));
         assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.valueOf(330));
     }
@@ -138,7 +138,7 @@ class TilkjentYtelseBeregnerTest {
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(1134));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(567));
-        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(95));
+        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(94.5000000000));
         assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.valueOf(66));
     }
 
@@ -154,7 +154,7 @@ class TilkjentYtelseBeregnerTest {
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(1000));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(500));
-        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(88));
+        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(88.3392226148));
         assertThat(resultat.reduksjon()).isEqualByComparingTo(barnetillegg);
     }
 
@@ -170,7 +170,7 @@ class TilkjentYtelseBeregnerTest {
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(870));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(435));
-        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(73));
+        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(72.5000000000));
         assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.valueOf(330));
     }
 
