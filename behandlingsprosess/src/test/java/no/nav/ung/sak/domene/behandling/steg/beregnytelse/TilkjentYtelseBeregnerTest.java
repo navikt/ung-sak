@@ -112,7 +112,7 @@ class TilkjentYtelseBeregnerTest {
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(1134));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(567));
-        assertThat(resultat.utbetalingsgrad()).isEqualTo(100);
+        assertThat(resultat.utbetalingsgrad()).isEqualTo(95);
         assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.valueOf(66));
     }
 
@@ -128,7 +128,7 @@ class TilkjentYtelseBeregnerTest {
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(1000));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(500));
-        assertThat(resultat.utbetalingsgrad()).isEqualTo(100);
+        assertThat(resultat.utbetalingsgrad()).isEqualTo(88);
         assertThat(resultat.reduksjon()).isEqualByComparingTo(barnetillegg);
     }
 
@@ -144,8 +144,24 @@ class TilkjentYtelseBeregnerTest {
 
         assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(870));
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(435));
-        assertThat(resultat.utbetalingsgrad()).isEqualTo(87);
+        assertThat(resultat.utbetalingsgrad()).isEqualTo(73);
         assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.valueOf(330));
+    }
+
+    @Test
+    void test_reduksjon_som_ikke_utgjør_endring_i_dagsats() {
+        LocalDateInterval di = new LocalDateInterval(LocalDate.of(2025, 2, 10), LocalDate.of(2025, 2, 10).plusDays(10));
+        BigDecimal grunnsatsBeløp = BigDecimal.valueOf(1000);
+        BigDecimal barnetillegg = BigDecimal.valueOf(132);
+        BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, barnetillegg.intValue());
+        int rapporertinntekt = 1;
+
+        final var resultat = beregn(di, sats, BigDecimal.valueOf(rapporertinntekt));
+
+        assertThat(resultat.redusertBeløp()).isEqualByComparingTo(BigDecimal.valueOf(1131.34));
+        assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(126));
+        assertThat(resultat.utbetalingsgrad()).isEqualTo(100);
+        assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.valueOf(0.66));
     }
 
 
