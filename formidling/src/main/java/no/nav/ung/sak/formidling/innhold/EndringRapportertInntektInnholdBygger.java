@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
@@ -57,12 +56,26 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             EndringRapportertInntektInnholdBygger::mapTilPeriodeDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        EndringRapportertInntektDto dto = new EndringRapportertInntektDto(
+        var utbetalingsperioder = periodeDtoTidslinje.toSegments().stream()
+            .filter(it -> it.getValue().utbetalingBeløp() > 0)
+            .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
+            .map(LocalDateSegment::getValue)
+            .toList();
+        var harFlereUtbetalingsperioder = utbetalingsperioder.size() > 1;
+
+        var ingenUtbetalingsperioder = periodeDtoTidslinje.toSegments().stream()
+            .filter(it -> it.getValue().utbetalingBeløp() == 0)
+            .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
+            .map(LocalDateSegment::getValue)
+            .toList();
+        var harIngenUtbetalingsperioder = !ingenUtbetalingsperioder.isEmpty();
+
+        var dto = new EndringRapportertInntektDto(
             REDUSJON_PROSENT,
-            periodeDtoTidslinje.toSegments().stream()
-                .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
-                .map(LocalDateSegment::getValue)
-                .collect(Collectors.toList())
+            utbetalingsperioder,
+            ingenUtbetalingsperioder,
+            harFlereUtbetalingsperioder,
+            harIngenUtbetalingsperioder
         );
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto, true);
@@ -79,8 +92,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             new EndringRapportertInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
                 tilHeltall(rhs.getValue()),
-                tilHeltall(ty.tilkjentBeløp()),
-                REDUSJON_PROSENT
+                tilHeltall(ty.tilkjentBeløp())
             )
         );
     }

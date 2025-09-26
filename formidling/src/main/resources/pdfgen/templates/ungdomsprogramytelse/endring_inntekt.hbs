@@ -1,26 +1,32 @@
 {{#> felles/base}}
-
-
     {{#> felles/seksjon/hoved }}
         <h1>Vi har endret ungdomsprogramytelsen din</h1>
-        {{#each perioder}}
+        {{#each utbetalingsperioder}}
+            <p>Du får {{> felles/beløp utbetalingBeløp}} i ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.</p>
+            {{#unless harFlereUtbetalinger}}<p>Pengene får du utbetalt innen fire dager.</p>{{/unless}}
             <p>
-                Du får {{> felles/beløp utbetalingBeløp}} i ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.
-                Det er fordi du har hatt en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.
+                Du får dette beløpet siden du hadde en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.
+                {{#unless harIngenUtbetalinger}}Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer {{reduksjonssats}} prosent av inntekten din.{{/unless}}
             </p>
         {{/each}}
-        <p>Pengene får du utbetalt før den 10. denne måneden. </p>
 
-        <p>
-            Når du har en inntekt, får du mindre penger i ungdomsprogramytelse. Vi regner ut hva {{reduksjonssats}} prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsprogramytelsen for den måneden.
-        </p>
-        <p>
-            Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsprogramytelse, enn hvis du bare hadde fått penger gjennom ungdomsprogramytelsen.
-        </p>
-        <p>
-            <a title="utregningseksempler" href="https://nav.no/ungdomsportal/beregning">Se eksempel på hvordan vi regner ut ungdomsprogramytelsen basert på inntekt i Ungdomsportalen.</a>
-        </p>
-        <p>Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 11.</p>
+        {{#if harFlereUtbetalinger}}
+            <p>Pengene får du utbetalt innen fire dager. </p>
+        {{/if}}
+
+        {{#if harIngenUtbetalinger}}
+            {{#each ingenUtbetalingPerioder}}
+                <p>Du får ikke utbetalt ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.
+                Det er fordi du hadde en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.</p>
+            {{/each}}
+
+            <h2>Hvorfor får du ingen utbetaling?</h2>
+            <p>Når du har en inntekt, får du mindre penger i ungdomsprogramytelse.
+                Vi regnet ut hva {{reduksjonssats}} prosent av inntekten din var for denne perioden, og så trakk vi dette beløpet fra pengene du får i ungdomsprogramytelsen.</p>
+            <p>Siden {{reduksjonssats}} prosent av inntekten din var høyere enn det du ville fått utbetalt i ungdomsprogramytelse for denne perioden, får du ingen utbetaling.</p>
+        {{/if}}
+
+        <p>Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 11. </p>
 
     {{/felles/seksjon/hoved}}
 

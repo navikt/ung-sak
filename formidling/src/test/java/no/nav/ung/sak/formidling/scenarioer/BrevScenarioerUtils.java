@@ -68,10 +68,36 @@ public class BrevScenarioerUtils {
         return lavSatsMedBarnBuilder(fom, 0);
     }
 
+    public static LocalDateTimeline<UngdomsytelseSatser> lavSatsBuilder(LocalDateInterval interval) {
+        SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
+        var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(interval).getValue();
+        return GrunnbeløpTidslinje.hentTidslinje().mapValue(g1 ->
+            UngdomsytelseSatser.builder()
+                .medGrunnbeløp(g1.verdi())
+                .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
+                .medSatstype(satsOgGrunnbeløpfaktor.satstype())
+                .medAntallBarn(0)
+                .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(0, barneTillegg).intValue() ).build()
+        );
+    }
+
+
     public static UngdomsytelseSatser.Builder lavSatsMedBarnBuilder(LocalDate fom, int antallBarn) {
         SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
         var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(new LocalDateInterval(fom, fom)).getValue();
         BigDecimal g = hentGrunnbeløpFor(fom);
+        return UngdomsytelseSatser.builder()
+            .medGrunnbeløp(g)
+            .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
+            .medSatstype(satsOgGrunnbeløpfaktor.satstype())
+            .medAntallBarn(antallBarn)
+            .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(antallBarn, barneTillegg).intValue() );
+    }
+
+    public static UngdomsytelseSatser.Builder lavSatsMedBarnBuilder(LocalDateInterval fom, int antallBarn) {
+        SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
+        var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(fom).getValue();
+        BigDecimal g = GrunnbeløpTidslinje.hentTidslinje().getSegment(fom).getValue().verdi();
         return UngdomsytelseSatser.builder()
             .medGrunnbeløp(g)
             .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
