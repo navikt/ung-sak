@@ -67,6 +67,7 @@ class VedtaksbrevReglerTest {
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
         assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
+        assertThat(regelResulat.dokumentMalType()).isEqualTo(DokumentMalType.ENDRING_INNTEKT);
         assertAutomatiskBrevEgenskaper(vedtaksbrevEgenskaper);
     }
 
@@ -87,6 +88,7 @@ class VedtaksbrevReglerTest {
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
         assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
+        assertThat(regelResulat.dokumentMalType()).isEqualTo(DokumentMalType.ENDRING_INNTEKT);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isTrue();
@@ -99,7 +101,7 @@ class VedtaksbrevReglerTest {
     @Test
     void skal_gi_ingen_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_uten_ap() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(EndringInntektScenarioer.endring0KrInntekt_19år(fom));
+        var behandling = lagBehandling(EndringInntektScenarioer.endringIngenInntekt(fom));
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isFalse();
@@ -172,7 +174,7 @@ class VedtaksbrevReglerTest {
     void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
-        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories);
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endringIngenInntekt(fom), ungTestRepositories);
         behandling.avsluttBehandling();
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
@@ -184,6 +186,7 @@ class VedtaksbrevReglerTest {
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
         assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(TomVedtaksbrevInnholdBygger.class);
+        assertThat(regelResulat.dokumentMalType()).isEqualTo(DokumentMalType.MANUELT_VEDTAK_DOK);
         assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
         assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isTrue();
@@ -242,6 +245,7 @@ class VedtaksbrevReglerTest {
             .anySatisfy(resultat -> {
                 var egenskaper = resultat.vedtaksbrevEgenskaper();
                 assertThat(resultat.vedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
+                assertThat(resultat.dokumentMalType()).isEqualTo(DokumentMalType.ENDRING_INNTEKT);
                 assertThat(egenskaper.kanHindre()).isTrue();
                 assertThat(egenskaper.kanRedigere()).isTrue();
                 assertThat(egenskaper.kanOverstyreHindre()).isTrue();
@@ -253,6 +257,7 @@ class VedtaksbrevReglerTest {
             .anySatisfy(resultat -> {
                 var egenskaper = resultat.vedtaksbrevEgenskaper();
                 assertThat(resultat.vedtaksbrevBygger()).isInstanceOf(EndringBarnetilleggInnholdBygger.class);
+                assertThat(resultat.dokumentMalType()).isEqualTo(DokumentMalType.ENDRING_BARNETILLEGG);
                 assertThat(egenskaper.kanHindre()).isTrue();
                 assertThat(egenskaper.kanRedigere()).isTrue();
                 assertThat(egenskaper.kanOverstyreRediger()).isTrue();

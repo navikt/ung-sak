@@ -36,7 +36,7 @@ class TomVedtaksbrevMalTest {
 
         var behandling = EndringInntektScenarioer
             .lagBehandlingMedAksjonspunktKontrollerInntekt(
-                EndringInntektScenarioer.endring0KrInntekt_19år(fom),
+                EndringInntektScenarioer.endringIngenInntekt(fom),
                 BrevTestUtils.lagAlleUngTestRepositories(entityManager));
         behandling.avsluttBehandling();
 
