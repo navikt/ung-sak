@@ -7,6 +7,7 @@ import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -67,6 +68,31 @@ class TilkjentYtelseBeregnerTest {
         assertThat(resultat.dagsats()).isEqualByComparingTo(BigDecimal.valueOf(500));
         assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(resultat.reduksjon()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+
+    @Test
+    void test_reduksjon_ulik_0_utbetalingsgrad_100_prosent() {
+        BigDecimal grenseRapportertInntektJanuar2025 = BigDecimal.valueOf(20);
+        var antallVirkedagerJanuar2025 = BigDecimal.valueOf(23);
+        LocalDateInterval januar2025 = new LocalDateInterval(
+            LocalDate.of(2025, 1, 1),
+            LocalDate.of(2025, 1, 31));
+
+        //utregnet med 10 desimaler
+        BigDecimal lavDagsatsJan2025 = BigDecimal.valueOf(649.0798666826);
+        var grunnsatsBeløp = lavDagsatsJan2025.multiply(antallVirkedagerJanuar2025);
+
+        BeregnetSats sats = new BeregnetSats(grunnsatsBeløp, 0);
+        final var resultat = beregn(januar2025, sats, grenseRapportertInntektJanuar2025);
+
+        assertThat(resultat.utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(100));
+
+        var avrundetGrunnsatsBeløp = lavDagsatsJan2025.setScale(0, RoundingMode.HALF_UP)
+            .multiply(antallVirkedagerJanuar2025);
+        assertThat(resultat.tilkjentBeløp()).isEqualByComparingTo(avrundetGrunnsatsBeløp);
+
+        assertThat(resultat.reduksjon()).isGreaterThan(BigDecimal.ZERO);
     }
 
     @Test
