@@ -81,4 +81,6 @@ public class NyBehandlingDto {
 
     public Periode getPeriode() { return periode; }
 
+    public void setPeriode(Periode periode) { this.periode = periode; }
+
 }
