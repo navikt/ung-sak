@@ -127,7 +127,7 @@ class LagTilkjentYtelseTest {
             forventetDagsats,
             forventetReduksjon,
             forventetRedusertBeløp,
-            76);
+            64);
     }
 
     @Test
