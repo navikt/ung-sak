@@ -230,7 +230,7 @@ class VurderVedtaksbrevTaskTest {
     void ingenBestillingHvisIngenBrev() {
         // Arrange
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+        UngTestScenario ungTestScenario = EndringInntektScenarioer.endringIngenInntekt(LocalDate.of(2025, 11, 1));
         var behandling = TestScenarioBuilder.builderMedSøknad().medUngTestGrunnlag(ungTestScenario)
             .buildOgLagreMedUng(ungTestRepositories);
 
@@ -335,7 +335,7 @@ class VurderVedtaksbrevTaskTest {
     void skalFeilHvisTomManuellBrevIkkeErRedigert() {
         // Arrange
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+        UngTestScenario ungTestScenario = EndringInntektScenarioer.endringIngenInntekt(LocalDate.of(2025, 11, 1));
 
         var behandling = EndringInntektScenarioer
             .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);
@@ -356,7 +356,7 @@ class VurderVedtaksbrevTaskTest {
     void skalFeileHvisForsøkerÅBestilleBrevSomIkkeErMulig() {
         // Arrange
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+        UngTestScenario ungTestScenario = EndringInntektScenarioer.endringIngenInntekt(LocalDate.of(2025, 11, 1));
 
         var behandling = EndringInntektScenarioer
             .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);

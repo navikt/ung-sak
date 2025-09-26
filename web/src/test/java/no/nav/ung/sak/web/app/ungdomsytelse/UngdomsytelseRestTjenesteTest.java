@@ -117,6 +117,7 @@ class UngdomsytelseRestTjenesteTest {
                 .medDagsats(BigDecimal.TEN)
                 .medReduksjon(BigDecimal.ZERO)
                 .medUredusertBeløp(BigDecimal.TEN)
+                .medUtbetalingsgrad(BigDecimal.valueOf(100))
                 .build()
         ), "test", "test");
 

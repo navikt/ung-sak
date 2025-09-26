@@ -4,8 +4,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,12 +75,12 @@ class LagTilkjentYtelseTest {
         final var forventetDagsats1 = BigDecimal.valueOf(14);
         final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
         LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();
-        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, 100);
+        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, BigDecimal.valueOf(100));
 
         LocalDateSegment<TilkjentYtelseVerdi> segment2 = iterator.next();
         final var forventetUredusertBeløp2 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
         final var forventetDagsats2 = BigDecimal.valueOf(20);
-        assertSegment(segment2, fom2, tom2, forventetUredusertBeløp2, forventetDagsats2, BigDecimal.ZERO, forventetUredusertBeløp2, 100);
+        assertSegment(segment2, fom2, tom2, forventetUredusertBeløp2, forventetDagsats2, BigDecimal.ZERO, forventetUredusertBeløp2, BigDecimal.valueOf(100));
     }
 
     @Test
@@ -127,7 +124,7 @@ class LagTilkjentYtelseTest {
             forventetDagsats,
             forventetReduksjon,
             forventetRedusertBeløp,
-            76);
+            BigDecimal.valueOf(63.6363636364));
     }
 
     @Test
@@ -170,7 +167,7 @@ class LagTilkjentYtelseTest {
         final var forventetDagsats1 = BigDecimal.valueOf(14);
         final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
         LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();
-        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, 100);
+        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, BigDecimal.valueOf(100));
     }
 
 
@@ -216,17 +213,17 @@ class LagTilkjentYtelseTest {
         final var forventetDagsats1 = BigDecimal.valueOf(14);
         final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
         LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();
-        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, 100);
+        assertSegment(segment1, fom1, tom1, forventetUredusertBeløp1, forventetDagsats1, BigDecimal.ZERO, forventetUredusertBeløp1, BigDecimal.valueOf(100));
 
         LocalDateSegment<TilkjentYtelseVerdi> segment2 = iterator.next();
         final var forventetUredusertBeløp2 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
         final var forventetDagsats2 = BigDecimal.valueOf(20);
-        assertSegment(segment2, fom2, tom2, forventetUredusertBeløp2, forventetDagsats2, BigDecimal.ZERO, forventetUredusertBeløp2, 100);
+        assertSegment(segment2, fom2, tom2, forventetUredusertBeløp2, forventetDagsats2, BigDecimal.ZERO, forventetUredusertBeløp2, BigDecimal.valueOf(100));
 
         LocalDateSegment<TilkjentYtelseVerdi> segment3 = iterator.next();
         final var forventetUredusertBeløp3 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
         final var forventetDagsats3 = BigDecimal.valueOf(36);
-        assertSegment(segment3, fom3, tom3, forventetUredusertBeløp3, forventetDagsats3, BigDecimal.ZERO, forventetUredusertBeløp3, 100);
+        assertSegment(segment3, fom3, tom3, forventetUredusertBeløp3, forventetDagsats3, BigDecimal.ZERO, forventetUredusertBeløp3, BigDecimal.valueOf(100));
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
@@ -242,14 +239,14 @@ class LagTilkjentYtelseTest {
                                       BigDecimal forventetUredusertBeløp,
                                       BigDecimal forventetDagsats,
                                       BigDecimal reduksjon,
-                                      BigDecimal forventetRedusertBeløp, int utbetalingsgrad) {
+                                      BigDecimal forventetRedusertBeløp, BigDecimal utbetalingsgrad) {
         assertEquals(fom, segment2.getFom());
         assertEquals(tom, segment2.getTom());
         assertThat(segment2.getValue().uredusertBeløp()).isEqualByComparingTo(forventetUredusertBeløp);
         assertThat(segment2.getValue().reduksjon()).isEqualByComparingTo(reduksjon);
         assertThat(segment2.getValue().redusertBeløp()).isEqualByComparingTo(forventetRedusertBeløp);
         assertThat(segment2.getValue().dagsats()).isEqualByComparingTo(forventetDagsats);
-        assertEquals(utbetalingsgrad, segment2.getValue().utbetalingsgrad());
+        assertThat(segment2.getValue().utbetalingsgrad()).isEqualByComparingTo(utbetalingsgrad);
     }
 
     private static LocalDateSegment<BeregnetSats> lagSatsperiode(BigDecimal grunnsats1, int barnetilleggSats1, LocalDate fom, LocalDate tom) {

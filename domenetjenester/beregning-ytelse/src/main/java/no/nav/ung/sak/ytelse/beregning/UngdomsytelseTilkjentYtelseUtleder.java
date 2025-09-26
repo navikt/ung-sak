@@ -24,7 +24,7 @@ public class UngdomsytelseTilkjentYtelseUtleder implements TilkjentYtelseUtleder
     @Override
     public LocalDateTimeline<DagsatsOgUtbetalingsgrad> utledTilkjentYtelseTidslinje(Long behandlingId) {
         final var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandlingId);
-        return tilkjentYtelseTidslinje.mapValue(v -> new DagsatsOgUtbetalingsgrad(v.dagsats().setScale(0, RoundingMode.HALF_UP ).longValue(), BigDecimal.valueOf(v.utbetalingsgrad())));
+        return tilkjentYtelseTidslinje.mapValue(v -> new DagsatsOgUtbetalingsgrad(v.dagsats().setScale(0, RoundingMode.HALF_UP ).longValue(), v.utbetalingsgrad()));
     }
 
 }

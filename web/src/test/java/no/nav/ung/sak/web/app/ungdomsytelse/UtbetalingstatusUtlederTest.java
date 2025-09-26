@@ -33,7 +33,7 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = aktuellBehandlingAvsluttetTidspunkt.avsluttetTid().toLocalDate().plusMonths(1).withDayOfMonth(15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100, BigDecimal.TEN )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var dagensDato = LocalDate.now();
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
@@ -57,7 +57,7 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = LocalDate.of(2025, 5, 15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100, BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
             aktuellBehandlingAvsluttetTidspunkt,
@@ -80,7 +80,7 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = LocalDate.of(2025, 5, 15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
             aktuellBehandlingAvsluttetTidspunkt,
@@ -105,7 +105,7 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = LocalDate.of(2025, 5, 15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
             aktuellBehandlingAvsluttetTidspunkt,
@@ -129,7 +129,7 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = LocalDate.of(2025, 5, 15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
             aktuellBehandlingAvsluttetTidspunkt,
@@ -145,7 +145,6 @@ class UtbetalingstatusUtlederTest {
     }
 
 
-
     @Test
     void skal_utlede_status_for_revurdering_med_ingen_endring() {
         var dagensDato = LocalDate.of(2025, 6, 10);
@@ -156,7 +155,7 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = LocalDate.of(2025, 5, 15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
             andregangsbehandlingAvsluttetTid,
@@ -182,11 +181,11 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = LocalDate.of(2025, 5, 15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
 
         var tilkjentYtelseTidslinjeRevurdering = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
             revurderingAvsluttetTid,
@@ -212,11 +211,11 @@ class UtbetalingstatusUtlederTest {
         var ytelseTom = LocalDate.of(2025, 5, 15);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
 
         var tilkjentYtelseTidslinjeRevurdering = new LocalDateTimeline<>(ytelseFom, ytelseTom,
-            new TilkjentYtelseVerdi(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
         var utbetalingstatusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(
             revurderingAvsluttetTid,
@@ -245,11 +244,11 @@ class UtbetalingstatusUtlederTest {
         var periode2Tom = LocalDate.of(2025, 5, 31);
 
         var tilkjentYtelseTidslinje = new LocalDateTimeline<>(periode1Fom, periode1Tom,
-            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN  )
+            new TilkjentYtelseVerdi(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         );
 
         var tilkjentYtelseTidslinjeRevurdering = new LocalDateTimeline<>(periode2Fom, periode2Tom,
-            new TilkjentYtelseVerdi(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, 100,BigDecimal.TEN )
+            new TilkjentYtelseVerdi(BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.TEN, BigDecimal.valueOf(100), BigDecimal.TEN)
         ).crossJoin(tilkjentYtelseTidslinje);
 
 
@@ -268,10 +267,6 @@ class UtbetalingstatusUtlederTest {
         assertThat(utbetalingstatusTidslinje.isEmpty()).isFalse();
         assertThat(utbetalingstatusTidslinje).isEqualTo(forventet);
     }
-
-
-
-
 
 
 }

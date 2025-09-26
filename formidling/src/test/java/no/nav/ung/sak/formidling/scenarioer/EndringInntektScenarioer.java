@@ -38,13 +38,7 @@ public class EndringInntektScenarioer {
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom) {
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
-            List.of(new LocalDateSegment<>(
-                fom.withDayOfMonth(1).plusMonths(1),
-                fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
-                BigDecimal.valueOf(10000))));
-
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringInntekt_19år(fom, BigDecimal.valueOf(10000));
     }
 
     /**
@@ -166,14 +160,14 @@ public class EndringInntektScenarioer {
     }
 
     /**
-     * 19 år ungdom med full ungdomsperiode uten inntekt og rapporterer ingen inntekt
+     * 19 år ungdom med rapportert inntekt første mulige måned
      */
-    public static UngTestScenario endring0KrInntekt_19år(LocalDate fom) {
+    public static UngTestScenario endringInntekt_19år(LocalDate fom, BigDecimal inntekt) {
         var rapportertInntektTimeline = new LocalDateTimeline<>(
             List.of(new LocalDateSegment<>(
                 fom.withDayOfMonth(1).plusMonths(1),
                 fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
-                BigDecimal.ZERO)));
+                inntekt)));
 
 
         return endringMedInntekt_19år(fom, rapportertInntektTimeline);
@@ -231,6 +225,10 @@ public class EndringInntektScenarioer {
         BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         return behandling;
+    }
+
+    public static UngTestScenario endringIngenInntekt(LocalDate fom) {
+        return endringInntekt_19år(fom, BigDecimal.ZERO);
     }
 
     @Test
