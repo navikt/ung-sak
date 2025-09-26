@@ -146,7 +146,6 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
                 "Du får 6 380 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
                 "Pengene får du utbetalt innen fire dager. " +
                 "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
-                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
                 "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
                 "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
                 standardTekstIngenUtbetalingEndringInntekt());
@@ -175,10 +174,8 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             "Vi har endret ungdomsprogramytelsen din " +
             "Du får 6 380 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
             "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
-            "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
             "Du får 8 382 kroner i ungdomsprogramytelse for perioden fra 1. mai 2025 til 31. mai 2025. " +
             "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
-            "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
             "Pengene får du utbetalt innen fire dager. " +
             "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
             "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
