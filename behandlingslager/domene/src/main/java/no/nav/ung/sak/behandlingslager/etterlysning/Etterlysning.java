@@ -43,11 +43,7 @@ public class Etterlysning extends BaseEntitet {
     @Column(name = "frist")
     private LocalDateTime frist;
 
-    @OneToOne
-    @JoinColumn(name = "uttalelse_id", unique = true)
-    private UttalelseEntitet uttalelse;
-
-    Etterlysning() {
+    public Etterlysning() {
         // Hibernate
     }
 
@@ -108,7 +104,6 @@ public class Etterlysning extends BaseEntitet {
             ", type=" + type +
             ", status=" + status +
             ", frist=" + frist +
-            ", uttalelse=" + uttalelse +
             '}';
     }
 
@@ -179,15 +174,12 @@ public class Etterlysning extends BaseEntitet {
     }
 
 
-    public void mottaSvar(JournalpostId svarJournalpostId, boolean harUttalelse, String uttalelse) {
+    public void mottaSvar() {
         if (status != EtterlysningStatus.VENTER) {
             throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
         }
         this.status = EtterlysningStatus.MOTTATT_SVAR;
-        this.uttalelse = new UttalelseEntitet(harUttalelse, uttalelse, svarJournalpostId);
     }
 
-    public Optional<UttalelseEntitet> getUttalelse() {
-        return Optional.ofNullable(uttalelse);
-    }
+
 }
