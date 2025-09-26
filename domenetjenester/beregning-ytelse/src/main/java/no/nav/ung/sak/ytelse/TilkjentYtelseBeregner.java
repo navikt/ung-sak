@@ -60,8 +60,10 @@ public class TilkjentYtelseBeregner {
 
         // Beregner utbetalingsgrad
         // Beregner avrundet grunnsats for perioden tilsvarende tilkjentBeløp slik at de kan sammenlignes.
-        BigDecimal avrundetGrunnsats = antallVirkedager.equals(BigDecimal.ZERO) ?  BigDecimal.ZERO : sats.grunnsats().divide(antallVirkedager, 0, RoundingMode.HALF_UP).multiply(antallVirkedager);
-        final var utbetalingsgrad = finnUtbetalingsgrad(tilkjentBeløp, avrundetGrunnsats, avrundetDagsats);
+        BigDecimal avrundetGrunnsatsMedBarnetillegg = antallVirkedager.equals(BigDecimal.ZERO) ?  BigDecimal.ZERO : sats.totalSats().divide(antallVirkedager, 0, RoundingMode.HALF_UP).multiply(antallVirkedager);
+        sporing.put("avrundetGrunnsatsMedBarnetillegg", avrundetGrunnsatsMedBarnetillegg.toString());
+
+        final var utbetalingsgrad = finnUtbetalingsgrad(tilkjentBeløp, avrundetGrunnsatsMedBarnetillegg);
         sporing.put("utbetalingsgrad", String.valueOf(utbetalingsgrad));
 
         sporing.put("periode", periode.toString());
@@ -77,27 +79,19 @@ public class TilkjentYtelseBeregner {
 
 
     /**
-     * Beregner utbetalingsgrad basert på tilkjent redusert beløp, avrundet grunnsats og dagsats.
+     * Beregner utbetalingsgrad basert på tilkjent redusert beløp, avrundet grunnsats med barnetillegg
      *
      * @param tilkjentBeløp     det reduserte beløpet etter fratrekk av rapportert inntekt
-     * @param avrundetGrunnsats avrundet grunnsats uten reduksjon eller barnetrygd
-     * @param dagsats           dagsatsen beregnet utifra antall antallVirkerdager
+     * @param avrundetGrunnsatsMedBarnetillegg avrundet grunnsats uten reduksjon eller barnetrygd
      * @return utbetalingsgraden som en prosentverdi
      */
-    private static int finnUtbetalingsgrad(BigDecimal tilkjentBeløp, BigDecimal avrundetGrunnsats, BigDecimal dagsats) {
-        // Utbetalingsgrad regnes utifra grunnsats, barnetillegg er ikke inkludert
-
-        // Dersom ingenting utbetales er utbetalingsgrad 0
-        if (dagsats.compareTo(BigDecimal.ZERO) == 0 || tilkjentBeløp.compareTo(BigDecimal.ZERO) == 0) {
+    private static int finnUtbetalingsgrad(BigDecimal tilkjentBeløp, BigDecimal avrundetGrunnsatsMedBarnetillegg) {
+        // Utbetalingsgrad regnes utifra grunnsats og  barnetillegg
+        if (avrundetGrunnsatsMedBarnetillegg.compareTo(BigDecimal.ZERO) == 0) {
             return 0;
         }
-
-        // Dersom tilkjent beløp er høyere enn grunnsats sier vi at det er full utbetaling (selv om det faktisk kan vere en reduksjon)
-        if (tilkjentBeløp.compareTo(avrundetGrunnsats) > 0) {
-            return 100;
-        }
         // Regner ut prosentvis utbetalingsgrad
-        return tilkjentBeløp.multiply(BigDecimal.valueOf(100)).divide(avrundetGrunnsats, 0, RoundingMode.HALF_UP).intValue();
+        return tilkjentBeløp.multiply(BigDecimal.valueOf(100)).divide(avrundetGrunnsatsMedBarnetillegg, 0, RoundingMode.HALF_UP).intValue();
     }
 
     public static <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(
