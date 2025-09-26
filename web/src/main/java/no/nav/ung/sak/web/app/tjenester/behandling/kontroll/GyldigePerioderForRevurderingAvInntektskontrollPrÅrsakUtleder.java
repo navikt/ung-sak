@@ -36,6 +36,7 @@ public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder impl
             .flatMap(it -> it.getPerioder().stream())
             .map(KontrollertInntektPeriode::getPeriode)
             .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
+            .sorted()
             .toList()).orElse(List.of()));
     }
 }
