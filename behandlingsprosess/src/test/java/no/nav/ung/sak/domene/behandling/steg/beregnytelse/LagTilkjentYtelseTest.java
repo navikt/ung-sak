@@ -249,7 +249,7 @@ class LagTilkjentYtelseTest {
         assertThat(segment2.getValue().reduksjon()).isEqualByComparingTo(reduksjon);
         assertThat(segment2.getValue().redusertBeløp()).isEqualByComparingTo(forventetRedusertBeløp);
         assertThat(segment2.getValue().dagsats()).isEqualByComparingTo(forventetDagsats);
-        assertEquals(utbetalingsgrad, segment2.getValue().utbetalingsgrad());
+        assertThat(segment2.getValue().utbetalingsgrad()).isEqualByComparingTo(BigDecimal.valueOf(utbetalingsgrad));
     }
 
     private static LocalDateSegment<BeregnetSats> lagSatsperiode(BigDecimal grunnsats1, int barnetilleggSats1, LocalDate fom, LocalDate tom) {

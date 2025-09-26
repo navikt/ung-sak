@@ -85,13 +85,13 @@ public class TilkjentYtelseBeregner {
      * @param avrundetGrunnsatsMedBarnetillegg avrundet grunnsats uten reduksjon eller barnetrygd
      * @return utbetalingsgraden som en prosentverdi
      */
-    private static int finnUtbetalingsgrad(BigDecimal tilkjentBeløp, BigDecimal avrundetGrunnsatsMedBarnetillegg) {
+    private static BigDecimal finnUtbetalingsgrad(BigDecimal tilkjentBeløp, BigDecimal avrundetGrunnsatsMedBarnetillegg) {
         // Utbetalingsgrad regnes utifra grunnsats og  barnetillegg
         if (avrundetGrunnsatsMedBarnetillegg.compareTo(BigDecimal.ZERO) == 0) {
-            return 0;
+            return BigDecimal.ZERO;
         }
         // Regner ut prosentvis utbetalingsgrad
-        return tilkjentBeløp.multiply(BigDecimal.valueOf(100)).divide(avrundetGrunnsatsMedBarnetillegg, 0, RoundingMode.HALF_UP).intValue();
+        return tilkjentBeløp.multiply(BigDecimal.valueOf(100)).divide(avrundetGrunnsatsMedBarnetillegg, 10, RoundingMode.HALF_UP);
     }
 
     public static <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(

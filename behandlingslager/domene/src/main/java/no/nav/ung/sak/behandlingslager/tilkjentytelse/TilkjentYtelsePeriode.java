@@ -35,8 +35,8 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
     @Column(name = "dagsats", nullable = false)
     private BigDecimal dagsats;
 
-    @Column(name = "utbetalingsgrad", nullable = false)
-    private int utbetalingsgrad;
+    @Column(name = "utbetalingsgrad", nullable = false, precision = 13, scale = 10)
+    private BigDecimal utbetalingsgrad;
 
     protected TilkjentYtelsePeriode() {
     }
@@ -45,7 +45,7 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
                                   BigDecimal uredusertBeløp,
                                   BigDecimal reduksjon,
                                   BigDecimal redusertBeløp,
-                                  BigDecimal dagsats, int utbetalingsgrad) {
+                                  BigDecimal dagsats, BigDecimal utbetalingsgrad) {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
         this.uredusertBeløp = uredusertBeløp;
         this.reduksjon = reduksjon;
@@ -74,7 +74,7 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
         return dagsats;
     }
 
-    public int getUtbetalingsgrad() {
+    public BigDecimal getUtbetalingsgrad() {
         return utbetalingsgrad;
     }
 
@@ -89,7 +89,7 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
         private BigDecimal reduksjon;
         private BigDecimal redusertBeløp;
         private BigDecimal dagsats;
-        private int utbetalingsgrad;
+        private BigDecimal utbetalingsgrad;
 
         private Builder() {}
 
@@ -133,7 +133,10 @@ public class TilkjentYtelsePeriode extends BaseEntitet {
             return this;
         }
 
-        public Builder medUtbetalingsgrad(int utbetalingsgrad) {
+        public Builder medUtbetalingsgrad(BigDecimal utbetalingsgrad) {
+            if (utbetalingsgrad == null) {
+                throw new IllegalArgumentException("utbetalingsgrad kan ikke være null");
+            }
             this.utbetalingsgrad = utbetalingsgrad;
             return this;
         }
