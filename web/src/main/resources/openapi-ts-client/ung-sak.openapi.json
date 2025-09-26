@@ -3245,9 +3245,6 @@
       },
       "ung.sak.kontrakt.klage.KlagebehandlingDto" : {
         "properties" : {
-          "klageFormkravResultatKA" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.klage.KlageFormkravResultatDto"
-          },
           "klageFormkravResultatNFP" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.klage.KlageFormkravResultatDto"
           },
