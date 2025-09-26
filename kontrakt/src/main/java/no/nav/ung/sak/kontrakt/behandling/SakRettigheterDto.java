@@ -23,6 +23,9 @@ public class SakRettigheterDto {
     @Size(max = 100)
     private List<BehandlingOperasjonerDto> behandlingTillatteOperasjoner;
 
+    public SakRettigheterDto() {
+    }
+
     public SakRettigheterDto(List<BehandlingOpprettingDto> behandlingTypeKanOpprettes, List<BehandlingOperasjonerDto> behandlingTillatteOperasjoner) {
         this.behandlingTypeKanOpprettes = behandlingTypeKanOpprettes;
         this.behandlingTillatteOperasjoner = behandlingTillatteOperasjoner;

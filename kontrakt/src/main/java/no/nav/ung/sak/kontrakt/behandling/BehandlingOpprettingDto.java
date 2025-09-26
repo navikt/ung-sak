@@ -34,6 +34,9 @@ public class BehandlingOpprettingDto {
         this.gyldigePerioderPerÅrsak = gyldigePerioderPerÅrsak;
     }
 
+    public BehandlingOpprettingDto() {
+    }
+
     public BehandlingType getBehandlingType() {
         return behandlingType;
     }
