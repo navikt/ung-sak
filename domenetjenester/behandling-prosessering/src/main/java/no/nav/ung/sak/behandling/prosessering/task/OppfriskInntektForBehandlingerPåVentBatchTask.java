@@ -20,7 +20,7 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements ProsessTa
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskInntektForBehandlingerPåVentBatchTask.class);
 
-    public static final String TASKTYPE = "ung.oppfrisk.inntekt.påvent";
+    public static final String TASKTYPE = "batch.oppfrisk.inntekt.påvent";
     private boolean oppfriskKontrollbehandlingEnabled;
 
     private EntityManager entityManager;
