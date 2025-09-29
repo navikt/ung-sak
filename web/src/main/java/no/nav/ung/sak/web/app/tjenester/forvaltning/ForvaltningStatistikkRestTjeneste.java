@@ -108,7 +108,7 @@ public class ForvaltningStatistikkRestTjeneste {
     @Path("utmeldt-prosentandel")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lister ut prosentandel av deltaker som meldes ut før det har gått ett år", summary = ("Brukes for statistikkformål"), tags = "statistikk")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     public BigDecimal utmeldtProsentandel() {
         //hardkodet 260 representerer ett år (ca antall virkedager)
         return (BigDecimal) entityManager.createNativeQuery("""
@@ -132,7 +132,7 @@ public class ForvaltningStatistikkRestTjeneste {
     @Path("vedtak")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lister ut antall vedtak for en måned", summary = ("Brukes for statistikkformål"), tags = "statistikk")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     public VedtakStatistikkMåned vedtak(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedDto månedDto) {
         YearMonth måned = YearMonth.of(månedDto.år, månedDto.måned);
         //hardkodet 260 representerer ett år (ca antall virkedager)
