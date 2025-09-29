@@ -14,7 +14,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 
@@ -22,7 +23,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
 
 @Path("/statistikk/forvaltning")
 @ApplicationScoped
@@ -45,7 +45,7 @@ public class ForvaltningStatistikkRestTjeneste {
     @Path("antall-deltakere")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lister ut antall deltakere med ulike sats-typer for en dato", summary = ("Brukes for statistikkformål"), tags = "statistikk")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     public AntallDeltakereStatistikk antallDeltakere(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) LocalDate dato) {
         Object[] resultat = (Object[]) entityManager.createNativeQuery("""
                 with

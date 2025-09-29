@@ -16,7 +16,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import kotlin.collections.EmptyList;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
@@ -28,7 +29,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
 
 @Path("/produksjonsstyring/forvaltning")
 @ApplicationScoped
@@ -49,8 +49,8 @@ public class ForvaltningProduksjonsstyringRestTjeneste {
     @GET
     @Path("saker-med-aksjonspunkt")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først", summary = ("Brukes for produksjonsstyring"), tags = "statistikk")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Operation(description = "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først", summary = ("Brukes for produksjonsstyring"), tags = "produksjonsstyring")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     public List<Saksnummer> sakerPåAksjonspunkt() {
         List<String> resultat = (List<String>) entityManager.createNativeQuery("""
                 select saksnummer
