@@ -226,6 +226,8 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
+    - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
