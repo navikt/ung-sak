@@ -18,7 +18,6 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -67,14 +66,6 @@ public class VedtaksbrevTjeneste {
 
         return new VedtaksbrevValgResponse(
             true,
-            førsteValg.enableHindre(),
-            førsteValg.hindret(),
-            førsteValg.kanOverstyreHindre(),
-            førsteValg.enableRediger(),
-            førsteValg.redigert(),
-            førsteValg.kanOverstyreRediger(),
-            førsteValg.forklaring(),
-            førsteValg.redigertBrevHtml(),
             vedtaksbrevValg);
     }
 
@@ -111,16 +102,20 @@ public class VedtaksbrevTjeneste {
     private static VedtaksbrevValgResponse mapIngenBrevResponse(BehandlingVedtaksbrevResultat totalResultat) {
         return new VedtaksbrevValgResponse(
             false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            totalResultat.ingenBrevResultater().stream().map(IngenBrev::forklaring).collect(Collectors.joining(", ", "[", "]")),
-            null,
-            Collections.emptyList()
-        );
+            totalResultat.ingenBrevResultater().stream().map(it ->
+                new VedtaksbrevValg(
+                    null,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    it.forklaring(),
+                    null,
+                    null
+                )).toList()
+            );
     }
 
     public boolean måSkriveBrev(Long behandlingId) {
