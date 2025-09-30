@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
-@ProsessTask(value = OppfriskInntektForBehandlingerPåVentBatchTask.TASKTYPE, cronExpression = "0 0 12 * * *")
+@ProsessTask(value = OppfriskInntektForBehandlingerPåVentBatchTask.TASKTYPE, cronExpression = "0 0 * * * *")
 public class OppfriskInntektForBehandlingerPåVentBatchTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskInntektForBehandlingerPåVentBatchTask.class);
 
-    public static final String TASKTYPE = "ung.oppfrisk.inntekt.påvent";
+    public static final String TASKTYPE = "batch.oppfriskInntektPåVent";
     private boolean oppfriskKontrollbehandlingEnabled;
 
     private EntityManager entityManager;
