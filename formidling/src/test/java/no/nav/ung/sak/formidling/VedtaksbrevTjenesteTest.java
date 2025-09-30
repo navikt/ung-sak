@@ -273,7 +273,7 @@ class VedtaksbrevTjenesteTest {
 
         VedtaksbrevValgResponse valg1 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valg1.vedtaksbrevValg()).hasSize(2);
-        assertThat(valg1.vedtaksbrevValg()).extracting(VedtaksbrevValg::dokumentMalType)
+        assertThat(valg1.vedtaksbrevValg()).extracting(vedtaksbrevValg -> vedtaksbrevValg.dokumentMalType().getKilde())
             .containsExactlyInAnyOrder(DokumentMalType.ENDRING_INNTEKT, DokumentMalType.ENDRING_BARNETILLEGG);
         assertThat(valg1.vedtaksbrevValg()).extracting(VedtaksbrevValg::kanOverstyreRediger)
             .containsExactly(true, true);
@@ -292,14 +292,14 @@ class VedtaksbrevTjenesteTest {
         assertThat(valg2.vedtaksbrevValg()).hasSize(2);
 
         var barnetilleggValg = valg2.vedtaksbrevValg().stream()
-            .filter(v -> v.dokumentMalType().equals(DokumentMalType.ENDRING_BARNETILLEGG))
+            .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_BARNETILLEGG))
             .findFirst()
             .orElseThrow();
         assertThat(barnetilleggValg.redigert()).isTrue();
         assertThat(barnetilleggValg.redigertBrevHtml()).isEqualTo(redigertHtml);
 
         var inntektValg = valg2.vedtaksbrevValg().stream()
-            .filter(v -> v.dokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_INNTEKT))
             .findFirst()
             .orElseThrow();
         assertThat(inntektValg.redigert()).isFalse();

@@ -2,6 +2,7 @@ package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -96,7 +97,7 @@ public class VedtaksbrevTjeneste {
             .orElse(null) : null;
 
         return new VedtaksbrevValg(
-            resultat.dokumentMalType(), egenskaper.kanHindre(),
+            new KodeverdiSomObjekt<>(resultat.dokumentMalType()), egenskaper.kanHindre(),
             valg.map(VedtaksbrevValgEntitet::isHindret).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreHindre(),
             egenskaper.kanRedigere(),
