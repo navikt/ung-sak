@@ -2674,7 +2674,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "behandlingId", "dokumentMalType" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg" : {
@@ -2740,7 +2740,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "behandlingId", "dokumentMalType" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse" : {
