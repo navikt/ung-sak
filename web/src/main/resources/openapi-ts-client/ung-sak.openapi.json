@@ -2745,32 +2745,8 @@
       },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse" : {
         "properties" : {
-          "enableHindre" : {
-            "type" : "boolean"
-          },
-          "enableRediger" : {
-            "type" : "boolean"
-          },
-          "forklaring" : {
-            "type" : "string"
-          },
           "harBrev" : {
             "type" : "boolean"
-          },
-          "hindret" : {
-            "type" : "boolean"
-          },
-          "kanOverstyreHindre" : {
-            "type" : "boolean"
-          },
-          "kanOverstyreRediger" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          },
-          "redigertBrevHtml" : {
-            "type" : "string"
           },
           "vedtaksbrevValg" : {
             "items" : {
