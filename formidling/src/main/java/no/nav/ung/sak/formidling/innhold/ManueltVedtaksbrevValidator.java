@@ -6,10 +6,10 @@ import org.jsoup.parser.Parser;
 import java.util.Set;
 
 /**
- * Validerer at brevet er gyldig XHTML for pdf generering
+ * Validerer at brevet er gyldig før pdf generering
  * Se også {@link no.nav.ung.sak.behandlingslager.formidling.XhtmlBrevRenser}
  */
-public class XHtmlBrevValidator {
+public class ManueltVedtaksbrevValidator {
     public static void valider(String redigertBrevHtml) {
         if (redigertBrevHtml == null || redigertBrevHtml.isBlank()) {
             throw new IllegalStateException("Ingen tekst oppgitt");

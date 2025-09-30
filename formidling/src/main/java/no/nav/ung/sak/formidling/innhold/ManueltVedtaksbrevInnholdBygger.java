@@ -12,8 +12,8 @@ public class ManueltVedtaksbrevInnholdBygger {
     public ManueltVedtaksbrevInnholdBygger() {
     }
 
-    public TemplateInnholdResultat bygg2(String brevHtml) {
-        XHtmlBrevValidator.valider(brevHtml);
+    public TemplateInnholdResultat bygg(String brevHtml) {
+        ManueltVedtaksbrevValidator.valider(brevHtml);
 
         return new TemplateInnholdResultat(
             TemplateType.MANUELT_VEDTAKSBREV,

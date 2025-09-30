@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class XHtmlBrevValidatorTest {
+class ManueltVedtaksbrevValidatorTest {
 
     @Test
     void skalKasteFeilHvisHtmlErNull() {
@@ -39,7 +39,7 @@ class XHtmlBrevValidatorTest {
     }
 
     private void byggOgAssertFeil(String brevtekst, String feilmelding) {
-        assertThatThrownBy(() -> XHtmlBrevValidator.valider(brevtekst))
+        assertThatThrownBy(() -> ManueltVedtaksbrevValidator.valider(brevtekst))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining(feilmelding);
     }

@@ -15,7 +15,7 @@ class ManueltVedtaksbrevInnholdByggerTest {
     void skalGåOkHvisRiktigHtml() {
         String redigertBrevHtml = "<h1>Dette er en overskrift</h1><p>Dette er innholdet i brevet.</p>";
 
-        TemplateInnholdResultat bygg = bygger.bygg2(redigertBrevHtml);
+        TemplateInnholdResultat bygg = bygger.bygg(redigertBrevHtml);
 
         assertThat(bygg.templateType()).isEqualTo(TemplateType.MANUELT_VEDTAKSBREV);
         assertThat(bygg.automatiskGenerertFooter()).isFalse();
@@ -27,7 +27,7 @@ class ManueltVedtaksbrevInnholdByggerTest {
 
     @Test
     void skalKasteFeilHvisUgyldigBrevHtml() {
-        assertThatThrownBy(() -> bygger.bygg2("<p>Har bare overskrift</p>"))
+        assertThatThrownBy(() -> bygger.bygg("<p>Har bare overskrift</p>"))
             .isInstanceOf(IllegalStateException.class);
     }
 

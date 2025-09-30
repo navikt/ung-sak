@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -20,8 +21,10 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -115,17 +118,17 @@ public class VedtaksbrevTjeneste {
         );
     }
 
-    public boolean måSkriveBrev(Long behandlingId) {
+    public Set<DokumentMalType> måSkriveBrev(Long behandlingId) {
         var totalResultat = vedtaksbrevRegler.kjør(behandlingId);
         if (!totalResultat.harBrev()) {
-            return false;
+            return Collections.emptySet();
         }
 
         return totalResultat.vedtaksbrevResultater().stream()
-            .map(Vedtaksbrev::vedtaksbrevEgenskaper)
-            .anyMatch(
-                egenskaper -> egenskaper.kanRedigere() && !egenskaper.kanOverstyreRediger()
-            );
+            .filter(
+                v -> v.vedtaksbrevEgenskaper().kanRedigere() && !v.vedtaksbrevEgenskaper().kanOverstyreRediger())
+            .map(Vedtaksbrev::dokumentMalType)
+            .collect(Collectors.toSet());
     }
 
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
