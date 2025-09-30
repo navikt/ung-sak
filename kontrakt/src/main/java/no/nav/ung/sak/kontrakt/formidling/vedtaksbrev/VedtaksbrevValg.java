@@ -1,6 +1,7 @@
 package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 
+import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 
 /**
@@ -22,7 +23,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
  * @param tidligereRedigertBrevHtml redigert tekst før tilbakehopp
  */
 public record VedtaksbrevValg(
-    DokumentMalType dokumentMalType,
+    KodeverdiSomObjekt<DokumentMalType> dokumentMalType,
     boolean enableHindre,
     boolean hindret,
     boolean kanOverstyreHindre,
