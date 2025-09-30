@@ -2680,7 +2680,7 @@
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg" : {
         "properties" : {
           "dokumentMalType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.dokument.DokumentMalType"
+            "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.dokument.DokumentMalType"
           },
           "enableHindre" : {
             "type" : "boolean"
