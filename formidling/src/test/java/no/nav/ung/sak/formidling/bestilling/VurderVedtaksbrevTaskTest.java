@@ -187,6 +187,13 @@ class VurderVedtaksbrevTaskTest {
             .orElseThrow();
         assertThat(bestilling2.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
 
+
+        var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
+        assertThat(vedtaksbrevResultater).hasSize(2);
+        assertThat(vedtaksbrevResultater.stream().filter(it -> it.getVedtaksbrevValg() == null)).hasSize(1);
+        assertThat(vedtaksbrevResultater.stream().filter(it -> it.getVedtaksbrevValg() != null)).hasSize(1);
+
+
     }
 
     @Test
@@ -303,9 +310,8 @@ class VurderVedtaksbrevTaskTest {
 
         behandling.avsluttBehandling();
 
-        vedtaksbrevValgRepository.lagre(
-            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT , true, false, "tekst")
-        );
+        VedtaksbrevValgEntitet valg = new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT, true, false, "tekst");
+        vedtaksbrevValgRepository.lagre(valg);
 
         var prosessTaskData = lagTask(behandling);
 
@@ -324,11 +330,14 @@ class VurderVedtaksbrevTaskTest {
         var resultat = vedtaksbrevResultater.getFirst();
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.BESTILT);
         assertThat(resultat.getBeskrivelse()).isNotNull();
+        assertThat(resultat.getVedtaksbrevValg().getId()).isNotNull();
+        assertThat(resultat.getVedtaksbrevValg().getId()).isEqualTo(valg.getId());
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(1);
         var task = tasker.getFirst();
         assertBestillingTask(task, bestilling);
+        assertThat(task.getPropertyValue(VedtaksbrevBestillingTask.ORIGINAL_DOKUMENTMAL_TYPE)).isEqualTo(DokumentMalType.ENDRING_INNTEKT.getKode());
     }
 
     @Test

@@ -34,6 +34,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.vedtak.brevbestilling";
     public static final String BREVBESTILLING_ID = "brevbestillingId";
+    public static final String ORIGINAL_DOKUMENTMAL_TYPE = "originalDokumentMalType";
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
 
@@ -70,7 +71,8 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
 
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
-            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), dokumentMalType, false);
+            DokumentMalType originalDokumentMalType = DokumentMalType.fraKode(prosessTaskData.getPropertyValue(ORIGINAL_DOKUMENTMAL_TYPE));
+            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), originalDokumentMalType, false);
             journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
             return;
         }

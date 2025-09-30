@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.formidling.bestilling;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import org.hibernate.annotations.Immutable;
 
 @Entity(name = "BehandlingVedtaksbrev")
@@ -31,24 +32,34 @@ public class BehandlingVedtaksbrev extends BaseEntitet {
     @JoinColumn(name = "brevbestilling_id", updatable = false)
     private BrevbestillingEntitet brevbestilling;
 
+    @OneToOne
+    @JoinColumn(name = "vedtaksbrev_valg_id", updatable = false)
+    private VedtaksbrevValgEntitet vedtaksbrevValg;
+
     public static BehandlingVedtaksbrev medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType) {
-        return new BehandlingVedtaksbrev(brevBestilling.getBehandlingId(), brevBestilling.getFagsakId(), resultatType, beskrivelse, brevBestilling);
+        return medBestillingOgValg(brevBestilling, beskrivelse, resultatType, null);
+    }
+
+
+    public static BehandlingVedtaksbrev medBestillingOgValg(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType, VedtaksbrevValgEntitet vedtaksbrevValg) {
+        return new BehandlingVedtaksbrev(brevBestilling.getBehandlingId(), brevBestilling.getFagsakId(), resultatType, beskrivelse, brevBestilling, vedtaksbrevValg);
     }
 
     public static BehandlingVedtaksbrev utenBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse) {
-        return new BehandlingVedtaksbrev(behandlingId, fagsakId, resultatType, beskrivelse, null);
+        return new BehandlingVedtaksbrev(behandlingId, fagsakId, resultatType, beskrivelse, null, null);
     }
 
     // Default constructor required by JPA
     public BehandlingVedtaksbrev() {
     }
 
-    public BehandlingVedtaksbrev(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse, BrevbestillingEntitet brevbestilling) {
+    public BehandlingVedtaksbrev(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse, BrevbestillingEntitet brevbestilling, VedtaksbrevValgEntitet vedtaksbrevValg) {
         this.behandlingId = behandlingId;
         this.fagsakId = fagsakId;
         this.resultatType = resultatType;
         this.beskrivelse = beskrivelse;
         this.brevbestilling = brevbestilling;
+        this.vedtaksbrevValg = vedtaksbrevValg;
     }
 
     public VedtaksbrevResultatType getResultatType() {
@@ -61,5 +72,9 @@ public class BehandlingVedtaksbrev extends BaseEntitet {
 
     public BrevbestillingEntitet getBrevbestilling() {
         return brevbestilling;
+    }
+
+    public VedtaksbrevValgEntitet getVedtaksbrevValg() {
+        return vedtaksbrevValg;
     }
 }

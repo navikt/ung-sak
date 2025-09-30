@@ -159,8 +159,12 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
                 behandling.getId(),
                 DokumentMalType.MANUELT_VEDTAK_DOK);
             brevbestillingRepository.lagre(bestilling);
-            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev.medBestilling(bestilling, "Redigert vedtaksbrev", VedtaksbrevResultatType.BESTILT));
-            prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId(), 0));
+
+            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev.medBestillingOgValg(bestilling, "Redigert vedtaksbrev", VedtaksbrevResultatType.BESTILT, vedtaksbrevValg));
+
+            ProsessTaskData prosessTaskData = lagBestillingTask(behandling, bestilling.getId(), 0);
+            prosessTaskData.setProperty(VedtaksbrevBestillingTask.ORIGINAL_DOKUMENTMAL_TYPE, vedtaksbrev.dokumentMalType().getKode());
+            prosessTaskTjeneste.lagre(prosessTaskData);
 
         }
 

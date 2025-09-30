@@ -158,6 +158,11 @@ public class VedtaksbrevTjeneste {
         vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
         vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
         vedtaksbrevValgEntitet.rensOgSettRedigertHtml(dto.redigertHtml());
+
+        LOG.info("Lagrer vedtaksbrevvalg for dokumentMalType={} med verdier redigert={} hindret={} redigertHtml={}",
+            dto.dokumentMalType(), vedtaksbrevValgEntitet.isRedigert(), vedtaksbrevValgEntitet.isHindret(),
+            vedtaksbrevValgEntitet.getRedigertBrevHtml() != null);
+
         return vedtaksbrevValgRepository.lagre(vedtaksbrevValgEntitet);
 
     }
@@ -240,6 +245,7 @@ public class VedtaksbrevTjeneste {
     }
 
     public void ryddVedTilbakeHopp(Long behandlingId) {
+        LOG.info("Fjerner vedtaksbrevvalg");
         vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId)
             .forEach(valg -> {
                 valg.deaktiver();
