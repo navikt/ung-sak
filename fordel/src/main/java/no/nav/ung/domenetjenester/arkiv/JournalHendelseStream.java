@@ -45,6 +45,7 @@ public class JournalHendelseStream implements KafkaIntegration {
 
     @Inject
     public JournalHendelseStream(@KonfigVerdi(value = "kafka.journal.topic") String topicName,
+                                 @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt,
                                  JournalføringHendelseHåndterer journalføringHendelseHåndterer,
                                  AivenKafkaSettings kafkaSettings) {
         Serde<JournalfoeringHendelseRecord> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new VtpJournalføringshendelserKafkaAvroSerde<>();

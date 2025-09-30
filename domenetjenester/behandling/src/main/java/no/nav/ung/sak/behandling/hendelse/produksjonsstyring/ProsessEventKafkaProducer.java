@@ -31,11 +31,12 @@ public class ProsessEventKafkaProducer {
                                      @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
                                      @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
                                      @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+                                     @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt,
                                      @KonfigVerdi("systembruker.username") String username,
                                      @KonfigVerdi("systembruker.password") String password) {
 
 
-        boolean aivenEnabled = !Environment.current().isLocal(); //har ikke støtte i vtp
+        boolean aivenEnabled = !Environment.current().isLocal() || brukAivenPropertyLokalt;
         String _topicName = aivenEnabled ? topicV2 : topic;
         String _bootstrapServer = kafkaBrokers;
 
