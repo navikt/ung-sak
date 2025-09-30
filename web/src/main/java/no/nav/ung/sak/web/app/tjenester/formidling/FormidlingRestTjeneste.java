@@ -74,7 +74,6 @@ public class FormidlingRestTjeneste {
     @POST
     @Path("/formidling/vedtaksbrev")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling",
         responses = @ApiResponse(responseCode = "200", description = "lagret ok")
     )
