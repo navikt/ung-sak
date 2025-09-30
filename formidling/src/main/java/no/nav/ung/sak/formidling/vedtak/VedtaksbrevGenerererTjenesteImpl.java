@@ -83,14 +83,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
      */
     @WithSpan
     @Override
-    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, originalDokumentMalType, kunHtml));
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, brevHtml, kunHtml));
     }
 
     @WithSpan
-    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
+    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, originalDokumentMalType);
+        var resultat = manueltVedtaksbrevInnholdBygger.bygg2(brevHtml);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(

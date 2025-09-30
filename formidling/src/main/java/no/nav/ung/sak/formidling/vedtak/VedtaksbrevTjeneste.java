@@ -180,7 +180,9 @@ public class VedtaksbrevTjeneste {
         }
 
         if (dto.redigertVersjon()) {
-            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandlingId, dto.dokumentMalType(), dto.htmlVersjon());
+            var valg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId, vedtaksbrev.dokumentMalType())
+                .orElseThrow(() -> new IllegalStateException("Ingen lagret valg for dokumentMaltype " + vedtaksbrev.dokumentMalType()));
+            return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandlingId, valg.getRedigertBrevHtml(), dto.htmlVersjon());
         }
 
         return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
@@ -231,7 +233,7 @@ public class VedtaksbrevTjeneste {
                 throw new IllegalArgumentException("Kan ikke forhåndsvise hindret brev");
             }
             if (valg.isRedigert()) {
-                return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandlingId, dokumentMalType, kunHtml);
+                return vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandlingId, valg.getRedigertBrevHtml(), kunHtml);
             }
         }
 

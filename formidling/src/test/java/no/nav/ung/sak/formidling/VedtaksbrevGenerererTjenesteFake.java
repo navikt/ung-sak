@@ -29,7 +29,7 @@ public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTje
     }
 
     @Override
-    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         return resultat;
     }
 }

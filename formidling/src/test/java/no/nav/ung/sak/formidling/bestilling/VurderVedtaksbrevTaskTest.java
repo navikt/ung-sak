@@ -337,7 +337,7 @@ class VurderVedtaksbrevTaskTest {
         assertThat(tasker).hasSize(1);
         var task = tasker.getFirst();
         assertBestillingTask(task, bestilling);
-        assertThat(task.getPropertyValue(VedtaksbrevBestillingTask.ORIGINAL_DOKUMENTMAL_TYPE)).isEqualTo(DokumentMalType.ENDRING_INNTEKT.getKode());
+        assertThat(task.getPropertyValue(VedtaksbrevBestillingTask.VEDTAKSBREV_VALG_ID)).isEqualTo(valg.getId().toString());
     }
 
     @Test
