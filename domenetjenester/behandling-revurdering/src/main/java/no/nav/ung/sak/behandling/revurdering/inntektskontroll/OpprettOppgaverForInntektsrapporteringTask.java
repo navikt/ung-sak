@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppgaveForInntektsrapporteringTask.*;
 
@@ -52,6 +53,7 @@ public class OpprettOppgaverForInntektsrapporteringTask implements ProsessTaskHa
         if (dryrun) {
             log.info("Kjører i dryrun modus, det vil si at ingen oppgaver blir opprettet");
             log.info("Resultat av dryrun for oppretting av oppgaver for inntektsrapportering for periode {} - {}: {} fagsaker funnet", fom, tom, fagsaker.size());
+            log.info("Saker funnet ved dryrun for oppretting av oppgaver for inntektsrapportering for periode {} - {}: {}", fom, tom, fagsaker.stream().map(Fagsak::getSaksnummer).collect(Collectors.toSet()));
         } else {
             opprettProsessTask(fagsaker, fom, tom);
         }
