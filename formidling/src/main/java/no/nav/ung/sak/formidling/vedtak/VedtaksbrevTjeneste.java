@@ -62,11 +62,7 @@ public class VedtaksbrevTjeneste {
         var deaktiverteValg = vedtaksbrevValgRepository.finnNyesteDeaktiverteVedtakbrevValg(behandlingId);
         var vedtaksbrevValg = mapVedtaksbrevValg(totalResultat, valg, deaktiverteValg, erAvsluttet);
 
-        VedtaksbrevValg førsteValg = vedtaksbrevValg.getFirst();
-
-        return new VedtaksbrevValgResponse(
-            true,
-            vedtaksbrevValg);
+        return new VedtaksbrevValgResponse(true, vedtaksbrevValg);
     }
 
     private static List<VedtaksbrevValg> mapVedtaksbrevValg(BehandlingVedtaksbrevResultat totalResultat, List<VedtaksbrevValgEntitet> valg, List<VedtaksbrevValgEntitet> deaktiverteValg, boolean erAvsluttet) {
