@@ -37,17 +37,19 @@ public class KodeverdiSomObjektDeserializer extends StdDeserializer<KodeverdiSom
         JsonNode node = jp.getCodec().readTree(jp);
         String kode = node.get("kode").asText();
 
-        if (valueType != null && valueType.getRawClass().isEnum()) {
-            Class<?> enumClass = valueType.getRawClass();
-            for (Object enumValue : enumClass.getEnumConstants()) {
-                Kodeverdi kodeverdi = (Kodeverdi) enumValue;
-                if (kodeverdi.getKode().equals(kode)) {
-                    return new KodeverdiSomObjekt<>(kodeverdi);
+        if (valueType != null ) {
+            if(valueType.getRawClass().isEnum()) {
+                Class<?> enumClass = valueType.getRawClass();
+                for (Object enumValue : enumClass.getEnumConstants()) {
+                    Kodeverdi kodeverdi = (Kodeverdi) enumValue;
+                    if (kodeverdi.getKode().equals(kode)) {
+                        return new KodeverdiSomObjekt<>(kodeverdi);
+                    }
                 }
+            } else {
+                throw new IllegalStateException("Could not deserialize KodeverdiSomObjekt with kode: \"" + kode + "\". Generic argument " + valueType.getGenericSignature() + " is not an enum");
             }
         }
-
-        // Fallback case
-        throw new IllegalStateException("Could not deserialize KodeverdiSomObjekt with kode: " + kode);
+        throw new IllegalStateException("Could not deserialize KodeverdiSomObjekt with kode: " + kode + ". No generic argument found.");
     }
 }
