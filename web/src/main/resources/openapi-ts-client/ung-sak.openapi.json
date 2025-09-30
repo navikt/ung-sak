@@ -4346,6 +4346,72 @@
         },
         "type" : "object"
       },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk" : {
+        "properties" : {
+          "antallBarn" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallHøySats" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallLavSats" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallMedBarnetillegg" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallTotalt" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "dato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.MånedDto" : {
+        "properties" : {
+          "måned" : {
+            "format" : "int32",
+            "maximum" : 12,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "år" : {
+            "format" : "int32",
+            "maximum" : 9999,
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.VedtakStatistikkMåned" : {
+        "properties" : {
+          "antallAutomatiskeVedtak" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "antallVedtak" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "måned" : {
+            "format" : "year-month",
+            "type" : "string"
+          },
+          "prosentandelAutomatiskeVedtak" : {
+            "type" : "number"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.forvaltning.MånedForRapportering" : {
         "enum" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
         "type" : "string",
@@ -7576,6 +7642,29 @@
         "tags" : [ "pip" ]
       }
     },
+    "/api/produksjonsstyring/forvaltning/saker-med-aksjonspunkt" : {
+      "get" : {
+        "description" : "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først",
+        "operationId" : "sakerPåAksjonspunkt",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for produksjonsstyring",
+        "tags" : [ "produksjonsstyring" ]
+      }
+    },
     "/api/prosesstask/create" : {
       "post" : {
         "description" : "Oppretter en prosess task i henhold til request",
@@ -7957,6 +8046,87 @@
         },
         "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
         "tags" : [ "nav-ansatt" ]
+      }
+    },
+    "/api/statistikk/forvaltning/antall-deltakere" : {
+      "post" : {
+        "description" : "Lister ut antall deltakere med ulike sats-typer for en dato",
+        "operationId" : "antallDeltakere",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "format" : "date",
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
+      }
+    },
+    "/api/statistikk/forvaltning/utmeldt-prosentandel" : {
+      "post" : {
+        "description" : "Lister ut prosentandel av deltaker som meldes ut før det har gått ett år",
+        "operationId" : "utmeldtProsentandel",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "number"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
+      }
+    },
+    "/api/statistikk/forvaltning/vedtak" : {
+      "post" : {
+        "description" : "Lister ut antall vedtak for en måned",
+        "operationId" : "vedtak",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.MånedDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.VedtakStatistikkMåned"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
       }
     },
     "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {

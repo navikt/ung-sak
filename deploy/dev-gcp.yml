@@ -226,6 +226,8 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
+    - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
@@ -238,6 +240,9 @@ spec:
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P1D"
+    - name: OPPDATERE_REGISTERDATA_TIDSPUNKT
+      value: "PT30M"
+
 
 
     # Audit logging
