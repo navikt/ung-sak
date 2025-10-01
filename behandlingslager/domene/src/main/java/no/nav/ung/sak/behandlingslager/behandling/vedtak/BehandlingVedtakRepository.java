@@ -90,7 +90,7 @@ public class BehandlingVedtakRepository {
     }
 
     public Optional<BehandlingVedtak> hentGjeldendeVedtak(Fagsak fagsak) {
-        List<Behandling> avsluttedeIkkeHenlagteBehandlinger = behandlingRepository.finnAlleAvsluttedeIkkeHenlagteBehandlinger(fagsak.getId());
+        List<Behandling> avsluttedeIkkeHenlagteBehandlinger = behandlingRepository.finnAlleAvsluttedeIkkeHenlagteYtelsebehandlinger(fagsak.getId());
         if (avsluttedeIkkeHenlagteBehandlinger.isEmpty()) {
             return Optional.empty();
         }

@@ -235,6 +235,8 @@ spec:
       value: "true"
     - name: KLAGE_VEDTAK_CONSUMER_ENABLED
       value: "true"
+    - name: INTEGRASJON_KABAL
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

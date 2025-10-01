@@ -35,8 +35,8 @@ public class FritekstRepository {
     }
 
     private Optional<FritekstEntitet> hent(Long behandlingId, String skrevetAv) {
-        Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR //$NON-NLS-1$
-        Objects.requireNonNull(skrevetAv, "skrevetAv"); // NOSONAR //$NON-NLS-1$
+        Objects.requireNonNull(behandlingId, "behandlingId");
+        Objects.requireNonNull(skrevetAv, "skrevetAv");
 
         final TypedQuery<FritekstEntitet> query = entityManager.createQuery(
             " FROM FritekstEntitet" +
@@ -49,8 +49,8 @@ public class FritekstRepository {
     }
 
     public Optional<String> hentFritekst(Long behandlingId, String skrevetAv) {
-        Objects.requireNonNull(behandlingId, "behandlingId"); // NOSONAR //$NON-NLS-1$
-        Objects.requireNonNull(skrevetAv, "skrevetAv"); // NOSONAR //$NON-NLS-1$
+        Objects.requireNonNull(behandlingId, "behandlingId");
+        Objects.requireNonNull(skrevetAv, "skrevetAv");
 
         final TypedQuery<FritekstEntitet> query = entityManager.createQuery(
             " FROM FritekstEntitet" +
@@ -60,5 +60,19 @@ public class FritekstRepository {
         query.setParameter("behandlingId", behandlingId);
         query.setParameter("skrevetAv", skrevetAv);
         return HibernateVerktøy.hentUniktResultat(query).map(FritekstEntitet::getFritekst);
+    }
+
+    private void slett(Long behandlingId, String skrevetAv) {
+        Objects.requireNonNull(behandlingId, "behandlingId");
+        Objects.requireNonNull(skrevetAv, "skrevetAv");
+
+        final TypedQuery<FritekstEntitet> query = entityManager.createQuery(
+            " DELETE FROM FritekstEntitet" +
+                "        WHERE behandlingId = :behandlingId " +
+                "        AND skrevetAv = :skrevetAv",
+            FritekstEntitet.class);// NOSONAR
+        query.setParameter("behandlingId", behandlingId);
+        query.setParameter("skrevetAv", skrevetAv);
+        query.executeUpdate();
     }
 }

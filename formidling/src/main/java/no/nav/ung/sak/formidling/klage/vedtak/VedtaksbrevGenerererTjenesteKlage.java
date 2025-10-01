@@ -11,7 +11,6 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.klage.regler.BehandlingVedtaksbrevResultatKlage;
@@ -25,17 +24,11 @@ import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 @ApplicationScoped
 @BehandlingTypeRef(BehandlingType.KLAGE)
 @FagsakYtelseTypeRef
 public class VedtaksbrevGenerererTjenesteKlage implements VedtaksbrevGenerererTjeneste {
-
-    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevGenerererTjenesteKlage.class);
 
     private BehandlingRepository behandlingRepository;
     private PdfGenKlient pdfGen;
@@ -101,14 +94,9 @@ public class VedtaksbrevGenerererTjenesteKlage implements VedtaksbrevGenerererTj
 
     @WithSpan
     @Override
-    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, originalDokumentMalType, kunHtml));
-    }
-
-    @WithSpan
-    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var resultat = manueltVedtaksbrevInnholdBygger.bygg(behandling, originalDokumentMalType);
+        var resultat = manueltVedtaksbrevInnholdBygger.bygg(brevHtml);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(

@@ -16,7 +16,6 @@ import no.nav.ung.sak.kabal.kontrakt.KabalRequest;
 import no.nav.ung.sak.kabal.task.KabalRequestMapper;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.PersonIdent;
-import org.intellij.lang.annotations.Language;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -82,7 +81,6 @@ class KabalMappingTest {
 
     @Test
     void json_mapping_test() throws JSONException {
-        @Language("JSON")
         String expectedJson = """
             {
                "avsenderEnhet":"4401",

@@ -13,5 +13,5 @@ public interface VedtaksbrevGenerererTjeneste {
 
     // Bestilling
     @WithSpan
-    GenerertBrev genererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, String brevHtml, boolean kunHtml);
+    GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml);
 }

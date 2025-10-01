@@ -70,7 +70,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
             Long valgId = Long.valueOf(prosessTaskData.getPropertyValue(VEDTAKSBREV_VALG_ID));
             VedtaksbrevValgEntitet valg = vedtaksbrevValgRepository.hentVedtaksbrevValg(valgId);
-            var generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), dokumentMalType, valg.getRedigertBrevHtml(), false);
+            var generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), valg.getRedigertBrevHtml(), false);
             journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
             return;
         }

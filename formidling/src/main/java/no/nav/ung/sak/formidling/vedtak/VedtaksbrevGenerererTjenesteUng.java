@@ -103,11 +103,6 @@ public class VedtaksbrevGenerererTjenesteUng implements VedtaksbrevGenerererTjen
     @WithSpan
     @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, brevHtml, kunHtml));
-    }
-
-    @WithSpan
-    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var resultat = manueltVedtaksbrevInnholdBygger.bygg(brevHtml);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
@@ -127,7 +122,5 @@ public class VedtaksbrevGenerererTjenesteUng implements VedtaksbrevGenerererTjen
             resultat.templateType()
         );
     }
-
-
 }
 

@@ -76,7 +76,7 @@ public class OppdaterFagsakStatusImpl implements OppdaterFagsakStatus {
         if (oppdaterFagsakStatusFelles.ingenLøpendeYtelsesvedtak(behandling)) {
             return true;
         }
-        Optional<Behandling> sisteInnvilgedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandling.getFagsakId());
+        Optional<Behandling> sisteInnvilgedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId());
 
         if (sisteInnvilgedeBehandling.isPresent()) {
             // FIXME K9 trengs logikk her?

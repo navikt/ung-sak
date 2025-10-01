@@ -299,7 +299,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
                 Long id = a.getArgument(0);
                 return behandlingMap.values().stream().filter(b -> b.getFagsakId().equals(id)).sorted().findFirst();
             });
-        when(behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(Mockito.any()))
+        when(behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(Mockito.any()))
             .thenAnswer(a -> {
                 Long id = a.getArgument(0);
                 return behandlingMap.values().stream()
