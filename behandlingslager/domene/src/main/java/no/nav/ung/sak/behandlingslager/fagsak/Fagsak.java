@@ -67,6 +67,9 @@ public class Fagsak extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
+    @Column(name = "ikke_digital_bruker", nullable = false)
+    private boolean ikkeDigitalBruker = false;
+
     Fagsak() {
         // Hibernate
     }
@@ -208,5 +211,13 @@ public class Fagsak extends BaseEntitet {
             throw new IllegalArgumentException(String.format("Alle saker må angi en startdato: [%s, %s]", fom, tom));
         }
         this.periode = DatoIntervallEntitet.fra(fom, tom).toRange();
+    }
+
+    public boolean erIkkeDigitalBruker() {
+        return ikkeDigitalBruker;
+    }
+
+    public void setIkkeDigitalBruker(boolean ikkeDigitalBruker) {
+        this.ikkeDigitalBruker = ikkeDigitalBruker;
     }
 }
