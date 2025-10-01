@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -31,6 +32,7 @@ public class AivenKafkaSettings implements KafkaSettings {
     private final String trustStorePath;
     private final String credstorePassword;
     private final String keyStorePath;
+    private final boolean brukAivenPropertyLokalt;
     private final String vtpOverride; // TODO: Benyttes av verdikjeden
     private final String schemaRegistryUrl;
     private final String schemaRegistryUser;
@@ -45,6 +47,7 @@ public class AivenKafkaSettings implements KafkaSettings {
                        @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH") String trustStorePath,
                        @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH") String keystorePath,
                        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD") String credstorePassword,
+                       @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt,
                        @KonfigVerdi(value = "KAFKA_OVERRIDE_KEYSTORE_PASSWORD", required = false) String vtpOverride) {
         this.bootstrapServers = bootstrapServers;
         this.schemaRegistryUrl = schemaRegistryUrl;
@@ -53,6 +56,7 @@ public class AivenKafkaSettings implements KafkaSettings {
         this.trustStorePath = trustStorePath;
         this.keyStorePath = keystorePath;
         this.credstorePassword = credstorePassword;
+        this.brukAivenPropertyLokalt = brukAivenPropertyLokalt;
         this.vtpOverride = vtpOverride;
     }
 
@@ -121,7 +125,7 @@ public class AivenKafkaSettings implements KafkaSettings {
         props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, getBootstrapServers());
 
         // Sikkerhet - miljø eller lokal
-        if (isDeployment) {
+        if (isDeployment || brukAivenPropertyLokalt) {
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
             props.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");
             props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "jks");
