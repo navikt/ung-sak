@@ -557,6 +557,12 @@
       },
       "k9.prosesstask.rest.dto.ProsessTaskOpprettInputDto" : {
         "properties" : {
+          "nesteKjøringEtter" : {
+            "description" : "Tidspunkt for neste kjøring. Null betyr umiddelbart. For crontasker betyr null at de vil kjøre basert på cron-uttrykket",
+            "format" : "date-time",
+            "nullable" : true,
+            "type" : "string"
+          },
           "taskParametre" : {
             "additionalProperties" : {
               "type" : "string"
