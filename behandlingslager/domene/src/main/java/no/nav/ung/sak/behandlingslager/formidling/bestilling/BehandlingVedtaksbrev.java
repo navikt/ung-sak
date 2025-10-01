@@ -36,17 +36,13 @@ public class BehandlingVedtaksbrev extends BaseEntitet {
     @JoinColumn(name = "vedtaksbrev_valg_id", updatable = false)
     private VedtaksbrevValgEntitet vedtaksbrevValg;
 
-    public static BehandlingVedtaksbrev medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType) {
-        return medBestillingOgValg(brevBestilling, beskrivelse, resultatType, null);
-    }
 
-
-    public static BehandlingVedtaksbrev medBestillingOgValg(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType, VedtaksbrevValgEntitet vedtaksbrevValg) {
+    public static BehandlingVedtaksbrev medBestilling(BrevbestillingEntitet brevBestilling, String beskrivelse, VedtaksbrevResultatType resultatType, VedtaksbrevValgEntitet vedtaksbrevValg) {
         return new BehandlingVedtaksbrev(brevBestilling.getBehandlingId(), brevBestilling.getFagsakId(), resultatType, beskrivelse, brevBestilling, vedtaksbrevValg);
     }
 
-    public static BehandlingVedtaksbrev utenBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse) {
-        return new BehandlingVedtaksbrev(behandlingId, fagsakId, resultatType, beskrivelse, null, null);
+    public static BehandlingVedtaksbrev utenBestilling(Long behandlingId, Long fagsakId, VedtaksbrevResultatType resultatType, String beskrivelse, VedtaksbrevValgEntitet valg) {
+        return new BehandlingVedtaksbrev(behandlingId, fagsakId, resultatType, beskrivelse, null, valg);
     }
 
     // Default constructor required by JPA

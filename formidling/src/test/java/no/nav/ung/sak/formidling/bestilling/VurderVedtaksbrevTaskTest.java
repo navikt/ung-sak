@@ -231,6 +231,10 @@ class VurderVedtaksbrevTaskTest {
             .orElseThrow();
         assertThat(bestilling2.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
 
+        var vedtaksbrevResultater = behandlingVedtaksbrevRepository.hentForBehandling(behandling.getId());
+        assertThat(vedtaksbrevResultater)
+                    .extracting(BehandlingVedtaksbrev::getVedtaksbrevValg)
+                    .allSatisfy(valg -> assertThat(valg).isNotNull());
     }
 
     @Test
@@ -256,6 +260,7 @@ class VurderVedtaksbrevTaskTest {
         assertThat(resultat.getBrevbestilling()).isNull();
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.IKKE_RELEVANT);
         assertThat(resultat.getBeskrivelse()).isNotNull();
+        assertThat(resultat.getVedtaksbrevValg()).isNull();
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(0);
@@ -275,8 +280,9 @@ class VurderVedtaksbrevTaskTest {
             .lagAvsluttetStandardBehandling(ungTestRepositories);
         var behandling = scenarioBuilder.getBehandling();
 
+        VedtaksbrevValgEntitet valg = new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.INNVILGELSE_DOK, false, true, null);
         vedtaksbrevValgRepository.lagre(
-            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.INNVILGELSE_DOK, false, true, null)
+            valg
         );
 
         var prosessTaskData = lagTask(behandling);
@@ -294,6 +300,8 @@ class VurderVedtaksbrevTaskTest {
         assertThat(resultat.getBrevbestilling()).isNull();
         assertThat(resultat.getResultatType()).isEqualTo(VedtaksbrevResultatType.HINDRET_SAKSBEHANDLER);
         assertThat(resultat.getBeskrivelse()).isNull();
+        assertThat(resultat.getVedtaksbrevValg().getId()).isNotNull();
+        assertThat(resultat.getVedtaksbrevValg().getId()).isEqualTo(valg.getId());
 
         var tasker = prosessTaskTjeneste.finnAlle(VedtaksbrevBestillingTask.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(tasker).hasSize(0);
