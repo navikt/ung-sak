@@ -6584,6 +6584,32 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/api/fordel/hentPapirSøknad" : {
+      "post" : {
+        "description" : "Henter og viser papirsøknad",
+        "operationId" : "hentPapirSøknad",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "Hent papirsøknad"
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/octet-stream" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter og viser papirsøknad",
+        "tags" : [ "fordel" ]
+      }
+    },
     "/api/fordel/relatertSak" : {
       "post" : {
         "description" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
