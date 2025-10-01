@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
@@ -26,18 +27,15 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessT
 
     public static final String TASKNAME = "batch.opprettOppgaverForInntektsrapporteringBatch";
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettOppgaverForInntektsrapporteringBatchTask.class);
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private FinnSakerForInntektkontroll finnRelevanteFagsaker;
 
     OpprettOppgaverForInntektsrapporteringBatchTask() {
     }
 
     @Inject
-    public OpprettOppgaverForInntektsrapporteringBatchTask(ProsessTaskTjeneste prosessTaskTjeneste, FinnSakerForInntektkontroll finnRelevanteFagsaker) {
+    public OpprettOppgaverForInntektsrapporteringBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.finnRelevanteFagsaker = finnRelevanteFagsaker;
     }
 
 
@@ -45,29 +43,11 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessT
     public void doTask(ProsessTaskData prosessTaskData) {
         var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
         var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
-        final var fagsaker = finnRelevanteFagsaker.finnFagsaker(fom, tom);
-        opprettProsessTask(fagsaker, fom, tom);
-    }
-
-
-    private void opprettProsessTask(List<Fagsak> fagsakerForKontroll, LocalDate fom, LocalDate tom) {
-        ProsessTaskGruppe taskGruppeTilRevurderinger = new ProsessTaskGruppe();
-
-        var revurderTasker = fagsakerForKontroll
-            .stream()
-            .map(fagsak -> {
-                log.info("Oppretter oppgave for inntektrappportering for fagsak {} for periode {} - {}", fagsak.getSaksnummer(), fom, tom);
-                ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettOppgaveForInntektsrapporteringTask.class);
-                tilVurderingTask.setAktørId(fagsak.getAktørId().getAktørId());
-                tilVurderingTask.setSaksnummer(fagsak.getSaksnummer().getVerdi());
-                tilVurderingTask.setProperty(PERIODE_FOM, fom.toString());
-                tilVurderingTask.setProperty(PERIODE_TOM, tom.toString());
-                tilVurderingTask.setProperty(OPPGAVE_REF, UUID.randomUUID().toString());
-                return tilVurderingTask;
-            }).toList();
-
-        taskGruppeTilRevurderinger.addNesteParallell(revurderTasker);
-        prosessTaskTjeneste.lagre(taskGruppeTilRevurderinger);
+        ProsessTaskData opprettOppgaverTask = ProsessTaskData.forProsessTask(OpprettOppgaverForInntektsrapporteringTask.class);
+        opprettOppgaverTask.setProperty(OpprettOppgaverForInntektsrapporteringTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        opprettOppgaverTask.setProperty(OpprettOppgaverForInntektsrapporteringTask.PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        opprettOppgaverTask.setProperty(OpprettOppgaverForInntektsrapporteringTask.DRY_RUN, Boolean.FALSE.toString());
+        prosessTaskTjeneste.lagre(opprettOppgaverTask);
     }
 
 
