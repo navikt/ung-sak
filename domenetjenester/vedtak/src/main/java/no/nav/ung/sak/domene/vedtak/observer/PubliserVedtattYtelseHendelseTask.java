@@ -90,9 +90,6 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
 
             producer = new GenerellKafkaProducer(topic, aivenProps);
         } else {
-            if (1==1){
-                throw new IllegalStateException("toggle virket ikke");
-            }
             //konfigurasjon for bruk mot VTP
             var onPremPropsBuilder = new KafkaPropertiesBuilder()
                 .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
