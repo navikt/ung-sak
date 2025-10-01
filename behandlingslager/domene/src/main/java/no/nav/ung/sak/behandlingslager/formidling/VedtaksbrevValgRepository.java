@@ -34,12 +34,20 @@ public class VedtaksbrevValgRepository {
         return query.getResultList();
     }
 
+
     public Optional<VedtaksbrevValgEntitet> finnVedtakbrevValg(Long behandlingId, DokumentMalType dokumentMalType) {
         TypedQuery<VedtaksbrevValgEntitet> query = entityManager.createQuery(
                 "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.behandlingId = :behandlingId and v.dokumentMalType = :dokumentMalType and aktiv = true", VedtaksbrevValgEntitet.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("dokumentMalType", dokumentMalType);
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public VedtaksbrevValgEntitet hentVedtaksbrevValg(Long vedtaksbrevValgId) {
+        TypedQuery<VedtaksbrevValgEntitet> query = entityManager.createQuery(
+                "SELECT v FROM VedtaksbrevValgEntitet v WHERE v.id = :id and aktiv = true", VedtaksbrevValgEntitet.class)
+            .setParameter("id", vedtaksbrevValgId);
+        return HibernateVerktøy.hentEksaktResultat(query);
     }
 
     public List<VedtaksbrevValgEntitet> finnNyesteDeaktiverteVedtakbrevValg(Long behandlingId) {

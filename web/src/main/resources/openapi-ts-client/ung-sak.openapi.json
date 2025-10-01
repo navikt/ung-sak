@@ -2674,13 +2674,13 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "behandlingId", "dokumentMalType" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg" : {
         "properties" : {
           "dokumentMalType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.dokument.DokumentMalType"
+            "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.dokument.DokumentMalType"
           },
           "enableHindre" : {
             "type" : "boolean"
@@ -2740,37 +2740,13 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "behandlingId", "dokumentMalType" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse" : {
         "properties" : {
-          "enableHindre" : {
-            "type" : "boolean"
-          },
-          "enableRediger" : {
-            "type" : "boolean"
-          },
-          "forklaring" : {
-            "type" : "string"
-          },
           "harBrev" : {
             "type" : "boolean"
-          },
-          "hindret" : {
-            "type" : "boolean"
-          },
-          "kanOverstyreHindre" : {
-            "type" : "boolean"
-          },
-          "kanOverstyreRediger" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          },
-          "redigertBrevHtml" : {
-            "type" : "string"
           },
           "vedtaksbrevValg" : {
             "items" : {
