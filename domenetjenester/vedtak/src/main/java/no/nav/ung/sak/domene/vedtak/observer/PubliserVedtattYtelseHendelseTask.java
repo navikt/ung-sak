@@ -68,7 +68,8 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
-        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
+        @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt
     ) {
         this.taskTjeneste = taskTjeneste;
         this.informasjonselementer = informasjonselementer;
@@ -76,7 +77,7 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         this.vedtakTjeneste = vedtakTjeneste;
 
         boolean kjørerIMiljø = Environment.current().isProd() || Environment.current().isDev();
-        if (kjørerIMiljø) {
+        if (kjørerIMiljø || brukAivenPropertyLokalt) {
             var aivenPropsBuilder = new KafkaPropertiesBuilder()
                 .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
 

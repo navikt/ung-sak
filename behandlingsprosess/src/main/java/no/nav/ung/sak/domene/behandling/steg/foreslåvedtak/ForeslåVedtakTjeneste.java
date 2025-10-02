@@ -2,14 +2,15 @@ package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
+import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevValidator;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 class ForeslåVedtakTjeneste {
@@ -27,6 +29,7 @@ class ForeslåVedtakTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -35,10 +38,11 @@ class ForeslåVedtakTjeneste {
     @Inject
     ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                          VedtaksbrevTjeneste vedtaksbrevTjeneste) {
+                          VedtaksbrevTjeneste vedtaksbrevTjeneste, VedtaksbrevValgRepository vedtaksbrevValgRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
+        this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -59,17 +63,20 @@ class ForeslåVedtakTjeneste {
             håndterUtenTotrinn(behandling, kontekst, aksjonspunktDefinisjoner);
         }
 
-        // Logging av automatisering av endringsmelding
-        if (aksjonspunktDefinisjoner.isEmpty()
-            && behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-            && behandling.erRevurdering()
-            && behandling.getBehandlingÅrsakerTyper().stream().allMatch(årsak -> årsak.equals(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE))) {
-            logger.info("Foreslår vedtak uten aksjonspunkter");
-        }
+        // Feiler hvis redigert brev er ugyldig slik at saksbehandler kan rette på det
+        validerEvtRedigertBrevHtml(behandling);
 
         return aksjonspunktDefinisjoner.isEmpty()
             ? BehandleStegResultat.utførtUtenAksjonspunkter()
             : BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
+    }
+
+    private void validerEvtRedigertBrevHtml(Behandling behandling) {
+        var vedtaksbrevValg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId());
+        vedtaksbrevValg.stream()
+            .filter(it -> !it.isHindret())
+            .filter(VedtaksbrevValgEntitet::isRedigert)
+            .forEach(it -> ManueltVedtaksbrevValidator.valider(it.getRedigertBrevHtml()));
     }
 
     private void håndterTotrinn(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
@@ -84,7 +91,23 @@ class ForeslåVedtakTjeneste {
         behandling.nullstillToTrinnsBehandling();
         logger.info("To-trinn fjernet på behandling={}", behandling.getId());
         settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
-        if (vedtaksbrevTjeneste.måSkriveBrev(behandling.getId())) {
+        vurderBrevRedigering(behandling, aksjonspunktDefinisjoner);
+    }
+
+    private void vurderBrevRedigering(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
+        var brevSomMåRedigeres = vedtaksbrevTjeneste.måSkriveBrev(behandling.getId());
+        if (brevSomMåRedigeres.isEmpty()) {
+            return;
+        }
+
+        var brevSomErHindretEllerRedigert = vedtaksbrevValgRepository
+            .finnVedtakbrevValg(behandling.getId()).stream()
+            .filter(it -> it.isHindret() || it.isRedigert())
+            .map(VedtaksbrevValgEntitet::getDokumentMalType)
+            .collect(Collectors.toSet());
+
+        if (!brevSomErHindretEllerRedigert.containsAll(brevSomMåRedigeres)) {
+            logger.info("Det finnes brev som må skrives manuelt eller hindres: {}", brevSomMåRedigeres);
             aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
         }
     }

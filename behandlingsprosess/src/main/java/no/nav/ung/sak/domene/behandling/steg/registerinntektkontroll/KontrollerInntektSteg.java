@@ -5,10 +5,13 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 import org.slf4j.Logger;
@@ -55,7 +58,23 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         kontrollerteInntektperioderTjeneste.ryddPerioderFritattForKontrollEllerTilVurderingIBehandlingen(behandlingId);
+
+
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+
+        if (!erKontrollbehandling(behandling)) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
+        Fagsak fagsak = behandling.getFagsak();
+        boolean ikkeDigitalBruker = fagsak.erIkkeDigitalBruker();
+
+        // Ved ikke-digital bruker opprettes aksjonspunkt for manuell kontroll av inntekt alltid.
+        if (ikkeDigitalBruker) {
+            log.info("Fagsak {} gjelder ikke-digital bruker, oppretter aksjonspunkt for manuell kontroll av inntekt.", fagsak.getSaksnummer());
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
+        }
+
         var behandlingReferanse = BehandlingReferanse.fra(behandling);
         var input = inputMapper.mapInput(behandlingReferanse);
         var kontrollResultat = new KontrollerInntektTjeneste(BigDecimal.valueOf(akseptertDifferanse)).utførKontroll(input);
@@ -99,6 +118,10 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         } catch (IOException e) {
             throw new IllegalStateException("Kunn ikke serialisere input eller kontrollresultat til JSON", e);
         }
+    }
+
+    private static boolean erKontrollbehandling(Behandling behandling) {
+        return behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
     }
 
 }

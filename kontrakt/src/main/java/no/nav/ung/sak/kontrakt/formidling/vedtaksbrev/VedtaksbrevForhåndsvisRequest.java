@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
  * DTO for forhåndsvisning av vedtaksbrev.
@@ -16,7 +15,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
  * @param redigertVersjon Angir om automatisk vedtaksbrev (false) eller lagret redigert brev skal forhåndsvises (true), default er false.
  *                        For fritekstbrev vil den alltid bruke redigert versjon.
  * @param htmlVersjon     Angir om html versjon skal hentes. False eller null henter PDF.
- * @param dokumentMalType Angier hvilket vedtaksbrev ønskes bestilt, null for default.
+ * @param dokumentMalType Angier hvilket vedtaksbrev ønskes bestilt.
  */
 public record VedtaksbrevForhåndsvisRequest(
     @NotNull
@@ -32,7 +31,8 @@ public record VedtaksbrevForhåndsvisRequest(
     @Valid
     Boolean htmlVersjon,
 
-    @Valid //TODO hør med Hallvard om ok å gjøre denne påkrevt
+    @Valid
+    @NotNull
     DokumentMalType dokumentMalType) {
 
 }

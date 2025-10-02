@@ -43,6 +43,7 @@ public class PdlLeesahHendelseStream implements KafkaIntegration {
     public PdlLeesahHendelseStream(PdlLeesahHendelseHåndterer hendelseHåndterer,
                                    PdlLeesahHendelseFiltrerer hendelseFiltrerer,
                                    AivenKafkaSettings kafkaSettings,
+                                   @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt,
                                    @KonfigVerdi(value = "hendelse.person.leesah.topic") String topicName) {
         Serde<Personhendelse> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new PdlPersonHendelserKafkaAvroSerde<>();
         this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), valueSerde);

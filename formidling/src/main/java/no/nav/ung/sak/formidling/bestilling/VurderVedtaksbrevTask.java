@@ -126,7 +126,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         );
         brevbestillingRepository.lagre(bestilling);
 
-        var vedtaksbrevResultatEntitet = BehandlingVedtaksbrev.medBestilling(bestilling, vedtaksbrev.forklaring(), VedtaksbrevResultatType.BESTILT);
+        var vedtaksbrevResultatEntitet = BehandlingVedtaksbrev
+            .medBestilling(bestilling, vedtaksbrev.forklaring(), VedtaksbrevResultatType.BESTILT, null);
         behandlingVedtaksbrevRepository.lagre(vedtaksbrevResultatEntitet);
 
         prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId(), brevNr));
@@ -145,7 +146,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         if (vedtaksbrevValg.isHindret()) {
             LOG.info("Vedtaksbrev er manuelt stoppet - bestiller ikke brev");
 
-            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev.utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.HINDRET_SAKSBEHANDLER, null));
+            behandlingVedtaksbrevRepository.lagre(
+                BehandlingVedtaksbrev.utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.HINDRET_SAKSBEHANDLER, null, vedtaksbrevValg));
             return;
         }
 
@@ -159,8 +161,13 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
                 behandling.getId(),
                 DokumentMalType.MANUELT_VEDTAK_DOK);
             brevbestillingRepository.lagre(bestilling);
-            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev.medBestilling(bestilling, "Redigert vedtaksbrev", VedtaksbrevResultatType.BESTILT));
-            prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId(), 0));
+
+            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
+                .medBestilling(bestilling, "Redigert vedtaksbrev", VedtaksbrevResultatType.BESTILT, vedtaksbrevValg));
+
+            ProsessTaskData prosessTaskData = lagBestillingTask(behandling, bestilling.getId(), 0);
+            prosessTaskData.setProperty(VedtaksbrevBestillingTask.VEDTAKSBREV_VALG_ID, vedtaksbrevValg.getId().toString());
+            prosessTaskTjeneste.lagre(prosessTaskData);
 
         }
 
@@ -189,14 +196,14 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             if (enableIgnoreManglendeBrev) {
                 LOG.warn("Ingen brev implementert for tilfelle pga: {}", forklaring);
                 behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
-                    .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
+                    .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring, null));
             } else {
                 throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
             }
         }
         LOG.info("Ingen brev relevant for tilfelle: {}", forklaring);
         behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
-            .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
+            .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring, null));
     }
 
 }
