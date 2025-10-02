@@ -145,7 +145,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         var historikkinnslag = new Historikkinnslag.Builder()
             .medFagsakId(behandlingReferanse.getFagsakId())
             .medBehandlingId(behandlingReferanse.getId())
-            .medTittel(SkjermlenkeType.BEREGNING)
+            .medTittel(SkjermlenkeType.INNTEKTSKONTROLL)
             .medAktør(HistorikkAktør.SAKSBEHANDLER)
             .medLinjer(linjer)
             .build();

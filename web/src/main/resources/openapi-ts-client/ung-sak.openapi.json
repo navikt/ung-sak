@@ -1148,9 +1148,9 @@
         "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
-        "enum" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ],
+        "enum" : [ "INNTEKTSKONTROLL", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ]
+        "x-enum-varnames" : [ "INNTEKTSKONTROLL", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.Venteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE" ],
@@ -4364,6 +4364,21 @@
             "maximum" : 9999,
             "minimum" : 1,
             "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.UtbetalingStatistikkMåned" : {
+        "properties" : {
+          "antallSaker" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "måned" : {
+            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.MånedForRapportering"
+          },
+          "utbetaltBeløp" : {
+            "type" : "number"
           }
         },
         "type" : "object"
@@ -8045,6 +8060,44 @@
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
+      }
+    },
+    "/api/statistikk/forvaltning/utbetaling" : {
+      "post" : {
+        "description" : "Utbetaling for en gitt måned og antall saker",
+        "operationId" : "utbetaling",
+        "parameters" : [ {
+          "description" : "måned",
+          "in" : "query",
+          "name" : "måned",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.MånedForRapportering"
+          }
+        }, {
+          "description" : "år",
+          "in" : "query",
+          "name" : "år",
+          "required" : true,
+          "schema" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.UtbetalingStatistikkMåned"
                 }
               }
             },
