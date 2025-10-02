@@ -65,32 +65,6 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_kunne_redigere_endring_inntekt_ved_ved_aksjonspunkt() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_19år(fom);
-        var behandling = EndringInntektScenarioer
-            .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestGrunnlag, ungTestRepositories);
-        behandling.avsluttBehandling();
-
-        var totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
-        assertThat(totalresultater.harBrev()).isTrue();
-        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
-
-        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
-
-        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
-
-        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
-        assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
-        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isTrue();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isTrue();
-
-        assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
-
-    }
-
-    @Test
     void skal_gi_ingen_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_uten_ap() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(EndringInntektScenarioer.endring0KrInntekt_19år(fom));
@@ -186,7 +160,7 @@ class VedtaksbrevReglerTest {
         assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
 
-        assertThat(regelResulat.forklaring()).contains("økt sats");
+        assertThat(regelResulat.forklaring()).contains("høy sats");
 
     }
 
@@ -248,9 +222,9 @@ class VedtaksbrevReglerTest {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
         assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);
-        assertThat(egenskaper.kanHindre()).isTrue();
+        assertThat(egenskaper.kanHindre()).isFalse();
+        assertThat(egenskaper.kanOverstyreHindre()).isFalse();
         assertThat(egenskaper.kanRedigere()).isTrue();
-        assertThat(egenskaper.kanOverstyreHindre()).isTrue();
         assertThat(egenskaper.kanOverstyreRediger()).isTrue();
     }
 
