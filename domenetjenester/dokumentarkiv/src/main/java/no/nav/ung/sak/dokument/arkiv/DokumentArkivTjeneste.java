@@ -63,7 +63,7 @@ public class DokumentArkivTjeneste {
         return new HashSet<>(Arrays.asList(arkivFilTypePdf, arkivFilTypePdfa));
     }
 
-    public byte[] hentDokumnet(JournalpostId journalpostId, String dokumentId) {
+    public byte[] hentDokument(JournalpostId journalpostId, String dokumentId) {
         LOG.info("HentDokument: input parametere journalpostId {} dokumentId {}", journalpostId, dokumentId);
 
         HentDokumentQuery query = new HentDokumentQuery(
