@@ -162,7 +162,7 @@ class VurderVedtaksbrevTaskTest {
 
         String redigertBrevHtml = "<h1>redigert</h1>";
         vedtaksbrevValgRepository.lagre(
-            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_BARNETILLEGG, true, false, redigertBrevHtml)
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT, true, false, redigertBrevHtml)
         );
 
 
@@ -176,7 +176,7 @@ class VurderVedtaksbrevTaskTest {
         assertThat(bestillinger).hasSize(2);
 
         var bestilling1 = bestillinger.stream()
-            .filter(b -> b.getDokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .filter(b -> b.getDokumentMalType().equals(DokumentMalType.ENDRING_BARNETILLEGG))
             .findFirst()
             .orElseThrow();
         assertThat(bestilling1.getStatus()).isEqualTo(BrevbestillingStatusType.NY);

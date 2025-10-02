@@ -232,7 +232,7 @@ public class EndringInntektScenarioer {
         assertThat(t.reduksjon()).isEqualByComparingTo("6600"); //66% av 10 0000
         assertThat(t.dagsats()).isEqualByComparingTo("362"); //649 - ((6600/22)  )
         assertThat(t.redusertBeløp()).isEqualByComparingTo("8328.8369336998"); // 14928.84 - 6600
-        assertThat(t.utbetalingsgrad()).isEqualTo(56); // 8328.84 / 14928.84 * 100
+        assertThat(t.utbetalingsgrad()).isEqualByComparingTo("55.7781201849"); // 8328.84 / 14928.84 * 100
 
     }
 }

@@ -150,16 +150,18 @@ public class VedtaksbrevTjeneste {
 
         var vedtaksbrevEgenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
 
-        if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
+        boolean redigert = Boolean.TRUE.equals(dto.redigert());
+        if (!vedtaksbrevEgenskaper.kanRedigere() && redigert) {
             throw new IllegalArgumentException("Brevet kan ikke redigeres.");
         }
 
-        if (!vedtaksbrevEgenskaper.kanHindre() && dto.hindret() != null) {
+        boolean hindret = Boolean.TRUE.equals(dto.hindret());
+        if (!vedtaksbrevEgenskaper.kanHindre() && hindret) {
             throw new IllegalArgumentException("Brevet kan ikke hindres. ");
         }
 
-        vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
-        vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
+        vedtaksbrevValgEntitet.setHindret(hindret);
+        vedtaksbrevValgEntitet.setRedigert(redigert);
         vedtaksbrevValgEntitet.rensOgSettRedigertHtml(dto.redigertHtml());
 
         LOG.info("Lagrer vedtaksbrevvalg for dokumentMalType={} med verdier redigert={} hindret={} redigertHtml={}",
