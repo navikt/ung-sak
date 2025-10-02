@@ -3575,9 +3575,6 @@
       "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
         "properties" : {
           "dokumentId" : {
-            "maxLength" : 50,
-            "minLength" : 3,
-            "pattern" : "\\d",
             "type" : "string"
           },
           "journalpostId" : {
@@ -7547,7 +7544,7 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/octet-stream" : { }
+              "*/*" : { }
             },
             "description" : "default response"
           }
