@@ -10,14 +10,11 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevTestUtils;
-import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.*;
 import no.nav.ung.sak.formidling.scenarioer.*;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
+import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -64,14 +61,11 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
-
-        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
-        assertAutomatiskBrevEgenskaper(vedtaksbrevEgenskaper);
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektInnholdBygger.class);
     }
 
     @Test
-    void skal_kunne_redigere_automatisk_brev_ved_aksjonspunkt() {
+    void skal_kunne_redigere_endring_inntekt_ved_ved_aksjonspunkt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_19år(fom);
         var behandling = EndringInntektScenarioer
@@ -146,7 +140,7 @@ class VedtaksbrevReglerTest {
 
     }
 
-    @Test
+    @Test //TODO remove
     void skal_gi_ingen_brev_ved_avslag_aldersvilkår() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
@@ -167,12 +161,15 @@ class VedtaksbrevReglerTest {
 
     }
 
-
     @Test
-    void skal_gi_manuell_vedtaksbrev_som_må_redigeres_ved_aksjonspunkt_uten_automatisk_brev() {
+    void skal_ikke_kunne_redigere_eller_hindre_brev_for_andre_totrinn_ap_enn_kontroller_inntekt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
-        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories);
+        var behandling = BrevScenarioerUtils.lagBehandlingMedAP(
+          EndringHøySatsScenarioer.endring25År(fom.minusYears(25)), ungTestRepositories,
+            AksjonspunktDefinisjon.VURDER_TILBAKETREKK
+        );
+
         behandling.avsluttBehandling();
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
@@ -183,13 +180,13 @@ class VedtaksbrevReglerTest {
 
         var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
 
-        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(TomVedtaksbrevInnholdBygger.class);
-        assertThat(vedtaksbrevEgenskaper.kanHindre()).isTrue();
-        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isTrue();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isTrue();
+        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(EndringHøySatsInnholdBygger.class);
+        assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
+        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
         assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
 
-        assertThat(regelResulat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
+        assertThat(regelResulat.forklaring()).contains("økt sats");
 
     }
 
@@ -213,18 +210,7 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
-
-        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(FørstegangsInnvilgelseInnholdBygger.class);
-        assertThat(regelResulat.dokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
-        assertAutomatiskBrevEgenskaper(vedtaksbrevEgenskaper);
-    }
-
-    private static void assertAutomatiskBrevEgenskaper(VedtaksbrevEgenskaper vedtaksbrevEgenskaper) {
-        assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.INNVILGELSE_DOK, FørstegangsInnvilgelseInnholdBygger.class);
     }
 
 
@@ -238,27 +224,43 @@ class VedtaksbrevReglerTest {
         assertThat(totalresultater.harBrev()).isTrue();
         assertThat(totalresultater.vedtaksbrevResultater()).hasSize(2);
 
-        assertThat(totalresultater.vedtaksbrevResultater())
-            .anySatisfy(resultat -> {
-                var egenskaper = resultat.vedtaksbrevEgenskaper();
-                assertThat(resultat.vedtaksbrevBygger()).isInstanceOf(EndringRapportertInntektInnholdBygger.class);
-                assertThat(egenskaper.kanHindre()).isTrue();
-                assertThat(egenskaper.kanRedigere()).isTrue();
-                assertThat(egenskaper.kanOverstyreHindre()).isTrue();
-                assertThat(egenskaper.kanOverstyreRediger()).isTrue();
-                assertThat(resultat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
-            });
+        var inntektResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .findFirst()
+            .orElseThrow();
 
-        assertThat(totalresultater.vedtaksbrevResultater())
-            .anySatisfy(resultat -> {
-                var egenskaper = resultat.vedtaksbrevEgenskaper();
-                assertThat(resultat.vedtaksbrevBygger()).isInstanceOf(EndringBarnetilleggInnholdBygger.class);
-                assertThat(egenskaper.kanHindre()).isTrue();
-                assertThat(egenskaper.kanRedigere()).isTrue();
-                assertThat(egenskaper.kanOverstyreRediger()).isTrue();
-                assertThat(resultat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
-                assertThat(resultat.forklaring()).contains("barn");
-            });
+        assertRedigerbarBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektInnholdBygger.class);
+
+        assertThat(inntektResultat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
+
+        var barnetilleggResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.ENDRING_BARNETILLEGG))
+            .findFirst()
+            .orElseThrow();
+
+        assertFullAutomatiskBrev(barnetilleggResultat, DokumentMalType.ENDRING_BARNETILLEGG, EndringBarnetilleggInnholdBygger.class);
+
+        assertThat(barnetilleggResultat.forklaring()).doesNotContain(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
+        assertThat(barnetilleggResultat.forklaring()).contains("barn");
+    }
+
+    private static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
+        var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
+        assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
+        assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);
+        assertThat(egenskaper.kanHindre()).isTrue();
+        assertThat(egenskaper.kanRedigere()).isTrue();
+        assertThat(egenskaper.kanOverstyreHindre()).isTrue();
+        assertThat(egenskaper.kanOverstyreRediger()).isTrue();
+    }
+
+    private static void assertFullAutomatiskBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
+        var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
+        assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
+        assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);
+        assertThat(egenskaper.kanHindre()).isFalse();
+        assertThat(egenskaper.kanRedigere()).isFalse();
+        assertThat(egenskaper.kanOverstyreRediger()).isFalse();
     }
 
 
