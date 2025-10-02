@@ -242,7 +242,7 @@ spec:
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
-      value: "false"
+      value: "true"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1H"
     - name: INNTEKTSKONTROLL_DAG_I_MAANED

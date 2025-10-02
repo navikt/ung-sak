@@ -30,6 +30,7 @@ public class PubliserProduksjonsstyringHendelseProducer extends KafkaProducer {
                                                       @KonfigVerdi(value = "KAFKA_OVERRIDE_KEYSTORE_PASSWORD", required = false) String overrideKeystorePassword,
                                                       @KonfigVerdi(value = "NAIS_NAMESPACE", defaultVerdi = "k9saksbehandling") String appNamespace,
                                                       @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
+                                                      @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt,
                                                       @KonfigVerdi("systembruker.username") String username,
                                                       @KonfigVerdi("systembruker.password") String password,
                                                       @KonfigVerdi(value = "PUBLISER_PRODUKSJONSSTYRING_HENDELSE", defaultVerdi = "false") boolean skalPublisereHendelse) {
@@ -40,7 +41,7 @@ public class PubliserProduksjonsstyringHendelseProducer extends KafkaProducer {
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, appNamespace + "." + appName);
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
         properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
-        if (overrideKeystorePassword != null) {
+        if (overrideKeystorePassword != null && !brukAivenPropertyLokalt) {
             setSecurity(username, properties);
             setUsernameAndPassword(username, password, properties);
         } else {
