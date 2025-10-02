@@ -1,6 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -9,19 +10,20 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
+import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 
 
 @Path("/statistikk/forvaltning")
@@ -38,6 +40,44 @@ public class ForvaltningStatistikkRestTjeneste {
 
     public ForvaltningStatistikkRestTjeneste() {
         // For Rest-CDI
+    }
+
+
+    @POST
+    @Path("utbetaling")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Utbetaling for en gitt måned og antall saker", summary = ("Brukes for statistikkformål"), tags = "statistikk")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
+    public UtbetalingStatistikkMåned utbetaling( @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedForRapportering måned,
+                                                 @NotNull @QueryParam("år") @Parameter(description = "år", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) int år) {
+        Object[] resultat = (Object[]) entityManager.createNativeQuery("""
+                with
+                    --hent programdeltakelse for siste vedtatte avsluttede behandling
+                    -- tar med denne for å ikke få med perioder som har blitt fjernet
+                    belop_pr_sak as (
+                        select distinct on (f.saksnummer) ty_periode.redusert_belop
+                        from TILKJENT_YTELSE ty
+                        join TILKJENT_YTELSE_PERIODE ty_periode on ty.id = ty_periode.tilkjent_ytelse_id
+                        join behandling b on ty.behandling_id = b.id
+                        join fagsak f on b.fagsak_id = f.id
+                        where ty.aktiv
+                        and b.behandling_status = 'AVSLU'
+                        and ty_periode.periode && daterange(:fom, :tom, '[]')
+                        order by f.saksnummer, b.opprettet_tid desc) --sorterer på behandlingens opprettettid for å velge den nyeste behandlingen som treffer perioden (pr sak)
+                 select
+                    count(*) as antall_saker,
+                    sum(redusert_belop) as totalt_utbetalt
+                 from belop_pr_sak
+                """)
+            .setParameter("fom", LocalDate.of(år, måned.tilMonth(), 1))
+            .setParameter("tom", LocalDate.of(år, måned.tilMonth(), 1).with(TemporalAdjusters.lastDayOfMonth()))
+            .getSingleResult();
+
+        return new UtbetalingStatistikkMåned(
+            måned,
+            resultat[0] != null ? (Long) resultat[0] : 0L,
+            resultat[1] != null ? (BigDecimal) resultat[1] : BigDecimal.ZERO
+            );
     }
 
 
@@ -172,6 +212,12 @@ public class ForvaltningStatistikkRestTjeneste {
         long antallVedtak,
         long antallAutomatiskeVedtak,
         BigDecimal prosentandelAutomatiskeVedtak) {
+    }
+
+    public record UtbetalingStatistikkMåned(
+        MånedForRapportering måned,
+        long antallSaker,
+        BigDecimal utbetaltBeløp) {
     }
 
 }

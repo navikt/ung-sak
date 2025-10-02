@@ -47,6 +47,7 @@ public class StønadstatistikkHendelseMeldingProducer {
             @KonfigVerdi(value = "KAFKA_OVERRIDE_KEYSTORE_PASSWORD", required = false) String overrideKeystorePassword,
             @KonfigVerdi(value = "NAIS_NAMESPACE", defaultVerdi = "k9saksbehandling") String appNamespace,
             @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
+            @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt,
             @KonfigVerdi("systembruker.username") String username,
             @KonfigVerdi("systembruker.password") String password
             ) {
@@ -57,7 +58,7 @@ public class StønadstatistikkHendelseMeldingProducer {
         properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
         properties.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "5242880"); // 5MB
 
-        if (overrideKeystorePassword != null) {
+        if (overrideKeystorePassword != null && !brukAivenPropertyLokalt) {
             // TODO: Gjør at dette er mulig mot vtp:
             //properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, overrideKeystorePassword);
             //properties.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, overrideKeystorePassword);
