@@ -114,7 +114,7 @@ class VedtaksbrevReglerTest {
 
     }
 
-    @Test //TODO remove
+    @Test
     void skal_gi_ingen_brev_ved_avslag_aldersvilkår() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
@@ -152,14 +152,7 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        var vedtaksbrevEgenskaper = regelResulat.vedtaksbrevEgenskaper();
-
-        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(EndringHøySatsInnholdBygger.class);
-        assertThat(vedtaksbrevEgenskaper.kanHindre()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanRedigere()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreHindre()).isFalse();
-        assertThat(vedtaksbrevEgenskaper.kanOverstyreRediger()).isFalse();
-
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_HØY_SATS, EndringHøySatsInnholdBygger.class);
         assertThat(regelResulat.forklaring()).contains("høy sats");
 
     }
