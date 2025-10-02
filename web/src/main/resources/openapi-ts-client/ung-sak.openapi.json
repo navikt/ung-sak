@@ -7529,7 +7529,7 @@
     },
     "/api/papir/hentPapirSøknad" : {
       "post" : {
-        "description" : "Henter og viser papirsøknad",
+        "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
         "operationId" : "hentPapirSøknad",
         "requestBody" : {
           "content" : {
@@ -7544,7 +7544,7 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/pdf" : { }
+              "application/octet-stream" : { }
             },
             "description" : "default response"
           }
