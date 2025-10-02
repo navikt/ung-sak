@@ -8,16 +8,18 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
+import no.nav.ung.sak.formidling.BrevXhtmlTilSeksjonKonverter;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,7 +172,7 @@ public class VedtaksbrevTjeneste {
 
     }
 
-    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
+    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisInput dto) {
         Long behandlingId = dto.behandlingId();
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandlingId);
         validerHarBrev(totalresultater);
@@ -260,6 +262,18 @@ public class VedtaksbrevTjeneste {
 
     }
 
+    public VedtaksbrevEditorResponse editor(Long behandlingId, DokumentMalType dokumentMalType, boolean redigertVersjon) {
+        BehandlingVedtaksbrevResultat kjør = vedtaksbrevRegler.kjør(behandlingId);
+        GenerertBrev forhåndsvis = forhåndsvis(new VedtaksbrevForhåndsvisInput(
+            behandlingId,
+            dokumentMalType,
+            redigertVersjon,
+            true
+        ));
 
+        List<VedtaksbrevSeksjon> seksjoner = BrevXhtmlTilSeksjonKonverter.konverter(forhåndsvis.dokument().html());
+
+        return new VedtaksbrevEditorResponse(seksjoner);
+    }
 }
 

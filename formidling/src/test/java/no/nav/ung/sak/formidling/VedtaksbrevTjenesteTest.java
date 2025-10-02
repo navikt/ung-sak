@@ -8,8 +8,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevForhåndsvisInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
@@ -326,7 +326,7 @@ class VedtaksbrevTjenesteTest {
 
     private String forhåndsvis(Behandling behandling, DokumentMalType dokumentMalType, Boolean redigertVersjon) {
         return vedtaksbrevTjeneste.forhåndsvis(
-            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true, dokumentMalType)
+            new VedtaksbrevForhåndsvisInput(behandling.getId(), dokumentMalType, redigertVersjon, true)
         ).dokument().html();
     }
 

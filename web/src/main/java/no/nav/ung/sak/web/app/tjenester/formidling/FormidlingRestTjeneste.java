@@ -22,6 +22,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevForhåndsvisInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
@@ -108,7 +109,13 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisRequest dto,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto);
+        var input = new VedtaksbrevForhåndsvisInput(
+            dto.behandlingId(),
+            dto.dokumentMalType(),
+            dto.redigertVersjon(),
+            Boolean.TRUE.equals(dto.htmlVersjon())
+        );
+        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(input);
 
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
 
