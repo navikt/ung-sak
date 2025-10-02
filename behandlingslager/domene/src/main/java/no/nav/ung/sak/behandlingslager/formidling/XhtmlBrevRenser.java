@@ -10,9 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Renser HTML før lagring for å unngå ikke-støttede tegn og html-elementer
+ */
 public class XhtmlBrevRenser {
 
-    private final Logger LOG = LoggerFactory.getLogger(XhtmlBrevRenser.class);
+    private final static Logger LOG = LoggerFactory.getLogger(XhtmlBrevRenser.class);
 
     private static final Document.OutputSettings XHTML_SETTINGS = new Document.OutputSettings()
         .syntax(Document.OutputSettings.Syntax.xml)
@@ -23,14 +26,14 @@ public class XhtmlBrevRenser {
 
     private static final Safelist SAFELIST = Safelist.none().addTags(SAFE_TAGS.toArray(new String[0]));
 
-    public String rens(String input) {
+    public static String rens(String input) {
         Objects.requireNonNull(input, "Input må være satt");
         String rensetHtml = Jsoup.clean(input, "", SAFELIST, XHTML_SETTINGS);
         loggHvisRenset(input, rensetHtml);
         return rensetHtml;
     }
 
-    private void loggHvisRenset(String input, String rensetHtml) {
+    private static void loggHvisRenset(String input, String rensetHtml) {
         var original = Jsoup.parseBodyFragment(input);
         var renset = Jsoup.parseBodyFragment(rensetHtml);
         int orgAntallElementer = original.select("*").size();

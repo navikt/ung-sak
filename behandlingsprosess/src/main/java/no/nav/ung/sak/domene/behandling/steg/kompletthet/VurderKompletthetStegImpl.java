@@ -3,14 +3,17 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
@@ -80,11 +83,17 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
 
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        Fagsak fagsak = behandling.getFagsak();
         final var behandlingReferanse = BehandlingReferanse.fra(behandling);
 
-        // Steg 1: Opprett etterlysninger
-        kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
-        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+        // Steg 1: Opprett etterlysninger dersom fagsak har digital bruker
+        boolean erDigitalBruker = !fagsak.erIkkeDigitalBruker();
+        if (erDigitalBruker) {
+            kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
+            programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+        } else {
+            log.info("Behandling {} har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.", kontekst.getBehandlingId());
+        }
 
         // Steg 2: Utled aksjonspunkter
         List<AksjonspunktResultat> aksjonspunktResultater = new ArrayList<>();
@@ -96,7 +105,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         // Sjekker etterlysninger opprettet i steg 1
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
-
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }
 

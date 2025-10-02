@@ -109,7 +109,7 @@ public class VedtaksbrevValgEntitet extends BaseEntitet {
         if (redigertBrevHtml == null) {
             return null;
         }
-        return new XhtmlBrevRenser().rens(redigertBrevHtml);
+        return XhtmlBrevRenser.rens(redigertBrevHtml);
     }
 
     public void deaktiver() {

@@ -1,0 +1,1 @@
+ALTER TABLE fagsak ADD COLUMN ikke_digital_bruker BOOLEAN DEFAULT FALSE;

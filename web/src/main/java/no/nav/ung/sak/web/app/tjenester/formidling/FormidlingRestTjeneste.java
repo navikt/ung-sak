@@ -11,12 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -79,7 +74,6 @@ public class FormidlingRestTjeneste {
     @POST
     @Path("/formidling/vedtaksbrev")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling",
         responses = @ApiResponse(responseCode = "200", description = "lagret ok")
     )
@@ -114,7 +108,7 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisRequest dto,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto).getFirst();
+        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto);
 
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
 

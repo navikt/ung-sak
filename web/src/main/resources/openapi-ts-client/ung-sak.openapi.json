@@ -2674,13 +2674,13 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "behandlingId", "dokumentMalType" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg" : {
         "properties" : {
           "dokumentMalType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.dokument.DokumentMalType"
+            "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.dokument.DokumentMalType"
           },
           "enableHindre" : {
             "type" : "boolean"
@@ -2740,37 +2740,13 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "behandlingId", "dokumentMalType" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse" : {
         "properties" : {
-          "enableHindre" : {
-            "type" : "boolean"
-          },
-          "enableRediger" : {
-            "type" : "boolean"
-          },
-          "forklaring" : {
-            "type" : "string"
-          },
           "harBrev" : {
             "type" : "boolean"
-          },
-          "hindret" : {
-            "type" : "boolean"
-          },
-          "kanOverstyreHindre" : {
-            "type" : "boolean"
-          },
-          "kanOverstyreRediger" : {
-            "type" : "boolean"
-          },
-          "redigert" : {
-            "type" : "boolean"
-          },
-          "redigertBrevHtml" : {
-            "type" : "string"
           },
           "vedtaksbrevValg" : {
             "items" : {
@@ -4388,6 +4364,21 @@
             "maximum" : 9999,
             "minimum" : 1,
             "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.UtbetalingStatistikkMåned" : {
+        "properties" : {
+          "antallSaker" : {
+            "format" : "int64",
+            "type" : "integer"
+          },
+          "måned" : {
+            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.MånedForRapportering"
+          },
+          "utbetaltBeløp" : {
+            "type" : "number"
           }
         },
         "type" : "object"
@@ -8069,6 +8060,44 @@
               "*/*" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for statistikkformål",
+        "tags" : [ "statistikk" ]
+      }
+    },
+    "/api/statistikk/forvaltning/utbetaling" : {
+      "post" : {
+        "description" : "Utbetaling for en gitt måned og antall saker",
+        "operationId" : "utbetaling",
+        "parameters" : [ {
+          "description" : "måned",
+          "in" : "query",
+          "name" : "måned",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.MånedForRapportering"
+          }
+        }, {
+          "description" : "år",
+          "in" : "query",
+          "name" : "år",
+          "required" : true,
+          "schema" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.UtbetalingStatistikkMåned"
                 }
               }
             },

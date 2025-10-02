@@ -6,7 +6,6 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -71,7 +70,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     void verifiserOverskrifter() {
         var behandling = lagScenarioForFellesTester();
 
-        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), true));
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.genererAlleForBehandling(behandling.getId(), true);
         assertThat(brev).hasSize(1);
         GenerertBrev generertBrev = brev.getFirst();
 
@@ -85,15 +84,11 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
 
     }
 
-    private static VedtaksbrevForhåndsvisRequest lagForhåndsvisInput(Long behandlingId, boolean kunHtml) {
-        return new VedtaksbrevForhåndsvisRequest(behandlingId, null, kunHtml, null);
-    }
-
     @Test
     void pdfStrukturTest() throws IOException {
         var behandling = lagScenarioForFellesTester();
 
-        List<GenerertBrev> brev = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandling.getId(), false));
+        List<GenerertBrev> brev = vedtaksbrevTjeneste.genererAlleForBehandling(behandling.getId(), false);
         assertThat(brev).hasSize(1);
         GenerertBrev generertBrev = brev.getFirst();
 
@@ -117,7 +112,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
     }
 
     private static GenerertBrev genererVedtaksbrevUtenLagring(Long behandlingId, VedtaksbrevTjeneste vedtaksbrevTjeneste1) {
-        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste1.forhåndsvis(lagForhåndsvisInput(behandlingId, true));
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste1.genererAlleForBehandling(behandlingId, true);
         assertThat(forhåndsvis).hasSize(1);
         return forhåndsvis.getFirst();
     }
@@ -132,7 +127,7 @@ abstract class AbstractVedtaksbrevInnholdByggerTest {
             return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
         }
 
-        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.forhåndsvis(lagForhåndsvisInput(behandlingId, !lagre.equals("PDF")));
+        List<GenerertBrev> forhåndsvis = vedtaksbrevTjeneste.genererAlleForBehandling(behandlingId, !lagre.equals("PDF"));
         assertThat(forhåndsvis).hasSize(1);
         GenerertBrev generertBrev = forhåndsvis.getFirst();
 
