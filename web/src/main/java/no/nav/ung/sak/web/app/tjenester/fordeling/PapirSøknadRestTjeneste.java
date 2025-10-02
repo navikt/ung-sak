@@ -44,9 +44,10 @@ public class PapirSøknadRestTjeneste {
     @POST
     @Path("/hentPapirSøknad")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces("application/pdf")
-    @Operation(description = "Henter og viser papirsøknad", summary = ("Henter og viser papirsøknad"), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT) // Kan bruke drift fordi kallet mot SAF gjør tilgangskontroll uansett.
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Operation(description = "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.", summary = ("Henter og viser papirsøknad"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
+    // Kan bruke drift fordi kallet mot SAF gjør tilgangskontroll uansett.
     public Response hentPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HentPapirSøknadRequestDto hentPapirSøknadRequestDto) {
 
         // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
@@ -55,7 +56,6 @@ public class PapirSøknadRestTjeneste {
 
         try {
             Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
-            responseBuilder.type("application/pdf");
             responseBuilder.header("Content-Disposition", "inline; filename=\"" + filnavn + "\"");
             return responseBuilder.build();
         } catch (Exception e) {
