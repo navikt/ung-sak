@@ -9,14 +9,16 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.sikkerhet.abac.*;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
+
+import java.io.ByteArrayInputStream;
 
 import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste.BASE_PATH;
 
@@ -38,17 +40,19 @@ public class PapirSøknadRestTjeneste {
 
     @POST
     @Path("/hentPapirSøknad")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Henter og viser papirsøknad", summary = ("Henter og viser papirsøknad"), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response hentPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HentPapirSøknadRequestDto hentPapirSøknadRequestDto) {
 
         // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        byte[] dokument = dokumentArkivTjeneste.hentDokumnet(hentPapirSøknadRequestDto.journalpostId(), hentPapirSøknadRequestDto.dokumentId().getVerdi());
+        byte[] dokument = dokumentArkivTjeneste.hentDokument(hentPapirSøknadRequestDto.journalpostId(), hentPapirSøknadRequestDto.dokumentId().getVerdi());
         String filnavn = "søknadsdokument-" + hentPapirSøknadRequestDto.dokumentId() + ".pdf";
 
         try {
-            return Response.ok(dokument).type("application/pdf").header("Content-Disposition", "inline; filename=\"" + filnavn + "\"").build();
+            Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
+            responseBuilder.type("application/pdf");
+            responseBuilder.header("Content-Disposition", "inline; filename=\"" + filnavn + "\"");
+            return responseBuilder.build();
         } catch (Exception e) {
             return Response.serverError().entity("Klarte ikke å generere PDF: " + e.getMessage()).build();
         }
