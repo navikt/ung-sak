@@ -10,6 +10,7 @@ import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public class MapperForTilkjentYtelse {
         }
         Inntektskategori inntektskategori = Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER;
         return new TilkjentYtelsePeriodeV1(periode.getFom(), periode.getTom(), List.of(
-            new TilkjentYtelseAndelV1(true, inntektskategori, periode.getValue().dagsats(), SatsType.DAG, periode.getValue().utbetalingsgrad())));
+            new TilkjentYtelseAndelV1(true, inntektskategori, periode.getValue().dagsats(), SatsType.DAG, periode.getValue().utbetalingsgrad().setScale(2, RoundingMode.HALF_UP))));
     }
 
 }
