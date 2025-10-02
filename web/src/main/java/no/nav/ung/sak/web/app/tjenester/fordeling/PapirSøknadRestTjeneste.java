@@ -2,34 +2,21 @@ package no.nav.ung.sak.web.app.tjenester.fordeling;
 
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.*;
-import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt;
-import no.nav.sif.abac.kontrakt.abac.ResourceType;
-import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto;
-import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
-import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning;
-import no.nav.sif.abac.kontrakt.person.PersonIdent;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
-import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
-import org.jboss.logging.annotations.Param;
-
-import java.util.List;
-import java.util.Set;
 
 @Path(FordelRestTjeneste.BASE_PATH)
 @ApplicationScoped
