@@ -7533,7 +7533,7 @@
         "operationId" : "hentPapirSøknad",
         "requestBody" : {
           "content" : {
-            "*/*" : {
+            "application/json" : {
               "schema" : {
                 "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
               }
@@ -7544,7 +7544,7 @@
         "responses" : {
           "default" : {
             "content" : {
-              "*/*" : { }
+              "application/pdf" : { }
             },
             "description" : "default response"
           }
