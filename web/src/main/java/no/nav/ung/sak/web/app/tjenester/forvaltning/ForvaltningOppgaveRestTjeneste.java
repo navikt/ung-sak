@@ -109,26 +109,9 @@ public class ForvaltningOppgaveRestTjeneste {
 
         final var periode = periodisertMånedvis.stream()
             // Enum ordinal er 0-indeksert og montvalue er 1-indeksert
-            .filter(it -> it.getFom().getMonth() == mapTilMonth(måned))
+            .filter(it -> it.getFom().getMonth() == måned.tilMonth())
             .findFirst().map(LocalDateSegment::getLocalDateInterval).get();
         return periode;
-    }
-
-    private Month mapTilMonth(MånedForRapportering måned) {
-        return switch (måned) {
-            case JANUAR -> Month.JANUARY;
-            case FEBRUAR -> Month.FEBRUARY;
-            case MARS -> Month.MARCH;
-            case APRIL -> Month.APRIL;
-            case MAI -> Month.MAY;
-            case JUNI -> Month.JUNE;
-            case JULI -> Month.JULY;
-            case AUGUST -> Month.AUGUST;
-            case SEPTEMBER -> Month.SEPTEMBER;
-            case OKTOBER -> Month.OCTOBER;
-            case NOVEMBER -> Month.NOVEMBER;
-            case DESEMBER -> Month.DECEMBER;
-        };
     }
 
     @POST
