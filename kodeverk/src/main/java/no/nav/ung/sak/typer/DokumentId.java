@@ -20,7 +20,7 @@ import java.util.Objects;
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class DokumenttId implements Serializable, IndexKey {
+public class DokumentId implements Serializable, IndexKey {
 
     private static final String GYLDIG = "^[\\p{Alnum}]+$";
 
@@ -30,17 +30,17 @@ public class DokumenttId implements Serializable, IndexKey {
     @Pattern(regexp = GYLDIG, message = "dokumentId [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String dokumentId; // NOSONAR
 
-    DokumenttId() {
+    DokumentId() {
         //
     }
 
-    public DokumenttId(Long dokumentId) {
+    public DokumentId(Long dokumentId) {
         Objects.requireNonNull(dokumentId, "dokumentId");
         this.dokumentId = Long.toString(dokumentId);
     }
 
     @JsonCreator
-    public DokumenttId(@NotNull @Size(max = 50, min = 3) @Pattern(regexp = GYLDIG, message = "dokumentId [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String dokumentId) {
+    public DokumentId(@NotNull @Size(max = 50, min = 3) @Pattern(regexp = GYLDIG, message = "dokumentId [${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String dokumentId) {
         this.dokumentId = Objects.requireNonNull(nonEmpty(dokumentId), "dokumentId");
     }
 
@@ -62,7 +62,7 @@ public class DokumenttId implements Serializable, IndexKey {
     }
 
     @AppAbacAttributt(AppAbacAttributtType.DOKUMENT_ID)
-    public DokumenttId getDokumentId() {
+    public DokumentId getDokumentId() {
         return this;
     }
 
@@ -73,7 +73,7 @@ public class DokumenttId implements Serializable, IndexKey {
         } else if (obj == null || !getClass().equals(obj.getClass())) {
             return false;
         }
-        DokumenttId other = (DokumenttId) obj;
+        DokumentId other = (DokumentId) obj;
         return Objects.equals(dokumentId, other.dokumentId);
     }
 
