@@ -3572,6 +3572,19 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
+        "properties" : {
+          "dokumentId" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "journalpostId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "dokumentId", "journalpostId" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
         "properties" : {
           "bruker" : {
@@ -6607,11 +6620,11 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "type" : "string"
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
               }
             }
           },
-          "description" : "Hent papirsøknad"
+          "required" : true
         },
         "responses" : {
           "default" : {
