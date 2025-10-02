@@ -3575,7 +3575,9 @@
       "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
         "properties" : {
           "dokumentId" : {
-            "minLength" : 1,
+            "maxLength" : 50,
+            "minLength" : 3,
+            "pattern" : "\\d",
             "type" : "string"
           },
           "journalpostId" : {
@@ -6612,32 +6614,6 @@
         "tags" : [ "fordel" ]
       }
     },
-    "/api/fordel/hentPapirSøknad" : {
-      "post" : {
-        "description" : "Henter og viser papirsøknad",
-        "operationId" : "hentPapirSøknad",
-        "requestBody" : {
-          "content" : {
-            "*/*" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/octet-stream" : { }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Henter og viser papirsøknad",
-        "tags" : [ "fordel" ]
-      }
-    },
     "/api/fordel/relatertSak" : {
       "post" : {
         "description" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
@@ -7552,6 +7528,32 @@
         },
         "summary" : "Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
+      }
+    },
+    "/api/papir/hentPapirSøknad" : {
+      "post" : {
+        "description" : "Henter og viser papirsøknad",
+        "operationId" : "hentPapirSøknad",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/octet-stream" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter og viser papirsøknad",
+        "tags" : [ "fordel" ]
       }
     },
     "/api/pip/aktoer-for-sak" : {
