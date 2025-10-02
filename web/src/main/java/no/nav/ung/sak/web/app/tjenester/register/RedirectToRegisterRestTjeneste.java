@@ -120,7 +120,6 @@ public class RedirectToRegisterRestTjeneste {
         HttpUriRequest request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         request.addHeader(new BasicHeader("Nav-A-inntekt-Filter", "Ung"));
-        request.addHeader(new BasicHeader("Nav-FagsakId", fagsak.getSaksnummer().getVerdi()));
         sisteBehandling.ifPresent(b -> request.addHeader(new BasicHeader("Nav-Enhet",  b.getBehandlendeEnhet())));
         try {
             var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
