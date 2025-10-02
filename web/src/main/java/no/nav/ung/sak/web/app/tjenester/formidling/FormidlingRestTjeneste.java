@@ -78,10 +78,9 @@ public class FormidlingRestTjeneste {
         responses = @ApiResponse(responseCode = "200", description = "lagret ok")
     )
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
-    public Response lagreVedtaksbrevValg(
+    public void lagreVedtaksbrevValg(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequest dto) {
         vedtaksbrevTjeneste.lagreVedtaksbrev(dto);
-        return Response.ok().build();
     }
 
     /**
