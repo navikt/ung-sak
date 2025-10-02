@@ -18,22 +18,22 @@ import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
 
-@Path(FordelRestTjeneste.BASE_PATH)
+import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste.BASE_PATH;
+
+@Path(BASE_PATH)
 @ApplicationScoped
 @Transactional
 public class PapirSøknadRestTjeneste {
     static final String BASE_PATH = "/papir";
-    private static final String JSON_UTF8 = "application/json; charset=UTF-8";
-    private SifAbacPdpRestKlient sifAbacPdpRestKlient;
+
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
     public PapirSøknadRestTjeneste() {// For Rest-CDI
     }
 
     @Inject
-    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste, SifAbacPdpRestKlient sifAbacPdpRestKlient) {
+    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
-        this.sifAbacPdpRestKlient = sifAbacPdpRestKlient;
     }
 
     @POST
