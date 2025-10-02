@@ -3572,6 +3572,21 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
+        "properties" : {
+          "dokumentId" : {
+            "maxLength" : 50,
+            "minLength" : 3,
+            "pattern" : "\\d",
+            "type" : "string"
+          },
+          "journalpostId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "dokumentId", "journalpostId" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
         "properties" : {
           "bruker" : {
@@ -7513,6 +7528,32 @@
         },
         "summary" : "Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
+      }
+    },
+    "/api/papir/hentPapirSøknad" : {
+      "post" : {
+        "description" : "Henter og viser papirsøknad",
+        "operationId" : "hentPapirSøknad",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/octet-stream" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter og viser papirsøknad",
+        "tags" : [ "fordel" ]
       }
     },
     "/api/pip/aktoer-for-sak" : {
