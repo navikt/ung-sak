@@ -102,8 +102,7 @@ public class PapirSøknadRestTjeneste {
             throw new IllegalStateException("Journalpost er allerede journalført");
         } else {
             try {
-                if (journalpostId != null && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.get().getAktørId())) {
-                    journalpostRepository.markerJournalposterBehandlet(journalpostId);
+                if (journalpostId != null && !journalpostRepository.markerJournalposterBehandlet(journalpostId).isEmpty() && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.get().getAktørId())) {
                     return Response.ok().build();
                 } else {
                     throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
