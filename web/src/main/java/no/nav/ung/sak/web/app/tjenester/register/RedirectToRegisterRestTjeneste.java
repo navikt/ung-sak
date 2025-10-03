@@ -18,6 +18,8 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
@@ -29,6 +31,7 @@ import org.apache.http.message.BasicHeader;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
@@ -45,6 +48,7 @@ public class RedirectToRegisterRestTjeneste {
 
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
+    private BehandlingRepository behandlingRepository;
     private NoAuthRestClient restClient;
     private String arbeidOgInntektBaseURL;
 
@@ -55,11 +59,12 @@ public class RedirectToRegisterRestTjeneste {
     @Inject
     public RedirectToRegisterRestTjeneste(
         TpsTjeneste tpsTjeneste,
-        FagsakRepository fagsakRepository,
+        FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository,
         NoAuthRestClient restClient,
         @KonfigVerdi(value = "arbeid.og.inntekt.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL) {
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.behandlingRepository = behandlingRepository;
         this.restClient = restClient;
         this.arbeidOgInntektBaseURL = arbeidOgInntektBaseURL;
     }
@@ -108,11 +113,14 @@ public class RedirectToRegisterRestTjeneste {
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             SaksnummerDto saksnummerDto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummerDto.getVerdi()).get();
+        Optional<Behandling> sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());
 
         var uri = URI.create(arbeidOgInntektBaseURL + "/api/v2/redirect/sok/a-inntekt");
         HttpUriRequest request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
+        request.addHeader(new BasicHeader("Nav-A-inntekt-Filter", "Ung"));
+        sisteBehandling.ifPresent(b -> request.addHeader(new BasicHeader("Nav-Enhet",  b.getBehandlendeEnhet())));
         try {
             var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
             var redirectUri = URI.create(respons);
