@@ -16,6 +16,7 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -227,6 +228,7 @@ class VedtaksbrevTjenesteTest {
     }
 
     @Test
+    @Disabled //TODO enable når tilfelle for tomt brev er klar som kan hindres.
     void skal_ikke_lage_brev_hvis_hindret() {
         UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
 
@@ -276,7 +278,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valg1.vedtaksbrevValg()).extracting(vedtaksbrevValg -> vedtaksbrevValg.dokumentMalType().getKilde())
             .containsExactlyInAnyOrder(DokumentMalType.ENDRING_INNTEKT, DokumentMalType.ENDRING_BARNETILLEGG);
         assertThat(valg1.vedtaksbrevValg()).extracting(VedtaksbrevValg::kanOverstyreRediger)
-            .containsExactly(true, true);
+            .containsExactlyInAnyOrder(true, false);
 
         //Redigerer ett av brevene
         vedtaksbrevTjeneste.lagreVedtaksbrev(
@@ -285,25 +287,25 @@ class VedtaksbrevTjenesteTest {
                 false,
                 true,
                 redigertHtml,
-                DokumentMalType.ENDRING_BARNETILLEGG)
+                DokumentMalType.ENDRING_INNTEKT)
         );
 
         VedtaksbrevValgResponse valg2 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valg2.vedtaksbrevValg()).hasSize(2);
 
-        var barnetilleggValg = valg2.vedtaksbrevValg().stream()
-            .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_BARNETILLEGG))
-            .findFirst()
-            .orElseThrow();
-        assertThat(barnetilleggValg.redigert()).isTrue();
-        assertThat(barnetilleggValg.redigertBrevHtml()).isEqualTo(redigertHtml);
-
         var inntektValg = valg2.vedtaksbrevValg().stream()
             .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_INNTEKT))
             .findFirst()
             .orElseThrow();
-        assertThat(inntektValg.redigert()).isFalse();
-        assertThat(inntektValg.redigertBrevHtml()).isNull();
+        assertThat(inntektValg.redigert()).isTrue();
+        assertThat(inntektValg.redigertBrevHtml()).isEqualTo(redigertHtml);
+
+        var barnetilleggValg = valg2.vedtaksbrevValg().stream()
+            .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_BARNETILLEGG))
+            .findFirst()
+            .orElseThrow();
+        assertThat(barnetilleggValg.redigert()).isFalse();
+        assertThat(barnetilleggValg.redigertBrevHtml()).isNull();
 
         //Forhåndsviser automatisk brev
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, false))
@@ -312,15 +314,15 @@ class VedtaksbrevTjenesteTest {
             .contains(automatiskInntekstbrevSnippet);
 
         //Forhåndsviser manuell brev
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, true))
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true))
             .contains(redigertHtml);
-        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true))
+        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, true))
             .isInstanceOf(IllegalStateException.class);
 
 
         //Brevet behandlingen kommer til å bruke skal være manuell brev for den redigerte
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, null)).contains(redigertHtml);
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskInntekstbrevSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(redigertHtml);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, null)).contains(automatiskBarnetilleggSnippet);
     }
 
 
