@@ -1,15 +1,20 @@
-package no.nav.ung.sak.formidling.vedtak;
+package no.nav.ung.sak.formidling.klage.vedtak;
 
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.klage.regler.BehandlingVedtaksbrevResultatKlage;
+import no.nav.ung.sak.formidling.klage.regler.VedtaksbrevReglerKlage;
 import no.nav.ung.sak.formidling.mottaker.BrevMottakerTjeneste;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
@@ -17,48 +22,58 @@ import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
-import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 
 @ApplicationScoped
-public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTjeneste {
-
-    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevGenerererTjenesteImpl.class);
+@BehandlingTypeRef(BehandlingType.KLAGE)
+@FagsakYtelseTypeRef
+public class VedtaksbrevGenerererTjenesteKlage implements VedtaksbrevGenerererTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private PdfGenKlient pdfGen;
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
+    private VedtaksbrevReglerKlage vedtaksbrevRegler;
+
+    public VedtaksbrevGenerererTjenesteKlage() {
+    }
 
     @Inject
-    public VedtaksbrevGenerererTjenesteImpl(
+    public VedtaksbrevGenerererTjenesteKlage(
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
-        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste) {
-
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste,
+        @Any VedtaksbrevReglerKlage vedtaksbrevRegler) {
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
+        this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
 
-    public VedtaksbrevGenerererTjenesteImpl() {
-    }
 
-    @WithSpan
     @Override
-    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(vedtaksbrevGenerererInput));
+    public GenerertBrev genererAutomatiskVedtaksbrev(Behandling behandling, DokumentMalType dokumentMalType, boolean kunHtml) {
+        BehandlingVedtaksbrevResultatKlage totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        var vedtaksbrev = totalresultater.vedtaksbrevResultater().stream()
+            .filter(it -> it.dokumentMalType() == dokumentMalType)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
+
+        return genererAutomatiskVedtaksbrev(
+            new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, null, false)
+        );
     }
 
     @WithSpan
-    private GenerertBrev doGenererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
+    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
         var behandling = behandlingRepository.hentBehandling(vedtaksbrevGenerererInput.behandlingId());
 
-        Vedtaksbrev vedtaksbrev = vedtaksbrevGenerererInput.vedtaksbrev();
-        VedtaksbrevInnholdBygger bygger = vedtaksbrev.vedtaksbrevBygger();
-        var resultat = bygger.bygg(behandling, vedtaksbrevGenerererInput.detaljertResultatTidslinje());
+        var vedtaksbrev = vedtaksbrevGenerererInput.vedtaksbrev();
+        var bygger = vedtaksbrev.vedtaksbrevBygger();
+        var resultat = bygger.bygg(behandling);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
@@ -77,18 +92,9 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-
-    /**
-     * Lager manuell brev lagret i databasen
-     */
     @WithSpan
     @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, brevHtml, kunHtml));
-    }
-
-    @WithSpan
-    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var resultat = manueltVedtaksbrevInnholdBygger.bygg(brevHtml);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);

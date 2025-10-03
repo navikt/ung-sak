@@ -130,7 +130,7 @@ public class InnhentDokumentTjeneste {
             sjekkBehandlingKanLåses(sisteBehandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
             if (erBehandlingAvsluttet(sisteYtelsesbehandling)) {
                 // siste behandling er avsluttet, oppretter ny behandling
-                Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+                Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
                 sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
 
                 // Håndter avsluttet behandling

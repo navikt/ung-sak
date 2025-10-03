@@ -35,6 +35,7 @@
         <module>grunnbelop</module>
         <module>behandlingskontroll</module>
         <module>etterlysning</module>
+        <module>kabal</module>
     </modules>
 
 </project>

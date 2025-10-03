@@ -54,7 +54,9 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
         initiellTask.ifPresent(taskData::addNesteSekvensiell);
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
-        parallelle.add(opprettTaskSendTilØkonomi());
+        if (behandling.erYtelseBehandling()) {
+            parallelle.add(opprettTaskSendTilØkonomi());
+        }
 
         taskData.addNesteParallell(parallelle);
         taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));

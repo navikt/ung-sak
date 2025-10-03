@@ -13,6 +13,7 @@ import no.nav.pdfgen.core.PDFGenCore;
 import no.nav.pdfgen.core.PDFGenResource;
 import no.nav.pdfgen.core.pdf.CreateHtmlKt;
 import no.nav.pdfgen.core.pdf.CreatePdfKt;
+import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +77,13 @@ public class PdfGenKlient {
         }
     }
 
-
     @WithSpan
     public PdfGenDokument lagDokument(TemplateInput payload, boolean kunHtml) {
+        return BrevGenereringSemafor.begrensetParallellitet(() -> doLagDokument(payload,  kunHtml));
+    }
+
+    @WithSpan
+    public PdfGenDokument doLagDokument(TemplateInput payload, boolean kunHtml) {
         JsonNode templateData = pdfgenObjectMapper.convertValue(payload.templateDto(), JsonNode.class);
         return lagDokument(payload.templateType().getPath(), payload.templateType().getDir(), templateData, kunHtml);
     }

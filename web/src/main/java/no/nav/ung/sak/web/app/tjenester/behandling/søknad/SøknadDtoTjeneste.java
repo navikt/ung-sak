@@ -70,7 +70,7 @@ public class SøknadDtoTjeneste {
 
     private List<Periode> hentFagsakPerioder(Optional<Fagsak> fagsakOpt) {
         return fagsakOpt
-            .flatMap(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
+            .flatMap(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()))
             .map(behandling -> {
                     final var vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTilVurderingTjeneste(behandling.getFagsak().getYtelseType(), behandling.getType());
                     final NavigableSet<DatoIntervallEntitet> søknadsperioder = vilkårsPerioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId());

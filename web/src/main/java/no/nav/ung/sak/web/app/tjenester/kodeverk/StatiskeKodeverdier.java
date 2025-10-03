@@ -10,6 +10,9 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.historikk.*;
+import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
+import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -42,7 +45,10 @@ public record StatiskeKodeverdier(
     @NotNull Set<VurderÅrsak> vurderingsÅrsaker,
     @NotNull Set<Språkkode> språkkoder,
     @NotNull Set<VedtakResultatType> vedtakResultatTyper,
-    @NotNull Set<ÅrsakTilVurdering> årsakerTilVurdering
+    @NotNull Set<ÅrsakTilVurdering> årsakerTilVurdering,
+    @NotNull Set<KlageMedholdÅrsak> klageMedholdÅrsak,
+    @NotNull Set<KlageAvvistÅrsak> klageAvvistÅrsaker,
+    @NotNull Set<KlageVurderingType> klageVurderingTyper
 ) {
 
     // Eigentleg ikkje så nødvendig, men signaliserer tydleg at dei fleste verdier er enums som implementerer Kodeverdi.
@@ -73,7 +79,10 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(VurderÅrsak.class),
             new HashSet<>(Språkkode.kodeMap().values()),
             alleEnumVerdier(VedtakResultatType.class),
-            alleEnumVerdier(ÅrsakTilVurdering.class)
+            alleEnumVerdier(ÅrsakTilVurdering.class),
+            alleEnumVerdier(KlageMedholdÅrsak.class),
+            alleEnumVerdier(KlageAvvistÅrsak.class),
+            alleEnumVerdier(KlageVurderingType.class)
         );
     }
 }

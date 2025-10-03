@@ -23,6 +23,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.vedtak.impl.KlageVedtakTjeneste;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
@@ -93,6 +94,9 @@ public class ForeslåVedtakTjenesteTest {
 
     private ArrayList<Oppgaveinfo> oppgaveinfoerSomReturneres = new ArrayList<>();
 
+    @Mock(strictness = Mock.Strictness.LENIENT)
+    private KlageVedtakTjeneste klageVedtakTjeneste;
+
     @BeforeEach
     public void setUp() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
@@ -105,7 +109,7 @@ public class ForeslåVedtakTjenesteTest {
 
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevTjeneste, vedtaksbrevValgRepository);
+        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevTjeneste, klageVedtakTjeneste, vedtaksbrevValgRepository);
     }
 
     @Test
