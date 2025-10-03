@@ -51,11 +51,6 @@
 			<artifactId>beregning-ytelse</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>no.nav.k9.felles.integrasjon</groupId>
-			<artifactId>k9-sensu-klient</artifactId>
-		</dependency>
-
 		<!-- Test -->
 		<dependency>
 			<groupId>no.nav.ung.sak</groupId>
