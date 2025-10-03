@@ -15,11 +15,13 @@ import java.time.LocalDate;
 
 public record JournalførPapirSøknadDto(
 
+    @StandardAbacAttributt(StandardAbacAttributtType.JOURNALPOST_ID)
     @JsonProperty(value = "journalpostId", required = true)
     @NotNull
     @Valid
     JournalpostId journalpostId,
 
+    @StandardAbacAttributt(StandardAbacAttributtType.AKTØR_ID)
     @JsonProperty(value ="aktørId", required = true)
     @NotNull
     @Valid

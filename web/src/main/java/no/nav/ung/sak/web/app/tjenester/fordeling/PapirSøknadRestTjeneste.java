@@ -83,18 +83,17 @@ public class PapirSøknadRestTjeneste {
     @Path("/journalførPapirSøknad")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaded med fagsakstilknytning.", summary = ("Oppretterfagsak og journalfører papirsøknad"), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
+    @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
         Periode periode = new Periode(journalførPapirSøknadDto.startDato(), journalførPapirSøknadDto.startDato().plusDays(260));
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, journalførPapirSøknadDto.aktørId(), periode.getFom(), periode.getTom());
-        Optional<String> saksnummer = Optional.of(fagsak.getSaksnummer().getVerdi());
         var journalpostId = journalførPapirSøknadDto.journalpostId();
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
         } else {
             try {
-                if (journalpostId != null && journalføringTjeneste.tilJournalføring(journalpostId, saksnummer, OmrådeTema.UNG, journalførPapirSøknadDto.aktørId().getId())) {
+                if (journalpostId != null && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, journalførPapirSøknadDto.aktørId().getId())) {
                     return Response.ok().build();
                 } else {
                     throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
