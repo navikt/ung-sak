@@ -3596,6 +3596,25 @@
         "required" : [ "bruker", "ytelseType" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.søknad.JournalførPapirSøknadDto" : {
+        "properties" : {
+          "journalpostId" : {
+            "type" : "string"
+          },
+          "personIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "startDato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "journalpostId", "personIdent", "startDato" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.søknad.SøknadDto" : {
         "properties" : {
           "begrunnelseForSenInnsending" : {
@@ -7550,6 +7569,32 @@
           }
         },
         "summary" : "Henter og viser papirsøknad",
+        "tags" : [ "fordel" ]
+      }
+    },
+    "/api/papir/journalførPapirSøknad" : {
+      "post" : {
+        "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
+        "operationId" : "journalførPapirSøknad",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.JournalførPapirSøknadDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Oppretter fagsak og journalfører papirsøknad",
         "tags" : [ "fordel" ]
       }
     },
