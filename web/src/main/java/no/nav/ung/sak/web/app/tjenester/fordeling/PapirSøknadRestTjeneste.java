@@ -17,11 +17,21 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.domenetjenester.arkiv.dok.DokarkivException;
+import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
+import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
+import no.nav.ung.sak.kontrakt.søknad.SøknadDto;
+import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.io.ByteArrayInputStream;
+import java.util.Optional;
 
 import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste.BASE_PATH;
 
@@ -33,12 +43,18 @@ public class PapirSøknadRestTjeneste {
 
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
+    private TilJournalføringTjeneste journalføringTjeneste;
+
+    private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
+
     public PapirSøknadRestTjeneste() {// For Rest-CDI
     }
 
     @Inject
-    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste) {
+    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste, TilJournalføringTjeneste journalføringTjeneste, UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
+        this.journalføringTjeneste = journalføringTjeneste;
+        this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
     }
 
     @POST
@@ -63,4 +79,29 @@ public class PapirSøknadRestTjeneste {
         }
     }
 
+    @POST
+    @Path("/journalførPapirSøknad")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaded med fagsakstilknytning.", summary = ("Oppretterfagsak og journalfører papirsøknad"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
+    public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
+        Periode periode = new Periode(journalførPapirSøknadDto.startDato(), journalførPapirSøknadDto.startDato().plusDays(260));
+        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, journalførPapirSøknadDto.aktørId(), periode.getFom(), periode.getTom());
+        Optional<String> saksnummer = Optional.of(fagsak.getSaksnummer().getVerdi());
+        var journalpostId = journalførPapirSøknadDto.journalpostId();
+        if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
+            throw new IllegalStateException("Journalpost er allerede journalført");
+        } else {
+            try {
+                if (journalpostId != null && journalføringTjeneste.tilJournalføring(journalpostId, saksnummer, OmrådeTema.UNG, journalførPapirSøknadDto.aktørId().getId())) {
+                    return Response.ok().build();
+                } else {
+                    throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
+                }
+            } catch (Exception e) {
+                return Response.serverError().entity("Kan ikke ferdigstille journalpost: " + e.getMessage()).build();
+            }
+        }
+    }
 }
