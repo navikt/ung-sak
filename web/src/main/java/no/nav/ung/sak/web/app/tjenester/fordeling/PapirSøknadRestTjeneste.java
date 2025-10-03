@@ -30,6 +30,7 @@ import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
 import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.io.ByteArrayInputStream;
@@ -59,6 +60,7 @@ public class PapirSøknadRestTjeneste {
     public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste,
                                    TilJournalføringTjeneste journalføringTjeneste,
                                    @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
+
                                    PersoninfoAdapter personinfoAdapter,
                                    JournalpostRepository journalpostRepository) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
@@ -97,18 +99,19 @@ public class PapirSøknadRestTjeneste {
     @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
-        Periode periode = new Periode(journalførPapirSøknadDto.startDato(), journalførPapirSøknadDto.startDato().plusDays(260));
+        Periode periode = new Periode(journalførPapirSøknadDto.startDato(), null);
 
-        Optional<AktørId> aktørId = Optional.ofNullable(personinfoAdapter.hentAktørIdForPersonIdent(journalførPapirSøknadDto.personIdent())
-            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for personIdent")));
-        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId.get(), periode.getFom(), periode.getTom());
+        AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(journalførPapirSøknadDto.personIdent()))
+            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for personIdent"));
+
+        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
 
         var journalpostId = journalførPapirSøknadDto.journalpostId();
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
         } else {
             try {
-                if (journalpostId != null && !journalpostRepository.markerJournalposterBehandlet(journalpostId).isEmpty() && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.get().getAktørId())) {
+                if (journalpostId != null && !journalpostRepository.markerJournalposterBehandlet(journalpostId).isEmpty() && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId())) {
                     return Response.ok().build();
                 } else {
                     throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
