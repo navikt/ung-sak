@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.slf4j.Logger;
@@ -15,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
-@ProsessTask(value = OppfriskInntektForBehandlingerPåVentBatchTask.TASKTYPE, cronExpression = "0 0 * * * *")
-public class OppfriskInntektForBehandlingerPåVentBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = OppfriskInntektForBehandlingerPåVentBatchTask.TASKTYPE)
+public class OppfriskInntektForBehandlingerPåVentBatchTask implements BatchProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskInntektForBehandlingerPåVentBatchTask.class);
 
@@ -88,5 +89,10 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements ProsessTa
     private boolean harPågåendeEllerFeiletTask(Behandling behandling) {
         Map<String, ProsessTaskData> nesteTask = prosesseringAsynkTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null);
         return !nesteTask.isEmpty();
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 0 * * * *");
     }
 }

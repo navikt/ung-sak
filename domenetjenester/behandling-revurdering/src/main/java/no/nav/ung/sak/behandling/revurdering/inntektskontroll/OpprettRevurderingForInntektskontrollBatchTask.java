@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandling.revurdering.inntektskontroll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -23,8 +24,8 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
  * Kjører den åttende i måneden kl 07:00.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, cronExpression = "0 0 7 8 * *", maxFailedRuns = 1)
-public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, maxFailedRuns = 1)
+public class OpprettRevurderingForInntektskontrollBatchTask implements BatchProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettRevurderingForInntektskontrollBatch";
     private ProsessTaskTjeneste prosessTaskTjeneste;
@@ -37,6 +38,10 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements ProsessTa
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 0 7 8 * *");
+    }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {

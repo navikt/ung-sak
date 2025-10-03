@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandling.revurdering.inntektskontroll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,10 @@ import static no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettOppg
  * Kjører den første i måneden kl 07:00.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettOppgaverForInntektsrapporteringBatchTask.TASKNAME, cronExpression = "0 0 7 1 * *", maxFailedRuns = 1)
-public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = OpprettOppgaverForInntektsrapporteringBatchTask.TASKNAME, maxFailedRuns = 1)
+public class OpprettOppgaverForInntektsrapporteringBatchTask implements BatchProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettOppgaverForInntektsrapporteringBatch";
-
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
@@ -38,6 +38,10 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements ProsessT
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 0 7 1 * *");
+    }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
