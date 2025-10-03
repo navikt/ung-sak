@@ -3602,6 +3602,9 @@
             "type" : "string"
           },
           "personIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
             "type" : "string"
           },
           "startDato" : {
