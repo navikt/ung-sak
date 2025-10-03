@@ -55,9 +55,9 @@ public class OpprettRevurderingHøySatsTask implements ProsessTaskHandler {
         log.info("Utleder fagsaker med overgang til høy sats for dato {}", dato.format(DateTimeFormatter.ISO_LOCAL_DATE));
         Set<Map.Entry<Fagsak, LocalDate>> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(dato).entrySet();
 
-        if (prosessTaskData.getFagsakId() != null) {
+        if (prosessTaskData.getSaksnummer() != null) {
             log.info("Kjører utledelse for enkelt fagsak  {}, overstyrer liste med fagsaker som skal ha revurdering", prosessTaskData.getFagsakId());
-            fagsakerTilRevurdering = fagsakerTilRevurdering.stream().filter(it -> it.getKey().getId().equals(prosessTaskData.getFagsakId())).collect(Collectors.toSet());
+            fagsakerTilRevurdering = fagsakerTilRevurdering.stream().filter(it -> it.getKey().getSaksnummer().getVerdi().equals(prosessTaskData.getSaksnummer())).collect(Collectors.toSet());
         }
 
         List<ProsessTaskData> prosessTaskerTilRevurdering = utledProsessTaskerForRevurdering(fagsakerTilRevurdering);
