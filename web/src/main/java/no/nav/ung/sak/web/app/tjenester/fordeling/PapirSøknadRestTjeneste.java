@@ -18,6 +18,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
+import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -45,18 +46,20 @@ public class PapirSøknadRestTjeneste {
     private TilJournalføringTjeneste journalføringTjeneste;
     private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
     private PersoninfoAdapter personinfoAdapter;
+    private JournalpostRepository journalpostRepository;
 
 
-    public PapirSøknadRestTjeneste(PersoninfoAdapter personinfoAdapter) {// For Rest-CDI
-        this.personinfoAdapter = personinfoAdapter;
+    public PapirSøknadRestTjeneste() {// For Rest-CDI
+
     }
 
     @Inject
-    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste, TilJournalføringTjeneste journalføringTjeneste, UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker, PersoninfoAdapter personinfoAdapter) {
+    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste, TilJournalføringTjeneste journalføringTjeneste, UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker, PersoninfoAdapter personinfoAdapter, JournalpostRepository journalpostRepository) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
         this.personinfoAdapter = personinfoAdapter;
+        this.journalpostRepository = journalpostRepository;
     }
 
     @POST
@@ -100,6 +103,7 @@ public class PapirSøknadRestTjeneste {
         } else {
             try {
                 if (journalpostId != null && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.get().getAktørId())) {
+                    journalpostRepository.markerJournalposterBehandlet(journalpostId);
                     return Response.ok().build();
                 } else {
                     throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
