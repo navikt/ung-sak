@@ -1,6 +1,5 @@
 package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -18,7 +17,6 @@ import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
-import no.nav.ung.sak.typer.AktørId;
 
 /**
  * Dette er et Repository for håndtering av alle persistente endringer i en Personopplysning graf.
@@ -76,15 +74,6 @@ public class PersonopplysningRepository {
     private DiffEntity personopplysningDiffer() {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
         return new DiffEntity(traverser);
-    }
-
-    public PersonopplysningGrunnlagEntitet hentPersonOpplysningerForOppgittBehandlingEllerSisteYtelsebehandling(Behandling behandling) {
-        var behandlingBruktForPersonopplysninger = behandling.erYtelseBehandling() ?
-            behandling :
-            behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(behandling.getFagsak().getId())
-                .orElseThrow(() -> new IllegalStateException("Forventer å finne en ytelsebehandling for fagsak " + behandling.getFagsak().getSaksnummer()));
-
-        return hentPersonopplysninger(behandlingBruktForPersonopplysninger.getId());
     }
 
     public PersonopplysningGrunnlagEntitet hentPersonopplysninger(Long behandlingId) {

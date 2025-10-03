@@ -17,6 +17,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -39,6 +40,7 @@ public class BehandlingsoppretterTjeneste {
     private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private KlageVurderingTjeneste klageVurderingTjeneste;
+    private PersonopplysningRepository personopplysningRepository;
 
     BehandlingsoppretterTjeneste() {
         // CDI
@@ -49,13 +51,15 @@ public class BehandlingsoppretterTjeneste {
                                         BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                         @Any Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                        KlageVurderingTjeneste klageVurderingTjeneste) {
+                                        KlageVurderingTjeneste klageVurderingTjeneste,
+                                        PersonopplysningRepository personopplysningRepository) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.klageVurderingTjeneste = klageVurderingTjeneste;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
@@ -82,26 +86,28 @@ public class BehandlingsoppretterTjeneste {
     }
 
 
-    public Behandling opprettBehandling(Fagsak fagsak, BehandlingType behandlingType) {
+    public Behandling opprettKlageBehandling(Fagsak fagsak) {
+        var forrigeBehandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(
+            () -> new IllegalStateException("Kan ikke opprette klagebehandling uten tidligere behandling")
+        );
+
         var enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        return opprettBehandling(fagsak, behandlingType, enhet, BehandlingÅrsakType.UDEFINERT);
+        var nyBehandling = opprettBehandling(fagsak, BehandlingType.KLAGE, enhet, BehandlingÅrsakType.UDEFINERT);
+        personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
+        klageVurderingTjeneste.opprettKlageUtredning(nyBehandling, enhet);
+        return nyBehandling;
     }
 
-
     private Behandling opprettBehandling(Fagsak fagsak, BehandlingType behandlingType, OrganisasjonsEnhet enhet, BehandlingÅrsakType årsak) {
-        var behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
+        return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
             beh -> {
                 if (!BehandlingÅrsakType.UDEFINERT.equals(årsak)) {
                     BehandlingÅrsak.builder(årsak).buildFor(beh);
                 }
                 beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
                 beh.setBehandlendeEnhet(enhet);
-            });
-
-        klageVurderingTjeneste.opprettKlageUtredning(behandling, enhet);
-        return behandling;
+        });
     }
-
 
     public boolean kanOppretteNyBehandlingAvType(Long fagsakId, BehandlingType type) {
         boolean finnesÅpneBehandlingerAvType = behandlingRepository.hentÅpneBehandlingerForFagsakId(fagsakId, type).size() > 0;

@@ -37,7 +37,7 @@ public class OppgaveTjeneste {
     private static final int DEFAULT_OPPGAVEFRIST_DAGER = 1;
 
     private static final String SAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Sak må flyttes til Infotrygd";
-    private static final String DEFAULT_OPPGAVEBESKRIVELSE = "Må behandle sak i VL!";
+    private static final String DEFAULT_OPPGAVEBESKRIVELSE = "Må behandle sak i VL";
     private static final String OPPGAVEBESKRIVELSE_ANKE = "Anke er ferdigbehandlet med utfall ";
 
     private static final String NØS_ANSVARLIG_ENHETID = "4151";

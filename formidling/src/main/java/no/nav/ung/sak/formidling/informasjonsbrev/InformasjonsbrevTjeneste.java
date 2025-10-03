@@ -56,7 +56,7 @@ public class InformasjonsbrevTjeneste {
     private List<InformasjonsbrevMottakerValgResponse> mapMottakere(Behandling behandling) {
         AktørId aktørId = behandling.getAktørId();
         var personopplysning = personopplysningRepository
-            .hentPersonOpplysningerForOppgittBehandlingEllerSisteYtelsebehandling(behandling)
+            .hentPersonopplysninger(behandling.getId())
             .getGjeldendeVersjon()
             .getPersonopplysning(aktørId);
 

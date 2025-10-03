@@ -33,7 +33,7 @@ public final class StadfesteStrategy implements VedtaksbrevKlageInnholdbyggerStr
         var stadfestetAvKlageinstans = klageutredning.hentKlagevurdering(KlageVurdertAv.KLAGEINSTANS).isPresent();
         if (!stadfestetAvKlageinstans) {
             return VedtaksbrevStrategyResultat.medBrev(
-                DokumentMalType.KLAGE_OVERSENDT_KLAGEINSTANS, klageOversendtInnholdBygger, "Brev for oversendelse av klage til klageinstans");
+                DokumentMalType.KLAGE_OVERSENDT_KLAGEINSTANS, false, klageOversendtInnholdBygger, "Brev for oversendelse av klage til klageinstans");
         } else {
             return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Sender ikke brev når klage er stadfestet i klageinstansen");
         }

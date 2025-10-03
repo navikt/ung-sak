@@ -49,7 +49,6 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.ung.sak.kontrakt.behandling.*;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
@@ -350,7 +349,7 @@ public class BehandlingRestTjeneste {
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
 
         } else if (BehandlingType.KLAGE.getKode().equals(dto.getBehandlingType().getKode())) {
-            Behandling behandling = behandlingsoppretterTjeneste.opprettBehandling(fagsak, BehandlingType.KLAGE);
+            Behandling behandling = behandlingsoppretterTjeneste.opprettKlageBehandling(fagsak);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
 
