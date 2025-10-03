@@ -9,6 +9,9 @@ import no.nav.ung.sak.formidling.template.dto.ManuellVedtaksbrevDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 
 @Dependent
+/**
+ * Denne brukes bare til å tilby frontend en mal å fylle inn, og ikke til å lage faktiske vedtaksbrev!
+ */
 public class TomVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger {
 
     public static final String TOM_VEDTAKSBREV_HTML_OVERSKRIFT = "Fyll inn overskrift...";

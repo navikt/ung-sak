@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
@@ -29,12 +30,27 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
 
         var forklaring = "Automatisk brev ved endring av rapportert inntekt.";
         if (harUtførtKontrollerInntekt) {
-            forklaring += " Kan redigere pga ap=" + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + ".";
+            return medRedigerbarKontrollerInntektBrev(forklaring);
         }
-        return VedtaksbrevStrategyResultat.medBrev(DokumentMalType.ENDRING_INNTEKT,
-            harUtførtKontrollerInntekt,
+
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_INNTEKT,
             endringRapportertInntektInnholdBygger,
             forklaring);
+    }
+
+    private VedtaksbrevStrategyResultat medRedigerbarKontrollerInntektBrev(String forklaring) {
+        forklaring += " Kan redigere pga ap=" + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + ".";
+        return new VedtaksbrevStrategyResultat(
+            DokumentMalType.ENDRING_INNTEKT,
+            endringRapportertInntektInnholdBygger,
+            new VedtaksbrevEgenskaper(
+                false,
+                false,
+                true,
+                true),
+            null,
+            forklaring
+        );
     }
 
     @Override

@@ -3,12 +3,12 @@ package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 
 public record VedtaksbrevStrategyResultat(
     DokumentMalType dokumentMalType,
     VedtaksbrevInnholdBygger bygger,
-    boolean kanRedigere,
-    boolean kanHindre,
+    VedtaksbrevEgenskaper vedtaksbrevEgenskaper,
     IngenBrevÅrsakType ingenBrevÅrsakType,
     String forklaring
 ) {
@@ -17,19 +17,25 @@ public record VedtaksbrevStrategyResultat(
         return new VedtaksbrevStrategyResultat(
             null,
             null,
-            false, false, ingenBrevÅrsakType, forklaring
+            new VedtaksbrevEgenskaper(false,
+                false,
+                false,
+                false),
+            ingenBrevÅrsakType, forklaring
         );
     }
 
-    public static VedtaksbrevStrategyResultat medBrev(
+    public static VedtaksbrevStrategyResultat medUredigerbarBrev(
         DokumentMalType dokumentMalType,
-        boolean kanRedigere, VedtaksbrevInnholdBygger bygger,
+        VedtaksbrevInnholdBygger bygger,
         String forklaring) {
         return new VedtaksbrevStrategyResultat(
             dokumentMalType,
             bygger,
-            kanRedigere,
-            false,
+            new VedtaksbrevEgenskaper(false,
+                false,
+                false,
+                false),
             null,
             forklaring
         );
