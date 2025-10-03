@@ -61,12 +61,7 @@ public class VedtaksbrevRegler {
             .toList();
 
         if (!ingenBrevResultat.isEmpty()) {
-            return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
-                ingenBrevResultat.stream()
-                    .map(it -> VedtaksbrevRegelResultat.ingenBrev(
-                        it.ingenBrevÅrsakType(), it.forklaring()))
-                    .toList()
-            );
+            return lagIngenBrevResultat(detaljertResultat, ingenBrevResultat);
         }
 
         var brevResultater = strategyResultater.stream()
@@ -74,23 +69,43 @@ public class VedtaksbrevRegler {
             .toList();
 
         if (!brevResultater.isEmpty()) {
-            var vedtaksbrev = brevResultater.stream()
-                .map(it -> new Vedtaksbrev(
-                    it.dokumentMalType(),
-                    it.bygger(),
-                    it.vedtaksbrevEgenskaper(),
-                    it.forklaring())
-                ).toList();
-            return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, vedtaksbrev);
+            return lagBrevResultat(detaljertResultat, brevResultater);
         }
 
+        //Fallback for ukjente brev
+        return lagIkkeImplementertBrevResultat(detaljertResultat);
+    }
+
+    private static BehandlingVedtaksbrevResultat lagIngenBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
+            ingenBrevResultat.stream()
+                .map(it -> VedtaksbrevRegelResultat.ingenBrev(
+                    it.ingenBrevÅrsakType(), it.forklaring()))
+                .toList()
+        );
+    }
+
+    private static BehandlingVedtaksbrevResultat lagBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> brevResultater) {
+        var vedtaksbrev = brevResultater.stream()
+            .map(it -> new Vedtaksbrev(
+                it.dokumentMalType(),
+                it.bygger(),
+                it.vedtaksbrevEgenskaper(),
+                it.forklaring())
+            ).toList();
+        return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, vedtaksbrev);
+    }
+
+    private static BehandlingVedtaksbrevResultat lagIkkeImplementertBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultaterInfo = detaljertResultat
             .toSegments().stream()
             .flatMap(it -> it.getValue().resultatInfo().stream())
             .collect(Collectors.toSet());
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring)));
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(
+            VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring
+            )));
     }
 
 
