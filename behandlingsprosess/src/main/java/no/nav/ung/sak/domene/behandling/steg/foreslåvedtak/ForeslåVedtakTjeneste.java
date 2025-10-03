@@ -44,7 +44,7 @@ class ForeslåVedtakTjeneste {
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           VedtaksbrevValgRepository vedtaksbrevValgRepository,
                           VedtaksbrevRegler vedtaksbrevRegler,
-                          @KonfigVerdi(value = "AP_VED_IKKE_IMPLEMENTERT_BREV", defaultVerdi = "true") boolean apVedIkkeImplementertBrev) {
+                          @KonfigVerdi(value = "AP_VED_IKKE_IMPLEMENTERT_BREV", defaultVerdi = "false") boolean apVedIkkeImplementertBrev) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
