@@ -83,6 +83,13 @@ public class PdfGenKlient {
         return lagDokument(payload.templateType().getPath(), payload.templateType().getDir(), templateData, kunHtml);
     }
 
+
+    @WithSpan
+    public PdfGenDokument lagDokument(String templateNavn, String dir, Object data, boolean kunHtml) {
+        JsonNode templateData = pdfgenObjectMapper.convertValue(data, JsonNode.class);
+        return lagDokument(templateNavn, dir, templateData, kunHtml);
+    }
+
     private PdfGenDokument lagDokument(String templateNavn, String dir, JsonNode payload, boolean kunHtml) {
         String html = OpentelemetrySpanWrapper.forApplikasjon().span("pdfgen.lagDokument.crateHtml",
             span -> span.setAttribute("templateNavn", templateNavn).setAttribute("templateDir", dir),
