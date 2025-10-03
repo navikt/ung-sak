@@ -3,9 +3,11 @@ package no.nav.ung.sak.formidling;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
@@ -14,9 +16,9 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -228,11 +230,14 @@ class VedtaksbrevTjenesteTest {
     }
 
     @Test
-    @Disabled //TODO enable når tilfelle for tomt brev er klar som kan hindres.
     void skal_ikke_lage_brev_hvis_hindret() {
-        UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
+        var behandling = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
+            .medUngTestGrunnlag(ungTestGrunnlag)
+            .buildOgLagreMedUng(ungTestRepositories);
 
-        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
         String automatiskBrevHtmlSnippet = "<h1>";
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
 
@@ -243,7 +248,7 @@ class VedtaksbrevTjenesteTest {
                 true,
                 true,
                 redigertHtml,
-                DokumentMalType.ENDRING_INNTEKT)
+                DokumentMalType.MANUELT_VEDTAK_DOK)
         );
 
         VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
@@ -255,13 +260,13 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering1.kanOverstyreHindre()).isTrue();
 
         //Forhåndsviser automatisk brev - skal fortsått gå bra
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, false)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.MANUELT_VEDTAK_DOK, false)).contains(automatiskBrevHtmlSnippet);
 
         //Forhåndsviser manuell brev - skal fortsatt gå bra
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true)).contains(redigertHtml);
+        assertThat(forhåndsvis(behandling, DokumentMalType.MANUELT_VEDTAK_DOK, true)).contains(redigertHtml);
 
         //Ingen brev som brukes av behandling
-        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null))
+        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.MANUELT_VEDTAK_DOK, null))
             .isInstanceOf(IllegalArgumentException.class);
     }
 

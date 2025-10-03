@@ -115,7 +115,7 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_gi_ingen_brev_ved_avslag_aldersvilkår() {
+    void skal_gi_tomt_brev_som_må_redigeres_ved_avslag_aldersvilkår() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
         var behandling = TestScenarioBuilder.builderMedSøknad()
@@ -123,15 +123,22 @@ class VedtaksbrevReglerTest {
             .medUngTestGrunnlag(ungTestGrunnlag)
             .buildOgLagreMedUng(ungTestRepositories);
 
+        behandling.avsluttBehandling();
+
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
-        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
 
-        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
-        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
-
-        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+        var egenskaper = regelResulat.vedtaksbrevEgenskaper();
+        assertThat(regelResulat.vedtaksbrevBygger()).isInstanceOf(TomVedtaksbrevInnholdBygger.class);
+        assertThat(regelResulat.dokumentMalType()).isEqualTo(DokumentMalType.MANUELT_VEDTAK_DOK);
+        assertThat(egenskaper.kanHindre()).isTrue();
+        assertThat(egenskaper.kanOverstyreHindre()).isTrue();
+        assertThat(egenskaper.kanRedigere()).isTrue();
+        assertThat(egenskaper.kanOverstyreRediger()).isTrue();
+        assertThat(regelResulat.forklaring()).contains("avslag");
 
     }
 
