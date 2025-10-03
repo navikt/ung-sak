@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandling.revurdering.sats;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -28,8 +29,8 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
  * Kjører hver dag kl 07:15.
  */
 @ApplicationScoped
-@ProsessTask(value = OpprettRevurderingHøySatsBatchTask.TASKNAME, cronExpression = "0 15 7 * * *", maxFailedRuns = 1)
-public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = OpprettRevurderingHøySatsBatchTask.TASKNAME, maxFailedRuns = 1)
+public class OpprettRevurderingHøySatsBatchTask implements BatchProsessTaskHandler {
 
     public static final String TASKNAME = "batch.opprettRevurderingHøySats";
 
@@ -84,5 +85,10 @@ public class OpprettRevurderingHøySatsBatchTask implements ProsessTaskHandler {
                 return tilVurderingTask;
             }).filter(Objects::nonNull)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 15 7 * * *");
     }
 }
