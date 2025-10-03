@@ -21,6 +21,7 @@ import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
@@ -34,6 +35,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
 
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste.BASE_PATH;
 
 @Path(BASE_PATH)
@@ -54,7 +56,11 @@ public class PapirSøknadRestTjeneste {
     }
 
     @Inject
-    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste, TilJournalføringTjeneste journalføringTjeneste, UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker, PersoninfoAdapter personinfoAdapter, JournalpostRepository journalpostRepository) {
+    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste,
+                                   TilJournalføringTjeneste journalføringTjeneste,
+                                   @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
+                                   PersoninfoAdapter personinfoAdapter,
+                                   JournalpostRepository journalpostRepository) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
