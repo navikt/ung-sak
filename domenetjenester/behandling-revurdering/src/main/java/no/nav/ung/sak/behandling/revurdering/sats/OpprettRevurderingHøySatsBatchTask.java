@@ -5,8 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 
 /**
@@ -32,9 +31,17 @@ public class OpprettRevurderingHøySatsBatchTask implements BatchProsessTaskHand
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        LocalDate datoForKjøring = LocalDate.now();
+
+        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(it -> it.getFagsakId() == null).toList();
+        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(it -> it.getFagsakId() == null).toList();
+        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(it -> it.getFagsakId() == null).toList();
+        if (!feiletTask.isEmpty() || !klarTask.isEmpty() || !vetoTask.isEmpty()) {
+            // Hvis det finnes noen task i noen av disse statusene, så betyr det at de enten kjører, eller skal kjøres.
+            // Vi ønsker ikke å opprette duplikater av disse.
+            return;
+        }
+
         ProsessTaskData taskData = ProsessTaskData.forProsessTask(OpprettRevurderingHøySatsTask.class);
-        taskData.setProperty(OpprettRevurderingHøySatsTask.DATO, datoForKjøring.format(DateTimeFormatter.ISO_LOCAL_DATE));
         prosessTaskTjeneste.lagre(taskData);
     }
 

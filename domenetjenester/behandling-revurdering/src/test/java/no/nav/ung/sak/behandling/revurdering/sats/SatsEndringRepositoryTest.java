@@ -48,7 +48,7 @@ class SatsEndringRepositoryTest {
     }
 
     @Test
-    void forventer_ingen_fagsak_der_bruker_ble_25_aar_før_dato() {
+    void forventer_1_fagsak_der_bruker_ble_25_aar_før_dato() {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 
@@ -56,7 +56,13 @@ class SatsEndringRepositoryTest {
 
         Map<Fagsak, LocalDate> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(LocalDate.now());
 
-        assertThat(fagsakerTilRevurdering.size()).isEqualTo(0);
+        assertThat(fagsakerTilRevurdering.size()).isEqualTo(1);
+        Map.Entry<Fagsak, LocalDate> fagsakTilRevurdering = fagsakerTilRevurdering.entrySet().stream().findFirst().get();
+        assertThat(fagsakTilRevurdering.getKey().getPeriode().getFomDato()).isEqualTo(fagsakPeriode.getFom());
+        assertThat(fagsakTilRevurdering.getKey().getPeriode().getTomDato()).isEqualTo(fagsakPeriode.getTom());
+
+        LocalDate endringsdato = fødselsdato.plusYears(25);
+        assertThat(fagsakTilRevurdering.getValue()).isEqualTo(endringsdato);
     }
 
     @Test

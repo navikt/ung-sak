@@ -30,7 +30,6 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
 public class OpprettRevurderingHøySatsTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "opprettRevurderingHøySats";
-    public static final String DATO = "DATO";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingHøySatsTask.class);
     private SatsEndringRepository satsEndringRepository;
@@ -52,7 +51,7 @@ public class OpprettRevurderingHøySatsTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         ProsessTaskGruppe taskGruppeTilRevurderinger = new ProsessTaskGruppe();
-        var dato = LocalDate.parse(prosessTaskData.getPropertyValue(DATO), DateTimeFormatter.ISO_LOCAL_DATE);
+        var dato = LocalDate.now();
         log.info("Utleder fagsaker med overgang til høy sats for dato {}", dato.format(DateTimeFormatter.ISO_LOCAL_DATE));
         Set<Map.Entry<Fagsak, LocalDate>> fagsakerTilRevurdering = satsEndringRepository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(dato).entrySet();
 
