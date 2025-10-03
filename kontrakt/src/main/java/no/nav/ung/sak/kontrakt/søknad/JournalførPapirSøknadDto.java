@@ -4,12 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.AppAbacAttributtType;
 import no.nav.ung.abac.StandardAbacAttributt;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.DokumentId;
 import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
 
@@ -21,11 +18,11 @@ public record JournalførPapirSøknadDto(
     @Valid
     JournalpostId journalpostId,
 
-    @StandardAbacAttributt(StandardAbacAttributtType.AKTØR_ID)
-    @JsonProperty(value ="aktørId", required = true)
+    @StandardAbacAttributt(StandardAbacAttributtType.FNR)
+    @JsonProperty(value ="personIdent", required = true)
     @NotNull
     @Valid
-    AktørId aktørId,
+    PersonIdent personIdent,
 
     @JsonProperty(value ="startDato", required = true)
     @NotNull

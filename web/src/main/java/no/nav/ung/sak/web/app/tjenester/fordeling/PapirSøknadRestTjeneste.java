@@ -17,16 +17,16 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.domenetjenester.arkiv.dok.DokarkivException;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
+import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
 import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
-import no.nav.ung.sak.kontrakt.søknad.SøknadDto;
 import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -42,19 +42,21 @@ public class PapirSøknadRestTjeneste {
     static final String BASE_PATH = "/papir";
 
     private DokumentArkivTjeneste dokumentArkivTjeneste;
-
     private TilJournalføringTjeneste journalføringTjeneste;
-
     private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
+    private PersoninfoAdapter personinfoAdapter;
 
-    public PapirSøknadRestTjeneste() {// For Rest-CDI
+
+    public PapirSøknadRestTjeneste(PersoninfoAdapter personinfoAdapter) {// For Rest-CDI
+        this.personinfoAdapter = personinfoAdapter;
     }
 
     @Inject
-    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste, TilJournalføringTjeneste journalføringTjeneste, UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker) {
+    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste, TilJournalføringTjeneste journalføringTjeneste, UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker, PersoninfoAdapter personinfoAdapter) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
+        this.personinfoAdapter = personinfoAdapter;
     }
 
     @POST
@@ -87,13 +89,17 @@ public class PapirSøknadRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
         Periode periode = new Periode(journalførPapirSøknadDto.startDato(), journalførPapirSøknadDto.startDato().plusDays(260));
-        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, journalførPapirSøknadDto.aktørId(), periode.getFom(), periode.getTom());
+
+        Optional<AktørId> aktørId = Optional.ofNullable(personinfoAdapter.hentAktørIdForPersonIdent(journalførPapirSøknadDto.personIdent())
+            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for personIdent")));
+        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId.get(), periode.getFom(), periode.getTom());
+
         var journalpostId = journalførPapirSøknadDto.journalpostId();
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
         } else {
             try {
-                if (journalpostId != null && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, journalførPapirSøknadDto.aktørId().getId())) {
+                if (journalpostId != null && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.get().getAktørId())) {
                     return Response.ok().build();
                 } else {
                     throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
