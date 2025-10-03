@@ -23,13 +23,13 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        boolean harUtførtKontrollerInntekt = behandling.getAksjonspunkterMedTotrinnskontroll().stream()
+        boolean harUtførtKontrollerInntekt = behandling.getAksjonspunkter().stream()
             .filter(Aksjonspunkt::erUtført)
             .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
-        var forklaring = "Automatisk brev ved endring av rapportert inntekt. ";
+        var forklaring = "Automatisk brev ved endring av rapportert inntekt.";
         if (harUtførtKontrollerInntekt) {
-            forklaring += "Kan redigere pga ap " + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + ".";
+            forklaring += " Kan redigere pga ap=" + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + ".";
         }
         return VedtaksbrevStrategyResultat.medBrev(DokumentMalType.ENDRING_INNTEKT,
             harUtførtKontrollerInntekt,
