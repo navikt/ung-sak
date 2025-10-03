@@ -26,6 +26,15 @@ import java.util.stream.Collectors;
 
 public class ObjectMapperFactory {
 
+    private static ObjectMapper baseObjectMapper;
+
+    public static ObjectMapper getBaseObjectMapperCopy() {
+        if(baseObjectMapper == null) {
+            baseObjectMapper = ObjectMapperFactory.createBaseObjectMapper();
+        }
+        return baseObjectMapper.copy();
+    }
+
     public static SimpleModule createOverstyrendeKodeverdiSerializerModule(final SakKodeverkOverstyringSerialisering sakKodeverkOverstyringSerialisering) {
         final SimpleModule module = new SimpleModule("KodeverdiSerialisering", new Version(1, 0, 0, null, null, null));
 
@@ -81,7 +90,7 @@ public class ObjectMapperFactory {
     }
 
 
-    public static ObjectMapper createBaseObjectMapper() {
+    private static ObjectMapper createBaseObjectMapper() {
         final var om = new ObjectMapper();
         om.registerModule(new Jdk8Module());
         om.registerModule(new JavaTimeModule());

@@ -19,7 +19,7 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
 
     private VilkårRestTjeneste restTjeneste;
 
-    private final ObjectWriter ow = ObjectMapperFactory.createBaseObjectMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter ow = ObjectMapperFactory.getBaseObjectMapperCopy().writerWithDefaultPrettyPrinter();
     private final String relativePath = "rest/vilkår";
 
     VilkårRestTjenesteDump() {

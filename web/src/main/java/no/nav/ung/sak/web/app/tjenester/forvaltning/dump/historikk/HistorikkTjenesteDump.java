@@ -16,7 +16,7 @@ public class HistorikkTjenesteDump implements DebugDumpFagsak {
 
     private HistorikkTjenesteAdapter historikkTjeneste;
 
-    private final ObjectWriter ow = ObjectMapperFactory.createBaseObjectMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter ow = ObjectMapperFactory.getBaseObjectMapperCopy().writerWithDefaultPrettyPrinter();
 
     HistorikkTjenesteDump() {
         // for proxy
