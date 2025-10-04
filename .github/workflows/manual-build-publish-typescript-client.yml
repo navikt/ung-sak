@@ -36,6 +36,7 @@ jobs:
       - uses: navikt/sif-gha-workflows/.github/actions/maven/generate-openapi@main
         id: generate-openapi
         with:
+          java-version: 25
           readerToken: ${{ secrets.READER_TOKEN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           openapiFileName: ung-sak.openapi.json
