@@ -10,15 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 
 @ApplicationScoped
-@ProsessTask(value = "batch.finnFagsakerForAvsluttning", cronExpression = "0 30 21 * * *", maxFailedRuns = 1)
-public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = "batch.finnFagsakerForAvsluttning", maxFailedRuns = 1)
+public class FinnFagsakerForAvsluttningBatchTask implements BatchProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(FinnFagsakerForAvsluttningBatchTask.class);
     private FagsakAvsluttningTjeneste tjeneste;
@@ -32,6 +33,11 @@ public class FinnFagsakerForAvsluttningBatchTask implements ProsessTaskHandler {
     public FinnFagsakerForAvsluttningBatchTask(FagsakAvsluttningTjeneste tjeneste, ProsessTaskTjeneste prosessTaskRepository) {
         this.tjeneste = tjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 30 21 * * *");
     }
 
     static <T> Collection<List<T>> partitionBasedOnSize(Collection<T> inputList, int size) {

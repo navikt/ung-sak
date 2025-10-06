@@ -76,7 +76,7 @@ public class VedtaksbrevRegler {
             .toList();
 
         if (!automatiskBrevResultat.isEmpty()) {
-            var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat, redigerRegelResultat);
+            var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat);
             return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, automatiskVedtaksbrevResultater);
         }
 
@@ -126,20 +126,18 @@ public class VedtaksbrevRegler {
     }
 
 
-    private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(
-        List<VedtaksbrevStrategyResultat> resultat,
-        RedigerRegelResultat redigerRegelResultat) {
-
+    private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(List<VedtaksbrevStrategyResultat> resultat) {
         return resultat.stream()
-            .map(it -> {
-                String forklaring = it.forklaring() + (redigerRegelResultat.kanRedigere() ? " Kan redigeres pga " + redigerRegelResultat.forklaring() : "");
-                    return VedtaksbrevRegelResultat
-                        .automatiskBrev(
-                            it.dokumentMalType(),
-                            it.bygger(),
-                            forklaring,
-                            redigerRegelResultat.kanRedigere());
-                }
+            .map(it -> new Vedtaksbrev(
+                it.dokumentMalType(),
+                it.bygger(),
+                new VedtaksbrevEgenskaper(
+                    it.kanHindre(),
+                    it.kanHindre(),
+                    it.kanRedigere(),
+                    it.kanRedigere()
+                ),
+                it.forklaring())
             ).toList();
     }
 

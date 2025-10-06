@@ -29,7 +29,7 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         return VedtaksbrevStrategyResultat.medBrev(
-            DokumentMalType.OPPHØR_DOK, opphørInnholdBygger,
+            DokumentMalType.OPPHØR_DOK, false, opphørInnholdBygger,
             "Automatisk brev ved opphør.");
     }
 

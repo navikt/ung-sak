@@ -3572,6 +3572,18 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
+        "properties" : {
+          "dokumentId" : {
+            "type" : "string"
+          },
+          "journalpostId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "dokumentId", "journalpostId" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
         "properties" : {
           "bruker" : {
@@ -3582,6 +3594,25 @@
           }
         },
         "required" : [ "bruker", "ytelseType" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.søknad.JournalførPapirSøknadDto" : {
+        "properties" : {
+          "journalpostId" : {
+            "type" : "string"
+          },
+          "personIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "startDato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "journalpostId", "personIdent", "startDato" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.SøknadDto" : {
@@ -7513,6 +7544,58 @@
         },
         "summary" : "Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
+      }
+    },
+    "/api/papir/hentPapirSøknad" : {
+      "post" : {
+        "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
+        "operationId" : "hentPapirSøknad",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/octet-stream" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter og viser papirsøknad",
+        "tags" : [ "fordel" ]
+      }
+    },
+    "/api/papir/journalførPapirSøknad" : {
+      "post" : {
+        "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
+        "operationId" : "journalførPapirSøknad",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.JournalførPapirSøknadDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Oppretter fagsak og journalfører papirsøknad",
+        "tags" : [ "fordel" ]
       }
     },
     "/api/pip/aktoer-for-sak" : {

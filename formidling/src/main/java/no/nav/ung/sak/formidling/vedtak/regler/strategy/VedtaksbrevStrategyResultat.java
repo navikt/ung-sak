@@ -7,26 +7,32 @@ import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 public record VedtaksbrevStrategyResultat(
     DokumentMalType dokumentMalType,
     VedtaksbrevInnholdBygger bygger,
-    String forklaring,
-    IngenBrevÅrsakType ingenBrevÅrsakType) {
+    boolean kanRedigere,
+    boolean kanHindre,
+    IngenBrevÅrsakType ingenBrevÅrsakType,
+    String forklaring
+) {
 
     public static VedtaksbrevStrategyResultat utenBrev(IngenBrevÅrsakType ingenBrevÅrsakType, String forklaring) {
         return new VedtaksbrevStrategyResultat(
             null,
             null,
-            forklaring,
-            ingenBrevÅrsakType);
+            false, false, ingenBrevÅrsakType, forklaring
+        );
     }
 
     public static VedtaksbrevStrategyResultat medBrev(
         DokumentMalType dokumentMalType,
-        VedtaksbrevInnholdBygger bygger,
+        boolean kanRedigere, VedtaksbrevInnholdBygger bygger,
         String forklaring) {
         return new VedtaksbrevStrategyResultat(
             dokumentMalType,
             bygger,
-            forklaring,
-            null);
+            kanRedigere,
+            false,
+            null,
+            forklaring
+        );
     }
 
 
