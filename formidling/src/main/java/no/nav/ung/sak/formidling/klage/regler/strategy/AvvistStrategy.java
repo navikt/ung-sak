@@ -22,7 +22,7 @@ public final class AvvistStrategy implements VedtaksbrevKlageInnholdbyggerStrate
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, KlageUtredningEntitet klageUtredning) {
-        return VedtaksbrevStrategyResultat.medRedigerbarBrev(
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(
             DokumentMalType.KLAGE_AVVIST_DOK, klageAvvistInnholdBygger, "Brev for avvist klage");
     }
 

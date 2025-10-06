@@ -1,7 +1,6 @@
 package no.nav.ung.sak.formidling.template.dto;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 
 /**
@@ -13,7 +12,7 @@ import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 public record TemplateDto(
     FellesDto felles,
     //inliner feltene fordi det er enklere å jobbe med i templatefiler
-    @JsonUnwrapped Object templateDataDto
+    @JsonUnwrapped TemplateInnholdDto templateDataDto
     )
 {
 }

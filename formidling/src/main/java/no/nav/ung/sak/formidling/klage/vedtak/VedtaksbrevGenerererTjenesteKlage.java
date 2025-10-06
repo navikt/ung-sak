@@ -68,7 +68,7 @@ public class VedtaksbrevGenerererTjenesteKlage implements VedtaksbrevGenerererTj
     }
 
     @WithSpan
-    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
+    private GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
         var behandling = behandlingRepository.hentBehandling(vedtaksbrevGenerererInput.behandlingId());
 
         var vedtaksbrev = vedtaksbrevGenerererInput.vedtaksbrev();

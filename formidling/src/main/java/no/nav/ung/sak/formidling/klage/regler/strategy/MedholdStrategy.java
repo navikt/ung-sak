@@ -22,7 +22,7 @@ public final class MedholdStrategy implements VedtaksbrevKlageInnholdbyggerStrat
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, KlageUtredningEntitet klageUtredning) {
-        return VedtaksbrevStrategyResultat.medRedigerbarBrev(
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(
             DokumentMalType.KLAGE_VEDTAK_MEDHOLD, klageMedholdInnholdBygger, "Brev for medhold i klage");
     }
 
