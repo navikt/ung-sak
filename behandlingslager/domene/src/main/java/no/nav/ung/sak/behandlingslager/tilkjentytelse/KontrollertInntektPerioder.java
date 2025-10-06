@@ -42,7 +42,8 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
 
-
+    public KontrollertInntektPerioder() {
+    }
 
     public Long getBehandlingId() {
         return behandlingId;
