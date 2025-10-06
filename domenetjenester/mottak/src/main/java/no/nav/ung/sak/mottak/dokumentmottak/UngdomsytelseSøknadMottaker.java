@@ -60,6 +60,28 @@ public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<Ungdo
         return nyFagsak;
     }
 
+    public Fagsak finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType ytelseType,
+                                         AktørId søkerAktørId,
+                                         LocalDate startDato,
+                                         LocalDate sluttDato) {
+        final Optional<Fagsak> fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+
+
+        if (fagsak.isPresent()) {
+            return fagsak.get();
+        }
+
+        final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        final Fagsak nyFagsak = opprettSakForIkkeDigitalBruker(saksnummer, søkerAktørId, ytelseType, startDato, sluttDato);
+        return nyFagsak;
+    }
+
+    private Fagsak opprettSakForIkkeDigitalBruker(Saksnummer saksnummer, AktørId søkerAktørId, FagsakYtelseType ytelseType, LocalDate startDato, LocalDate sluttDato) {
+        final Fagsak fagsak = Fagsak.opprettNyForIkkeDigitalBruker(ytelseType, søkerAktørId, saksnummer, startDato, sluttDato);
+        fagsakTjeneste.opprettFagsak(fagsak);
+        return fagsak;
+    }
+
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, FagsakYtelseType ytelseType, LocalDate startDato, LocalDate sluttDato) {
         final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, saksnummer, startDato, sluttDato);
         fagsakTjeneste.opprettFagsak(fagsak);

@@ -24,7 +24,7 @@ public final class EndringProgramPeriodeStrategy implements VedtaksbrevInnholdby
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medBrev(DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av programperiode");
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av programperiode");
     }
 
     @Override

@@ -6,9 +6,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -28,18 +26,15 @@ public class VedtaksbrevRegler {
     private final BehandlingRepository behandlingRepository;
     private final DetaljertResultatUtleder detaljertResultatUtleder;
     private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
-    private final TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger;
 
     @Inject
     public VedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         DetaljertResultatUtleder detaljertResultatUtleder,
-        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies,
-        TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger) {
+        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies) {
         this.behandlingRepository = behandlingRepository;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
         this.innholdbyggerStrategies = innholdbyggerStrategies;
-        this.tomVedtaksbrevInnholdBygger = tomVedtaksbrevInnholdBygger;
     }
 
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
@@ -61,103 +56,57 @@ public class VedtaksbrevRegler {
                 .collect(Collectors.joining(", ")));
         }
 
-        var redigerRegelResultat = harUtførteManuelleAksjonspunkterMedToTrinn(behandling);
-
         var ingenBrevResultat = strategyResultater.stream()
             .filter(it -> it.bygger() == null)
             .toList();
 
         if (!ingenBrevResultat.isEmpty()) {
-            return håndterIngenBrevResultat(detaljertResultat, redigerRegelResultat, ingenBrevResultat);
+            return lagIngenBrevResultat(detaljertResultat, ingenBrevResultat);
         }
 
-        var automatiskBrevResultat = strategyResultater.stream()
+        var brevResultater = strategyResultater.stream()
             .filter(it -> it.bygger() != null)
             .toList();
 
-        if (!automatiskBrevResultat.isEmpty()) {
-            var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat, redigerRegelResultat);
-            return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, automatiskVedtaksbrevResultater);
+        if (!brevResultater.isEmpty()) {
+            return lagBrevResultat(detaljertResultat, brevResultater);
         }
 
-        if (redigerRegelResultat.kanRedigere()) {
-            // ingen automatisk brev, men har ap så tilbyr tom brev for redigering
-            return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat,
-                List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
-                    tomVedtaksbrevInnholdBygger,
-                    "Tom fritekstbrev pga manuelle aksjonspunkter: " + redigerRegelResultat.forklaring()))
-            );
-        }
+        //Fallback for ukjente brev
+        return lagIkkeImplementertBrevResultat(detaljertResultat);
+    }
 
+    private static BehandlingVedtaksbrevResultat lagIngenBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
+            ingenBrevResultat.stream()
+                .map(it -> VedtaksbrevRegelResultat.ingenBrev(
+                    it.ingenBrevÅrsakType(), it.forklaring()))
+                .toList()
+        );
+    }
+
+    private static BehandlingVedtaksbrevResultat lagBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> brevResultater) {
+        var vedtaksbrev = brevResultater.stream()
+            .map(it -> new Vedtaksbrev(
+                it.dokumentMalType(),
+                it.bygger(),
+                it.vedtaksbrevEgenskaper(),
+                it.forklaring())
+            ).toList();
+        return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, vedtaksbrev);
+    }
+
+    private static BehandlingVedtaksbrevResultat lagIkkeImplementertBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultaterInfo = detaljertResultat
             .toSegments().stream()
             .flatMap(it -> it.getValue().resultatInfo().stream())
             .collect(Collectors.toSet());
 
         String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
-        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring)));
+        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(
+            VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring
+            )));
     }
 
-    private BehandlingVedtaksbrevResultat håndterIngenBrevResultat(
-        LocalDateTimeline<DetaljertResultat> detaljertResultat,
-        RedigerRegelResultat redigerRegelResultat,
-        List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
-
-        if (redigerRegelResultat.kanRedigere()) {
-            String forklaringer = ingenBrevResultat.stream().map(VedtaksbrevStrategyResultat::forklaring).collect(Collectors.joining(", "));
-
-            // ingen brev, men har ap så tilbyr tom brev for redigering
-            String forklaring = "Tom fritekstbrev pga manuelle aksjonspunkter: %s. Ingen automatisk brev pga: %s."
-                .formatted(redigerRegelResultat.forklaring(), forklaringer);
-            return BehandlingVedtaksbrevResultat.medBrev(
-                detaljertResultat,
-                List.of(VedtaksbrevRegelResultat.tomRedigerbarBrev(
-                    tomVedtaksbrevInnholdBygger,
-                    forklaring
-                )));
-        }
-
-        return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
-            ingenBrevResultat.stream()
-                .map(it -> VedtaksbrevRegelResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring()))
-                .toList()
-        );
-
-    }
-
-
-    private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(
-        List<VedtaksbrevStrategyResultat> resultat,
-        RedigerRegelResultat redigerRegelResultat) {
-
-        return resultat.stream()
-            .map(it -> {
-                String forklaring = it.forklaring() + (redigerRegelResultat.kanRedigere() ? " Kan redigeres pga " + redigerRegelResultat.forklaring() : "");
-                    return VedtaksbrevRegelResultat
-                        .automatiskBrev(
-                            it.dokumentMalType(),
-                            it.bygger(),
-                            forklaring,
-                            redigerRegelResultat.kanRedigere());
-                }
-            ).toList();
-    }
-
-    private static RedigerRegelResultat harUtførteManuelleAksjonspunkterMedToTrinn(Behandling behandling) {
-        var lukkedeApMedToTrinn = behandling.getAksjonspunkterMedTotrinnskontroll().stream()
-            .filter(Aksjonspunkt::erUtført).toList();
-        boolean kanRedigere = !lukkedeApMedToTrinn.isEmpty();
-        if (kanRedigere) {
-            return new RedigerRegelResultat(true, "aksjonspunkt(er) %s".formatted(
-                lukkedeApMedToTrinn.stream().map(it -> it.getAksjonspunktDefinisjon().getKode())
-                    .collect(Collectors.toSet())
-            ));
-        }
-        return new RedigerRegelResultat(false, "");
-    }
-
-
-    private record RedigerRegelResultat(boolean kanRedigere, String forklaring) {
-    }
 
 }

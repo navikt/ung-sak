@@ -17,12 +17,28 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
+import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
+import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
+import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
+import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.util.Optional;
 
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste.BASE_PATH;
 
 @Path(BASE_PATH)
@@ -32,13 +48,28 @@ public class PapirSøknadRestTjeneste {
     static final String BASE_PATH = "/papir";
 
     private DokumentArkivTjeneste dokumentArkivTjeneste;
+    private TilJournalføringTjeneste journalføringTjeneste;
+    private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
+    private PersoninfoAdapter personinfoAdapter;
+    private JournalpostRepository journalpostRepository;
+
 
     public PapirSøknadRestTjeneste() {// For Rest-CDI
+
     }
 
     @Inject
-    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste) {
+    public PapirSøknadRestTjeneste(DokumentArkivTjeneste dokumentArkivTjeneste,
+                                   TilJournalføringTjeneste journalføringTjeneste,
+                                   @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
+
+                                   PersoninfoAdapter personinfoAdapter,
+                                   JournalpostRepository journalpostRepository) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
+        this.journalføringTjeneste = journalføringTjeneste;
+        this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
+        this.personinfoAdapter = personinfoAdapter;
+        this.journalpostRepository = journalpostRepository;
     }
 
     @POST
@@ -63,4 +94,42 @@ public class PapirSøknadRestTjeneste {
         }
     }
 
+    @POST
+    @Path("/journalførPapirSøknad")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
+    public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
+        Periode periode = new Periode(journalførPapirSøknadDto.startDato(), null);
+
+        AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(journalførPapirSøknadDto.personIdent()))
+            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for personIdent"));
+
+        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
+
+        var journalpostId = journalførPapirSøknadDto.journalpostId();
+        if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
+            throw new IllegalStateException("Journalpost er allerede journalført");
+        } else {
+            try {
+                boolean ferdigJournalført = journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId());
+                if (!ferdigJournalført) {
+                    throw new IllegalStateException("Journalpost kunne ikke journalføres");
+                }
+
+                String response = """
+                    {
+                      "saksnummer": "%s"
+                    }
+                    """.formatted(fagsak.getSaksnummer().getVerdi());
+
+                return Response.ok()
+                    .entity(response)
+                    .build();
+            } catch (Exception e) {
+                return Response.serverError().entity("Kan ikke ferdigstille journalpost: " + e.getMessage()).build();
+            }
+        }
+    }
 }
