@@ -32,10 +32,9 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
@@ -51,7 +50,7 @@ public class PapirSøknadRestTjeneste {
     private TilJournalføringTjeneste journalføringTjeneste;
     private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
     private PersoninfoAdapter personinfoAdapter;
-    private JournalpostRepository journalpostRepository;
+    private PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste;
 
 
     public PapirSøknadRestTjeneste() {// For Rest-CDI
@@ -64,12 +63,12 @@ public class PapirSøknadRestTjeneste {
                                    @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
 
                                    PersoninfoAdapter personinfoAdapter,
-                                   JournalpostRepository journalpostRepository) {
+                                   JournalpostRepository journalpostRepository, PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
         this.personinfoAdapter = personinfoAdapter;
-        this.journalpostRepository = journalpostRepository;
+        this.papirsøknadHåndteringTjeneste = papirsøknadHåndteringTjeneste;
     }
 
     @POST
@@ -82,8 +81,12 @@ public class PapirSøknadRestTjeneste {
     public Response hentPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HentPapirSøknadRequestDto hentPapirSøknadRequestDto) {
 
         // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        byte[] dokument = dokumentArkivTjeneste.hentDokument(hentPapirSøknadRequestDto.journalpostId(), hentPapirSøknadRequestDto.dokumentId().getVerdi());
+        // TODO: Aktiver denne når testing lokalt er utført.
+        //byte[] dokument = dokumentArkivTjeneste.hentDokument(hentPapirSøknadRequestDto.journalpostId(), hentPapirSøknadRequestDto.dokumentId().getVerdi());
         String filnavn = "søknadsdokument-" + hentPapirSøknadRequestDto.dokumentId() + ".pdf";
+
+        // Fjern denne før prodsetting. Kun for å teste journalføring av papirsøknad.
+        byte[] dokument = papirsøknadHåndteringTjeneste.journalførPapirsøknad(PersonIdent.fra("12345678910"), LocalDate.now()).pdf();
 
         try {
             Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
