@@ -113,11 +113,6 @@ public class PapirSøknadRestTjeneste {
             throw new IllegalStateException("Journalpost er allerede journalført");
         } else {
             try {
-                boolean journalpostFerdigBehandlet = !journalpostRepository.markerJournalposterBehandlet(journalpostId).isEmpty();
-                if (!journalpostFerdigBehandlet) {
-                    throw new IllegalStateException("Journalpost kunne ikke settes til ferdig behandlet");
-                }
-
                 boolean ferdigJournalført = journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId());
                 if (!ferdigJournalført) {
                     throw new IllegalStateException("Journalpost kunne ikke journalføres");
