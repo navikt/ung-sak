@@ -179,7 +179,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
         // Assert
         assertThat(context).hasSize(1);
-        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.BEREGNING.getKode());
+        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.KONTROLL_AV_INNTEKT.getKode());
         List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter = context.get(0).getTotrinnskontrollAksjonspunkter();
         assertThat(totrinnskontrollAksjonspunkter).hasSize(1);
         assertThat(totrinnskontrollAksjonspunkter.get(0).getAksjonspunktKode()).isEqualTo(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
@@ -208,7 +208,7 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
         // Assert
         assertThat(context).hasSize(1);
-        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.BEREGNING.getKode());
+        assertThat(context.get(0).getSkjermlenkeType()).isEqualTo(SkjermlenkeType.KONTROLL_AV_INNTEKT.getKode());
 
         List<TotrinnskontrollAksjonspunkterDto> totrinnskontrollAksjonspunkter = context.get(0).getTotrinnskontrollAksjonspunkter();
         assertThat(totrinnskontrollAksjonspunkter).hasSize(1);
