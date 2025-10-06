@@ -13,9 +13,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM;
-import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM;
-
 
 /**
  * Batchtask som starter kontroll av inntekt fra a-inntekt
@@ -62,13 +59,13 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements BatchPros
         }
 
         ProsessTaskData kontrollTask = ProsessTaskData.forProsessTask(OpprettRevurderingForInntektskontrollTask.class);
-        kontrollTask.setProperty(PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        kontrollTask.setProperty(PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        kontrollTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        kontrollTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
         prosessTaskTjeneste.lagre(kontrollTask);
     }
 
     private static Predicate<ProsessTaskData> gjelderSammePeriode(LocalDate fom) {
-        return it -> it.getPropertyValue(PERIODE_FOM).equals(fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        return it -> it.getPropertyValue(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM).equals(fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 
 }
