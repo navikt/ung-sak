@@ -32,7 +32,6 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.vedtak.brevvurdering";
 
-    private boolean enableIgnoreManglendeBrev;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository;
@@ -45,13 +44,11 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     @Inject
     public VurderVedtaksbrevTask(
-        VedtaksbrevRegler vedtaksbrevRegler,
         ProsessTaskTjeneste prosessTaskTjeneste,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository,
         BehandlingRepository behandlingRepository, BrevbestillingRepository brevbestillingRepository) {
 
-        this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingVedtaksbrevRepository = behandlingVedtaksbrevRepository;

@@ -42,4 +42,16 @@ public record VedtaksbrevStrategyResultat(
     }
 
 
+    public static VedtaksbrevStrategyResultat medRedigerbarBrev(DokumentMalType dokumentMalType, VedtaksbrevInnholdBygger innholdBygger, String forklaring) {
+        return new VedtaksbrevStrategyResultat(
+            dokumentMalType,
+            innholdBygger,
+            new VedtaksbrevEgenskaper(true,
+                true,
+                true,
+                true),
+            null,
+            forklaring
+        );
+    }
 }
