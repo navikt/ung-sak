@@ -5,12 +5,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -32,12 +29,6 @@ public class ArbeidsgiverOpplysningerDto {
     @Valid
     @JsonProperty(value = "fødselsdato")
     private LocalDate fødselsdato;
-
-    @Valid
-    @Size()
-    @NotNull
-    @JsonProperty(value = "arbeidsforholdreferanser")
-    private List<ArbeidsforholdIdDto> arbeidsforholdreferanser;
 
 
     public ArbeidsgiverOpplysningerDto(String identifikator, String alternativIdentifikator, String navn, LocalDate fødselsdato) {
@@ -68,7 +59,4 @@ public class ArbeidsgiverOpplysningerDto {
         return fødselsdato;
     }
 
-    public List<ArbeidsforholdIdDto> getArbeidsforholdreferanser() {
-        return arbeidsforholdreferanser;
-    }
 }
