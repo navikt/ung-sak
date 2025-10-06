@@ -48,9 +48,9 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements BatchPros
         var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
 
 
-        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(gjelderSammePeriode(fom)).toList();
-        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(gjelderSammePeriode(fom)).toList();
-        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(gjelderSammePeriode(fom)).toList();
+        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(gjelderSammePeriode(fom)).toList();
+        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(gjelderSammePeriode(fom)).toList();
+        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(gjelderSammePeriode(fom)).toList();
         if (!feiletTask.isEmpty() || !klarTask.isEmpty() || !vetoTask.isEmpty()) {
             // Hvis det finnes noen task i noen av disse statusene, så betyr det at de enten kjører, eller skal kjøres.
             // Vi ønsker ikke å opprette duplikater av disse.
