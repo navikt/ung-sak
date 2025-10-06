@@ -15,7 +15,7 @@ import java.util.*;
 public class KontrollertInntektGrunnlag extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_GR_UNGDOMSPROGRAMPERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_KONTROLLERT_INNTEKT")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
