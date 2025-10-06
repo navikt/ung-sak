@@ -68,6 +68,11 @@ public class TilkjentYtelseRepository {
         entityManager.persist(ny);
         entityManager.flush();
 
+        lagreNyttGrunnlag(behandlingId, ny);
+
+    }
+
+    private void lagreNyttGrunnlag(long behandlingId, KontrollertInntektPerioder ny) {
         KontrollertInntektGrunnlag kontrollertInntektGrunnlag = new KontrollertInntektGrunnlag(behandlingId, ny);
         Optional<KontrollertInntektGrunnlag> eksisterendeGrunnlag = hentKontrollertInntektGrunnlag(behandlingId);
         if (eksisterendeGrunnlag.isPresent()) {
@@ -77,7 +82,6 @@ public class TilkjentYtelseRepository {
         }
         entityManager.persist(kontrollertInntektGrunnlag);
         entityManager.flush();
-
     }
 
 
@@ -85,7 +89,6 @@ public class TilkjentYtelseRepository {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
         return new DiffEntity(traverser);
     }
-
 
 
     private void deaktiver(KontrollertInntektPerioder eksisterende) {
@@ -109,9 +112,7 @@ public class TilkjentYtelseRepository {
             entityManager.persist(ny);
             entityManager.flush();
 
-            KontrollertInntektGrunnlag nyttGrunnlag = new KontrollertInntektGrunnlag(nyBehandlingId, ny);
-            entityManager.persist(nyttGrunnlag);
-            entityManager.flush();
+            lagreNyttGrunnlag(nyBehandlingId, ny);
         }
     }
 
@@ -125,7 +126,7 @@ public class TilkjentYtelseRepository {
     }
 
 
-        public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
+    public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
         final var eksisterende = hentTilkjentYtelse(behandlingId);
         if (eksisterende.isPresent()) {
             eksisterende.get().setIkkeAktiv();
