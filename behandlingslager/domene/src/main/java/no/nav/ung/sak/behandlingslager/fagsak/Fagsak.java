@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
-import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.AttributeOverride;
@@ -84,6 +83,17 @@ public class Fagsak extends BaseEntitet {
         setPeriode(fom, tom);
     }
 
+    public Fagsak(FagsakYtelseType ytelseType, AktørId søker, Saksnummer saksnummer, LocalDate fom, LocalDate tom, boolean ikkeDigitalBruker) {
+        Objects.requireNonNull(ytelseType, "ytelseType");
+        this.ytelseType = ytelseType;
+        this.brukerAktørId = søker;
+        this.ikkeDigitalBruker = ikkeDigitalBruker;
+        if (saksnummer != null) {
+            setSaksnummer(saksnummer);
+        }
+        setPeriode(fom, tom);
+    }
+
     /**
      * Oppretter en default fagsak, med startdato fra i dag.
      */
@@ -102,6 +112,10 @@ public class Fagsak extends BaseEntitet {
 
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
         return new Fagsak(ytelseType, bruker, saksnummer, fom, tom);
+    }
+
+    public static Fagsak opprettNyForIkkeDigitalBruker(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
+        return new Fagsak(ytelseType, bruker, saksnummer, fom, tom, true);
     }
 
     public DatoIntervallEntitet getPeriode() {
