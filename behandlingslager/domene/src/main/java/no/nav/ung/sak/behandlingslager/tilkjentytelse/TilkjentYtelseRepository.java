@@ -64,8 +64,20 @@ public class TilkjentYtelseRepository {
             .medRegelInput(input)
             .medRegelSporing(sporing)
             .build();
+
         entityManager.persist(ny);
         entityManager.flush();
+
+        KontrollertInntektGrunnlag kontrollertInntektGrunnlag = new KontrollertInntektGrunnlag(behandlingId, ny);
+        Optional<KontrollertInntektGrunnlag> eksisterendeGrunnlag = hentKontrollertInntektGrunnlag(behandlingId);
+        if (eksisterendeGrunnlag.isPresent()) {
+            deaktiver(eksisterendeGrunnlag.get());
+            entityManager.persist(eksisterendeGrunnlag.get());
+            entityManager.flush();
+        }
+        entityManager.persist(kontrollertInntektGrunnlag);
+        entityManager.flush();
+
     }
 
 
@@ -82,11 +94,23 @@ public class TilkjentYtelseRepository {
         entityManager.flush();
     }
 
+    private void deaktiver(KontrollertInntektGrunnlag eksisterende) {
+        eksisterende.setAktiv(false);
+        entityManager.persist(eksisterende);
+        entityManager.flush();
+    }
+
     public void kopierKontrollPerioder(long originalBehandlingId, long nyBehandlingId) {
         final var eksisterende = hentKontrollertInntektPerioder(originalBehandlingId);
+        // TODO: Endre til å vise til aggregat i staden for kopi av alle perioder når behandlingId på aggregat er fjernet
         if (eksisterende.isPresent()) {
             final var ny = KontrollertInntektPerioder.kopi(nyBehandlingId, eksisterende.get()).build();
+
             entityManager.persist(ny);
+            entityManager.flush();
+
+            KontrollertInntektGrunnlag nyttGrunnlag = new KontrollertInntektGrunnlag(nyBehandlingId, ny);
+            entityManager.persist(nyttGrunnlag);
             entityManager.flush();
         }
     }
@@ -130,6 +154,14 @@ public class TilkjentYtelseRepository {
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
+
+    public Optional<KontrollertInntektGrunnlag> hentKontrollertInntektGrunnlag(Long behandlingId) {
+        var query = entityManager.createQuery("SELECT t FROM KontrollertInntektGrunnlag t WHERE t.behandlingId=:id AND t.aktiv = true", KontrollertInntektGrunnlag.class)
+            .setParameter("id", behandlingId);
+
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
 
     public Map<Behandling, LocalDateTimeline<TilkjentYtelseVerdi>> hentTidslinjerForFagsak(Long fagsakId) {
         var tilkjentYtelseMap = hentTilkjentYtelseForFagsak(fagsakId);

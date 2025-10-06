@@ -42,7 +42,14 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
 
+    public KontrollertInntektPerioder(Clob regelInput, Clob regelSporing, List<KontrollertInntektPeriode> perioder) {
+        this.regelInput = regelInput;
+        this.regelSporing = regelSporing;
+        this.perioder = perioder.stream().map(KontrollertInntektPeriode::new).toList();
+    }
 
+    public KontrollertInntektPerioder() {
+    }
 
     public Long getBehandlingId() {
         return behandlingId;
