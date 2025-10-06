@@ -16,7 +16,7 @@ import java.util.Map;
 public class ArbeidsgiverOversiktDto {
 
     @Valid
-    @Size
+    @Size(max = 100)
     @JsonProperty(value = "arbeidsgivere")
     private final Map<String, ArbeidsgiverOpplysningerDto> arbeidsgivere;
 
