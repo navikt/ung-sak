@@ -2,7 +2,6 @@ package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -46,13 +45,13 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     @Inject
     public VurderVedtaksbrevTask(
-        @KonfigVerdi(value = "IGNORE_MANGLENDE_BREV", defaultVerdi = "false") boolean ignoreManglendeBrev,
+        VedtaksbrevRegler vedtaksbrevRegler,
         ProsessTaskTjeneste prosessTaskTjeneste,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository,
         BehandlingRepository behandlingRepository, BrevbestillingRepository brevbestillingRepository) {
 
-        this.enableIgnoreManglendeBrev = ignoreManglendeBrev;
+        this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingVedtaksbrevRepository = behandlingVedtaksbrevRepository;
@@ -195,13 +194,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .toList();
 
         if (!ikkeImplementerteBrev.isEmpty()) {
-            if (enableIgnoreManglendeBrev) {
-                LOG.warn("Ingen brev implementert for tilfelle pga: {}", forklaring);
-                behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
-                    .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring, null));
-            } else {
-                throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
-            }
+            throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
         }
         LOG.info("Ingen brev relevant for tilfelle: {}", forklaring);
         behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
