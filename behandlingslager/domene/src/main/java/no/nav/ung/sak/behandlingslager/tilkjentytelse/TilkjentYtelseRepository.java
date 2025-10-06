@@ -43,12 +43,9 @@ public class TilkjentYtelseRepository {
 
 
     public void lagreKontrollertePerioder(long behandlingId, List<KontrollertInntektPeriode> perioder, String input, String sporing) {
-        final var eksisterende = hentKontrollertInntektPerioder(behandlingId);
-        final var eksisterendePerioder = eksisterende.stream()
-            .flatMap(it -> it.getPerioder().stream())
-            .toList();
+        final var eksisterende = hentKontrollertInntektGrunnlag(behandlingId);
         final var differ = differ();
-        if (!differ.areDifferent(eksisterendePerioder, perioder)) {
+        if (eksisterende.isPresent() && !differ.areDifferent(eksisterende.get().getKontrollertInntektPerioder().getPerioder(), perioder)) {
             log.info("Fant ingen diff mellom eksisterende og nye perioder, lagrer ikke.");
             return;
         }
@@ -57,6 +54,10 @@ public class TilkjentYtelseRepository {
 
         if (perioder.isEmpty()) {
             return;
+        }
+
+        if (perioder.stream().anyMatch(it -> it.getId() != null)) {
+            throw new IllegalStateException("Perioder som lagres  på nytt grunnlag kan ikke ha id, det betyr at de allerede er lagret.");
         }
 
         final var ny = KontrollertInntektPerioder.ny(behandlingId)
@@ -91,12 +92,6 @@ public class TilkjentYtelseRepository {
     }
 
 
-    private void deaktiver(KontrollertInntektPerioder eksisterende) {
-        eksisterende.setIkkeAktiv();
-        entityManager.persist(eksisterende);
-        entityManager.flush();
-    }
-
     private void deaktiver(KontrollertInntektGrunnlag eksisterende) {
         eksisterende.setAktiv(false);
         entityManager.persist(eksisterende);
@@ -104,24 +99,11 @@ public class TilkjentYtelseRepository {
     }
 
     public void kopierKontrollPerioder(long originalBehandlingId, long nyBehandlingId) {
-        final var eksisterende = hentKontrollertInntektPerioder(originalBehandlingId);
-        // TODO: Endre til å vise til aggregat i staden for kopi av alle perioder når behandlingId på aggregat er fjernet
-        if (eksisterende.isPresent()) {
-            final var ny = KontrollertInntektPerioder.kopi(nyBehandlingId, eksisterende.get()).build();
-
-            entityManager.persist(ny);
-            entityManager.flush();
-
-            lagreNyttGrunnlag(nyBehandlingId, ny);
-        }
+        final var eksisterende = hentKontrollertInntektGrunnlag(originalBehandlingId);
+        eksisterende.ifPresent(kontrollertInntektGrunnlag -> lagreNyttGrunnlag(nyBehandlingId, kontrollertInntektGrunnlag.getKontrollertInntektPerioder()));
     }
 
     public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {
-        final var eksisterendeOptional = hentKontrollertInntektPerioder(behandlingId);
-        if (eksisterendeOptional.isPresent()) {
-            final var eksisterende = eksisterendeOptional.get();
-            deaktiver(eksisterende);
-        }
         kopierKontrollPerioder(originalBehandlingId, behandlingId);
     }
 
@@ -150,14 +132,11 @@ public class TilkjentYtelseRepository {
     }
 
     public Optional<KontrollertInntektPerioder> hentKontrollertInntektPerioder(Long behandlingId) {
-        var query = entityManager.createQuery("SELECT t FROM KontrollertInntektPerioder t WHERE t.behandlingId=:id AND t.aktiv = true", KontrollertInntektPerioder.class)
-            .setParameter("id", behandlingId);
-
-        return HibernateVerktøy.hentUniktResultat(query);
+        return hentKontrollertInntektGrunnlag(behandlingId).map(KontrollertInntektGrunnlag::getKontrollertInntektPerioder);
     }
 
     public Optional<KontrollertInntektGrunnlag> hentKontrollertInntektGrunnlag(Long behandlingId) {
-        var query = entityManager.createQuery("SELECT t FROM KontrollertInntektGrunnlag t WHERE t.behandlingId=:id AND t.aktiv = true", KontrollertInntektGrunnlag.class)
+        var query = entityManager.createQuery("SELECT gr FROM KontrollertInntektGrunnlag gr WHERE gr.behandlingId=:id AND gr.aktiv = true", KontrollertInntektGrunnlag.class)
             .setParameter("id", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
