@@ -21,7 +21,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medBrev(DokumentMalType.ENDRING_HØY_SATS, false, endringHøySatsInnholdBygger, "Automatisk brev ved endring til høy sats.");
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_HØY_SATS, endringHøySatsInnholdBygger, "Automatisk brev ved endring til høy sats.");
     }
 
     @Override
