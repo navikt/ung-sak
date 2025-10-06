@@ -4,11 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
-import no.nav.ung.sak.behandling.revurdering.sats.OpprettRevurderingHøySatsTask;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +13,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.*;
+import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM;
+import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM;
 
 
 /**
@@ -55,9 +51,9 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements BatchPros
         var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
 
 
-        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(gjelderSammePeriode(fom)).toList();
-        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(gjelderSammePeriode(fom)).toList();
-        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(gjelderSammePeriode(fom)).toList();
+        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(gjelderSammePeriode(fom)).toList();
+        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(gjelderSammePeriode(fom)).toList();
+        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(gjelderSammePeriode(fom)).toList();
         if (!feiletTask.isEmpty() || !klarTask.isEmpty() || !vetoTask.isEmpty()) {
             // Hvis det finnes noen task i noen av disse statusene, så betyr det at de enten kjører, eller skal kjøres.
             // Vi ønsker ikke å opprette duplikater av disse.
