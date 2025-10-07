@@ -1,6 +1,6 @@
 package no.nav.ung.sak.formidling.klage.regler;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
@@ -18,7 +19,8 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Dependent
+@ApplicationScoped
+@FagsakYtelseTypeRef
 @BehandlingTypeRef(BehandlingType.KLAGE)
 public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
 

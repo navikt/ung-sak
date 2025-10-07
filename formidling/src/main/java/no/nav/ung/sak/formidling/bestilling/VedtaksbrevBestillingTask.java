@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -52,7 +53,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         BehandlingRepository behandlingRepository,
         JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste,
         BrevbestillingRepository brevbestillingRepository, VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste) {
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
@@ -91,7 +92,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     }
 
     private void genererOgJournalførAutomatiskBrev(Behandling behandling, BrevbestillingEntitet brevbestilling) {
-        var vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(behandling.getFagsakYtelseType(), vedtaksbrevRegler, behandling.getType());
+        var vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getType());
         var totalresultater = vedtaksbrevRegel.kjør(behandling.getId());
 
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();

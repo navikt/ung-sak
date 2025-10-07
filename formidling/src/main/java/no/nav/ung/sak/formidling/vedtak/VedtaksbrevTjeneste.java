@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
@@ -37,7 +38,7 @@ public class VedtaksbrevTjeneste {
     @Inject
     public VedtaksbrevTjeneste(
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        VedtaksbrevReglerUng vedtaksbrevRegler,
+        @Any VedtaksbrevReglerUng vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;

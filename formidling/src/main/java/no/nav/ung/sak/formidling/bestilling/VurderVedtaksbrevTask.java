@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -47,7 +48,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository,
         BehandlingRepository behandlingRepository,
-        BrevbestillingRepository brevbestillingRepository, Instance<VedtaksbrevRegel> vedtaksbrevRegler) {
+        BrevbestillingRepository brevbestillingRepository,
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler) {
 
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
@@ -62,7 +64,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(behandling.getFagsakYtelseType(), this.vedtaksbrevRegler, behandling.getType());
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(this.vedtaksbrevRegler, behandling.getType());
         var resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", resultat.safePrint());
 

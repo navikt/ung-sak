@@ -29,6 +29,7 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -112,7 +113,7 @@ public class ForeslåVedtakTjenesteTest {
 
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevValgRepository, klageVedtakTjeneste, vedtaksbrevRegler, false);
+        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevValgRepository, klageVedtakTjeneste, false, new UnitTestLookupInstanceImpl<>(vedtaksbrevRegler));
         when(vedtaksbrevRegler.kjør(any())).thenReturn(
             new BehandlingVedtaksbrevResultat(
                 false,
