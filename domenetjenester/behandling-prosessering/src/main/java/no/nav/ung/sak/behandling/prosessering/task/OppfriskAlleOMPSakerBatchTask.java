@@ -10,17 +10,18 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 @ApplicationScoped
-@ProsessTask(value = OppfriskAlleOMPSakerBatchTask.TASKTYPE, cronExpression = "0 0 20 * * MON-FRI")
-public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = OppfriskAlleOMPSakerBatchTask.TASKTYPE)
+public class OppfriskAlleOMPSakerBatchTask implements BatchProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskAlleOMPSakerBatchTask.class);
 
@@ -80,5 +81,10 @@ public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
     private boolean harPågåendeEllerFeiletTask(Behandling behandling) {
         Map<String, ProsessTaskData> nesteTask = prosesseringAsynkTjeneste.sjekkProsessTaskPågårForBehandling(behandling, null);
         return !nesteTask.isEmpty();
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 0 20 * * MON-FRI");
     }
 }

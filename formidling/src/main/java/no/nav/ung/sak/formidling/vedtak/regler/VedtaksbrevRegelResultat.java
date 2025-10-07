@@ -9,19 +9,6 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 public sealed interface VedtaksbrevRegelResultat permits IngenBrev, Vedtaksbrev {
     String forklaring();
 
-    static Vedtaksbrev automatiskBrev(DokumentMalType dokumentMalType, VedtaksbrevInnholdBygger bygger, String forklaring, boolean kanRedigere) {
-        return new Vedtaksbrev(
-                dokumentMalType,
-                bygger,
-                new VedtaksbrevEgenskaper(
-                        kanRedigere,
-                        kanRedigere,
-                        kanRedigere,
-                        kanRedigere
-                ),
-            forklaring);
-    }
-
     static Vedtaksbrev tomRedigerbarBrev(VedtaksbrevInnholdBygger bygger, String forklaring) {
         return new Vedtaksbrev(
             DokumentMalType.MANUELT_VEDTAK_DOK,

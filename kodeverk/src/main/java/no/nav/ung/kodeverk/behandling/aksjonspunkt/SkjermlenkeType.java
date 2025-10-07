@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public enum SkjermlenkeType implements Kodeverdi {
-    BEREGNING("BEREGNING", "Beregning"),
+    KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll av inntekt"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     SOEKNADSFRIST("SOEKNADSFRIST", "Søknadsfrist"),
     UDEFINERT("-", "Ikke definert"),

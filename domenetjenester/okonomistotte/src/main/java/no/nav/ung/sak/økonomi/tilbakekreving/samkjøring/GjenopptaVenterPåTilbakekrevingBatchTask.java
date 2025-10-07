@@ -10,11 +10,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 
@@ -23,8 +24,8 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepos
  * og avbryter aksjonspunktet hvis tilbakekrevingsbehandlingen er ferdig.
  */
 @ApplicationScoped
-@ProsessTask(value = GjenopptaVenterPåTilbakekrevingBatchTask.TASKTYPE, cronExpression = "0 5 7 * * *")
-public class GjenopptaVenterPåTilbakekrevingBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = GjenopptaVenterPåTilbakekrevingBatchTask.TASKTYPE)
+public class GjenopptaVenterPåTilbakekrevingBatchTask implements BatchProsessTaskHandler {
 
     public static final String TASKTYPE = "batch.gjenopptaVenterPåTilbakekreving";
     private static final Logger logger = LoggerFactory.getLogger(GjenopptaVenterPåTilbakekrevingBatchTask.class);
@@ -64,6 +65,11 @@ public class GjenopptaVenterPåTilbakekrevingBatchTask implements ProsessTaskHan
         gruppe.addNesteParallell(tasker);
         prosessTaskTjeneste.lagre(gruppe);
 
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 5 7 * * *");
     }
 
 }

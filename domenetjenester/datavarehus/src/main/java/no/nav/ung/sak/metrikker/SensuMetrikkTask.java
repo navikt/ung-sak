@@ -13,13 +13,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.felles.integrasjon.sensu.SensuKlient;
+import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 
 @ApplicationScoped
-@ProsessTask(value = SensuMetrikkTask.TASKTYPE, cronExpression = "0 */5 * * * *", maxFailedRuns = 20, firstDelay = 60)
-public class SensuMetrikkTask implements ProsessTaskHandler {
+@ProsessTask(value = SensuMetrikkTask.TASKTYPE, maxFailedRuns = 20, firstDelay = 60)
+public class SensuMetrikkTask implements BatchProsessTaskHandler {
 
     private static final int CHUNK_EVENT_SIZE = 1000;
 
@@ -32,6 +33,11 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
     private SensuKlient sensuKlient;
 
     private StatistikkRepository statistikkRepository;
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 */5 * * * *");
+    }
 
     SensuMetrikkTask() {
         // for proxyd

@@ -4,9 +4,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.felles.integrasjon.sensu.SensuKlient;
+import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@ProsessTask(value = DagligSensuMetrikkTask.TASKTYPE, cronExpression = "0 1 23 * * *", maxFailedRuns = 20, firstDelay = 60)
+@ProsessTask(value = DagligSensuMetrikkTask.TASKTYPE, maxFailedRuns = 20, firstDelay = 60)
 @Deprecated // Trengs sannsynligvis ikke for ung
-public class DagligSensuMetrikkTask implements ProsessTaskHandler {
+public class DagligSensuMetrikkTask implements BatchProsessTaskHandler {
 
     private static final int CHUNK_EVENT_SIZE = 1000;
 
@@ -64,6 +66,11 @@ public class DagligSensuMetrikkTask implements ProsessTaskHandler {
             }
         }
 
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 1 23 * * *");
     }
 
     private void logMetrics(List<SensuEvent> events) {

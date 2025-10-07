@@ -1148,9 +1148,9 @@
         "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
-        "enum" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ],
+        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ]
+        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.Venteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE" ],
@@ -1757,6 +1757,38 @@
           }
         },
         "required" : [ "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
+        "properties" : {
+          "fødselsdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "identifikator" : {
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "navn" : {
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "personIdentifikator" : {
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto" : {
+        "properties" : {
+          "arbeidsgivere" : {
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto"
+            },
+            "type" : "object"
+          }
+        },
         "type" : "object"
       },
       "ung.sak.kontrakt.behandling.BehandlingDto" : {
@@ -3596,6 +3628,25 @@
         "required" : [ "bruker", "ytelseType" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.søknad.JournalførPapirSøknadDto" : {
+        "properties" : {
+          "journalpostId" : {
+            "type" : "string"
+          },
+          "personIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "startDato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "journalpostId", "personIdent", "startDato" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.søknad.SøknadDto" : {
         "properties" : {
           "begrunnelseForSenInnsending" : {
@@ -5046,6 +5097,36 @@
           }
         },
         "tags" : [ "aksjonspunkt" ]
+      }
+    },
+    "/api/behandling/arbeidsgiver" : {
+      "get" : {
+        "description" : "Henter informasjon om alle arbeidsgivere knyttet til bruker",
+        "operationId" : "getArbeidsgiverOpplysninger",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto"
+                }
+              }
+            },
+            "description" : "Returnerer ArbeidsgiverOversiktDto"
+          }
+        },
+        "summary" : "Henter informasjon om alle arbeidsgivere (navn, fødselsnr for privat arbeidsgiver osv)",
+        "tags" : [ "arbeidsgiver" ]
       }
     },
     "/api/behandling/backend-root" : {
@@ -7550,6 +7631,32 @@
           }
         },
         "summary" : "Henter og viser papirsøknad",
+        "tags" : [ "fordel" ]
+      }
+    },
+    "/api/papir/journalførPapirSøknad" : {
+      "post" : {
+        "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
+        "operationId" : "journalførPapirSøknad",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.JournalførPapirSøknadDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Oppretter fagsak og journalfører papirsøknad",
         "tags" : [ "fordel" ]
       }
     },

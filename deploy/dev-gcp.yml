@@ -177,7 +177,7 @@ spec:
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
-      value: https://arbeid-og-inntekt.nais.preprod.local
+      value: https://arbeid-og-inntekt-q2.dev.adeo.no
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE

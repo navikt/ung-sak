@@ -4,7 +4,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
-import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -21,10 +20,8 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -118,19 +115,6 @@ public class VedtaksbrevTjeneste {
         );
     }
 
-    public Set<DokumentMalType> måSkriveBrev(Long behandlingId) {
-        var totalResultat = vedtaksbrevRegler.kjør(behandlingId);
-        if (!totalResultat.harBrev()) {
-            return Collections.emptySet();
-        }
-
-        return totalResultat.vedtaksbrevResultater().stream()
-            .filter(
-                v -> v.vedtaksbrevEgenskaper().kanRedigere() && !v.vedtaksbrevEgenskaper().kanOverstyreRediger())
-            .map(Vedtaksbrev::dokumentMalType)
-            .collect(Collectors.toSet());
-    }
-
     public VedtaksbrevValgEntitet lagreVedtaksbrev(VedtaksbrevValgRequest dto) {
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
         if (behandling.erAvsluttet()) {
@@ -150,16 +134,18 @@ public class VedtaksbrevTjeneste {
 
         var vedtaksbrevEgenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
 
-        if (!vedtaksbrevEgenskaper.kanRedigere() && dto.redigert() != null) {
+        boolean redigert = Boolean.TRUE.equals(dto.redigert());
+        if (!vedtaksbrevEgenskaper.kanRedigere() && redigert) {
             throw new IllegalArgumentException("Brevet kan ikke redigeres.");
         }
 
-        if (!vedtaksbrevEgenskaper.kanHindre() && dto.hindret() != null) {
+        boolean hindret = Boolean.TRUE.equals(dto.hindret());
+        if (!vedtaksbrevEgenskaper.kanHindre() && hindret) {
             throw new IllegalArgumentException("Brevet kan ikke hindres. ");
         }
 
-        vedtaksbrevValgEntitet.setHindret(Boolean.TRUE.equals(dto.hindret()));
-        vedtaksbrevValgEntitet.setRedigert(Boolean.TRUE.equals(dto.redigert()));
+        vedtaksbrevValgEntitet.setHindret(hindret);
+        vedtaksbrevValgEntitet.setRedigert(redigert);
         vedtaksbrevValgEntitet.rensOgSettRedigertHtml(dto.redigertHtml());
 
         LOG.info("Lagrer vedtaksbrevvalg for dokumentMalType={} med verdier redigert={} hindret={} redigertHtml={}",

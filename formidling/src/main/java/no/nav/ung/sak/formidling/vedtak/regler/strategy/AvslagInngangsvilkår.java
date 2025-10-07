@@ -5,32 +5,38 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.innhold.EndringBarnetilleggInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 @Dependent
-public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final EndringBarnetilleggInnholdBygger endringBarnetilleggInnholdBygger;
+
+    private final TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger;
 
     @Inject
-    public EndringBarnetilleggStrategy(EndringBarnetilleggInnholdBygger endringBarnetilleggInnholdBygger) {
-        this.endringBarnetilleggInnholdBygger = endringBarnetilleggInnholdBygger;
+    public AvslagInngangsvilkår(TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger) {
+        this.tomVedtaksbrevInnholdBygger = tomVedtaksbrevInnholdBygger;
     }
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_BARNETILLEGG, endringBarnetilleggInnholdBygger, "Automatisk brev ved fødsel av barn.");
+        return new VedtaksbrevStrategyResultat(
+            DokumentMalType.MANUELT_VEDTAK_DOK,
+            tomVedtaksbrevInnholdBygger,
+            new VedtaksbrevEgenskaper(true, true, true, true),
+            null,
+            "Tom brev for redigering ved avslag"
+        );
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
-            && resultater.innholderIkke(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)
-            && resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL);
+        return resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
     }
 
 }

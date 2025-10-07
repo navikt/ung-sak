@@ -7,6 +7,8 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Vedtaksbrevresultat for hele behandlingen. Vet om det er flere vedtaksbrev.
@@ -40,6 +42,22 @@ public record BehandlingVedtaksbrevResultat(
     public static BehandlingVedtaksbrevResultat utenBrev(LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
                                                          List<IngenBrev> ingenBrevResultater) {
                 return new BehandlingVedtaksbrevResultat(false, detaljertResultatTimeline, Collections.emptyList() , ingenBrevResultater );
+    }
+
+    public Set<DokumentMalType> brevSomMåRedigeres() {
+        return this.vedtaksbrevResultater().stream()
+            .filter(
+                v -> v.vedtaksbrevEgenskaper().kanRedigere() && !v.vedtaksbrevEgenskaper().kanOverstyreRediger())
+            .map(Vedtaksbrev::dokumentMalType)
+            .collect(Collectors.toSet());
+    }
+
+    public String forklaringer() {
+        if (harBrev) {
+            return vedtaksbrevResultater.stream().map(Vedtaksbrev::forklaring).collect(Collectors.joining(", "));
+        } else {
+            return ingenBrevResultater.stream().map(IngenBrev::forklaring).collect(Collectors.joining(", "));
+        }
     }
 
 
