@@ -25,6 +25,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
 import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
 import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
@@ -34,7 +35,6 @@ import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.io.ByteArrayInputStream;
-import java.time.LocalDate;
 import java.util.Optional;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
@@ -81,12 +81,8 @@ public class PapirSøknadRestTjeneste {
     public Response hentPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HentPapirSøknadRequestDto hentPapirSøknadRequestDto) {
 
         // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        // TODO: Aktiver denne når testing lokalt er utført.
-        //byte[] dokument = dokumentArkivTjeneste.hentDokument(hentPapirSøknadRequestDto.journalpostId(), hentPapirSøknadRequestDto.dokumentId().getVerdi());
+        byte[] dokument = dokumentArkivTjeneste.hentDokument(hentPapirSøknadRequestDto.journalpostId(), hentPapirSøknadRequestDto.dokumentId().getVerdi());
         String filnavn = "søknadsdokument-" + hentPapirSøknadRequestDto.dokumentId() + ".pdf";
-
-        // Fjern denne før prodsetting. Kun for å teste journalføring av papirsøknad.
-        byte[] dokument = papirsøknadHåndteringTjeneste.journalførPapirsøknad(PersonIdent.fra("12345678910"), LocalDate.now()).pdf();
 
         try {
             Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
@@ -134,5 +130,20 @@ public class PapirSøknadRestTjeneste {
                 return Response.serverError().entity("Kan ikke ferdigstille journalpost: " + e.getMessage()).build();
             }
         }
+    }
+
+    @POST
+    @Path("/sendInnPapirsøknadopplysninger")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Mapper til strukturert søknadsopplysninger og journalfører mot fagsak.", summary = ("Mapper til strukturert søknadsopplysninger og journalfører mot fagsak."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
+    public OpprettJournalpostResponse sendInnPapirsøknadopplysninger(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SendInnPapirsøknadopplysningerRequestDto dto) {
+        return papirsøknadHåndteringTjeneste.journalførPapirsøknad(
+            PersonIdent.fra(dto.deltakerIdent()),
+            dto.startdato(),
+            dto.deltakelseId(),
+            dto.journalpostIdForPapirsøknad()
+        );
     }
 }
