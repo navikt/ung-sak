@@ -188,7 +188,7 @@ spec:
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
-      value: https://arbeid-og-inntekt.nais.adeo.no
+      value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
