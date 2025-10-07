@@ -86,6 +86,7 @@ spec:
         - host: "oppgave.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
+        - host: "ereg-services-q2.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
@@ -169,7 +170,7 @@ spec:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
     - name: ORGANISASJON_RS_URL
-      value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
+      value: https://ereg-services-q2.dev-fss-pub.nais.io
     - name: K9_OPPDRAG_DIREKTE_URL
       value: https://k9-oppdrag.dev-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
