@@ -2,7 +2,6 @@ package no.nav.ung.sak.web.app.tjenester.fordeling;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.saf.Journalposttype;
 import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.søknad.JsonUtils;
@@ -51,6 +50,8 @@ public class PapirsøknadHåndteringTjeneste {
     public OpprettJournalpostResponse journalførPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, UUID deltakelseId, JournalpostId journalpostId) {
         Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
+
+        // TODO: Valider at fagsak finnes for deltaker før journalføring.
 
         byte[] pdfDokument = lagPdfDokument(deltakerIdent, startdato, deltakerNavn);
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
