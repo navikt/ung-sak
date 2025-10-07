@@ -66,20 +66,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
                                       BigDecimal inntekt,
-                                      KontrollertInntektKilde kilde,
-                                      boolean erManueltVurdert,
-                                      String begrunnelse) {
-        this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
-        this.inntekt = inntekt;
-        this.kilde = kilde;
-        this.erManueltVurdert = erManueltVurdert;
-        this.begrunnelse = begrunnelse;
-    }
-
-    private KontrollertInntektPeriode(DatoIntervallEntitet periode,
-                                      BigDecimal inntekt,
                                       BigDecimal rapportertInntekt,
-                                        BigDecimal registerInntekt,
+                                      BigDecimal registerInntekt,
                                       KontrollertInntektKilde kilde,
                                       boolean erManueltVurdert,
                                       String begrunnelse) {
@@ -191,7 +179,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
 
         public KontrollertInntektPeriode build() {
-            return new KontrollertInntektPeriode(periode, inntekt, kilde, erManueltVurdert, begrunnelse);
+            return new KontrollertInntektPeriode(periode, inntekt, rapportertInntekt, registerInntekt, kilde, erManueltVurdert, begrunnelse);
         }
 
 
