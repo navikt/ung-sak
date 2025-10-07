@@ -82,8 +82,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .collect(Collectors.toSet());
 
         var vedtaksbrevResultater = resultat.vedtaksbrevResultater().stream()
-                .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
-                .toList();
+            .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
+            .toList();
 
         for (int brevNr = 0; brevNr < vedtaksbrevResultater.size(); brevNr++) {
             Vedtaksbrev it = vedtaksbrevResultater.get(brevNr);
@@ -135,7 +135,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
 
-    private void håndterSaksbehandlerValg(Behandling behandling, VedtaksbrevValgEntitet vedtaksbrevValg, FellesVedtaksbrevresultat resultat) {
+    private void håndterSaksbehandlerValg(Behandling behandling, VedtaksbrevValgEntitet vedtaksbrevValg, BehandlingVedtaksbrevResultat resultat) {
         Long behandlingId = behandling.getId();
         Long fagsakId = behandling.getFagsakId();
 
@@ -183,7 +183,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
 
-    private void håndterIngenBrevResultat(FellesVedtaksbrevresultat resultat, Behandling behandling) {
+    private void håndterIngenBrevResultat(BehandlingVedtaksbrevResultat resultat, Behandling behandling) {
         String forklaring = resultat.ingenBrevResultater().stream().map(VedtaksbrevRegelResultat::forklaring).collect(Collectors.joining(", ", "[", "]"));
         var behandlingId = behandling.getId();
         var fagsakId = behandling.getFagsakId();

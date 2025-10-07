@@ -1,7 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 public class VedtaksbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
-    private final VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste;
+    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private final VedtaksbrevReglerUng vedtaksbrevRegler;
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
@@ -37,8 +36,8 @@ public class VedtaksbrevTjeneste {
 
     @Inject
     public VedtaksbrevTjeneste(
-        @Any VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste,
-        @Any VedtaksbrevReglerUng vedtaksbrevRegler,
+        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
+        VedtaksbrevReglerUng vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;

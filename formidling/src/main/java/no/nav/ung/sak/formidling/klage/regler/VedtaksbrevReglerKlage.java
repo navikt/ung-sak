@@ -1,6 +1,6 @@
 package no.nav.ung.sak.formidling.klage.regler;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
@@ -19,8 +18,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
-@FagsakYtelseTypeRef
+@Dependent
 @BehandlingTypeRef(BehandlingType.KLAGE)
 public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
 
@@ -41,13 +39,13 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
     public VedtaksbrevReglerKlage() {
     }
 
-    public BehandlingVedtaksbrevResultatKlage kjør(Long behandlingId) {
+    public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var klageutredning = klageRepository.hentKlageUtredning(behandlingId);
         return bestemResultat(behandling, klageutredning);
     }
 
-    private BehandlingVedtaksbrevResultatKlage bestemResultat(Behandling behandling, KlageUtredningEntitet klageutredning) {
+    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, KlageUtredningEntitet klageutredning) {
         var klagevurderingFørsteinstans = klageutredning.getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
             .orElseThrow(() -> new IllegalStateException("Trenger vurdering av førsteinstans for å kunne vise vedtaksbrev for klage"));
 
@@ -69,7 +67,8 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
             .toList();
 
         if (!ingenBrevResultat.isEmpty()) {
-            return BehandlingVedtaksbrevResultatKlage.utenBrev(
+            return BehandlingVedtaksbrevResultat.utenBrev(
+                null,
                 ingenBrevResultat.stream()
                 .map(it -> VedtaksbrevRegelResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring()))
                 .toList());
@@ -84,7 +83,7 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
         }
 
         var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat);
-        return BehandlingVedtaksbrevResultatKlage.medBrev(automatiskVedtaksbrevResultater);
+        return BehandlingVedtaksbrevResultat.medBrev(null, automatiskVedtaksbrevResultater);
     }
 
     private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(List<VedtaksbrevStrategyResultat> resultat) {
