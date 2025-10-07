@@ -8,6 +8,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollerInntektRestTjeneste;
@@ -85,6 +86,8 @@ public class RestImplementationClasses {
         classes.add(KontrollerInntektRestTjeneste.class);
         classes.add(EtterlysningRestTjeneste.class);
         classes.add(OppdragProxyRestTjeneste.class);
+        classes.add(ArbeidsgiverRestTjeneste.class);
+
 
         classes.add(KlageRestTjeneste.class);
 

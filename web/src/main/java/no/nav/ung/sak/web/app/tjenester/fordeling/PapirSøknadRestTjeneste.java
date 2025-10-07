@@ -32,6 +32,8 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
@@ -104,18 +106,27 @@ public class PapirSøknadRestTjeneste {
         AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(journalførPapirSøknadDto.personIdent()))
             .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for personIdent"));
 
-        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
+        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
 
         var journalpostId = journalførPapirSøknadDto.journalpostId();
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
         } else {
             try {
-                if (journalpostId != null && !journalpostRepository.markerJournalposterBehandlet(journalpostId).isEmpty() && journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId())) {
-                    return Response.ok().build();
-                } else {
-                    throw new IllegalStateException("Har mangler som ikke kan fikses opp maskinelt");
+                boolean ferdigJournalført = journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId());
+                if (!ferdigJournalført) {
+                    throw new IllegalStateException("Journalpost kunne ikke journalføres");
                 }
+
+                String response = """
+                    {
+                      "saksnummer": "%s"
+                    }
+                    """.formatted(fagsak.getSaksnummer().getVerdi());
+
+                return Response.ok()
+                    .entity(response)
+                    .build();
             } catch (Exception e) {
                 return Response.serverError().entity("Kan ikke ferdigstille journalpost: " + e.getMessage()).build();
             }

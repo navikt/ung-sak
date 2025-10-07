@@ -21,12 +21,6 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_KONTROLLERT_INNTEKT_PERIODER")
     private Long id;
 
-    @Column(name = "behandling_id", nullable = false, updatable = false)
-    private Long behandlingId;
-
-    @Column(name = "aktiv", nullable = false, updatable = true)
-    private boolean aktiv = true;
-
     @Lob
     @Column(name = "regel_input")
     @DiffIgnore
@@ -42,18 +36,7 @@ public class KontrollertInntektPerioder extends BaseEntitet {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
 
-
-
-    public Long getBehandlingId() {
-        return behandlingId;
-    }
-
-    public boolean isAktiv() {
-        return aktiv;
-    }
-
-    void setIkkeAktiv() {
-        this.aktiv = false;
+    public KontrollertInntektPerioder() {
     }
 
     public List<KontrollertInntektPeriode> getPerioder() {
@@ -73,27 +56,25 @@ public class KontrollertInntektPerioder extends BaseEntitet {
         if (behandlingId == null) {
             throw new IllegalArgumentException("behandlingId kan ikke være null");
         }
-        return new Builder(behandlingId);
+        return new Builder();
     }
 
-    public static Builder kopi(Long behandlingId, KontrollertInntektPerioder perioder) {
-        return new Builder(behandlingId, perioder);
+    public static Builder kopi(KontrollertInntektPerioder perioder) {
+        return new Builder(perioder);
     }
 
     public static class Builder {
-        private Long behandlingId;
         private List<KontrollertInntektPeriode> perioder = new ArrayList<>();
         private Clob regelInput;
         private Clob regelSporing;
 
 
-        public Builder(Long behandlingId, KontrollertInntektPerioder perioder) {
-            this.behandlingId = behandlingId;
+        public Builder(KontrollertInntektPerioder perioder) {
+
             this.perioder = perioder.perioder.stream().map(KontrollertInntektPeriode::new).toList();
         }
 
-        public Builder(Long behandlingId) {
-            this.behandlingId = behandlingId;
+        public Builder() {
         }
 
         public Builder medPerioder(List<KontrollertInntektPeriode> perioder) {
@@ -117,7 +98,6 @@ public class KontrollertInntektPerioder extends BaseEntitet {
 
         public KontrollertInntektPerioder build() {
             KontrollertInntektPerioder kontrollertInntektPerioder = new KontrollertInntektPerioder();
-            kontrollertInntektPerioder.behandlingId = this.behandlingId;
             kontrollertInntektPerioder.perioder = this.perioder;
             kontrollertInntektPerioder.regelInput = this.regelInput;
             kontrollertInntektPerioder.regelSporing = this.regelSporing;

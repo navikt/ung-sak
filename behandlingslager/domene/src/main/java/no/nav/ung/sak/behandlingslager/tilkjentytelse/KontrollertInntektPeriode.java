@@ -70,6 +70,10 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         this.begrunnelse = begrunnelse;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }

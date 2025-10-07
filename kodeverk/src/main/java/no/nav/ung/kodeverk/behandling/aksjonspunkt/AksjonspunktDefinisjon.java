@@ -98,7 +98,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     // Gruppe: 80xx
     KONTROLLER_INNTEKT(
         AksjonspunktKodeDefinisjon.KONTROLLER_INNTEKT_KODE, AksjonspunktType.MANUELL, "Kontroller inntekt",
-        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, UTEN_VILKÅR, SkjermlenkeType.BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
+        BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, UTEN_VILKÅR, SkjermlenkeType.KONTROLL_AV_INNTEKT, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
 
     VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS(

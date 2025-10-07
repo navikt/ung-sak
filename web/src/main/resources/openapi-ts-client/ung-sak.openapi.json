@@ -1202,9 +1202,9 @@
         "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
-        "enum" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
+        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BEREGNING", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
+        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.Venteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "OVERSENDT_KABAL" ],
@@ -1837,6 +1837,38 @@
           }
         },
         "required" : [ "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
+        "properties" : {
+          "fødselsdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "identifikator" : {
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "navn" : {
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "personIdentifikator" : {
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto" : {
+        "properties" : {
+          "arbeidsgivere" : {
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto"
+            },
+            "type" : "object"
+          }
+        },
         "type" : "object"
       },
       "ung.sak.kontrakt.behandling.BehandlingDto" : {
@@ -5440,6 +5472,36 @@
           }
         },
         "tags" : [ "aksjonspunkt" ]
+      }
+    },
+    "/api/behandling/arbeidsgiver" : {
+      "get" : {
+        "description" : "Henter informasjon om alle arbeidsgivere knyttet til bruker",
+        "operationId" : "getArbeidsgiverOpplysninger",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto"
+                }
+              }
+            },
+            "description" : "Returnerer ArbeidsgiverOversiktDto"
+          }
+        },
+        "summary" : "Henter informasjon om alle arbeidsgivere (navn, fødselsnr for privat arbeidsgiver osv)",
+        "tags" : [ "arbeidsgiver" ]
       }
     },
     "/api/behandling/backend-root" : {

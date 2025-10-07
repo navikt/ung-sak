@@ -43,12 +43,9 @@ public class TilkjentYtelseRepository {
 
 
     public void lagreKontrollertePerioder(long behandlingId, List<KontrollertInntektPeriode> perioder, String input, String sporing) {
-        final var eksisterende = hentKontrollertInntektPerioder(behandlingId);
-        final var eksisterendePerioder = eksisterende.stream()
-            .flatMap(it -> it.getPerioder().stream())
-            .toList();
+        final var eksisterende = hentKontrollertInntektGrunnlag(behandlingId);
         final var differ = differ();
-        if (!differ.areDifferent(eksisterendePerioder, perioder)) {
+        if (eksisterende.isPresent() && !differ.areDifferent(eksisterende.get().getKontrollertInntektPerioder().getPerioder(), perioder)) {
             log.info("Fant ingen diff mellom eksisterende og nye perioder, lagrer ikke.");
             return;
         }
@@ -59,12 +56,32 @@ public class TilkjentYtelseRepository {
             return;
         }
 
+        if (perioder.stream().anyMatch(it -> it.getId() != null)) {
+            throw new IllegalStateException("Perioder som lagres  på nytt grunnlag kan ikke ha id, det betyr at de allerede er lagret.");
+        }
+
         final var ny = KontrollertInntektPerioder.ny(behandlingId)
             .medPerioder(perioder)
             .medRegelInput(input)
             .medRegelSporing(sporing)
             .build();
+
         entityManager.persist(ny);
+        entityManager.flush();
+
+        lagreNyttGrunnlag(behandlingId, ny);
+
+    }
+
+    private void lagreNyttGrunnlag(long behandlingId, KontrollertInntektPerioder ny) {
+        KontrollertInntektGrunnlag kontrollertInntektGrunnlag = new KontrollertInntektGrunnlag(behandlingId, ny);
+        Optional<KontrollertInntektGrunnlag> eksisterendeGrunnlag = hentKontrollertInntektGrunnlag(behandlingId);
+        if (eksisterendeGrunnlag.isPresent()) {
+            deaktiver(eksisterendeGrunnlag.get());
+            entityManager.persist(eksisterendeGrunnlag.get());
+            entityManager.flush();
+        }
+        entityManager.persist(kontrollertInntektGrunnlag);
         entityManager.flush();
     }
 
@@ -75,33 +92,23 @@ public class TilkjentYtelseRepository {
     }
 
 
-
-    private void deaktiver(KontrollertInntektPerioder eksisterende) {
-        eksisterende.setIkkeAktiv();
+    private void deaktiver(KontrollertInntektGrunnlag eksisterende) {
+        eksisterende.setAktiv(false);
         entityManager.persist(eksisterende);
         entityManager.flush();
     }
 
     public void kopierKontrollPerioder(long originalBehandlingId, long nyBehandlingId) {
-        final var eksisterende = hentKontrollertInntektPerioder(originalBehandlingId);
-        if (eksisterende.isPresent()) {
-            final var ny = KontrollertInntektPerioder.kopi(nyBehandlingId, eksisterende.get()).build();
-            entityManager.persist(ny);
-            entityManager.flush();
-        }
+        final var eksisterende = hentKontrollertInntektGrunnlag(originalBehandlingId);
+        eksisterende.ifPresent(kontrollertInntektGrunnlag -> lagreNyttGrunnlag(nyBehandlingId, kontrollertInntektGrunnlag.getKontrollertInntektPerioder()));
     }
 
     public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {
-        final var eksisterendeOptional = hentKontrollertInntektPerioder(behandlingId);
-        if (eksisterendeOptional.isPresent()) {
-            final var eksisterende = eksisterendeOptional.get();
-            deaktiver(eksisterende);
-        }
         kopierKontrollPerioder(originalBehandlingId, behandlingId);
     }
 
 
-        public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
+    public void lagre(long behandlingId, List<TilkjentYtelsePeriode> perioder, String input, String sporing) {
         final var eksisterende = hentTilkjentYtelse(behandlingId);
         if (eksisterende.isPresent()) {
             eksisterende.get().setIkkeAktiv();
@@ -125,11 +132,16 @@ public class TilkjentYtelseRepository {
     }
 
     public Optional<KontrollertInntektPerioder> hentKontrollertInntektPerioder(Long behandlingId) {
-        var query = entityManager.createQuery("SELECT t FROM KontrollertInntektPerioder t WHERE t.behandlingId=:id AND t.aktiv = true", KontrollertInntektPerioder.class)
+        return hentKontrollertInntektGrunnlag(behandlingId).map(KontrollertInntektGrunnlag::getKontrollertInntektPerioder);
+    }
+
+    public Optional<KontrollertInntektGrunnlag> hentKontrollertInntektGrunnlag(Long behandlingId) {
+        var query = entityManager.createQuery("SELECT gr FROM KontrollertInntektGrunnlag gr WHERE gr.behandlingId=:id AND gr.aktiv = true", KontrollertInntektGrunnlag.class)
             .setParameter("id", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
+
 
     public Map<Behandling, LocalDateTimeline<TilkjentYtelseVerdi>> hentTidslinjerForFagsak(Long fagsakId) {
         var tilkjentYtelseMap = hentTilkjentYtelseForFagsak(fagsakId);
