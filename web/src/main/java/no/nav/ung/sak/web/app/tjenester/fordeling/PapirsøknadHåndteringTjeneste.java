@@ -53,7 +53,7 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] pdfDokument = lagPdfDokument(deltakerIdent, startdato, deltakerNavn);
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
-        OpprettJournalpostResponse opprettJournalpostResponse = opprettJournalpost(deltakerIdent, deltakelseId, pdfDokument, jsonDokument);
+        OpprettJournalpostResponse opprettJournalpostResponse = opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument);
 
         return opprettJournalpostResponse;
     }
@@ -78,7 +78,7 @@ public class PapirsøknadHåndteringTjeneste {
     }
 
 
-    private OpprettJournalpostResponse opprettJournalpost(PersonIdent deltakerIdent, UUID deltakelseId, byte[] pdfDokument, byte[] jsonDokument) {
+    private OpprettJournalpostResponse opprettJournalpost(PersonIdent deltakerIdent, String deltakerNavn, UUID deltakelseId, byte[] pdfDokument, byte[] jsonDokument) {
         return dokArkivKlientImpl.opprettJournalpost(new OpprettJournalpostRequestBuilder()
             .bruker(new OpprettJournalpostRequest.Bruker(deltakerIdent.getIdent(), OpprettJournalpostRequest.Bruker.BrukerIdType.FNR))
             .tema(Tema.UNG.name())
@@ -86,6 +86,7 @@ public class PapirsøknadHåndteringTjeneste {
             .kanal(Kanal.NAV_NO.name())
             .journalfoerendeEnhet(MASKINELL_JOURNALFØRENDE_ENHET)
             .eksternReferanseId(deltakelseId.toString())
+            .avsenderMottaker(new OpprettJournalpostRequest.AvsenderMottaker(deltakerIdent.getIdent(), deltakerNavn, null, OpprettJournalpostRequest.AvsenderMottaker.IdType.FNR))
             .dokumenter(List.of(
                 new OpprettJournalpostRequest.Dokument(
                     "Punsjet papirsøknad om ungdomsprogramytelsen",

@@ -62,7 +62,7 @@ public class JournalføringOgDistribusjonsTjeneste {
 
     private BrevbestillingResultat journalførOgDistribuer(Behandling behandling, BrevbestillingEntitet bestilling, GenerertBrev generertBrev, ProsessTaskData distTaskMal) {
         var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);
-        var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
+        var opprettJournalpostResponse = dokArkivKlient.opprettJournalpostOgFerdigstill(dokArkivRequest);
 
         bestilling.journalført(
             opprettJournalpostResponse.journalpostId(),
