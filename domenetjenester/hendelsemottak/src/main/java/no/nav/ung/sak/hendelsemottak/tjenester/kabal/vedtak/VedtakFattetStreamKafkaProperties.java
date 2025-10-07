@@ -23,7 +23,6 @@ class VedtakFattetStreamKafkaProperties {
     private final String trustStorePassword;
     private final String keyStoreLocation;
     private final String keyStorePassword;
-    private final boolean aivenEnabled;
 
     @SuppressWarnings("resource")
     @Inject
@@ -32,33 +31,27 @@ class VedtakFattetStreamKafkaProperties {
                                       @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
                                       @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
                                       @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
-                                      @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
-                                      @KonfigVerdi(value = "KAFKA_AIVEN_ENABLED", defaultVerdi = "false") boolean aivenEnabled) {
+                                      @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword) {
         this.trustStorePath = trustStorePath;
         this.trustStorePassword = trustStorePassword;
         this.keyStoreLocation = keyStoreLocation;
         this.keyStorePassword = keyStorePassword;
         this.topic = topicName;
         this.bootstrapServers = bootstrapServers;
-        this.aivenEnabled = aivenEnabled;
     }
 
     Properties setupProperties() {
         var builder = new KafkaPropertiesBuilder();
 
-        builder.clientId("ung-sak").applicationId("ung-sak").bootstrapServers(bootstrapServers);
-
-        Properties props = aivenEnabled ?
-            builder
-                .truststorePath(trustStorePath)
-                .truststorePassword(trustStorePassword)
-                .keystorePath(keyStoreLocation)
-                .keystorePassword(keyStorePassword)
-                .buildForStreamsAiven() :
-            builder
-                .username("vtp")
-                .password("vtp")
-                .buildForStreamsJaas();
+        Properties props = builder
+            .clientId("ung-sak")
+            .applicationId("ung-sak")
+            .bootstrapServers(bootstrapServers)
+            .truststorePath(trustStorePath)
+            .truststorePassword(trustStorePassword)
+            .keystorePath(keyStoreLocation)
+            .keystorePassword(keyStorePassword)
+            .buildForStreamsAiven();
 
         // Serde
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
@@ -69,8 +62,8 @@ class VedtakFattetStreamKafkaProperties {
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "200");
         props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "100000");
 
-        log.info("Configuring topic='{}' with applicationId='{} & SSL-auth enabled={}",
-            topic, props.getProperty(StreamsConfig.APPLICATION_ID_CONFIG), aivenEnabled);
+        log.info("Configuring topic='{}' with applicationId='{} & SSL-auth enabled",
+            topic, props.getProperty(StreamsConfig.APPLICATION_ID_CONFIG));
 
         return props;
     }
