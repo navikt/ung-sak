@@ -67,7 +67,7 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements BatchPros
             log.info("Ingen behandlinger på vent som skal oppfriskes");
             return;
         }
-        log.info("Starter asynk oppfrisk av inntekt for" + behandlinger.size() + "behandlinger på vent");
+        log.info("Starter asynk oppfrisk av inntekt for {} behandlinger på vent", behandlinger.size());
         opprettTaskerForOppfrisking(behandlinger);
     }
 
@@ -75,11 +75,11 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements BatchPros
         final ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
         for (Behandling behandling : behandlinger) {
             if (behandling.isBehandlingPåVent() && !harPågåendeEllerFeiletTask(behandling)) {
-                log.info("oppfrisker behandling " + behandling.getId());
+                log.info("oppfrisker behandling {}", behandling.getId());
                 final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling, false);
                 gruppe.addNesteParallell(oppfriskTaskData);
             } else {
-                log.info("oppfrisker ikke behandling " + behandling.getId());
+                log.info("oppfrisker ikke behandling {}", behandling.getId());
             }
         }
         String gruppeId = prosessTaskTjeneste.lagre(gruppe);
