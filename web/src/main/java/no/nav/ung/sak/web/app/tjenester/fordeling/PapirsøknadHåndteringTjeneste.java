@@ -88,12 +88,13 @@ public class PapirsøknadHåndteringTjeneste {
             .kanal(Kanal.NAV_NO.name())
             .journalfoerendeEnhet(MASKINELL_JOURNALFØRENDE_ENHET)
             .eksternReferanseId(deltakelseId.toString())
+            .behandlingstema("-")
             .avsenderMottaker(new OpprettJournalpostRequest.AvsenderMottaker(deltakerIdent.getIdent(), deltakerNavn, null, OpprettJournalpostRequest.AvsenderMottaker.IdType.FNR))
             .journalpostType(JournalpostType.INNGAAENDE)
             .dokumenter(List.of(
                 new OpprettJournalpostRequest.Dokument(
                     "Punsjet papirsøknad om ungdomsprogramytelsen",
-                    Brevkode.UNGDOMSYTELSE_SOKNAD_KODE,
+                    Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
                     "SOK",
                     List.of(
                         new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(pdfDokument),
