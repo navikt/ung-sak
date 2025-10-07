@@ -1759,6 +1759,38 @@
         "required" : [ "periode" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
+        "properties" : {
+          "fødselsdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "identifikator" : {
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "navn" : {
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "personIdentifikator" : {
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto" : {
+        "properties" : {
+          "arbeidsgivere" : {
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto"
+            },
+            "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.behandling.BehandlingDto" : {
         "properties" : {
           "ansvarligBeslutter" : {
@@ -5065,6 +5097,36 @@
           }
         },
         "tags" : [ "aksjonspunkt" ]
+      }
+    },
+    "/api/behandling/arbeidsgiver" : {
+      "get" : {
+        "description" : "Henter informasjon om alle arbeidsgivere knyttet til bruker",
+        "operationId" : "getArbeidsgiverOpplysninger",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto"
+                }
+              }
+            },
+            "description" : "Returnerer ArbeidsgiverOversiktDto"
+          }
+        },
+        "summary" : "Henter informasjon om alle arbeidsgivere (navn, fødselsnr for privat arbeidsgiver osv)",
+        "tags" : [ "arbeidsgiver" ]
       }
     },
     "/api/behandling/backend-root" : {
