@@ -110,8 +110,9 @@ public class JettyDevServer extends JettyServer {
          */
 
         // truststore avgjør hva vi stoler på av sertifikater når vi gjør utadgående TLS kall
-        initCryptoStoreConfig("truststore", "javax.net.ssl.trustStore", "javax.net.ssl.trustStorePassword", "vtpvtp");
-        initCryptoStoreConfig("keystore", "javax.net.ssl.keyStore", "javax.net.ssl.keyStorePassword", "vtpvtp");
+        initCryptoStoreConfig("truststore", "javax.net.ssl.trustStore", "javax.net.ssl.trustStorePassword", "changeit");
+        initCryptoStoreConfig("keystore", "javax.net.ssl.keyStore", "javax.net.ssl.keyStorePassword",
+            "devillokeystore1234");
     }
 
     @SuppressWarnings("resource")
