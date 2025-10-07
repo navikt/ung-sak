@@ -24,6 +24,7 @@ public record OpprettJournalpostRequest(
     public OpprettJournalpostRequest {
         Objects.requireNonNull(avsenderMottaker, "avsenderMottaker cannot be null");
         Objects.requireNonNull(dokumenter, "dokumenter cannot be null");
+        Objects.requireNonNull(journalpostType, "journalpostType cannot be null");
     }
 
     @Override

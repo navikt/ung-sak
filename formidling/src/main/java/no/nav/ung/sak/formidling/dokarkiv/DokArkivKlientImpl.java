@@ -31,7 +31,9 @@ public class DokArkivKlientImpl implements DokArkivKlient {
             .queryParam("forsoekFerdigstill", true)
             .build();
 
-        this.opprettJournalpostUrl = tilUri(dokarkivBaseUrl, "journalpost");
+        this.opprettJournalpostUrl = UriBuilder.fromUri(tilUri(dokarkivBaseUrl, "journalpost"))
+            .queryParam("forsoekFerdigstill", false)
+            .build();
         this.restClient = restClient;
     }
 

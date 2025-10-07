@@ -110,7 +110,7 @@ public class JournalføringOgDistribusjonsTjeneste {
 
 
         return new OpprettJournalpostRequestBuilder()
-            .journalpostType("UTGAAENDE")
+            .journalpostType(JournalpostType.UTGAAENDE)
             .avsenderMottaker(avsenderMottaker)
             .bruker(bruker)
             .tema(OmrådeTema.UNG.getKode())

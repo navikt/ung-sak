@@ -2,6 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.fordeling;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.saf.Journalposttype;
 import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.søknad.JsonUtils;
@@ -14,6 +15,7 @@ import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
+import no.nav.ung.sak.formidling.bestilling.JournalpostType;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientImpl;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
@@ -87,6 +89,7 @@ public class PapirsøknadHåndteringTjeneste {
             .journalfoerendeEnhet(MASKINELL_JOURNALFØRENDE_ENHET)
             .eksternReferanseId(deltakelseId.toString())
             .avsenderMottaker(new OpprettJournalpostRequest.AvsenderMottaker(deltakerIdent.getIdent(), deltakerNavn, null, OpprettJournalpostRequest.AvsenderMottaker.IdType.FNR))
+            .journalpostType(JournalpostType.INNGAAENDE)
             .dokumenter(List.of(
                 new OpprettJournalpostRequest.Dokument(
                     "Punsjet papirsøknad om ungdomsprogramytelsen",

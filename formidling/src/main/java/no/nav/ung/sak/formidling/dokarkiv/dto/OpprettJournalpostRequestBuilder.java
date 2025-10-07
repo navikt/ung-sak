@@ -1,9 +1,11 @@
 package no.nav.ung.sak.formidling.dokarkiv.dto;
 
+import no.nav.ung.sak.formidling.bestilling.JournalpostType;
+
 import java.util.List;
 
 public class OpprettJournalpostRequestBuilder {
-    private String journalpostType;
+    private JournalpostType journalpostType;
     private OpprettJournalpostRequest.AvsenderMottaker avsenderMottaker;
     private OpprettJournalpostRequest.Bruker bruker;
     private String tema;
@@ -16,7 +18,7 @@ public class OpprettJournalpostRequestBuilder {
     private OpprettJournalpostRequest.Sak sak;
     private List<OpprettJournalpostRequest.Dokument> dokumenter;
 
-    public OpprettJournalpostRequestBuilder journalpostType(String journalpostType) {
+    public OpprettJournalpostRequestBuilder journalpostType(JournalpostType journalpostType) {
         this.journalpostType = journalpostType;
         return this;
     }
@@ -77,6 +79,6 @@ public class OpprettJournalpostRequestBuilder {
     }
 
     public OpprettJournalpostRequest build() {
-        return new OpprettJournalpostRequest(journalpostType, avsenderMottaker, bruker, tema, behandlingstema, tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
+        return new OpprettJournalpostRequest(journalpostType.name(), avsenderMottaker, bruker, tema, behandlingstema, tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
     }
 }
