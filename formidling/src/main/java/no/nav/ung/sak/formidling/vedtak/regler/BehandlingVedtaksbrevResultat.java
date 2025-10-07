@@ -17,7 +17,7 @@ public record BehandlingVedtaksbrevResultat(
     boolean harBrev,
     LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
     List<Vedtaksbrev> vedtaksbrevResultater,
-    List<IngenBrev> ingenBrevResultater) implements FellesVedtaksbrevresultat  {
+    List<IngenBrev> ingenBrevResultater) {
 
     public BehandlingVedtaksbrevResultat {
         // Valider at kun en av vedtaksbrevResultater og ingenBrevResultater har elementer
@@ -28,7 +28,6 @@ public record BehandlingVedtaksbrevResultat(
         }
     }
 
-    @Override
     public Optional<Vedtaksbrev> finnVedtaksbrev(DokumentMalType dokumentMalType) {
         return vedtaksbrevResultater.stream().filter(it -> it.dokumentMalType().equals(dokumentMalType)).findFirst();
     }

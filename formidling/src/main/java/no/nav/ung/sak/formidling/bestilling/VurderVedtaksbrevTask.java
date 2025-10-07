@@ -1,14 +1,13 @@
 package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
@@ -37,6 +36,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     private BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository;
     private BehandlingRepository behandlingRepository;
     private BrevbestillingRepository brevbestillingRepository;
+    private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
 
     VurderVedtaksbrevTask() {
         // for proxy
@@ -47,13 +47,16 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         ProsessTaskTjeneste prosessTaskTjeneste,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository,
-        BehandlingRepository behandlingRepository, BrevbestillingRepository brevbestillingRepository) {
+        BehandlingRepository behandlingRepository,
+        BrevbestillingRepository brevbestillingRepository,
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler) {
 
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingVedtaksbrevRepository = behandlingVedtaksbrevRepository;
         this.behandlingRepository = behandlingRepository;
         this.brevbestillingRepository = brevbestillingRepository;
+        this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
 
     @Override
@@ -61,7 +64,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var vedtaksbrevRegler = hentVedtaksbrevRegel(behandling.getFagsakYtelseType(), behandling.getType());
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(this.vedtaksbrevRegler, behandling.getType());
         var resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", resultat.safePrint());
 
@@ -81,8 +84,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .collect(Collectors.toSet());
 
         var vedtaksbrevResultater = resultat.vedtaksbrevResultater().stream()
-                .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
-                .toList();
+            .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
+            .toList();
 
         for (int brevNr = 0; brevNr < vedtaksbrevResultater.size(); brevNr++) {
             Vedtaksbrev it = vedtaksbrevResultater.get(brevNr);
@@ -134,7 +137,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
 
-    private void håndterSaksbehandlerValg(Behandling behandling, VedtaksbrevValgEntitet vedtaksbrevValg, FellesVedtaksbrevresultat resultat) {
+    private void håndterSaksbehandlerValg(Behandling behandling, VedtaksbrevValgEntitet vedtaksbrevValg, BehandlingVedtaksbrevResultat resultat) {
         Long behandlingId = behandling.getId();
         Long fagsakId = behandling.getFagsakId();
 
@@ -182,7 +185,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
 
-    private void håndterIngenBrevResultat(FellesVedtaksbrevresultat resultat, Behandling behandling) {
+    private void håndterIngenBrevResultat(BehandlingVedtaksbrevResultat resultat, Behandling behandling) {
         String forklaring = resultat.ingenBrevResultater().stream().map(VedtaksbrevRegelResultat::forklaring).collect(Collectors.joining(", ", "[", "]"));
         var behandlingId = behandling.getId();
         var fagsakId = behandling.getFagsakId();
@@ -198,8 +201,4 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring, null));
     }
 
-    private VedtaksbrevRegel hentVedtaksbrevRegel(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
-        return BehandlingTypeRef.Lookup.find(VedtaksbrevRegel.class, ytelseType, behandlingType)
-            .orElseThrow(() -> new IllegalStateException("Har ikke Vedtaksbrevregel for BehandlingType:" + behandlingType + ", ytelseType:" + ytelseType));
-    }
 }

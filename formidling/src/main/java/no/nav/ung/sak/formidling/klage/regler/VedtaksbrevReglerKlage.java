@@ -41,13 +41,13 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
     public VedtaksbrevReglerKlage() {
     }
 
-    public BehandlingVedtaksbrevResultatKlage kjør(Long behandlingId) {
+    public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var klageutredning = klageRepository.hentKlageUtredning(behandlingId);
         return bestemResultat(behandling, klageutredning);
     }
 
-    private BehandlingVedtaksbrevResultatKlage bestemResultat(Behandling behandling, KlageUtredningEntitet klageutredning) {
+    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, KlageUtredningEntitet klageutredning) {
         var klagevurderingFørsteinstans = klageutredning.getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
             .orElseThrow(() -> new IllegalStateException("Trenger vurdering av førsteinstans for å kunne vise vedtaksbrev for klage"));
 
@@ -69,7 +69,8 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
             .toList();
 
         if (!ingenBrevResultat.isEmpty()) {
-            return BehandlingVedtaksbrevResultatKlage.utenBrev(
+            return BehandlingVedtaksbrevResultat.utenBrev(
+                null,
                 ingenBrevResultat.stream()
                 .map(it -> VedtaksbrevRegelResultat.ingenBrev(it.ingenBrevÅrsakType(), it.forklaring()))
                 .toList());
@@ -84,7 +85,7 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
         }
 
         var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat);
-        return BehandlingVedtaksbrevResultatKlage.medBrev(automatiskVedtaksbrevResultater);
+        return BehandlingVedtaksbrevResultat.medBrev(null, automatiskVedtaksbrevResultater);
     }
 
     private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(List<VedtaksbrevStrategyResultat> resultat) {

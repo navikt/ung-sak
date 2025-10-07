@@ -1,6 +1,8 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -16,7 +18,7 @@ import no.nav.ung.sak.domene.vedtak.impl.KlageVedtakTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevValidator;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevReglerUng;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +37,8 @@ class ForeslåVedtakTjeneste {
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
     private KlageVedtakTjeneste klageVedtakTjeneste;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
-    private VedtaksbrevReglerUng vedtaksbrevRegler;
     private boolean apVedIkkeImplementertBrev;
+    private Instance<VedtaksbrevRegel> vedtaksbrevReglene;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -45,16 +47,16 @@ class ForeslåVedtakTjeneste {
     @Inject
     ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                            VedtaksbrevValgRepository vedtaksbrevValgRepository,
+                          VedtaksbrevValgRepository vedtaksbrevValgRepository,
                           KlageVedtakTjeneste klageVedtakTjeneste,
-                          VedtaksbrevReglerUng vedtaksbrevRegler,
-                          @KonfigVerdi(value = "AP_VED_IKKE_IMPLEMENTERT_BREV", defaultVerdi = "false") boolean apVedIkkeImplementertBrev) {
+                          @KonfigVerdi(value = "AP_VED_IKKE_IMPLEMENTERT_BREV", defaultVerdi = "false") boolean apVedIkkeImplementertBrev,
+                          @Any Instance<VedtaksbrevRegel> vedtaksbrevReglene) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
         this.klageVedtakTjeneste = klageVedtakTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
-        this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.apVedIkkeImplementertBrev = apVedIkkeImplementertBrev;
+        this.vedtaksbrevReglene = vedtaksbrevReglene;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -103,6 +105,7 @@ class ForeslåVedtakTjeneste {
     }
 
     private void vurderBrev(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getType());
         var totalResultat = vedtaksbrevRegler.kjør(behandling.getId());
 
         feilHvisIkkeImplementertBrev(aksjonspunktDefinisjoner, totalResultat);

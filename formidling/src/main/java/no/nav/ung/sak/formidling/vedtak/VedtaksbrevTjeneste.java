@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class VedtaksbrevTjeneste {
 
     private final BehandlingRepository behandlingRepository;
-    private final VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste;
+    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private final VedtaksbrevReglerUng vedtaksbrevRegler;
     private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
@@ -37,7 +37,7 @@ public class VedtaksbrevTjeneste {
 
     @Inject
     public VedtaksbrevTjeneste(
-        @Any VedtaksbrevGenerererTjenesteUng vedtaksbrevGenerererTjeneste,
+        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         @Any VedtaksbrevReglerUng vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {

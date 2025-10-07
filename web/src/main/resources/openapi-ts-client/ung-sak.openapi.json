@@ -2768,6 +2768,21 @@
         "required" : [ "behandlingId", "dokumentMalType" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevKlageForhåndsvisRequest" : {
+        "properties" : {
+          "behandlingId" : {
+            "format" : "int64",
+            "maximum" : 9223372036854775807,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "htmlVersjon" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg" : {
         "properties" : {
           "dokumentMalType" : {
@@ -7176,6 +7191,47 @@
             "application/json" : {
               "schema" : {
                 "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/octet-stream" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "application/pdf" : {
+                "schema" : {
+                  "format" : "binary",
+                  "type" : "string"
+                }
+              },
+              "text/html" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "description" : "pdf"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/vedtaksbrev/klage/forhaandsvis" : {
+      "post" : {
+        "description" : "Forhåndsvise klage vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
+        "operationId" : "forhåndsvisKlageVedtaksbrev",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevKlageForhåndsvisRequest"
               }
             }
           },
