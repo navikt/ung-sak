@@ -57,7 +57,7 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements BatchPros
                     "where behandling_status = 'UTRED' " +
                     "and behandling_arsak_type = 'RE-KONTROLL-REGISTER-INNTEKT' " +
                     "and aksjonspunkt_def = '7040' " +
-                    "and aksjonspunkt_status = 'OPPRE' " +
+                    "and aksjonspunkt_status = 'OPPR' " +
                     "and vent_aarsak = 'VENTER_ETTERLYS_INNTEKT_UTTALELSE'",
                     Behandling.class);
         final List<Behandling> behandlinger = q.getResultList();

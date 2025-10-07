@@ -243,8 +243,6 @@ spec:
     - name: OPPDATERE_REGISTERDATA_TIDSPUNKT
       value: "PT30M"
 
-
-
     # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
