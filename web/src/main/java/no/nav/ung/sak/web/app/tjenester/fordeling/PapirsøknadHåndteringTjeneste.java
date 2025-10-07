@@ -7,8 +7,6 @@ import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
-import no.nav.ung.domenetjenester.arkiv.dok.model.Sakstype;
-import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.VariantFormat;
@@ -36,8 +34,6 @@ public class PapirsøknadHåndteringTjeneste {
     private PdfGenKlient pdfGenKlient;
     private DokArkivKlientImpl dokArkivKlientImpl;
     private TpsTjeneste tpsTjeneste;
-    private FagsakTjeneste fagsakTjeneste;
-    private AktørTjeneste aktørTjeneste;
 
     public PapirsøknadHåndteringTjeneste() {
         // For CDI
@@ -48,20 +44,16 @@ public class PapirsøknadHåndteringTjeneste {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
-        this.fagsakTjeneste = fagsakTjeneste;
-        this.aktørTjeneste = aktørTjeneste;
     }
 
     public OpprettJournalpostResponse journalførPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, UUID deltakelseId, JournalpostId journalpostId) {
         Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
-        var aktørId = aktørTjeneste.hentAktørIdForPersonIdent(deltakerIdent).orElseThrow();
-        var saksnummer = fagsakTjeneste.finnFagsakerForAktør(aktørId).getFirst().getSaksnummer().getVerdi();
 
         byte[] pdfDokument = lagPdfDokument(deltakerIdent, startdato, deltakerNavn);
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
-        OpprettJournalpostResponse opprettJournalpostResponse = opprettJournalpost(deltakerIdent, deltakelseId, saksnummer, pdfDokument, jsonDokument);
+        OpprettJournalpostResponse opprettJournalpostResponse = opprettJournalpost(deltakerIdent, deltakelseId, pdfDokument, jsonDokument);
 
         return opprettJournalpostResponse;
     }
@@ -86,11 +78,10 @@ public class PapirsøknadHåndteringTjeneste {
     }
 
 
-    private OpprettJournalpostResponse opprettJournalpost(PersonIdent deltakerIdent, UUID deltakelseId, String saksnummer, byte[] pdfDokument, byte[] jsonDokument) {
+    private OpprettJournalpostResponse opprettJournalpost(PersonIdent deltakerIdent, UUID deltakelseId, byte[] pdfDokument, byte[] jsonDokument) {
         return dokArkivKlientImpl.opprettJournalpost(new OpprettJournalpostRequestBuilder()
             .bruker(new OpprettJournalpostRequest.Bruker(deltakerIdent.getIdent(), OpprettJournalpostRequest.Bruker.BrukerIdType.FNR))
             .tema(Tema.UNG.name())
-            .sak(new OpprettJournalpostRequest.Sak(Sakstype.FAGSAK.name(), saksnummer, Fagsystem.UNG_SAK.getOffisiellKode()))
             .tittel("Punsjet papirsøknad om ungdomsprogramytelsen")
             .kanal(Kanal.NAV_NO.name())
             .journalfoerendeEnhet(MASKINELL_JOURNALFØRENDE_ENHET)
