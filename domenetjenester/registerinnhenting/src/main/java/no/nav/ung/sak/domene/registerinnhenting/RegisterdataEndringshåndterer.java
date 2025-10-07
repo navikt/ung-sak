@@ -65,7 +65,9 @@ public class RegisterdataEndringshåndterer {
         this.endringsresultatSjekker = endringsresultatSjekker;
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
         this.behandlingÅrsakTjeneste = behandlingÅrsakTjeneste;
-        this.oppdatereRegisterdataTidspunkt = Duration.parse(oppdaterRegisterdataEtterPeriode);
+        if (oppdaterRegisterdataEtterPeriode != null) {
+            this.oppdatereRegisterdataTidspunkt = Duration.parse(oppdaterRegisterdataEtterPeriode);
+        }
     }
 
     public boolean skalInnhenteRegisteropplysningerPåNytt(Behandling behandling) {
