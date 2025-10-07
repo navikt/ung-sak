@@ -49,12 +49,12 @@ public class RegisterdataEndringshåndterer {
     }
 
     /**
-     * @param periode - Periode for hvor ofte registerdata skal oppdateres
+     * @param oppdaterRegisterdataEtterPeriode - periode som angir hvor gammel registerdata skal være for at den skal oppdateres på nytt
      */
     @Inject
     public RegisterdataEndringshåndterer( // NOSONAR jobber med å redusere
                                           BehandlingRepositoryProvider repositoryProvider,
-                                          @KonfigVerdi(value = "oppdatere.registerdata.tidspunkt", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
+                                          @KonfigVerdi(value = "OPPDATERE_REGISTERDATA_TIDSPUNKT", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
                                           Endringskontroller endringskontroller,
                                           EndringsresultatSjekker endringsresultatSjekker,
                                           RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
