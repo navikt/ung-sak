@@ -73,7 +73,7 @@ public class PapirSøknadRestTjeneste {
     }
 
     @POST
-    @Path("/hentPapirSøknad")
+    @Path("/hent-søknad-pdf")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.", summary = ("Henter og viser papirsøknad"), tags = PAPIRSØKNAD_TAG)
@@ -95,7 +95,7 @@ public class PapirSøknadRestTjeneste {
     }
 
     @POST
-    @Path("/journalførPapirSøknad")
+    @Path("/steg-1/journalfør-papir-søknad-mot-fagsak")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = PAPIRSØKNAD_TAG)
@@ -134,10 +134,10 @@ public class PapirSøknadRestTjeneste {
     }
 
     @POST
-    @Path("/sendInnPapirsøknadopplysninger")
+    @Path("/steg-2/send-inn-papirsøknadopplysninger")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Mapper til strukturert søknadsopplysninger og journalfører mot fagsak.", summary = ("Mapper til strukturert søknadsopplysninger og journalfører mot fagsak."), tags = PAPIRSØKNAD_TAG)
+    @Operation(description = "Mapper til strukturert søknadsopplysninger og oppretter journalpost.", summary = ("Mapper til strukturert søknadsopplysninger og oppretter journalpost."), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     public OpprettJournalpostResponse sendInnPapirsøknadopplysninger(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SendInnPapirsøknadopplysningerRequestDto dto) {
         return papirsøknadHåndteringTjeneste.journalførPapirsøknad(
