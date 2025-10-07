@@ -29,9 +29,12 @@ public class VedtaksbrevReglerUng implements VedtaksbrevRegel {
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevReglerUng.class);
 
-    private final BehandlingRepository behandlingRepository;
-    private final DetaljertResultatUtleder detaljertResultatUtleder;
-    private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
+    private BehandlingRepository behandlingRepository;
+    private DetaljertResultatUtleder detaljertResultatUtleder;
+    private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
+
+    public VedtaksbrevReglerUng() {
+    }
 
     @Inject
     public VedtaksbrevReglerUng(

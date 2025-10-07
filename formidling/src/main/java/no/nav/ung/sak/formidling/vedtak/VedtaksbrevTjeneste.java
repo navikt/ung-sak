@@ -28,12 +28,15 @@ import java.util.stream.Collectors;
 @Dependent
 public class VedtaksbrevTjeneste {
 
-    private final BehandlingRepository behandlingRepository;
-    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private final VedtaksbrevReglerUng vedtaksbrevRegler;
-    private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
+    private BehandlingRepository behandlingRepository;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
+    private VedtaksbrevReglerUng vedtaksbrevRegler;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
+
+    public VedtaksbrevTjeneste() {
+    }
 
     @Inject
     public VedtaksbrevTjeneste(
@@ -46,7 +49,6 @@ public class VedtaksbrevTjeneste {
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingRepository = behandlingRepository;
     }
-
 
     public VedtaksbrevValgResponse vedtaksbrevValg(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
