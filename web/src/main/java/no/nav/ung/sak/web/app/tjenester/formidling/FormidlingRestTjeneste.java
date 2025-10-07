@@ -146,7 +146,7 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevKlageForhåndsvisRequest dto,
         @Context HttpServletRequest request
     ) {
-        GenerertBrev generertBrev = vedtaksbrevTjenesteKlage.forhåndsvis(dto);
+        GenerertBrev generertBrev = vedtaksbrevTjenesteKlage.forhåndsvis(dto.behandlingId(), Boolean.TRUE.equals(dto.htmlVersjon()));
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
     }
 
