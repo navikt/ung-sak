@@ -1,5 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.fordeling;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
@@ -18,6 +19,7 @@ public record SendInnPapirsøknadopplysningerRequestDto(
     String deltakerIdent,
 
     @StandardAbacAttributt(StandardAbacAttributtType.JOURNALPOST_ID)
+    @Valid
     JournalpostId journalpostIdForPapirsøknad,
 
     UUID deltakelseId,
