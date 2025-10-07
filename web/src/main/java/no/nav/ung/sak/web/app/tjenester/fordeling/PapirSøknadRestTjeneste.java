@@ -45,6 +45,7 @@ import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjenest
 @Transactional
 public class PapirSøknadRestTjeneste {
     static final String BASE_PATH = "/papir";
+    static final String PAPIRSØKNAD_TAG = "papirsøknad";
 
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private TilJournalføringTjeneste journalføringTjeneste;
@@ -75,7 +76,7 @@ public class PapirSøknadRestTjeneste {
     @Path("/hentPapirSøknad")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Operation(description = "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.", summary = ("Henter og viser papirsøknad"), tags = "fordel")
+    @Operation(description = "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.", summary = ("Henter og viser papirsøknad"), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     // Kan bruke drift fordi kallet mot SAF gjør tilgangskontroll uansett.
     public Response hentPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HentPapirSøknadRequestDto hentPapirSøknadRequestDto) {
@@ -97,7 +98,7 @@ public class PapirSøknadRestTjeneste {
     @Path("/journalførPapirSøknad")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = "fordel")
+    @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
         Periode periode = new Periode(journalførPapirSøknadDto.startDato(), null);
@@ -136,7 +137,7 @@ public class PapirSøknadRestTjeneste {
     @Path("/sendInnPapirsøknadopplysninger")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Mapper til strukturert søknadsopplysninger og journalfører mot fagsak.", summary = ("Mapper til strukturert søknadsopplysninger og journalfører mot fagsak."), tags = "fordel")
+    @Operation(description = "Mapper til strukturert søknadsopplysninger og journalfører mot fagsak.", summary = ("Mapper til strukturert søknadsopplysninger og journalfører mot fagsak."), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     public OpprettJournalpostResponse sendInnPapirsøknadopplysninger(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SendInnPapirsøknadopplysningerRequestDto dto) {
         return papirsøknadHåndteringTjeneste.journalførPapirsøknad(
