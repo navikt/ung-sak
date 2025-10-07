@@ -12,6 +12,8 @@ import no.nav.ung.sak.domene.iay.modell.Inntekter;
 import no.nav.ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
 import no.nav.ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
 import no.nav.ung.sak.typer.Arbeidsgiver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @Dependent
 public class ArbeidsgiverOversiktTjeneste {
 
+    private static final Logger log = LoggerFactory.getLogger(ArbeidsgiverOversiktTjeneste.class);
     private BehandlingRepository behandlingRepository;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -69,6 +72,7 @@ public class ArbeidsgiverOversiktTjeneste {
                     opplysninger.getNavn(), opplysninger.getFødselsdato());
             }
         } catch (Exception e) {
+            log.warn("Feil ved oppslag av arbeidsgiveropplysninger for identifikator {}", identifikator, e);
             return new ArbeidsgiverOpplysningerDto(identifikator, "Feil ved oppslag");
         }
     }
