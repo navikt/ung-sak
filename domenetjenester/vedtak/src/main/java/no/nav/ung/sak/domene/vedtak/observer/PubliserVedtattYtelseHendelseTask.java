@@ -68,39 +68,23 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
-        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
-        @KonfigVerdi(value = "KAFKA_BRUK_AIVEN_PROPERTY_LOKALT", required = false, defaultVerdi = "false") boolean brukAivenPropertyLokalt
+        @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword
     ) {
         this.taskTjeneste = taskTjeneste;
         this.informasjonselementer = informasjonselementer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
 
-        boolean kjørerIMiljø = Environment.current().isProd() || Environment.current().isDev();
-        if (kjørerIMiljø || brukAivenPropertyLokalt) {
-            var aivenPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
+        Properties aivenProps = new KafkaPropertiesBuilder()
+            .clientId("KP-" + topic)
+            .bootstrapServers(kafkaBrokers)
+            .truststorePath(trustStorePath)
+            .truststorePassword(trustStorePassword)
+            .keystorePath(keyStoreLocation)
+            .keystorePassword(keyStorePassword)
+            .buildForProducerAiven();
 
-            Properties aivenProps = aivenPropsBuilder
-                .truststorePath(trustStorePath)
-                .truststorePassword(trustStorePassword)
-                .keystorePath(keyStoreLocation)
-                .keystorePassword(keyStorePassword)
-                .buildForProducerAiven();
-
-            producer = new GenerellKafkaProducer(topic, aivenProps);
-        } else {
-            //konfigurasjon for bruk mot VTP
-            var onPremPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
-
-            Properties onPremProps = onPremPropsBuilder
-                .username("vtp")
-                .password("vtp")
-                .buildForProducerJaas();
-            producer = new GenerellKafkaProducer(topic, onPremProps);
-        }
-
+        producer = new GenerellKafkaProducer(topic, aivenProps);
 
         @SuppressWarnings("resource")
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
