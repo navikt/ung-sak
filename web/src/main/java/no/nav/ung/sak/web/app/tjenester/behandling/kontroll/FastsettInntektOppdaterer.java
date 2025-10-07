@@ -31,7 +31,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettInntektDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -41,7 +40,6 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     private RapportertInntektMapper rapportertInntektMapper;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private HistorikkinnslagRepository historikkinnslagRepository;
-    ;
 
 
     public FastsettInntektOppdaterer() {
@@ -58,9 +56,10 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     @Override
     public OppdateringResultat oppdater(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
-        final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, param);
+        var rapportertInntektTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(param.getBehandlingId());
+        final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, rapportertInntektTidslinje);
         validerVurdertePerioder(param, sammenslåtteInntekterTidslinje);
-        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje);
+        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje, rapportertInntektTidslinje);
         opprettHistorikkinnslag(dto, param.getRef(), sammenslåtteInntekterTidslinje);
         return OppdateringResultat.builder().medTotrinnHvis(true).build();
     }
@@ -74,8 +73,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         }
     }
 
-    private LocalDateTimeline<ManueltKontrollertInntekt> finnInntektOgKildeTidslinje(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
-        final var brukerOgRegisterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(param.getBehandlingId());
+    private LocalDateTimeline<ManueltKontrollertInntekt> finnInntektOgKildeTidslinje(FastsettInntektDto dto, LocalDateTimeline<RapporterteInntekter> brukerOgRegisterTidslinje) {
         final var saksbehandlerFastsatteInntekterTidslinje = finnSaksbehandlersFastsatteInntekterTidslinje(dto);
         final var inntekterForAlleKilderTidslinje = kombinerInntekterFraAlleKilder(brukerOgRegisterTidslinje, saksbehandlerFastsatteInntekterTidslinje);
         final var valgTidslinje = tidslinjeForValg(dto);
