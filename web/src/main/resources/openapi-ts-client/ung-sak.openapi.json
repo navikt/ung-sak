@@ -1280,6 +1280,34 @@
         "type" : "string",
         "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ]
       },
+      "ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse" : {
+        "properties" : {
+          "dokumenter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse.Dokument"
+            },
+            "type" : "array"
+          },
+          "journalpostId" : {
+            "type" : "string"
+          },
+          "journalpostferdigstilt" : {
+            "type" : "boolean"
+          },
+          "melding" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse.Dokument" : {
+        "properties" : {
+          "dokumentInfoId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.AsyncPollingStatus" : {
         "properties" : {
           "cancelUri" : {
@@ -4381,6 +4409,28 @@
         "properties" : {
           "vilkårTidslinje" : {
             "$ref" : "#/components/schemas/fpsak.tidsserie.LocalDateTimelineUng.sak.kontrakt.vilkår.VilkårUtfallSamlet"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.fordeling.SendInnPapirsøknadopplysningerRequestDto" : {
+        "properties" : {
+          "deltakelseId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "deltakerIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "journalpostIdForPapirsøknad" : {
+            "type" : "string"
+          },
+          "startdato" : {
+            "format" : "date",
+            "type" : "string"
           }
         },
         "type" : "object"
@@ -7608,7 +7658,7 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/api/papir/hentPapirSøknad" : {
+    "/api/papir/hent-søknad-pdf" : {
       "post" : {
         "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
         "operationId" : "hentPapirSøknad",
@@ -7631,10 +7681,10 @@
           }
         },
         "summary" : "Henter og viser papirsøknad",
-        "tags" : [ "fordel" ]
+        "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/journalførPapirSøknad" : {
+    "/api/papir/steg-1/journalfør-papir-søknad-mot-fagsak" : {
       "post" : {
         "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
         "operationId" : "journalførPapirSøknad",
@@ -7657,7 +7707,37 @@
           }
         },
         "summary" : "Oppretter fagsak og journalfører papirsøknad",
-        "tags" : [ "fordel" ]
+        "tags" : [ "papirsøknad" ]
+      }
+    },
+    "/api/papir/steg-2/send-inn-papirsøknadopplysninger" : {
+      "post" : {
+        "description" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
+        "operationId" : "sendInnPapirsøknadopplysninger",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.fordeling.SendInnPapirsøknadopplysningerRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
+        "tags" : [ "papirsøknad" ]
       }
     },
     "/api/pip/aktoer-for-sak" : {
