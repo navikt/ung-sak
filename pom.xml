@@ -40,11 +40,11 @@
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.5.7</k9format.version>
         <jackson.version>2.20.0</jackson.version>
-        <asm.version>9.8</asm.version>
+        <asm.version>9.9</asm.version>
         <kotlin-stdlib.version>2.2.20</kotlin-stdlib.version>
         <jandex.version>3.5.0</jandex.version>
         <pdfgen-core.version>1.1.60</pdfgen-core.version>
-        <flyway.version>11.13.2</flyway.version>
+        <flyway.version>11.13.3</flyway.version>
         <confluent.platform.version>8.0.1</confluent.platform.version>
         <mockito.version>5.20.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.4.0</ung-deltakelse-opplyser.version>
@@ -676,7 +676,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -686,7 +686,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.9.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -753,7 +753,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.6.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
