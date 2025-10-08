@@ -2,6 +2,12 @@ package no.nav.ung.sak.datavarehus.observer;
 
 import java.util.List;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
+import no.nav.ung.sak.metrikker.PubliserKontrollerteInntektperioderMetrikkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +25,19 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 public class DatavarehusEventObserver {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Inject
+    private ProsessTaskTjeneste taskTjeneste;
+    private boolean kontrollerInntektMetrikkPubliseringEnabled;
+
     public DatavarehusEventObserver() {
+        // for CDI proxy
+    }
+
+
+    @Inject
+    public DatavarehusEventObserver(ProsessTaskTjeneste taskTjeneste,
+                                    @KonfigVerdi(value = "PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED", required = false, defaultVerdi = "false") boolean kontrollerInntektMetrikkPubliseringEnabled) {
+        this.taskTjeneste = taskTjeneste;
+        this.kontrollerInntektMetrikkPubliseringEnabled = kontrollerInntektMetrikkPubliseringEnabled;
     }
 
     public void observerAksjonspunktStatusEvent(@Observes AksjonspunktStatusEvent event) {
@@ -45,7 +62,19 @@ public class DatavarehusEventObserver {
     }
 
     public void observerBehandlingVedtakEvent(@Observes BehandlingVedtakEvent event) {
-        log.debug("Lagrer vedtak {} for behandling {} i DVH datavarehus", event.getVedtak().getId(), event.getBehandlingId());//NOSONAR
+        if (kontrollerInntektMetrikkPubliseringEnabled && event.getVedtak().getIverksettingStatus().equals(IverksettingStatus.IVERKSATT) && erInntektkontrollBehandling(event)) {
+            taskTjeneste.lagre(opprettTaskForInntektkontrollMetrikkPublisering(event));
+        }
+    }
+
+    private ProsessTaskData opprettTaskForInntektkontrollMetrikkPublisering(BehandlingVedtakEvent event) {
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(PubliserKontrollerteInntektperioderMetrikkTask.class);
+        prosessTaskData.setBehandling(event.getFagsakId(), event.getBehandlingId());
+        return prosessTaskData;
+    }
+
+    private boolean erInntektkontrollBehandling(BehandlingVedtakEvent event) {
+        return event.getBehandling().getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
     }
 
 }
