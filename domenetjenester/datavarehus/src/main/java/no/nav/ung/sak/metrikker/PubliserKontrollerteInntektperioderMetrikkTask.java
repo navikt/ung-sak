@@ -10,8 +10,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.metrikker.bigquery.KontrollerteInntektPerioderMetrikkPubliserer;
 
-
-// ung-tilbake lytter på denne for å opprette tilbakekrevingsbehandlinger ved behov
 @ApplicationScoped
 @ProsessTask(PubliserKontrollerteInntektperioderMetrikkTask.TASKTYPE)
 public class PubliserKontrollerteInntektperioderMetrikkTask implements ProsessTaskHandler {
