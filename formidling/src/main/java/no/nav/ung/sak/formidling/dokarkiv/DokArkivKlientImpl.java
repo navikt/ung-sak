@@ -20,22 +20,31 @@ import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 public class DokArkivKlientImpl implements DokArkivKlient {
 
     private final OidcRestClient restClient;
-    private final URI uriDokarkiv;
+    private final URI forsøkFerdigstillUrl;
+    private final URI opprettJournalpostUrl;
 
     @Inject
     public DokArkivKlientImpl(
         OidcRestClient restClient,
-        @KonfigVerdi(value = "DOKARKIV_URL", defaultVerdi = "http://dokdistfordeling.teamdokumenthandtering/rest/v1") String urlDokarkiv) {
-
-        this.uriDokarkiv = UriBuilder.fromUri(tilUri(urlDokarkiv, "journalpost"))
+        @KonfigVerdi(value = "DOKARKIV_URL", defaultVerdi = "http://dokdistfordeling.teamdokumenthandtering/rest/v1") String dokarkivBaseUrl) {
+        this.forsøkFerdigstillUrl = UriBuilder.fromUri(tilUri(dokarkivBaseUrl, "journalpost"))
             .queryParam("forsoekFerdigstill", true)
+            .build();
+
+        this.opprettJournalpostUrl = UriBuilder.fromUri(tilUri(dokarkivBaseUrl, "journalpost"))
+            .queryParam("forsoekFerdigstill", false)
             .build();
         this.restClient = restClient;
     }
 
     @Override
+    public OpprettJournalpostResponse opprettJournalpostOgFerdigstill(OpprettJournalpostRequest request) {
+        return restClient.post(forsøkFerdigstillUrl, request, OpprettJournalpostResponse.class);
+    }
+
+    @Override
     public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request) {
-        return restClient.post(uriDokarkiv, request, OpprettJournalpostResponse.class);
+        return restClient.post(opprettJournalpostUrl, request, OpprettJournalpostResponse.class);
     }
 
     private static URI tilUri(String baseUrl, String path) {
