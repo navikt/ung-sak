@@ -25,7 +25,7 @@ public record KontrollertePerioderRecord(
 
     public static final BigQueryTabell<KontrollertePerioderRecord> KONTROLLERTE_PERIODER_TABELL =
         new BigQueryTabell<>(
-            "kontrollerte_perioder",
+            "kontrollerte_inntekt_perioder",
             Schema.of(
                 Field.of("saksnummer", StandardSQLTypeName.STRING),
                 Field.of("rapportertInntekt", StandardSQLTypeName.BIGNUMERIC),
@@ -40,7 +40,7 @@ public record KontrollertePerioderRecord(
                 "rapportertInntekt", rec.rapportertInntekt(),
                 "registerInntekt", rec.registerInntekt(),
                 "fastsattInntekt", rec.fastsattInntekt(),
-                "månedOgÅr", rec.månedOgÅr().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                "månedOgÅr", rec.månedOgÅr().format(DateTimeFormatter.ofPattern("yyyy-MM")),
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
