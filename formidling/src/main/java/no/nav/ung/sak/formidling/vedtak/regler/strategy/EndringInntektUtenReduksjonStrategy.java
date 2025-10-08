@@ -39,7 +39,7 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
                     true,
                     true),
                 null,
-                " Redigerbar brev ved full utbetaling med ap=" + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + "."
+                "Redigerbar brev ved full utbetaling med ap=" + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + "."
             );
         }
         return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,"Ingen brev ved full utbetaling etter kontroll av inntekt.");
