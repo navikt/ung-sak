@@ -17,6 +17,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Dependent
 public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
@@ -39,15 +40,14 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
             .filtererTidslinje(detaljertResultat, DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)
             .combine(kontrollertInntektPerioderTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .filterValue(it ->
-                it.getErManueltVurdert() && it.getRapportertInntekt().compareTo(BigDecimal.ZERO) > 0 && it.getInntekt().compareTo(BigDecimal.ZERO) == 0
-            );
+            .stream()
+            .anyMatch(it -> harManuellFastsatt0krMedOver0krRapportert(it.getValue()));
 
         boolean harUtførtKontrollerInntekt = behandling.getAksjonspunkter().stream()
             .filter(Aksjonspunkt::erUtført)
             .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
-        if (harUtførtKontrollerInntekt && !manueltFastsatt0MedOver0RapportertTidslinje.isEmpty()) {
+        if (harUtførtKontrollerInntekt && manueltFastsatt0MedOver0RapportertTidslinje) {
             return new VedtaksbrevStrategyResultat(
                 DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON,
                 endringRapportertInntektUtenReduksjonInnholdBygger,
@@ -60,6 +60,14 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
             );
         }
         return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,"Ingen brev ved full utbetaling etter kontroll av inntekt.");
+    }
+
+    private static boolean harManuellFastsatt0krMedOver0krRapportert(KontrollertInntektPeriode it) {
+        boolean harFastSattInntektTil0kr = it.getInntekt().compareTo(BigDecimal.ZERO) == 0;
+        boolean harRapporterInntektOver0kr = Optional.ofNullable(it.getRapportertInntekt())
+            .map( r -> r.compareTo(BigDecimal.ZERO) > 0)
+            .orElse(true); //Tolker ingen verdi som over 0 kr for å la andre sjekker fange opp
+        return it.getErManueltVurdert() && harRapporterInntektOver0kr && harFastSattInntektTil0kr;
     }
 
     private LocalDateTimeline<KontrollertInntektPeriode> hentKontrollertInntektTidslinje(Behandling behandling) {
