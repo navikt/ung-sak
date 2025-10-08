@@ -76,8 +76,10 @@ public class PapirsøknadHåndteringTjeneste {
 
     private void validerDeltakelseEksisterer(UUID deltakelseId, AktørId aktørId) {
         List<UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO> deltakerOpplysningerDTO = ungdomsprogramRegisterKlient.hentForAktørId(aktørId.getAktørId()).opplysninger();
-        boolean deltakelseIkkeEksister = deltakerOpplysningerDTO.stream()
-            .noneMatch(deltakelse -> deltakelse.id() == deltakelseId);
+        boolean deltakelseIkkeEksister = deltakerOpplysningerDTO
+            .stream()
+            .noneMatch(deltakelse -> deltakelse.id().equals(deltakelseId));
+
         if (deltakelseIkkeEksister) {
             throw new IllegalStateException("Finner ikke deltakelse med id " + deltakelseId);
         }
