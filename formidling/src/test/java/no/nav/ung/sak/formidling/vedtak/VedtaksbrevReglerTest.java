@@ -84,7 +84,7 @@ class VedtaksbrevReglerTest {
 
     @Test
     void skal_gi_redigerbar_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_med_ap_8000() {
-        UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2024, 12, 1));
+        UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(LocalDate.of(2024, 12, 1));
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestGrunnlag, ungTestRepositories);
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());

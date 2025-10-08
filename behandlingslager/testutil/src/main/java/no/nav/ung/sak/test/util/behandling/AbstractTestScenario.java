@@ -485,26 +485,29 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         if (ungTestscenario.tilkjentYtelsePerioder() != null) {
-            final var startdato = Objects.requireNonNull(ungTestscenario.programPerioder())
-                .stream().min(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).stream().findFirst()
-                .map(UngdomsprogramPeriode::getPeriode)
-                .map(DatoIntervallEntitet::getFomDato)
-                .orElseThrow();
-
-            final var sluttdato = Objects.requireNonNull(ungTestscenario.programPerioder())
-                .stream().max(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).stream().findFirst()
-                .map(UngdomsprogramPeriode::getPeriode)
-                .map(DatoIntervallEntitet::getTomDato)
-                .orElseThrow();
-            final var kontrollertePerioder = ungTestscenario.tilkjentYtelsePerioder().stream()
-                .filter(p -> !p.getFom().equals(startdato) && !p.getTom().equals(sluttdato))
-                .map(p -> KontrollertInntektPeriode.ny()
-                    .medInntekt(p.getValue().reduksjon().divide(BigDecimal.valueOf(0.66), 2, RoundingMode.HALF_UP))
-                    .medKilde(KontrollertInntektKilde.REGISTER)
-                    .medPeriode(DatoIntervallEntitet.fra(p.getLocalDateInterval())).build())
-                .toList();
-            repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), kontrollertePerioder);
             repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), ungTestscenario.tilkjentYtelsePerioder(), "input", "sporing");
+            if (ungTestscenario.kontrollerInntektPerioder() == null) {
+                final var startdato = Objects.requireNonNull(ungTestscenario.programPerioder())
+                    .stream().min(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).stream().findFirst()
+                    .map(UngdomsprogramPeriode::getPeriode)
+                    .map(DatoIntervallEntitet::getFomDato)
+                    .orElseThrow();
+
+                final var sluttdato = Objects.requireNonNull(ungTestscenario.programPerioder())
+                    .stream().max(Comparator.comparing(UngdomsprogramPeriode::getPeriode)).stream().findFirst()
+                    .map(UngdomsprogramPeriode::getPeriode)
+                    .map(DatoIntervallEntitet::getTomDato)
+                    .orElseThrow();
+                final var kontrollertePerioder = ungTestscenario.tilkjentYtelsePerioder().stream()
+                    .filter(p -> !p.getFom().equals(startdato) && !p.getTom().equals(sluttdato))
+                    .map(p -> KontrollertInntektPeriode.ny()
+                        .medInntekt(p.getValue().reduksjon().divide(BigDecimal.valueOf(0.66), 2, RoundingMode.HALF_UP))
+                        .medKilde(KontrollertInntektKilde.REGISTER)
+                        .medPeriode(DatoIntervallEntitet.fra(p.getLocalDateInterval())).build())
+                    .toList();
+                repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), kontrollertePerioder);
+            }
+
         }
 
         if (ungTestscenario.behandlingTriggere() != null && repositories.prosessTriggereRepository() != null) {

@@ -72,7 +72,7 @@ public class KombinasjonScenarioer {
             ),
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
-            ), null);
+            ), null, null);
     }
 
 
@@ -125,7 +125,7 @@ public class KombinasjonScenarioer {
                 new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, p.getTomDato()))
             ),
             Collections.emptyList(),
-            null);
+            null, null);
     }
 
     /**
@@ -163,7 +163,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null);
+            null, null);
     }
 
     public static UngTestScenario endringStartdatoOgOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate nyStartdato, LocalDate sluttdato) {
@@ -199,7 +199,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null);
+            null, null);
     }
 
 
@@ -238,6 +238,6 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ),
-            null);
+            null, null);
     }
 }
