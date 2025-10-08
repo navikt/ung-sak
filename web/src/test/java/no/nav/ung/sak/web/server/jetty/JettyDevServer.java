@@ -44,6 +44,9 @@ public class JettyDevServer extends JettyServer {
                 "Passord for å aksessere store " + storeName + " i " + storePath + " er null");
         }
 
+        System.setProperty(storeProperty, storeFile.getAbsolutePath());
+        System.setProperty(storePasswordProperty, password);
+
         if (storeName.equals("keystore")) {
             System.setProperty("KAFKA_KEYSTORE_PATH", storeFile.getAbsolutePath());
         }
