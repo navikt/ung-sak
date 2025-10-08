@@ -15,7 +15,6 @@ import no.nav.ung.kodeverk.dokument.VariantFormat;
 import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
-import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientImpl;
@@ -41,7 +40,6 @@ public class PapirsøknadHåndteringTjeneste {
     private DokArkivKlientImpl dokArkivKlientImpl;
     private TpsTjeneste tpsTjeneste;
     private FagsakTjeneste fagsakTjeneste;
-    private AktørTjeneste aktørTjeneste;
     private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
 
     public PapirsøknadHåndteringTjeneste() {
@@ -49,19 +47,18 @@ public class PapirsøknadHåndteringTjeneste {
     }
 
     @Inject
-    public PapirsøknadHåndteringTjeneste(PdfGenKlient pdfGenKlient, DokArkivKlientImpl dokArkivKlientImpl, TpsTjeneste tpsTjeneste, FagsakTjeneste fagsakTjeneste, AktørTjeneste aktørTjeneste, UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient) {
+    public PapirsøknadHåndteringTjeneste(PdfGenKlient pdfGenKlient, DokArkivKlientImpl dokArkivKlientImpl, TpsTjeneste tpsTjeneste, FagsakTjeneste fagsakTjeneste, UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
-        this.aktørTjeneste = aktørTjeneste;
         this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
     }
 
     public OpprettJournalpostResponse journalførPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, UUID deltakelseId, JournalpostId journalpostId) {
         Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
-        AktørId aktørId = aktørTjeneste.hentAktørIdForPersonIdent(deltakerIdent).orElseThrow();
+        AktørId aktørId = personinfo.getAktørId();
 
         validerDeltakelseEksisterer(deltakelseId, aktørId);
         validerFagsakEksisterer(aktørId);
@@ -74,13 +71,13 @@ public class PapirsøknadHåndteringTjeneste {
 
     private void validerFagsakEksisterer(AktørId aktørId) {
         fagsakTjeneste.finnesEnFagsakSomOverlapper(FagsakYtelseType.UNGDOMSYTELSE, aktørId, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
-            .orElseThrow(() ->  new IllegalStateException("Finner ikke fagsak for deltaker " + " ved journalføring av papirsøknad."));
+            .orElseThrow(() -> new IllegalStateException("Finner ikke fagsak for deltaker " + " ved journalføring av papirsøknad."));
     }
 
     private void validerDeltakelseEksisterer(UUID deltakelseId, AktørId aktørId) {
         List<UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO> deltakerOpplysningerDTO = ungdomsprogramRegisterKlient.hentForAktørId(aktørId.getAktørId()).opplysninger();
         boolean deltakelseIkkeEksister = deltakerOpplysningerDTO.stream()
-            .noneMatch( deltakelse -> deltakelse.id() == deltakelseId);
+            .noneMatch(deltakelse -> deltakelse.id() == deltakelseId);
         if (deltakelseIkkeEksister) {
             throw new IllegalStateException("Finner ikke deltakelse med id " + deltakelseId);
         }
