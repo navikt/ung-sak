@@ -8,10 +8,12 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.metrikker.bigquery.KontrollerteInntektPerioderMetrikkPubliserer;
 
 @ApplicationScoped
 @ProsessTask(PubliserKontrollerteInntektperioderMetrikkTask.TASKTYPE)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class PubliserKontrollerteInntektperioderMetrikkTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "bigquery.kontrollertinntektmetrikk";
