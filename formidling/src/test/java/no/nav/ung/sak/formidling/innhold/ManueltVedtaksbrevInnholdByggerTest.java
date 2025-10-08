@@ -18,7 +18,6 @@ class ManueltVedtaksbrevInnholdByggerTest {
         TemplateInnholdResultat bygg = bygger.bygg(redigertBrevHtml);
 
         assertThat(bygg.templateType()).isEqualTo(TemplateType.MANUELT_VEDTAKSBREV);
-        assertThat(bygg.automatiskGenerertFooter()).isFalse();
         assertThat(bygg.templateInnholdDto()).isInstanceOf(ManuellVedtaksbrevDto.class);
         var dto = (ManuellVedtaksbrevDto) bygg.templateInnholdDto();
         assertThat(dto.tekstHtml()).isEqualTo(redigertBrevHtml);

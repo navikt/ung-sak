@@ -28,6 +28,6 @@ public class TomVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        return new TemplateInnholdResultat(TemplateType.MANUELT_VEDTAKSBREV, new ManuellVedtaksbrevDto(TOM_VEDTAKSBREV_HTML_MAL), false);
+        return new TemplateInnholdResultat(TemplateType.MANUELT_VEDTAKSBREV, new ManuellVedtaksbrevDto(TOM_VEDTAKSBREV_HTML_MAL));
     }
 }

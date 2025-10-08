@@ -5,6 +5,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.GenerertBrev;
@@ -60,9 +61,10 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         VedtaksbrevInnholdBygger bygger = vedtaksbrev.vedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, vedtaksbrevGenerererInput.detaljertResultatTidslinje());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
+        var automatiskGenerertFooter = harManuellAksjonspunkt(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), resultat.automatiskGenerertFooter()),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), automatiskGenerertFooter),
                 resultat.templateInnholdDto()
             )
         );
@@ -75,6 +77,10 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             vedtaksbrev.dokumentMalType(),
             resultat.templateType()
         );
+    }
+
+    private static boolean harManuellAksjonspunkt(Behandling behandling) {
+        return behandling.getAksjonspunkter().stream().anyMatch(it -> !it.getAksjonspunktDefinisjon().getAksjonspunktType().erAutopunkt() && it.erUtført());
     }
 
 

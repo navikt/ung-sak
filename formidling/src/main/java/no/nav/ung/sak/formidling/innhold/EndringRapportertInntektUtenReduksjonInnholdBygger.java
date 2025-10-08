@@ -52,8 +52,8 @@ public class EndringRapportertInntektUtenReduksjonInnholdBygger implements Vedta
 
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT_UTEN_REDUKSJON,
-            new EndringRapportertInntektUtenReduksjonDto(fullUtbetalingsperioder),
-            true);
+            new EndringRapportertInntektUtenReduksjonDto(fullUtbetalingsperioder)
+        );
     }
 
 }

@@ -20,8 +20,8 @@ public class ManueltVedtaksbrevInnholdBygger {
 
         return new TemplateInnholdResultat(
             TemplateType.MANUELT_VEDTAKSBREV,
-            new ManuellVedtaksbrevDto(brevHtml),
-            false);
+            new ManuellVedtaksbrevDto(brevHtml)
+        );
     }
 
 

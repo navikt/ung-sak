@@ -100,7 +100,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 null,
                 erEtterbetaling,
                 satsEndringHendelseDtos.isEmpty(),
-                sisteUtbetalingsdato), true);
+                sisteUtbetalingsdato));
     }
 
     private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
