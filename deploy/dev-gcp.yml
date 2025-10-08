@@ -173,7 +173,7 @@ spec:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
     - name: ORGANISASJON_RS_URL
-      value: https://ereg-services-q2.dev-fss-pub.nais.io
+      value: https://ereg-services-q2.dev-fss-pub.nais.io/api/v2/organisasjon
     - name: K9_OPPDRAG_DIREKTE_URL
       value: https://k9-oppdrag.dev-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
