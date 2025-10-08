@@ -241,7 +241,7 @@ spec:
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "false"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
-      value: "false"
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
