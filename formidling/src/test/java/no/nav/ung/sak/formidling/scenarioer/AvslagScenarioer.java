@@ -36,6 +36,6 @@ public class AvslagScenarioer {
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))),
                 Collections.emptyList(),
-            null);
+            null, null);
     }
 }

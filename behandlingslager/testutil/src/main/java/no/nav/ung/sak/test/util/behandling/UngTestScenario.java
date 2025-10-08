@@ -3,6 +3,7 @@ package no.nav.ung.sak.test.util.behandling;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
@@ -16,16 +17,17 @@ import java.util.Set;
 /**
  * Hjelpeobjekt for å populere databasen med diverse ung data. Brukes av TestScenarioBuilder
  *
- * @param programPerioder      - perioder ungdommen er i programmet, kan være stykkevis
- * @param satser               - timeline med satser og når de gjelder. Bruk gjerne statiske hjelpebuildere fra denne klassen
- * @param uttakPerioder        - perioder med uttak, kan evt legge på gradering her
- * @param aldersvilkår         - timeline med aldersvilkår oppfylt og ikke oppfylt
- * @param ungdomsprogramvilkår - timeline med ungdomsprogramvilkår oppfylt og ikke oppfylt
+ * @param programPerioder           - perioder ungdommen er i programmet, kan være stykkevis
+ * @param satser                    - timeline med satser og når de gjelder. Bruk gjerne statiske hjelpebuildere fra denne klassen
+ * @param uttakPerioder             - perioder med uttak, kan evt legge på gradering her
+ * @param aldersvilkår              - timeline med aldersvilkår oppfylt og ikke oppfylt
+ * @param ungdomsprogramvilkår      - timeline med ungdomsprogramvilkår oppfylt og ikke oppfylt
  * @param fødselsdato
- * @param søknadStartDato      - startdatoer fra søknad
+ * @param søknadStartDato           - startdatoer fra søknad
  * @param behandlingTriggere
  * @param barn
  * @param dødsdato
+ * @param kontrollerInntektPerioder
  */
 public record UngTestScenario(
     String navn,
@@ -39,7 +41,8 @@ public record UngTestScenario(
     List<LocalDate> søknadStartDato,
     Set<Trigger> behandlingTriggere,
     List<PersonInformasjon> barn,
-    LocalDate dødsdato) {
+    LocalDate dødsdato,
+    LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder) {
 }
 
 

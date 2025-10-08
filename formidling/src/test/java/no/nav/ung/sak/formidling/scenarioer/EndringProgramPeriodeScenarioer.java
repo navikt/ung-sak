@@ -53,7 +53,7 @@ public class EndringProgramPeriodeScenarioer {
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(sluttdato.plusDays(1), fagsakPeriode.getTomDato()))
             ),
                 Collections.emptyList(),
-            null);
+            null, null);
     }
 
     /**
@@ -96,7 +96,7 @@ public class EndringProgramPeriodeScenarioer {
                         DatoIntervallEntitet.fra(opprinneligProgramPeriode.getTomDato().plusDays(1), nySluttdato))
             ),
                 Collections.emptyList(),
-            null);
+            null, null);
     }
 
     /**
@@ -144,7 +144,7 @@ public class EndringProgramPeriodeScenarioer {
                         DatoIntervallEntitet.fra(fom, fagsakPeriode.getTomDato()))
             ),
                 Collections.emptyList(),
-            null);
+            null, null);
     }
 
     /**
@@ -177,6 +177,6 @@ public class EndringProgramPeriodeScenarioer {
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(dødsdato, fagsakPeriode.getTomDato()))
             ),
                 Collections.emptyList(),
-            dødsdato);
+            dødsdato, null);
     }
 }
