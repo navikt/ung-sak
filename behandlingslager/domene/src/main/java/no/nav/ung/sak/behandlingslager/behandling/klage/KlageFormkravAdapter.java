@@ -2,9 +2,11 @@ package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class KlageFormkravAdapter {
 
@@ -59,7 +61,7 @@ public class KlageFormkravAdapter {
     }
 
     public boolean erAvvist() {
-        return !erKlagerPart || !erKonkret || !erSignert || !gjelderVedtak;
+        return !erFristOverholdt || !erKlagerPart || !erKonkret || !erSignert || !gjelderVedtak;
     }
 
     public List<KlageAvvistÅrsak> hentAvvistÅrsaker() {
@@ -81,6 +83,14 @@ public class KlageFormkravAdapter {
         }
         return avvistÅrsaker;
     }
+
+    public Optional<KlageVurderingType> hentVurderingTypeHvisAvvist() {
+        if (erAvvist()) {
+            return Optional.of(KlageVurderingType.AVVIS_KLAGE);
+        }
+        return Optional.empty();
+    }
+
 
     public String getBegrunnelse() {
         return begrunnelse;

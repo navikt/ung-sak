@@ -108,7 +108,7 @@ public class KlageRestTjeneste {
         throws URISyntaxException { // NOSONAR
 
         Behandling behandling = behandlingRepository.hentBehandling(apDto.getBehandlingId());
-        KlageVurderingAdapter klageVurderingAdapter = mapDto(behandling, apDto);
+        KlageVurderingAdapter klageVurderingAdapter = mapDto(apDto);
         klageVurderingTjeneste.mellomlagreVurderingResultat(behandling, klageVurderingAdapter);
         return Response.ok().build();
     }
@@ -124,7 +124,7 @@ public class KlageRestTjeneste {
         throws URISyntaxException { // NOSONAR
 
         Behandling behandling = behandlingRepository.hentBehandling(apDto.getBehandlingId());
-        KlageVurderingAdapter klageVurderingAdapter = mapDto(behandling, apDto);
+        KlageVurderingAdapter klageVurderingAdapter = mapDto(apDto);
         klageVurderingTjeneste.mellomlagreVurderingResultatOgÅpneAksjonspunkt(behandling, klageVurderingAdapter);
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }
@@ -146,7 +146,7 @@ public class KlageRestTjeneste {
         }
     }
 
-    private KlageVurderingAdapter mapDto(Behandling behandling, KlageVurderingResultatAksjonspunktMellomlagringDto apDto) {
+    private KlageVurderingAdapter mapDto(KlageVurderingResultatAksjonspunktMellomlagringDto apDto) {
         Hjemmel hjemmel = Hjemmel.fraKode(apDto.getHjemmel());
 
         return new KlageVurderingAdapter(apDto.getKlageVurdering(), apDto.getKlageMedholdArsak(), apDto.getKlageVurderingOmgjoer(),

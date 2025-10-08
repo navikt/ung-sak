@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageFormkravAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageFormkravEntitet;
@@ -79,10 +80,10 @@ public class KlageFormkravOppdaterer implements AksjonspunktOppdaterer<KlageForm
             return OppdateringResultat.builder().medTotrinn().build();
         }
 
-        klageBehandling.getAksjonspunkter().stream()
-            .filter(ap -> ap.getAksjonspunktDefinisjon().equals(apDefFormkrav))
-            .findFirst()
-            .ifPresent(ap -> aksjonspunktRepository.fjernToTrinnsBehandlingKreves(ap));
+        Aksjonspunkt aksjonspunkt = klageBehandling.getAksjonspunktFor(apDefFormkrav);
+        if (aksjonspunkt.isToTrinnsBehandling()) {
+            aksjonspunktRepository.fjernToTrinnsBehandlingKreves(aksjonspunkt);
+        }
 
         return OppdateringResultat.builder().build();
     }

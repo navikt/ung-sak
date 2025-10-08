@@ -17,7 +17,7 @@ import java.util.Map;
 public enum KlageVurdertAv implements Kodeverdi {
 
     VEDTAKSINSTANS("VI", "NAV Vedtaksinstans"),
-    KLAGEINSTANS("NK", "NAV Klageenhet"),
+    KLAGEINSTANS("NKK", "NAV Klageenhet kabal"),
     UDEFINERT("Udefinert", "Udenfinert");
 
     private static final Map<String, KlageVurdertAv> KODER = new LinkedHashMap<>();

@@ -48,8 +48,8 @@ public class KlageRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    public void lagre(KlageUtredningEntitet påklagdBehandling) {
-        entityManager.persist(påklagdBehandling);
+    public void lagre(KlageUtredningEntitet klageutredning) {
+        entityManager.persist(klageutredning);
         entityManager.flush();
     }
 }

@@ -1,28 +1,27 @@
 {{#> felles/base }}
 
-    <h1> NAV har avvist klagen din på vedtaket om ungdomsprogramytelse</h1>
+    <h1>NAV har avvist klagen din på vedtaket om ungdomsprogramytelse</h1>
 
     {{#if flereÅrsaker}}
+        Vi har avvist klagen fordi:
         <ul>
-        Vi har avvist klagen fordi
-        {{#if aarsakKlagetForSent}}
-            <li> du har klaget for sent. Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen </li>
-        {{/if}}
-        {{#if aarsakManglerUnderskrift}}
-            <li> du ikke har underskrevet den </li>
-        {{/if}}
-        {{#if aarsakIkkeEtVedtak}}
-            <li> det du har klaget på ikke er et vedtak </li>
-        {{/if}}
-        {{#if aarsakVedtakGjelderIkkePart}}
-            <li> du har klaget på et vedtak som ikke gjelder deg </li>
-        {{/if}}
-        {{#if aarsakManglerKlagegrunn}}
-            <li> du ikke har sagt hva det er du klager på </li>
-        {{/if}}
+            {{#if aarsakKlagetForSent}}
+                <li> Du har klaget for sent. Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen </li>
+            {{/if}}
+            {{#if aarsakManglerUnderskrift}}
+                <li> Du ikke har underskrevet den </li>
+            {{/if}}
+            {{#if aarsakIkkeEtVedtak}}
+                <li> Det du har klaget på ikke er et vedtak </li>
+            {{/if}}
+            {{#if aarsakVedtakGjelderIkkePart}}
+                <li> Du har klaget på et vedtak som ikke gjelder deg </li>
+            {{/if}}
+            {{#if aarsakManglerKlagegrunn}}
+                <li> Du ikke har sagt hva det er du klager på </li>
+            {{/if}}
         </ul>
     {{else}}
-
         {{#if aarsakKlagetForSent}}
             Vi har avvist klagen fordi du har klaget for sent. Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen.
         {{/if}}

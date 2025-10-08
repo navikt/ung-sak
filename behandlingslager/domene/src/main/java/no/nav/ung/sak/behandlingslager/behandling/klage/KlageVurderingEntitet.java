@@ -24,7 +24,7 @@ public class KlageVurderingEntitet extends BaseEntitet {
     @Embedded
     private Vurderingresultat klageresultat = Vurderingresultat.TomtResultat;
 
-    @Column(name = "kabal_referanse")
+    @Column(name = "kabal_referanse", nullable = false, updatable = false, unique = true)
     private String kabalReferanse;
 
     public KlageVurderingEntitet() {

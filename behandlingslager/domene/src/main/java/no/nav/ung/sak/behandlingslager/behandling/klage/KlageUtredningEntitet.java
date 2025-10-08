@@ -19,18 +19,17 @@ public class KlageUtredningEntitet extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_KLAGE_UTREDNING")
     private Long id;
 
-    @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
+    @Column(name = "behandling_id", nullable = false, updatable = false)
     private Long behandlingId;
 
-
-    @Column(name = "paaklagd_behandling_uuid", nullable = false, updatable = false, unique = true)
+    @Column(name = "paaklagd_behandling_uuid")
     private UUID påklagdBehandlingUuid;
 
     @Convert(converter = BehandlingTypeKodeverdiConverter.class)
     @Column(name = "paaklagd_behandling_type")
     private BehandlingType påklagdBehandlingType;
 
-    @Column(name = "behandlende_enhet")
+    @Column(name = "behandlende_enhet", nullable = false, updatable = false)
     private String opprinneligBehandlendeEnhet;
 
     @Column(name = "godkjent_av_medunderskriver", nullable = false)
@@ -91,6 +90,7 @@ public class KlageUtredningEntitet extends BaseEntitet {
         }
         formkrav.oppdater(formkravAdapter);
         if (!formkrav.hentAvvistÅrsaker().isEmpty()) {
+            // TODO: Utled og lagre hjemmel brukt i avvisning, i vurdering
             setKlagevurdering(KlageVurderingAdapter.Templates.AVVIST_VURDERING_VEDTAKSINSTANS);
         }
         return formkrav.utledAvvistÅrsak();
@@ -114,36 +114,13 @@ public class KlageUtredningEntitet extends BaseEntitet {
         var klagevurdering = hentKlagevurdering(klageVurdertAv);
         return klagevurdering
             .map(kv -> kv.getKlageresultat().getKlageVurdering())
-            .orElseGet(() -> formkrav.tilFormkrav().erAvvist() ? Optional.of(KlageVurderingType.AVVIS_KLAGE) : Optional.empty());
+            .orElseGet(() -> getFormkrav()
+                .map(KlageFormkravEntitet::tilFormkrav)
+                .flatMap(KlageFormkravAdapter::hentVurderingTypeHvisAvvist));
     }
 
     public boolean harFormkrav() {
         return formkrav != null;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        } else if (!(obj instanceof KlageUtredningEntitet)) {
-            return false;
-        }
-        KlageUtredningEntitet other = (KlageUtredningEntitet) obj;
-        return Objects.equals(this.id, other.id) //Skal det sammenliknes på id?
-            && Objects.equals(this.behandlingId, other.behandlingId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, behandlingId);
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "<" + //$NON-NLS-1$
-            (id != null ? "id=" + id + ", " : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            + "klageBehandling=" + behandlingId + ", " //$NON-NLS-1$ //$NON-NLS-2$
-            + ">"; //$NON-NLS-1$
     }
 
     public String getOpprinneligBehandlendeEnhet() {
@@ -163,6 +140,12 @@ public class KlageUtredningEntitet extends BaseEntitet {
                 klagevurderinger.add(klageVurderingResultatBuilder.build());
             }
         );
+    }
+
+    public Optional<KlageVurderingEntitet> hentKlagevurdering(KlageVurdertAv klageVurdertAv) {
+        return klagevurderinger.stream()
+            .filter(klageVurderingEntitet -> klageVurdertAv.equals(klageVurderingEntitet.getVurdertAvEnhet()))
+            .findFirst();
     }
 
     public void fjernKlageVurderingVedtaksinstans() {
@@ -222,9 +205,28 @@ public class KlageUtredningEntitet extends BaseEntitet {
         }
     }
 
-    public Optional<KlageVurderingEntitet> hentKlagevurdering(KlageVurdertAv klageVurdertAv) {
-        return klagevurderinger.stream()
-            .filter(klageVurderingEntitet -> klageVurdertAv.equals(klageVurderingEntitet.getVurdertAvEnhet()))
-            .findFirst();
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        } else if (!(obj instanceof KlageUtredningEntitet)) {
+            return false;
+        }
+        KlageUtredningEntitet other = (KlageUtredningEntitet) obj;
+        return Objects.equals(this.id, other.id) //Skal det sammenliknes på id?
+            && Objects.equals(this.behandlingId, other.behandlingId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, behandlingId);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "<" + //$NON-NLS-1$
+            (id != null ? "id=" + id + ", " : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            + "klageBehandling=" + behandlingId + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + ">"; //$NON-NLS-1$
     }
 }
