@@ -26,11 +26,6 @@ public class KlageAvvistInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        throw new UnsupportedOperationException("Gjelder ikke for klagebrev");
-    }
-
-    @Override
-    public TemplateInnholdResultat bygg(Behandling behandling) {
         var klageutredning = klageRepository.hentKlageUtredning(behandling.getId());
         var formkrav = klageutredning.getFormkrav().orElseThrow();
         var formkravA = formkrav.tilFormkrav();
