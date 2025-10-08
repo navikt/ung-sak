@@ -73,7 +73,7 @@ public class ArbeidsgiverOversiktTjeneste {
             }
         } catch (Exception e) {
             log.warn("Feil ved oppslag av arbeidsgiveropplysninger for identifikator {}", identifikator, e);
-            return new ArbeidsgiverOpplysningerDto(identifikator, "Feil ved oppslag");
+            return new ArbeidsgiverOpplysningerDto(identifikator, identifikator);
         }
     }
 
