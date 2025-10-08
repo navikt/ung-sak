@@ -29,6 +29,12 @@ public class KontrollertInntektPeriode extends BaseEntitet {
     @Column(name = "inntekt")
     private BigDecimal inntekt;
 
+    @Column(name = "rapportert_inntekt")
+    private BigDecimal rapportertInntekt;
+
+    @Column(name = "register_inntekt")
+    private BigDecimal registerInntekt;
+
     @Convert(converter = KontrollertInntektKildeKodeverdiConverter.class)
     @Column(name = "kilde", nullable = false)
     private KontrollertInntektKilde kilde;
@@ -60,6 +66,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
                                       BigDecimal inntekt,
+                                      BigDecimal rapportertInntekt,
+                                      BigDecimal registerInntekt,
                                       KontrollertInntektKilde kilde,
                                       boolean erManueltVurdert,
                                       String begrunnelse) {
@@ -68,6 +76,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         this.kilde = kilde;
         this.erManueltVurdert = erManueltVurdert;
         this.begrunnelse = begrunnelse;
+        this.registerInntekt = registerInntekt;
+        this.rapportertInntekt = rapportertInntekt;
     }
 
     public Long getId() {
@@ -80,6 +90,14 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     public BigDecimal getInntekt() {
         return inntekt;
+    }
+
+    public BigDecimal getRapportertInntekt() {
+        return rapportertInntekt;
+    }
+
+    public BigDecimal getRegisterInntekt() {
+        return registerInntekt;
     }
 
     public KontrollertInntektKilde getKilde() {
@@ -112,6 +130,8 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
         private DatoIntervallEntitet periode;
         private BigDecimal inntekt;
+        private BigDecimal rapportertInntekt;
+        private BigDecimal registerInntekt;
         private KontrollertInntektKilde kilde;
         private boolean erManueltVurdert;
         private String begrunnelse;
@@ -132,6 +152,16 @@ public class KontrollertInntektPeriode extends BaseEntitet {
             return this;
         }
 
+        public Builder medRapportertInntekt(BigDecimal rapportertInntekt) {
+            this.rapportertInntekt = rapportertInntekt;
+            return this;
+        }
+
+        public Builder medRegisterInntekt(BigDecimal registerInntekt) {
+            this.registerInntekt = registerInntekt;
+            return this;
+        }
+
         public Builder medKilde(KontrollertInntektKilde kilde) {
             this.kilde = kilde;
             return this;
@@ -149,7 +179,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
 
         public KontrollertInntektPeriode build() {
-            return new KontrollertInntektPeriode(periode, inntekt, kilde, erManueltVurdert, begrunnelse);
+            return new KontrollertInntektPeriode(periode, inntekt, rapportertInntekt, registerInntekt, kilde, erManueltVurdert, begrunnelse);
         }
 
 

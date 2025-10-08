@@ -112,6 +112,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
             kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
                 kontekst.getBehandlingId(),
                 ferdigKontrollertTidslinje.mapValue(Kontrollresultat::inntektsresultat),
+                input.gjeldendeRapporterteInntekter(),
                 JsonObjectMapper.getJson(input),
                 JsonObjectMapper.getJson(kontrollResultat)
             );
