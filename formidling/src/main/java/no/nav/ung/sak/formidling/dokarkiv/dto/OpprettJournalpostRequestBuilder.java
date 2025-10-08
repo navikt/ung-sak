@@ -80,6 +80,7 @@ public class OpprettJournalpostRequestBuilder {
     }
 
     public OpprettJournalpostRequest build() {
-        return new OpprettJournalpostRequest(journalpostType.name(), avsenderMottaker, bruker, tema, behandlingstema.getOffisiellKode(), tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
+        String offisiellKode = behandlingstema != null ? behandlingstema.getOffisiellKode() : null;
+        return new OpprettJournalpostRequest(journalpostType.name(), avsenderMottaker, bruker, tema, offisiellKode, tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
     }
 }
