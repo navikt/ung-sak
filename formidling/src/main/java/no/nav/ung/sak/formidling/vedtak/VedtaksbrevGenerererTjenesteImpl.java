@@ -4,6 +4,7 @@ package no.nav.ung.sak.formidling.vedtak;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -61,10 +62,10 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         VedtaksbrevInnholdBygger bygger = vedtaksbrev.vedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, vedtaksbrevGenerererInput.detaljertResultatTidslinje());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
-        var automatiskGenerertFooter = harManuellAksjonspunkt(behandling);
+        var brukAutomatiskGenerertVedtakFooter = !harManuellAksjonspunkt(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), automatiskGenerertFooter),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brukAutomatiskGenerertVedtakFooter),
                 resultat.templateInnholdDto()
             )
         );
@@ -80,7 +81,11 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     }
 
     private static boolean harManuellAksjonspunkt(Behandling behandling) {
-        return behandling.getAksjonspunkter().stream().anyMatch(it -> !it.getAksjonspunktDefinisjon().getAksjonspunktType().erAutopunkt() && it.erUtført());
+        return behandling.getAksjonspunkter().stream()
+            .anyMatch(
+                it -> (!it.getAksjonspunktDefinisjon().getAksjonspunktType().erAutopunkt() && it.erUtført())
+                    || (it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT && it.erÅpentAksjonspunkt())
+            );
     }
 
 

@@ -3,7 +3,9 @@ package no.nav.ung.sak.formidling;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
@@ -39,9 +41,11 @@ class TomVedtaksbrevMalTest {
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
-        var behandling = TestScenarioBuilder.builderMedSøknad()
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
-            .medUngTestGrunnlag(ungTestGrunnlag)
+            .medUngTestGrunnlag(ungTestGrunnlag);
+        scenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT, BehandlingStegType.FORESLÅ_VEDTAK);
+        var behandling = scenarioBuilder
             .buildOgLagreMedUng(ungTestRepositories);
 
 
