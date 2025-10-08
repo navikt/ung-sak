@@ -104,10 +104,13 @@ public class PapirsøknadHåndteringTjeneste {
 
 
     private OpprettJournalpostResponse opprettJournalpost(PersonIdent deltakerIdent, String deltakerNavn, UUID deltakelseId, byte[] pdfDokument, byte[] jsonDokument) {
+        String ungdomsytelseSoknadOffisiellKode = Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode();
+        String journalpostTittel = "Punsjet søknad om ungdomsprogramytelse - " + ungdomsytelseSoknadOffisiellKode;
+
         return dokArkivKlientImpl.opprettJournalpost(new OpprettJournalpostRequestBuilder()
             .bruker(new OpprettJournalpostRequest.Bruker(deltakerIdent.getIdent(), OpprettJournalpostRequest.Bruker.BrukerIdType.FNR))
             .tema(Tema.UNG.name())
-            .tittel("Punsjet papirsøknad om ungdomsprogramytelsen")
+            .tittel(journalpostTittel)
             .kanal(Kanal.NAV_NO.name())
             .journalfoerendeEnhet(MASKINELL_JOURNALFØRENDE_ENHET)
             .eksternReferanseId(deltakelseId.toString())
@@ -116,13 +119,16 @@ public class PapirsøknadHåndteringTjeneste {
             .journalpostType(JournalpostType.INNGAAENDE)
             .dokumenter(List.of(
                 new OpprettJournalpostRequest.Dokument(
-                    "Punsjet papirsøknad om ungdomsprogramytelsen",
-                    Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
+                    journalpostTittel,
+                    ungdomsytelseSoknadOffisiellKode,
                     "SOK",
-                    List.of(
-                        new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(pdfDokument),
-                        new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(ArkivFilType.JSON.getKode(), VariantFormat.ORIGINAL.getOffisiellKode(), jsonDokument)
-                    )
+                    List.of(new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(pdfDokument))
+                ),
+                new OpprettJournalpostRequest.Dokument(
+                    journalpostTittel + "(JSON)",
+                    ungdomsytelseSoknadOffisiellKode,
+                    "SOK",
+                    List.of(new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(ArkivFilType.JSON.getKode(), VariantFormat.ORIGINAL.getOffisiellKode(), jsonDokument))
                 )
             ))
             .build()
