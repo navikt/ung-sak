@@ -1,9 +1,9 @@
 {{#> felles/base}}
     {{#> felles/seksjon/hoved }}
         <h1>Vi har ikke endret ungdomsprogramytelsen din</h1>
-        {{#each utbetalingsperioder}}
-            Du har gitt oss beskjed om at du hadde inntekt i perioden {{> felles/periode-inline periode}}.
-            Vi har kontrollert inntekten din for denne perioden og kommet frem til at du ikke får redusert ungdomsprogramytelsen din.
+        {{#each perioder}}
+            <p>Du har gitt oss beskjed om at du hadde inntekt i perioden {{> felles/periode-inline periode}}.</p>
+            <p>Vi har kontrollert inntekten din for denne perioden og kommet frem til at du ikke får redusert ungdomsprogramytelsen din.</p>
         {{/each}}
 
         <p>Pengene får du utbetalt innen fire dager. </p>
