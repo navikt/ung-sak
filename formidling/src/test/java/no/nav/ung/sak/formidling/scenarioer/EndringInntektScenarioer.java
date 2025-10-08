@@ -124,7 +124,7 @@ public class EndringInntektScenarioer {
      * 19 år ungdom med
      * 1. mnd: 0 kr utbetaling med for høy inntekt
      * 2. mnd: redusert utbetaling
-     * 3. mnd: full utbetaling pga ingen inntekt
+     * 3. mnd: ingen reduksjon pga ingen inntekt
      * 4. mnd: 0 kr utbetaling pga for høy inntekt
      * 5. mnd: redusert utbetaling
      */
@@ -143,7 +143,7 @@ public class EndringInntektScenarioer {
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(3),
                     førsteIMåneden.plusMonths(3).with(TemporalAdjusters.lastDayOfMonth()),
-                    BigDecimal.valueOf(0)),
+                    BigDecimal.ZERO),
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(4),
                     førsteIMåneden.plusMonths(4).with(TemporalAdjusters.lastDayOfMonth()),

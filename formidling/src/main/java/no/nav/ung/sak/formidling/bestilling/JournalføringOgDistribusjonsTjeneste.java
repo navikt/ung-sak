@@ -132,6 +132,7 @@ public class JournalføringOgDistribusjonsTjeneste {
             case ENDRING_BARNETILLEGG -> "Endring Barnetillegg";
             case ENDRING_PROGRAMPERIODE -> "Endring Programperiode";
             case ENDRING_INNTEKT -> "Endring Inntekt";
+            case ENDRING_INNTEKT_UTEN_REDUKSJON -> "Endring inntekt uten reduksjon";
             case ENDRING_HØY_SATS -> "Endring Høy Sats";
             case OPPHØR_DOK -> "Opphør";
             case AVSLAG__DOK -> "Avslag";

@@ -7,7 +7,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektReduksjonInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
@@ -15,11 +15,11 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 @Dependent
 public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final EndringRapportertInntektInnholdBygger endringRapportertInntektInnholdBygger;
+    private final EndringRapportertInntektReduksjonInnholdBygger endringRapportertInntektReduksjonInnholdBygger;
 
     @Inject
-    public EndringInntektReduksjonStrategy(EndringRapportertInntektInnholdBygger endringRapportertInntektInnholdBygger) {
-        this.endringRapportertInntektInnholdBygger = endringRapportertInntektInnholdBygger;
+    public EndringInntektReduksjonStrategy(EndringRapportertInntektReduksjonInnholdBygger endringRapportertInntektReduksjonInnholdBygger) {
+        this.endringRapportertInntektReduksjonInnholdBygger = endringRapportertInntektReduksjonInnholdBygger;
     }
 
     @Override
@@ -34,7 +34,7 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
         }
 
         return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_INNTEKT,
-            endringRapportertInntektInnholdBygger,
+            endringRapportertInntektReduksjonInnholdBygger,
             forklaring);
     }
 
@@ -42,7 +42,7 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
         forklaring += " Kan redigere pga ap=" + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + ".";
         return new VedtaksbrevStrategyResultat(
             DokumentMalType.ENDRING_INNTEKT,
-            endringRapportertInntektInnholdBygger,
+            endringRapportertInntektReduksjonInnholdBygger,
             new VedtaksbrevEgenskaper(
                 false,
                 false,
