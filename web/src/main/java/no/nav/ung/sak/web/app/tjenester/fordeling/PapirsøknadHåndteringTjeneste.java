@@ -26,6 +26,7 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.ungdomsprogram.UngdomsprogramRegisterKlient;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,35 +42,48 @@ public class PapirsøknadHåndteringTjeneste {
     private TpsTjeneste tpsTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private AktørTjeneste aktørTjeneste;
+    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
 
     public PapirsøknadHåndteringTjeneste() {
         // For CDI
     }
 
     @Inject
-    public PapirsøknadHåndteringTjeneste(PdfGenKlient pdfGenKlient, DokArkivKlientImpl dokArkivKlientImpl, TpsTjeneste tpsTjeneste, FagsakTjeneste fagsakTjeneste, AktørTjeneste aktørTjeneste) {
+    public PapirsøknadHåndteringTjeneste(PdfGenKlient pdfGenKlient, DokArkivKlientImpl dokArkivKlientImpl, TpsTjeneste tpsTjeneste, FagsakTjeneste fagsakTjeneste, AktørTjeneste aktørTjeneste, UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.aktørTjeneste = aktørTjeneste;
+        this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
     }
 
     public OpprettJournalpostResponse journalførPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, UUID deltakelseId, JournalpostId journalpostId) {
         Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
-
         AktørId aktørId = aktørTjeneste.hentAktørIdForPersonIdent(deltakerIdent).orElseThrow();
-        // Sjekk at det finnes en fagsak før vi journalfører.
-        fagsakTjeneste.finnesEnFagsakSomOverlapper(FagsakYtelseType.UNGDOMSYTELSE, aktørId, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
-            .orElseThrow(() ->  new IllegalStateException("Finner ikke fagsak for deltaker " + " ved journalføring av papirsøknad."));
+
+        validerDeltakelseEksisterer(deltakelseId, aktørId);
+        validerFagsakEksisterer(aktørId);
 
         byte[] pdfDokument = lagPdfDokument(deltakerIdent, startdato, deltakerNavn);
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
-        OpprettJournalpostResponse opprettJournalpostResponse = opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument);
+        return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument);
+    }
 
-        return opprettJournalpostResponse;
+    private void validerFagsakEksisterer(AktørId aktørId) {
+        fagsakTjeneste.finnesEnFagsakSomOverlapper(FagsakYtelseType.UNGDOMSYTELSE, aktørId, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            .orElseThrow(() ->  new IllegalStateException("Finner ikke fagsak for deltaker " + " ved journalføring av papirsøknad."));
+    }
+
+    private void validerDeltakelseEksisterer(UUID deltakelseId, AktørId aktørId) {
+        List<UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO> deltakerOpplysningerDTO = ungdomsprogramRegisterKlient.hentForAktørId(aktørId.getAktørId()).opplysninger();
+        boolean deltakelseIkkeEksister = deltakerOpplysningerDTO.stream()
+            .noneMatch( deltakelse -> deltakelse.id() == deltakelseId);
+        if (deltakelseIkkeEksister) {
+            throw new IllegalStateException("Finner ikke deltakelse med id " + deltakelseId);
+        }
     }
 
     private static byte[] lagJsonDokument(PersonIdent deltakerIdent, LocalDate startdato, UUID deltakelseId, JournalpostId journalpostId) {
