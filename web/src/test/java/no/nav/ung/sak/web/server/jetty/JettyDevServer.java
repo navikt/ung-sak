@@ -44,12 +44,13 @@ public class JettyDevServer extends JettyServer {
                 "Passord for å aksessere store " + storeName + " i " + storePath + " er null");
         }
 
-        System.setProperty(storeProperty, storeFile.getAbsolutePath());
-        System.setProperty(storePasswordProperty, password);
-
-        // Aiven:
-        System.setProperty("KAFKA_TRUSTSTORE_PATH", storeFile.getAbsolutePath());
-        System.setProperty("KAFKA_KEYSTORE_PATH", storeFile.getAbsolutePath());
+        if (storeName.equals("keystore")) {
+            System.setProperty("KAFKA_KEYSTORE_PATH", storeFile.getAbsolutePath());
+        }
+        if (storeName.equals("truststore")) {
+            System.setProperty("KAFKA_TRUSTSTORE_PATH", storeFile.getAbsolutePath());
+        }
+        //samme passord for begge
         System.setProperty("KAFKA_CREDSTORE_PASSWORD", password);
 
         return storePath;
