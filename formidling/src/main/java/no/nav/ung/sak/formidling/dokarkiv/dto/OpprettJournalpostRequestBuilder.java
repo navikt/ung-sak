@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.dokarkiv.dto;
 
+import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public class OpprettJournalpostRequestBuilder {
     private OpprettJournalpostRequest.AvsenderMottaker avsenderMottaker;
     private OpprettJournalpostRequest.Bruker bruker;
     private String tema;
-    private String behandlingstema;
+    private BehandlingTema behandlingstema;
     private String tittel;
     private String kanal;
     private String journalfoerendeEnhet;
@@ -38,7 +39,7 @@ public class OpprettJournalpostRequestBuilder {
         return this;
     }
 
-    public OpprettJournalpostRequestBuilder behandlingstema(String behandlingstema) {
+    public OpprettJournalpostRequestBuilder behandlingstema(BehandlingTema behandlingstema) {
         this.behandlingstema = behandlingstema;
         return this;
     }
@@ -79,6 +80,6 @@ public class OpprettJournalpostRequestBuilder {
     }
 
     public OpprettJournalpostRequest build() {
-        return new OpprettJournalpostRequest(journalpostType.name(), avsenderMottaker, bruker, tema, behandlingstema, tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
+        return new OpprettJournalpostRequest(journalpostType.name(), avsenderMottaker, bruker, tema, behandlingstema.getOffisiellKode(), tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
     }
 }

@@ -7,9 +7,12 @@ import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
+import no.nav.ung.kodeverk.behandling.BehandlingTema;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.VariantFormat;
+import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
@@ -20,6 +23,7 @@ import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.PersonIdent;
 
@@ -35,6 +39,8 @@ public class PapirsøknadHåndteringTjeneste {
     private PdfGenKlient pdfGenKlient;
     private DokArkivKlientImpl dokArkivKlientImpl;
     private TpsTjeneste tpsTjeneste;
+    private FagsakTjeneste fagsakTjeneste;
+    private AktørTjeneste aktørTjeneste;
 
     public PapirsøknadHåndteringTjeneste() {
         // For CDI
@@ -45,13 +51,18 @@ public class PapirsøknadHåndteringTjeneste {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
+        this.fagsakTjeneste = fagsakTjeneste;
+        this.aktørTjeneste = aktørTjeneste;
     }
 
     public OpprettJournalpostResponse journalførPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, UUID deltakelseId, JournalpostId journalpostId) {
         Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
 
-        // TODO: Valider at fagsak finnes for deltaker før journalføring.
+        AktørId aktørId = aktørTjeneste.hentAktørIdForPersonIdent(deltakerIdent).orElseThrow();
+        // Sjekk at det finnes en fagsak før vi journalfører.
+        fagsakTjeneste.finnesEnFagsakSomOverlapper(FagsakYtelseType.UNGDOMSYTELSE, aktørId, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE)
+            .orElseThrow(() ->  new IllegalStateException("Finner ikke fagsak for deltaker " + " ved journalføring av papirsøknad."));
 
         byte[] pdfDokument = lagPdfDokument(deltakerIdent, startdato, deltakerNavn);
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
@@ -89,7 +100,7 @@ public class PapirsøknadHåndteringTjeneste {
             .kanal(Kanal.NAV_NO.name())
             .journalfoerendeEnhet(MASKINELL_JOURNALFØRENDE_ENHET)
             .eksternReferanseId(deltakelseId.toString())
-            .behandlingstema("-")
+            .behandlingstema(BehandlingTema.UNGDOMSPROGRAMYTELSEN)
             .avsenderMottaker(new OpprettJournalpostRequest.AvsenderMottaker(deltakerIdent.getIdent(), deltakerNavn, null, OpprettJournalpostRequest.AvsenderMottaker.IdType.FNR))
             .journalpostType(JournalpostType.INNGAAENDE)
             .dokumenter(List.of(
