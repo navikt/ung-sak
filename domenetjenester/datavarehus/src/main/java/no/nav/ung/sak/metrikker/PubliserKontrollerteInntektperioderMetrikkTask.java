@@ -30,10 +30,8 @@ public class PubliserKontrollerteInntektperioderMetrikkTask implements ProsessTa
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        String behandingIdString = prosessTaskData.getBehandlingId();
-
-        if (behandingIdString != null && !behandingIdString.isEmpty()) {
-            long behandlingId = Long.parseLong(behandingIdString);
+        String behandlingId = prosessTaskData.getBehandlingId();
+        if (behandlingId != null && !behandlingId.isEmpty()) {
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
             kontrollerteInntektPerioderMetrikkPubliserer.publiserKontrollertePerioderMetrikker(BehandlingReferanse.fra(behandling));
         }
