@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling.Builder;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
+import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -111,6 +112,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
     private UngTestScenario ungTestscenario;
+    private UngKlageTestScenario klageTestScenario;
 
     protected AbstractTestScenario(FagsakYtelseType fagsakYtelseType) {
         this.fagsakBuilder = FagsakBuilder
@@ -412,12 +414,32 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return nyBehandling;
     }
 
+    public Behandling buildOgLagreKlage(UngTestRepositories repositories) {
+        settOppPersoner();
+        Behandling klageBehandling = buildBehandling(repositories.repositoryProvider());
+        buildKlage(repositories, klageBehandling);
+        return klageBehandling;
+    }
+
 
     private void settOppVilkårOgPersoner() {
         if (ungTestscenario == null)
             throw new IllegalArgumentException("ungTestGrunnlag må settes for å bruke buildUng");
 
         // Default Person
+        settOppPersoner();
+
+        //Vilkår
+        if (ungTestscenario.aldersvilkår() != null) {
+            ungTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        }
+
+        if (ungTestscenario.ungdomsprogramvilkår() != null) {
+            ungTestscenario.ungdomsprogramvilkår().forEach(it -> leggTilVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, it.getValue(), new Periode(it.getFom(), it.getTom())));
+        }
+    }
+
+    private void settOppPersoner() {
         if (personer == null) {
             var ungdom = getDefaultBrukerAktørId();
             Personas ungdomPersonas = opprettBuilderForRegisteropplysninger()
@@ -432,15 +454,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             PersonInformasjon personInformasjon = ungdomPersonas
                 .build();
             medRegisterOpplysninger(personInformasjon);
-        }
-
-        //Vilkår
-        if (ungTestscenario.aldersvilkår() != null) {
-            ungTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
-        }
-
-        if (ungTestscenario.ungdomsprogramvilkår() != null) {
-            ungTestscenario.ungdomsprogramvilkår().forEach(it -> leggTilVilkår(VilkårType.UNGDOMSPROGRAMVILKÅRET, it.getValue(), new Periode(it.getFom(), it.getTom())));
         }
     }
 
@@ -498,6 +511,21 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
     }
+
+    private void buildKlage(UngTestRepositories repositories, Behandling behandling) {
+
+        repositories.klageRepository().lagre(
+            klageTestScenario.klageUtredning()
+                .medKlageBehandling(behandling)
+                .build()
+        );
+
+        KlageUtredningEntitet klageUtredningEntitet = repositories.klageRepository().hentKlageUtredning(behandling.getId());
+        klageUtredningEntitet.setKlagevurdering(klageTestScenario.klageVurdering());
+        repositories.klageRepository().lagre(klageUtredningEntitet);
+
+    }
+
 
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {
         if (mockBehandlingRepository != null && behandling != null) {
@@ -882,6 +910,12 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         this.fagsak = originalBehandling.getFagsak();
         this.behandlingÅrsakType = behandlingÅrsakType;
         this.manueltOpprettet = manueltOpprettet;
+        return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public S medKlageGrunnlag(UngKlageTestScenario klageGrunnlag) {
+        this.klageTestScenario = klageGrunnlag;
         return (S) this;
     }
 

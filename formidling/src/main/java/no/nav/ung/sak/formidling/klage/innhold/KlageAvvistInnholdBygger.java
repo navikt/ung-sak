@@ -34,11 +34,11 @@ public class KlageAvvistInnholdBygger implements VedtaksbrevInnholdBygger {
             new KlageAvvistDto(
                 "NAV",
                 formkrav.hentAvvistÅrsaker().size() > 1,
-                formkravA.isFristOverholdt(),
-                formkravA.isErSignert(),
-                formkravA.gjelderVedtak(),
-                formkravA.isErKlagerPart(),
-                formkravA.isErKonkret(),
+                !formkravA.isFristOverholdt(),
+                !formkravA.isErSignert(),
+                !formkravA.gjelderVedtak(),
+                !formkravA.isErKlagerPart(),
+                !formkravA.isErKonkret(),
                 "FTRL/FL"   // TODO: Utled hjemler
             )
         );
