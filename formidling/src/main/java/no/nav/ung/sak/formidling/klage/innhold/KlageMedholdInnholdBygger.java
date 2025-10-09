@@ -41,7 +41,7 @@ public class KlageMedholdInnholdBygger implements VedtaksbrevInnholdBygger {
                 harDelvisMedhold,
                 fritekst,
                 true
-            ),
-            false);
+            )
+        );
     }
 }

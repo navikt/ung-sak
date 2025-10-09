@@ -40,7 +40,7 @@ public class KlageAvvistInnholdBygger implements VedtaksbrevInnholdBygger {
                 formkravA.isErKlagerPart(),
                 formkravA.isErKonkret(),
                 "FTRL/FL"   // TODO: Utled hjemler
-            ),
-            false);
+            )
+        );
     }
 }

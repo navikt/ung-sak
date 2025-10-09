@@ -32,7 +32,7 @@ public class KlageOversendtInnholdBygger implements VedtaksbrevInnholdBygger {
             new KlageOversendtDto(
                 "NAV Klageinstans Nord",
                 fritekst
-            ),
-            false);
+            )
+        );
     }
 }
