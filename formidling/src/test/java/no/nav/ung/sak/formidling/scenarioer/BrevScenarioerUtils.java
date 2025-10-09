@@ -59,11 +59,20 @@ public class BrevScenarioerUtils {
         LocalDateTimeline<BeregnetSats> beregnetSats = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
         return beregnetSats.intersection(ytelseTidslinje).combine(kontrollerInntektHolder,
             (s, lhs, rhs) -> {
-                var inntekt = rhs == null ? BigDecimal.ZERO : rhs.getValue().rapportertInntekt;
+                var inntekt = rhs != null ? bestemInntekt(rhs.getValue()) : BigDecimal.ZERO;
                 return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), inntekt).verdi());
             },
             LocalDateTimeline.JoinStyle.LEFT_JOIN
         );
+    }
+
+    private static BigDecimal bestemInntekt(KontrollerInntektHolder value) {
+        if (value.inntekt != null) {
+            // inntekt er fastsatt
+            return value.inntekt;
+        }
+        // inntekt er ikke fastsatt, bruker register inntekten
+        return value.registerInntekt != null ? value.registerInntekt : BigDecimal.ZERO;
     }
 
 
@@ -153,8 +162,8 @@ public class BrevScenarioerUtils {
     }
 
     public record KontrollerInntektHolder(BigDecimal inntekt, BigDecimal rapportertInntekt, BigDecimal registerInntekt, boolean erManueltVurdert) {
-        public static KontrollerInntektHolder forRapportertInntekt(BigDecimal rapportertInntekt) {
-            return new KontrollerInntektHolder(null, rapportertInntekt, null, false);
+        public static KontrollerInntektHolder forRegisterInntekt(BigDecimal registerInntekt) {
+            return new KontrollerInntektHolder(null, registerInntekt, registerInntekt, false);
         }
 
     }

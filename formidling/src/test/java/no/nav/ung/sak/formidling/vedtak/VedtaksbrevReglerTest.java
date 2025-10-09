@@ -61,7 +61,7 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektReduksjonInnholdBygger.class);
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
     }
 
     @Test
@@ -91,7 +91,7 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        assertRedigerbarBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON, EndringRapportertInntektUtenReduksjonInnholdBygger.class);
+        assertRedigerbarBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON, EndringInntektUtenReduksjonInnholdBygger.class);
     }
 
     @Test
@@ -217,7 +217,7 @@ class VedtaksbrevReglerTest {
             .findFirst()
             .orElseThrow();
 
-        assertRedigerbarBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektReduksjonInnholdBygger.class);
+        assertRedigerbarBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
 
         assertThat(inntektResultat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
 

@@ -5,7 +5,7 @@
             <p>Du får {{> felles/beløp utbetalingBeløp}} i ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.</p>
             {{#unless harFlereUtbetalinger}}<p>Pengene får du utbetalt innen fire dager.</p>{{/unless}}
             <p>
-                Du får dette beløpet siden du hadde en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.
+                Du får dette beløpet siden du hadde en inntekt på {{> felles/beløp inntekt}} i denne perioden.
                 {{#unless harIngenUtbetalinger}}Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer {{reduksjonssats}} prosent av inntekten din.{{/unless}}
             </p>
         {{/each}}
@@ -17,7 +17,7 @@
         {{#if harIngenUtbetalinger}}
             {{#each ingenUtbetalingPerioder}}
                 <p>Du får ikke utbetalt ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.
-                Det er fordi du hadde en inntekt på {{> felles/beløp rapportertInntekt}} i denne perioden.</p>
+                Det er fordi du hadde en inntekt på {{> felles/beløp inntekt}} i denne perioden.</p>
             {{/each}}
 
             <h2>Hvorfor får du ingen utbetaling?</h2>

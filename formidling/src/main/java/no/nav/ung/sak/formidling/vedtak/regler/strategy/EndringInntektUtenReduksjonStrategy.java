@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.formidling.innhold.EndringRapportertInntektUtenReduksjonInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -23,12 +23,12 @@ import java.util.Optional;
 public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
 
-    private final EndringRapportertInntektUtenReduksjonInnholdBygger endringRapportertInntektUtenReduksjonInnholdBygger;
+    private final EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger;
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public EndringInntektUtenReduksjonStrategy(EndringRapportertInntektUtenReduksjonInnholdBygger endringRapportertInntektUtenReduksjonInnholdBygger, TilkjentYtelseRepository tilkjentYtelseRepository) {
-        this.endringRapportertInntektUtenReduksjonInnholdBygger = endringRapportertInntektUtenReduksjonInnholdBygger;
+    public EndringInntektUtenReduksjonStrategy(EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger, TilkjentYtelseRepository tilkjentYtelseRepository) {
+        this.endringInntektUtenReduksjonInnholdBygger = endringInntektUtenReduksjonInnholdBygger;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
@@ -50,7 +50,7 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
         if (harUtførtKontrollerInntekt && manueltFastsatt0MedOver0RapportertTidslinje) {
             return new VedtaksbrevStrategyResultat(
                 DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON,
-                endringRapportertInntektUtenReduksjonInnholdBygger,
+                endringInntektUtenReduksjonInnholdBygger,
                 new VedtaksbrevEgenskaper(false,
                     false,
                     true,
