@@ -63,7 +63,7 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektInnholdBygger.class);
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektReduksjonInnholdBygger.class);
     }
 
     @Test
@@ -80,6 +80,20 @@ class VedtaksbrevReglerTest {
 
         assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
 
+    }
+
+    @Test
+    void skal_gi_redigerbar_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_med_ap_8000() {
+        UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2024, 12, 1));
+        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestGrunnlag, ungTestRepositories);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
+
+        assertRedigerbarBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON, EndringRapportertInntektUtenReduksjonInnholdBygger.class);
     }
 
     @Test
@@ -205,7 +219,7 @@ class VedtaksbrevReglerTest {
             .findFirst()
             .orElseThrow();
 
-        assertRedigerbarBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektInnholdBygger.class);
+        assertRedigerbarBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektReduksjonInnholdBygger.class);
 
         assertThat(inntektResultat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
 

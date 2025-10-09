@@ -56,7 +56,7 @@ public class AntallDagerStatistikk {
      *
      * @return Collection av DagerIProgrammetRecord med statistikk
      */
-    Collection<DagerIProgrammetRecord> dagerIProgrammet() {
+    public Collection<DagerIProgrammetRecord> dagerIProgrammet() {
         return dagerIProgrammet(LocalDate.now());
     }
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC
+        "-//OPENHTMLTOPDF//DOC XHTML Character Entities Only 1.0//EN" "">
+
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="subject" content="Papirsøknad for ungdomsprogramytelsen"/>
+    <meta name="description" content="Papirsøknad for ungdomsprogramytelsen"/>
+    <meta name="keywords" content="Papirsøknad Nav ungdomsprogramytelsen" />
+    <meta name="author" content="NAV IT"/>
+    <title>Papirsøknad for ungdomsprogramytelsen</title>
+    {{> felles/style }}
+</head>
+
+<body>
+<header>
+    <div id="nav_logo_container" >
+        <img id="nav_logo" src="{{ image "Navlogo.png" }}" alt="nav logo"/>
+    </div>
+
+    <p style="text-align: right">
+        {{søknadsdato}}
+    </p>
+
+    <div style="margin-top: -20mm; min-height: 20mm;">
+        <div class="uten-mellomrom">
+            <p>Til: {{deltakerNavn}}</p>
+            <p>Fødselsnummer: {{deltakerIdent}}</p>
+        </div>
+    </div>
+
+</header>
+
+<section style="height: 20cm;" data-hidden="data-hidden">
+    <h1>Punsjet søknad om ungdomsprogramytelse</h1>
+    <p>Deltaker deltar i ungdomsprogrammet fra og med: {{startdato}}.</p>
+</section>
+
+<footer style="position: running(footer)">
+    <span class="sidetall">side <span id="pagenumber"></span> av <span id="pagecount"></span></span>
+</footer>
+
+</body>
+</html>

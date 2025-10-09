@@ -10,7 +10,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektDto;
+import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektReduksjonDto;
 import no.nav.ung.sak.formidling.template.dto.endring.inntekt.EndringRapportertInntektPeriodeDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -24,7 +24,7 @@ import java.util.Objects;
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
 
 @Dependent
-public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnholdBygger {
+public class EndringRapportertInntektReduksjonInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
@@ -33,7 +33,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
     private static final int REDUSJON_PROSENT = REDUKSJONS_FAKTOR.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
 
     @Inject
-    public EndringRapportertInntektInnholdBygger(
+    public EndringRapportertInntektReduksjonInnholdBygger(
         TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
@@ -53,7 +53,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
         }
 
         var periodeDtoTidslinje = relevantTilkjentYtelse.combine(kontrollertInntektPerioderTidslinje,
-            EndringRapportertInntektInnholdBygger::mapTilPeriodeDto,
+            EndringRapportertInntektReduksjonInnholdBygger::mapTilPeriodeDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         var utbetalingsperioder = periodeDtoTidslinje.toSegments().stream()
@@ -70,7 +70,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             .toList();
         var harIngenUtbetalingsperioder = !ingenUtbetalingsperioder.isEmpty();
 
-        var dto = new EndringRapportertInntektDto(
+        var dto = new EndringRapportertInntektReduksjonDto(
             REDUSJON_PROSENT,
             utbetalingsperioder,
             ingenUtbetalingsperioder,
@@ -78,7 +78,7 @@ public class EndringRapportertInntektInnholdBygger implements VedtaksbrevInnhold
             harIngenUtbetalingsperioder
         );
 
-        return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto, true);
+        return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto);
     }
 
     private static LocalDateSegment<EndringRapportertInntektPeriodeDto> mapTilPeriodeDto(

@@ -25,7 +25,7 @@ record Papirsøknadopplysninger(
 
 public class PapirsøknadtilK9FormatSøknadMapper {
 
-    public Søknad mapTilSøknad(Papirsøknadopplysninger papirsøknadopplysninger) {
+    public static Søknad mapTilSøknad(Papirsøknadopplysninger papirsøknadopplysninger) {
         return new Søknad()
             .medVersjon(Versjon.of("1.0.0"))
             .medMottattDato(ZonedDateTime.now())

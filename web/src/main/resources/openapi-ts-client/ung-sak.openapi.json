@@ -1217,9 +1217,9 @@
         "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
       "ung.kodeverk.dokument.DokumentMalType" : {
-        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_HØY_SATS", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV", "KLAGAV", "KLAGOV", "VEDMED" ],
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_INNTEKT_UTEN_REDUKSJON", "ENDRING_HØY_SATS", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV", "KLAGAV", "KLAGOV", "VEDMED" ],
         "type" : "string",
-        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_HØY_SATS", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV", "KLAGE_AVVIST_DOK", "KLAGE_OVERSENDT_KLAGEINSTANS", "KLAGE_VEDTAK_MEDHOLD" ]
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_INNTEKT_UTEN_REDUKSJON", "ENDRING_HØY_SATS", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV", "KLAGE_AVVIST_DOK", "KLAGE_OVERSENDT_KLAGEINSTANS", "KLAGE_VEDTAK_MEDHOLD" ]
       },
       "ung.kodeverk.dokument.Kommunikasjonsretning" : {
         "enum" : [ "I", "U", "N" ],
@@ -1353,6 +1353,34 @@
         "enum" : [ "-", "TILBAKEKR_OPPRETT", "TILBAKEKR_IGNORER", "TILBAKEKR_INNTREKK", "TILBAKEKR_OPPDATER" ],
         "type" : "string",
         "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ]
+      },
+      "ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse" : {
+        "properties" : {
+          "dokumenter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse.Dokument"
+            },
+            "type" : "array"
+          },
+          "journalpostId" : {
+            "type" : "string"
+          },
+          "journalpostferdigstilt" : {
+            "type" : "boolean"
+          },
+          "melding" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse.Dokument" : {
+        "properties" : {
+          "dokumentInfoId" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
       },
       "ung.sak.kontrakt.AsyncPollingStatus" : {
         "properties" : {
@@ -3887,14 +3915,17 @@
       },
       "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
         "properties" : {
-          "dokumentId" : {
+          "deltakerIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
             "type" : "string"
           },
           "journalpostId" : {
             "type" : "string"
           }
         },
-        "required" : [ "dokumentId", "journalpostId" ],
+        "required" : [ "deltakerIdent", "journalpostId" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
@@ -3911,13 +3942,13 @@
       },
       "ung.sak.kontrakt.søknad.JournalførPapirSøknadDto" : {
         "properties" : {
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "personIdent" : {
+          "deltakerIdent" : {
             "maxLength" : 20,
             "minLength" : 0,
             "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "journalpostId" : {
             "type" : "string"
           },
           "startDato" : {
@@ -3925,7 +3956,25 @@
             "type" : "string"
           }
         },
-        "required" : [ "journalpostId", "personIdent", "startDato" ],
+        "required" : [ "deltakerIdent", "journalpostId", "startDato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto" : {
+        "properties" : {
+          "deltakerIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "journalpostIdForPapirsøknad" : {
+            "type" : "string"
+          },
+          "startdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.SøknadDto" : {
@@ -8103,7 +8152,7 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/api/papir/hentPapirSøknad" : {
+    "/api/papir/hent-søknad-pdf" : {
       "post" : {
         "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
         "operationId" : "hentPapirSøknad",
@@ -8126,10 +8175,10 @@
           }
         },
         "summary" : "Henter og viser papirsøknad",
-        "tags" : [ "fordel" ]
+        "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/journalførPapirSøknad" : {
+    "/api/papir/steg-1/journalfør-papir-søknad-mot-fagsak" : {
       "post" : {
         "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
         "operationId" : "journalførPapirSøknad",
@@ -8152,7 +8201,37 @@
           }
         },
         "summary" : "Oppretter fagsak og journalfører papirsøknad",
-        "tags" : [ "fordel" ]
+        "tags" : [ "papirsøknad" ]
+      }
+    },
+    "/api/papir/steg-2/send-inn-papirsøknadopplysninger" : {
+      "post" : {
+        "description" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
+        "operationId" : "sendInnPapirsøknadopplysninger",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
+        "tags" : [ "papirsøknad" ]
       }
     },
     "/api/pip/aktoer-for-sak" : {

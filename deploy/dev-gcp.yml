@@ -238,6 +238,8 @@ spec:
       value: "true"
     - name: INTEGRASJON_KABAL
       value: "true"
+    - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

@@ -4,7 +4,7 @@ import no.nav.ung.sak.formidling.template.dto.endring.inntekt.EndringRapportertI
 
 import java.util.List;
 
-public record EndringRapportertInntektDto(
+public record EndringRapportertInntektReduksjonDto(
     int reduksjonssats,
     List<EndringRapportertInntektPeriodeDto> utbetalingsperioder,
     List<EndringRapportertInntektPeriodeDto> ingenUtbetalingPerioder,

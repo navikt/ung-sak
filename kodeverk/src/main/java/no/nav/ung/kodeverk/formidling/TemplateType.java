@@ -6,6 +6,7 @@ package no.nav.ung.kodeverk.formidling;
 public enum TemplateType {
     INNVILGELSE("innvilgelse", "ungdomsprogramytelse", "Førstegangsinnvilgelse"),
     ENDRING_INNTEKT("endring_inntekt", "ungdomsprogramytelse", "Endring av inntekt"),
+    ENDRING_INNTEKT_UTEN_REDUKSJON("endring_inntekt_uten_reduksjon", "Endring av inntekt"),
     ENDRING_HØY_SATS("endring_høy_sats", "ungdomsprogramytelse", "Endring til høy sats"),
     ENDRING_BARNETILLEGG("endring_barnetillegg", "ungdomsprogramytelse", "Endring pga barnetillegg"),
     MANUELT_VEDTAKSBREV("manuelt_vedtaksbrev", "ungdomsprogramytelse", "Manuelt vedtaksbrev"),

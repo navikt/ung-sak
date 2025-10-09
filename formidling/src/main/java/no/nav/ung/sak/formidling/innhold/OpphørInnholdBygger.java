@@ -41,7 +41,7 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
             new OpphørDto(
                 opphørStartdato,
                 sisteUtbetalingsdato
-            ), true);
+            ));
     }
 
     private YearMonth bestemInneværendeMåned() {
