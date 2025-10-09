@@ -3639,9 +3639,15 @@
           },
           "journalpostId" : {
             "type" : "string"
+          },
+          "personIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
           }
         },
-        "required" : [ "dokumentId", "journalpostId" ],
+        "required" : [ "dokumentId", "journalpostId", "personIdent" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
@@ -3673,6 +3679,28 @@
           }
         },
         "required" : [ "journalpostId", "personIdent", "startDato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto" : {
+        "properties" : {
+          "deltakelseId" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "deltakerIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "journalpostIdForPapirsøknad" : {
+            "type" : "string"
+          },
+          "startdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.SøknadDto" : {
@@ -4409,28 +4437,6 @@
         "properties" : {
           "vilkårTidslinje" : {
             "$ref" : "#/components/schemas/fpsak.tidsserie.LocalDateTimelineUng.sak.kontrakt.vilkår.VilkårUtfallSamlet"
-          }
-        },
-        "type" : "object"
-      },
-      "ung.sak.web.app.tjenester.fordeling.SendInnPapirsøknadopplysningerRequestDto" : {
-        "properties" : {
-          "deltakelseId" : {
-            "format" : "uuid",
-            "type" : "string"
-          },
-          "deltakerIdent" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          },
-          "journalpostIdForPapirsøknad" : {
-            "type" : "string"
-          },
-          "startdato" : {
-            "format" : "date",
-            "type" : "string"
           }
         },
         "type" : "object"
@@ -7718,7 +7724,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.fordeling.SendInnPapirsøknadopplysningerRequestDto"
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto"
               }
             }
           },
