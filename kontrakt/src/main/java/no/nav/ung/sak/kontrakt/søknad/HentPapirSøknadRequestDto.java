@@ -20,17 +20,13 @@ public record HentPapirSøknadRequestDto(
     @Valid
     JournalpostId journalpostId,
 
-    @AppAbacAttributt(AppAbacAttributtType.DOKUMENT_ID)
-    @JsonProperty(value = "dokumentId", required = true)
-    @Valid
-    DokumentId dokumentId,
 
     @StandardAbacAttributt(StandardAbacAttributtType.FNR)
-    @JsonProperty(value = "personIdent", required = true)
+    @JsonProperty(value = "deltakerIdent", required = true)
     @NotNull
     @Size(max = 20)
     @Pattern(regexp = "^\\d+$", message = "ident [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
-    String personIdent
+    String deltakerIdent
 ) {
 }

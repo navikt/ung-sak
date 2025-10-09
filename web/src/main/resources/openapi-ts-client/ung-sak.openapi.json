@@ -3634,20 +3634,17 @@
       },
       "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
         "properties" : {
-          "dokumentId" : {
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "personIdent" : {
+          "deltakerIdent" : {
             "maxLength" : 20,
             "minLength" : 0,
             "pattern" : "^\\d+$",
             "type" : "string"
+          },
+          "journalpostId" : {
+            "type" : "string"
           }
         },
-        "required" : [ "dokumentId", "journalpostId", "personIdent" ],
+        "required" : [ "deltakerIdent", "journalpostId" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
@@ -3664,13 +3661,13 @@
       },
       "ung.sak.kontrakt.søknad.JournalførPapirSøknadDto" : {
         "properties" : {
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "personIdent" : {
+          "deltakerIdent" : {
             "maxLength" : 20,
             "minLength" : 0,
             "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "journalpostId" : {
             "type" : "string"
           },
           "startDato" : {
@@ -3678,15 +3675,11 @@
             "type" : "string"
           }
         },
-        "required" : [ "journalpostId", "personIdent", "startDato" ],
+        "required" : [ "deltakerIdent", "journalpostId", "startDato" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto" : {
         "properties" : {
-          "deltakelseId" : {
-            "format" : "uuid",
-            "type" : "string"
-          },
           "deltakerIdent" : {
             "maxLength" : 20,
             "minLength" : 0,

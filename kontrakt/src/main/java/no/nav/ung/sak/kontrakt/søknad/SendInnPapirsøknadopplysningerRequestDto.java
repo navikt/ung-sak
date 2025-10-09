@@ -22,8 +22,6 @@ public record SendInnPapirsøknadopplysningerRequestDto(
     @Valid
     JournalpostId journalpostIdForPapirsøknad,
 
-    UUID deltakelseId,
-
     LocalDate startdato
 ) {
 }

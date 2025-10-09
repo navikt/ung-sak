@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
 
@@ -21,12 +20,12 @@ public record JournalførPapirSøknadDto(
     JournalpostId journalpostId,
 
     @StandardAbacAttributt(StandardAbacAttributtType.FNR)
-    @JsonProperty(value ="personIdent", required = true)
+    @JsonProperty(value ="deltakerIdent", required = true)
     @NotNull
     @Size(max = 20)
     @Pattern(regexp = "^\\d+$", message = "ident [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
-    String personIdent,
+    String deltakerIdent,
 
     @JsonProperty(value ="startDato", required = true)
     @NotNull
