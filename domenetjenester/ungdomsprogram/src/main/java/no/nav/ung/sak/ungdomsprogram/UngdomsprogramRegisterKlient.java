@@ -2,8 +2,8 @@ package no.nav.ung.sak.ungdomsprogram;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
-import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.kontrakt.person.AktørIdDto;
 
@@ -16,12 +16,12 @@ import java.util.UUID;
 @Dependent
 @ScopedRestIntegration(scopeKey = "ungdomsprogramregister.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default")
 public class UngdomsprogramRegisterKlient {
-    private final SystemUserOidcRestClient restClient;
+    private final OidcRestClient restClient;
     private final URI hentUri;
 
     @Inject
     public UngdomsprogramRegisterKlient(
-        SystemUserOidcRestClient restClient,
+        OidcRestClient restClient,
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
         hentUri = tilUri(url, "register/hent/alle");
