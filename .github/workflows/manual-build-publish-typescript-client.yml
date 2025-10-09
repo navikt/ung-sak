@@ -16,7 +16,7 @@ jobs:
       id-token: write
     uses: navikt/sif-gha-workflows/.github/workflows/maven-build-app-db.yml@main
     with:
-      java-version: 21
+      java-version: 25
       build-image: false
       push-image: false
       upload-image: false
@@ -36,6 +36,7 @@ jobs:
       - uses: navikt/sif-gha-workflows/.github/actions/maven/generate-openapi@main
         id: generate-openapi
         with:
+          java-version: 25
           readerToken: ${{ secrets.READER_TOKEN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           openapiFileName: ung-sak.openapi.json
