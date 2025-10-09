@@ -44,7 +44,7 @@ public class KombinasjonScenarioer {
 
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
         var rapportertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode,
-            BrevScenarioerUtils.KontrollerInntektHolder.forRapportertInntekt(BigDecimal.valueOf(10000))));
+            BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.valueOf(10000))));
         var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
 
         var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, rapportertInntektTimeline);
@@ -105,7 +105,7 @@ public class KombinasjonScenarioer {
 
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
         var rapportertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode,
-            BrevScenarioerUtils.KontrollerInntektHolder.forRapportertInntekt(BigDecimal.valueOf(10000))));
+            BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.valueOf(10000))));
         var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
 
         var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, rapportertInntektTimeline);
