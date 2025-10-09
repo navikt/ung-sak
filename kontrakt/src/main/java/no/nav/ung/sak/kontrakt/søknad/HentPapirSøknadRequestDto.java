@@ -20,10 +20,6 @@ public record HentPapirSøknadRequestDto(
     @Valid
     JournalpostId journalpostId,
 
-    @AppAbacAttributt(AppAbacAttributtType.DOKUMENT_ID)
-    @JsonProperty(value = "dokumentId", required = true)
-    @Valid
-    DokumentId dokumentId,
 
     @StandardAbacAttributt(StandardAbacAttributtType.FNR)
     @JsonProperty(value = "deltakerIdent", required = true)

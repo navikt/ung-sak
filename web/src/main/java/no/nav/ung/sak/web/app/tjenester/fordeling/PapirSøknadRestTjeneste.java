@@ -23,7 +23,9 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
+import no.nav.ung.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto;
@@ -53,6 +55,7 @@ public class PapirSøknadRestTjeneste {
     private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
     private PersoninfoAdapter personinfoAdapter;
     private PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste;
+    private SafAdapter safAdapter;
 
 
     public PapirSøknadRestTjeneste() {// For Rest-CDI
@@ -65,12 +68,13 @@ public class PapirSøknadRestTjeneste {
                                    @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
 
                                    PersoninfoAdapter personinfoAdapter,
-                                   JournalpostRepository journalpostRepository, PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste) {
+                                   JournalpostRepository journalpostRepository, PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste, SafAdapter safAdapter) {
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
         this.personinfoAdapter = personinfoAdapter;
         this.papirsøknadHåndteringTjeneste = papirsøknadHåndteringTjeneste;
+        this.safAdapter = safAdapter;
     }
 
     @POST
@@ -82,9 +86,12 @@ public class PapirSøknadRestTjeneste {
     // Kan bruke drift fordi kallet mot SAF gjør tilgangskontroll uansett.
     public Response hentPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HentPapirSøknadRequestDto hentPapirSøknadRequestDto) {
 
+        ArkivJournalPost arkivJournalPost = safAdapter.hentInngåendeJournalpostHoveddokument(hentPapirSøknadRequestDto.journalpostId());
+        String hoveddokumentId = arkivJournalPost.getHovedDokument().getDokumentId();
+
         // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        byte[] dokument = dokumentArkivTjeneste.hentDokument(hentPapirSøknadRequestDto.journalpostId(), hentPapirSøknadRequestDto.dokumentId().getVerdi());
-        String filnavn = "søknadsdokument-" + hentPapirSøknadRequestDto.dokumentId() + ".pdf";
+        byte[] dokument = dokumentArkivTjeneste.hentDokument(hentPapirSøknadRequestDto.journalpostId(), hoveddokumentId);
+        String filnavn = "søknadsdokument-" + hoveddokumentId + ".pdf";
 
         try {
             Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
