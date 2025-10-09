@@ -82,9 +82,6 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     }
 
 
-    /**
-     * Lager manuell brev lagret i databasen
-     */
     @WithSpan
     @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
