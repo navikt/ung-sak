@@ -3639,9 +3639,15 @@
           },
           "journalpostId" : {
             "type" : "string"
+          },
+          "personIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
           }
         },
-        "required" : [ "dokumentId", "journalpostId" ],
+        "required" : [ "dokumentId", "journalpostId", "personIdent" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
