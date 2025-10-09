@@ -45,15 +45,17 @@ public class EndringRapportertInntektUtenReduksjonInnholdBygger implements Vedta
             throw new IllegalStateException("Fant tilkjent ytelse med utbetalingsgrad mindre enn 100%.");
         }
 
-        var fullUtbetalingsperioder = relevantTilkjentYtelse.toSegments().stream()
+        var fullUtbetalingsperioder = relevantTilkjentYtelse.mapValue(it -> true)
+            .compress()
+            .toSegments().stream()
             .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
             .map(it -> new PeriodeDto(it.getFom(), it.getTom()))
             .collect(Collectors.toSet());
 
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT_UTEN_REDUKSJON,
-            new EndringRapportertInntektUtenReduksjonDto(fullUtbetalingsperioder),
-            true);
+            new EndringRapportertInntektUtenReduksjonDto(fullUtbetalingsperioder)
+        );
     }
 
 }

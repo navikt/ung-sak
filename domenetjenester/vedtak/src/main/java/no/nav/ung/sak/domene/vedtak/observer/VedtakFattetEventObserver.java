@@ -30,7 +30,6 @@ public class VedtakFattetEventObserver {
             if (erBehandlingAvRettTypeForAbakus(event)) {
                 taskTjeneste.lagre(opprettTaskForPubliseringAvVedtakMedYtelse(event));
             }
-
         }
     }
 

@@ -78,7 +78,7 @@ public class EndringRapportertInntektReduksjonInnholdBygger implements Vedtaksbr
             harIngenUtbetalingsperioder
         );
 
-        return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto, true);
+        return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto);
     }
 
     private static LocalDateSegment<EndringRapportertInntektPeriodeDto> mapTilPeriodeDto(
