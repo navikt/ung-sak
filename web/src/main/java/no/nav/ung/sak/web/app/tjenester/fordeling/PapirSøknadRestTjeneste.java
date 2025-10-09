@@ -104,8 +104,8 @@ public class PapirSøknadRestTjeneste {
     public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
         Periode periode = new Periode(journalførPapirSøknadDto.startDato(), null);
 
-        AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(journalførPapirSøknadDto.personIdent()))
-            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for personIdent"));
+        AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(journalførPapirSøknadDto.deltakerIdent()))
+            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for deltakerIdent"));
 
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
 
@@ -144,7 +144,6 @@ public class PapirSøknadRestTjeneste {
         return papirsøknadHåndteringTjeneste.journalførPapirsøknad(
             PersonIdent.fra(dto.deltakerIdent()),
             dto.startdato(),
-            dto.deltakelseId(),
             dto.journalpostIdForPapirsøknad()
         );
     }
