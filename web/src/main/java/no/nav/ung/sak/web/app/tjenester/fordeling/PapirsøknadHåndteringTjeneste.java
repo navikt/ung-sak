@@ -124,13 +124,10 @@ public class PapirsøknadHåndteringTjeneste {
                     journalpostTittel,
                     ungdomsytelseSoknadOffisiellKode,
                     "SOK",
-                    List.of(new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(pdfDokument))
-                ),
-                new OpprettJournalpostRequest.Dokument(
-                    journalpostTittel + "(JSON)",
-                    ungdomsytelseSoknadOffisiellKode,
-                    "SOK",
-                    List.of(new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(ArkivFilType.JSON.getKode(), VariantFormat.ORIGINAL.getOffisiellKode(), jsonDokument))
+                    List.of(
+                        new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(pdfDokument),
+                        new OpprettJournalpostRequest.DokumentVariantArkivertPDFA(ArkivFilType.JSON.getKode(), VariantFormat.ORIGINAL.getOffisiellKode(), jsonDokument)
+                    )
                 )
             ))
             .build()
