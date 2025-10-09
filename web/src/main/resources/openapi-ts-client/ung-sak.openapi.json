@@ -3632,21 +3632,6 @@
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
-        "properties" : {
-          "deltakerIdent" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "deltakerIdent", "journalpostId" ],
-        "type" : "object"
-      },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
         "properties" : {
           "bruker" : {
@@ -7657,33 +7642,35 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/api/papir/hent-søknad-pdf" : {
+    "/api/papir/steg-1/hent-deltakerident-fra-journalpost" : {
       "post" : {
-        "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
-        "operationId" : "hentPapirSøknad",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
-              }
-            }
-          },
-          "required" : true
-        },
+        "description" : "Henter deltakerIdent fra journalpostId",
+        "operationId" : "hentPersonIdent",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "journalpostId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "default" : {
             "content" : {
-              "application/octet-stream" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
             },
             "description" : "default response"
           }
         },
-        "summary" : "Henter og viser papirsøknad",
+        "summary" : "Henter personIdent fra journalpostId",
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/steg-1/journalfør-papir-søknad-mot-fagsak" : {
+    "/api/papir/steg-3/journalfør-papir-søknad-mot-fagsak" : {
       "post" : {
         "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
         "operationId" : "journalførPapirSøknad",
@@ -7709,7 +7696,7 @@
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/steg-2/send-inn-papirsøknadopplysninger" : {
+    "/api/papir/steg-4/send-inn-papirsøknadopplysninger" : {
       "post" : {
         "description" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
         "operationId" : "sendInnPapirsøknadopplysninger",
