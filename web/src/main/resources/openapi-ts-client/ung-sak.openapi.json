@@ -3640,14 +3640,11 @@
             "pattern" : "^\\d+$",
             "type" : "string"
           },
-          "dokumentId" : {
-            "type" : "string"
-          },
           "journalpostId" : {
             "type" : "string"
           }
         },
-        "required" : [ "deltakerIdent", "dokumentId", "journalpostId" ],
+        "required" : [ "deltakerIdent", "journalpostId" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
