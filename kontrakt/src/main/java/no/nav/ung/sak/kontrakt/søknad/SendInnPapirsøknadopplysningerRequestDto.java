@@ -1,4 +1,4 @@
-package no.nav.ung.sak.web.app.tjenester.fordeling;
+package no.nav.ung.sak.kontrakt.søknad;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -21,8 +21,6 @@ public record SendInnPapirsøknadopplysningerRequestDto(
     @StandardAbacAttributt(StandardAbacAttributtType.JOURNALPOST_ID)
     @Valid
     JournalpostId journalpostIdForPapirsøknad,
-
-    UUID deltakelseId,
 
     LocalDate startdato
 ) {

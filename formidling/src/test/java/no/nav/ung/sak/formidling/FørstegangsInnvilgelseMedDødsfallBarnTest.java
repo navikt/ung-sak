@@ -74,13 +74,13 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + FørstegangsInnvilgelseTest.hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en bestemt sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
+                Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 """ + FørstegangsInnvilgelseTest.meldFraTilOssHvisDuHarEndringerAvsnitt()
         );

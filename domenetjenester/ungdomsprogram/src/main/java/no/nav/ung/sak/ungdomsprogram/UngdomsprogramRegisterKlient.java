@@ -1,17 +1,17 @@
 package no.nav.ung.sak.ungdomsprogram;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.kontrakt.person.AktørIdDto;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "ungdomsprogramregister.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default")

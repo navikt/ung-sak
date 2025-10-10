@@ -3632,18 +3632,6 @@
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto" : {
-        "properties" : {
-          "dokumentId" : {
-            "type" : "string"
-          },
-          "journalpostId" : {
-            "type" : "string"
-          }
-        },
-        "required" : [ "dokumentId", "journalpostId" ],
-        "type" : "object"
-      },
       "ung.sak.kontrakt.søknad.HentSøknadPerioderDto" : {
         "properties" : {
           "bruker" : {
@@ -3658,13 +3646,13 @@
       },
       "ung.sak.kontrakt.søknad.JournalførPapirSøknadDto" : {
         "properties" : {
-          "journalpostId" : {
-            "type" : "string"
-          },
-          "personIdent" : {
+          "deltakerIdent" : {
             "maxLength" : 20,
             "minLength" : 0,
             "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "journalpostId" : {
             "type" : "string"
           },
           "startDato" : {
@@ -3672,7 +3660,25 @@
             "type" : "string"
           }
         },
-        "required" : [ "journalpostId", "personIdent", "startDato" ],
+        "required" : [ "deltakerIdent", "journalpostId", "startDato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto" : {
+        "properties" : {
+          "deltakerIdent" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "journalpostIdForPapirsøknad" : {
+            "type" : "string"
+          },
+          "startdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.SøknadDto" : {
@@ -4409,28 +4415,6 @@
         "properties" : {
           "vilkårTidslinje" : {
             "$ref" : "#/components/schemas/fpsak.tidsserie.LocalDateTimelineUng.sak.kontrakt.vilkår.VilkårUtfallSamlet"
-          }
-        },
-        "type" : "object"
-      },
-      "ung.sak.web.app.tjenester.fordeling.SendInnPapirsøknadopplysningerRequestDto" : {
-        "properties" : {
-          "deltakelseId" : {
-            "format" : "uuid",
-            "type" : "string"
-          },
-          "deltakerIdent" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          },
-          "journalpostIdForPapirsøknad" : {
-            "type" : "string"
-          },
-          "startdato" : {
-            "format" : "date",
-            "type" : "string"
           }
         },
         "type" : "object"
@@ -7658,20 +7642,18 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/api/papir/hent-søknad-pdf" : {
+    "/api/papir/steg-1/hent-søknad-pdf" : {
       "post" : {
         "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
         "operationId" : "hentPapirSøknad",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.HentPapirSøknadRequestDto"
-              }
-            }
-          },
-          "required" : true
-        },
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "journalpostId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
         "responses" : {
           "default" : {
             "content" : {
@@ -7684,7 +7666,7 @@
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/steg-1/journalfør-papir-søknad-mot-fagsak" : {
+    "/api/papir/steg-2/journalfør-papir-søknad-mot-fagsak" : {
       "post" : {
         "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
         "operationId" : "journalførPapirSøknad",
@@ -7710,7 +7692,7 @@
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/steg-2/send-inn-papirsøknadopplysninger" : {
+    "/api/papir/steg-3/send-inn-papirsøknadopplysninger" : {
       "post" : {
         "description" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
         "operationId" : "sendInnPapirsøknadopplysninger",
@@ -7718,7 +7700,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.fordeling.SendInnPapirsøknadopplysningerRequestDto"
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto"
               }
             }
           },
