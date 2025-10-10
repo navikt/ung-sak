@@ -234,7 +234,7 @@ spec:
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "true"
-    - name: KLAGE_VEDTAK_CONSUMER_ENABLED
+    - name: KLAGE_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL
       value: "true"

@@ -1,5 +1,6 @@
 package no.nav.ung.sak.kabal.task;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
@@ -29,6 +30,7 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
     private BehandlingRepository repository;
     private TpsTjeneste pdlTjeneste;
     private KlageRepository klageRepository;
+    private boolean klageEnabled;
 
 
     OverføringTilKabalTask() {
@@ -41,13 +43,15 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
                                   KabalRequestMapper kabalRequestMapper,
                                   BehandlingRepository repository,
                                   TpsTjeneste pdlTjeneste,
-                                  KlageRepository klageRepository) {
+                                  KlageRepository klageRepository,
+                                  @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.restKlient = restKlient;
         this.kabalRequestMapper = kabalRequestMapper;
         this.repository = repository;
         this.pdlTjeneste = pdlTjeneste;
         this.klageRepository = klageRepository;
+        this.klageEnabled = klageEnabled;
     }
 
     @Override
@@ -61,7 +65,9 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
 
         var request = kabalRequestMapper.map(behandling, personIdent, klageUtredning);
 
-        log.info("Overfører til kabal - klagevurdering={}", klageVurdering);
-        restKlient.overførKlagebehandling(request);
+        if (klageEnabled) {
+            log.info("Overfører til kabal - klagevurdering={}", klageVurdering);
+            restKlient.overførKlagebehandling(request);
+        }
     }
 }

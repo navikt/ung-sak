@@ -30,7 +30,7 @@ public class KlageVedtakConsumer implements AppServiceHandler {
     @Inject
     public KlageVedtakConsumer(KlageinstansVedtaksHendelseHåndterer klageinstansVedtaksHendelseHåndterer,
                                VedtakFattetStreamKafkaProperties streamKafkaProperties,
-                               @KonfigVerdi(value = "KLAGE_VEDTAK_CONSUMER_ENABLED", defaultVerdi = "false") boolean consumerEnabled) {
+                               @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean consumerEnabled) {
         this.topic = streamKafkaProperties.getTopic();
         this.consumerEnabled = consumerEnabled;
 
