@@ -431,7 +431,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
             .build(), DokumentStatus.GYLDIG);
         boolean harUttalelse = true;
         String uttalelse = null;
-        eksisterendeEtterlysning.mottaSvar(svarJournalpostId, harUttalelse, uttalelse);
+        eksisterendeEtterlysning.mottaSvar();
         uttalelseRepository.lagre(behandling.getId(), new UttalelseV2(
             harUttalelse,
             uttalelse,
