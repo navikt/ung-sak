@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
@@ -60,7 +61,7 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
             var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
 
             var klageutredning = klageRepository.hentKlageUtredning(behandling.getId());
-            klageutredning.fjernKlageVurderingVedtaksinstans();
+            klageutredning.fjernKlageVurdering(KlageVurdertAv.VEDTAKSINSTANS);
 
             endreAnsvarligEnhetTilFørsteinstansVedTilbakeføringOgLagreHistorikkinnslag(behandling);
 

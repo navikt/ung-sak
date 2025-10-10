@@ -67,7 +67,9 @@ class ForeslåVedtakTjeneste {
         if (BehandlingType.KLAGE.equals(behandling.getType())) {
             if (klageVedtakTjeneste.erKlageResultatHjemsendt(behandling)) {
                 behandling.nullstillToTrinnsBehandling();
-                return BehandleStegResultat.utførtUtenAksjonspunkter();
+                settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
+                aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS);
+                return BehandleStegResultat.tilbakeførtMedAksjonspunkter(aksjonspunktDefinisjoner);
             }
         }
 

@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @BehandlingStegRef(BehandlingStegType.OVERFØRT_NK)
 @BehandlingTypeRef
@@ -55,6 +56,16 @@ public class VenterPåAndreinstansVedtakSteg implements BehandlingSteg {
         } else {
             // Medhold, henleggelse og avvist går utenom NK og direkte til foreslå vedtak
             return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+    }
+
+    @Override
+    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType førsteSteg,
+                                   BehandlingStegType sisteSteg) {
+        if (!Objects.equals(BehandlingStegType.FATTE_VEDTAK, sisteSteg)) {
+            var klageutredning = klageRepository.hentKlageUtredning(kontekst.getBehandlingId());
+            klageutredning.fjernKlageVurdering(KlageVurdertAv.KLAGEINSTANS);
+            klageRepository.lagre(klageutredning);
         }
     }
 }

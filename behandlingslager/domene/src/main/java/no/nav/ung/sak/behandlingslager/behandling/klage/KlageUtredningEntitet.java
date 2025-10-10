@@ -148,9 +148,8 @@ public class KlageUtredningEntitet extends BaseEntitet {
             .findFirst();
     }
 
-    public void fjernKlageVurderingVedtaksinstans() {
-        klagevurderinger.removeIf((vurdering) ->
-            KlageVurdertAv.VEDTAKSINSTANS.equals(vurdering.getVurdertAvEnhet()));
+    public void fjernKlageVurdering(KlageVurdertAv klageVurdertAv) {
+        klagevurderinger.removeIf((vurdering) -> klageVurdertAv.equals(vurdering.getVurdertAvEnhet()));
     }
 
     public Optional<PartEntitet> getKlagendePart() {
