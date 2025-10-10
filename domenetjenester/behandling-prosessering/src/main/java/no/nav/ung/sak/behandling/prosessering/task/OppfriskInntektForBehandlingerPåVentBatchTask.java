@@ -17,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -83,16 +84,19 @@ public class OppfriskInntektForBehandlingerPåVentBatchTask implements BatchPros
     }
 
     private void opprettTaskerForOppfrisking(List<Behandling> behandlinger) {
-        final ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
+        var tasker = new ArrayList<ProsessTaskData>();
         for (Behandling behandling : behandlinger) {
             if (behandling.isBehandlingPåVent() && !harPågåendeEllerFeiletTask(behandling)) {
                 log.info("oppfrisker behandling={} saksnummer={}", behandling.getId(), behandling.getFagsak().getSaksnummer().getVerdi());
                 final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling, false);
-                gruppe.addNesteParallell(oppfriskTaskData);
+                tasker.add(oppfriskTaskData);
             } else {
                 log.info("oppfrisker ikke behandling={} saksnummer={}", behandling.getId(), behandling.getFagsak().getSaksnummer().getVerdi());
             }
         }
+
+        final ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
+        gruppe.addNesteParallell(tasker);
         String gruppeId = prosessTaskTjeneste.lagre(gruppe);
         log.info("Lagret oppfrisk-tasker i taskgruppe [{}]", gruppeId);
     }
