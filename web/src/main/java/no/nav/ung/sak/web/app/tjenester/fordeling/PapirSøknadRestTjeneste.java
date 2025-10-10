@@ -96,49 +96,36 @@ public class PapirSøknadRestTjeneste {
     @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
-        Periode periode = new Periode(journalførPapirSøknadDto.startDato(), null);
-
-        AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(journalførPapirSøknadDto.deltakerIdent()))
-            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for deltakerIdent"));
-
-        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
-
-        var journalpostId = journalførPapirSøknadDto.journalpostId();
-        if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
-            throw new IllegalStateException("Journalpost er allerede journalført");
-        } else {
-            try {
-                boolean ferdigJournalført = journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId());
-                if (!ferdigJournalført) {
-                    throw new IllegalStateException("Journalpost kunne ikke journalføres");
+        try {
+            String response = """
+                {
+                  "saksnummer": "%s"
                 }
-
-                String response = """
-                    {
-                      "saksnummer": "%s"
-                    }
-                    """.formatted(fagsak.getSaksnummer().getVerdi());
-
-                return Response.ok()
-                    .entity(response)
-                    .build();
-            } catch (Exception e) {
-                return Response.serverError().entity("Kan ikke ferdigstille journalpost: " + e.getMessage()).build();
-            }
+                """.formatted(
+                papirsøknadHåndteringTjeneste
+                    .journalførPapirSøknadMotFagsak(
+                        journalførPapirSøknadDto.startDato(),
+                        journalførPapirSøknadDto.deltakerIdent(),
+                        journalførPapirSøknadDto.journalpostId())
+                    .getVerdi());
+            return Response.ok().entity(response).build();
+        } catch (Exception e) {
+            return Response.serverError().entity("Kan ikke ferdigstille journalpost: " + e.getMessage()).build();
         }
     }
+}
 
-    @POST
-    @Path("/steg-3/send-inn-papirsøknadopplysninger")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Mapper til strukturert søknadsopplysninger og oppretter journalpost.", summary = ("Mapper til strukturert søknadsopplysninger og oppretter journalpost."), tags = PAPIRSØKNAD_TAG)
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
-    public OpprettJournalpostResponse sendInnPapirsøknadopplysninger(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SendInnPapirsøknadopplysningerRequestDto dto) {
-        return papirsøknadHåndteringTjeneste.journalførPapirsøknad(
-            PersonIdent.fra(dto.deltakerIdent()),
-            dto.startdato(),
-            dto.journalpostIdForPapirsøknad()
-        );
-    }
+@POST
+@Path("/steg-3/send-inn-papirsøknadopplysninger")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Operation(description = "Mapper til strukturert søknadsopplysninger og oppretter journalpost.", summary = ("Mapper til strukturert søknadsopplysninger og oppretter journalpost."), tags = PAPIRSØKNAD_TAG)
+@BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
+public OpprettJournalpostResponse sendInnPapirsøknadopplysninger(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SendInnPapirsøknadopplysningerRequestDto dto) {
+    return papirsøknadHåndteringTjeneste.journalførPapirsøknad(
+        PersonIdent.fra(dto.deltakerIdent()),
+        dto.startdato(),
+        dto.journalpostIdForPapirsøknad()
+    );
+}
 }
