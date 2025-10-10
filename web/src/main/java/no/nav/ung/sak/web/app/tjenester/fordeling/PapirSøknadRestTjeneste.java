@@ -21,6 +21,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
@@ -32,6 +33,7 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
+import java.io.ByteArrayInputStream;
 import java.util.Optional;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
@@ -49,6 +51,7 @@ public class PapirSøknadRestTjeneste {
     private PersoninfoAdapter personinfoAdapter;
     private PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste;
     private ArkivTjeneste arkivTjeneste;
+    private DokumentArkivTjeneste dokumentArkivTjeneste;
 
 
     public PapirSøknadRestTjeneste() {// For Rest-CDI
@@ -60,34 +63,44 @@ public class PapirSøknadRestTjeneste {
         TilJournalføringTjeneste journalføringTjeneste,
         @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
         PersoninfoAdapter personinfoAdapter,
-        PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste, ArkivTjeneste arkivTjeneste) {
+        PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste, ArkivTjeneste arkivTjeneste, DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
         this.personinfoAdapter = personinfoAdapter;
         this.papirsøknadHåndteringTjeneste = papirsøknadHåndteringTjeneste;
         this.arkivTjeneste = arkivTjeneste;
+        this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }
 
     @POST
-    @Path("/steg-1/hent-deltakerident-fra-journalpost")
+    @Path("/steg-1/hent-søknad-pdf")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter deltakerIdent fra journalpostId", summary = ("Henter personIdent fra journalpostId"), tags = PAPIRSØKNAD_TAG)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Operation(description = "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.", summary = ("Henter og viser papirsøknad"), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
-    public String hentPersonIdent(@NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
+    // Kan bruke drift fordi kallet mot SAF gjør tilgangskontroll uansett.
+    public Response hentPapirSøknad(@NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
         JournalpostInfo journalpostInfo = arkivTjeneste.hentJournalpostInfo(journalpostId);
-        AktørId aktørId = journalpostInfo.getAktørId().orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for journalpost"));
-        PersonIdent personIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalArgumentException("Finner ikke personIdent for aktørId"));
-        return """
-            {
-              "steg-2": "Sjekk deltakerens mottatte dokument i Gosys.",
-              "deltakerIdent": "%s"
-            }
-            """.formatted(personIdent.getIdent());
+        String dokumentInfoId = journalpostInfo.getDokumentInfoId();
+        if (dokumentInfoId == null) {
+            throw new IllegalArgumentException("Finner ikke dokumentInfoId for journalpost " + journalpostId.getVerdi());
+        }
+
+        // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
+        byte[] dokument = dokumentArkivTjeneste.hentDokument(journalpostId, dokumentInfoId);
+        String filnavn = "søknadsdokument-" + dokumentInfoId + ".pdf";
+
+        try {
+            Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
+            responseBuilder.header("Content-Disposition", "inline; filename=\"" + filnavn + "\"");
+            return responseBuilder.build();
+        } catch (Exception e) {
+            return Response.serverError().entity("Klarte ikke å generere PDF: " + e.getMessage()).build();
+        }
     }
 
     @POST
-    @Path("/steg-3/journalfør-papir-søknad-mot-fagsak")
+    @Path("/steg-2/journalfør-papir-søknad-mot-fagsak")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = PAPIRSØKNAD_TAG)
@@ -126,7 +139,7 @@ public class PapirSøknadRestTjeneste {
     }
 
     @POST
-    @Path("/steg-4/send-inn-papirsøknadopplysninger")
+    @Path("/steg-3/send-inn-papirsøknadopplysninger")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Mapper til strukturert søknadsopplysninger og oppretter journalpost.", summary = ("Mapper til strukturert søknadsopplysninger og oppretter journalpost."), tags = PAPIRSØKNAD_TAG)
