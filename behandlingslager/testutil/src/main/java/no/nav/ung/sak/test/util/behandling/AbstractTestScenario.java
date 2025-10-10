@@ -517,6 +517,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         repositories.klageRepository().lagre(
             klageTestScenario.klageUtredning()
                 .medKlageBehandling(behandling)
+                .medpåklagdBehandlingId(klageTestScenario.originalBehandlingScenario().getBehandling().getUuid())
                 .build()
         );
 
@@ -838,8 +839,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return (S) this;
     }
 
-    public void leggTilAksjonspunkt(AksjonspunktDefinisjon apDef, BehandlingStegType stegType) {
+    @SuppressWarnings("unchecked")
+    public S leggTilAksjonspunkt(AksjonspunktDefinisjon apDef, BehandlingStegType stegType) {
         aksjonspunktDefinisjoner.put(apDef, stegType);
+        return (S) this;
     }
 
     @SuppressWarnings("unchecked")
