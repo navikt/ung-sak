@@ -61,7 +61,7 @@ public class RegisterdataEndringshåndterer {
                                           EndringsresultatSjekker endringsresultatSjekker,
                                           RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
                                           BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
-                                          @KonfigVerdi(value = "OVERSTYR_REGISTERDATA_DURATION") String overstyrtInnhentingDuration) {
+                                          @KonfigVerdi(value = "OVERSTYR_REGISTERDATA_DURATION", required = false) String overstyrtInnhentingDuration) {
 
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.endringskontroller = endringskontroller;
