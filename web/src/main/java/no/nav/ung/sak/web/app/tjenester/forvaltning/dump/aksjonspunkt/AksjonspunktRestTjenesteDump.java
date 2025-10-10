@@ -19,7 +19,7 @@ public class AksjonspunktRestTjenesteDump implements DebugDumpBehandling {
 
     private AksjonspunktRestTjeneste restTjeneste;
 
-    private final ObjectWriter ow = ObjectMapperFactory.createBaseObjectMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter ow = ObjectMapperFactory.getBaseObjectMapperCopy().writerWithDefaultPrettyPrinter();
 
     private final String relativePath = "rest/aksjonpunkter";
 
