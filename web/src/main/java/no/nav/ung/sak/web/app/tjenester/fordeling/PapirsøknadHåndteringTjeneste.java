@@ -7,6 +7,8 @@ import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
+import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
+import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
@@ -17,6 +19,7 @@ import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientImpl;
@@ -43,19 +46,23 @@ public class PapirsøknadHåndteringTjeneste {
     private FagsakTjeneste fagsakTjeneste;
     private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+    private ArkivTjeneste arkivTjeneste;
+    private DokumentArkivTjeneste dokumentArkivTjeneste;
 
     public PapirsøknadHåndteringTjeneste() {
         // For CDI
     }
 
     @Inject
-    public PapirsøknadHåndteringTjeneste(PdfGenKlient pdfGenKlient, DokArkivKlientImpl dokArkivKlientImpl, TpsTjeneste tpsTjeneste, FagsakTjeneste fagsakTjeneste, UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
+    public PapirsøknadHåndteringTjeneste(PdfGenKlient pdfGenKlient, DokArkivKlientImpl dokArkivKlientImpl, TpsTjeneste tpsTjeneste, FagsakTjeneste fagsakTjeneste, UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste, ArkivTjeneste arkivTjeneste, DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
+        this.arkivTjeneste = arkivTjeneste;
+        this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }
 
     public OpprettJournalpostResponse journalførPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, JournalpostId journalpostId) {
@@ -74,6 +81,25 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
+    }
+
+    public String hentFilnavnForJournalpostId(JournalpostId journalpostId){
+        // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
+        return  "søknadsdokument-" + hentDokumentInfoId(journalpostId) + ".pdf";
+    }
+
+    public byte[] hentDokumentForJournalpostId(JournalpostId journalpostId){
+        // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
+        return dokumentArkivTjeneste.hentDokument(journalpostId, hentDokumentInfoId(journalpostId));
+    }
+
+    private String hentDokumentInfoId(JournalpostId journalpostId){
+        JournalpostInfo journalpostInfo = arkivTjeneste.hentJournalpostInfo(journalpostId);
+        String dokumentInfoId = journalpostInfo.getDokumentInfoId();
+        if (dokumentInfoId == null) {
+            throw new IllegalArgumentException("Finner ikke dokumentInfoId for journalpost " + journalpostId.getVerdi());
+        }
+        return dokumentInfoId;
     }
 
     private Fagsak validerFagsakEksisterer(AktørId aktørId) {

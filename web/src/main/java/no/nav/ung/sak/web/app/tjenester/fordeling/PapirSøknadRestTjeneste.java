@@ -80,19 +80,9 @@ public class PapirSøknadRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     // Kan bruke drift fordi kallet mot SAF gjør tilgangskontroll uansett.
     public Response hentPapirSøknad(@NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
-        JournalpostInfo journalpostInfo = arkivTjeneste.hentJournalpostInfo(journalpostId);
-        String dokumentInfoId = journalpostInfo.getDokumentInfoId();
-        if (dokumentInfoId == null) {
-            throw new IllegalArgumentException("Finner ikke dokumentInfoId for journalpost " + journalpostId.getVerdi());
-        }
-
-        // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        byte[] dokument = dokumentArkivTjeneste.hentDokument(journalpostId, dokumentInfoId);
-        String filnavn = "søknadsdokument-" + dokumentInfoId + ".pdf";
-
         try {
-            Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
-            responseBuilder.header("Content-Disposition", "inline; filename=\"" + filnavn + "\"");
+            Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(papirsøknadHåndteringTjeneste.hentDokumentForJournalpostId(journalpostId)));
+            responseBuilder.header("Content-Disposition", "inline; filename=\"" + papirsøknadHåndteringTjeneste.hentFilnavnForJournalpostId(journalpostId) + "\"");
             return responseBuilder.build();
         } catch (Exception e) {
             return Response.serverError().entity("Klarte ikke å generere PDF: " + e.getMessage()).build();
