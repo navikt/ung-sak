@@ -30,7 +30,6 @@ public record BehandlingVedtaksbrevResultat(
 
     public Optional<Vedtaksbrev> finnVedtaksbrev(DokumentMalType dokumentMalType) {
         return vedtaksbrevResultater.stream().filter(it -> it.dokumentMalType().equals(dokumentMalType)).findFirst();
-
     }
 
     public static BehandlingVedtaksbrevResultat medBrev(
@@ -69,6 +68,5 @@ public record BehandlingVedtaksbrevResultat(
             ", ingenBrevResultater=" + ingenBrevResultater +
             '}';
     }
-
 }
 

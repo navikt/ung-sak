@@ -44,7 +44,7 @@ public class BehandlingRevurderingRepository {
     public List<Behandling> finnHenlagteBehandlingerEtterSisteInnvilgedeIkkeHenlagteBehandling(Long fagsakId) {
         Objects.requireNonNull(fagsakId, "fagsakId"); // NOSONAR //$NON-NLS-1$
 
-        Optional<Behandling> sisteInnvilgede = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+        Optional<Behandling> sisteInnvilgede = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
 
         if (sisteInnvilgede.isPresent()) {
             final List<Long> behandlingsIder = finnHenlagteBehandlingerEtter(fagsakId, sisteInnvilgede.get());
@@ -59,7 +59,7 @@ public class BehandlingRevurderingRepository {
     }
 
     public Optional<Behandling> hentSisteBehandling(Long fagsakId) {
-        return behandlingRepository.hentSisteBehandlingForFagsakId(fagsakId);
+        return behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
     }
 
     private List<Long> finnHenlagteBehandlingerEtter(Long fagsakId, Behandling sisteInnvilgede) {

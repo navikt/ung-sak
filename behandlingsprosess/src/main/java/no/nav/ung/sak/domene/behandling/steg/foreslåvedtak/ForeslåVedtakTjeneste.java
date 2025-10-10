@@ -1,8 +1,11 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -11,10 +14,11 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
+import no.nav.ung.sak.domene.vedtak.impl.KlageVedtakTjeneste;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevValidator;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +35,10 @@ class ForeslåVedtakTjeneste {
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
+    private KlageVedtakTjeneste klageVedtakTjeneste;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
-    private VedtaksbrevRegler vedtaksbrevRegler;
     private boolean apVedIkkeImplementertBrev;
+    private Instance<VedtaksbrevRegel> vedtaksbrevReglene;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -43,13 +48,15 @@ class ForeslåVedtakTjeneste {
     ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           VedtaksbrevValgRepository vedtaksbrevValgRepository,
-                          VedtaksbrevRegler vedtaksbrevRegler,
-                          @KonfigVerdi(value = "AP_VED_IKKE_IMPLEMENTERT_BREV", defaultVerdi = "false") boolean apVedIkkeImplementertBrev) {
+                          KlageVedtakTjeneste klageVedtakTjeneste,
+                          @KonfigVerdi(value = "AP_VED_IKKE_IMPLEMENTERT_BREV", defaultVerdi = "false") boolean apVedIkkeImplementertBrev,
+                          @Any Instance<VedtaksbrevRegel> vedtaksbrevReglene) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
+        this.klageVedtakTjeneste = klageVedtakTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
-        this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.apVedIkkeImplementertBrev = apVedIkkeImplementertBrev;
+        this.vedtaksbrevReglene = vedtaksbrevReglene;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -57,8 +64,16 @@ class ForeslåVedtakTjeneste {
         // TODO: Fiks integrering mot k9-tilbake
 //        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
-        Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
-            .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
+        if (BehandlingType.KLAGE.equals(behandling.getType())) {
+            if (klageVedtakTjeneste.erKlageResultatHjemsendt(behandling)) {
+                behandling.nullstillToTrinnsBehandling();
+                settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
+                aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS);
+                return BehandleStegResultat.tilbakeførtMedAksjonspunkter(aksjonspunktDefinisjoner);
+            }
+        }
+
+        Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
         if (vedtakUtenTotrinnskontroll.isPresent()) {
             behandling.nullstillToTrinnsBehandling();
             return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
@@ -92,6 +107,7 @@ class ForeslåVedtakTjeneste {
     }
 
     private void vurderBrev(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getType());
         var totalResultat = vedtaksbrevRegler.kjør(behandling.getId());
 
         feilHvisIkkeImplementertBrev(aksjonspunktDefinisjoner, totalResultat);

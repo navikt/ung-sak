@@ -18,7 +18,6 @@ public interface VedtaksbrevInnholdBygger {
      */
     TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje);
 
-
     /**
      * Standard heltall avrunding for brev
      */

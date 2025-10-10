@@ -142,7 +142,7 @@ public class BehandlingRepositoryImplTest {
 
         lagreBehandling(builder);
 
-        Optional<Behandling> sisteBehandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId());
+        Optional<Behandling> sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
 
         assertThat(sisteBehandling).isPresent();
         assertThat(sisteBehandling.get().getFagsakId()).isEqualTo(fagsak.getId());

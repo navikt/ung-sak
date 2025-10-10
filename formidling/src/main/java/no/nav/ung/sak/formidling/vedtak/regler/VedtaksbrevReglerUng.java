@@ -1,10 +1,13 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
@@ -18,25 +21,33 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Dependent
-public class VedtaksbrevRegler {
+@ApplicationScoped
+@FagsakYtelseTypeRef
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef(BehandlingType.REVURDERING)
+public class VedtaksbrevReglerUng implements VedtaksbrevRegel {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevRegler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevReglerUng.class);
 
-    private final BehandlingRepository behandlingRepository;
-    private final DetaljertResultatUtleder detaljertResultatUtleder;
-    private final Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
+    private BehandlingRepository behandlingRepository;
+    private DetaljertResultatUtleder detaljertResultatUtleder;
+    private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
+
+    public VedtaksbrevReglerUng() {
+    }
 
     @Inject
-    public VedtaksbrevRegler(
+    public VedtaksbrevReglerUng(
         BehandlingRepository behandlingRepository,
         DetaljertResultatUtleder detaljertResultatUtleder,
-        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies) {
+        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies
+    ) {
         this.behandlingRepository = behandlingRepository;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
         this.innholdbyggerStrategies = innholdbyggerStrategies;
     }
 
+    @Override
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);

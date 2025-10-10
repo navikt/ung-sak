@@ -141,6 +141,9 @@ spec:
       value: pdl.leesah-v1
     - name: KAFKA_JOURNAL_TOPIC
       value: teamdokumenthandtering.aapen-dok-journalfoering
+    - name: KAFKA_KABAL_TOPIC
+      value: klage.behandling-events.v1
+
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -189,6 +192,8 @@ spec:
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
+    - name: KABAL_URL
+      value: https://kabal-api.dev-fss-pub.nais.io
 
     # Saf
     - name: SAF_BASE_URL
@@ -228,6 +233,10 @@ spec:
     - name: BIGQUERY_ENABLED
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
+      value: "true"
+    - name: KLAGE_ENABLED
+      value: "true"
+    - name: INTEGRASJON_KABAL
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"

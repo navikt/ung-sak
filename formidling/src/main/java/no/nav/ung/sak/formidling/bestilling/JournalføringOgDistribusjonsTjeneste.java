@@ -138,6 +138,10 @@ public class JournalføringOgDistribusjonsTjeneste {
             case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";
             case GENERELT_FRITEKSTBREV -> "Fritekst generelt brev";
+            case KLAGE_AVVIST_DOK -> "Vedtaksbrev for avvist klage";
+            case KLAGE_VEDTAK_MEDHOLD -> "Vedtaksbrev for medhold klage";
+            case KLAGE_OVERSENDT_KLAGEINSTANS -> "Brev om oversendelse til klageinstans";
+
         };
         return prefix + fraMal;
     }

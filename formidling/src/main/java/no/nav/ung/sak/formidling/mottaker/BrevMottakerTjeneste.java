@@ -24,8 +24,9 @@ public class BrevMottakerTjeneste {
     }
 
     public PdlPerson hentMottaker(Behandling behandling) {
-        AktørId aktørId = behandling.getAktørId();
         PersonopplysningGrunnlagEntitet personopplysningGrunnlagEntitet = personopplysningRepository.hentPersonopplysninger(behandling.getId());
+
+        AktørId aktørId = behandling.getAktørId();
         PersonopplysningEntitet personopplysning = personopplysningGrunnlagEntitet.getGjeldendeVersjon().getPersonopplysning(aktørId);
 
         String navn = personopplysning.getNavn();

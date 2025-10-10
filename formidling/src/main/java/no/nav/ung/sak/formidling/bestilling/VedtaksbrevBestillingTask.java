@@ -1,6 +1,8 @@
 package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -15,10 +17,9 @@ import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepos
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
-import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjenesteImpl;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,18 +42,18 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
 
     private BehandlingRepository behandlingRepository;
-    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste;
-    private VedtaksbrevRegler vedtaksbrevRegler;
     private BrevbestillingRepository brevbestillingRepository;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
+    private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
+    private VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste;
 
     @Inject
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
-        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler, BrevbestillingRepository brevbestillingRepository, VedtaksbrevValgRepository vedtaksbrevValgRepository) {
+        BrevbestillingRepository brevbestillingRepository, VedtaksbrevValgRepository vedtaksbrevValgRepository,
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
@@ -91,7 +92,8 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     }
 
     private void genererOgJournalførAutomatiskBrev(Behandling behandling, BrevbestillingEntitet brevbestilling) {
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        var vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getType());
+        var totalresultater = vedtaksbrevRegel.kjør(behandling.getId());
 
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
         Vedtaksbrev vedtaksbrev = totalresultater.finnVedtaksbrev(dokumentMalType)

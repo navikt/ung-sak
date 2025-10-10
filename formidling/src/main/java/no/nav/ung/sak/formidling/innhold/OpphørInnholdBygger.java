@@ -27,7 +27,6 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
         this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
-
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         var opphørStartdato = resultatTidslinje.filterValue(it -> it.resultatInfo().stream()

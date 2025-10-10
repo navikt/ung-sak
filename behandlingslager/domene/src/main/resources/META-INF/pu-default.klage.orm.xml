@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+        version="3.0">
+
+    <sequence-generator name="SEQ_PART" allocation-size="50" sequence-name="SEQ_PART"/>
+    <sequence-generator name="SEQ_KLAGE_UTREDNING" allocation-size="50" sequence-name="SEQ_KLAGE_UTREDNING"/>
+    <sequence-generator name="SEQ_KLAGE_VURDERING" allocation-size="50" sequence-name="SEQ_KLAGE_VURDERING"/>
+    <sequence-generator name="SEQ_KLAGE_FORMKRAV" allocation-size="50" sequence-name="SEQ_KLAGE_FORMKRAV"/>
+    <sequence-generator name="SEQ_FRITEKST" allocation-size="50" sequence-name="SEQ_FRITEKST"/>
+
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.part.PartEntitet" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingEntitet" />
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.klage.KlageFormkravEntitet" />
+    <entity class="no.nav.ung.sak.behandlingslager.fritekst.FritekstEntitet" />
+
+</entity-mappings>

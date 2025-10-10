@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
@@ -11,7 +12,7 @@ import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevReglerUng;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
@@ -27,17 +28,20 @@ import java.util.stream.Collectors;
 @Dependent
 public class VedtaksbrevTjeneste {
 
-    private final BehandlingRepository behandlingRepository;
-    private final VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private final VedtaksbrevRegler vedtaksbrevRegler;
-    private final VedtaksbrevValgRepository vedtaksbrevValgRepository;
+    private BehandlingRepository behandlingRepository;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
+    private VedtaksbrevReglerUng vedtaksbrevRegler;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
+
+    public VedtaksbrevTjeneste() {
+    }
 
     @Inject
     public VedtaksbrevTjeneste(
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler,
+        @Any VedtaksbrevReglerUng vedtaksbrevRegler,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingRepository behandlingRepository) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
@@ -45,7 +49,6 @@ public class VedtaksbrevTjeneste {
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingRepository = behandlingRepository;
     }
-
 
     public VedtaksbrevValgResponse vedtaksbrevValg(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -245,7 +248,5 @@ public class VedtaksbrevTjeneste {
 
 
     }
-
-
 }
 

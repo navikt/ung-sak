@@ -27,7 +27,7 @@ public class VedtaksbrevVerifikasjon {
         %s\
         side av""";
 
-    static String medHeaderOgFooter(String fnr, String body) {
+    public static String medHeaderOgFooter(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
 
         return STANDARD_HEADER_FOOTER
@@ -39,7 +39,7 @@ public class VedtaksbrevVerifikasjon {
                 "Dette er et automatisk behandlet vedtak. ");
     }
 
-    static String medHeaderOgFooterManuell(String fnr, String body) {
+    public static String medHeaderOgFooterManuell(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
         return STANDARD_HEADER_FOOTER
             .formatted(
