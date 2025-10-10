@@ -34,7 +34,6 @@ import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.typer.*;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramRegisterKlient;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.personopplysning.debug.DebugPersoninfoAdapter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -75,22 +74,27 @@ public class PapirsøknadHåndteringTjeneste {
         this.journalføringTjeneste = journalføringTjeneste;
     }
 
-    public Saksnummer journalførPapirSøknadMotFagsak(LocalDate startdato, String deltakerIdent, JournalpostId journalpostId) {
+    public Saksnummer journalførPapirsøknadMotFagsak(LocalDate startdato, String deltakerIdent, JournalpostId journalpostId) {
         Periode periode = new Periode(startdato, null);
+
         AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(deltakerIdent))
             .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for deltakerIdent"));
+
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
+
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
         }
+
         boolean ferdigJournalført = journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId());
         if (!ferdigJournalført) {
             throw new IllegalStateException("Journalpost kunne ikke journalføres");
         }
+
         return fagsak.getSaksnummer();
     }
 
-    public OpprettJournalpostResponse journalførPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, JournalpostId journalpostId) {
+    public OpprettJournalpostResponse opprettJournalpostForInnsendtPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, JournalpostId journalpostId) {
         Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
         AktørId aktørId = personinfo.getAktørId();
@@ -108,21 +112,21 @@ public class PapirsøknadHåndteringTjeneste {
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 
-    public String hentFilnavnForJournalpostId(JournalpostId journalpostId) {
-        // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        return "søknadsdokument-" + hentDokumentInfoId(journalpostId) + ".pdf";
+    public PapirsøknadPdf hentDokumentForJournalpostId(JournalpostId journalpostId) {
+        String dokumentInfoId = hentDokumentInfoId(journalpostId);
+        byte[] dokument = dokumentArkivTjeneste.hentDokument(journalpostId, dokumentInfoId);
+        return new PapirsøknadPdf(dokument, lagFilnavnForDokumentId(dokumentInfoId));
     }
 
-    public byte[] hentDokumentForJournalpostId(JournalpostId journalpostId) {
-        // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        return dokumentArkivTjeneste.hentDokument(journalpostId, hentDokumentInfoId(journalpostId));
+    private String lagFilnavnForDokumentId(String dokumentId) {
+        return "søknadsdokument-" + dokumentId + ".pdf";
     }
 
     private String hentDokumentInfoId(JournalpostId journalpostId) {
         JournalpostInfo journalpostInfo = arkivTjeneste.hentJournalpostInfo(journalpostId);
         String dokumentInfoId = journalpostInfo.getDokumentInfoId();
         if (dokumentInfoId == null) {
-            throw new IllegalArgumentException("Finner ikke dokumentInfoId for journalpost " + journalpostId.getVerdi());
+            throw new IllegalArgumentException("Finner ikke filnavn for journalpost " + journalpostId.getVerdi());
         }
         return dokumentInfoId;
     }
