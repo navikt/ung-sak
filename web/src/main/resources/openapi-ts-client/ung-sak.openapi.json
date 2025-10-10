@@ -7642,10 +7642,10 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/api/papir/steg-1/hent-deltakerident-fra-journalpost" : {
+    "/api/papir/steg-1/hent-søknad-pdf" : {
       "post" : {
-        "description" : "Henter deltakerIdent fra journalpostId",
-        "operationId" : "hentPersonIdent",
+        "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
+        "operationId" : "hentPapirSøknad",
         "parameters" : [ {
           "in" : "query",
           "name" : "journalpostId",
@@ -7657,20 +7657,16 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
+              "application/octet-stream" : { }
             },
             "description" : "default response"
           }
         },
-        "summary" : "Henter personIdent fra journalpostId",
+        "summary" : "Henter og viser papirsøknad",
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/steg-3/journalfør-papir-søknad-mot-fagsak" : {
+    "/api/papir/steg-2/journalfør-papir-søknad-mot-fagsak" : {
       "post" : {
         "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
         "operationId" : "journalførPapirSøknad",
@@ -7696,7 +7692,7 @@
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/api/papir/steg-4/send-inn-papirsøknadopplysninger" : {
+    "/api/papir/steg-3/send-inn-papirsøknadopplysninger" : {
       "post" : {
         "description" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
         "operationId" : "sendInnPapirsøknadopplysninger",
