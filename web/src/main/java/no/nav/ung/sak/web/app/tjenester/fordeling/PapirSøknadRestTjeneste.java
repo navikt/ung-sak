@@ -76,7 +76,6 @@ public class PapirSøknadRestTjeneste {
         try {
             String saksnummer = papirsøknadHåndteringTjeneste
                 .journalførPapirsøknadMotFagsak(
-                    journalførPapirSøknadDto.startDato(),
                     journalførPapirSøknadDto.deltakerIdent(),
                     journalførPapirSøknadDto.journalpostId())
                 .getVerdi();
@@ -103,7 +102,6 @@ public class PapirSøknadRestTjeneste {
     public OpprettJournalpostResponse sendInnPapirsøknadopplysninger(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SendInnPapirsøknadopplysningerRequestDto dto) {
         return papirsøknadHåndteringTjeneste.opprettJournalpostForInnsendtPapirsøknad(
             PersonIdent.fra(dto.deltakerIdent()),
-            dto.startdato(),
             dto.journalpostIdForPapirsøknad()
         );
     }
