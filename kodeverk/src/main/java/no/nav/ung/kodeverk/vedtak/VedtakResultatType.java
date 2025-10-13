@@ -13,9 +13,9 @@ public enum VedtakResultatType implements Kodeverdi {
     DELVIS_INNVILGET("DELVIS_INNVILGET", "delvis innvilget"),
     AVSLAG("AVSLAG", "Avslag"),
     OPPHØR("OPPHØR", "Opphør"),
-    VEDTAK_I_KLAGEBEHANDLING("VEDTAK_I_KLAGEBEHANDLING", "vedtak i klagebehandling"),
-    VEDTAK_I_ANKEBEHANDLING("VEDTAK_I_ANKEBEHANDLING", "vedtak i ankebehandling"),
-    VEDTAK_I_INNSYNBEHANDLING("VEDTAK_I_INNSYNBEHANDLING", "vedtak i innsynbehandling"),
+    VEDTAK_I_KLAGEBEHANDLING("VEDTAK_I_KLAGEBEHANDLING", "Vedtak i klagebehandling"),
+    VEDTAK_I_ANKEBEHANDLING("VEDTAK_I_ANKEBEHANDLING", "Vedtak i ankebehandling"),
+    VEDTAK_I_INNSYNBEHANDLING("VEDTAK_I_INNSYNBEHANDLING", "Vedtak i innsynbehandling"),
     UDEFINERT("-", "Ikke definert"),
 
     ;

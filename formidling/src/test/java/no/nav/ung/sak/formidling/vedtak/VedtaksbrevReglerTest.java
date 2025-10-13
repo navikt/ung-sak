@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak;
 
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -15,7 +16,7 @@ import no.nav.ung.sak.formidling.scenarioer.*;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevReglerUng;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -42,7 +43,8 @@ class VedtaksbrevReglerTest {
     private UngTestRepositories ungTestRepositories;
 
     @Inject
-    private VedtaksbrevRegler vedtaksbrevRegler;
+    @Any
+    private VedtaksbrevReglerUng vedtaksbrevRegler;
 
 
     @BeforeEach

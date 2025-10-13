@@ -33,6 +33,11 @@ public class BrevTestUtils {
         return UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, new AbakusInMemoryInntektArbeidYtelseTjeneste());
     }
 
+
+    public static UngTestRepositories lagForKlage(EntityManager entityManager) {
+        return UngTestRepositories.lagForKlage(entityManager);
+    }
+
     public static void lagrePdf(GenerertBrev generertBrev, TestInfo testInfo) {
         byte[] pdf = generertBrev.dokument().pdf();
         String filnavn = bestemFilnavn(generertBrev, testInfo);

@@ -115,7 +115,10 @@ public class KodeverkRestTjeneste {
             sortert(alle.språkkoder()),
             sortert(alle.vedtakResultatTyper()),
             sortert(alle.årsakerTilVurdering()),
-            new TreeMap<>(avslagårsakerGruppertPåVilkårType)
+            new TreeMap<>(avslagårsakerGruppertPåVilkårType),
+            sortert(alle.klageMedholdÅrsak()),
+            sortert(alle.klageAvvistÅrsaker()),
+            sortert(alle.klageVurderingTyper())
         );
     }
 
@@ -158,7 +161,10 @@ public class KodeverkRestTjeneste {
             o.vurderingsÅrsaker(),
             o.språkkoder(),
             o.vedtakResultatTyper(),
-            o.årsakerTilVurdering()
+            o.årsakerTilVurdering(),
+            o.klageMedholdÅrsak(),
+            o.klageAvvistÅrsaker(),
+            o.klagevurderingType()
         );
 
         final Map<String, Object> r = new LinkedHashMap<>();

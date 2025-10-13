@@ -5,7 +5,9 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -13,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -30,7 +33,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -54,17 +56,27 @@ class BehandlingsoppretterTjenesteTest {
     private BehandlingVedtakRepository behandlingVedtakRepository;
 
     @Inject
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+
+    @Inject
+    private KlageVurderingTjeneste klageVurderingTjeneste;
+
+    @Inject
     TilkjentYtelseRepository tilkjentYtelseRepository;
+
+    @Inject
+    private PersonopplysningRepository personopplysningRepository;
 
     private Behandling behandling;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+
 
     @BeforeEach
     void setUp() {
         opprettRevurderingsKandidat();
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any())).thenReturn(new OrganisasjonsEnhet("1234", "Nav Test"));
-        this.behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, new UnitTestLookupInstanceImpl<>(new GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder(tilkjentYtelseRepository, behandlingRepository)));
+        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, new UnitTestLookupInstanceImpl<>(new GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder(tilkjentYtelseRepository, behandlingRepository)), behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository);
     }
 
     @Test

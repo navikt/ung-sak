@@ -44,7 +44,7 @@ public class OppdaterFagsakStatusFelles {
     }
 
     public boolean ingenLøpendeYtelsesvedtak(Behandling behandling) {
-        Optional<Behandling> sisteInnvilgedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandling.getFagsakId());
+        Optional<Behandling> sisteInnvilgedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId());
 
         if (sisteInnvilgedeBehandling.isPresent()) {
             Behandling sisteBehandling = sisteInnvilgedeBehandling.get();
