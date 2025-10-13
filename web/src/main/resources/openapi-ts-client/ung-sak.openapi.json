@@ -3654,13 +3654,9 @@
           },
           "journalpostId" : {
             "type" : "string"
-          },
-          "startDato" : {
-            "format" : "date",
-            "type" : "string"
           }
         },
-        "required" : [ "deltakerIdent", "journalpostId", "startDato" ],
+        "required" : [ "deltakerIdent", "journalpostId" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto" : {
@@ -3672,10 +3668,6 @@
             "type" : "string"
           },
           "journalpostIdForPapirsøknad" : {
-            "type" : "string"
-          },
-          "startdato" : {
-            "format" : "date",
             "type" : "string"
           }
         },
