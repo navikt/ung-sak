@@ -19,6 +19,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
@@ -52,15 +53,27 @@ public class PapirsøknadHåndteringTjeneste {
     private ArkivTjeneste arkivTjeneste;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private PersoninfoAdapter personinfoAdapter;
-    private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
     private TilJournalføringTjeneste journalføringTjeneste;
+    private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
 
     public PapirsøknadHåndteringTjeneste() {
         // For CDI
     }
 
     @Inject
-    public PapirsøknadHåndteringTjeneste(PdfGenKlient pdfGenKlient, DokArkivKlientImpl dokArkivKlientImpl, TpsTjeneste tpsTjeneste, FagsakTjeneste fagsakTjeneste, UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient, BehandlendeEnhetTjeneste behandlendeEnhetTjeneste, ArkivTjeneste arkivTjeneste, DokumentArkivTjeneste dokumentArkivTjeneste, PersoninfoAdapter personinfoAdapter, UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker, TilJournalføringTjeneste journalføringTjeneste) {
+    public PapirsøknadHåndteringTjeneste(
+        PdfGenKlient pdfGenKlient,
+        DokArkivKlientImpl dokArkivKlientImpl,
+        TpsTjeneste tpsTjeneste,
+        FagsakTjeneste fagsakTjeneste,
+        UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient,
+        BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
+        ArkivTjeneste arkivTjeneste,
+        DokumentArkivTjeneste dokumentArkivTjeneste,
+        PersoninfoAdapter personinfoAdapter,
+        TilJournalføringTjeneste journalføringTjeneste,
+        @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker
+        ) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
@@ -70,8 +83,8 @@ public class PapirsøknadHåndteringTjeneste {
         this.arkivTjeneste = arkivTjeneste;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.personinfoAdapter = personinfoAdapter;
-        this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
         this.journalføringTjeneste = journalføringTjeneste;
+        this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
     }
 
     public Saksnummer journalførPapirsøknadMotFagsak(LocalDate startdato, String deltakerIdent, JournalpostId journalpostId) {
