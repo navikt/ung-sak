@@ -26,6 +26,7 @@ public class UngOppgaveKlient {
     private final URI utløptURI;
     private final URI opprettEndretSluttdatoURI;
     private final URI opprettEndretStartdatoURI;
+    private final URI løsURI;
 
 
     @Inject
@@ -40,6 +41,7 @@ public class UngOppgaveKlient {
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
         this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgave/utlopt/forTypeOgPeriode");
+        this.løsURI = tilUri(url, "oppgave/los");
     }
 
     public void avbrytOppgave(UUID eksternRef) {
@@ -99,6 +101,16 @@ public class UngOppgaveKlient {
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
+    }
+
+
+    public void løsSøkYtelseOppgave(SøkYtelseOppgaveDTO søkYtelseOppgaveDTO) {
+        try {
+            restClient.post(løsURI, søkYtelseOppgaveDTO);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+
     }
 
 

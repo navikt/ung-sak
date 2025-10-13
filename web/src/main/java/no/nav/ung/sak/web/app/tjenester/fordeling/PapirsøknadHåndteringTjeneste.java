@@ -25,6 +25,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
+import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientImpl;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
@@ -55,6 +56,7 @@ public class PapirsøknadHåndteringTjeneste {
     private PersoninfoAdapter personinfoAdapter;
     private TilJournalføringTjeneste journalføringTjeneste;
     private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
+    private UngOppgaveKlient ungOppgaveKlient;
 
     public PapirsøknadHåndteringTjeneste() {
         // For CDI
@@ -72,8 +74,9 @@ public class PapirsøknadHåndteringTjeneste {
         DokumentArkivTjeneste dokumentArkivTjeneste,
         PersoninfoAdapter personinfoAdapter,
         TilJournalføringTjeneste journalføringTjeneste,
-        @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker
-        ) {
+        @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
+        UngOppgaveKlient ungOppgaveKlient
+    ) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
@@ -85,6 +88,7 @@ public class PapirsøknadHåndteringTjeneste {
         this.personinfoAdapter = personinfoAdapter;
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
+        this.ungOppgaveKlient = ungOppgaveKlient;
     }
 
     public Saksnummer journalførPapirsøknadMotFagsak(String deltakerIdent, JournalpostId journalpostId) {
@@ -96,6 +100,7 @@ public class PapirsøknadHåndteringTjeneste {
         Periode periode = new Periode(deltakelse.fraOgMed(), null);
 
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
+        ungOppgaveKlient.løsSøkYtelseOppgave();
 
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
