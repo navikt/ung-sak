@@ -275,7 +275,9 @@ public class FagsakRestTjeneste {
             personDto,
             kanRevurderingOpprettes,
             fagsak.getOpprettetTidspunkt(),
-            fagsak.getEndretTidspunkt());
+            fagsak.getEndretTidspunkt(),
+            fagsak.erIkkeDigitalBruker()
+        );
     }
 
     private PersonDto mapFraPersoninfoBasis(PersoninfoBasis pi) {
