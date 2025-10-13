@@ -75,7 +75,7 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + FørstegangsInnvilgelseTest.hvorforFårDuPleiepengerAvsnitt() + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
-                Når vi har regnet ut hvor mye penger du får, har vi brukt en bestemt sum som heter grunnbeløpet. \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
