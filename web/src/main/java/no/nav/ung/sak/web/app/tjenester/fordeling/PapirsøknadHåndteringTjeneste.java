@@ -87,11 +87,13 @@ public class PapirsøknadHåndteringTjeneste {
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
     }
 
-    public Saksnummer journalførPapirsøknadMotFagsak(LocalDate startdato, String deltakerIdent, JournalpostId journalpostId) {
-        Periode periode = new Periode(startdato, null);
+    public Saksnummer journalførPapirsøknadMotFagsak(String deltakerIdent, JournalpostId journalpostId) {
 
         AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(deltakerIdent))
             .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for deltakerIdent"));
+
+        UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO deltakelse = validerDeltakelseEksisterer(aktørId);
+        Periode periode = new Periode(deltakelse.fraOgMed(), null);
 
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
 
@@ -107,13 +109,14 @@ public class PapirsøknadHåndteringTjeneste {
         return fagsak.getSaksnummer();
     }
 
-    public OpprettJournalpostResponse opprettJournalpostForInnsendtPapirsøknad(PersonIdent deltakerIdent, LocalDate startdato, JournalpostId journalpostId) {
+    public OpprettJournalpostResponse opprettJournalpostForInnsendtPapirsøknad(PersonIdent deltakerIdent, JournalpostId journalpostId) {
         Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
         AktørId aktørId = personinfo.getAktørId();
 
         UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO deltakelse = validerDeltakelseEksisterer(aktørId);
         UUID deltakelseId = deltakelse.id();
+        LocalDate startdato = deltakelse.fraOgMed();
 
         Fagsak fagsak = validerFagsakEksisterer(aktørId);
 

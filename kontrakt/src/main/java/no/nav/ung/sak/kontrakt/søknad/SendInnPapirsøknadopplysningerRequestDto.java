@@ -20,8 +20,6 @@ public record SendInnPapirsøknadopplysningerRequestDto(
 
     @StandardAbacAttributt(StandardAbacAttributtType.JOURNALPOST_ID)
     @Valid
-    JournalpostId journalpostIdForPapirsøknad,
-
-    LocalDate startdato
+    JournalpostId journalpostIdForPapirsøknad
 ) {
 }

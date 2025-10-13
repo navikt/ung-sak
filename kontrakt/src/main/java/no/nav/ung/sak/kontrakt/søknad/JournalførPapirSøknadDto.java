@@ -25,12 +25,7 @@ public record JournalførPapirSøknadDto(
     @Size(max = 20)
     @Pattern(regexp = "^\\d+$", message = "ident [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
-    String deltakerIdent,
-
-    @JsonProperty(value ="startDato", required = true)
-    @NotNull
-    @Valid
-    LocalDate startDato
+    String deltakerIdent
 
 ) {
 }
