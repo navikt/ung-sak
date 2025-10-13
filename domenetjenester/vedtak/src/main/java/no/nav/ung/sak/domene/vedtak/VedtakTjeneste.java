@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.vedtak;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
@@ -140,6 +141,11 @@ public class VedtakTjeneste {
         if (BehandlingResultatType.OPPHØR == resultatType) {
             return VedtakResultatType.OPPHØR;
         }
+
+        if (BehandlingType.KLAGE.equals(behandling.getType())) {
+            return VedtakResultatType.VEDTAK_I_KLAGEBEHANDLING;
+        }
+
         return VedtakResultatType.AVSLAG;
     }
 

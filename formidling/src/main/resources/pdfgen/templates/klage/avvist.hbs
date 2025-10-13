@@ -1,0 +1,46 @@
+{{#> felles/base }}
+
+    <h1>NAV har avvist klagen din på vedtaket om ungdomsprogramytelse</h1>
+
+    {{#if flereÅrsaker}}
+        Vi har avvist klagen fordi:
+        <ul>
+            {{#if aarsakKlagetForSent}}
+                <li> Du har klaget for sent. Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen </li>
+            {{/if}}
+            {{#if aarsakManglerUnderskrift}}
+                <li> Du ikke har underskrevet den </li>
+            {{/if}}
+            {{#if aarsakIkkeEtVedtak}}
+                <li> Det du har klaget på ikke er et vedtak </li>
+            {{/if}}
+            {{#if aarsakVedtakGjelderIkkePart}}
+                <li> Du har klaget på et vedtak som ikke gjelder deg </li>
+            {{/if}}
+            {{#if aarsakManglerKlagegrunn}}
+                <li> Du ikke har sagt hva det er du klager på </li>
+            {{/if}}
+        </ul>
+    {{else}}
+        {{#if aarsakKlagetForSent}}
+            Vi har avvist klagen fordi du har klaget for sent. Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen.
+        {{/if}}
+        {{#if aarsakManglerUnderskrift}}
+            Vi har avvist klagen fordi du ikke har underskrevet den.
+        {{/if}}
+        {{#if aarsakIkkeEtVedtak}}
+            Vi har avvist klagen fordi det du har klaget på ikke er et vedtak.
+        {{/if}}
+        {{#if aarsakVedtakGjelderIkkePart}}
+            Vi har avvist klagen fordi du har klaget på et vedtak som ikke gjelder deg.
+        {{/if}}
+        {{#if aarsakManglerKlagegrunn}}
+            Vi har avvist klagen fordi du ikke har sagt hva det er du klager på.
+        {{/if}}
+    {{/if}}
+
+    {{hjemler}}
+
+    {{> felles/footer/footer-vedtak}}
+
+{{/felles/base}}
