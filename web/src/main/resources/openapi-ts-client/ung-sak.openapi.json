@@ -2631,6 +2631,9 @@
             "format" : "date-time",
             "type" : "string"
           },
+          "erIkkeDigitalBruker" : {
+            "type" : "boolean"
+          },
           "gyldigPeriode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
