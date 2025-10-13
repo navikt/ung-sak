@@ -96,6 +96,9 @@ public class BehandlingDtoUtil {
 
     private static String utledVisningsnavn(Behandling behandling) {
         final var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper().stream().filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER).toList();
+        if (behandlingÅrsakerTyper.isEmpty()) {
+            return null;
+        }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT == it || BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT == it)) {
             return "Kontroll av inntekt";
         }

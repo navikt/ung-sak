@@ -22,9 +22,8 @@ public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTje
         );
     }
 
-
     @Override
-    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
+    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenereringInput) {
         return resultat;
     }
 
