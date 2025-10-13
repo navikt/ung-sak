@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -33,29 +32,23 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
 
+    public VedtaksbrevGenerererTjenesteImpl() {
+    }
+
     @Inject
     public VedtaksbrevGenerererTjenesteImpl(
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste) {
-
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
     }
 
-    public VedtaksbrevGenerererTjenesteImpl() {
-    }
 
     @WithSpan
-    @Override
     public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererAutomatiskVedtaksbrev(vedtaksbrevGenerererInput));
-    }
-
-    @WithSpan
-    private GenerertBrev doGenererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
         var behandling = behandlingRepository.hentBehandling(vedtaksbrevGenerererInput.behandlingId());
 
         Vedtaksbrev vedtaksbrev = vedtaksbrevGenerererInput.vedtaksbrev();
@@ -89,17 +82,9 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     }
 
 
-    /**
-     * Lager manuell brev lagret i databasen
-     */
     @WithSpan
     @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererManuellVedtaksbrev(behandlingId, brevHtml, kunHtml));
-    }
-
-    @WithSpan
-    private GenerertBrev doGenererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var resultat = manueltVedtaksbrevInnholdBygger.bygg(brevHtml);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
@@ -119,7 +104,5 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             resultat.templateType()
         );
     }
-
-
 }
 
