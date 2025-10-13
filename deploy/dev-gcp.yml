@@ -243,7 +243,7 @@ spec:
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P1D"
-    - name: OPPDATERE_REGISTERDATA_TIDSPUNKT
+    - name: OVERSTYR_REGISTERDATA_DURATION
       value: "PT30M"
 
     # Audit logging
