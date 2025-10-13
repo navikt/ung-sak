@@ -10,7 +10,7 @@ RUN ["java", "scripts/RyddBiblioteker", "DUPLIKAT", "/app/lib", "/build/lib"]
 FROM ghcr.io/navikt/k9-felles/felles-java-25:7.1.3
 LABEL org.opencontainers.image.source=https://github.com/navikt/ung-sak
 
-ENV JAVA_OPTS="-XX:+UseParallelGC -XX:MaxRAMPercentage=75.0 -XX:ActiveProcessorCount=4 -Djdk.virtualThreadScheduler.parallelism=8 -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo "
+ENV JAVA_OPTS="-Djdk.virtualThreadScheduler.parallelism=8 "
 
 COPY --link --from=duplikatfjerner /build/lib/ /app/lib/
 USER root
