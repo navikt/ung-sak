@@ -8353,6 +8353,36 @@
         "tags" : [ "produksjonsstyring" ]
       }
     },
+    "/api/produksjonsstyring/forvaltning/saker-med-etterlysninger-av-type" : {
+      "get" : {
+        "description" : "Henter alle saker som har en etterlysning av type",
+        "operationId" : "sakerMedEtterlysningerAvType",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "etterlysningType",
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.varsel.EtterlysningType"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for produksjonsstyring",
+        "tags" : [ "produksjonsstyring" ]
+      }
+    },
     "/api/prosesstask/create" : {
       "post" : {
         "description" : "Oppretter en prosess task i henhold til request",
