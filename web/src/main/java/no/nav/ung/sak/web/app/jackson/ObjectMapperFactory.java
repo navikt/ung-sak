@@ -28,7 +28,7 @@ public class ObjectMapperFactory {
 
     private static ObjectMapper baseObjectMapper;
 
-    public static ObjectMapper getBaseObjectMapperCopy() {
+    public static ObjectMapper createBaseObjectMapperCopy() {
         if(baseObjectMapper == null) {
             baseObjectMapper = ObjectMapperFactory.createBaseObjectMapper();
         }

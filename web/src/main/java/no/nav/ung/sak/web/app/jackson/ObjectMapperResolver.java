@@ -15,7 +15,7 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
     // Har ingen overstyring, men har spesialkode for å støtte deserialisering frå kodeverdi som objekt i ein overgangsperiode,
     // for å støtte klienter med gammal versjon av kontrakt, som dermed serialiserer Kodeverdi enums til objekt.
     private static ObjectMapper createDefaultObjectMapper() {
-        return ObjectMapperFactory.getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN));
+        return ObjectMapperFactory.createBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN));
     }
 
     /**
@@ -23,12 +23,12 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
      */
     public ObjectMapperResolver() {
         super(createDefaultObjectMapper());
-        final var overstyrKodeverdiAlltidSomStringMapper = ObjectMapperFactory.getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING));
+        final var overstyrKodeverdiAlltidSomStringMapper = ObjectMapperFactory.createBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING));
         super.addObjectMapper(JSON_SERIALIZER_ALLTID_SOM_STRING, overstyrKodeverdiAlltidSomStringMapper);
-        final var overstyrKodeverdiLegacySomObjekt = ObjectMapperFactory.getBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.LEGACY_OBJEKT));
+        final var overstyrKodeverdiLegacySomObjekt = ObjectMapperFactory.createBaseObjectMapperCopy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.LEGACY_OBJEKT));
         super.addObjectMapper(JSON_SERIALIZER_KODEVERDI_OBJEKT, overstyrKodeverdiLegacySomObjekt);
         // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
-        final var openapiObjektMapper = OpenapiCompatObjectMapperModifier.withDefaultModifications().modify(ObjectMapperFactory.getBaseObjectMapperCopy());
+        final var openapiObjektMapper = OpenapiCompatObjectMapperModifier.withDefaultModifications().modify(ObjectMapperFactory.createBaseObjectMapperCopy());
         super.addObjectMapper(JSON_SERIALIZER_OPENAPI, openapiObjektMapper);
     }
 
