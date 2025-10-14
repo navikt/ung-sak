@@ -5,14 +5,19 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -27,7 +32,8 @@ public class ForvaltningProduksjonsstyringRestTjeneste {
     private EntityManager entityManager;
 
     @Inject
-    public ForvaltningProduksjonsstyringRestTjeneste(EntityManager entityManager) {
+    public ForvaltningProduksjonsstyringRestTjeneste(
+        EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -58,5 +64,30 @@ public class ForvaltningProduksjonsstyringRestTjeneste {
             .toList();
     }
 
+    @GET
+    @Path("saker-med-etterlysninger-av-type")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter alle saker som har en etterlysning av type", summary = ("Brukes for produksjonsstyring"), tags = "produksjonsstyring")
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
+    public List<Saksnummer> sakerMedEtterlysningerAvType(
+        @QueryParam("etterlysningType") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) EtterlysningType etterlysningType
+    ) {
+        System.out.println("etterlysningType = " + etterlysningType);
+        List<String> resultat = (List<String>) entityManager.createNativeQuery("""
+                select saksnummer
+                 from etterlysning e
+                 join behandling b on e.behandling_id = b.id
+                 join fagsak f on b.fagsak_id = f.id
+                 where e.type = :type
+                 order by b.opprettet_tid;
+                """)
+            .setParameter("type", etterlysningType.getKode())
+            .getResultList();
 
+        return resultat.stream()
+            .map(Saksnummer::new)
+            .collect(Collectors.toCollection(LinkedHashSet::new)) //for å fjerne evt. duplikate og beholde rekkefølge
+            .stream()
+            .toList();
+    }
 }
