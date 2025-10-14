@@ -1,26 +1,19 @@
 package no.nav.ung.sak.kontrakt.fagsak;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @JsonInclude(value = Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -58,6 +51,9 @@ public class FagsakDto {
     @Valid
     private PersonDto person;
 
+    @JsonProperty(value = "erIkkeDigitalBruker")
+    private Boolean erIkkeDigitalBruker;
+
     public FagsakDto() {
         // Injiseres i test
     }
@@ -69,7 +65,8 @@ public class FagsakDto {
                      PersonDto person,
                      Boolean kanRevurderingOpprettes,
                      LocalDateTime opprettetTidspunkt,
-                     LocalDateTime endretTidspunkt) {
+                     LocalDateTime endretTidspunkt,
+                     Boolean erIkkeDigitalBruker) {
         this.saksnummer = saksnummer;
         this.sakstype = ytelseType;
         this.status = status;
@@ -78,6 +75,7 @@ public class FagsakDto {
         this.opprettet = opprettetTidspunkt;
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;
+        this.erIkkeDigitalBruker = erIkkeDigitalBruker;
     }
 
     @Override

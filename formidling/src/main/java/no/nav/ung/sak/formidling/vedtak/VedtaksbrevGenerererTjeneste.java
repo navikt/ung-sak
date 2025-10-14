@@ -9,5 +9,5 @@ public interface VedtaksbrevGenerererTjeneste {
     GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenereringInput);
 
     @WithSpan
-    GenerertBrev genererManuellVedtaksbrev(Long behandlingId, boolean kunHtml);
+    GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml);
 }

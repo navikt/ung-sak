@@ -7,7 +7,14 @@
     <sequence-generator name="SEQ_ETTERLYSNING" allocation-size="50" sequence-name="SEQ_ETTERLYSNING"/>
     <sequence-generator name="SEQ_UTTALELSE" allocation-size="50" sequence-name="SEQ_UTTALELSE"/>
 
+    <sequence-generator name="SEQ_UTTALELSE_V2" allocation-size="50" sequence-name="SEQ_UTTALELSE_V2"/>
+    <sequence-generator name="SEQ_UTTALELSER" allocation-size="50" sequence-name="SEQ_UTTALELSER"/>
+    <sequence-generator name="SEQ_GR_UTTALELSE" allocation-size="50" sequence-name="SEQ_GR_UTTALELSE"/>
+
     <entity class="no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning"/>
     <entity class="no.nav.ung.sak.behandlingslager.etterlysning.UttalelseEntitet"/>
+    <entity class="no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2"/>
+    <entity class="no.nav.ung.sak.behandlingslager.uttalelse.Uttalelser"/>
+    <entity class="no.nav.ung.sak.behandlingslager.uttalelse.UttalelseGrunnlag"/>
 
 </entity-mappings>

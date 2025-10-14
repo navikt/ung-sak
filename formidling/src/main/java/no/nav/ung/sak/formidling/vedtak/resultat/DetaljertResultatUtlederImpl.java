@@ -15,8 +15,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,7 +49,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
             .intersection(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
-                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue())));
+                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue(), behandling.erManueltOpprettet())));
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
@@ -137,7 +137,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             resultater.add(kontrollerInntektDetaljertResultat(tilkjentYtelse));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)
+            || vilkårsresultatOgBehandlingsårsaker.manuellOpprettetBehandling() && relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
             resultater.add(nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
 
@@ -183,7 +184,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Innvilgede vilkår uten tilkjent ytelse"));
         }
 
-        if (tilkjentYtelse.utbetalingsgrad() <= 0) {
+        if (tilkjentYtelse.utbetalingsgrad().compareTo(BigDecimal.ZERO) <= 0) {
             return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Innvilgede vilkår 0 kr tilkjent ytelse"));
         }
 
@@ -216,23 +217,22 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
                 return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslått inngangsvilkår for ny periode");
             }
 
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_VILKÅR_NY_PERIODE);
+            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_KUN_VILKÅR);
         }
 
-        return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE);
+        return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING);
     }
 
-    @NotNull
     private static DetaljertResultatInfo kontrollerInntektDetaljertResultat(TilkjentYtelseVerdi tilkjentYtelse) {
         if (tilkjentYtelse == null) {
             // Usikker om dette er mulig
             return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_UTEN_TILKJENT_YTELSE);
         }
-        if (tilkjentYtelse.utbetalingsgrad() >= 100) {
+        if (tilkjentYtelse.utbetalingsgrad().compareTo(BigDecimal.valueOf(100)) >= 0) {
             return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
         }
 
-        if (tilkjentYtelse.utbetalingsgrad() <= 0) {
+        if (tilkjentYtelse.utbetalingsgrad().compareTo(BigDecimal.ZERO) <= 0) {
             return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
         }
 

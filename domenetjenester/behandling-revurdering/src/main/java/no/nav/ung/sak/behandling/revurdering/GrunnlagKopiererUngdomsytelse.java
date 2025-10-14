@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
@@ -22,6 +23,7 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private UttalelseRepository uttalelseRepository;
 
     public GrunnlagKopiererUngdomsytelse() {
         // for CDI proxy
@@ -30,12 +32,13 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererUngdomsytelse(BehandlingRepositoryProvider repositoryProvider,
                                          InntektArbeidYtelseTjeneste iayTjeneste,
-                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository) {
+                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository, UttalelseRepository uttalelseRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.uttalelseRepository = uttalelseRepository;
     }
 
 
@@ -47,6 +50,7 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
         ungdomsprogramPeriodeRepository.kopier(originalBehandlingId, nyBehandlingId);
         ungdomsytelseStartdatoRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
+        uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);

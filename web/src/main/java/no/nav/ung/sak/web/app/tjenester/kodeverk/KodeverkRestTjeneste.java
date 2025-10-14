@@ -6,10 +6,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.api.Kodeverdi;
@@ -26,11 +31,17 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("/kodeverk")
 @ApplicationScoped
@@ -56,7 +67,7 @@ public class KodeverkRestTjeneste {
     @GET
     @Path("/ung-sak/kodeverk/typer")
     @Operation(description = "Ikkje reell implementasjon for bruk. Kun for openapi type generering av ung-sak kodeverkstyper", tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     public KodeverkWeb getUngSakKodeverkTyper() {
         return new KodeverkWeb();
     }
@@ -64,7 +75,7 @@ public class KodeverkRestTjeneste {
     @GET
     @Path("/behandlende-enheter")
     @Operation(description = "Henter liste over behandlende enheter", tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<OrganisasjonsEnhet> hentBehandlendeEnheter(@QueryParam("ytelseType") @DefaultValue(value = "OMP") @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FagsakYtelseType ytelseType) {
         return behandlendeEnhetTjeneste.hentEnhetListe(ytelseType);
@@ -84,47 +95,36 @@ public class KodeverkRestTjeneste {
                 .collect(Collectors.toMap(e -> e.getKey().getKode(), e -> sortert(e.getValue())));
 
         oppslagAlleResponse = new AlleKodeverdierSomObjektResponse(
-            sortert(alle.relatertYtelseTilstander()),
             sortert(alle.fagsakStatuser()),
             sortert(alle.fagsakYtelseTyper()),
             sortert(alle.behandlingÅrsakTyper()),
-            sortert(alle.historikkBegrunnelseTyper()),
             sortert(alle.oppgaveÅrsaker()),
-            sortert(alle.medlemskapManuellVurderingTyper()),
             sortert(alle.behandlingResultatTyper()),
             VenteårsakSomObjekt.sorterteVenteårsaker(alle.venteårsaker()),
             sortert(alle.behandlingTyper()),
             sortert(alle.arbeidTyper()),
-            sortert(alle.opptjeningAktivitetTyper()),
             sortert(alle.revurderingVarslingÅrsaker()),
-            sortert(alle.arbeidskategorier()),
             sortert(alle.fagsystemer()),
             sortert(alle.skjermlenkeTyper()),
-            sortert(alle.historikkOpplysningTyper()),
-            sortert(alle.historikkEndretFeltTyper()),
-            sortert(alle.historikkEndretFeltVerdiTyper()),
-            sortert(alle.historikkinnslagTyper()),
             sortert(alle.historikkAktører()),
-            sortert(alle.historikkAvklartSoeknadsperiodeTyper()),
-            sortert(alle.historikkResultatTyper()),
             sortert(alle.behandlingStatuser()),
-            sortert(alle.medlemskapDekningTyper()),
-            sortert(alle.medlemskapTyper()),
             sortert(alle.avslagsårsaker()),
             sortert(alle.vilkårTyper()),
-            sortert(alle.vurderArbeidsforholdHistorikkinnslag()),
             sortert(alle.tilbakekrevingVidereBehandlinger()),
             sortert(alle.vurderingsÅrsaker()),
             sortert(alle.språkkoder()),
             sortert(alle.vedtakResultatTyper()),
             sortert(alle.årsakerTilVurdering()),
-            new TreeMap<>(avslagårsakerGruppertPåVilkårType)
+            new TreeMap<>(avslagårsakerGruppertPåVilkårType),
+            sortert(alle.klageMedholdÅrsak()),
+            sortert(alle.klageAvvistÅrsaker()),
+            sortert(alle.klageVurderingTyper())
         );
     }
 
     @GET
     @Path("/alle/objekt")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @Operation(description = "Alle statisk kodeverdier som objekt", tags = "kodeverk")
     @CacheControl(maxAge = 60)
     public AlleKodeverdierSomObjektResponse alleKodeverdierSomObjekt() {
@@ -142,40 +142,29 @@ public class KodeverkRestTjeneste {
         final var o = oppslagAlleResponse;
         final List<SortedSet<? extends KodeverdiSomObjekt<?>>> alleKodeverdier;
         alleKodeverdier = Arrays.asList(
-            o.relatertYtelseTilstander(),
             o.fagsakStatuser(),
             o.fagsakYtelseTyper(),
             o.behandlingÅrsakTyper(),
-            o.historikkBegrunnelseTyper(),
             o.oppgaveÅrsaker(),
-            o.medlemskapManuellVurderingTyper(),
             o.behandlingResultatTyper(),
             o.venteårsaker(),
             o.behandlingTyper(),
             o.arbeidTyper(),
-            o.opptjeningAktivitetTyper(),
             o.revurderingVarslingÅrsaker(),
-            o.arbeidskategorier(),
             o.fagsystemer(),
             o.skjermlenkeTyper(),
-            o.historikkOpplysningTyper(),
-            o.historikkEndretFeltTyper(),
-            o.historikkEndretFeltVerdiTyper(),
-            o.historikkinnslagTyper(),
             o.historikkAktører(),
-            o.historikkAvklartSoeknadsperiodeTyper(),
-            o.historikkResultatTyper(),
             o.behandlingStatuser(),
-            o.medlemskapDekningTyper(),
-            o.medlemskapTyper(),
             o.avslagsårsaker(),
             o.vilkårTyper(),
-            o.vurderArbeidsforholdHistorikkinnslag(),
             o.tilbakekrevingVidereBehandlinger(),
             o.vurderingsÅrsaker(),
             o.språkkoder(),
             o.vedtakResultatTyper(),
-            o.årsakerTilVurdering()
+            o.årsakerTilVurdering(),
+            o.klageMedholdÅrsak(),
+            o.klageAvvistÅrsaker(),
+            o.klagevurderingType()
         );
 
         final Map<String, Object> r = new LinkedHashMap<>();
@@ -202,7 +191,7 @@ public class KodeverkRestTjeneste {
      */
     @GET
     @Operation(description = "Henter kodeliste", deprecated = true, tags = "kodeverk")
-    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @Deprecated(forRemoval = true)
     public Response hentGruppertKodeliste() throws IOException {

@@ -1,28 +1,31 @@
 package no.nav.ung.sak.metrikker.bigquery;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningStatus;
-import no.nav.ung.kodeverk.etterlysning.EtterlysningType;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -31,18 +34,23 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.aksjonspunkt.AksjonspunktRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.behandlingstatus.BehandlingStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet.fraOgMedTilOgMed;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -51,9 +59,6 @@ class BigQueryStatistikkRepositoryTest {
 
     @Inject
     private EntityManager entityManager;
-
-    @Inject
-    private @Any Instance<ProsessTaskHandler> handlers;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -67,12 +72,15 @@ class BigQueryStatistikkRepositoryTest {
     @Inject
     private SaksnummerRepository saksnummerRepository;
 
+    @Inject
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+
     private BigQueryStatistikkRepository statistikkRepository;
 
 
     @BeforeEach
     void setup() {
-        statistikkRepository = new BigQueryStatistikkRepository(entityManager, handlers);
+        statistikkRepository = new BigQueryStatistikkRepository(entityManager, null);
     }
 
     @Test
@@ -205,8 +213,8 @@ class BigQueryStatistikkRepositoryTest {
         // Gitt en fagsak med behandling med etterlysning
         Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
         lagreBehandling(behandling);
-        etterlysningRepository.lagre(new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningStatus.VENTER));
-        var etterlysningMedFrist = new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningStatus.AVBRUTT);
+        etterlysningRepository.lagre(new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningStatus.VENTER));
+        var etterlysningMedFrist = new Etterlysning(behandling.getId(), UUID.randomUUID(), UUID.randomUUID(), fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusDays(10)), EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningStatus.AVBRUTT);
         etterlysningMedFrist.setFrist(LocalDateTime.now());
         etterlysningRepository.lagre(etterlysningMedFrist);
 
@@ -219,6 +227,52 @@ class BigQueryStatistikkRepositoryTest {
         assertThat(etterlysningUtenFrist.frist()).isNull();
         var etterlysningRecordMedFrist = etterlysninger.stream().filter(it -> it.etterlysningType().equals(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)).findFirst().get();
         assertThat(etterlysningRecordMedFrist.frist()).isNotNull();
+    }
+
+
+    @Test
+    void skal_kunne_hente_alder_og_kjønn_statistikk() {
+        AktørId aktørId = AktørId.dummy();
+        var fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE)
+            .medBruker(aktørId)
+            .medSaksnummer(new Saksnummer(saksnummerRepository.genererNyttSaksnummer())).medStatus(FagsakStatus.LØPENDE).build();
+        lagreFagsaker(List.of(fagsak));
+
+        // Gitt en fagsak med behandling med etterlysning
+        Behandling behandling = byggBehandlingForFagsak(fagsak, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
+        lagreBehandling(behandling);
+
+        PersonInformasjonBuilder pibuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+        leggTilAktør(pibuilder, aktørId, 20, NavBrukerKjønn.MANN);
+        leggTilAktør(pibuilder, AktørId.dummy(), 20, NavBrukerKjønn.KVINNE);
+
+        new PersonopplysningRepository(entityManager).lagre(behandling.getId(), pibuilder);
+
+        var alderOgKjønnStatistikk = statistikkRepository.alderOgKjønnStatistikk();
+        // Og vi skal ha en bruker i statistikken
+        assertThat(alderOgKjønnStatistikk.size()).isEqualTo(1);
+        AlderOgKjønnRecord next = alderOgKjønnStatistikk.iterator().next();
+        assertThat(next.alder()).isEqualTo(20);
+        assertThat(next.navBrukerKjønn()).isEqualTo(NavBrukerKjønn.MANN);
+        assertThat(next.antall().compareTo(BigDecimal.ONE)).isEqualTo(0);
+    }
+
+    private void lagFagsakOgBehandlingMedUngdomsprogram(DatoIntervallEntitet... perioder) {
+        var fagsak1 = byggFagsak(FagsakYtelseType.UNGDOMSYTELSE, FagsakStatus.LØPENDE);
+        lagreFagsaker(List.of(fagsak1));
+
+        // Gitt en fagsak med behandling med etterlysning
+        Behandling behandling = byggBehandlingForFagsak(fagsak1, BehandlingType.FØRSTEGANGSSØKNAD, BehandlingStatus.UTREDES);
+        lagreBehandling(behandling);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), Stream.of(perioder).map(UngdomsprogramPeriode::new).toList());
+    }
+
+    private static void leggTilAktør(PersonInformasjonBuilder pibuilder, AktørId aktørId, int alder, NavBrukerKjønn kjønn) {
+        PersonInformasjonBuilder.PersonopplysningBuilder poBuilder = pibuilder.getPersonopplysningBuilder(aktørId);
+        poBuilder.medFødselsdato(LocalDate.now().minusYears(alder));
+        poBuilder.medNavn("Ola Nordmann");
+        poBuilder.medKjønn(kjønn);
+        pibuilder.leggTil(poBuilder);
     }
 
 

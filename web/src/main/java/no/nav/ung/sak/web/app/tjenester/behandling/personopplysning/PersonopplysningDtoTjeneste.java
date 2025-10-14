@@ -1,7 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.personopplysning;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9,6 +7,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
@@ -50,9 +49,9 @@ public class PersonopplysningDtoTjeneste {
         return new String(tegn);
     }
 
-    public Optional<PersonopplysningDto> lagPersonopplysningDto(Long behandlingId, LocalDate tidspunkt) {
+    public Optional<PersonopplysningDto> lagPersonopplysningDto(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Optional<PersonopplysningerAggregat> aggregatOpt = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunktHvisEksisterer(behandling.getId(), behandling.getAktørId(), tidspunkt);
+        Optional<PersonopplysningerAggregat> aggregatOpt = personopplysningTjeneste.hentPersonopplysningerHvisEksisterer(BehandlingReferanse.fra(behandling));
 
         if (aggregatOpt.isPresent()) {
             PersonopplysningerAggregat aggregat = aggregatOpt.get();

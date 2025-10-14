@@ -10,10 +10,12 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInputMapper;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.ytelse.InntektType;
@@ -58,7 +60,7 @@ class KontrollerInntektEtterlysningOppretterTest {
         oppretter = new KontrollerInntektEtterlysningOppretter(
             etterlysningRepository,
             sporingRepository,
-            new EtterlysningTjeneste(mottatteDokumentRepository, etterlysningRepository),
+            new EtterlysningTjeneste(mottatteDokumentRepository, new EtterlysningOgUttalelseTjeneste(etterlysningRepository, new UttalelseRepository(entityManager))),
             iayTjeneste,
             mock(ProsessTaskTjeneste.class), // ProsessTaskTjeneste er ikke nødvendig for denne testen
             kontrollerInntektInputMapper, // KontrollerInntektInputMapper er ikke nødvendig for denne testen

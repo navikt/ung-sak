@@ -1,4 +1,6 @@
 package no.nav.ung.sak.etterlysning;
 
-public record UttalelseData(boolean harUttalelse, String uttalelse) {
+import no.nav.ung.sak.typer.JournalpostId;
+
+public record UttalelseData(boolean harUttalelse, String uttalelse, JournalpostId svarJournalpostId) {
 }

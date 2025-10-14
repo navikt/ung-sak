@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 public enum Sats {
 
     LAV(UngdomsytelseSatsType.LAV, 18, 25),
-    HØY(UngdomsytelseSatsType.HØY, 25, 29);
+    HØY(UngdomsytelseSatsType.HØY, 25, 31);
 
     private final UngdomsytelseSatsType satsType;
     private final int fomAlder;
@@ -25,7 +25,7 @@ public enum Sats {
         return fomAlder;
     }
 
-    public int getTomAlder() {
+    public int getTilAlder() {
         return tomAlder;
     }
 }

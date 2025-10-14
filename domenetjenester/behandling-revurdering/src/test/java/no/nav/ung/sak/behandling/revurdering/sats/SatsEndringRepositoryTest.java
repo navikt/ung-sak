@@ -48,7 +48,7 @@ class SatsEndringRepositoryTest {
     }
 
     @Test
-    void forventer_1_fagsak_der_bruker_er_over_25_aar_fra_dato() {
+    void forventer_1_fagsak_der_bruker_ble_25_aar_før_dato() {
         Periode fagsakPeriode = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now().plusWeeks(51));
         LocalDate fødselsdato = LocalDate.now().minusYears(25).minusWeeks(1);
 

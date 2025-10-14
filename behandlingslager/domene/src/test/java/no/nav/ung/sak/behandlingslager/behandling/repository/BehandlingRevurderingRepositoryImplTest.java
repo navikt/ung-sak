@@ -119,7 +119,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         behandlingRepository.lagreOgClear(nyRevurderingsBehandling, behandlingRepository.taSkriveLås(nyRevurderingsBehandling));
         nyRevurderingsBehandling = behandlingRepository.hentBehandling(nyRevurderingsBehandling.getId());
 
-        List<Behandling> result = behandlingRepository.finnAlleAvsluttedeIkkeHenlagteBehandlinger(fagsakId);
+        List<Behandling> result = behandlingRepository.finnAlleAvsluttedeIkkeHenlagteYtelsebehandlinger(fagsakId);
         assertThat(result).isNotEmpty();
         result.forEach(r -> assertThat(r.getBehandlingResultatType()).isEqualTo(BehandlingResultatType.INNVILGET));
         assertThat(result).anySatisfy(r -> r.getId().equals(behandling.getId()));
@@ -139,7 +139,7 @@ public class BehandlingRevurderingRepositoryImplTest {
         henlagtBehandling.avsluttBehandling();
         behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
 
-        Optional<Behandling> resultatOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandling.getFagsak().getId());
+        Optional<Behandling> resultatOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsak().getId());
         assertThat(resultatOpt).hasValueSatisfying(resultat -> assertThat(resultat.getId()).isEqualTo(behandling.getId()));
     }
 

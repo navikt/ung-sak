@@ -15,16 +15,23 @@ public enum DokumentMalType implements Kodeverdi {
 
 //    UENDRETUTFALL_DOK("UENDRE", "Uendret utfall", true),
 //    FORLENGET_DOK("FORLEN", "Forlenget saksbehandlingstid", false),
-    INNVILGELSE_DOK("INNVILGELSE", "Innvilgelsesbrev", true),
+    INNVILGELSE_DOK("INNVILGELSE", "Innvilgelse", true),
     ENDRING_BARNETILLEGG("ENDRING_BARNETILLEGG", "Endring barnetillegg", true),
     ENDRING_PROGRAMPERIODE("ENDRING_PROGRAMPERIODE", "Endring programperiode", true),
     ENDRING_INNTEKT("ENDRING_INNTEKT", "Endring inntekt", true),
+    ENDRING_INNTEKT_UTEN_REDUKSJON("ENDRING_INNTEKT_UTEN_REDUKSJON", "Endring inntekt uten reduksjon", true),
     ENDRING_HØY_SATS("ENDRING_HØY_SATS", "Endring høy sats", true),
-    OPPHØR_DOK("OPPHOR", "Opphør brev", true),
-    AVSLAG__DOK("AVSLAG", "Avslagsbrev", true),
-    MANUELT_VEDTAK_DOK("MANUELL", "Fritekst vedtaksbrev", true),
-    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev", false);
+    OPPHØR_DOK("OPPHOR", "Opphør", true),
+    AVSLAG__DOK("AVSLAG", "Avslag", true),
+    MANUELT_VEDTAK_DOK("MANUELL", "Fritekstvedtak", true),
+    GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt", false),
 //    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst", false);
+
+
+    KLAGE_AVVIST_DOK("KLAGAV", "Vedtak om avvist klage", true),
+    KLAGE_OVERSENDT_KLAGEINSTANS("KLAGOV", "Overføring til NAV Klageinstans", false),
+    KLAGE_VEDTAK_MEDHOLD("VEDMED", "Vedtak om medhold", true),
+;
 
 
     private static final Map<String, DokumentMalType> KODER = new LinkedHashMap<>();

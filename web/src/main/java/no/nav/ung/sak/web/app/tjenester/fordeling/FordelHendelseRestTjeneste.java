@@ -12,7 +12,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelsemottakTjeneste;
@@ -22,8 +23,6 @@ import no.nav.ung.sak.kontrakt.hendelser.PåvirkedeSaker;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.stream.Collectors;
-
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 /**
  * Mottar hendelser
@@ -51,7 +50,7 @@ public class FordelHendelseRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Finn saker påvirket av hendelse", summary = ("Finn saker påvirket av hendelse"), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public PåvirkedeSaker finnPåvirkedeFagsaker(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) HendelseDto dto) {
         var hendelse = dto.getHendelse();
 
@@ -67,7 +66,7 @@ public class FordelHendelseRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av dokument.", tags = "fordel")
     @PollTaskAfterTransaction
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public PåvirkedeSaker innsending(@Parameter(description = "Hendelse innsendt.") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid HendelseDto dto) {
         var hendelse = dto.getHendelse();
 

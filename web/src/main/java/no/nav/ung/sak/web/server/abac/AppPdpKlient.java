@@ -27,7 +27,6 @@ public class AppPdpKlient implements PdpKlient {
         no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning resultat = sifAbacPdpRestKlient.sjekkTilgangForInnloggetBruker(tilgangskontrollInput);
         return new Tilgangsbeslutning(
             resultat.harTilgang(),
-            Set.of(),
             pdpRequest,
             TilgangType.INTERNBRUKER // TODO: Bruker riktig tilgangstype?
         );

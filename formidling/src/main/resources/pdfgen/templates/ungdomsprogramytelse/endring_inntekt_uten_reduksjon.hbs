@@ -1,0 +1,17 @@
+{{#> felles/base}}
+    {{#> felles/seksjon/hoved }}
+        <h1>Vi har ikke endret ungdomsprogramytelsen din</h1>
+        {{#each perioder}}
+            <p>Du har gitt oss beskjed om at du hadde inntekt i perioden {{> felles/periode-inline periode}}.</p>
+            <p>Vi har kontrollert inntekten din for denne perioden og kommet frem til at du ikke får redusert ungdomsprogramytelsen din.</p>
+        {{/each}}
+
+        <p>Pengene får du utbetalt innen fire dager. </p>
+
+        <p>Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 11. </p>
+
+    {{/felles/seksjon/hoved}}
+
+    {{> felles/footer/footer-vedtak }}
+
+{{/felles/base}}

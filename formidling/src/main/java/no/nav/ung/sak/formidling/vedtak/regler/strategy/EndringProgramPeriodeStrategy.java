@@ -24,14 +24,14 @@ public final class EndringProgramPeriodeStrategy implements VedtaksbrevInnholdby
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medBrev(DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av programperiode");
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger, "Automatisk brev ved endring av programperiode");
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
+        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
             && (resultater.innholder(DetaljertResultatType.ENDRING_STARTDATO)
                 || resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO) && !OpphørStrategy.erFørsteSluttdato(behandling, ungdomsprogramPeriodeRepository));
     }

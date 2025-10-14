@@ -28,7 +28,7 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medBrev(
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(
             DokumentMalType.OPPHØR_DOK, opphørInnholdBygger,
             "Automatisk brev ved opphør.");
     }
@@ -37,7 +37,7 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING_NY_PERIODE)
+        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
             && resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO)
             && erFørsteSluttdato(behandling, ungdomsprogramPeriodeRepository);
     }

@@ -1,8 +1,9 @@
 package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -14,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.*;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +31,12 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.vedtak.brevvurdering";
 
-    private boolean enableIgnoreManglendeBrev;
-    private VedtaksbrevRegler vedtaksbrevRegler;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository;
     private BehandlingRepository behandlingRepository;
     private BrevbestillingRepository brevbestillingRepository;
+    private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
 
     VurderVedtaksbrevTask() {
         // for proxy
@@ -43,20 +44,19 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     @Inject
     public VurderVedtaksbrevTask(
-        VedtaksbrevRegler vedtaksbrevRegler,
-        @KonfigVerdi(value = "IGNORE_MANGLENDE_BREV", defaultVerdi = "false") boolean ignoreManglendeBrev,
         ProsessTaskTjeneste prosessTaskTjeneste,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository,
-        BehandlingRepository behandlingRepository, BrevbestillingRepository brevbestillingRepository) {
+        BehandlingRepository behandlingRepository,
+        BrevbestillingRepository brevbestillingRepository,
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler) {
 
-        this.enableIgnoreManglendeBrev = ignoreManglendeBrev;
-        this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingVedtaksbrevRepository = behandlingVedtaksbrevRepository;
         this.behandlingRepository = behandlingRepository;
         this.brevbestillingRepository = brevbestillingRepository;
+        this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
 
     @Override
@@ -64,6 +64,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(this.vedtaksbrevRegler, behandling.getType());
         var resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", resultat.safePrint());
 
@@ -72,30 +73,41 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             return;
         }
 
-        var vedtaksbrevValgEntitet = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).orElse(null);
-        boolean harSaksbehandlerHindretEllerRedigertBrev = vedtaksbrevValgEntitet != null && (vedtaksbrevValgEntitet.isHindret() || vedtaksbrevValgEntitet.isRedigert());
-        if (harSaksbehandlerHindretEllerRedigertBrev) {
-            håndterSaksbehandlerValg(behandling, vedtaksbrevValgEntitet, resultat);
-            return;
-        }
+        var hindredeEllerRedigerteValg = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId).stream()
+            .filter(it -> it.isHindret() || it.isRedigert())
+            .toList();
 
-        if (vedtaksbrevValgEntitet != null) {
-            LOG.warn("Vedtaksbrevvalg lagret, men verken hindret eller redigert");
-        }
+        hindredeEllerRedigerteValg.forEach(it -> håndterSaksbehandlerValg(behandling, it, resultat));
 
-        resultat.vedtaksbrevResultater().forEach(it -> bestill(behandling, it));
+        var hindredeEllerRedigerteMaler = hindredeEllerRedigerteValg.stream()
+            .map(VedtaksbrevValgEntitet::getDokumentMalType)
+            .collect(Collectors.toSet());
+
+        var vedtaksbrevResultater = resultat.vedtaksbrevResultater().stream()
+            .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
+            .toList();
+
+        for (int brevNr = 0; brevNr < vedtaksbrevResultater.size(); brevNr++) {
+            Vedtaksbrev it = vedtaksbrevResultater.get(brevNr);
+            bestill(behandling, it, brevNr);
+        }
 
     }
 
-    private void validerBrevbestillingForespørsel(Behandling behandling, DokumentMalType dokumentMalType) {
-        if (!behandling.erAvsluttet()) {
+    private void validerBrevbestillingForespørsel(Behandling behandling, Vedtaksbrev vedtaksbrev) {
+        if (!behandling.erAvsluttet() &&
+            !DokumentMalType.KLAGE_OVERSENDT_KLAGEINSTANS.equals(vedtaksbrev.dokumentMalType())) { // Unntak for oversendt til klageinstans, som ikke avslutter behandling før den er ferdig behandlet i kabal
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
+        }
+
+        if (vedtaksbrev.vedtaksbrevBygger().getClass().equals(TomVedtaksbrevInnholdBygger.class)) {
+            throw new IllegalStateException("Kan ikke bestille vedtaksbrev der bygger er TomVedtaksbrevInnholdBygger");
         }
 
         var tidligereBestillinger = brevbestillingRepository.hentForBehandling(behandling.getId());
         var tidligereVedtaksbrev = tidligereBestillinger.stream()
             .filter(BrevbestillingEntitet::isVedtaksbrev)
-            .filter(it -> it.getDokumentMalType() == dokumentMalType)
+            .filter(it -> it.getDokumentMalType() == vedtaksbrev.dokumentMalType())
             .toList();
         if (!tidligereVedtaksbrev.isEmpty()) {
             String collect = tidligereVedtaksbrev.stream()
@@ -105,8 +117,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         }
     }
 
-    public void bestill(Behandling behandling, Vedtaksbrev vedtaksbrev) {
-        validerBrevbestillingForespørsel(behandling, vedtaksbrev.dokumentMalType());
+    public void bestill(Behandling behandling, Vedtaksbrev vedtaksbrev, int brevNr) {
+        validerBrevbestillingForespørsel(behandling, vedtaksbrev);
 
         var bestilling = BrevbestillingEntitet.nyBrevbestilling(
             behandling.getFagsakId(),
@@ -115,10 +127,11 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         );
         brevbestillingRepository.lagre(bestilling);
 
-        var vedtaksbrevResultatEntitet = BehandlingVedtaksbrev.medBestilling(bestilling, vedtaksbrev.forklaring(), VedtaksbrevResultatType.BESTILT);
+        var vedtaksbrevResultatEntitet = BehandlingVedtaksbrev
+            .medBestilling(bestilling, vedtaksbrev.forklaring(), VedtaksbrevResultatType.BESTILT, null);
         behandlingVedtaksbrevRepository.lagre(vedtaksbrevResultatEntitet);
 
-        prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId()));
+        prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId(), brevNr));
         LOG.info("Opprettet vedtaksbrev bestilling med id: {} og mal {}", bestilling.getId(), bestilling.getDokumentMalType().getKode());
 
     }
@@ -128,33 +141,42 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         Long behandlingId = behandling.getId();
         Long fagsakId = behandling.getFagsakId();
 
+        var vedtaksbrev = resultat.finnVedtaksbrev(vedtaksbrevValg.getDokumentMalType())
+            .orElseThrow(() -> new IllegalStateException("Har valg for vedtaksbrev mal " + vedtaksbrevValg.getDokumentMalType() + ", men malen er ikke tillatt for behandlingen. "));
+
         if (vedtaksbrevValg.isHindret()) {
             LOG.info("Vedtaksbrev er manuelt stoppet - bestiller ikke brev");
 
-            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev.utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.HINDRET_SAKSBEHANDLER, null));
+            behandlingVedtaksbrevRepository.lagre(
+                BehandlingVedtaksbrev.utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.HINDRET_SAKSBEHANDLER, null, vedtaksbrevValg));
             return;
         }
 
         if (vedtaksbrevValg.isRedigert()) {
             LOG.info("Vedtaksbrev er manuelt redigert - bestiller manuell brev");
-            if (resultat.vedtaksbrevResultater().stream().noneMatch(it -> it.vedtaksbrevEgenskaper().kanRedigere())) {
+            if (!vedtaksbrev.vedtaksbrevEgenskaper().kanRedigere()) {
                 throw new IllegalStateException("Redigering ikke tilatt, men er redigert. " + vedtaksbrevValg);
             }
-            //TODO håndtere flere vedtaksbrev
             var bestilling = BrevbestillingEntitet.nyBrevbestilling(
                 behandling.getFagsakId(),
                 behandling.getId(),
                 DokumentMalType.MANUELT_VEDTAK_DOK);
             brevbestillingRepository.lagre(bestilling);
-            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev.medBestilling(bestilling, "Redigert vedtaksbrev", VedtaksbrevResultatType.BESTILT));
-            prosessTaskTjeneste.lagre(lagBestillingTask(behandling, bestilling.getId()));
+
+            behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
+                .medBestilling(bestilling, "Redigert vedtaksbrev", VedtaksbrevResultatType.BESTILT, vedtaksbrevValg));
+
+            ProsessTaskData prosessTaskData = lagBestillingTask(behandling, bestilling.getId(), 0);
+            prosessTaskData.setProperty(VedtaksbrevBestillingTask.VEDTAKSBREV_VALG_ID, vedtaksbrevValg.getId().toString());
+            prosessTaskTjeneste.lagre(prosessTaskData);
 
         }
 
     }
 
-    private static ProsessTaskData lagBestillingTask(Behandling behandling, Long brevbestillingId) {
-        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
+    private static ProsessTaskData lagBestillingTask(Behandling behandling, Long brevbestillingId, int brevNr) {
+        ProsessTaskData prosessTaskData = BrevbestillingTaskGenerator
+            .formidlingProsessTaskIGruppe(VedtaksbrevBestillingTask.class, behandling.getFagsakId(), brevNr);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
         prosessTaskData.setSaksnummer(behandling.getFagsak().getSaksnummer().toString());
         prosessTaskData.setProperty(VedtaksbrevBestillingTask.BREVBESTILLING_ID, brevbestillingId.toString());
@@ -172,17 +194,11 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .toList();
 
         if (!ikkeImplementerteBrev.isEmpty()) {
-            if (enableIgnoreManglendeBrev) {
-                LOG.warn("Ingen brev implementert for tilfelle pga: {}", forklaring);
-                behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
-                    .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
-            } else {
-                throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
-            }
+            throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
         }
         LOG.info("Ingen brev relevant for tilfelle: {}", forklaring);
         behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
-            .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring));
+            .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring, null));
     }
 
 }

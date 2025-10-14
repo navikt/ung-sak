@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.person.pdl;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.*;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
@@ -50,6 +51,14 @@ public class PersoninfoTjeneste {
             + (navn.getMellomnavn() == null ? "" : " " + navn.getMellomnavn());
     }
 
+    private static NavBrukerKjønn mapKjønn(Kjoenn kjønn) {
+        return switch (kjønn.getKjoenn()) {
+            case KVINNE -> NavBrukerKjønn.KVINNE;
+            case MANN -> NavBrukerKjønn.MANN;
+            case UKJENT -> NavBrukerKjønn.UDEFINERT;
+        };
+    }
+
     private static Set<Familierelasjon> mapFamilierelasjoner(
         List<no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjon> forelderBarnRelasjoner) {
         Set<Familierelasjon> relasjoner = new HashSet<>();
@@ -74,6 +83,7 @@ public class PersoninfoTjeneste {
         var query = new HentPersonQueryRequest();
         query.setIdent(personIdent.getIdent());
         var projection = new PersonResponseProjection()
+            .kjoenn(new KjoennResponseProjection().kjoenn())
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
@@ -99,6 +109,8 @@ public class PersoninfoTjeneste {
         var familierelasjoner = mapFamilierelasjoner(personFraPdl.getForelderBarnRelasjon());
 
         return new Personinfo.Builder()
+            .medKjønn(personFraPdl.getKjoenn().stream().map(PersoninfoTjeneste::mapKjønn).filter(Objects::nonNull)
+                .findFirst().orElse(null))
             .medAktørId(aktørId)
             .medPersonIdent(personIdent)
             .medNavn(personFraPdl.getNavn().stream().map(PersoninfoTjeneste::mapNavn).filter(Objects::nonNull)

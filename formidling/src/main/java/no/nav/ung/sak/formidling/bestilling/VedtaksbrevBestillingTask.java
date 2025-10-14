@@ -1,6 +1,8 @@
 package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -8,15 +10,16 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
-import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjenesteImpl;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegler;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,26 +37,29 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.vedtak.brevbestilling";
     public static final String BREVBESTILLING_ID = "brevbestillingId";
+    public static final String VEDTAKSBREV_VALG_ID = "vedtaksbrevValgId";
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevBestillingTask.class);
 
     private BehandlingRepository behandlingRepository;
-    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste;
-    private VedtaksbrevRegler vedtaksbrevRegler;
     private BrevbestillingRepository brevbestillingRepository;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
+    private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
+    private VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste;
 
     @Inject
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
-        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste,
-        VedtaksbrevRegler vedtaksbrevRegler, BrevbestillingRepository brevbestillingRepository) {
+        BrevbestillingRepository brevbestillingRepository, VedtaksbrevValgRepository vedtaksbrevValgRepository,
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.brevbestillingRepository = brevbestillingRepository;
+        this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
     }
 
     VedtaksbrevBestillingTask() {
@@ -70,8 +76,8 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
 
         if (dokumentMalType == DokumentMalType.MANUELT_VEDTAK_DOK) {
-            GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), false);
-            journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
+            Long valgId = Long.valueOf(prosessTaskData.getPropertyValue(VEDTAKSBREV_VALG_ID));
+            genererOgJournalførManuellBrev(behandling, brevbestilling, valgId);
             return;
         }
 
@@ -79,19 +85,24 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     }
 
+    private void genererOgJournalførManuellBrev(Behandling behandling, BrevbestillingEntitet brevbestilling, Long valgId) {
+        VedtaksbrevValgEntitet valg = vedtaksbrevValgRepository.hentVedtaksbrevValg(valgId);
+        GenerertBrev generertBrev = vedtaksbrevGenerererTjeneste.genererManuellVedtaksbrev(behandling.getId(), valg.getRedigertBrevHtml(), false);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
+    }
+
     private void genererOgJournalførAutomatiskBrev(Behandling behandling, BrevbestillingEntitet brevbestilling) {
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        var vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getType());
+        var totalresultater = vedtaksbrevRegel.kjør(behandling.getId());
 
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();
-        Vedtaksbrev vedtaksbrev = totalresultater.vedtaksbrevResultater().stream()
-            .filter(it -> it.dokumentMalType() == dokumentMalType)
-            .findFirst()
+        Vedtaksbrev vedtaksbrev = totalresultater.finnVedtaksbrev(dokumentMalType)
             .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
 
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
             new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
 
-        journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, brevbestilling, generertBrev);
+        journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
     }
 
 }

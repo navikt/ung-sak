@@ -29,7 +29,7 @@ public class ManglendeKontrollperioderTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(ManglendeKontrollperioderTjeneste.class);
 
-    private final int rapporteringsfristIMåned;
+    private final int dagIMånedForInntektsKontroll;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
@@ -37,11 +37,11 @@ public class ManglendeKontrollperioderTjeneste {
     @Inject
     public ManglendeKontrollperioderTjeneste(MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                              ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
-                                             @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristIMåned,
+                                             @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int dagIMånedForInntektsKontroll,
                                              TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
-        this.rapporteringsfristIMåned = rapporteringsfristIMåned;
+        this.dagIMånedForInntektsKontroll = dagIMånedForInntektsKontroll;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
@@ -86,7 +86,7 @@ public class ManglendeKontrollperioderTjeneste {
 
     private LocalDate getTomDatoForPassertRapporteringsfrist() {
         final var dagensDato = LocalDate.now();
-        return dagensDato.getDayOfMonth() <= rapporteringsfristIMåned ? dagensDato.minusMonths(2).with(TemporalAdjusters.lastDayOfMonth()) : dagensDato.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        return dagensDato.getDayOfMonth() < dagIMånedForInntektsKontroll ? dagensDato.minusMonths(2).with(TemporalAdjusters.lastDayOfMonth()) : dagensDato.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
     }
 
 }

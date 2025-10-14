@@ -77,23 +77,26 @@ spec:
       rules:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
+        - application: ung-tilbake
       external:
         - host: "dokarkiv-q2.dev-fss-pub.nais.io"
         - host: "k9-abakus.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
         - host: "norg2.dev-fss-pub.nais.io"
+        - host: "oppgave.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
-        - host: "oppgave.dev-fss-pub.nais.io"
+        - host: "ereg-services-q2.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
           namespace: k9saksbehandling
           cluster: dev-fss
         - application: sif-abac-pdp
+        - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
-        - application: ung-deltakelse-opplyser
+        - application: ung-tilbake
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -138,6 +141,9 @@ spec:
       value: pdl.leesah-v1
     - name: KAFKA_JOURNAL_TOPIC
       value: teamdokumenthandtering.aapen-dok-journalfoering
+    - name: KAFKA_KABAL_TOPIC
+      value: klage.behandling-events.v1
+
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -167,7 +173,7 @@ spec:
     - name: PDL_SCOPE
       value: api://dev-fss.pdl.pdl-api/.default
     - name: ORGANISASJON_RS_URL
-      value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
+      value: https://ereg-services-q2.dev-fss-pub.nais.io/api/v2/organisasjon
     - name: K9_OPPDRAG_DIREKTE_URL
       value: https://k9-oppdrag.dev-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
@@ -175,7 +181,7 @@ spec:
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
-      value: https://arbeid-og-inntekt.nais.preprod.local
+      value: https://arbeid-og-inntekt-q2.dev-fss-pub.nais.io
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
@@ -186,6 +192,8 @@ spec:
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
+    - name: KABAL_URL
+      value: https://kabal-api.dev-fss-pub.nais.io
 
     # Saf
     - name: SAF_BASE_URL
@@ -208,6 +216,9 @@ spec:
       value: "api://dev-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+      value: "/ung/tilbake,api://dev-gcp.k9saksbehandling.ung-tilbake/.default"
+
 
     - name: SENSU_HOST
       value: "sensu.nais"
@@ -221,19 +232,28 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
+    - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
+      value: "true"
+    - name: KLAGE_ENABLED
+      value: "true"
+    - name: INTEGRASJON_KABAL
+      value: "true"
+    - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1M"
-    - name: RAPPORTERINGSFRIST_DAG_I_MAANED
-      value: "5"
+    - name: INNTEKTSKONTROLL_DAG_I_MAANED
+      value: "8"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P1D"
-
+    - name: OVERSTYR_REGISTERDATA_DURATION
+      value: "PT30M"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

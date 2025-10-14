@@ -1,18 +1,16 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.Barnetillegg;
+import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BeregnDagsatsInput;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
@@ -25,24 +23,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-@Dependent
 public class UngdomsytelseBeregnDagsats {
 
-    private final LagBarnetilleggTidslinje lagBarnetilleggTidslinje;
-
-    @Inject
-    public UngdomsytelseBeregnDagsats(LagBarnetilleggTidslinje lagBarnetilleggTidslinje) {
-        this.lagBarnetilleggTidslinje = lagBarnetilleggTidslinje;
-    }
-
-
-    public UngdomsytelseSatsResultat beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
+    public static UngdomsytelseSatsResultat beregnDagsats(BeregnDagsatsInput input) {
         var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
-        var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
-        LocalDateTimeline<SatsOgGrunnbeløpfaktor> satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
-        var barnetilleggResultat = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef, perioder);
+        var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(mapTilSatsInput(input));
+        var satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
+        var barnetilleggResultat = LagBarnetilleggTidslinje.lagTidslinje(input.barnsFødselOgDødInformasjon());
 
-        var satsTidslinje = perioder
+        var satsTidslinje = input.perioder()
             .intersection(satsOgGrunnbeløpfaktorTidslinje, StandardCombinators::rightOnly)
             .mapValue(UngdomsytelseBeregnDagsats::leggTilSatsTypeOgGrunnbeløpFaktor)
             .intersection(grunnbeløpTidslinje, leggTilGrunnbeløp())
@@ -56,8 +45,12 @@ public class UngdomsytelseBeregnDagsats {
                 "satsOgGrunnbeløpfaktorTidslinje", satsOgGrunnbeløpfaktorTidslinje,
                 "barnetilleggTidslinje", barnetilleggResultat.barnetilleggTidslinje()
             )),
-            lagRegelInput(perioder, fødselsdato, harTriggerBeregnHøySats, beregningsdato, barnetilleggResultat.relevanteBarnPersoninformasjon())
+            lagRegelInput(input.perioder(), input.fødselsdato(), input.harTriggerBeregnHøySats(), input.harBeregnetHøySatsTidligere(), input.barnsFødselOgDødInformasjon())
         );
+    }
+
+    private static UtledSatsInput mapTilSatsInput(BeregnDagsatsInput input) {
+        return new UtledSatsInput(input.fødselsdato(), input.harTriggerBeregnHøySats(), input.harBeregnetHøySatsTidligere(), input.perioder().getMinLocalDate());
     }
 
     private static UngdomsytelseSatser.Builder leggTilSatsTypeOgGrunnbeløpFaktor(SatsOgGrunnbeløpfaktor sats) {
@@ -71,32 +64,49 @@ public class UngdomsytelseBeregnDagsats {
         };
     }
 
+    /**
+     * Kombinerer barnetillegg inn i satsbyggeren. Null-sikker og tydelig builder-bruk.
+     */
     private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, Barnetillegg, UngdomsytelseSatser.Builder> leggTilBarnetillegg() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue().kopi();
-            return new LocalDateSegment<>(di,
-                rhs == null ?
-                    builder.medAntallBarn(0).medBarnetilleggDagsats(0) :
-                    builder.medAntallBarn(rhs.getValue().antallBarn()).medBarnetilleggDagsats(rhs.getValue().dagsats()));
+            if (rhs == null) {
+                builder.medAntallBarn(0).medBarnetilleggDagsats(0);
+            } else {
+                var barnetillegg = rhs.getValue();
+                builder.medAntallBarn(barnetillegg.antallBarn())
+                       .medBarnetilleggDagsats(barnetillegg.dagsats());
+            }
+            return new LocalDateSegment<>(di, builder);
         };
     }
 
-    private static String lagRegelInput(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats, LocalDate beregningsdato, List<FødselOgDødInfo> barnPersoninformasjon) {
+    /**
+     * Lager serialisert regelinput for sporing og dokumentasjon.
+     */
+    private static String lagRegelInput(
+        LocalDateTimeline<Boolean> perioder,
+        LocalDate fødselsdato,
+        boolean harTriggerBeregnHøySats,
+        boolean harBeregnetHøySatsTidligere,
+        List<FødselOgDødInfo> barnPersoninformasjon) {
         var regelInput = new RegelInput(
             TidslinjeUtil.tilPerioder(perioder),
             fødselsdato,
             harTriggerBeregnHøySats,
-            beregningsdato,
+            harBeregnetHøySatsTidligere,
             barnPersoninformasjon
         );
         return JsonObjectMapper.toJson(regelInput, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
 
-    private record RegelInput(List<Periode> perioder, LocalDate fødselsdato, boolean harTriggerBeregnHøySats,
-                              LocalDate beregningsdato, List<FødselOgDødInfo> barnFødselOgDød) {
+    public record RegelInput(List<Periode> perioder,
+                             LocalDate fødselsdato,
+                             boolean harTriggerBeregnHøySats,
+                             boolean harBeregnetHøySatsTidligere,
+                             List<FødselOgDødInfo> barnFødselOgDød) {
     }
-
 
 
 }

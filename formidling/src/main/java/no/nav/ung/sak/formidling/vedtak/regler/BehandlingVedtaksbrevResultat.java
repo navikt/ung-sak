@@ -1,10 +1,14 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Vedtaksbrevresultat for hele behandlingen. Vet om det er flere vedtaksbrev.
@@ -24,6 +28,10 @@ public record BehandlingVedtaksbrevResultat(
         }
     }
 
+    public Optional<Vedtaksbrev> finnVedtaksbrev(DokumentMalType dokumentMalType) {
+        return vedtaksbrevResultater.stream().filter(it -> it.dokumentMalType().equals(dokumentMalType)).findFirst();
+    }
+
     public static BehandlingVedtaksbrevResultat medBrev(
         LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
         List<Vedtaksbrev> vedtaksbrevResultater) {
@@ -35,6 +43,23 @@ public record BehandlingVedtaksbrevResultat(
                 return new BehandlingVedtaksbrevResultat(false, detaljertResultatTimeline, Collections.emptyList() , ingenBrevResultater );
     }
 
+    public Set<DokumentMalType> brevSomMåRedigeres() {
+        return this.vedtaksbrevResultater().stream()
+            .filter(
+                v -> v.vedtaksbrevEgenskaper().kanRedigere() && !v.vedtaksbrevEgenskaper().kanOverstyreRediger())
+            .map(Vedtaksbrev::dokumentMalType)
+            .collect(Collectors.toSet());
+    }
+
+    public String forklaringer() {
+        if (harBrev) {
+            return vedtaksbrevResultater.stream().map(Vedtaksbrev::forklaring).collect(Collectors.joining(", "));
+        } else {
+            return ingenBrevResultater.stream().map(IngenBrev::forklaring).collect(Collectors.joining(", "));
+        }
+    }
+
+
     public String safePrint() {
         return "BehandlingVedtaksbrevResultat{" +
             "harBrev=" + harBrev +
@@ -43,6 +68,5 @@ public record BehandlingVedtaksbrevResultat(
             ", ingenBrevResultater=" + ingenBrevResultater +
             '}';
     }
-
 }
 

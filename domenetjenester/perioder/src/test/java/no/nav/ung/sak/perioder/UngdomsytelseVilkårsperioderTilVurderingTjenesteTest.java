@@ -5,16 +5,13 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.perioder.UtledPeriodeTilVurderingFraUngdomsprogram;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,9 +24,6 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
 
     @Mock
     private UngdomsytelseSøknadsperiodeTjeneste fraSøknadsperiode;
-
-    @Mock
-    private UtledPeriodeTilVurderingFraUngdomsprogram fraUngdomsprogram;
 
     @Mock
     private VilkårResultatRepository vilkårResultatRepository;
@@ -56,7 +50,6 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
 
         mockVilkårPeriode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 2, 28));
         when(fraSøknadsperiode.utledTidslinje(anyLong())).thenReturn(søknadsperiodeTidslinje);
-        when(fraUngdomsprogram.finnTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         when(fraProsesstriggere.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
 
         final var resultat = tjeneste.utled(1L, VilkårType.UNGDOMSPROGRAMVILKÅRET);

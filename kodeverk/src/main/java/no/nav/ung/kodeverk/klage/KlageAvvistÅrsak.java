@@ -1,0 +1,107 @@
+package no.nav.ung.kodeverk.klage;
+
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@JsonFormat(shape = Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+public enum KlageAvvistÅrsak implements Kodeverdi {
+
+    KLAGET_FOR_SENT("KLAGET_FOR_SENT", "Bruker har klaget for sent",
+            "{\"klageAvvistAarsak\":{\"NFP\": {\"lovreferanser\": [\"31\", \"33\"]},\"KA\": {\"lovreferanser\": [\"31\", \"34\"]}}}"),
+    KLAGE_UGYLDIG("KLAGE_UGYLDIG", "Klage er ugyldig", null),
+    IKKE_PAKLAGD_VEDTAK("IKKE_PAKLAGD_VEDTAK", "Ikke påklagd et vedtak",
+            "{\"klageAvvistAarsak\":{\"NFP\": {\"lovreferanser\": [\"28\", \"33\"]},\"KA\": {\"lovreferanser\": [\"28\", \"34\"]}}}"),
+    KLAGER_IKKE_PART("KLAGER_IKKE_PART", "Klager er ikke part",
+            "{\"klageAvvistAarsak\":{\"NFP\": {\"lovreferanser\": [\"28\", \"33\"]},\"KA\": {\"lovreferanser\": [\"28\", \"34\"]}}}"),
+    IKKE_KONKRET("IKKE_KONKRET", "Klagen er ikke konkret",
+            "{\"klageAvvistAarsak\":{\"NFP\": {\"lovreferanser\": [\"32\", \"33\"]},\"KA\": {\"lovreferanser\": [\"32\", \"34\"]}}}"),
+    IKKE_SIGNERT("IKKE_SIGNERT", "Klagen er ikke signert",
+            "{\"klageAvvistAarsak\":{\"NFP\": {\"lovreferanser\": [\"31\", \"33\"]},\"KA\": {\"lovreferanser\": [\"31\", \"34\"]}}}"),
+    UDEFINERT("-", "Ikke definert", null),
+    ;
+
+    private static final Map<String, KlageAvvistÅrsak> KODER = new LinkedHashMap<>();
+
+    public static final String KODEVERK = "KLAGE_AVVIST_AARSAK";
+
+    @Deprecated
+    public static final String DISCRIMINATOR = "KLAGE_AVVIST_AARSAK";
+
+    static {
+        for (var v : values()) {
+            if (KODER.putIfAbsent(v.kode, v) != null) {
+                throw new IllegalArgumentException("Duplikat : " + v.kode);
+            }
+        }
+    }
+
+    private String navn;
+
+    @JsonValue
+    private String kode;
+
+    private String lovHjemmel;
+
+    private KlageAvvistÅrsak(String kode) {
+        this.kode = kode;
+    }
+
+    private KlageAvvistÅrsak(String kode, String navn, String lovHjemmel) {
+        this.kode = kode;
+        this.navn = navn;
+        this.lovHjemmel = lovHjemmel;
+    }
+
+    public static KlageAvvistÅrsak fraKode(final String kode) {
+        if (kode == null) {
+            return null;
+        }
+        var ad = KODER.get(kode);
+        if (ad == null) {
+            throw new IllegalArgumentException("Ukjent KlageAvvistÅrsak: " + kode);
+        }
+        return ad;
+    }
+
+    public static Map<String, KlageAvvistÅrsak> kodeMap() {
+        return Collections.unmodifiableMap(KODER);
+    }
+
+    @Override
+    public String getNavn() {
+        return navn;
+    }
+
+    @Override
+    public String getKodeverk() {
+        return KODEVERK;
+    }
+
+    @Override
+    public String getKode() {
+        return kode;
+    }
+
+    public String getLovHjemmelData() {
+        return lovHjemmel;
+    }
+
+    @Override
+    public String getOffisiellKode() {
+        return getKode();
+    }
+
+    /** Kun til invortes bruk i tester. Ingen garanti for at dette dekker alle konstanter. */
+    public static Map<String, KlageAvvistÅrsak> getHardkodedeKonstanter() {
+        return Set.of(values()).stream().collect(Collectors.toMap(v -> v.getKode(), v -> v));
+    }
+}

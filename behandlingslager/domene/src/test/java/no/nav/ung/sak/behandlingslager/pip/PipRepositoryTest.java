@@ -64,8 +64,8 @@ public class PipRepositoryTest {
 
         Optional<PipBehandlingsData> pipBehandlingsData = pipRepository.hentDataForBehandling(behandling.getId());
         assertThat(pipBehandlingsData).isPresent();
-        assertThat(pipBehandlingsData.get().getBehandligStatus()).isEqualTo(behandling.getStatus().getKode());
-        assertThat(pipBehandlingsData.get().getFagsakStatus()).isEqualTo(behandling.getFagsak().getStatus().getKode());
+        assertThat(pipBehandlingsData.get().behandligStatus()).isEqualTo(behandling.getStatus());
+        assertThat(pipBehandlingsData.get().fagsakStatus()).isEqualTo(behandling.getFagsak().getStatus());
     }
 
     @Test

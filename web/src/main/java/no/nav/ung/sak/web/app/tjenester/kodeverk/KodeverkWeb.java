@@ -4,17 +4,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.ung.kodeverk.Fagsystem;
-import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.RevurderingVarslingÅrsak;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.historikk.HistorikkBegrunnelseType;
-import no.nav.ung.kodeverk.medlem.MedlemskapManuellVurderingType;
-import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 
@@ -32,18 +26,6 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
  * Legger hovedsakleg til typer som ikkje er enkelt tilgjengeleg frå allereie brukte Dto klasser her.
  */
 public class KodeverkWeb {
-    @NotNull
-    @Valid
-    public KodeverkWeb.KodeverkArbeidsforhold arbeidsforhold;
-    public static class KodeverkArbeidsforhold {
-        @NotNull
-        public RelatertYtelseTilstand relatertYtelseTilstand;
-        @NotNull
-        public ArbeidType arbeidType;
-        @NotNull
-        public Arbeidskategori arbeidskategori;
-    }
-
     @NotNull
     @Valid
     public KodeverkWeb.KodeverkBehandling behandling;
@@ -69,26 +51,10 @@ public class KodeverkWeb {
 
     @NotNull
     @Valid
-    public KodeverkHistorikk historikk;
-    public static class KodeverkHistorikk {
-        @NotNull
-        public HistorikkBegrunnelseType historikkBegrunnelseType;
-    }
-
-    @NotNull
-    @Valid
     KodeverkProduksjonsstyring produksjonsstyring;
     public static class KodeverkProduksjonsstyring {
         @NotNull
         public OppgaveÅrsak oppgaveÅrsak;
-    }
-
-    @NotNull
-    @Valid
-    public KodeverkMedlem medlem;
-    public static class KodeverkMedlem {
-        @NotNull
-        public MedlemskapManuellVurderingType medlemskapManuellVurderingType;
     }
 
     @NotNull
@@ -101,14 +67,6 @@ public class KodeverkWeb {
          */
         @NotNull
         public VirksomhetType virksomhetType;
-    }
-
-    @NotNull
-    @Valid
-    public KodeverkOpptjening opptjening;
-    public static class KodeverkOpptjening {
-        @NotNull
-        public OpptjeningAktivitetType opptjeningAktivitetType;
     }
 
     @NotNull

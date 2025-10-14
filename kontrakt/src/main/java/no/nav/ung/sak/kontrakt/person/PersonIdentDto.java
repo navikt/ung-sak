@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -49,7 +50,7 @@ public abstract class PersonIdentDto {
         return diskresjonskode;
     }
 
-    @AbacAttributt("fnr")
+    @StandardAbacAttributt(StandardAbacAttributtType.FNR)
     public String getFnr() {
         return fnr;
     }

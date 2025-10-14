@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.fagsak;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.AttributeOverride;
@@ -42,7 +43,7 @@ public class Fagsak extends BaseEntitet {
     @Column(name = "ytelse_type", nullable = false, updatable = false)
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
-    @Embedded
+    @Convert(converter = AktørIdConverter.class, attributeName = "brukerAktørId")
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId brukerAktørId;
 
@@ -65,6 +66,9 @@ public class Fagsak extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
+    @Column(name = "ikke_digital_bruker", nullable = false)
+    private boolean ikkeDigitalBruker = false;
+
     Fagsak() {
         // Hibernate
     }
@@ -73,6 +77,17 @@ public class Fagsak extends BaseEntitet {
         Objects.requireNonNull(ytelseType, "ytelseType");
         this.ytelseType = ytelseType;
         this.brukerAktørId = søker;
+        if (saksnummer != null) {
+            setSaksnummer(saksnummer);
+        }
+        setPeriode(fom, tom);
+    }
+
+    public Fagsak(FagsakYtelseType ytelseType, AktørId søker, Saksnummer saksnummer, LocalDate fom, LocalDate tom, boolean ikkeDigitalBruker) {
+        Objects.requireNonNull(ytelseType, "ytelseType");
+        this.ytelseType = ytelseType;
+        this.brukerAktørId = søker;
+        this.ikkeDigitalBruker = ikkeDigitalBruker;
         if (saksnummer != null) {
             setSaksnummer(saksnummer);
         }
@@ -97,6 +112,10 @@ public class Fagsak extends BaseEntitet {
 
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
         return new Fagsak(ytelseType, bruker, saksnummer, fom, tom);
+    }
+
+    public static Fagsak opprettNyForIkkeDigitalBruker(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer, LocalDate fom, LocalDate tom) {
+        return new Fagsak(ytelseType, bruker, saksnummer, fom, tom, true);
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -206,5 +225,13 @@ public class Fagsak extends BaseEntitet {
             throw new IllegalArgumentException(String.format("Alle saker må angi en startdato: [%s, %s]", fom, tom));
         }
         this.periode = DatoIntervallEntitet.fra(fom, tom).toRange();
+    }
+
+    public boolean erIkkeDigitalBruker() {
+        return ikkeDigitalBruker;
+    }
+
+    public void setIkkeDigitalBruker(boolean ikkeDigitalBruker) {
+        this.ikkeDigitalBruker = ikkeDigitalBruker;
     }
 }

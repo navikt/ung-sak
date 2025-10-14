@@ -2,9 +2,12 @@ package no.nav.ung.sak.behandling.revurdering;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.k9.prosesstask.api.*;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +46,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     public static final String PERIODER = "perioder";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
-    public static final Set<BehandlingÅrsakType> REGISTERINNHENTING_ÅRSAKER = Set.of(
-        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
-        BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
-        BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
-        BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
-        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+    public static final Set<BehandlingÅrsakType> REGISTERINNHENTING_ÅRSAKER = Stream.of(
+        BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().stream(),
+        BehandlingÅrsakType.årsakerForInnhentingAvPersonopplysninger().stream(),
+        BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream()
+    ).flatMap(Function.identity()).collect(Collectors.toSet());
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
@@ -83,11 +85,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         logContext(fagsak);
 
-        var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId);
+        var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId, BehandlingType.getYtelseBehandlingTyper());
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
         var perioder = utledPerioder(prosessTaskData);
         if (behandlinger.isEmpty()) {
-            var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
             if (sisteVedtak.isPresent() && skalUtsetteKjøring(prosessTaskData, sisteVedtak)) {
                 log.info("Siste vedtatte behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", sisteVedtak.get());
                 prosessTaskTjeneste.lagre(prosessTaskData);

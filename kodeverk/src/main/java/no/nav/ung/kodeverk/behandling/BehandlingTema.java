@@ -6,9 +6,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import java.util.*;
 
 public enum BehandlingTema implements Kodeverdi {
-    PLEIEPENGER_SYKT_BARN("PLEIE", "Pleiepenger sykt barn", "ab0320", FagsakYtelseType.PLEIEPENGER_SYKT_BARN), // ny ordning fom 011017
-    PLEIEPENGER_LIVETS_SLUTTFASE("PLEIE_PPN", "Pleiepenger i livets sluttfase", "ab0094", FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE),
-    OMSORGSPENGER("OMS_OMSORG", "Omsorgspenger", "ab0149", FagsakYtelseType.OMSORGSPENGER),
+    UNGDOMSPROGRAMYTELSEN("UNGDOMSPROGRAMYTELSEN", "Ungdomsprogramytelsen", "ab0564", FagsakYtelseType.UNGDOMSYTELSE),
     UDEFINERT("-", "Ikke definert", null, FagsakYtelseType.UDEFINERT),
 
     ;

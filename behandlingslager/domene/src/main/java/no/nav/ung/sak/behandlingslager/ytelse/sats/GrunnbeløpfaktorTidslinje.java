@@ -17,7 +17,7 @@ public class GrunnbeløpfaktorTidslinje {
         )
     );
 
-    private static final LocalDateTimeline<BigDecimal> LAV_GRUNNBELØPFAKTOR_TIDSLINJE = HØY_GRUNNBELØPFAKTOR_TIDSLINJE.mapValue(it -> it.multiply(BigDecimal.valueOf(2).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)).setScale(5, RoundingMode.HALF_UP));
+    private static final LocalDateTimeline<BigDecimal> LAV_GRUNNBELØPFAKTOR_TIDSLINJE = HØY_GRUNNBELØPFAKTOR_TIDSLINJE.mapValue(it -> it.multiply(BigDecimal.valueOf(2).divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP)).setScale(10, RoundingMode.HALF_UP));
 
     public static LocalDateTimeline<SatsOgGrunnbeløpfaktor> hentGrunnbeløpfaktorTidslinjeFor(LocalDateTimeline<Sats> sats) {
         return sats.stream()

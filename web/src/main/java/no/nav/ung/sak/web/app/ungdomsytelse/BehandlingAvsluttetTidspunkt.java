@@ -1,7 +1,6 @@
 package no.nav.ung.sak.web.app.ungdomsytelse;
 
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -32,7 +31,7 @@ public record BehandlingAvsluttetTidspunkt(LocalDateTime avsluttetTid) implement
     }
 
     @Override
-    public int compareTo(@NotNull BehandlingAvsluttetTidspunkt o) {
+    public int compareTo(BehandlingAvsluttetTidspunkt o) {
         if (this.erAvsluttet() && o.erAvsluttet()) {
             return this.avsluttetTid.compareTo(o.avsluttetTid);
         }

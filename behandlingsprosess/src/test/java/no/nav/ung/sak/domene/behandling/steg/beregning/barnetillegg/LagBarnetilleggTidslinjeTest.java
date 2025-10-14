@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg;
 
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ class LagBarnetilleggTidslinjeTest {
 
     public static final int BARNETILLEGG_SATS = 36;
     public static final int BARNETILLEGG_SATS_HØY = 37;
+    public static final LocalDate ENDRET_SATS_DATO = LocalDate.of(2025, 1, 1);
 
 
     @Test
@@ -31,18 +33,14 @@ class LagBarnetilleggTidslinjeTest {
             new FødselOgDødInfo(AktørId.dummy(), fødselsdato3, null)
         );
 
-        var relevantTidslinje = new LocalDateTimeline<>(
-            LocalDate.of(2019, 12, 15),
-            LocalDate.of(2020, 3, 15),
-            true
-        );
 
-        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
+        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fødselsdato1, dødsdato1, new Barnetillegg(BARNETILLEGG_SATS, 1)),
             new LocalDateSegment<>(fødselsdato2, dødsdato2, new Barnetillegg(BARNETILLEGG_SATS, 1)),
-            new LocalDateSegment<>(fødselsdato3, LocalDate.of(2020, 3, 15), new Barnetillegg(BARNETILLEGG_SATS, 1))));
+            new LocalDateSegment<>(fødselsdato3, ENDRET_SATS_DATO.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS, 1)),
+            new LocalDateSegment<>(ENDRET_SATS_DATO, TIDENES_ENDE, new Barnetillegg(BARNETILLEGG_SATS_HØY, 1))));
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
     }
@@ -59,18 +57,14 @@ class LagBarnetilleggTidslinjeTest {
             new FødselOgDødInfo(AktørId.dummy(), fødselsdato3, null)
         );
 
-        var relevantTidslinje = new LocalDateTimeline<>(
-            LocalDate.of(2019, 12, 15),
-            LocalDate.of(2020, 3, 15),
-            true
-        );
-
-        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
+        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fødselsdato1, fødselsdato2.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS, 1)),
             new LocalDateSegment<>(fødselsdato2, fødselsdato3.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS * 2, 2)),
-            new LocalDateSegment<>(fødselsdato3, LocalDate.of(2020, 3, 15), new Barnetillegg(BARNETILLEGG_SATS * 3, 3))));
+            new LocalDateSegment<>(fødselsdato3, ENDRET_SATS_DATO.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS * 3, 3)),
+            new LocalDateSegment<>(ENDRET_SATS_DATO, TIDENES_ENDE, new Barnetillegg(BARNETILLEGG_SATS_HØY* 3, 3))
+));
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
     }
@@ -85,16 +79,11 @@ class LagBarnetilleggTidslinjeTest {
             new FødselOgDødInfo(AktørId.dummy(), fødselsdato1, dødsdato1)
         );
 
-        var relevantTidslinje = new LocalDateTimeline<>(
-            LocalDate.of(2019, 12, 15),
-            LocalDate.of(2020, 3, 15),
-            true
-        );
-
-        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
+        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fødselsdato1, dødsdato1, new Barnetillegg(BARNETILLEGG_SATS, 1))));
+            new LocalDateSegment<>(fødselsdato1, dødsdato1, new Barnetillegg(BARNETILLEGG_SATS, 1))
+        ));
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
     }
@@ -114,7 +103,7 @@ class LagBarnetilleggTidslinjeTest {
             true
         );
 
-        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
+        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fødselsdato1, dødsdato1, new Barnetillegg(BARNETILLEGG_SATS, 1))));
@@ -131,19 +120,11 @@ class LagBarnetilleggTidslinjeTest {
             new FødselOgDødInfo(AktørId.dummy(), fødselsdato1, null)
         );
 
-        var fomDato = LocalDate.of(2024, 12, 15);
-        var tomDato = LocalDate.of(2025, 3, 15);
-        var relevantTidslinje = new LocalDateTimeline<>(
-            fomDato,
-            tomDato,
-            true
-        );
-
-        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(relevantTidslinje, fødselOgDødInfos);
+        var resultat = LagBarnetilleggTidslinje.beregnBarnetillegg(fødselOgDødInfos);
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fomDato, LocalDate.of(2024, 12, 31), new Barnetillegg(BARNETILLEGG_SATS, 1)),
-            new LocalDateSegment<>(LocalDate.of(2025, 1, 1), tomDato, new Barnetillegg(BARNETILLEGG_SATS_HØY, 1)))
+            new LocalDateSegment<>(fødselsdato1, ENDRET_SATS_DATO.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS, 1)),
+            new LocalDateSegment<>(ENDRET_SATS_DATO, TIDENES_ENDE, new Barnetillegg(BARNETILLEGG_SATS_HØY, 1)))
         );
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);

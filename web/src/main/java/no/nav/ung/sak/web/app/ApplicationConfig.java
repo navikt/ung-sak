@@ -15,6 +15,7 @@ import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 import no.nav.ung.sak.web.server.caching.CacheControlFeature;
+import no.nav.ung.sak.web.server.typedresponse.TypedResponseFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
@@ -59,6 +60,7 @@ public class ApplicationConfig extends ResourceConfig {
 
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
         register(CacheControlFeature.class);
+        register(TypedResponseFeature.class);
 
         property(org.glassfish.jersey.server.ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, true);
 

@@ -181,6 +181,7 @@ public class RegisterdataInnhenter {
     private void mapPersonopplysning(PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
         final PersonInformasjonBuilder.PersonopplysningBuilder builder = informasjonBuilder.getPersonopplysningBuilder(personinfo.getAktørId());
         builder.medFødselsdato(personinfo.getFødselsdato())
+            .medKjønn(personinfo.getKjønn())
             .medNavn(personinfo.getNavn())
             .medDødsdato(personinfo.getDødsdato());
         informasjonBuilder.leggTil(builder);

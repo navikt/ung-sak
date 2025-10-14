@@ -50,7 +50,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     @Inject
     public OpprettOppgaveForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
                                                      UngOppgaveKlient ungOppgaveKlient,
-                                                     @KonfigVerdi(value = "RAPPORTERINGSFRIST_DAG_I_MAANED", defaultVerdi = "6") int rapporteringsfristDagIMåned) {
+                                                     @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int rapporteringsfristDagIMåned) {
 
         this.personinfoAdapter = personinfoAdapter;
         this.ungOppgaveKlient = ungOppgaveKlient;
@@ -70,7 +70,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         ungOppgaveKlient.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
             deltakerIdent.getIdent(),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
-            fom.plusMonths(1).withDayOfMonth(rapporteringsfristDagIMåned + 1).atStartOfDay(),
+            fom.plusMonths(1).withDayOfMonth(rapporteringsfristDagIMåned).atStartOfDay(),
             fom,
             tom
         ));
