@@ -96,6 +96,35 @@ public class AksjonspunktRestTjenesteTest {
         });
     }
 
+    @SuppressWarnings("resource")
+    @Test
+    public void skal_bekrefte_med_behandlingUuid() throws URISyntaxException {
+        // Test that bekreft works when behandlingId is a UUID instead of Long
+        when(behandling.getId()).thenReturn(behandlingId);
+        Collection<BekreftetAksjonspunktDto> aksjonspunkt = new ArrayList<>();
+        aksjonspunkt.add(new KontrollAvManueltOpprettetRevurderingsbehandlingDto());
+
+        // Create DTO with UUID instead of Long ID
+        BekreftedeAksjonspunkterDto apDto = new BekreftedeAksjonspunkterDto();
+        apDto.setBehandlingVersjon(behandlingVersjon);
+        apDto.setBekreftedeAksjonspunktDtoer(aksjonspunkt);
+        no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto behandlingIdDto = new no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto(UUID.randomUUID());
+        java.lang.reflect.Field field;
+        try {
+            field = BekreftedeAksjonspunkterDto.class.getDeclaredField("behandlingId");
+            field.setAccessible(true);
+            field.set(apDto, behandlingIdDto);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class), apDto);
+
+        // Verify that initBehandlingskontroll was called with the Long ID from behandling.getId()
+        verify(behandlingskontrollTjenesteMock).initBehandlingskontroll(behandlingId);
+        verify(aksjonspunktApplikasjonTjenesteMock).bekreftAksjonspunkter(ArgumentMatchers.anyCollection(), anyLong(), any(BehandlingskontrollKontekst.class));
+    }
+
     private AksjonspunktGodkjenningDto opprettetGodkjentAksjonspunkt(boolean godkjent) {
         AksjonspunktGodkjenningDto endretDto = new AksjonspunktGodkjenningDto();
         endretDto.setAksjonspunktKode(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);

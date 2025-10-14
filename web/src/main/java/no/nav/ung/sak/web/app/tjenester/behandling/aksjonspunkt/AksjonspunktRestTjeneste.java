@@ -186,13 +186,13 @@ public class AksjonspunktRestTjeneste {
             BekreftedeAksjonspunkterDto apDto)
         throws URISyntaxException { // NOSONAR
         Long behandlingId = apDto.getBehandlingId();
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
-
-        Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = apDto.getBekreftedeAksjonspunktDtoer();
-
         Behandling behandling = behandlingId != null
             ? behandlingRepository.hentBehandling(behandlingId)
             : behandlingRepository.hentBehandling(apDto.getBehandlingUuid());
+
+        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
+
+        Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = apDto.getBekreftedeAksjonspunktDtoer();
 
         behandlingutredningTjeneste.kanEndreBehandling(behandling.getId(), apDto.getBehandlingVersjon());
 
