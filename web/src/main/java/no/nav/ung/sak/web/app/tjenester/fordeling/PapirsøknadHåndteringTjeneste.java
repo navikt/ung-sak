@@ -7,6 +7,7 @@ import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
+import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
@@ -100,7 +101,7 @@ public class PapirsøknadHåndteringTjeneste {
         Periode periode = new Periode(deltakelse.fraOgMed(), null);
 
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
-        ungOppgaveKlient.løsSøkYtelseOppgave();
+        ungOppgaveKlient.løsSøkYtelseOppgave(new DeltakerDTO(null, deltakerIdent));
 
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
