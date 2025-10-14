@@ -101,6 +101,7 @@ public class PapirsøknadHåndteringTjeneste {
         Periode periode = new Periode(deltakelse.fraOgMed(), null);
 
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
+        //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
         ungOppgaveKlient.løsSøkYtelseOppgave(new DeltakerDTO(null, deltakerIdent));
 
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
