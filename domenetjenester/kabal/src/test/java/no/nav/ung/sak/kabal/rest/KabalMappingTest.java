@@ -66,7 +66,7 @@ class KabalMappingTest {
     @Test
     void kabal_request_mapper_test() {
         Assertions.assertEquals(klageBehandling.getBehandlendeEnhet(), kabalRequest.forrigeBehandlendeEnhet(), "forrigeBehandlendeEnhet");
-        Assertions.assertEquals(klageBehandling.getOpprettetDato().toLocalDate().toString(), kabalRequest.brukersKlageMottattVedtaksinstans(), "brukersKlageMottattVedtaksinstans");
+        Assertions.assertEquals(klageBehandling.getOpprettetDato().toLocalDate(), kabalRequest.brukersKlageMottattVedtaksinstans(), "brukersKlageMottattVedtaksinstans");
         Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.kildeReferanse(), "kildeReferanse");
         Assertions.assertNotNull(kabalRequest.klager(), "klager");
         Assertions.assertEquals("KLAGE", kabalRequest.type(), "type");
