@@ -203,7 +203,9 @@ spec:
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
     - name: KABAL_URL
-      value: https://kabal-api.prod-fss-pub.nais.io
+      value: http://kabal-api.klage
+    - name: KABAL_SCOPE
+      value: api://prod-gcp.klage.kabal-api/.default
 
     # Saf
     - name: SAF_BASE_URL

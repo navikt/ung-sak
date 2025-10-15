@@ -36,7 +36,7 @@ import java.util.UUID;
 
 
 @ApplicationScoped
-@ScopedRestIntegration(scopeKey = "azure.scope.kabal", defaultScope = "api://prod-gcp.klage.kabal-api/.default")
+@ScopedRestIntegration(scopeKey = "kabal.scope", defaultScope = "api://prod-gcp.klage.kabal-api/.default")
 public class KabalRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(KabalRestKlient.class);
@@ -69,7 +69,7 @@ public class KabalRestKlient {
         OidcRestClient oidcRestClient) {
 
         // https://github.com/navikt/kabal-api/tree/main/docs/integrasjon
-        this.endpointKabalApi = toUri(kabalEndpoint, "/api/oversendelse/v2/klage");
+        this.endpointKabalApi = toUri(kabalEndpoint, "/api/oversendelse/v4/sak");
         this.oidcRestClient = oidcRestClient;
     }
 
