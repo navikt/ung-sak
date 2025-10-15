@@ -112,26 +112,26 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private static LocalDateTimeline<InntekterPrKilde> kombinerInntekterFraAlleKilder(LocalDateTimeline<RapporterteInntekter> brukerOgRegisterTidslinje,
                                                                                       LocalDateTimeline<BigDecimal> saksbehandlerFastsatteInntekterTidslinje) {
-        LocalDateTimeline<InntekterPrKilde> combined = brukerOgRegisterTidslinje.combine(saksbehandlerFastsatteInntekterTidslinje,
+        LocalDateTimeline<InntekterPrKilde> kombinerteInntekterFraAlleKilder = brukerOgRegisterTidslinje.combine(saksbehandlerFastsatteInntekterTidslinje,
             FastsettInntektOppdaterer::mapTilInntekterPrKilde,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         // Dersom saksbehandler har satt inntekt uten at det finnes rapportert inntekt fra bruker eller register, må vi likevel få med dette i tidslinjen
-        if (combined.isEmpty()) {
-            combined = saksbehandlerFastsatteInntekterTidslinje.combine(brukerOgRegisterTidslinje,
-                (di, saksbehandletBeløp, rapportert) -> {
-                    if (rapportert == null) {
-                        return new LocalDateSegment<>(di, new InntekterPrKilde(
-                            Set.of(),
-                            Set.of(), saksbehandletBeløp.getValue()));
-                    }
-                    return new LocalDateSegment<>(di, new InntekterPrKilde(
-                        rapportert.getValue().brukerRapporterteInntekter(),
-                        rapportert.getValue().registerRapporterteInntekter(), saksbehandletBeløp.getValue()));
-                }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
-        }
+        return kombinerteInntekterFraAlleKilder.isEmpty() ? brukSaksbehandlersFastsatteInntekt(brukerOgRegisterTidslinje, saksbehandlerFastsatteInntekterTidslinje) : kombinerteInntekterFraAlleKilder;
+    }
 
-        return combined;
+    private static LocalDateTimeline<InntekterPrKilde> brukSaksbehandlersFastsatteInntekt(LocalDateTimeline<RapporterteInntekter> brukerOgRegisterTidslinje, LocalDateTimeline<BigDecimal> saksbehandlerFastsatteInntekterTidslinje) {
+        return saksbehandlerFastsatteInntekterTidslinje.combine(brukerOgRegisterTidslinje,
+            (di, saksbehandletBeløp, rapportert) -> {
+                if (rapportert == null) {
+                    return new LocalDateSegment<>(di, new InntekterPrKilde(
+                        Set.of(),
+                        Set.of(), saksbehandletBeløp.getValue()));
+                }
+                return new LocalDateSegment<>(di, new InntekterPrKilde(
+                    rapportert.getValue().brukerRapporterteInntekter(),
+                    rapportert.getValue().registerRapporterteInntekter(), saksbehandletBeløp.getValue()));
+            }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     private static LocalDateTimeline<BigDecimal> finnSaksbehandlersFastsatteInntekterTidslinje(FastsettInntektDto dto) {
