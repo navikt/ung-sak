@@ -26,7 +26,7 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
     private static final Logger log = LoggerFactory.getLogger(OverføringTilKabalTask.class);
 
     private KabalRestKlient restKlient;
-    private KabalRequestMapper kabalRequestMapper;
+    private KabalRequestMapperV4 kabalRequestMapper;
     private BehandlingRepository repository;
     private TpsTjeneste pdlTjeneste;
     private KlageRepository klageRepository;
@@ -40,7 +40,7 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
     @Inject
     public OverføringTilKabalTask(KabalRestKlient restKlient,
                                   BehandlingRepositoryProvider repositoryProvider,
-                                  KabalRequestMapper kabalRequestMapper,
+                                  KabalRequestMapperV4 kabalRequestMapper,
                                   BehandlingRepository repository,
                                   TpsTjeneste pdlTjeneste,
                                   KlageRepository klageRepository,
@@ -63,9 +63,8 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
         var klageVurdering = klageUtredning.hentKlagevurdering(KlageVurdertAv.VEDTAKSINSTANS)
             .orElseThrow(() -> new IllegalStateException("Fann ikke NFP-klageVurdering for klage: " + behandling));
 
-        var request = kabalRequestMapper.map(behandling, personIdent, klageUtredning);
-
         if (klageEnabled) {
+            var request = kabalRequestMapper.map(behandling, personIdent, klageUtredning);
             log.info("Overfører til kabal - klagevurdering={}", klageVurdering);
             restKlient.overførKlagebehandling(request);
         }
