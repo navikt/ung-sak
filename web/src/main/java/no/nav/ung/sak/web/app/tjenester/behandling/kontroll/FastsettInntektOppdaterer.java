@@ -108,9 +108,18 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private static LocalDateTimeline<InntekterPrKilde> kombinerInntekterFraAlleKilder(LocalDateTimeline<RapporterteInntekter> brukerOgRegisterTidslinje,
                                                                                       LocalDateTimeline<BigDecimal> saksbehandlerFastsatteInntekterTidslinje) {
-        return brukerOgRegisterTidslinje.combine(saksbehandlerFastsatteInntekterTidslinje,
-            FastsettInntektOppdaterer::mapTilInntekterPrKilde,
-            LocalDateTimeline.JoinStyle.LEFT_JOIN);
+
+        return saksbehandlerFastsatteInntekterTidslinje.combine(brukerOgRegisterTidslinje,
+            (di, saksbehandletBeløp, rapportert) -> {
+            if (rapportert == null) {
+                return new LocalDateSegment<>(di, new InntekterPrKilde(
+                    Set.of(),
+                    Set.of(), saksbehandletBeløp.getValue()));
+            }
+                return new LocalDateSegment<>(di, new InntekterPrKilde(
+                    rapportert.getValue().brukerRapporterteInntekter(),
+                    rapportert.getValue().registerRapporterteInntekter(), saksbehandletBeløp.getValue()));
+            }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     private static LocalDateTimeline<BigDecimal> finnSaksbehandlersFastsatteInntekterTidslinje(FastsettInntektDto dto) {
@@ -120,12 +129,6 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
             .reduce(LocalDateTimeline::crossJoin).orElse(LocalDateTimeline.empty());
     }
 
-    private static LocalDateSegment<InntekterPrKilde> mapTilInntekterPrKilde(LocalDateInterval di, LocalDateSegment<RapporterteInntekter> rapportert, LocalDateSegment<BigDecimal> saksbehandlet) {
-        return new LocalDateSegment<>(di, new InntekterPrKilde(
-            rapportert.getValue().brukerRapporterteInntekter(),
-            rapportert.getValue().registerRapporterteInntekter(), saksbehandlet == null ? null : saksbehandlet.getValue()));
-    }
-
     private void opprettHistorikkinnslag(FastsettInntektDto dto, BehandlingReferanse behandlingReferanse, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
 
         var linjer = dto.getPerioder().stream()
@@ -133,7 +136,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
                 new ArrayList<>(List.of(
                     HistorikkinnslagLinjeBuilder.fraTilEquals("Inntekt for " + finnMåned(p), null, finnValgTekst(sammenslåtteInntekterTidslinje.getSegment(new LocalDateInterval(p.periode().getFom(), p.periode().getTom())))),
                     HistorikkinnslagLinjeBuilder.plainTekstLinje(p.begrunnelse())
-                    )))
+                )))
             .reduce((s1, s2) -> {
                 s1.add(HistorikkinnslagLinjeBuilder.LINJESKIFT);
                 s1.addAll(s2);
@@ -152,8 +155,10 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private static String finnValgTekst(LocalDateSegment<ManueltKontrollertInntekt> segment) {
         return switch (segment.getValue().kilde()) {
-            case BRUKER -> "Rapportert inntekt fra deltaker: " + formater(segment.getValue().samletInntekt().intValue());
-            case REGISTER -> "Rapportert inntekt fra a-ordningen: " + formater(segment.getValue().samletInntekt().intValue());
+            case BRUKER ->
+                "Rapportert inntekt fra deltaker: " + formater(segment.getValue().samletInntekt().intValue());
+            case REGISTER ->
+                "Rapportert inntekt fra a-ordningen: " + formater(segment.getValue().samletInntekt().intValue());
             case SAKSBEHANDLER -> "Manuelt fastsatt beløp: " + formater(segment.getValue().samletInntekt().intValue());
         };
     }
