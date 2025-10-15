@@ -2,9 +2,14 @@ package no.nav.ung.sak.kabal.rest;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -13,7 +18,7 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.sak.kabal.kontrakt.KabalRequest;
+import no.nav.ung.sak.kabal.kontrakt.KabalRequestv4;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -24,8 +29,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -70,7 +73,7 @@ public class KabalRestKlient {
         this.oidcRestClient = oidcRestClient;
     }
 
-    public void overførKlagebehandling(KabalRequest request) {
+    public void overførKlagebehandling(KabalRequestv4 request) {
         URIBuilder builder = new URIBuilder(endpointKabalApi);
         try {
             HttpPost kall = new HttpPost(builder.build());
@@ -78,7 +81,7 @@ public class KabalRestKlient {
             kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
             post(kall);
         } catch (IOException | URISyntaxException e) {
-            throw RestTjenesteFeil.FEIL.feilKallTilKabal(request.getBehandlingUuid(), e).toException();
+            throw RestTjenesteFeil.FEIL.feilKallTilKabal(request.behandlingUuid(), e).toException();
         }
     }
 

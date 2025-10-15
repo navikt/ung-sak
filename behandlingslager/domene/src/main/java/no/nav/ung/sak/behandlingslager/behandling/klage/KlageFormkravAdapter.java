@@ -1,12 +1,16 @@
 package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 
+import no.nav.ung.kodeverk.hjemmel.KlageHjemmel;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static no.nav.ung.kodeverk.hjemmel.KlageHjemmel.*;
 
 public class KlageFormkravAdapter {
 
@@ -89,6 +93,47 @@ public class KlageFormkravAdapter {
             return Optional.of(KlageVurderingType.AVVIS_KLAGE);
         }
         return Optional.empty();
+    }
+
+    public List<KlageHjemmel> hentFolketrygdParagrafer() {
+        List<KlageHjemmel> paragrafer = new ArrayList<>();
+
+        if (!isFristOverholdt()) {
+            paragrafer.add(FTRL_KLAGE_ANKE_TRYGDESAKER);
+        }
+
+        return paragrafer;
+    }
+
+    public List<KlageHjemmel> hentForvaltningslovParagrafer() {
+        List<KlageHjemmel> paragrafer = new ArrayList<>();
+
+        paragrafer.add(FL_SAKSFORBEREDELSE_I_KLAGESAK);
+
+        if (!gjelderVedtak()) {
+            paragrafer.add(FL_VEDTAK_SOM_KAN_PÅKLAGES);
+        }
+
+        if (!isErKlagerPart()) {
+            paragrafer.add(FL_VEDTAK_SOM_KAN_PÅKLAGES);
+        }
+
+        if (!isFristOverholdt()) {
+            paragrafer.add(FL_OVERSITTING_AV_KLAGEFRIST);
+        }
+
+        if (!isErKonkret()) {
+            paragrafer.add(FL_ADRESSAT_FORM_OG_INNHOLD);
+        }
+
+        if (!isErSignert()) {
+            paragrafer.add(FL_ADRESSAT_FORM_OG_INNHOLD);
+        }
+
+        return paragrafer.stream()
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
     }
 
 

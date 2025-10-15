@@ -90,7 +90,6 @@ public class KlageUtredningEntitet extends BaseEntitet {
         }
         formkrav.oppdater(formkravAdapter);
         if (!formkrav.hentAvvistÅrsaker().isEmpty()) {
-            // TODO: Utled og lagre hjemmel brukt i avvisning, i vurdering
             setKlagevurdering(KlageVurderingAdapter.Templates.AVVIST_VURDERING_VEDTAKSINSTANS);
         }
         return formkrav.utledAvvistÅrsak();
