@@ -117,21 +117,11 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         // Dersom saksbehandler har satt inntekt uten at det finnes rapportert inntekt fra bruker eller register, må vi likevel få med dette i tidslinjen
-        return kombinerteInntekterFraAlleKilder.isEmpty() ? brukSaksbehandlersFastsatteInntekt(brukerOgRegisterTidslinje, saksbehandlerFastsatteInntekterTidslinje) : kombinerteInntekterFraAlleKilder;
+        return kombinerteInntekterFraAlleKilder.isEmpty() ? brukSaksbehandlersFastsatteInntekt(saksbehandlerFastsatteInntekterTidslinje) : kombinerteInntekterFraAlleKilder;
     }
 
-    private static LocalDateTimeline<InntekterPrKilde> brukSaksbehandlersFastsatteInntekt(LocalDateTimeline<RapporterteInntekter> brukerOgRegisterTidslinje, LocalDateTimeline<BigDecimal> saksbehandlerFastsatteInntekterTidslinje) {
-        return saksbehandlerFastsatteInntekterTidslinje.combine(brukerOgRegisterTidslinje,
-            (di, saksbehandletBeløp, rapportert) -> {
-                if (rapportert == null) {
-                    return new LocalDateSegment<>(di, new InntekterPrKilde(
-                        Set.of(),
-                        Set.of(), saksbehandletBeløp.getValue()));
-                }
-                return new LocalDateSegment<>(di, new InntekterPrKilde(
-                    rapportert.getValue().brukerRapporterteInntekter(),
-                    rapportert.getValue().registerRapporterteInntekter(), saksbehandletBeløp.getValue()));
-            }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    private static LocalDateTimeline<InntekterPrKilde> brukSaksbehandlersFastsatteInntekt(LocalDateTimeline<BigDecimal> saksbehandlerFastsatteInntekterTidslinje) {
+        return saksbehandlerFastsatteInntekterTidslinje.mapSegment(bigDecimal -> new InntekterPrKilde(Set.of(), Set.of(), bigDecimal));
     }
 
     private static LocalDateTimeline<BigDecimal> finnSaksbehandlersFastsatteInntekterTidslinje(FastsettInntektDto dto) {
