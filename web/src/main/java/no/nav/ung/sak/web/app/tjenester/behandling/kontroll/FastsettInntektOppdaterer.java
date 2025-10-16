@@ -90,12 +90,15 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
                 yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.BRUKER, summerRapporterteInntekter(inntekt.getValue().brukersRapporterteInntekt()), valgOgBegrunnelse.getValue().begrunnelse()));
             }
             case BRUK_REGISTER_INNTEKT -> {
-                Set<RapportertInntekt> inntekter = inntekt == null ? Set.of() : inntekt.getValue().registersRapporterteInntekt();
-                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.REGISTER, summerRapporterteInntekter(inntekter), valgOgBegrunnelse.getValue().begrunnelse()));
+                Set<RapportertInntekt> registersRapporterteInntekt = inntekt == null ? Set.of() : inntekt.getValue().registersRapporterteInntekt;
+                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.REGISTER, summerRapporterteInntekter(registersRapporterteInntekt), valgOgBegrunnelse.getValue().begrunnelse()));
             }
             case MANUELT_FASTSATT -> {
-                BigDecimal inntekter = inntekt == null ? BigDecimal.ZERO : inntekt.getValue().saksbehandlersFastsatteInntekt();
-                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.SAKSBEHANDLER, inntekter, valgOgBegrunnelse.getValue().begrunnelse()));
+                if (inntekt == null) {
+                    throw new IllegalArgumentException("Kan ikke bruke saksbehandlers fastsatte inntekt for periode " + di + " da saksbehandler ikke har fastsatt inntekt i perioden");
+                }
+                BigDecimal saksbehandlersFastsatteInntekt = inntekt.getValue().saksbehandlersFastsatteInntekt;
+                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.SAKSBEHANDLER, saksbehandlersFastsatteInntekt, valgOgBegrunnelse.getValue().begrunnelse()));
             }
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
