@@ -98,7 +98,7 @@ class KabalMappingTest {
                "tilknyttedeJournalposter":[
                ],
                "brukersKlageMottattVedtaksinstans":"dagensDato",
-               "ytelse": "UNG"
+               "ytelse": "UNG_UNG"
             }
             """;
 

@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
+class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
-    KlageAvvistTest() {
+    KlageOversendtTest() {
         super(1, "NAV har avvist klagen din på vedtaket om ");
     }
 
@@ -32,7 +32,7 @@ class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
                 NAV har avvist klagen din på vedtaket om ungdomsprogramytelse \
                 Vi har avvist klagen fordi du har klaget for sent. \
                 Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen. \
-                FTRL/FL \
+                Vedtaket er gjort etter folketrygdloven § 21-12 og forvaltningsloven §§ 31 og 33. \
                 """);
 
 
