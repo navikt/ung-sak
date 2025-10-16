@@ -74,7 +74,7 @@ public class KabalRequestMapperV4 {
 
     private String mapK9YtelseTilKabal(FagsakYtelseType fagsakYtelseType) {
         return switch (fagsakYtelseType) {
-            case UNGDOMSYTELSE -> FagsakYtelseType.UNGDOMSYTELSE.getKode();
+            case UNGDOMSYTELSE -> "UNG_UNG";
             default -> FagsakYtelseType.UDEFINERT.getKode();
         };
     }
