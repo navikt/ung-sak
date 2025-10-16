@@ -30,7 +30,7 @@ public class KlageOversendtInnholdBygger implements VedtaksbrevInnholdBygger {
 
         return new TemplateInnholdResultat(TemplateType.KLAGE_OVERSENDT,
             new KlageOversendtDto(
-                "NAV Klageinstans Nord",
+                "NAV Klageinstans Sør",
                 fritekst
             )
         );

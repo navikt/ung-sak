@@ -13,41 +13,41 @@ import org.junit.jupiter.api.Test;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
+class KlageMedholdTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
-    KlageOversendtTest() {
-        super(1, "Vi har sendt saken til NAV Klageinstans");
+    KlageMedholdTest() {
+        super(1, "NAV har omgjort vedtaket ditt om ");
     }
 
 
     @Test
-    void standardOversendtKlage() {
+    void standardMedholdKlage() {
         TestScenarioBuilder testScenarioBuilder = FørstegangsbehandlingScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
-        UngKlageTestScenario klageScenario = KlageScenarioer.klageOversendt(testScenarioBuilder);
+        UngKlageTestScenario klageScenario = KlageScenarioer.klageMedhold(testScenarioBuilder);
 
         var klage = KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
             """
-                Vi har sendt saken til NAV Klageinstans \
-                Vi har vurdert klagen på vedtaket om ungdomsprogramytelse, og kommet fram til at vedtaket ikke \
-                endres. NAV Klageinstans skal derfor vurdere saken din på nytt. Du får melding fra NAV Klageinstans når \
-                de har mottatt saken. Du finner oversikt over saksbehandlingstidene på nav.no/saksbehandlingstider. \
+                NAV har omgjort vedtaket ditt om ungdomsprogramytelse \
+                Etter at du klaget har vi vurdert saken på nytt. Vi har kommet fram til at vedtaket gjøres om. \
                 Dette har vi lagt vekt på i vurderingen vår \
                 FRITEKST I BREV \
-                Har du nye opplysninger eller ønsker å uttale deg, kan du sende dette via klage.nav.no/nb/ettersendelse/klage/SYKDOM_I_FAMILIEN. Velg NAV-enhet: NAV Klageinstans Sør. \
+                Du må melde fra om endringer \
+                Dersom det skjer endringer som kan ha betydning for vedtaket, må du straks melde fra til NAV. Du finner \
+                mer informasjon på nav.no/rettogplikt. \
                 """);
 
 
         GenerertBrev generertBrev = genererVedtaksbrev(klage);
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.KLAGE_OVERSENDT);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.KLAGE_MEDHOLD);
 
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har sendt saken til NAV Klageinstans</h1>"
+                "<h1>NAV har omgjort vedtaket ditt om ungdomsprogramytelse</h1>"
             );
 
     }
@@ -56,7 +56,7 @@ class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
     @Override
     protected Behandling lagScenarioForFellesTester() {
         TestScenarioBuilder påklagdBehandlingScenario = FørstegangsbehandlingScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
-        UngKlageTestScenario klageScenario = KlageScenarioer.klageOversendt(påklagdBehandlingScenario);
+        UngKlageTestScenario klageScenario = KlageScenarioer.klageMedhold(påklagdBehandlingScenario);
         return KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
     }
 }
