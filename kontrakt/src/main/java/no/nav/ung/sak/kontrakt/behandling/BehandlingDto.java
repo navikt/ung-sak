@@ -38,8 +38,6 @@ public class BehandlingDto {
 
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "visningsnavn")
-    @Size(max = 100)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private BehandlingVisningsnavn visningsnavn;
 
     @JsonInclude(value = Include.NON_EMPTY)

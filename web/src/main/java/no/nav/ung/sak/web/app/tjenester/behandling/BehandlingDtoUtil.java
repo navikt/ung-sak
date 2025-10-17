@@ -102,7 +102,7 @@ public class BehandlingDtoUtil {
             .toList();
 
         if (behandlingÅrsakerTyper.isEmpty()) {
-            return null;
+            return BehandlingVisningsnavn.INGEN_RELEVANT_BEHANDLINGÅRSAK;
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT == it || BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT == it)) {
             return BehandlingVisningsnavn.KONTROLL_AV_INNTEKT;
@@ -119,7 +119,7 @@ public class BehandlingDtoUtil {
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM == it || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
             return BehandlingVisningsnavn.UNGDOMSPROGRAMENDRING;
         }
-        return null;
+        return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;
     }
 
     static Optional<BehandlingÅrsakDto> førsteÅrsak(Behandling behandling) {
