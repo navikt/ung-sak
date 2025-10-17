@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.klage.KlageFormkravAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -12,6 +13,10 @@ import no.nav.ung.sak.formidling.template.dto.KlageAvvistDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Dependent
 public class KlageAvvistInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -39,8 +44,22 @@ public class KlageAvvistInnholdBygger implements VedtaksbrevInnholdBygger {
                 !formkravA.gjelderVedtak(),
                 !formkravA.isErKlagerPart(),
                 !formkravA.isErKonkret(),
-                "FTRL/FL"   // TODO: Utled hjemler
+                lagHjemmelTekst(formkravA)
             )
         );
+    }
+
+    public static String lagHjemmelTekst(KlageFormkravAdapter paragrafBygger) {
+        String hjemler = Stream.of(
+                HjemmelMapper.lagTekst(paragrafBygger.hentFolketrygdParagrafer(), "folketrygdloven"),
+                HjemmelMapper.lagTekst(paragrafBygger.hentForvaltningslovParagrafer(), "forvaltningsloven")
+            ).filter(Objects::nonNull)
+            .collect(Collectors.joining(" og "));
+
+        if (hjemler.isEmpty()) {
+            throw new IllegalStateException("Mangler hjemmeltekst");
+        }
+
+        return "Vedtaket er gjort etter " + hjemler + ".";
     }
 }

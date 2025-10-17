@@ -13,39 +13,41 @@ import org.junit.jupiter.api.Test;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
+class KlageMedholdTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
-    KlageAvvistTest() {
-        super(1, "NAV har avvist klagen din på vedtaket om ");
+    KlageMedholdTest() {
+        super(1, "NAV har omgjort vedtaket ditt om ");
     }
 
 
     @Test
-    void standardAvvistKlage() {
+    void standardMedholdKlage() {
         TestScenarioBuilder testScenarioBuilder = FørstegangsbehandlingScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
-        UngKlageTestScenario klageScenario = KlageScenarioer.klageAvvist(testScenarioBuilder);
+        UngKlageTestScenario klageScenario = KlageScenarioer.klageMedhold(testScenarioBuilder);
 
         var klage = KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
             """
-                NAV har avvist klagen din på vedtaket om ungdomsprogramytelse \
-                Vi har avvist klagen fordi du har klaget for sent. \
-                Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen. \
-                Vedtaket er gjort etter folketrygdloven § 21-12 og forvaltningsloven §§ 31 og 33. \
+                NAV har omgjort vedtaket ditt om ungdomsprogramytelse \
+                Etter at du klaget har vi vurdert saken på nytt. Vi har kommet fram til at vedtaket gjøres om. \
+                Dette har vi lagt vekt på i vurderingen vår \
+                FRITEKST I BREV \
+                Du må melde fra om endringer \
+                Dersom det skjer endringer som kan ha betydning for vedtaket, må du straks melde fra til NAV. Du finner \
+                mer informasjon på nav.no/rettogplikt. \
                 """);
 
 
-
         GenerertBrev generertBrev = genererVedtaksbrev(klage);
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.KLAGE_AVVIST);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.KLAGE_MEDHOLD);
 
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>NAV har avvist klagen din på vedtaket om ungdomsprogramytelse</h1>"
+                "<h1>NAV har omgjort vedtaket ditt om ungdomsprogramytelse</h1>"
             );
 
     }
@@ -54,7 +56,7 @@ class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
     @Override
     protected Behandling lagScenarioForFellesTester() {
         TestScenarioBuilder påklagdBehandlingScenario = FørstegangsbehandlingScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
-        UngKlageTestScenario klageScenario = KlageScenarioer.klageAvvist(påklagdBehandlingScenario);
+        UngKlageTestScenario klageScenario = KlageScenarioer.klageMedhold(påklagdBehandlingScenario);
         return KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
     }
 }
