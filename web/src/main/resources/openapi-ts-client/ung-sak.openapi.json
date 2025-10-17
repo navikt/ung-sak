@@ -2068,10 +2068,7 @@
             "type" : "integer"
           },
           "visningsnavn" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$",
-            "type" : "string"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.BehandlingVisningsnavn"
           }
         },
         "required" : [ "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
@@ -2158,6 +2155,11 @@
         },
         "required" : [ "stegStatus", "stegType" ],
         "type" : "object"
+      },
+      "ung.sak.kontrakt.behandling.BehandlingVisningsnavn" : {
+        "enum" : [ "BEREGNING_AV_HØY_SATS", "ENDRING_AV_BARNETILLEGG", "BRUKERS_DØDSFALL", "UNGDOMSPROGRAMENDRING", "KONTROLL_AV_INNTEKT", "INGEN_RELEVANT_BEHANDLINGÅRSAK", "FLERE_BEHANDLINGÅRSAKER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "BEREGNING_AV_HØY_SATS", "ENDRING_AV_BARNETILLEGG", "BRUKERS_DØDSFALL", "UNGDOMSPROGRAMENDRING", "KONTROLL_AV_INNTEKT", "INGEN_RELEVANT_BEHANDLINGÅRSAK", "FLERE_BEHANDLINGÅRSAKER" ]
       },
       "ung.sak.kontrakt.behandling.BehandlingsresultatDto" : {
         "properties" : {
