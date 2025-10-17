@@ -95,7 +95,11 @@ public class BehandlingDtoUtil {
     }
 
     private static String utledVisningsnavn(Behandling behandling) {
-        final var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper().stream().filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER).toList();
+        final var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper().stream()
+            .filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
+            .filter(it -> it != BehandlingÅrsakType.RE_REGISTEROPPLYSNING)
+            .toList();
+
         if (behandlingÅrsakerTyper.isEmpty()) {
             return null;
         }
