@@ -81,12 +81,39 @@ class BehandlingDtoUtilTest {
     }
 
     @Test
+    void forventer_ingen_relevant_behandlingsårsak_når_kun_re_inntektsopplysning() {
+        Behandling behandling = mockBehandling();
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING));
+
+        BehandlingDto dto = new BehandlingDto();
+        BehandlingDtoUtil.setStandardfelter(behandling, dto, null, false);
+
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.INGEN_RELEVANT_BEHANDLINGÅRSAK);
+    }
+
+    @Test
     void forventer_kontroll_av_inntekt_for_kombinasjon_av_inntektsårsaker() {
         Behandling behandling = mockBehandling();
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
             BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
             BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT
         ));
+
+        BehandlingDto dto = new BehandlingDto();
+        BehandlingDtoUtil.setStandardfelter(behandling, dto, null, false);
+
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.KONTROLL_AV_INNTEKT);
+    }
+
+    @Test
+    void forventer_kontroll_av_inntekt_når_re_inntektsopplysning_kombineres_med_andre_inntektsårsaker() {
+        Behandling behandling = mock(Behandling.class);
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
+            BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING,
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
+            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT
+        ));
+        when(behandling.getBehandlendeOrganisasjonsEnhet()).thenReturn(organisasjonsEnhet);
 
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, dto, null, false);
