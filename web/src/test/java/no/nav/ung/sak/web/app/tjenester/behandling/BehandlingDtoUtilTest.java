@@ -95,6 +95,7 @@ class BehandlingDtoUtilTest {
     void forventer_kontroll_av_inntekt_for_kombinasjon_av_inntektsårsaker() {
         Behandling behandling = mockBehandling();
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
+            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
             BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT
         ));
 
