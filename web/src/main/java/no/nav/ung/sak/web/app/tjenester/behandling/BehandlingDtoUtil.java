@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -96,9 +97,20 @@ public class BehandlingDtoUtil {
     }
 
     private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling) {
+        final var relevanteÅrsaker = Set.of(
+            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
+            BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
+            BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+            BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+        );
+
+        // Kun behold behandlingsårsaker som faktisk har en spesifikk visningsnavnlogikk
         final var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper().stream()
-            .filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER)
-            .filter(it -> it != BehandlingÅrsakType.RE_REGISTEROPPLYSNING)
+            .filter(relevanteÅrsaker::contains)
             .toList();
 
         if (behandlingÅrsakerTyper.isEmpty()) {
