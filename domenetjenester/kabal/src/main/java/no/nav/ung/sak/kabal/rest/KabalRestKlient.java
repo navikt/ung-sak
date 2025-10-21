@@ -55,7 +55,7 @@ public class KabalRestKlient {
         .setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE)
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
-    private OidcRestClient oidcRestClient;
+    private OidcRestClient restClient;
 
     private URI endpointKabalApi;
 
@@ -65,38 +65,19 @@ public class KabalRestKlient {
 
     @Inject
     public KabalRestKlient(
-        @KonfigVerdi(value = "kabal.url", defaultVerdi = "http://kabal-api") URI kabalEndpoint,
+        @KonfigVerdi(value = "kabal.url", defaultVerdi = "http://kabal-api.klage") URI kabalEndpoint,
         OidcRestClient oidcRestClient) {
 
         // https://github.com/navikt/kabal-api/tree/main/docs/integrasjon
         this.endpointKabalApi = toUri(kabalEndpoint, "/api/oversendelse/v4/sak");
-        this.oidcRestClient = oidcRestClient;
+        this.restClient = oidcRestClient;
     }
 
     public void overførKlagebehandling(KabalRequestv4 request) {
-        URIBuilder builder = new URIBuilder(endpointKabalApi);
         try {
-            HttpPost kall = new HttpPost(builder.build());
-            var json = objectMapper.writer().writeValueAsString(request);
-            kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
-            post(kall);
-        } catch (IOException | URISyntaxException e) {
+            restClient.post(endpointKabalApi, request);
+        } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilKabal(request.behandlingUuid(), e).toException();
-        }
-    }
-
-    private void post(HttpUriRequest request) throws IOException {
-        try (var httpResponse = oidcRestClient.execute(request)) {
-            int responseCode = httpResponse.getStatusLine().getStatusCode();
-            if (responseCode == HttpStatus.SC_OK || responseCode == HttpStatus.SC_CREATED) {
-                return;
-            } else if (responseCode == HttpStatus.SC_BAD_REQUEST) {
-                throw RestTjenesteFeil.FEIL.feilKallTilKabal(EntityUtils.toString(httpResponse.getEntity())).toException();
-            } else {
-                throw RestTjenesteFeil.FEIL.feilVedKallTilKabal(EntityUtils.toString(httpResponse.getEntity())).toException();
-            }
-        } catch (RuntimeException re) {
-            throw re;
         }
     }
 
@@ -112,14 +93,7 @@ public class KabalRestKlient {
     interface RestTjenesteFeil extends DeklarerteFeil {
         static final RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "K9KLAGE-KABAL-1000011", feilmelding = "Feil ved kall til Kabal: %s", logLevel = LogLevel.ERROR)
-        Feil feilVedKallTilKabal(String feilmelding);
-
-        @TekniskFeil(feilkode = "K9KLAGE-KABAL-1000012", feilmelding = "Feil ved kall til Kabal: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilKabal(String feilmelding);
-
         @TekniskFeil(feilkode = "K9KLAGE-KABAL-1000014", feilmelding = "Feil ved kall til Kabal: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilKabal(UUID behandlingUuid, Throwable t);
     }
-
 }
