@@ -65,7 +65,7 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
 
         if (klageEnabled) {
             var request = kabalRequestMapper.map(behandling, personIdent, klageUtredning);
-            log.info("Overfører til kabal - klagevurdering={}", klageVurdering);
+            log.info("Overfører til kabal - request={}", request);
             restKlient.overførKlagebehandling(request);
         }
     }

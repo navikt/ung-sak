@@ -56,11 +56,9 @@ public record KabalRequestv4(
         return "KabalRequest{" +
             ", avsenderEnhet='" + forrigeBehandlendeEnhet + '\'' +
             ", frist='" + frist + '\'' +
-            ", hjemler=" + hjemler +
+            ", hjemler=" + hjemler + '\'' +
             ", kildeReferanse='" + kildeReferanse + '\'' +
-            ", klager=" + klager +
-            ", kommentar='" + kommentar + '\'' +
-            ", tilknyttedeJournalposter=" + tilknyttedeJournalposter +
+            ", tilknyttedeJournalposter=" + tilknyttedeJournalposter + '\'' +
             ", type='" + type + '\'' +
             ", ytelse='" + ytelse + '\'' +
             ", fagsak=" + fagsak +
