@@ -78,6 +78,8 @@ spec:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
         - application: ung-tilbake
+        - application: kabal-api
+          namespace: klage
       external:
         - host: "dokarkiv-q2.dev-fss-pub.nais.io"
         - host: "k9-abakus.dev-fss-pub.nais.io"

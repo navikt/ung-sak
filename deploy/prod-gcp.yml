@@ -79,6 +79,8 @@ spec:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
         - application: ung-sak
+        - application: kabal-api
+          namespace: klage
         #kommenter inn når ung-tilbake er i prod
         #- application: ung-tilbake
       external:
