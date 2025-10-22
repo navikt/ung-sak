@@ -2,8 +2,8 @@ package no.nav.ung.sak.kabal.kontrakt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,19 +12,32 @@ public record KabalRequestv4(
 
     @JsonIgnore
     UUID behandlingUuid,
+
+    @NotNull
     String type,
+
     OversendtKlager klager,
+
+    @NotNull
     OversendtSakenGjelder sakenGjelder,
-    OversendtProsessfullmektig prosessfullmektig,
+
+    @NotNull
     OversendtSak fagsak,
+
+    @NotNull
     String kildeReferanse,
+
+    @NotNull
     List<String> hjemler,
+
+    @NotNull
     String forrigeBehandlendeEnhet,
+
+    @NotNull
     List<String> tilknyttedeJournalposter,
-    LocalDate brukersKlageMottattVedtaksinstans,
-    LocalDate frist,
-    String ytelse,
-    String kommentar        // Kommentarer fra saksbehandler i førsteinstans som ikke er med i oversendelsesbrevet klager mottar
+
+    @NotNull
+    String ytelse
 ) {
 
     public record OversendtKlager(OversendtPartId id) { }
@@ -53,8 +66,7 @@ public record KabalRequestv4(
     @Override
     public String toString() {
         return "KabalRequest{" +
-            ", avsenderEnhet='" + forrigeBehandlendeEnhet + '\'' +
-            ", frist='" + frist + '\'' +
+            "forrigeBehandlendeEnhet='" + forrigeBehandlendeEnhet + '\'' +
             ", hjemler=" + hjemler + '\'' +
             ", kildeReferanse='" + kildeReferanse + '\'' +
             ", tilknyttedeJournalposter=" + tilknyttedeJournalposter + '\'' +

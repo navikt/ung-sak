@@ -3,7 +3,6 @@ package no.nav.ung.sak.kabal.rest;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
@@ -20,11 +19,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-
 import static no.nav.ung.sak.kabal.rest.KabalRestKlient.objectMapper;
 
-class KabalMappingTest {
+class KabalRequestMapperv4Test {
 
     private static Behandling klageBehandling;
     private static KabalRequestv4 kabalRequest;
@@ -47,7 +44,7 @@ class KabalMappingTest {
 
         var klageVurderingAdapter = new KlageVurderingAdapter(
             KlageVurderingType.STADFESTE_YTELSESVEDTAK, KlageMedholdÅrsak.UDEFINERT, KlageVurderingOmgjør.UDEFINERT,
-            "-", "-", Hjemmel.UNG_FORSKRIFT_PARAGRAF_11, "kabalref", KlageVurdertAv.VEDTAKSINSTANS);
+            "-", "-", null, "kabalref", KlageVurdertAv.VEDTAKSINSTANS);
 
         klageUtredning.setKlagevurdering(klageVurderingAdapter);
 
@@ -66,7 +63,6 @@ class KabalMappingTest {
     @Test
     void kabal_request_mapper_test() {
         Assertions.assertEquals(klageBehandling.getBehandlendeEnhet(), kabalRequest.forrigeBehandlendeEnhet(), "forrigeBehandlendeEnhet");
-        Assertions.assertEquals(klageBehandling.getOpprettetDato().toLocalDate(), kabalRequest.brukersKlageMottattVedtaksinstans(), "brukersKlageMottattVedtaksinstans");
         Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.kildeReferanse(), "kildeReferanse");
         // Assertions.assertNotNull(kabalRequest.klager(), "klager");
         Assertions.assertNotNull(kabalRequest.sakenGjelder(), "sakenGjelder");
@@ -93,18 +89,15 @@ class KabalMappingTest {
                },
                "kildeReferanse":"behandlingUuid",
                "hjemler": [
-                "UNG_FRSKRFT_11"
                ],
                "forrigeBehandlendeEnhet":"4401",
                "tilknyttedeJournalposter":[
                ],
-               "brukersKlageMottattVedtaksinstans":"dagensDato",
                "ytelse": "UNG_UNG"
             }
             """;
 
         expectedJson = expectedJson
-            .replaceAll("dagensDato", LocalDate.now().toString())
             .replaceAll("behandlingUuid", klageBehandling.getUuid().toString())
             .replaceAll("saksnummer", klageBehandling.getFagsak().getSaksnummer().getVerdi())
             .replaceAll(" ", "")
