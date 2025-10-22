@@ -61,7 +61,7 @@ public class KabalRequestMapperV4 {
             sakenGjelder,
             oversendtSak,
             kildereferanse,
-            hjemler,
+            List.of("FVL_31"), // Påkrevd. Eneste gyldige hjemmel lagt inn i kabal pt. // hjemler,
             opprinneligBehandlendeEnhet,
             tilknyttedeJournalposter,
             mapK9YtelseTilKabal(ytelseType)
