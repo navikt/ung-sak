@@ -68,7 +68,8 @@ class KabalMappingTest {
         Assertions.assertEquals(klageBehandling.getBehandlendeEnhet(), kabalRequest.forrigeBehandlendeEnhet(), "forrigeBehandlendeEnhet");
         Assertions.assertEquals(klageBehandling.getOpprettetDato().toLocalDate(), kabalRequest.brukersKlageMottattVedtaksinstans(), "brukersKlageMottattVedtaksinstans");
         Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.kildeReferanse(), "kildeReferanse");
-        Assertions.assertNotNull(kabalRequest.klager(), "klager");
+        // Assertions.assertNotNull(kabalRequest.klager(), "klager");
+        Assertions.assertNotNull(kabalRequest.sakenGjelder(), "sakenGjelder");
         Assertions.assertEquals("KLAGE", kabalRequest.type(), "type");
         Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.kildeReferanse());
         // MA, KS, AO mappes om til OMP i KabalRequestMapper.
@@ -80,7 +81,7 @@ class KabalMappingTest {
         String expectedJson = """
             {
                "type":"KLAGE",
-               "klager":{
+               "sakenGjelder":{
                   "id":{
                      "type":"PERSON",
                      "verdi":null

@@ -42,8 +42,7 @@ public record KabalRequestv4(
     }
 
     public record OversendtSakenGjelder(
-        OversendtPartId id,
-        boolean skalMottaKopi
+        OversendtPartId id
     ) { }
 
     public record OversendtSak(
