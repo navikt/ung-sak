@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
@@ -108,10 +107,11 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                                     LocalDateTimeline<Kontrollresultat> kontrollResultat,
                                                     KontrollerInntektInput input) {
         var ferdigKontrollertTidslinje = kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.FERDIG_KONTROLLERT);
-        var perioderMedEndring = finnKontrollperioderMedEndring(kontekst, kontrollResultat);
+        var aksjonspunktTidslinje = kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.OPPRETT_AKSJONSPUNKT);
+
         log.info("Bruker inntekt fra bruker eller godkjent inntekt fra register for perioder {}", ferdigKontrollertTidslinje);
-        if (!perioderMedEndring.isEmpty()) {
-            log.info("Forkaster tidligere vurderte perioder pga aksjonspunkt {}", perioderMedEndring);
+        if (!aksjonspunktTidslinje.isEmpty()) {
+            log.info("Forkaster tidligere vurderte perioder pga aksjonspunkt {}", aksjonspunktTidslinje);
         }
         try {
             kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
@@ -120,23 +120,11 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                 input.gjeldendeRapporterteInntekter(),
                 JsonObjectMapper.getJson(input),
                 JsonObjectMapper.getJson(kontrollResultat),
-                perioderMedEndring
+                aksjonspunktTidslinje.mapValue(_ -> true)
             );
         } catch (IOException e) {
             throw new IllegalStateException("Kunn ikke serialisere input eller kontrollresultat til JSON", e);
         }
-    }
-
-    private LocalDateTimeline<Boolean> finnKontrollperioderMedEndring(BehandlingskontrollKontekst kontekst, LocalDateTimeline<Kontrollresultat> kontrollResultat) {
-        var avvikTidslinje = kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.OPPRETT_AKSJONSPUNKT);
-
-        var eksisterendeKontrollPerioder = new LocalDateTimeline<>(
-            kontrollerteInntektperioderTjeneste.finnPerioderKontrollertIBehandling(kontekst.getBehandlingId()).stream()
-                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
-                .toList()
-        );
-
-        return eksisterendeKontrollPerioder.intersection(avvikTidslinje);
     }
 
     private static boolean erKontrollbehandling(Behandling behandling) {
