@@ -24,20 +24,21 @@ public class KabalRequestMapperV4 {
         var saksnummer = behandling.getFagsak().getSaksnummer().getVerdi();
         var ytelseType = behandling.getFagsakYtelseType();
 
-        KabalRequestv4.OversendtKlager klager;
-        KabalRequestv4.OversendtSakenGjelder sakenGjelder = null;
+        KabalRequestv4.OversendtKlager klager = null;
 
-        if (klagendePart.isPresent() && klagendePart.get().rolleType == RolleType.ARBEIDSGIVER) {
-            var orgNr = klagendePart.get().identifikasjon;
-            var arbeidsgiverId = new KabalRequestv4.OversendtPartId("VIRKSOMHET", orgNr);
-            klager = new KabalRequestv4.OversendtKlager(arbeidsgiverId);
-
-            var personId = new KabalRequestv4.OversendtPartId("PERSON", personIdent.getIdent());
-            sakenGjelder = new KabalRequestv4.OversendtSakenGjelder(personId, false);
-        } else {
-            var personId = new KabalRequestv4.OversendtPartId("PERSON", personIdent.getIdent());
-            klager = new KabalRequestv4.OversendtKlager(personId);
+        if (klagendePart.isPresent()) {
+            if (klagendePart.get().rolleType == RolleType.ARBEIDSGIVER) {
+                var orgNr = klagendePart.get().identifikasjon;
+                var arbeidsgiverId = new KabalRequestv4.OversendtPartId("VIRKSOMHET", orgNr);
+                klager = new KabalRequestv4.OversendtKlager(arbeidsgiverId);
+            } else {
+                var personId = new KabalRequestv4.OversendtPartId("PERSON", personIdent.getIdent());
+                klager = new KabalRequestv4.OversendtKlager(personId);
+            }
         }
+
+        var personId = new KabalRequestv4.OversendtPartId("PERSON", personIdent.getIdent());
+        var sakenGjelder = new KabalRequestv4.OversendtSakenGjelder(personId);
 
         var opprettetDato = behandling.getOpprettetDato().toLocalDate();
 
