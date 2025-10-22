@@ -37,6 +37,8 @@ public class KabalRequestMapperV4 {
             }
         }
 
+        var opprettetDato = behandling.getOpprettetDato().toLocalDate();
+
         var personId = new KabalRequestv4.OversendtPartId("PERSON", personIdent.getIdent());
         var sakenGjelder = new KabalRequestv4.OversendtSakenGjelder(personId);
 
@@ -64,6 +66,7 @@ public class KabalRequestMapperV4 {
             List.of("FVL_31"), // Påkrevd. Eneste gyldige hjemmel lagt inn i kabal pt. // hjemler,
             opprinneligBehandlendeEnhet,
             tilknyttedeJournalposter,
+            opprettetDato,
             mapK9YtelseTilKabal(ytelseType)
         );
     }
