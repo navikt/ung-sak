@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,9 @@ public record KabalRequestv4(
 
     @NotNull
     List<String> tilknyttedeJournalposter,
+
+    @NotNull    // Valgfri i kontrakt, men påkrevd for klager
+    LocalDate brukersKlageMottattVedtaksinstans,
 
     @NotNull
     String ytelse
@@ -71,6 +75,7 @@ public record KabalRequestv4(
             ", kildeReferanse='" + kildeReferanse + '\'' +
             ", tilknyttedeJournalposter=" + tilknyttedeJournalposter + '\'' +
             ", type='" + type + '\'' +
+            ", brukersKlageMottattVedtaksinstans='" + brukersKlageMottattVedtaksinstans + '\'' +
             ", ytelse='" + ytelse + '\'' +
             ", fagsak=" + fagsak +
             '}';

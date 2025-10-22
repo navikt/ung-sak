@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+
 import static no.nav.ung.sak.kabal.rest.KabalRestKlient.objectMapper;
 
 class KabalRequestMapperv4Test {
@@ -94,11 +96,13 @@ class KabalRequestMapperv4Test {
                "forrigeBehandlendeEnhet":"4401",
                "tilknyttedeJournalposter":[
                ],
+               "brukersKlageMottattVedtaksinstans":"dagensDato",
                "ytelse": "UNG_UNG"
             }
             """;
 
         expectedJson = expectedJson
+            .replaceAll("dagensDato", LocalDate.now().toString())
             .replaceAll("behandlingUuid", klageBehandling.getUuid().toString())
             .replaceAll("saksnummer", klageBehandling.getFagsak().getSaksnummer().getVerdi())
             .replaceAll(" ", "")
