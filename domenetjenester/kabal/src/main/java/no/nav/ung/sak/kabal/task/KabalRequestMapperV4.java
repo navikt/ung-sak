@@ -40,13 +40,12 @@ public class KabalRequestMapperV4 {
         var personId = new KabalRequestv4.OversendtPartId("PERSON", personIdent.getIdent());
         var sakenGjelder = new KabalRequestv4.OversendtSakenGjelder(personId);
 
-        var opprettetDato = behandling.getOpprettetDato().toLocalDate();
-
         // https://github.com/navikt/klage-kodeverk/blob/main/src/main/kotlin/no/nav/klage/kodeverk/hjemmel/YtelseTilHjemler.kt
         var hjemler = klageUtredning.hentKlagevurdering(KlageVurdertAv.VEDTAKSINSTANS)
             .map(KlageVurderingEntitet::getKlageresultat)
             .map(Vurderingresultat::getHjemmel)
-            .map((hjemmel) -> List.of(hjemmel.getKode())).orElse(null);
+            .map((hjemmel) -> List.of(hjemmel.getKode()))
+            .orElse(Collections.emptyList());
 
         var oversendtSak = new KabalRequestv4.OversendtSak(saksnummer, Fagsystem.UNG_SAK.getKode());
 
@@ -60,16 +59,12 @@ public class KabalRequestMapperV4 {
             type,
             klager,
             sakenGjelder,
-            null, // prosessfullmektig
             oversendtSak,
             kildereferanse,
             hjemler,
             opprinneligBehandlendeEnhet,
             tilknyttedeJournalposter,
-            opprettetDato,
-            null,
-            mapK9YtelseTilKabal(ytelseType),
-            null //kommentar
+            mapK9YtelseTilKabal(ytelseType)
         );
     }
 
