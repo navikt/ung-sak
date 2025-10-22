@@ -89,6 +89,7 @@ class KabalRequestMapperv4Test {
                },
                "kildeReferanse":"behandlingUuid",
                "hjemler": [
+                "FVL_31"
                ],
                "forrigeBehandlendeEnhet":"4401",
                "tilknyttedeJournalposter":[
