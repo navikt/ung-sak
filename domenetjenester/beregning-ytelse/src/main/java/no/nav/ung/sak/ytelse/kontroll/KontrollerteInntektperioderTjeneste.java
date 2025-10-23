@@ -47,8 +47,7 @@ public class KontrollerteInntektperioderTjeneste {
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId,
                                                               LocalDateTimeline<Inntektsresultat> inntektsresultat,
                                                               LocalDateTimeline<RapporterteInntekter> rapporterteInntekter, String input,
-                                                              String sporing,
-                                                              LocalDateTimeline<Boolean> perioderMedEndring) {
+                                                              String sporing) {
         final var kontrollertePerioder = mapAutomatiskKontrollerteInntektperioder(inntektsresultat.mapValue(it -> true),
             inntektsresultat.mapValue(it -> new RapportertInntektOgKilde(it.kilde(), it.inntekt())),
             rapporterteInntekter,
@@ -57,7 +56,7 @@ public class KontrollerteInntektperioderTjeneste {
         LOG.info("Lagrer inntekt fra bruker: {}", kontrollertePerioder);
 
 
-        final var allePerioder = utvidEksisterendePerioder(behandlingId, kontrollertePerioder, perioderMedEndring);
+        final var allePerioder = utvidEksisterendePerioder(behandlingId, kontrollertePerioder);
 
         tilkjentYtelseRepository.lagreKontrollertePerioder(behandlingId, allePerioder, input, sporing);
     }
@@ -89,11 +88,11 @@ public class KontrollerteInntektperioderTjeneste {
 
 
             var perioderSomFjernes = eksisterendePerioder.stream()
-                .filter(it -> relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
+                .filter(it -> tidslinjeSomBeholdes.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
                 .toList();
 
             if (!perioderSomFjernes.isEmpty()) {
-                LOG.info("Fjerner kontrollerte perioder siden det ikke er påkrevd kontroll for første og siste måned i programperioden. Perioder som beholdes: {}, perioder som fjernes: {}",
+                LOG.info("Fjerner kontrollerte perioder. Perioder som beholdes: {}, perioder som fjernes: {}",
                     perioderSomBeholdes.size(), perioderSomFjernes.size());
                 tilkjentYtelseRepository.lagre(behandlingId, perioderSomBeholdes.stream().map(KontrollertInntektPeriode::new).toList());
             }
@@ -116,13 +115,12 @@ public class KontrollerteInntektperioderTjeneste {
         return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).mapValue(it -> true);
     }
 
-    private List<KontrollertInntektPeriode> utvidEksisterendePerioder(Long behandlingId, List<KontrollertInntektPeriode> nyePerioder, LocalDateTimeline<Boolean> perioderMedEndring) {
+    private ArrayList<KontrollertInntektPeriode> utvidEksisterendePerioder(Long behandlingId, List<KontrollertInntektPeriode> nyePerioder) {
         final var eksisterende = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandlingId);
 
         final var eksisterendePerioderSomSkalBeholdes = eksisterende.stream()
             .flatMap(it -> it.getPerioder().stream())
             .filter(p -> nyePerioder.stream().map(KontrollertInntektPeriode::getPeriode).noneMatch(p2 -> p.getPeriode().overlapper(p2)))
-            .filter(it -> perioderMedEndring.stream().noneMatch(p -> it.getPeriode().overlapper(DatoIntervallEntitet.fra(p.getLocalDateInterval()))))
             .map(KontrollertInntektPeriode::new).toList();
         final var allePerioder = new ArrayList<KontrollertInntektPeriode>();
         allePerioder.addAll(eksisterendePerioderSomSkalBeholdes);
@@ -132,7 +130,7 @@ public class KontrollerteInntektperioderTjeneste {
 
     public void opprettKontrollerteInntekterPerioderEtterManuellVurdering(Long behandlingId, LocalDateTimeline<ManueltKontrollertInntekt> inntektTidslinje, LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje) {
         final var kontrollertePerioder = mapManueltKontrollerteInntektperioder(inntektTidslinje, rapportertInntektTidslinje);
-        tilkjentYtelseRepository.lagre(behandlingId, utvidEksisterendePerioder(behandlingId, kontrollertePerioder, LocalDateTimeline.empty()));
+        tilkjentYtelseRepository.lagre(behandlingId, utvidEksisterendePerioder(behandlingId, kontrollertePerioder));
     }
 
     public void gjenopprettTilOriginal(Long originalBehandlingId, Long behandlingId) {
