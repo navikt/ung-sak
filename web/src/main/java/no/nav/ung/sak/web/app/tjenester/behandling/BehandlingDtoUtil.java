@@ -8,10 +8,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
 import org.apache.http.client.utils.URIBuilder;
 
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -94,27 +96,42 @@ public class BehandlingDtoUtil {
 
     }
 
-    private static String utledVisningsnavn(Behandling behandling) {
-        final var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper().stream().filter(it -> it != BehandlingÅrsakType.UTTALELSE_FRA_BRUKER).toList();
+    private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling) {
+        final var relevanteÅrsaker = Set.of(
+            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
+            BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
+            BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
+            BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
+            BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+        );
+
+        // Kun behold behandlingsårsaker som faktisk har en spesifikk visningsnavnlogikk
+        final var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper().stream()
+            .filter(relevanteÅrsaker::contains)
+            .toList();
+
         if (behandlingÅrsakerTyper.isEmpty()) {
-            return null;
+            return BehandlingVisningsnavn.INGEN_RELEVANT_BEHANDLINGÅRSAK;
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT == it || BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT == it)) {
-            return "Kontroll av inntekt";
+            return BehandlingVisningsnavn.KONTROLL_AV_INNTEKT;
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS == it)) {
-            return "Beregning av høy sats";
+            return BehandlingVisningsnavn.BEREGNING_AV_HØY_SATS;
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_FØDSEL == it || BehandlingÅrsakType.RE_HENDELSE_DØD_BARN == it)) {
-            return "Endring av barnetillegg";
+            return BehandlingVisningsnavn.ENDRING_AV_BARNETILLEGG;
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER == it)) {
-            return "Brukers dødsfall";
+            return BehandlingVisningsnavn.BRUKERS_DØDSFALL;
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM == it || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
-            return "Ungdomsprogramendring";
+            return BehandlingVisningsnavn.UNGDOMSPROGRAMENDRING;
         }
-        return null;
+        return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;
     }
 
     static Optional<BehandlingÅrsakDto> førsteÅrsak(Behandling behandling) {

@@ -34,7 +34,7 @@ public class OverførKlagebehandlingEventObserver {
 
     @Inject
     public OverførKlagebehandlingEventObserver(ProsessTaskTjeneste prosessTaskRepository, BehandlingRepository behandlingRepository,
-                                               @KonfigVerdi(value = "INTEGRASJON_KABAL", defaultVerdi = "false") Boolean lansert) {
+                                               @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") Boolean lansert) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
         this.lansert = lansert;
@@ -44,12 +44,16 @@ public class OverførKlagebehandlingEventObserver {
      * Overfør behandling til NK (system Kabal) etter at behandlingskontroll er kjørt ferdig.
      */
     public void overførBehandlingTilKabal(@Observes BehandlingskontrollEvent.StoppetEvent event) {
+        Behandling behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
+        if (behandling.erYtelseBehandling()) {
+            return;
+        }
+
         if (!lansert) {
             logger.info("Overføring til Kabal er ikke lansert, avslutter uten å opprette task");
             return;
         }
 
-        Behandling behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
         List<Aksjonspunkt> åpneAutopunkter = behandling.getÅpneAksjonspunkter(AksjonspunktType.AUTOPUNKT);
         var inneholderAutopunktForVentingPåKabal = inneholderAutopunkt(event, AksjonspunktDefinisjon.AUTO_OVERFØRT_NK, åpneAutopunkter);
         if (inneholderAutopunktForVentingPåKabal) {

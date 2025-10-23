@@ -78,6 +78,8 @@ spec:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
         - application: ung-tilbake
+        - application: kabal-api
+          namespace: klage
       external:
         - host: "dokarkiv-q2.dev-fss-pub.nais.io"
         - host: "k9-abakus.dev-fss-pub.nais.io"
@@ -192,8 +194,11 @@ spec:
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
+
     - name: KABAL_URL
-      value: https://kabal-api.dev-fss-pub.nais.io
+      value: http://kabal-api.klage
+    - name: KABAL_SCOPE
+      value: api://dev-gcp.klage.kabal-api/.default
 
     # Saf
     - name: SAF_BASE_URL

@@ -3,6 +3,7 @@ package no.nav.ung.sak.test.util.behandling;
 import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -524,7 +525,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         KlageUtredningEntitet klageUtredningEntitet = repositories.klageRepository().hentKlageUtredning(behandling.getId());
         klageUtredningEntitet.setKlagevurdering(klageTestScenario.klageVurdering());
         repositories.klageRepository().lagre(klageUtredningEntitet);
-
+        repositories.fritekstRepository().lagre(behandling.getId(),KlageVurdertAv.VEDTAKSINSTANS, klageTestScenario.klageVurdering().getFritekstTilBrev());
     }
 
 

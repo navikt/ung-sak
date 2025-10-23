@@ -13,39 +13,41 @@ import org.junit.jupiter.api.Test;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
+class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
-    KlageAvvistTest() {
-        super(1, "NAV har avvist klagen din på vedtaket om ");
+    KlageOversendtTest() {
+        super(1, "Vi har sendt saken til NAV Klageinstans");
     }
 
 
     @Test
-    void standardAvvistKlage() {
+    void standardOversendtKlage() {
         TestScenarioBuilder testScenarioBuilder = FørstegangsbehandlingScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
-        UngKlageTestScenario klageScenario = KlageScenarioer.klageAvvist(testScenarioBuilder);
+        UngKlageTestScenario klageScenario = KlageScenarioer.klageOversendt(testScenarioBuilder);
 
         var klage = KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
             """
-                NAV har avvist klagen din på vedtaket om ungdomsprogramytelse \
-                Vi har avvist klagen fordi du har klaget for sent. \
-                Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen. \
-                Vedtaket er gjort etter folketrygdloven § 21-12 og forvaltningsloven §§ 31 og 33. \
+                Vi har sendt saken til NAV Klageinstans \
+                Vi har vurdert klagen på vedtaket om ungdomsprogramytelse, og kommet fram til at vedtaket ikke \
+                endres. NAV Klageinstans skal derfor vurdere saken din på nytt. Du får melding fra NAV Klageinstans når \
+                de har mottatt saken. Du finner oversikt over saksbehandlingstidene på nav.no/saksbehandlingstider. \
+                Dette har vi lagt vekt på i vurderingen vår \
+                FRITEKST I BREV \
+                Har du nye opplysninger eller ønsker å uttale deg, kan du sende dette via klage.nav.no/nb/ettersendelse/klage/SYKDOM_I_FAMILIEN. Velg NAV-enhet: NAV Klageinstans Sør. \
                 """);
 
 
-
         GenerertBrev generertBrev = genererVedtaksbrev(klage);
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.KLAGE_AVVIST);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.KLAGE_OVERSENDT);
 
         var brevtekst = generertBrev.dokument().html();
 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>NAV har avvist klagen din på vedtaket om ungdomsprogramytelse</h1>"
+                "<h1>Vi har sendt saken til NAV Klageinstans</h1>"
             );
 
     }
@@ -54,7 +56,7 @@ class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
     @Override
     protected Behandling lagScenarioForFellesTester() {
         TestScenarioBuilder påklagdBehandlingScenario = FørstegangsbehandlingScenarioer.lagAvsluttetStandardBehandling(ungTestRepositories);
-        UngKlageTestScenario klageScenario = KlageScenarioer.klageAvvist(påklagdBehandlingScenario);
+        UngKlageTestScenario klageScenario = KlageScenarioer.klageOversendt(påklagdBehandlingScenario);
         return KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
     }
 }

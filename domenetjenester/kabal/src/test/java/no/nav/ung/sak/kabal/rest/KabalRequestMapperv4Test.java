@@ -3,7 +3,6 @@ package no.nav.ung.sak.kabal.rest;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
@@ -12,29 +11,27 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
-import no.nav.ung.sak.kabal.kontrakt.KabalRequest;
-import no.nav.ung.sak.kabal.task.KabalRequestMapper;
+import no.nav.ung.sak.kabal.kontrakt.KabalRequestv4;
+import no.nav.ung.sak.kabal.task.KabalRequestMapperV4;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.PersonIdent;
-import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.time.LocalDate;
 
 import static no.nav.ung.sak.kabal.rest.KabalRestKlient.objectMapper;
 
-class KabalMappingTest {
+class KabalRequestMapperv4Test {
 
     private static Behandling klageBehandling;
-    private static KabalRequest kabalRequest;
+    private static KabalRequestv4 kabalRequest;
     private static String jsonActual;
 
     @BeforeAll
     static void setup() {
-        KabalRequestMapper mapper = new KabalRequestMapper();
+        KabalRequestMapperV4 mapper = new KabalRequestMapperV4();
         klageBehandling = TestScenarioBuilder
             .builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBehandlingType(BehandlingType.KLAGE)
@@ -49,7 +46,7 @@ class KabalMappingTest {
 
         var klageVurderingAdapter = new KlageVurderingAdapter(
             KlageVurderingType.STADFESTE_YTELSESVEDTAK, KlageMedholdÅrsak.UDEFINERT, KlageVurderingOmgjør.UDEFINERT,
-            "-", "-", Hjemmel.UNG_FORSKRIFT_PARAGRAF_11, "kabalref", KlageVurdertAv.VEDTAKSINSTANS);
+            "-", "-", null, "kabalref", KlageVurdertAv.VEDTAKSINSTANS);
 
         klageUtredning.setKlagevurdering(klageVurderingAdapter);
 
@@ -67,57 +64,50 @@ class KabalMappingTest {
 
     @Test
     void kabal_request_mapper_test() {
-        Assertions.assertEquals(klageBehandling.getBehandlendeEnhet(), kabalRequest.getAvsenderEnhet(), "getAvsenderEnhet");
-        Assertions.assertEquals(klageBehandling.getAnsvarligSaksbehandler(), kabalRequest.getAvsenderSaksbehandlerIdent(), "getAvsenderSaksbehandlerIdent");
-        Assertions.assertEquals(klageBehandling.getOpprettetDato().toLocalDate().toString(), kabalRequest.getInnsendtTilNav(), "getInnsendtTilNav");
-        Assertions.assertEquals("UNG", kabalRequest.getKilde(), "getKilde");
-        Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.getKildeReferanse(), "getKildeReferanse");
-        Assertions.assertNotNull(kabalRequest.getKlager(), "getKlager");
-        Assertions.assertEquals("KLAGE", kabalRequest.getType(), "getType");
-        Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.getDvhReferanse());
+        Assertions.assertEquals(klageBehandling.getBehandlendeEnhet(), kabalRequest.forrigeBehandlendeEnhet(), "forrigeBehandlendeEnhet");
+        Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.kildeReferanse(), "kildeReferanse");
+        // Assertions.assertNotNull(kabalRequest.klager(), "klager");
+        Assertions.assertNotNull(kabalRequest.sakenGjelder(), "sakenGjelder");
+        Assertions.assertEquals("KLAGE", kabalRequest.type(), "type");
+        Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.kildeReferanse());
         // MA, KS, AO mappes om til OMP i KabalRequestMapper.
         Assertions.assertEquals(klageBehandling.getFagsakYtelseType().getKode(), FagsakYtelseType.UNGDOMSYTELSE.getKode());
     }
 
     @Test
-    void json_mapping_test() throws JSONException {
+    void json_mapping_test() {
         String expectedJson = """
             {
-               "avsenderEnhet":"4401",
-               "avsenderSaksbehandlerIdent":"Z1234567",
-               "innsendtTilNav":"dagensDato",
-               "kilde":"UNG",
-               "kildeReferanse":"behandlingUuid",
-               "klager":{
+               "type":"KLAGE",
+               "sakenGjelder":{
                   "id":{
                      "type":"PERSON",
                      "verdi":null
-                  },
-                  "klagersProsessfullmektig":null
+                  }
                },
-               "mottattFoersteinstans":"dagensDato",
-               "tilknyttedeJournalposter":[
-               ],
-               "type":"KLAGE",
-               "hjemler": [
-                "UNG_FRSKRFT_11"
-               ],
-               "dvhReferanse":"behandlingUuid",
-               "ytelse": "UNG",
-               "oversendtKaDato": "nå",
                "fagsak": {
                   "fagsakId": "saksnummer",
                   "fagsystem": "UNG_SAK"
-               }
+               },
+               "kildeReferanse":"behandlingUuid",
+               "hjemler": [
+                "FVL_31"
+               ],
+               "forrigeBehandlendeEnhet":"4401",
+               "tilknyttedeJournalposter":[
+               ],
+               "brukersKlageMottattVedtaksinstans":"dagensDato",
+               "ytelse": "UNG_UNG"
             }
             """;
 
         expectedJson = expectedJson
             .replaceAll("dagensDato", LocalDate.now().toString())
             .replaceAll("behandlingUuid", klageBehandling.getUuid().toString())
-            .replaceAll("nå", kabalRequest.getOversendtKaDato())
-            .replaceAll("saksnummer", klageBehandling.getFagsak().getSaksnummer().getVerdi());
+            .replaceAll("saksnummer", klageBehandling.getFagsak().getSaksnummer().getVerdi())
+            .replaceAll(" ", "")
+            .replaceAll("\n", "");
 
-        JSONAssert.assertEquals(expectedJson, jsonActual, true);
+        Assertions.assertEquals(expectedJson, jsonActual.trim());
     }
 }

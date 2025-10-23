@@ -101,8 +101,6 @@ public class PapirsøknadHåndteringTjeneste {
         Periode periode = new Periode(deltakelse.fraOgMed(), null);
 
         Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
-        //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
-        ungOppgaveKlient.løsSøkYtelseOppgave(new DeltakerDTO(null, deltakerIdent));
 
         if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
             throw new IllegalStateException("Journalpost er allerede journalført");
@@ -132,6 +130,8 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] pdfDokument = lagPdfDokument(deltakerIdent, startdato, deltakerNavn);
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
+        //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
+        ungOppgaveKlient.løsSøkYtelseOppgave(new DeltakerDTO(null, deltakerIdent.getIdent()));
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 

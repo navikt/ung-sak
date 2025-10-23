@@ -88,11 +88,11 @@ public class KontrollerteInntektperioderTjeneste {
 
 
             var perioderSomFjernes = eksisterendePerioder.stream()
-                .filter(it -> relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
+                .filter(it -> tidslinjeSomBeholdes.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
                 .toList();
 
             if (!perioderSomFjernes.isEmpty()) {
-                LOG.info("Fjerner kontrollerte perioder siden det ikke er påkrevd kontroll for første og siste måned i programperioden. Perioder som beholdes: {}, perioder som fjernes: {}",
+                LOG.info("Fjerner kontrollerte perioder. Perioder som beholdes: {}, perioder som fjernes: {}",
                     perioderSomBeholdes.size(), perioderSomFjernes.size());
                 tilkjentYtelseRepository.lagre(behandlingId, perioderSomBeholdes.stream().map(KontrollertInntektPeriode::new).toList());
             }

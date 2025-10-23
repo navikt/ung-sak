@@ -3,6 +3,8 @@ package no.nav.ung.sak.formidling.scenarioer;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
+import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -23,9 +25,8 @@ public class KlageScenarioer {
      * Klage Avvist
      *
      * @param originalScenario
+     * @return
      */
-
-
     public static UngKlageTestScenario klageAvvist(TestScenarioBuilder originalScenario) {
         var klageUtredning = new KlageUtredningEntitet.Builder()
             .medFormkrav(new KlageFormkravAdapter(
@@ -38,18 +39,58 @@ public class KlageScenarioer {
             ))
             .medOpprinneligBehandlendeEnhet("4806");
 
+        var klageVurdering = KlageVurderingAdapter.Templates.AVVIST_VURDERING_VEDTAKSINSTANS;
+
+        return new UngKlageTestScenario(klageUtredning, klageVurdering, originalScenario, List.of(AksjonspunktDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS));
+    }
+
+    /**
+     * Klage oversendt
+     *
+     * @param originalScenario
+     * @return
+     */
+    public static UngKlageTestScenario klageOversendt(TestScenarioBuilder originalScenario) {
+        var klageUtredning = new KlageUtredningEntitet.Builder()
+            .medFormkrav(lagGodkjentFormkrav())
+            .medOpprinneligBehandlendeEnhet("4806");
+
         var klageVurdering = new KlageVurderingAdapter(
-            KlageVurderingType.AVVIS_KLAGE,
+            KlageVurderingType.STADFESTE_YTELSESVEDTAK,
             null,
             null,
-            null,
-            null,
+            "Fritekstbeskrivelse av klagevurdering",
+            "FRITEKST I BREV",
             null,
             null,
             KlageVurdertAv.VEDTAKSINSTANS
         );
 
-        return new UngKlageTestScenario(klageUtredning, klageVurdering, originalScenario, List.of(AksjonspunktDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS));
+        return new UngKlageTestScenario(klageUtredning, klageVurdering, originalScenario, List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS));
+    }
+    /**
+     * Klage medhold
+     *
+     * @param originalScenario
+     * @return
+     */
+    public static UngKlageTestScenario klageMedhold(TestScenarioBuilder originalScenario) {
+        var klageUtredning = new KlageUtredningEntitet.Builder()
+            .medFormkrav(lagGodkjentFormkrav())
+            .medOpprinneligBehandlendeEnhet("4806");
+
+        var klageVurdering = new KlageVurderingAdapter(
+            KlageVurderingType.MEDHOLD_I_KLAGE,
+            KlageMedholdÅrsak.ULIK_VURDERING,
+            KlageVurderingOmgjør.GUNST_MEDHOLD_I_KLAGE,
+            "Fritekstbeskrivelse av klagevurdering",
+            "FRITEKST I BREV",
+            null,
+            null,
+            KlageVurdertAv.VEDTAKSINSTANS
+        );
+
+        return new UngKlageTestScenario(klageUtredning, klageVurdering, originalScenario, List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS));
     }
 
 
@@ -70,5 +111,16 @@ public class KlageScenarioer {
         behandlingRepository.lagre(klageBehandling, behandlingRepository.taSkriveLås(klageBehandling));
 
         return klageBehandling;
+    }
+
+    private static KlageFormkravAdapter lagGodkjentFormkrav() {
+        return new KlageFormkravAdapter(
+            true,
+            true,
+            true,
+            true,
+            true,
+            "Alt ser bra ut"
+        );
     }
 }
