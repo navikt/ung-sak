@@ -2,6 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.klage;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,15 +30,17 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
 import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.klage.KlageFormkravResultatDto;
-import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatAksjonspunktMellomlagringDto;
-import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatDto;
-import no.nav.ung.sak.kontrakt.klage.KlagebehandlingDto;
+import no.nav.ung.sak.kontrakt.klage.*;
+import no.nav.ung.sak.kontrakt.vedtak.TotrinnskontrollSkjermlenkeContextDto;
 import no.nav.ung.sak.web.app.rest.Redirect;
+import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.UPDATE;
@@ -51,6 +54,7 @@ public class KlageRestTjeneste {
     public static final String KLAGE_V2_PATH = "/klage-v2";
     private static final String MELLOMLAGRE_PART_PATH = "/klage-v2/mellomlagre-klage";
     private static final String MELLOMLAGRE_GJENAPNE_KLAGE_PART_PATH = "/klage-v2/mellomlagre-gjennapne-klage";
+    public static final String HJEMLER = KLAGE_V2_PATH+"/hjemler";
 
     private BehandlingRepository behandlingRepository;
     private KlageRepository klageRepository;
@@ -96,6 +100,31 @@ public class KlageRestTjeneste {
         cc.setNoStore(true);
         cc.setMaxAge(0);
         return Response.ok(dto).cacheControl(cc).build();
+    }
+
+    @GET
+    @Path(HJEMLER)
+    @Operation(description = "Hent hjemler aktuelle for bruk i klagevurdering",
+        tags = "no/nav/k9/klage",
+        responses = {
+            @ApiResponse(responseCode = "200",
+                description = "Returnerer alle relevant hjemler for en klagevurdering",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON,
+                    array = @ArraySchema(arraySchema = @Schema(implementation = Set.class),
+                        schema = @Schema(implementation = KlageHjemmelDto.class)
+                    )
+                )
+            )
+        })
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response getKlagehjemler() {
+        var klagehjemler = Arrays.stream(Hjemmel.values()).map(hjemmel ->
+            new KlageHjemmelDto(hjemmel.getKode(), hjemmel.getNavn())
+        );
+
+        return Response.ok(klagehjemler).build();
     }
 
     @POST
