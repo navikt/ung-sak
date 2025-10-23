@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 
-import no.nav.ung.kodeverk.hjemmel.HjemmelBruktKlagebrev;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.kodeverk.hjemmel.HjemmelBruktKlagebrev.*;
+import static no.nav.ung.sak.behandlingslager.behandling.klage.HjemmelBruktKlagebrev.*;
 
 public class KlageFormkravAdapter {
 

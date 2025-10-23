@@ -3,6 +3,7 @@ package no.nav.ung.sak.kabal.task;
 import jakarta.enterprise.context.Dependent;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
@@ -46,8 +47,8 @@ public class KabalRequestMapperV4 {
         var hjemler = klageUtredning.hentKlagevurdering(KlageVurdertAv.VEDTAKSINSTANS)
             .map(KlageVurderingEntitet::getKlageresultat)
             .map(Vurderingresultat::getHjemmel)
-            .map((hjemmel) -> List.of(hjemmel.getKode()))
-            .orElse(Collections.emptyList());
+            .map(List::of)
+            .orElse(List.of(Hjemmel.FORVALTNINGSLOVEN_PARAGRAF_31)); // TODO: Må feile hvis klagevurdering mangler hjemmel. Kan fjernes når FE lagrer ned hjemmel
 
         var oversendtSak = new KabalRequestv4.OversendtSak(saksnummer, Fagsystem.UNG_SAK.getOffisiellKode());
 
@@ -63,7 +64,7 @@ public class KabalRequestMapperV4 {
             sakenGjelder,
             oversendtSak,
             kildereferanse,
-            List.of("FVL_31"), // Påkrevd. Eneste gyldige hjemmel lagt inn i kabal pt. // hjemler,
+            HjemmelKodeMapperKabal.mapHjemlerToKabalCodes(hjemler),
             opprinneligBehandlendeEnhet,
             tilknyttedeJournalposter,
             opprettetDato,

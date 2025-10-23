@@ -1,6 +1,6 @@
 package no.nav.ung.sak.formidling.klage.innhold;
 
-import no.nav.ung.kodeverk.hjemmel.HjemmelBruktKlagebrev;
+import no.nav.ung.sak.behandlingslager.behandling.klage.HjemmelBruktKlagebrev;
 
 import java.util.Collection;
 
