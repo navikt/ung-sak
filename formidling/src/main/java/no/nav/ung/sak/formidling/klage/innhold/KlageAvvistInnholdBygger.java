@@ -51,7 +51,7 @@ public class KlageAvvistInnholdBygger implements VedtaksbrevInnholdBygger {
 
     public static String lagHjemmelTekst(KlageFormkravAdapter paragrafBygger) {
         String hjemler = Stream.of(
-                HjemmelMapper.lagTekst(paragrafBygger.hentFolketrygdParagrafer(), "folketrygdloven"),
+                HjemmelMapper.lagTekst(paragrafBygger.hentArbeidsmarkedParagrafer(), "arbeidsmarkedloven"),
                 HjemmelMapper.lagTekst(paragrafBygger.hentForvaltningslovParagrafer(), "forvaltningsloven")
             ).filter(Objects::nonNull)
             .collect(Collectors.joining(" og "));

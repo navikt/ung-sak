@@ -49,12 +49,12 @@ public class KabalRequestMapperV4 {
             .map((hjemmel) -> List.of(hjemmel.getKode()))
             .orElse(Collections.emptyList());
 
-        var oversendtSak = new KabalRequestv4.OversendtSak(saksnummer, Fagsystem.UNG_SAK.getKode());
+        var oversendtSak = new KabalRequestv4.OversendtSak(saksnummer, Fagsystem.UNG_SAK.getOffisiellKode());
 
         List<String> tilknyttedeJournalposter = Collections.emptyList();
 
         var kildereferanse = behandling.getUuid().toString(); // UUID på klage-behandling
-        var type = "KLAGE"; // UUID på klage-behandling
+        var type = "KLAGE";
 
         return new KabalRequestv4(
             behandling.getUuid(),
