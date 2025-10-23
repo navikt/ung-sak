@@ -13,6 +13,15 @@ public enum Hjemmel implements Kodeverdi {
     UNG_FORSKRIFT_PARAGRAF_11("UNG_FRSKRFT_11", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 11"),
     UNG_FORSKRIFT_PARAGRAF_9("UNG_FRSKRFT_9", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 9"),
     UNG_FORSKRIFT_PARAGRAF_6("UNG_FRSKRFT_6", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 6"),
+
+
+    FL_VEDTAK_SOM_KAN_PÅKLAGES("28", "Forvaltningsloven § 28"),
+    FL_OVERSITTING_AV_KLAGEFRIST("31", "Forvaltningsloven § 31"),
+    FL_ADRESSAT_FORM_OG_INNHOLD("32", "Forvaltningsloven § 32"),
+    FL_SAKSFORBEREDELSE_I_KLAGESAK("33", "Forvaltningsloven § 33"),
+    FTRL_KLAGE_ANKE_TRYGDESAKER("21-12", "Folketrygdloven § 21-12"),
+
+
     MANGLER("-", "MANGLER"); // Mangler etter kontrakt fra kabal-api hjemmel enum.
 
     private static final Map<String, Hjemmel> KODER = new LinkedHashMap<>();
