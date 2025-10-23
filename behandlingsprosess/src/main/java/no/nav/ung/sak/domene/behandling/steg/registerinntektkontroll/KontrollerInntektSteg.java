@@ -107,20 +107,14 @@ public class KontrollerInntektSteg implements BehandlingSteg {
                                                     LocalDateTimeline<Kontrollresultat> kontrollResultat,
                                                     KontrollerInntektInput input) {
         var ferdigKontrollertTidslinje = kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.FERDIG_KONTROLLERT);
-        var aksjonspunktTidslinje = kontrollResultat.filterValue(it -> it.type() == KontrollResultatType.OPPRETT_AKSJONSPUNKT);
-
         log.info("Bruker inntekt fra bruker eller godkjent inntekt fra register for perioder {}", ferdigKontrollertTidslinje);
-        if (!aksjonspunktTidslinje.isEmpty()) {
-            log.info("Forkaster tidligere vurderte perioder pga aksjonspunkt {}", aksjonspunktTidslinje);
-        }
         try {
             kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderFraBruker(
                 kontekst.getBehandlingId(),
                 ferdigKontrollertTidslinje.mapValue(Kontrollresultat::inntektsresultat),
                 input.gjeldendeRapporterteInntekter(),
                 JsonObjectMapper.getJson(input),
-                JsonObjectMapper.getJson(kontrollResultat),
-                aksjonspunktTidslinje.mapValue(_ -> true)
+                JsonObjectMapper.getJson(kontrollResultat)
             );
         } catch (IOException e) {
             throw new IllegalStateException("Kunn ikke serialisere input eller kontrollresultat til JSON", e);
