@@ -89,7 +89,7 @@ public class KontrollerteInntektperioderTjeneste {
 
 
             var perioderSomFjernes = eksisterendePerioder.stream()
-                .filter(it -> relevantForKontrollTidslinje.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
+                .filter(it -> tidslinjeSomBeholdes.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
                 .toList();
 
             if (!perioderSomFjernes.isEmpty()) {
