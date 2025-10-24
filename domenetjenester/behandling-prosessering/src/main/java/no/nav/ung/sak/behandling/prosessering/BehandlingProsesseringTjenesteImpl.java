@@ -139,9 +139,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
             fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingDersomIkkePåVentTask.class);
         } else {
             fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
-            fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
             fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         }
+        fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
 
         gruppe.setCallIdFraEksisterende();
