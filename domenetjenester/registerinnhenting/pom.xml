@@ -34,7 +34,14 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>perioder</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>inntektskontroll</artifactId>
+        </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingskontroll</artifactId>
@@ -56,11 +63,6 @@
             <artifactId>migreringer</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>perioder</artifactId>
-        </dependency>
-
 
     </dependencies>
 

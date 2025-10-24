@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -20,12 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
-import no.nav.ung.sak.ytelse.kontroll.ManueltKontrollertInntekt;
+import no.nav.ung.sak.kontroll.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,7 +32,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private RapportertInntektMapper rapportertInntektMapper;
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     private HistorikkinnslagRepository historikkinnslagRepository;
 
 
@@ -47,10 +41,10 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     }
 
     @Inject
-    public FastsettInntektOppdaterer(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste, RapportertInntektMapper rapportertInntektMapper, ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder, HistorikkinnslagRepository historikkinnslagRepository) {
+    public FastsettInntektOppdaterer(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste, RapportertInntektMapper rapportertInntektMapper, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder, HistorikkinnslagRepository historikkinnslagRepository) {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
         this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
@@ -65,8 +59,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     }
 
     private void validerVurdertePerioder(AksjonspunktOppdaterParameter param, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
-        final var prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(param.getBehandlingId());
-        final var tidslinjeTilVurdering = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        final var tidslinjeTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(param.getBehandlingId());
         final var vurdertePerioderSomIkkeSkalVurderes = sammenslåtteInntekterTidslinje.disjoint(tidslinjeTilVurdering);
         if (!vurdertePerioderSomIkkeSkalVurderes.isEmpty()) {
             throw new IllegalStateException("Kan ikke bekrefte perioder som ikke skal vurderes i denne behandlingen: " + vurdertePerioderSomIkkeSkalVurderes);

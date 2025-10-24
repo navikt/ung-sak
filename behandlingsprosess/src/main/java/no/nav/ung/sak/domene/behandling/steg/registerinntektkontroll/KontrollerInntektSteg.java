@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
+import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

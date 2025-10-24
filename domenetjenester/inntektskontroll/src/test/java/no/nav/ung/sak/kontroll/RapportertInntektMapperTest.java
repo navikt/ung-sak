@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.uttak;
+package no.nav.ung.sak.kontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -9,10 +9,6 @@ import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

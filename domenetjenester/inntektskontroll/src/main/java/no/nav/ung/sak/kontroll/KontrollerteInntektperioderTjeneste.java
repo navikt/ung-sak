@@ -1,19 +1,14 @@
-package no.nav.ung.sak.ytelse.kontroll;
+package no.nav.ung.sak.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapportertInntektOgKilde;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +29,14 @@ public class KontrollerteInntektperioderTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(KontrollerteInntektperioderTjeneste.class);
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
     private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
-    private final ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private final RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
 
     @Inject
-    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder ytelsesperiodeutleder, ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
+    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder ytelsesperiodeutleder, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.ytelsesperiodeutleder = ytelsesperiodeutleder;
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId,
@@ -79,7 +74,7 @@ public class KontrollerteInntektperioderTjeneste {
         if (relevantForKontrollTidslinje.isEmpty()) {
             tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());
         } else {
-            final var tidslinjeTilVurdering = finnTidslinjeForKontroll(behandlingId);
+            final var tidslinjeTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
             final var tidslinjeSomBeholdes = relevantForKontrollTidslinje.disjoint(tidslinjeTilVurdering);
             final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
             final var perioderSomBeholdes = eksisterendePerioder.stream()
@@ -104,15 +99,11 @@ public class KontrollerteInntektperioderTjeneste {
         if (kontrollertInntektPerioder.isEmpty()) {
             return List.of();
         }
-        final var tidslinjeTilVurdering = finnTidslinjeForKontroll(behandlingId);
+        final var tidslinjeTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
         final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
         return eksisterendePerioder.stream()
             .filter(it -> !tidslinjeTilVurdering.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
             .toList();
-    }
-
-    public LocalDateTimeline<Boolean> finnTidslinjeForKontroll(Long behandlingId) {
-        return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).mapValue(it -> true);
     }
 
     private ArrayList<KontrollertInntektPeriode> utvidEksisterendePerioder(Long behandlingId, List<KontrollertInntektPeriode> nyePerioder) {

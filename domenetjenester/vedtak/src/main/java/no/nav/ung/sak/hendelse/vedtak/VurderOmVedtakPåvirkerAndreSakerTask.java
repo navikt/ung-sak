@@ -16,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.ytelse.kontroll.ManglendeKontrollperioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
