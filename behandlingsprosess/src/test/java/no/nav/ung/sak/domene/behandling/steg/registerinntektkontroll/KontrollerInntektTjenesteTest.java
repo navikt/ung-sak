@@ -31,7 +31,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<EtterlysningOgRegisterinntekt> harUttalelseTidslinje = new LocalDateTimeline<>(fom, tom,
             new EtterlysningOgRegisterinntekt(
                 Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))),
-                new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true)
+                new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true)
             ));
 
         // Act
@@ -101,7 +101,7 @@ class KontrollerInntektTjenesteTest {
             fom, tom,
             new EtterlysningOgRegisterinntekt(
                 Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))),
-                new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false)
+                new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false)
             ));
 
         // Act
@@ -125,7 +125,7 @@ class KontrollerInntektTjenesteTest {
                     new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000)),
                     new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000))
                 ),
-                new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
+                new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
         );
 
         // Act
@@ -177,7 +177,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, register, bruker);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje = new LocalDateTimeline<>(fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))), new EtterlysningInfo(EtterlysningStatus.UTLØPT, null)));
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.UTLØPT, null)));
 
         // Act
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);

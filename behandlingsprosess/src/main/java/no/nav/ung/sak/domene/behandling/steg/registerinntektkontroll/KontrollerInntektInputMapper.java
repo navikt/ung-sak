@@ -43,9 +43,9 @@ public class KontrollerInntektInputMapper {
 
     private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnGjeldendeEtterlysningTidslinje(List<EtterlysningData> etterlysninger, BehandlingReferanse behandlingReferanse) {
         var etterlysningsperioder = etterlysninger.stream()
-            .map(it -> new EtterlysningsPeriode(
+            .map(it -> new InntektskontrollEtterlysningsPeriode(
                 it.periode().toLocalDateInterval(),
-                new EtterlysningInfo(it.status(), it.uttalelseData() != null ? it.uttalelseData().harUttalelse() : null),
+                new InntektskontrollEtterlysningInfo(it.status(), it.uttalelseData() != null ? it.uttalelseData().harUttalelse() : null),
                 it.grunnlagsreferanse())).toList();
         return rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingReferanse.getBehandlingId(), etterlysningsperioder);
     }

@@ -34,7 +34,7 @@ class EtterlysningutlederKontrollerInntektTest {
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, register, bruker);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(registerFraUttalelse))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false)));
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(registerFraUttalelse))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false)));
 
         // Act
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
@@ -132,7 +132,7 @@ class EtterlysningutlederKontrollerInntektTest {
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1001, 0);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
             fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
         );
 
         // Act
@@ -151,7 +151,7 @@ class EtterlysningutlederKontrollerInntektTest {
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 0, 1001, 0);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> godkjentUttalelseTidslinje = new LocalDateTimeline<>(
             fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
         );
 
         // Act
@@ -173,7 +173,7 @@ class EtterlysningutlederKontrollerInntektTest {
             fom, tom,
             new EtterlysningOgRegisterinntekt(Set.of(
                 new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000)),
-                new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000))), new EtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
+                new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true))
         );
 
         // Act
@@ -192,7 +192,7 @@ class EtterlysningutlederKontrollerInntektTest {
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 10_000, 11_001);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> uttalelseTidslinje = new LocalDateTimeline<>(fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(10_002))), new EtterlysningInfo(EtterlysningStatus.VENTER, null)));
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(10_002))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.VENTER, null)));
 
         // Act
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, uttalelseTidslinje);
