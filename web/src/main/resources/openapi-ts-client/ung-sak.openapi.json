@@ -3224,6 +3224,17 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.klage.KlageHjemmelDto" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.klage.KlageVurderingResultatAksjonspunktDto.KlageVurderingResultatNfpAksjonspunktDto" : {
         "properties" : {
           "begrunnelse" : {
@@ -7637,6 +7648,28 @@
               }
             },
             "description" : "Returnerer vurdering av en klage fra ulike instanser"
+          }
+        },
+        "tags" : [ "no/nav/k9/klage" ]
+      }
+    },
+    "/api/klage-v2/hjemler" : {
+      "get" : {
+        "description" : "Henter hjemler aktuelle for bruk i klagevurdering",
+        "operationId" : "hentValgbareKlagehjemler",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.klage.KlageHjemmelDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Returnerer alle valgbare hjemler for klagevurdering"
           }
         },
         "tags" : [ "no/nav/k9/klage" ]
