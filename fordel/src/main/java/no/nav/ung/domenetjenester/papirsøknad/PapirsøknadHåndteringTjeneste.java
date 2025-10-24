@@ -1,4 +1,4 @@
-package no.nav.ung.sak.web.app.tjenester.fordeling;
+package no.nav.ung.domenetjenester.papirsøknad;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
