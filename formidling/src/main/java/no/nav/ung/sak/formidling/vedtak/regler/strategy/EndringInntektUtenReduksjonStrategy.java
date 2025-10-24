@@ -29,7 +29,7 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public EndringInntektUtenReduksjonStrategy(@KonfigVerdi(value = "ENABLE_ENDRING_UTEN_REDUKSJON_SJEKK", defaultVerdi = "true") boolean enableEndringUtenReduksjonSjekk, EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger, TilkjentYtelseRepository tilkjentYtelseRepository) {
+    public EndringInntektUtenReduksjonStrategy(@KonfigVerdi(value = "ENABLE_ENDRING_UTEN_REDUKSJON_SJEKK", defaultVerdi = "false") boolean enableEndringUtenReduksjonSjekk, EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger, TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.enableEndringUtenReduksjonSjekk = enableEndringUtenReduksjonSjekk;
         this.endringInntektUtenReduksjonInnholdBygger = endringInntektUtenReduksjonInnholdBygger;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;

@@ -19,7 +19,7 @@ class EndringInntektUtenReduksjonTest extends AbstractVedtaksbrevInnholdByggerTe
 
     @DisplayName("Endringsbrev inntekt uten reduksjon")
     @Test
-    void standardBrev() {
+    void rapportert10000krRegister0krFastsatt0kr() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(
             EndringInntektScenarioer.endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(fom), ungTestRepositories

@@ -83,7 +83,7 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_gi_redigerbar_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_med_ap_8000() {
+    void skal_gi_redigerbar_brev_ved_avkortning_men_fastsatt_til_0_kr_og_register_er_0kr() {
         UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(LocalDate.of(2024, 12, 1));
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestGrunnlag, ungTestRepositories);
 

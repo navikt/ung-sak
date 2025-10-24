@@ -192,6 +192,26 @@ public class EndringInntektScenarioer {
         return endringMedInntekt_19år_med_kontroll(fom, kontrollerInntektPerioder);
     }
 
+    /**
+     * 19 år ungdom med full ungdomsperiode har inntekt men har 10000 kr i register men rapporterer 0 kr, saksbehandler fastsetter 0 kr
+     */
+    public static UngTestScenario endring0KrRapportert10000KrRegister0krFastsatt(LocalDate fom) {
+        BigDecimal registerInntekt = BigDecimal.valueOf(10000);
+
+        var kontrollerInntektPerioder = new LocalDateTimeline<>(
+            List.of(new LocalDateSegment<>(
+                fom.withDayOfMonth(1).plusMonths(1),
+                fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
+                new BrevScenarioerUtils.KontrollerInntektHolder(
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    registerInntekt,
+                    true)
+            )));
+
+        return endringMedInntekt_19år_med_kontroll(fom, kontrollerInntektPerioder);
+    }
+
     static UngTestScenario endringMedInntekt_19år(LocalDate fom, LocalDateTimeline<BigDecimal> registerInntektTimeline) {
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
