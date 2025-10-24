@@ -4,22 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import org.slf4j.Logger;
-
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Kjører behandlingskontroll automatisk fra der prosessen står.
@@ -29,7 +21,7 @@ import java.util.stream.Collectors;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class FortsettBehandlingDersomIkkePåVentTask extends UnderBehandlingProsessTask {
 
-    public static final String TASKTYPE = "behandlingskontroll.fortsettBehandlingDersomIkkePåVent";
+    public static final String TASKTYPE = "behandlingskontroll.sjekkVentOgFortsettBehandling";
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(FortsettBehandlingDersomIkkePåVentTask.class);
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
