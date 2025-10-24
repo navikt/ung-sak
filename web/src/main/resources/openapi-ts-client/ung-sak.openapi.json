@@ -7655,8 +7655,8 @@
     },
     "/api/klage-v2/hjemler" : {
       "get" : {
-        "description" : "Hent hjemler aktuelle for bruk i klagevurdering",
-        "operationId" : "getKlagehjemler",
+        "description" : "Henter hjemler aktuelle for bruk i klagevurdering",
+        "operationId" : "hentValgbareKlagehjemler",
         "responses" : {
           "200" : {
             "content" : {
@@ -7669,7 +7669,7 @@
                 }
               }
             },
-            "description" : "Returnerer alle relevant hjemler for en klagevurdering"
+            "description" : "Returnerer alle valgbare hjemler for klagevurdering"
           }
         },
         "tags" : [ "no/nav/k9/klage" ]
