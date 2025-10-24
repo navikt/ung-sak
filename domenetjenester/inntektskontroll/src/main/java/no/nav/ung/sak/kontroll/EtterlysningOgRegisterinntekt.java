@@ -1,6 +1,5 @@
-package no.nav.ung.sak.ytelse;
+package no.nav.ung.sak.kontroll;
 
-import no.nav.ung.sak.uttalelse.EtterlysningInfo;
 
 import java.util.Set;
 

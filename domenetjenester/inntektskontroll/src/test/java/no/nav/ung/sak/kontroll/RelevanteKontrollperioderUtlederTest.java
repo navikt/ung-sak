@@ -1,8 +1,7 @@
-package no.nav.ung.sak.ytelse;
+package no.nav.ung.sak.kontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.ytelse.kontroll.RelevanteKontrollperioderUtleder;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

@@ -8,9 +8,6 @@ import no.nav.ung.sak.domene.iay.modell.Inntekt;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.kontrakt.kontroll.*;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
 
 import java.util.*;
 

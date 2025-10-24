@@ -30,7 +30,6 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.kontroll.KontrollerInntektDto;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
 
 import java.util.Collections;
 

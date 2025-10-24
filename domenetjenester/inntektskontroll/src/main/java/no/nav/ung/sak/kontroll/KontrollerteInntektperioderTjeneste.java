@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse.kontroll;
+package no.nav.ung.sak.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -11,9 +11,6 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapportertInntektOgKilde;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

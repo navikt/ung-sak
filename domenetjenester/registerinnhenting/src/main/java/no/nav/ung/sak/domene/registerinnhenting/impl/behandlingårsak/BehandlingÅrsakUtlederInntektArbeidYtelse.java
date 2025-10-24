@@ -10,6 +10,7 @@ import no.nav.ung.sak.domene.arbeidsforhold.IAYGrunnlagDiff;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private BehandlingÅrsakUtlederInntekter behandlingÅrsakUtlederInntekter;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
 
     @Inject

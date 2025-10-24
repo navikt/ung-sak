@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse;
+package no.nav.ung.sak.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -12,7 +12,6 @@ import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

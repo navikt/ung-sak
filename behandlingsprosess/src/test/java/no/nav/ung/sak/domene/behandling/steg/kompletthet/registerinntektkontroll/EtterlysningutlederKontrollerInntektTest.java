@@ -7,11 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
-import no.nav.ung.sak.uttalelse.EtterlysningInfo;
-import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import no.nav.ung.sak.kontroll.*;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;

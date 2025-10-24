@@ -1,4 +1,4 @@
-package no.nav.ung.sak.uttalelse;
+package no.nav.ung.sak.kontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 
