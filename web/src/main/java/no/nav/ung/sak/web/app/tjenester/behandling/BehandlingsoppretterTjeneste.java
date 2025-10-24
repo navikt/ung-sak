@@ -10,6 +10,7 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.revurdering.RevurderingFeil;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
@@ -17,6 +18,8 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -41,6 +44,8 @@ public class BehandlingsoppretterTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private KlageVurderingTjeneste klageVurderingTjeneste;
     private PersonopplysningRepository personopplysningRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
+
 
     BehandlingsoppretterTjeneste() {
         // CDI
@@ -52,7 +57,8 @@ public class BehandlingsoppretterTjeneste {
                                         @Any Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                         KlageVurderingTjeneste klageVurderingTjeneste,
-                                        PersonopplysningRepository personopplysningRepository) {
+                                        PersonopplysningRepository personopplysningRepository,
+                                        HistorikkinnslagRepository historikkinnslagRepository) {
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
@@ -60,6 +66,7 @@ public class BehandlingsoppretterTjeneste {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.klageVurderingTjeneste = klageVurderingTjeneste;
         this.personopplysningRepository = personopplysningRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     public Behandling opprettManuellRevurdering(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
@@ -95,6 +102,8 @@ public class BehandlingsoppretterTjeneste {
         var nyBehandling = opprettBehandling(fagsak, BehandlingType.KLAGE, enhet, BehandlingÅrsakType.UDEFINERT);
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(forrigeBehandling.getId(), nyBehandling.getId());
         klageVurderingTjeneste.opprettKlageUtredning(nyBehandling, enhet);
+
+        opprettHistorikkinnslag(nyBehandling, true);
         return nyBehandling;
     }
 
@@ -152,4 +161,15 @@ public class BehandlingsoppretterTjeneste {
 
     }
 
+    public void opprettHistorikkinnslag(Behandling behandling, boolean manueltOpprettet) {
+        HistorikkAktør historikkAktør = manueltOpprettet ? HistorikkAktør.SAKSBEHANDLER : HistorikkAktør.VEDTAKSLØSNINGEN;
+
+        var historikkBuilder = new Historikkinnslag.Builder();
+        historikkBuilder.medTittel("Klagebehandling opprettet")
+            .medBehandlingId(behandling.getId())
+            .medFagsakId(behandling.getFagsakId())
+            .medAktør(historikkAktør);
+
+        historikkinnslagRepository.lagre(historikkBuilder.build());
+    }
 }
