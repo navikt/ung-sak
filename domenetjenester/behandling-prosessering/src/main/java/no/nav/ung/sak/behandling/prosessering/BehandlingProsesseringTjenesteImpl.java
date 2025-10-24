@@ -133,10 +133,14 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
                 leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
             }
         }
-        ProsessTaskData fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
-        fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(!oppfriskKontrollbehandlingEnabled));
-        gruppe.addNesteSekvensiell(fortsettBehandlingTask);
+        if (!behandling.isBehandlingPåVent()) {
+            ProsessTaskData fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+            fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+            fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(!oppfriskKontrollbehandlingEnabled));
+            gruppe.addNesteSekvensiell(fortsettBehandlingTask);
+        } else {
+            log.info("Behandling står på vent, fortsetter ikke behandling etter oppfrisking. behandlingId={}", behandling.getId());
+        }
         gruppe.setCallIdFraEksisterende();
         return gruppe;
     }
