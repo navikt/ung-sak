@@ -7,7 +7,10 @@ import jakarta.transaction.Transactional;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.hendelsemottak.tjenester.kabal.kontrakt.KabalBehandlingEvent;
@@ -27,15 +30,18 @@ public class KlageinstansVedtaksHendelseHåndterer {
     private static final Logger log = LoggerFactory.getLogger(KlageinstansVedtaksHendelseHåndterer.class);
     private ProsessTaskTjeneste taskRepository;
     private BehandlingRepository behandlingRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
 
     KlageinstansVedtaksHendelseHåndterer() {
     }
 
     @Inject
     public KlageinstansVedtaksHendelseHåndterer(BehandlingRepository behandlingRepository,
-                                                ProsessTaskTjeneste taskRepository) {
+                                                ProsessTaskTjeneste taskRepository,
+                                                HistorikkinnslagRepository historikkinnslagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.taskRepository = taskRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     void handleMessage(String key, String payload) {
