@@ -12,16 +12,12 @@ public record FellesDto(
     LocalDate brevDato,
     MottakerDto mottaker,
     String fagsakYtelse,
-    boolean automatiskBehandlet,
-    String saksbehandlerNavn,
-    String beslutterNavn) {
-    public static FellesDto lag(MottakerDto mottakerDto, boolean automatiskBehandletFooter, String saksbehandlerNavn, String beslutterNavn) {
+    BrevAnsvarligDto brevAnsvarlig) {
+    public static FellesDto lag(MottakerDto mottakerDto, BrevAnsvarligDto brevAnsvarlig) {
         return new FellesDto(LocalDate.now(),
             mottakerDto,
             FagsakYtelseType.UNGDOMSYTELSE.getKode(),
-            automatiskBehandletFooter,
-            saksbehandlerNavn,
-            beslutterNavn);
+            brevAnsvarlig);
     }
 
 }

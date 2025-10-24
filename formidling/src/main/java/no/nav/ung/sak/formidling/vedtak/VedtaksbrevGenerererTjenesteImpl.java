@@ -17,11 +17,14 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
+import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 @ApplicationScoped
 public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTjeneste {
@@ -59,14 +62,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         VedtaksbrevInnholdBygger bygger = vedtaksbrev.vedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, vedtaksbrevGenerererInput.detaljertResultatTidslinje());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
-        var brukAutomatiskGenerertVedtakFooter = !harManuellAksjonspunkt(behandling);
+
+        var brevAnsvarlig = bestemBrevansvarlig(behandling);
+
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
                 FellesDto.lag(
                     new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()),
-                    brukAutomatiskGenerertVedtakFooter,
-                    null,
-                    null),
+                    brevAnsvarlig),
                 resultat.templateInnholdDto()
             )
         );
@@ -78,6 +81,33 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             pdlMottaker,
             vedtaksbrev.dokumentMalType(),
             resultat.templateType()
+        );
+    }
+
+    private BrevAnsvarligDto bestemBrevansvarlig(Behandling behandling) {
+        if (harManuellAksjonspunkt(behandling)) {
+            return lagManuellBrevAnsvarlig(behandling);
+        }
+
+        return new BrevAnsvarligDto(true, null, null);
+    }
+
+    private BrevAnsvarligDto lagManuellBrevAnsvarlig(Behandling behandling) {
+        var saksbehandlerNavn = Optional.ofNullable(behandling.getAnsvarligSaksbehandler())
+            .flatMap(microsoftGraphTjeneste::navnPåNavAnsatt)
+            .orElse(null);
+
+        var beslutterNavn = Optional.ofNullable(behandling.getAnsvarligBeslutter())
+            .flatMap(microsoftGraphTjeneste::navnPåNavAnsatt)
+            .orElse(null);
+
+        if (saksbehandlerNavn == null) {
+            LOG.warn("Forventet saksbehandlernavn, men var tom.");
+        }
+        return new BrevAnsvarligDto(
+            false,
+            saksbehandlerNavn,
+            beslutterNavn
         );
     }
 
@@ -96,9 +126,10 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var resultat = manueltVedtaksbrevInnholdBygger.bygg(brevHtml);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
+
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false, null, null),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), lagManuellBrevAnsvarlig(behandling)),
                 resultat.templateInnholdDto()
             )
         );

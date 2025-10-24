@@ -149,25 +149,47 @@ public class BrevScenarioerUtils {
     }
 
     public static Behandling lagAvsluttetBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
-        var behandling = lagAvsluttetBehandling(ungTestscenario, ungTestRepositories1);
-
+        var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
         BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
         leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
-        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling, BESLUTTER_IDENT, behandlingRepository);
+        leggTilBeslutter(behandling,behandlingRepository);
+        behandling.avsluttBehandling();
+
+        return behandling;
+    }
+
+    public static Behandling lagÅpenBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
+        BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
 
         return behandling;
     }
 
     public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository) {
-        AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
-        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
-        aksjonspunkt.setAnsvarligSaksbehandler(BESLUTTER_IDENT);
-        aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "utført");
+        Aksjonspunkt aksjonspunkt = leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling);
+        behandling.setAnsvarligSaksbehandler(ident);
+        aksjonspunkt.setAnsvarligSaksbehandler(ident);
+
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }
 
-    public static Behandling lagAvsluttetBehandling(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1) {
+    private static Aksjonspunkt leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling) {
+        AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
+        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
+        aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "utført");
+        return aksjonspunkt;
+    }
+
+    public static void leggTilBeslutter(Behandling behandling, BehandlingRepository behandlingRepository) {
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling);
+        behandling.setAnsvarligBeslutter(BESLUTTER_IDENT);
+
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+    }
+
+    public static Behandling lagInnvilgetBehandling(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);

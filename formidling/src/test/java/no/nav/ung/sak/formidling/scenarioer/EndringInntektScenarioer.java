@@ -212,22 +212,21 @@ public class EndringInntektScenarioer {
     }
 
     public static Behandling lagBehandlingMedAksjonspunktKontrollerInntekt(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories) {
-        var behandling = BrevScenarioerUtils.lagAvsluttetBehandling(ungTestscenario, ungTestRepositories);
+        var behandling = BrevScenarioerUtils.lagInnvilgetBehandling(ungTestscenario, ungTestRepositories);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
         BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository);
-        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling, BrevScenarioerUtils.BESLUTTER_IDENT, behandlingRepository);
+        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository);
 
         return behandling;
     }
 
     public static Behandling lagBehandlingMedAksjonspunktVurderFeilutbetaling(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories) {
-        var behandling = BrevScenarioerUtils.lagAvsluttetBehandling(ungTestscenario, ungTestRepositories);
+        var behandling = BrevScenarioerUtils.lagInnvilgetBehandling(ungTestscenario, ungTestRepositories);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
         BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository);
-        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling, BrevScenarioerUtils.BESLUTTER_IDENT, behandlingRepository);
-
+        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository);
         return behandling;
     }
 

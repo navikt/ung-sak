@@ -19,6 +19,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -187,7 +189,9 @@ public class FormidlingRestTjeneste {
         @Valid @QueryParam("kunHtml") Boolean kunHtml,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = informasjonsbrevTjeneste.forhåndsvis(dto, kunHtml);
+
+        var bestillerIdent = Optional.ofNullable(SubjectHandler.getSubjectHandler().getUid()).orElseThrow();
+        var generertBrev = informasjonsbrevTjeneste.forhåndsvis(dto, bestillerIdent, kunHtml);
 
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
 
@@ -222,7 +226,9 @@ public class FormidlingRestTjeneste {
     public Response bestillInformasjonsbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingRequest dto
     ) {
-        BrevbestillingResultat resultat = informasjonsbrevTjeneste.bestill(dto);
+        var bestillerIdent = Optional.ofNullable(SubjectHandler.getSubjectHandler().getUid()).orElseThrow();
+
+        BrevbestillingResultat resultat = informasjonsbrevTjeneste.bestill(dto, bestillerIdent);
 
         return Response.ok(resultat.journalpostId()).build();
 
