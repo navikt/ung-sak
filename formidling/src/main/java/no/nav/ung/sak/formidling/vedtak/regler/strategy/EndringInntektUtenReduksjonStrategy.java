@@ -18,7 +18,6 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Dependent
 public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
@@ -65,7 +64,7 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
                 .combine(kontrollertInntektPerioderTidslinje, StandardCombinators::rightOnly,
                     LocalDateTimeline.JoinStyle.LEFT_JOIN)
                 .stream()
-                .anyMatch(it -> harManuellFastsatt0krMedOver0krRapportert(it.getValue()));
+                .anyMatch(it -> harManuellFastsatt0kr(it.getValue()));
         }
 
         return behandling.getAksjonspunkter().stream()
@@ -74,12 +73,9 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
     }
 
 
-    private static boolean harManuellFastsatt0krMedOver0krRapportert(KontrollertInntektPeriode it) {
+    private static boolean harManuellFastsatt0kr(KontrollertInntektPeriode it) {
         boolean harFastSattInntektTil0kr = it.getInntekt().compareTo(BigDecimal.ZERO) == 0;
-        boolean harRapporterInntektOver0kr = Optional.ofNullable(it.getRapportertInntekt())
-            .map(r -> r.compareTo(BigDecimal.ZERO) > 0)
-            .orElse(true); //Tolker ingen verdi som over 0 kr for å la andre sjekker fange opp
-        return it.getErManueltVurdert() && harRapporterInntektOver0kr && harFastSattInntektTil0kr;
+        return it.getErManueltVurdert() && harFastSattInntektTil0kr;
     }
 
     private LocalDateTimeline<KontrollertInntektPeriode> hentKontrollertInntektTidslinje(Behandling behandling) {

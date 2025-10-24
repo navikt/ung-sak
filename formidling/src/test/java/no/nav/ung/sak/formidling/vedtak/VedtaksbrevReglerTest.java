@@ -234,7 +234,7 @@ class VedtaksbrevReglerTest {
         assertThat(barnetilleggResultat.forklaring()).contains("barn");
     }
 
-    private static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
+     static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
         assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);
