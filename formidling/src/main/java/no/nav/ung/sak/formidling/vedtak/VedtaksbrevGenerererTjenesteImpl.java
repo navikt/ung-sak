@@ -4,6 +4,7 @@ package no.nav.ung.sak.formidling.vedtak;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -31,7 +32,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private PdfGenKlient pdfGen;
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
-
+    private MicrosoftGraphTjeneste microsoftGraphTjeneste;
     public VedtaksbrevGenerererTjenesteImpl() {
     }
 
@@ -39,11 +40,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     public VedtaksbrevGenerererTjenesteImpl(
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
-        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger, BrevMottakerTjeneste brevMottakerTjeneste) {
+        ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger,
+        BrevMottakerTjeneste brevMottakerTjeneste,
+        MicrosoftGraphTjeneste microsoftGraphTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
+        this.microsoftGraphTjeneste = microsoftGraphTjeneste;
     }
 
 
@@ -58,7 +62,11 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var brukAutomatiskGenerertVedtakFooter = !harManuellAksjonspunkt(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brukAutomatiskGenerertVedtakFooter),
+                FellesDto.lag(
+                    new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()),
+                    brukAutomatiskGenerertVedtakFooter,
+                    null,
+                    null),
                 resultat.templateInnholdDto()
             )
         );
@@ -90,7 +98,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false, null, null),
                 resultat.templateInnholdDto()
             )
         );

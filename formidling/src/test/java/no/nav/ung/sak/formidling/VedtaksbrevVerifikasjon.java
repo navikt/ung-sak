@@ -47,6 +47,6 @@ public class VedtaksbrevVerifikasjon {
                 BrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body,
-                "");
+                BrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN + " " + BrevScenarioerUtils.DEFAULT_BESLUTTER_NAVN);
     }
 }

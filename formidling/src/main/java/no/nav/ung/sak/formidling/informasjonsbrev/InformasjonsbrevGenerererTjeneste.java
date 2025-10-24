@@ -58,7 +58,7 @@ public class InformasjonsbrevGenerererTjeneste {
 
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false, null, null),
                 innhold.templateInnholdDto()
             ));
 

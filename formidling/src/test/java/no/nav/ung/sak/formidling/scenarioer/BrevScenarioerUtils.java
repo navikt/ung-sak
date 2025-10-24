@@ -30,10 +30,24 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Map;
 
 public class BrevScenarioerUtils {
 
     public static final String DEFAULT_NAVN = "Ung Testesen";
+    public static final String DEFAULT_SAKSBEHANDLER_NAVN = "Sara Saksbehandler";
+    public static final String SAKSBEHANDLER_2_NAVN = "Siggurd Saksbehandler";
+    public static final String DEFAULT_BESLUTTER_NAVN = "Birger Beslutter";
+
+    public static String SAKSBEHANDLER1_IDENT = "SAKSB1";
+    public static String SAKSBEHANDLER2_IDENT = "SAKSB2";
+    public static String BESLUTTER_IDENT = "BESLUTTER";
+
+    public static final Map<String, String> identNavnMap = Map.of(
+        SAKSBEHANDLER1_IDENT, DEFAULT_SAKSBEHANDLER_NAVN,
+        SAKSBEHANDLER2_IDENT, SAKSBEHANDLER_2_NAVN,
+        BESLUTTER_IDENT, DEFAULT_BESLUTTER_NAVN
+    );
 
     static PersonInformasjon lagBarn(LocalDate barnFødselsdato) {
         return PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).medPersonas().barn(AktørId.dummy(), barnFødselsdato).build();
@@ -134,19 +148,32 @@ public class BrevScenarioerUtils {
         ))).stream().findFirst().orElseThrow().getValue();
     }
 
-    public static Behandling lagBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+    public static Behandling lagAvsluttetBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        var behandling = lagAvsluttetBehandling(ungTestscenario, ungTestRepositories1);
+
+        BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling, BESLUTTER_IDENT, behandlingRepository);
+
+        return behandling;
+    }
+
+    public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository) {
+        AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
+        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
+        aksjonspunkt.setAnsvarligSaksbehandler(BESLUTTER_IDENT);
+        aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "utført");
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+    }
+
+    public static Behandling lagAvsluttetBehandling(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);
 
-        scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, aksjonspunktDefinisjon.getBehandlingSteg());
-
         var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories1);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
-        new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
-        BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         return behandling;
     }
 }
