@@ -14,6 +14,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingDersomIkkePåVentTask;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.ung.sak.behandling.prosessering.task.HoppTilbakeTilStegTask;
@@ -133,14 +134,16 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
                 leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
             }
         }
-        if (!behandling.isBehandlingPåVent()) {
-            ProsessTaskData fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
-            fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(!oppfriskKontrollbehandlingEnabled));
-            gruppe.addNesteSekvensiell(fortsettBehandlingTask);
+        ProsessTaskData fortsettBehandlingTask;
+        if (oppfriskKontrollbehandlingEnabled) {
+            fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingDersomIkkePåVentTask.class);
         } else {
-            log.info("Behandling står på vent, fortsetter ikke behandling etter oppfrisking. behandlingId={}", behandling.getId());
+            fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+            fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+            fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         }
+        gruppe.addNesteSekvensiell(fortsettBehandlingTask);
+
         gruppe.setCallIdFraEksisterende();
         return gruppe;
     }

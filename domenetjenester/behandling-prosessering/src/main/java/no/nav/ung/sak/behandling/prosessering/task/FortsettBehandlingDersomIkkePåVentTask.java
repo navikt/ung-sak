@@ -1,0 +1,59 @@
+package no.nav.ung.sak.behandling.prosessering.task;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingStegTilstand;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * Kjører behandlingskontroll automatisk fra der prosessen står.
+ */
+@ApplicationScoped
+@ProsessTask(FortsettBehandlingDersomIkkePåVentTask.TASKTYPE)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+public class FortsettBehandlingDersomIkkePåVentTask extends UnderBehandlingProsessTask {
+
+    public static final String TASKTYPE = "behandlingskontroll.fortsettBehandlingDersomIkkePåVent";
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+
+    FortsettBehandlingDersomIkkePåVentTask() {
+        // For CDI proxy
+    }
+
+    @Inject
+    public FortsettBehandlingDersomIkkePåVentTask(BehandlingRepository behandlingRepository,
+                                                  BehandlingLåsRepository behandlingLåsRepository,
+                                                  BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
+        super(behandlingRepository, behandlingLåsRepository);
+        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+    }
+
+    @Override
+    public void doProsesser(ProsessTaskData data, Behandling behandling) {
+        var behandlingId = data.getBehandlingId();
+        if (behandling.isBehandlingPåVent()) {
+            return;
+        }
+        if (behandling.erAvsluttet()) {
+            throw new IllegalStateException("Kan ikke fortsette en avsluttet behandling");
+        }
+        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
+        behandlingskontrollTjeneste.prosesserBehandling(kontekst);
+
+    }
+}
