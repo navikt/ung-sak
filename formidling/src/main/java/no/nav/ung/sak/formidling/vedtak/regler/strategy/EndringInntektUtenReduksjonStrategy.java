@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -23,11 +24,13 @@ import java.util.Optional;
 public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
 
+    private final boolean enableEndringUtenReduksjonSjekk;
     private final EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger;
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public EndringInntektUtenReduksjonStrategy(EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger, TilkjentYtelseRepository tilkjentYtelseRepository) {
+    public EndringInntektUtenReduksjonStrategy(@KonfigVerdi(value = "ENABLE_ENDRING_UTEN_REDUKSJON_SJEKK", defaultVerdi = "true") boolean enableEndringUtenReduksjonSjekk, EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger, TilkjentYtelseRepository tilkjentYtelseRepository) {
+        this.enableEndringUtenReduksjonSjekk = enableEndringUtenReduksjonSjekk;
         this.endringInntektUtenReduksjonInnholdBygger = endringInntektUtenReduksjonInnholdBygger;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
@@ -36,18 +39,9 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
 
-        var manueltFastsatt0MedOver0RapportertTidslinje = DetaljertResultat
-            .filtererTidslinje(detaljertResultat, DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)
-            .combine(kontrollertInntektPerioderTidslinje, StandardCombinators::rightOnly,
-                LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .stream()
-            .anyMatch(it -> harManuellFastsatt0krMedOver0krRapportert(it.getValue()));
+        var harManueltFastsattInntekt = harManueltFastsattInntekt(behandling, detaljertResultat, kontrollertInntektPerioderTidslinje);
 
-        boolean harUtførtKontrollerInntekt = behandling.getAksjonspunkter().stream()
-            .filter(Aksjonspunkt::erUtført)
-            .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
-
-        if (harUtførtKontrollerInntekt && manueltFastsatt0MedOver0RapportertTidslinje) {
+        if (harManueltFastsattInntekt) {
             return new VedtaksbrevStrategyResultat(
                 DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON,
                 endringInntektUtenReduksjonInnholdBygger,
@@ -59,13 +53,31 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
                 "Redigerbar brev ved full utbetaling med manuelt fastsatt inntekt på 0 kr uten registerinntekt."
             );
         }
-        return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,"Ingen brev ved full utbetaling etter kontroll av inntekt.");
+        return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved full utbetaling etter kontroll av inntekt.");
     }
+
+    private boolean harManueltFastsattInntekt(
+        Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat,
+        LocalDateTimeline<KontrollertInntektPeriode> kontrollertInntektPerioderTidslinje) {
+        if (this.enableEndringUtenReduksjonSjekk) {
+            return DetaljertResultat
+                .filtererTidslinje(detaljertResultat, DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)
+                .combine(kontrollertInntektPerioderTidslinje, StandardCombinators::rightOnly,
+                    LocalDateTimeline.JoinStyle.LEFT_JOIN)
+                .stream()
+                .anyMatch(it -> harManuellFastsatt0krMedOver0krRapportert(it.getValue()));
+        }
+
+        return behandling.getAksjonspunkter().stream()
+            .filter(Aksjonspunkt::erUtført)
+            .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+    }
+
 
     private static boolean harManuellFastsatt0krMedOver0krRapportert(KontrollertInntektPeriode it) {
         boolean harFastSattInntektTil0kr = it.getInntekt().compareTo(BigDecimal.ZERO) == 0;
         boolean harRapporterInntektOver0kr = Optional.ofNullable(it.getRapportertInntekt())
-            .map( r -> r.compareTo(BigDecimal.ZERO) > 0)
+            .map(r -> r.compareTo(BigDecimal.ZERO) > 0)
             .orElse(true); //Tolker ingen verdi som over 0 kr for å la andre sjekker fange opp
         return it.getErManueltVurdert() && harRapporterInntektOver0kr && harFastSattInntektTil0kr;
     }
