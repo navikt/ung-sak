@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class FortsettBehandlingDersomIkkePåVentTask extends UnderBehandlingProsessTask {
 
-    public static final String TASKTYPE = "behandlingskontroll.fortsettBehandlingDersomIkkePåVent";
+    public static final String TASKTYPE = "behandlingskontroll.sjekkVentOgFortsettBehandling";
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(FortsettBehandlingDersomIkkePåVentTask.class);
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
