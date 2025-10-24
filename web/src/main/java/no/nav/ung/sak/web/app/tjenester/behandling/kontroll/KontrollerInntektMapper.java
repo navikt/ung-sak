@@ -2,7 +2,6 @@ package no.nav.ung.sak.web.app.tjenester.behandling.kontroll;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.domene.iay.modell.Inntekt;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
@@ -21,7 +20,7 @@ public class KontrollerInntektMapper {
                                            LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
                                            List<Inntekt> registerinntekter,
                                            LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
-                                           LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
+                                           LocalDateTimeline<Boolean> perioderTilKontroll) {
 
         final var vurdertePerioder = finnVurdertePerioder(
             kontrollertInntektPerioder,
@@ -43,7 +42,7 @@ public class KontrollerInntektMapper {
         return new KontrollerInntektDto(perioder);
     }
 
-    private static List<KontrollerInntektPeriodeDto> finnVurdertePerioder(List<KontrollertInntektPeriode> kontrollertInntektPerioder, LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje, List<Inntekt> registerinntekter, LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger, LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
+    private static List<KontrollerInntektPeriodeDto> finnVurdertePerioder(List<KontrollertInntektPeriode> kontrollertInntektPerioder, LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje, List<Inntekt> registerinntekter, LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger, LocalDateTimeline<Boolean> perioderTilKontroll) {
         return kontrollertInntektPerioder.stream()
             .map(it -> mapTilPeriodeDto(
                 rapporterteInntekterTidslinje,
@@ -58,7 +57,7 @@ public class KontrollerInntektMapper {
         LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
         List<Inntekt> registerinntekter,
         LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
-        LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll) {
+        LocalDateTimeline<Boolean> perioderTilKontroll) {
         final var vurdertePerioderTidslinje = finnTidslinjeForVurdertePerioder(kontrollertInntektPerioder);
         return mapIkkeVurdertePerioder(
             rapporterteInntekterTidslinje,
@@ -78,7 +77,7 @@ public class KontrollerInntektMapper {
     private static List<KontrollerInntektPeriodeDto> mapIkkeVurdertePerioder(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
                                                                              List<Inntekt> registerinntekter,
                                                                              LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
-                                                                             LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll,
+                                                                             LocalDateTimeline<Boolean> perioderTilKontroll,
                                                                              LocalDateTimeline<Boolean> vurdertePerioderTidslinje) {
         final var ikkeVurdertTidslinje = perioderTilKontroll.disjoint(vurdertePerioderTidslinje);
         return ikkeVurdertTidslinje.toSegments().stream()
@@ -102,7 +101,7 @@ public class KontrollerInntektMapper {
     private static KontrollerInntektPeriodeDto mapTilPeriodeDto(LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje,
                                                                 List<Inntekt> registerinntekter,
                                                                 LocalDateTimeline<EtterlysningData> gjeldendeEtterlysninger,
-                                                                LocalDateTimeline<Set<BehandlingÅrsakType>> perioderTilKontroll, KontrollertInntektPeriode it) {
+                                                                LocalDateTimeline<Boolean> perioderTilKontroll, KontrollertInntektPeriode it) {
         final var overlappendeRapporterteInntekter = rapporterteInntekterTidslinje.intersection(it.getPeriode().toLocalDateInterval());
         final var rapporterteInntekter = mapRapporterteInntekter(overlappendeRapporterteInntekter, registerinntekter, it.getPeriode().toLocalDateInterval());
         final var uttalelseFraBruker = finnUttalelse(gjeldendeEtterlysninger, it.getPeriode().toLocalDateInterval());

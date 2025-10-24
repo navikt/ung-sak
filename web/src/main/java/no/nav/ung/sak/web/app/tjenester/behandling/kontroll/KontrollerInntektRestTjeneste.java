@@ -16,7 +16,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -30,7 +29,6 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.kontroll.KontrollerInntektDto;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.Collections;
@@ -49,7 +47,6 @@ public class KontrollerInntektRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RapportertInntektMapper rapportertInntektMapper;
     private EtterlysningTjeneste etterlysningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
@@ -63,13 +60,11 @@ public class KontrollerInntektRestTjeneste {
     @Inject
     public KontrollerInntektRestTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                          TilkjentYtelseRepository tilkjentYtelseRepository,
-                                         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                          RapportertInntektMapper rapportertInntektMapper,
                                          EtterlysningTjeneste etterlysningTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                          RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
