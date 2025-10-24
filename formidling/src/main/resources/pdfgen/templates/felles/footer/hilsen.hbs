@@ -3,7 +3,13 @@
     <p>Nav Arbeid og ytelser</p>
 </div>
 
-<div style="display: flex; justify-content: space-between;">
-    <span>{{felles.brevAnsvarlig.saksbehandlerNavn}}</span>
-    <span>{{felles.brevAnsvarlig.beslutterNavn}}</span>
-</div>
+<table style="width:100%; border-collapse:collapse; margin-top:4mm;">
+    <tr>
+        <td style="text-align:left; vertical-align:top;">
+            {{felles.brevAnsvarlig.saksbehandlerNavn}}
+        </td>
+        <td style="text-align:right; vertical-align:top;">
+            {{felles.brevAnsvarlig.beslutterNavn}}
+        </td>
+    </tr>
+</table>
