@@ -54,7 +54,7 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
         boolean erInntektEndretForSøker = diff.erEndringPåInntekter(perioderTilVurdering);
         if (erInntektEndretForSøker) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_INNTEKT, "aktør inntekt for periode " + perioderTilVurdering);
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.VURDER_KOMPLETTHET, "aktør inntekt for periode " + perioderTilVurdering);
         }
 
 
