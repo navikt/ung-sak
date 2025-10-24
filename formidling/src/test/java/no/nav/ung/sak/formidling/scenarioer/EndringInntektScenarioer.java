@@ -27,40 +27,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class EndringInntektScenarioer {
     /**
-     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre måned på 10 000 kroner.
+     * 19 år ungdom med full ungdomsperiode som har inntekt andre måned på 10 000 kroner.
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektPå10k_19år(LocalDate fom) {
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
+        var registerInntektTimeline = new LocalDateTimeline<>(
             List.of(new LocalDateSegment<>(
                 fom.withDayOfMonth(1).plusMonths(1),
                 fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
                 BigDecimal.valueOf(10000))));
 
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringMedInntekt_19år(fom, registerInntektTimeline);
     }
 
     /**
-     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre og tredje måned på 10 000 kroner.
+     * 19 år ungdom med full ungdomsperiode som har inntekt andre og tredje måned på 10 000 kroner.
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektPå10k_flere_mnd_19år(LocalDate fom) {
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
+        var registerInntektTimeline = new LocalDateTimeline<>(
             List.of(new LocalDateSegment<>(
                 fom.withDayOfMonth(1).plusMonths(1),
                 fom.withDayOfMonth(1).plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()),
                 BigDecimal.valueOf(10000))));
 
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringMedInntekt_19år(fom, registerInntektTimeline);
     }
 
     /**
-     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre og tredje måned på 10 000 kroner.
+     * 19 år ungdom med full ungdomsperiode som har inntekt andre og tredje måned på 10 000 kroner.
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektPå10k_utenom_mnd_2(LocalDate fom) {
         LocalDate førsteIMåneden = fom.withDayOfMonth(1);
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
+        var registerInntektTimeline = new LocalDateTimeline<>(
             List.of(
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(1),
@@ -77,17 +77,17 @@ public class EndringInntektScenarioer {
 
             ));
 
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringMedInntekt_19år(fom, registerInntektTimeline);
     }
 
 
     /**
-     * 19 år ungdom med full ungdomsperiode som rapporterer inntekt andre og tredje måned på 10 000 kroner.
+     * 19 år ungdom med full ungdomsperiode som har inntekt andre og tredje måned på 10 000 kroner.
      * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektIngenUtbetaling(LocalDate fom) {
         LocalDate førsteIMåneden = fom.withDayOfMonth(1);
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
+        var registerInntektTimeline = new LocalDateTimeline<>(
             List.of(
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(1),
@@ -95,7 +95,7 @@ public class EndringInntektScenarioer {
                     BigDecimal.valueOf(23000))
             ));
 
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringMedInntekt_19år(fom, registerInntektTimeline);
     }
 
     /**
@@ -105,7 +105,7 @@ public class EndringInntektScenarioer {
      */
     public static UngTestScenario endringInntektRedusertOgIngenUtbetaling(LocalDate fom) {
         LocalDate førsteIMåneden = fom.withDayOfMonth(1);
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
+        var registerInntektTimeline = new LocalDateTimeline<>(
             List.of(
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(1),
@@ -117,7 +117,7 @@ public class EndringInntektScenarioer {
                     BigDecimal.valueOf(10000))
             ));
 
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringMedInntekt_19år(fom, registerInntektTimeline);
     }
 
     /**
@@ -130,7 +130,7 @@ public class EndringInntektScenarioer {
      */
     public static UngTestScenario endringInntektAlleKombinasjoner(LocalDate fom) {
         LocalDate førsteIMåneden = fom.withDayOfMonth(1);
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
+        var registerInntektTimeline = new LocalDateTimeline<>(
             List.of(
                 new LocalDateSegment<>(
                     førsteIMåneden.plusMonths(1),
@@ -155,45 +155,92 @@ public class EndringInntektScenarioer {
 
             ));
 
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringMedInntekt_19år(fom, registerInntektTimeline);
     }
 
     /**
-     * 19 år ungdom med full ungdomsperiode uten inntekt og rapporterer ingen inntekt
+     * 19 år ungdom med full ungdomsperiode uten inntekt og har ingen inntekt
      */
     public static UngTestScenario endring0KrInntekt_19år(LocalDate fom) {
-        var rapportertInntektTimeline = new LocalDateTimeline<>(
+        var registerInntektTimeline = new LocalDateTimeline<>(
             List.of(new LocalDateSegment<>(
                 fom.withDayOfMonth(1).plusMonths(1),
                 fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
                 BigDecimal.ZERO)));
 
 
-        return endringMedInntekt_19år(fom, rapportertInntektTimeline);
+        return endringMedInntekt_19år(fom, registerInntektTimeline);
     }
 
-    static UngTestScenario endringMedInntekt_19år(LocalDate fom, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
+    /**
+     * 19 år ungdom med full ungdomsperiode har inntekt men har 0 kr i register og får derfor 0 kr i fastsatt
+     */
+    public static UngTestScenario endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(LocalDate fom) {
+        BigDecimal rapportertInntekt = BigDecimal.valueOf(10000);
+
+        var kontrollerInntektPerioder = new LocalDateTimeline<>(
+            List.of(new LocalDateSegment<>(
+                fom.withDayOfMonth(1).plusMonths(1),
+                fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
+                new BrevScenarioerUtils.KontrollerInntektHolder(
+                    BigDecimal.ZERO,
+                    rapportertInntekt,
+                    BigDecimal.ZERO,
+                    true)
+            )));
+
+        return endringMedInntekt_19år_med_kontroll(fom, kontrollerInntektPerioder);
+    }
+
+    /**
+     * 19 år ungdom med full ungdomsperiode har inntekt men har 10000 kr i register men rapporterer 0 kr, saksbehandler fastsetter 0 kr
+     */
+    public static UngTestScenario endring0KrRapportert10000KrRegister0krFastsatt(LocalDate fom) {
+        BigDecimal registerInntekt = BigDecimal.valueOf(10000);
+
+        var kontrollerInntektPerioder = new LocalDateTimeline<>(
+            List.of(new LocalDateSegment<>(
+                fom.withDayOfMonth(1).plusMonths(1),
+                fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
+                new BrevScenarioerUtils.KontrollerInntektHolder(
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    registerInntekt,
+                    true)
+            )));
+
+        return endringMedInntekt_19år_med_kontroll(fom, kontrollerInntektPerioder);
+    }
+
+    static UngTestScenario endringMedInntekt_19år(LocalDate fom, LocalDateTimeline<BigDecimal> registerInntektTimeline) {
+        var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
+            BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
+        return endringMedInntekt_19år_med_kontroll(fom, kontrollertInntektTidslinje);
+    }
+
+    static UngTestScenario endringMedInntekt_19år_med_kontroll(LocalDate fom, LocalDateTimeline<BrevScenarioerUtils.KontrollerInntektHolder> kontrollertInntektTidslinje) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
         var satser = BrevScenarioerUtils.lavSatsBuilder(p);
 
-        var tilkjentPeriode = new LocalDateInterval(rapportertInntektTimeline.getMinLocalDate(), rapportertInntektTimeline.getMaxLocalDate());
+        var tilkjentPeriode = new LocalDateInterval(kontrollertInntektTidslinje.getMinLocalDate(), kontrollertInntektTidslinje.getMaxLocalDate());
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
-        var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, tilkjentPeriode, rapportertInntektTimeline);
+        var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, tilkjentPeriode, kontrollertInntektTidslinje);
 
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, kontrollertInntektTidslinje);
 
         var opptjening = OppgittOpptjeningBuilder.ny();
 
-        rapportertInntektTimeline.forEach(it ->
+        kontrollerInntektPerioder.forEach(it ->
             opptjening.leggTilOppgittArbeidsforhold(OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny()
-                .medInntekt(it.getValue())
+                .medInntekt(it.getValue().getRapportertInntekt())
                 .medPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             ));
 
         var triggere = HashSet.<Trigger>newHashSet(2);
         triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode)));
-        rapportertInntektTimeline.filterValue(it -> it.compareTo(BigDecimal.ZERO) > 0)
+        kontrollerInntektPerioder.filterValue(it -> it.getInntekt().compareTo(BigDecimal.ZERO) > 0)
             .forEach(it -> triggere.add(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(it.getLocalDateInterval()))));
 
         return new UngTestScenario(
@@ -207,7 +254,8 @@ public class EndringInntektScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             triggere,
-            Collections.emptyList(), null);
+            Collections.emptyList(), null,
+            kontrollerInntektPerioder);
     }
 
     public static Behandling lagBehandlingMedAksjonspunktKontrollerInntekt(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories) {

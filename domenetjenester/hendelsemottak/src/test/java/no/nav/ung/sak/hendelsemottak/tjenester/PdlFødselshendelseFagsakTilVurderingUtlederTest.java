@@ -2,14 +2,12 @@ package no.nav.ung.sak.hendelsemottak.tjenester;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.integrasjon.pdl.*;
+import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
+import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -27,14 +25,11 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
-import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -129,8 +124,8 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
                 List.of(fom),
                 Set.of(),
                 List.of(PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).leggTilPersonopplysning(Personopplysning.builder().aktørId(barnAktørId).fødselsdato(barnFødselsdato).build()).build()),
-                null
-            )
+                null,
+                null)
         ).buildOgLagreMedUng(UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, null));
         return behandling;
     }

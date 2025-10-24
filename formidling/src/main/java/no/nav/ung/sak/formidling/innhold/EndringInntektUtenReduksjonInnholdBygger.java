@@ -8,7 +8,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.formidling.template.dto.EndringRapportertInntektUtenReduksjonDto;
+import no.nav.ung.sak.formidling.template.dto.EndringInntektUtenReduksjonDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
@@ -18,12 +18,12 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Dependent
-public class EndringRapportertInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnholdBygger {
+public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public EndringRapportertInntektUtenReduksjonInnholdBygger(
+    public EndringInntektUtenReduksjonInnholdBygger(
         TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
@@ -54,7 +54,7 @@ public class EndringRapportertInntektUtenReduksjonInnholdBygger implements Vedta
 
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT_UTEN_REDUKSJON,
-            new EndringRapportertInntektUtenReduksjonDto(fullUtbetalingsperioder)
+            new EndringInntektUtenReduksjonDto(fullUtbetalingsperioder)
         );
     }
 

@@ -11,18 +11,18 @@ import java.time.LocalDate;
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class EndringRapportertInntektUtenReduksjonTest extends AbstractVedtaksbrevInnholdByggerTest {
+class EndringInntektUtenReduksjonTest extends AbstractVedtaksbrevInnholdByggerTest {
 
-    EndringRapportertInntektUtenReduksjonTest() {
+    EndringInntektUtenReduksjonTest() {
         super(1, "Vi har ikke endret ungdomsprogramytelsen din");
     }
 
     @DisplayName("Endringsbrev inntekt uten reduksjon")
     @Test
-    void standardBrev() {
+    void rapportert10000krRegister0krFastsatt0kr() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(
-            EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories
+            EndringInntektScenarioer.endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(fom), ungTestRepositories
         );
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
@@ -49,11 +49,10 @@ class EndringRapportertInntektUtenReduksjonTest extends AbstractVedtaksbrevInnho
     @Override
     protected Behandling lagScenarioForFellesTester() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        Behandling behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(
-            EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories
-        );
 
-        return behandling;
+        return EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(
+            EndringInntektScenarioer.endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(fom), ungTestRepositories
+        );
     }
 }
 

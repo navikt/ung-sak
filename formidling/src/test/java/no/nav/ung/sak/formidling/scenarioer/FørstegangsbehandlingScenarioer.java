@@ -53,7 +53,7 @@ public class FørstegangsbehandlingScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))),
-            Collections.emptyList(), null);
+            Collections.emptyList(), null, null);
     }
 
     /**
@@ -82,7 +82,7 @@ public class FørstegangsbehandlingScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))),
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
-            ), null);
+            ), null, null);
     }
 
     /**
@@ -111,7 +111,7 @@ public class FørstegangsbehandlingScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))),
             List.of(
                 BrevScenarioerUtils.lagBarnMedDødsdato(fom.minusYears(1), barnDødsdato)
-            ), null);
+            ), null, null);
     }
 
     /**
@@ -151,7 +151,7 @@ public class FørstegangsbehandlingScenarioer {
                 BrevScenarioerUtils.lagBarn(barnFødselsdato),
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ),
-            null);
+            null, null);
     }
 
     /**
@@ -175,7 +175,7 @@ public class FørstegangsbehandlingScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fom.minusYears(27).plusDays(42),
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), Collections.emptyList(), null);
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), Collections.emptyList(), null, null);
     }
 
     /**
@@ -199,7 +199,7 @@ public class FørstegangsbehandlingScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), Collections.emptyList(), null);
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), Collections.emptyList(), null, null);
     }
 
     /**
@@ -234,7 +234,7 @@ public class FørstegangsbehandlingScenarioer {
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
             List.of(p.getFomDato()),
-            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), Collections.emptyList(), null);
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))), Collections.emptyList(), null, null);
     }
 
 
@@ -256,7 +256,7 @@ public class FørstegangsbehandlingScenarioer {
             ungTestScenario.søknadStartDato(),
             Set.of(new Trigger(BehandlingÅrsakType.RE_SATS_ENDRING, p)),
             ungTestScenario.barn(),
-            ungTestScenario.dødsdato());
+            ungTestScenario.dødsdato(), null);
 
     }
 
@@ -292,7 +292,7 @@ public class FørstegangsbehandlingScenarioer {
                 new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(startdato, sluttdato))
             ),
             Collections.emptyList(),
-            null);
+            null, null);
     }
 
     /**
@@ -321,6 +321,6 @@ public class FørstegangsbehandlingScenarioer {
             fødselsdato, // 10 dager til blir 19 år
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE, DatoIntervallEntitet.fra(p))),
-            Collections.emptyList(), null);
+            Collections.emptyList(), null, null);
     }
 }
