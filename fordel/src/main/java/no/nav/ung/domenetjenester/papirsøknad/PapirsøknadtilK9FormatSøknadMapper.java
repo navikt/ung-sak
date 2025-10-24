@@ -1,4 +1,4 @@
-package no.nav.ung.sak.web.app.tjenester.fordeling;
+package no.nav.ung.domenetjenester.papirsøknad;
 
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.Kildesystem;
