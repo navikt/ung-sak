@@ -25,8 +25,8 @@ public class RelevanteKontrollperioderUtleder {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
     }
 
-    public LocalDateTimeline<Set<BehandlingÅrsakType>> utledPerioderForKontrollAvInntekt(Long behandlingId) {
-        return utledPerioderForKontrollAvInntekt(behandlingId, Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+    public LocalDateTimeline<Boolean> utledPerioderForKontrollAvInntekt(Long behandlingId) {
+        return utledPerioderForKontrollAvInntekt(behandlingId, Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).mapValue(_ -> true);
     }
 
 

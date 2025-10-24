@@ -32,13 +32,15 @@ public class KontrollerteInntektperioderTjeneste {
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
     private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
     private final ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private final RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
 
     @Inject
-    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder ytelsesperiodeutleder, ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
+    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder ytelsesperiodeutleder, ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.ytelsesperiodeutleder = ytelsesperiodeutleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     public void opprettKontrollerteInntekterPerioderFraBruker(Long behandlingId,
@@ -76,7 +78,7 @@ public class KontrollerteInntektperioderTjeneste {
         if (relevantForKontrollTidslinje.isEmpty()) {
             tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());
         } else {
-            final var tidslinjeTilVurdering = finnTidslinjeForKontroll(behandlingId);
+            final var tidslinjeTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
             final var tidslinjeSomBeholdes = relevantForKontrollTidslinje.disjoint(tidslinjeTilVurdering);
             final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
             final var perioderSomBeholdes = eksisterendePerioder.stream()
@@ -101,15 +103,11 @@ public class KontrollerteInntektperioderTjeneste {
         if (kontrollertInntektPerioder.isEmpty()) {
             return List.of();
         }
-        final var tidslinjeTilVurdering = finnTidslinjeForKontroll(behandlingId);
+        final var tidslinjeTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
         final var eksisterendePerioder = kontrollertInntektPerioder.get().getPerioder();
         return eksisterendePerioder.stream()
             .filter(it -> !tidslinjeTilVurdering.intersection(it.getPeriode().toLocalDateInterval()).isEmpty())
             .toList();
-    }
-
-    public LocalDateTimeline<Boolean> finnTidslinjeForKontroll(Long behandlingId) {
-        return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)).mapValue(it -> true);
     }
 
     private ArrayList<KontrollertInntektPeriode> utvidEksisterendePerioder(Long behandlingId, List<KontrollertInntektPeriode> nyePerioder) {
