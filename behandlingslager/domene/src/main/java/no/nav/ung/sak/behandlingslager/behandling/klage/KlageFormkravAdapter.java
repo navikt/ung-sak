@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 
-import no.nav.ung.kodeverk.hjemmel.KlageHjemmel;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.kodeverk.hjemmel.KlageHjemmel.*;
+import static no.nav.ung.sak.behandlingslager.behandling.klage.HjemmelBruktKlagebrev.*;
 
 public class KlageFormkravAdapter {
 
@@ -95,18 +94,18 @@ public class KlageFormkravAdapter {
         return Optional.empty();
     }
 
-    public List<KlageHjemmel> hentFolketrygdParagrafer() {
-        List<KlageHjemmel> paragrafer = new ArrayList<>();
+    public List<HjemmelBruktKlagebrev> hentArbeidsmarkedParagrafer() {
+        List<HjemmelBruktKlagebrev> paragrafer = new ArrayList<>();
 
         if (!isFristOverholdt()) {
-            paragrafer.add(FTRL_KLAGE_ANKE_TRYGDESAKER);
+            paragrafer.add(ARBEIDSMARKEDSLOVEN_17);
         }
 
         return paragrafer;
     }
 
-    public List<KlageHjemmel> hentForvaltningslovParagrafer() {
-        List<KlageHjemmel> paragrafer = new ArrayList<>();
+    public List<HjemmelBruktKlagebrev> hentForvaltningslovParagrafer() {
+        List<HjemmelBruktKlagebrev> paragrafer = new ArrayList<>();
 
         paragrafer.add(FL_SAKSFORBEREDELSE_I_KLAGESAK);
 

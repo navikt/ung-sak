@@ -32,9 +32,8 @@ class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
                 NAV har avvist klagen din på vedtaket om ungdomsprogramytelse \
                 Vi har avvist klagen fordi du har klaget for sent. \
                 Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen. \
-                Vedtaket er gjort etter folketrygdloven § 21-12 og forvaltningsloven §§ 31 og 33. \
+                Vedtaket er gjort etter arbeidsmarkedsloven § 17 og forvaltningsloven §§ 31 og 33. \
                 """);
-
 
 
         GenerertBrev generertBrev = genererVedtaksbrev(klage);
