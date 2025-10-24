@@ -29,6 +29,7 @@ import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.kontroll.KontrollerInntektDto;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -52,6 +53,7 @@ public class KontrollerInntektRestTjeneste {
     private RapportertInntektMapper rapportertInntektMapper;
     private EtterlysningTjeneste etterlysningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
 
     public KontrollerInntektRestTjeneste() {
@@ -63,13 +65,15 @@ public class KontrollerInntektRestTjeneste {
                                          TilkjentYtelseRepository tilkjentYtelseRepository,
                                          ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                          RapportertInntektMapper rapportertInntektMapper,
-                                         EtterlysningTjeneste etterlysningTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+                                         EtterlysningTjeneste etterlysningTjeneste, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                         RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     @GET
@@ -83,8 +87,7 @@ public class KontrollerInntektRestTjeneste {
             .flatMap(it -> it.getPerioder().stream())
             .toList();
 
-        final var perioderTilKontroll = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId())
-            .filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        final var perioderTilKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
 
         final var rapporterteInntekter = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandling.getId());
         final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysningTidslinje(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);

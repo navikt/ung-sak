@@ -11,7 +11,6 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,22 +26,21 @@ class BehandlingÅrsakUtlederInntektArbeidYtelse implements BehandlingÅrsakUtle
 
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private BehandlingÅrsakUtlederInntekter behandlingÅrsakUtlederInntekter;
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
 
     @Inject
     public BehandlingÅrsakUtlederInntektArbeidYtelse(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                      BehandlingÅrsakUtlederInntekter behandlingÅrsakUtlederInntekter,
-                                                     ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
+                                                     RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.behandlingÅrsakUtlederInntekter = behandlingÅrsakUtlederInntekter;
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     @Override
     public Set<BehandlingÅrsakType> utledBehandlingÅrsaker(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        final var kontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(ref.getBehandlingId()).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        final var kontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(ref.getBehandlingId());
         return hentAlleBehandlingÅrsakTyperForInntektArbeidYtelse(ref, kontrollTidslinje, (UUID) grunnlagId1, (UUID) grunnlagId2);
     }
 
