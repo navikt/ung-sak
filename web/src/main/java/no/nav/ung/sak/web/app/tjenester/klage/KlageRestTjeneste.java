@@ -31,14 +31,11 @@ import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
 import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.klage.*;
-import no.nav.ung.sak.kontrakt.vedtak.TotrinnskontrollSkjermlenkeContextDto;
 import no.nav.ung.sak.web.app.rest.Redirect;
-import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -104,11 +101,11 @@ public class KlageRestTjeneste {
 
     @GET
     @Path(HJEMLER)
-    @Operation(description = "Hent hjemler aktuelle for bruk i klagevurdering",
+    @Operation(description = "Henter hjemler aktuelle for bruk i klagevurdering",
         tags = "no/nav/k9/klage",
         responses = {
             @ApiResponse(responseCode = "200",
-                description = "Returnerer alle relevant hjemler for en klagevurdering",
+                description = "Returnerer alle valgbare hjemler for klagevurdering",
                 content = @Content(
                     mediaType = MediaType.APPLICATION_JSON,
                     array = @ArraySchema(arraySchema = @Schema(implementation = Set.class),
@@ -119,7 +116,7 @@ public class KlageRestTjeneste {
         })
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getKlagehjemler() {
+    public Response hentValgbareKlagehjemler() {
         var klagehjemler = Arrays.stream(Hjemmel.values()).map(hjemmel ->
             new KlageHjemmelDto(hjemmel.getKode(), hjemmel.getNavn())
         );
