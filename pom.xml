@@ -37,23 +37,23 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>8.0.0</felles.version>
-        <swagger.version>2.2.38</swagger.version>
+        <swagger.version>2.2.39</swagger.version>
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.5.8</k9format.version>
         <jackson.version>2.20.0</jackson.version>
         <asm.version>9.9</asm.version>
-        <kotlin-stdlib.version>2.2.20</kotlin-stdlib.version>
-        <jandex.version>3.5.0</jandex.version>
+        <kotlin-stdlib.version>2.2.21</kotlin-stdlib.version>
+        <jandex.version>3.5.1</jandex.version>
         <pdfgen-core.version>1.1.63</pdfgen-core.version>
-        <flyway.version>11.13.3</flyway.version>
-        <confluent.platform.version>8.0.1</confluent.platform.version>
+        <flyway.version>11.15.0</flyway.version>
+        <confluent.platform.version>8.1.0</confluent.platform.version>
         <mockito.version>5.20.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.4.0</ung-deltakelse-opplyser.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.31</openhtmltopdf.version>
         <jsoup.version>1.21.2</jsoup.version>
-        <commonmark.version>0.26.0</commonmark.version>
+        <commonmark.version>0.27.0</commonmark.version>
 
     </properties>
 
@@ -180,7 +180,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.20.1</version>
+                <version>2.21.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -539,7 +539,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.181</version>
+                <version>4.8.184</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -592,7 +592,7 @@
             <dependency>
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
-                <version>1.12.0</version>
+                <version>1.12.1</version>
             </dependency>
 
             <!-- Brev/formidling -->
@@ -682,17 +682,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.2.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.6.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.13</version>
+                    <version>0.8.14</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
