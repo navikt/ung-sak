@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepos
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
+import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class FortsettBehandlingDersomIkkePåVentTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "behandlingskontroll.fortsettBehandlingDersomIkkePåVent";
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(FortsettBehandlingDersomIkkePåVentTask.class);
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     FortsettBehandlingDersomIkkePåVentTask() {
@@ -47,6 +49,7 @@ public class FortsettBehandlingDersomIkkePåVentTask extends UnderBehandlingPros
     public void doProsesser(ProsessTaskData data, Behandling behandling) {
         var behandlingId = data.getBehandlingId();
         if (behandling.isBehandlingPåVent()) {
+            logger.info("Behandling {} er på vent, fortsetter ikke behandling nå.", behandlingId);
             return;
         }
         if (behandling.erAvsluttet()) {
