@@ -61,11 +61,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             log.warn("Forventet at status for etterlysning er VENTER, men var " + etterlysning.getStatus());
 
         } else {
-            etterlysning.mottaSvar(
-                oppgaveBekreftelse.mottattDokument().getJournalpostId(),
-                bekreftelse.harUttalelse(),
-                bekreftelse.getUttalelseFraBruker()
-            );
+            etterlysning.mottaSvar();
             etterlysningRepository.lagre(etterlysning);
 
             UttalelseV2 nyUttalelse = new UttalelseV2(
