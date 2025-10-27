@@ -37,10 +37,21 @@ public class RelevanteKontrollperioderUtleder {
     public LocalDateTimeline<Set<BehandlingÅrsakType>> utledPerioderForKontrollAvInntekt(Long behandlingId,
                                                                                          Set<BehandlingÅrsakType> årsakerForKontroll) {
 
-        final var periodisertMånedsvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
-        final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
+        final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(behandlingId);
         final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.stream().anyMatch(årsakerForKontroll::contains));
         return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje);
+    }
+
+    /**
+     * Utleder måneder som er relevante for kontroll av inntekt basert på programperioder. Tar ikke hensyn til om det faktisk er markert for kontroll.
+     *
+     * @param behandlingId behandlingId
+     * @return Perioder som er relevante for kontroll av inntekt
+     */
+    public LocalDateTimeline<Boolean> utledPerioderRelevantForKontrollAvInntekt(Long behandlingId) {
+        final var periodisertMånedsvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
+        return relevantForKontrollTidslinje;
     }
 
 
