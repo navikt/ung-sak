@@ -70,7 +70,7 @@ public class KontrollerteInntektperioderTjeneste {
         }
 
         final var ytelseTidslinje = ytelsesperiodeutleder.periodiserMånedsvis(behandlingId);
-        final var relevantForKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelseTidslinje);
+        final var relevantForKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(ytelseTidslinje);
         if (relevantForKontrollTidslinje.isEmpty()) {
             tilkjentYtelseRepository.lagre(behandlingId, new ArrayList<>());
         } else {
