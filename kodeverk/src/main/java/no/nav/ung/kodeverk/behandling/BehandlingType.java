@@ -16,8 +16,12 @@ public enum BehandlingType implements Kodeverdi {
      */
     FØRSTEGANGSSØKNAD("BT-002", "Førstegangsbehandling", "ae0034", 6, true),
     REVURDERING("BT-004", "Revurdering", "ae0028", 6, false),
+
+    // Klagebehandlinger og referanser brukt i klageløsning
     KLAGE("BT-003", "Klage", "ae0058", 10, false),
     ANKE("BT-008", "Anke", "ae0046", 10, false),
+    TILBAKEKREVING("BT-007", "Tilbakekreving", "BT-007", 10, false),
+    REVURDERING_TILBAKEKREVING("BT-009", "Tilbakekreving revurdering", "BT-009", 10, false),
 
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;
