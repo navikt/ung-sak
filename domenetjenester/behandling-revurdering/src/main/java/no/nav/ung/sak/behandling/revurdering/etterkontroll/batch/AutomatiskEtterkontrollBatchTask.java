@@ -8,10 +8,11 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MDCOperations;
+import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.task.AutomatiskEtterkontrollTask;
@@ -19,8 +20,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 
 @ApplicationScoped
-@ProsessTask(value = AutomatiskEtterkontrollBatchTask.TASKTYPE, cronExpression = "0 15 7 * * *", maxFailedRuns = 1)
-public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
+@ProsessTask(value = AutomatiskEtterkontrollBatchTask.TASKTYPE, maxFailedRuns = 1)
+public class AutomatiskEtterkontrollBatchTask implements BatchProsessTaskHandler {
 
     public static final String TASKTYPE = "batch.etterkontroll";
     private static final Logger log = LoggerFactory.getLogger(AutomatiskEtterkontrollBatchTask.class);
@@ -70,6 +71,11 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
         prosessTaskData.setCallId(callId);
 
         prosessTaskTjeneste.lagre(prosessTaskData);
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 15 7 * * *");
     }
 
 }

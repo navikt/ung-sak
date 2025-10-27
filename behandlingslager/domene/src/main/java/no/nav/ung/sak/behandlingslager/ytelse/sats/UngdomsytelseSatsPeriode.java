@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
-import no.nav.ung.kodeverk.hjemmel.HjemmelKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.Column;
@@ -15,7 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.ung.kodeverk.ungdomsytelse.UngdomsytelseSatsTypeKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.UngdomsytelseSatsTypeKodeverdiConverter;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;

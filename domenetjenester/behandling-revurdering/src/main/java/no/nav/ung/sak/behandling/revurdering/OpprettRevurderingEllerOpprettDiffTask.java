@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.k9.prosesstask.api.*;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,11 +85,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         logContext(fagsak);
 
-        var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId);
+        var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId, BehandlingType.getYtelseBehandlingTyper());
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
         var perioder = utledPerioder(prosessTaskData);
         if (behandlinger.isEmpty()) {
-            var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
             if (sisteVedtak.isPresent() && skalUtsetteKjøring(prosessTaskData, sisteVedtak)) {
                 log.info("Siste vedtatte behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", sisteVedtak.get());
                 prosessTaskTjeneste.lagre(prosessTaskData);

@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.registerinnhenting.impl.startpunkt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
@@ -11,7 +10,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,7 +24,7 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private ProsessTriggerPeriodeUtleder periodeUtleder;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     public StartpunktUtlederInntektArbeidYtelse() {
         // For CDI
@@ -33,9 +32,9 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     @Inject
     StartpunktUtlederInntektArbeidYtelse(InntektArbeidYtelseTjeneste iayTjeneste,
-                                         ProsessTriggerPeriodeUtleder periodeUtleder) {
+                                         RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.iayTjeneste = iayTjeneste;
-        this.periodeUtleder = periodeUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     @Override
@@ -51,11 +50,11 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
         var forrigeGrunnlag = grunnlagId2 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2) : null;
         var diff = new IAYGrunnlagDiff(oppdatertGrunnlag, forrigeGrunnlag);
 
-        var perioderTilVurdering = periodeUtleder.utledTidslinje(ref.getBehandlingId()).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        var perioderTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(ref.getBehandlingId());
 
         boolean erInntektEndretForSøker = diff.erEndringPåInntekter(perioderTilVurdering);
         if (erInntektEndretForSøker) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_INNTEKT, "aktør inntekt for periode " + perioderTilVurdering);
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.VURDER_KOMPLETTHET, "aktør inntekt for periode " + perioderTilVurdering);
         }
 
 

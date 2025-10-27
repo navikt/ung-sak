@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +87,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     @Override
     protected List<String> identifiserBehandling(ProsessTaskData prosessTaskData) {
-        return behandlingRepository.hentÅpneBehandlingerIdForFagsakId(prosessTaskData.getFagsakId()).stream().map(String::valueOf).collect(Collectors.toList());
+        return behandlingRepository.hentÅpneBehandlingerIdForFagsakId(prosessTaskData.getFagsakId(), BehandlingType.getYtelseBehandlingTyper()).stream().map(String::valueOf).collect(Collectors.toList());
     }
 
     private void validerDokumenter(Long behandlingId, Collection<MottattDokument> mottatteDokumenter) {

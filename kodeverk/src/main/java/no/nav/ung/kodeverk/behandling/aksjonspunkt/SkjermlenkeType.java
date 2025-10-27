@@ -1,8 +1,6 @@
 package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.Collections;
@@ -10,13 +8,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public enum SkjermlenkeType implements Kodeverdi {
-    BEREGNING("BEREGNING", "Beregning"),
+    KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll av inntekt"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     SOEKNADSFRIST("SOEKNADSFRIST", "Søknadsfrist"),
     UDEFINERT("-", "Ikke definert"),
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     VEDTAK("VEDTAK", "Vedtak"),
+    FORMKRAV_KLAGE_VEDTAKSINSTANS("FORMKRAV_KLAGE_VEDTAKSINSTANS", "Formkrav klage Vedtaksinstans"),
+    KLAGE_BEH_VEDTAKSINSTANS("KLAGE_BEH_VEDTAKSINSTANS", "Klageresultat Vedtaksinstans"),
     ;
 
     private static final Map<String, SkjermlenkeType> KODER = new LinkedHashMap<>();
@@ -89,19 +89,6 @@ public enum SkjermlenkeType implements Kodeverdi {
     @Deprecated
     public static SkjermlenkeType finnSkjermlenkeType(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         return aksjonspunktDefinisjon.getSkjermlenkeType();
-    }
-
-    @Converter(autoApply = true)
-    public static class KodeverdiConverter implements AttributeConverter<SkjermlenkeType, String> {
-        @Override
-        public String convertToDatabaseColumn(SkjermlenkeType attribute) {
-            return attribute == null ? null : attribute.getKode();
-        }
-
-        @Override
-        public SkjermlenkeType convertToEntityAttribute(String dbData) {
-            return dbData == null ? null : fraKode(dbData);
-        }
     }
 
 }

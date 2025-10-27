@@ -75,31 +75,16 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vedtakTjeneste = vedtakTjeneste;
 
-        boolean kjørerIMiljø = Environment.current().isProd() || Environment.current().isDev();
-        if (kjørerIMiljø) {
-            var aivenPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
+        Properties aivenProps = new KafkaPropertiesBuilder()
+            .clientId("KP-" + topic)
+            .bootstrapServers(kafkaBrokers)
+            .truststorePath(trustStorePath)
+            .truststorePassword(trustStorePassword)
+            .keystorePath(keyStoreLocation)
+            .keystorePassword(keyStorePassword)
+            .buildForProducerAiven();
 
-            Properties aivenProps = aivenPropsBuilder
-                .truststorePath(trustStorePath)
-                .truststorePassword(trustStorePassword)
-                .keystorePath(keyStoreLocation)
-                .keystorePassword(keyStorePassword)
-                .buildForProducerAiven();
-
-            producer = new GenerellKafkaProducer(topic, aivenProps);
-        } else {
-            //konfigurasjon for bruk mot VTP
-            var onPremPropsBuilder = new KafkaPropertiesBuilder()
-                .clientId("KP-" + topic).bootstrapServers(kafkaBrokers);
-
-            Properties onPremProps = onPremPropsBuilder
-                .username("vtp")
-                .password("vtp")
-                .buildForProducerJaas();
-            producer = new GenerellKafkaProducer(topic, onPremProps);
-        }
-
+        producer = new GenerellKafkaProducer(topic, aivenProps);
 
         @SuppressWarnings("resource")
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();

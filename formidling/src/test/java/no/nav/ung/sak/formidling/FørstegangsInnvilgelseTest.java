@@ -57,13 +57,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
+                Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
@@ -73,7 +73,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ungdomsprogramytelse</h1>",
                 "<h2>Hvorfor får du penger?</h2>",
-                "<h2>Hvordan regner vi oss fram til hvor mye penger du får?</h2>",
+                "<h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>",
                 "<h2>Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen</h2>"
             );
 
@@ -96,13 +96,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
+                Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
@@ -140,13 +140,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
-                Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
+                Fordi du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
                 Det blir 265 657 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt());
 
@@ -172,13 +172,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
-                Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
+                Fordi du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
                 Det blir 265 657 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
@@ -210,13 +210,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
@@ -259,13 +259,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
+                Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 Fordi du har ett barn, får du i tillegg 37 kroner per dag i barnetillegg. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
@@ -302,13 +302,13 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnitt() + """
-                Hvordan regner vi oss fram til hvor mye penger du får? \
-                Når Nav regner ut hvor mye penger du har rett på, bruker vi en bestemt sum som heter grunnbeløpet. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye penger du får, har vi brukt en sum som heter grunnbeløpet. \
                 Grunnbeløpet er bestemt av Stortinget, og det øker hvert år. \
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 168 761 kroner i året. \
-                Denne summen deler vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
@@ -359,11 +359,11 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
     static String meldFraTilOssHvisDuHarEndringerAvsnitt() {
         return """
             Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen \
-            Hvis du har inntekt fra arbeid i tillegg til ungdomsprogramytelsen, er det veldig viktig at du sier fra til oss om det. \
+            Hvis du har en arbeidstinntekt i tillegg til ungdomsprogramytelsen, er det viktig at du sier fra til oss om det. \
             Du får en SMS den 1. hver måned. \
             Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all arbeidsinntekt du har hatt måneden før. \
-            Når du har en inntekt fra arbeid, får du mindre penger gjennom ungdomsprogramytelsen. \
-            Likevel får du til sammen mer penger når du både har en inntekt fra arbeid og får ungdomsprogramytelsen, enn hvis du bare får ytelsen. \
+            Når du jobber og har en inntekt, får du mindre penger i ungdomsprogramytelsen. \
+            Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsprogramytelsen, enn hvis du bare får ytelsen. \
             """;
     }
 
@@ -371,8 +371,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         return """
             Hvorfor får du penger? \
             Du får penger fordi du er med i ungdomsprogrammet. \
-            Pengene gir deg en inntekt mens du deltar i ungdomsprogrammet. \
-            Pengene får du så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få det i mer enn ett år. \
+            Pengene får du så lenge du er i programmet, men du kan som hovedregel ikke få det i mer enn ett år. \
             Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og §§ 6, 9 og 10. \
             """;
     }
@@ -381,8 +380,7 @@ class FørstegangsInnvilgelseTest extends AbstractVedtaksbrevInnholdByggerTest {
         return """
             Hvorfor får du penger? \
             Du får penger fordi du er med i ungdomsprogrammet. \
-            Pengene gir deg en inntekt mens du deltar i ungdomsprogrammet. \
-            Pengene får du så lenge du er i ungdomsprogrammet. \
+            Pengene får du så lenge du er i programmet. \
             Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og §§ 6, 9 og 10. \
             """;
     }

@@ -68,6 +68,8 @@ public class BigQueryStatistikkRepository {
         Collection<DagerIProgrammetRecord> dagerIProgrammet = antallDagerStatistikk.dagerIProgrammet();
         dagligRapporterte.add(new Tuple<>(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, dagerIProgrammet));
 
+
+
         return dagligRapporterte;
     }
 
@@ -420,7 +422,6 @@ public class BigQueryStatistikkRepository {
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
-
 
     /**
      * Henter statistikk for behandlinger gruppert på årsakstype og ferdigbehandlet-status.

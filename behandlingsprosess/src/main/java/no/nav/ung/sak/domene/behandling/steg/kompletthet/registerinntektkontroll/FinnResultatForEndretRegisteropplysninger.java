@@ -2,9 +2,9 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontrol
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import no.nav.ung.sak.kontroll.EtterlysningOgRegisterinntekt;
+import no.nav.ung.sak.kontroll.RapportertInntekt;
+import no.nav.ung.sak.kontroll.RapporterteInntekter;
 
 import java.math.BigDecimal;
 import java.util.Set;

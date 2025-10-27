@@ -3,9 +3,11 @@ package no.nav.ung.sak.formidling;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
@@ -14,6 +16,7 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,12 +65,12 @@ class VedtaksbrevTjenesteTest {
 
         //Forhåndsviser automatisk brev
         String automatiskBrevHtmlSnippet = "<h1>";
-        assertThat(forhåndsvis(behandling, false)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, false)).contains(automatiskBrevHtmlSnippet);
         //Brevet behandlingen kommer til å bruke skal være automatisk brev
-        assertThat(forhåndsvis(behandling, null)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskBrevHtmlSnippet);
 
         //Forhåndsviser redigert brev - skal feile da det ikke finnes noe lagret
-        assertThatThrownBy(() -> forhåndsvis(behandling, true))
+        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true))
             .isInstanceOf(IllegalStateException.class);
 
     }
@@ -101,13 +104,13 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering1.tidligereRedigertBrevHtml()).isNull();
 
         //Forhåndsviser automatisk brev - skal fortsått gå bra
-        assertThat(forhåndsvis(behandling, false)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, false)).contains(automatiskBrevHtmlSnippet);
 
         //Forhåndsviser manuell brev - skal nå gå bra
-        assertThat(forhåndsvis(behandling, true)).contains(redigertHtml);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true)).contains(redigertHtml);
 
         //Brevet behandlingen kommer til å bruke skal være manuell brev
-        assertThat(forhåndsvis(behandling, null)).contains(redigertHtml);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(redigertHtml);
     }
 
 
@@ -130,7 +133,7 @@ class VedtaksbrevTjenesteTest {
         );
 
         //Brevet behandlingen kommer til å bruke skal være manuell brev
-        assertThat(forhåndsvis(behandling, null)).contains(redigertHtml);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(redigertHtml);
 
         //Tilbakestiller manuell brev
         vedtaksbrevTjeneste.lagreVedtaksbrev(
@@ -154,14 +157,14 @@ class VedtaksbrevTjenesteTest {
 
 
         //Forhåndsviser automatisk brev
-        assertThat(forhåndsvis(behandling, false)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, false)).contains(automatiskBrevHtmlSnippet);
 
         //Forhåndsviser redigert brev - skal feile da det ikke finnes noe lagret lenger
-        assertThatThrownBy(() -> forhåndsvis(behandling, true))
+        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true))
             .isInstanceOf(IllegalStateException.class);
 
         //Brevet behandlingen kommer til å bruke skal være automatisk brev
-        assertThat(forhåndsvis(behandling, null)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskBrevHtmlSnippet);
 
     }
 
@@ -195,10 +198,10 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterTilbakehopp.tidligereRedigertBrevHtml()).isEqualTo(redigertHtml);
 
         //Brevet behandlingen kommer til å bruke skal være automatisk brev
-        assertThat(forhåndsvis(behandling, null)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskBrevHtmlSnippet);
 
         //Forhåndsviser redigert brev - skal feile
-        assertThatThrownBy(() -> forhåndsvis(behandling, true))
+        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true))
             .isInstanceOf(IllegalStateException.class);
 
 
@@ -228,9 +231,13 @@ class VedtaksbrevTjenesteTest {
 
     @Test
     void skal_ikke_lage_brev_hvis_hindret() {
-        UngTestScenario ungTestscenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2024, 12, 1));
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
+        var behandling = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
+            .medUngTestGrunnlag(ungTestGrunnlag)
+            .buildOgLagreMedUng(ungTestRepositories);
 
-        var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
         String automatiskBrevHtmlSnippet = "<h1>";
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
 
@@ -241,7 +248,7 @@ class VedtaksbrevTjenesteTest {
                 true,
                 true,
                 redigertHtml,
-                DokumentMalType.ENDRING_INNTEKT)
+                DokumentMalType.MANUELT_VEDTAK_DOK)
         );
 
         VedtaksbrevValgResponse response = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
@@ -253,13 +260,13 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering1.kanOverstyreHindre()).isTrue();
 
         //Forhåndsviser automatisk brev - skal fortsått gå bra
-        assertThat(forhåndsvis(behandling, false)).contains(automatiskBrevHtmlSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.MANUELT_VEDTAK_DOK, false)).contains(automatiskBrevHtmlSnippet);
 
         //Forhåndsviser manuell brev - skal fortsatt gå bra
-        assertThat(forhåndsvis(behandling, true)).contains(redigertHtml);
+        assertThat(forhåndsvis(behandling, DokumentMalType.MANUELT_VEDTAK_DOK, true)).contains(redigertHtml);
 
         //Ingen brev som brukes av behandling
-        assertThatThrownBy(() -> forhåndsvis(behandling, null))
+        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.MANUELT_VEDTAK_DOK, null))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -273,10 +280,10 @@ class VedtaksbrevTjenesteTest {
 
         VedtaksbrevValgResponse valg1 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valg1.vedtaksbrevValg()).hasSize(2);
-        assertThat(valg1.vedtaksbrevValg()).extracting(VedtaksbrevValg::dokumentMalType)
+        assertThat(valg1.vedtaksbrevValg()).extracting(vedtaksbrevValg -> vedtaksbrevValg.dokumentMalType().getKilde())
             .containsExactlyInAnyOrder(DokumentMalType.ENDRING_INNTEKT, DokumentMalType.ENDRING_BARNETILLEGG);
         assertThat(valg1.vedtaksbrevValg()).extracting(VedtaksbrevValg::kanOverstyreRediger)
-            .containsExactly(true, true);
+            .containsExactlyInAnyOrder(true, false);
 
         //Redigerer ett av brevene
         vedtaksbrevTjeneste.lagreVedtaksbrev(
@@ -285,25 +292,25 @@ class VedtaksbrevTjenesteTest {
                 false,
                 true,
                 redigertHtml,
-                DokumentMalType.ENDRING_BARNETILLEGG)
+                DokumentMalType.ENDRING_INNTEKT)
         );
 
         VedtaksbrevValgResponse valg2 = vedtaksbrevTjeneste.vedtaksbrevValg(behandling.getId());
         assertThat(valg2.vedtaksbrevValg()).hasSize(2);
 
-        var barnetilleggValg = valg2.vedtaksbrevValg().stream()
-            .filter(v -> v.dokumentMalType().equals(DokumentMalType.ENDRING_BARNETILLEGG))
-            .findFirst()
-            .orElseThrow();
-        assertThat(barnetilleggValg.redigert()).isTrue();
-        assertThat(barnetilleggValg.redigertBrevHtml()).isEqualTo(redigertHtml);
-
         var inntektValg = valg2.vedtaksbrevValg().stream()
-            .filter(v -> v.dokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_INNTEKT))
             .findFirst()
             .orElseThrow();
-        assertThat(inntektValg.redigert()).isFalse();
-        assertThat(inntektValg.redigertBrevHtml()).isNull();
+        assertThat(inntektValg.redigert()).isTrue();
+        assertThat(inntektValg.redigertBrevHtml()).isEqualTo(redigertHtml);
+
+        var barnetilleggValg = valg2.vedtaksbrevValg().stream()
+            .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_BARNETILLEGG))
+            .findFirst()
+            .orElseThrow();
+        assertThat(barnetilleggValg.redigert()).isFalse();
+        assertThat(barnetilleggValg.redigertBrevHtml()).isNull();
 
         //Forhåndsviser automatisk brev
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, false))
@@ -312,32 +319,22 @@ class VedtaksbrevTjenesteTest {
             .contains(automatiskInntekstbrevSnippet);
 
         //Forhåndsviser manuell brev
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, true))
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true))
             .contains(redigertHtml);
-        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, true))
+        assertThatThrownBy(() -> forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, true))
             .isInstanceOf(IllegalStateException.class);
 
 
         //Brevet behandlingen kommer til å bruke skal være manuell brev for den redigerte
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, null)).contains(redigertHtml);
-        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskInntekstbrevSnippet);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(redigertHtml);
+        assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, null)).contains(automatiskBarnetilleggSnippet);
     }
 
-
-    private String forhåndsvis(Behandling behandling, Boolean redigertVersjon) {
-        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(
-            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true, null)
-        );
-        assertThat(generertBrev).as("Forventet kun ett brev ved kall til denne metoden").hasSize(1);
-        return generertBrev.stream().findFirst().map(it -> it.dokument().html()).orElseThrow();
-    }
 
     private String forhåndsvis(Behandling behandling, DokumentMalType dokumentMalType, Boolean redigertVersjon) {
-        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(
+        return vedtaksbrevTjeneste.forhåndsvis(
             new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true, dokumentMalType)
-        );
-        assertThat(generertBrev).as("Forventet kun ett brev").hasSize(1);
-        return generertBrev.stream().findFirst().map(it -> it.dokument().html()).orElseThrow();
+        ).dokument().html();
     }
 
 }

@@ -2,7 +2,7 @@ package no.nav.ung.sak.formidling.vedtak.resultat;
 
 public enum DetaljertResultatType {
     AVSLAG_INNGANGSVILKÅR("Avslag inngangsvilkår"),
-    ENDRING_ØKT_SATS("Endring økt sats 25 prosent"),
+    ENDRING_ØKT_SATS("Endring økt sats"),
     ENDRING_BARN_FØDSEL("Endring pga fødsel av nytt barn"),
     KONTROLLER_INNTEKT_REDUKSJON("Reduksjon etter kontroll av inntekt"),
     KONTROLLER_INNTEKT_FULL_UTBETALING("Full utbetaling etter kontroll av inntekt"),

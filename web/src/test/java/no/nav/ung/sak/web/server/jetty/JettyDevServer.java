@@ -47,9 +47,13 @@ public class JettyDevServer extends JettyServer {
         System.setProperty(storeProperty, storeFile.getAbsolutePath());
         System.setProperty(storePasswordProperty, password);
 
-        // Aiven:
-        System.setProperty("KAFKA_TRUSTSTORE_PATH", storeFile.getAbsolutePath());
-        System.setProperty("KAFKA_KEYSTORE_PATH", storeFile.getAbsolutePath());
+        if (storeName.equals("keystore")) {
+            System.setProperty("KAFKA_KEYSTORE_PATH", storeFile.getAbsolutePath());
+        }
+        if (storeName.equals("truststore")) {
+            System.setProperty("KAFKA_TRUSTSTORE_PATH", storeFile.getAbsolutePath());
+        }
+        //samme passord for begge
         System.setProperty("KAFKA_CREDSTORE_PASSWORD", password);
 
         return storePath;
@@ -110,9 +114,8 @@ public class JettyDevServer extends JettyServer {
          */
 
         // truststore avgjør hva vi stoler på av sertifikater når vi gjør utadgående TLS kall
-        initCryptoStoreConfig("truststore", "javax.net.ssl.trustStore", "javax.net.ssl.trustStorePassword", "changeit");
-        initCryptoStoreConfig("keystore", "javax.net.ssl.keyStore", "javax.net.ssl.keyStorePassword",
-            "devillokeystore1234");
+        initCryptoStoreConfig("truststore", "javax.net.ssl.trustStore", "javax.net.ssl.trustStorePassword", "vtpvtp");
+        initCryptoStoreConfig("keystore", "javax.net.ssl.keyStore", "javax.net.ssl.keyStorePassword", "vtpvtp");
     }
 
     @SuppressWarnings("resource")

@@ -3,10 +3,10 @@ package no.nav.ung.sak.kontrakt.formidling.vedtaksbrev;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.Patterns;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 /**
  * @param behandlingId
@@ -18,7 +18,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 public record VedtaksbrevValgRequest(
     @NotNull
     @Valid
-    @AbacAttributt(BehandlingIdDto.NAME)
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
     @Min(0)
     @Max(Long.MAX_VALUE)
     Long behandlingId,
@@ -27,6 +27,9 @@ public record VedtaksbrevValgRequest(
 
     @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     String redigertHtml,
+
+    @NotNull
+    @Valid
     DokumentMalType dokumentMalType) {
 
     @AssertTrue(message = "Redigert tekst kan ikke være tom samtidig som redigert er true")

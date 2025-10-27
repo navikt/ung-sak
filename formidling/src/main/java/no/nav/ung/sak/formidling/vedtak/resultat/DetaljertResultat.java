@@ -23,7 +23,8 @@ public record DetaljertResultat(
 
 
     public static String timelineToString(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        return String.join(", ", detaljertResultatTidslinje.toSegments().stream()
+        return detaljertResultatTidslinje == null ? "null" :
+            String.join(", ", detaljertResultatTidslinje.toSegments().stream()
             .map(it ->
                 it.getLocalDateInterval().toString() + " -> " +
                     "resultatInfo: " + it.getValue().resultatInfo()
@@ -34,9 +35,10 @@ public record DetaljertResultat(
             .collect(Collectors.toSet()));
     }
 
-    public static LocalDateTimeline<DetaljertResultat> filtererTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje, DetaljertResultatType detaljertResultatType) {
+    public static LocalDateTimeline<DetaljertResultat> filtererTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje, DetaljertResultatType... filter) {
+        var ønskedeTyper = Set.of(filter);
         return resultatTidslinje
             .filterValue(it -> it.resultatInfo().stream()
-                .anyMatch(b -> b.detaljertResultatType() == detaljertResultatType));
+                .anyMatch(b -> ønskedeTyper.contains(b.detaljertResultatType())));
     }
 }

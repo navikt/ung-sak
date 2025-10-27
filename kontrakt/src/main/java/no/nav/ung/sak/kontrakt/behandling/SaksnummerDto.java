@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -47,7 +48,7 @@ public class SaksnummerDto {
         return Objects.equals(saksnummer, other.saksnummer);
     }
 
-    @AbacAttributt("saksnummer")
+    @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
     public Saksnummer getVerdi() {
         return new Saksnummer(saksnummer);
     }

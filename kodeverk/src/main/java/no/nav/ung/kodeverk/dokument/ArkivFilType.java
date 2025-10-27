@@ -16,6 +16,7 @@ public enum ArkivFilType implements Kodeverdi {
     DOC("DOC"),
     DOCX("DOCX"),
     JPEG("JPEG"),
+    JSON("JSON"),
     RTF("RTF"),
     TIFF("TIFF"),
     XLS("XLS"),

@@ -1,20 +1,10 @@
 package no.nav.ung.sak.web.app.tjenester.notat;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -29,7 +19,9 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.notat.NotatGjelderType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -45,7 +37,18 @@ import no.nav.ung.sak.kontrakt.notat.SkjulNotatDto;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.CREATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("")
 @ApplicationScoped
@@ -71,7 +74,7 @@ public class NotatRestTjeneste {
     @Path("/notat")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter alle notater for fagsak", tags = "notat")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Collection<NotatDto> hent(
         @NotNull @QueryParam(SaksnummerDto.NAME) @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
@@ -91,7 +94,7 @@ public class NotatRestTjeneste {
     @Path("/notat")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lag nytt notat", tags = "notat")
-    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     @ApiResponse(responseCode = "201", description = "Opprettet notat", content = {
         @Content(mediaType = "application/json", schema = @Schema(implementation = NotatDto.class))
     })
@@ -112,7 +115,7 @@ public class NotatRestTjeneste {
     @Path("/notat/endre")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Endre eksistrende notat", tags = "notat")
-    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     @ApiResponse(responseCode = "200", description = "Endret notat", content = {
         @Content(mediaType = "application/json", schema = @Schema(implementation = NotatDto.class))
     })
@@ -151,7 +154,7 @@ public class NotatRestTjeneste {
     @Path("/notat/skjul")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Skjul notat", tags = "notat")
-    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     @ApiResponse(responseCode = "200", description = "Skjult notat", content = {
         @Content(mediaType = "application/json", schema = @Schema(implementation = NotatDto.class))
     })

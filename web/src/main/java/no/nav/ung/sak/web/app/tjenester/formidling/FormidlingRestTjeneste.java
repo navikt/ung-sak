@@ -17,15 +17,19 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
+import no.nav.ung.sak.formidling.klage.vedtak.VedtaksbrevTjenesteKlage;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgResponseDto;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevKlageForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
@@ -35,8 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("")
 @ApplicationScoped
@@ -45,15 +48,22 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 public class FormidlingRestTjeneste {
 
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
+    private VedtaksbrevTjenesteKlage vedtaksbrevTjenesteKlage;
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
     private static final String PDF_MEDIA_STRING = "application/pdf";
 
     @Inject
-    public FormidlingRestTjeneste(VedtaksbrevTjeneste vedtaksbrevTjeneste, InformasjonsbrevTjeneste informasjonsbrevTjeneste) {
+    public FormidlingRestTjeneste(VedtaksbrevTjeneste vedtaksbrevTjeneste,
+                                  VedtaksbrevTjenesteKlage vedtaksbrevTjenesteKlage,
+                                  InformasjonsbrevTjeneste informasjonsbrevTjeneste,
+                                  BehandlingRepository behandlingRepository) {
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
+        this.vedtaksbrevTjenesteKlage = vedtaksbrevTjenesteKlage;
         this.informasjonsbrevTjeneste = informasjonsbrevTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     FormidlingRestTjeneste() {
@@ -65,7 +75,7 @@ public class FormidlingRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Operasjoner som er mulig for vedtaksbrev", tags = "formidling")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public VedtaksbrevValgResponse vedtaksbrevValg(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
         return vedtaksbrevTjeneste.vedtaksbrevValg(dto.getBehandlingId());
@@ -74,11 +84,10 @@ public class FormidlingRestTjeneste {
     @POST
     @Path("/formidling/vedtaksbrev")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling",
         responses = @ApiResponse(responseCode = "200", description = "lagret ok")
     )
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response lagreVedtaksbrevValg(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequest dto) {
         vedtaksbrevTjeneste.lagreVedtaksbrev(dto);
@@ -104,15 +113,41 @@ public class FormidlingRestTjeneste {
             }
         )
     )
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response forhåndsvisVedtaksbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevForhåndsvisRequest dto,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto).getFirst();
-
+        var generertBrev = vedtaksbrevTjeneste.forhåndsvis(dto);
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
+    }
 
+    /**
+     * MediaType.APPLICATION_JSON is added to Produces because currently the generated client always adds accept: application/json to requests.
+     */
+    @POST
+    @Path("/formidling/vedtaksbrev/klage/forhaandsvis")
+    @Consumes(MediaType.APPLICATION_JSON)
+    //Json er med fordi frontend klienten alltid setter Accept = json, men denne produserer ikke json
+    @Produces({APPLICATION_OCTET_STREAM, PDF_MEDIA_STRING, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON})
+    @Operation(description = "Forhåndsvise klage vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ", tags = "formidling",
+        responses = @ApiResponse(
+            responseCode = "200",
+            description = "pdf",
+            content = {
+                @Content(mediaType = APPLICATION_OCTET_STREAM, schema = @Schema(type = "string", format = "binary")),
+                @Content(mediaType = PDF_MEDIA_STRING, schema = @Schema(type = "string", format = "binary")),
+                @Content(mediaType = MediaType.TEXT_HTML, schema = @Schema(type = "string"))
+            }
+        )
+    )
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    public Response forhåndsvisKlageVedtaksbrev(
+        @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevKlageForhåndsvisRequest dto,
+        @Context HttpServletRequest request
+    ) {
+        GenerertBrev generertBrev = vedtaksbrevTjenesteKlage.forhåndsvis(dto.behandlingId(), Boolean.TRUE.equals(dto.htmlVersjon()));
+        return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
     }
 
     @GET
@@ -120,7 +155,7 @@ public class FormidlingRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Maler for informasjon og støttebrev", tags = "formidling")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public InformasjonsbrevValgResponseDto informasjonsbrevValg(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto) {
         return new InformasjonsbrevValgResponseDto(informasjonsbrevTjeneste.informasjonsbrevValg(dto.getBehandlingId()));
@@ -146,7 +181,7 @@ public class FormidlingRestTjeneste {
             }
         )
     )
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response forhåndsvisInformasjonsbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingRequest dto,
         @Valid @QueryParam("kunHtml") Boolean kunHtml,
@@ -183,7 +218,7 @@ public class FormidlingRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Bestill informasjonsbrev for en behandling. ", tags = "formidling")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response bestillInformasjonsbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingRequest dto
     ) {

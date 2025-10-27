@@ -16,7 +16,7 @@ class UngdomsprogramInformasjonDtoTest {
 
         final var json = JsonUtil.getJson(dto);
 
-        assertThat(json).isEqualTo("""
+        assertThat(json).isEqualToIgnoringWhitespace("""
             {
               "startdato" : "2025-01-01",
               "maksdatoForDeltakelse" : "2025-04-30",

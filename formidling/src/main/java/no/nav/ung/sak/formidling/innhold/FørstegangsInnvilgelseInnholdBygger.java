@@ -66,14 +66,13 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        var brevfeilSamler = new BrevfeilHåndterer(!ignoreIkkeStøttedeBrev);
         Long behandlingId = behandling.getId();
 
         var ytelseFom = DetaljertResultat
             .filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_UTBETALING)
             .getMinLocalDate();
 
-        var ytelseTom = finnEvtTomDato(detaljertResultatTidslinje, behandlingId, brevfeilSamler);
+        var ytelseTom = finnEvtTomDato(detaljertResultatTidslinje, behandlingId);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
@@ -83,17 +82,13 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var førsteSatser = satsTidslinje.toSegments().first().getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
-        var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje, brevfeilSamler);
+        var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje);
 
-        var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments(), brevfeilSamler);
+        var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments());
 
-        var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje, brevfeilSamler);
+        var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje);
 
         var sisteUtbetalingsdato = ytelseTom != null ? PeriodeBeregner.utledFremtidigUtbetalingsdato(ytelseTom, YearMonth.from(bestemDagensDato())) : null;
-
-        if (brevfeilSamler.harFeil()) {
-            LOG.warn("Innvilgelse brev har feil som ignoreres. Brevet er mest sannsynlig feil! Feilmelding(er): {}", brevfeilSamler.samletFeiltekst());
-        }
 
         return new TemplateInnholdResultat(TemplateType.INNVILGELSE,
             new InnvilgelseDto(
@@ -102,16 +97,16 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 dagsatsFom,
                 satsEndringHendelseDtos,
                 satsOgBeregningDto,
-                brevfeilSamler.samletFeiltekst(),
+                null,
                 erEtterbetaling,
                 satsEndringHendelseDtos.isEmpty(),
-                sisteUtbetalingsdato), true);
+                sisteUtbetalingsdato));
     }
 
-    private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, BrevfeilHåndterer brevfeilSamler) {
+    private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
         if (tilkjentYtelseTimeline.isEmpty()) {
-            brevfeilSamler.registrerFeilmelding("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
+            throw new IllegalStateException("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
         }
         var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
         var dagensDato = bestemDagensDato();
@@ -123,17 +118,17 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
     }
 
-    private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId, BrevfeilHåndterer brevfeilSamler) {
+    private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId) {
         var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnVirkedagerTidslinje(behandlingId);
 
         long antallDager = vurderAntallDagerResultat.forbrukteDager();
         if (antallDager <= 0) {
-            brevfeilSamler.registrerFeilmelding("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
+            throw new IllegalStateException("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
         }
         return FinnForbrukteDager.MAKS_ANTALL_DAGER != antallDager ? detaljertResultatTidslinje.getMaxLocalDate() : null;
     }
 
-    private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, BrevfeilHåndterer brevfeilHåndterer) {
+    private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {
         List<SatsEndringHendelseDto> resultat = new ArrayList<>();
         var satsSegments = satsTidslinje.toSegments();
         LocalDateSegment<UngdomsytelseSatser> previous = null;
@@ -142,7 +137,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 previous = current;
                 continue;
             }
-            resultat.add(lagSatsEndringHendelseDto(brevfeilHåndterer, current, previous));
+            resultat.add(lagSatsEndringHendelseDto(current, previous));
             previous = current;
         }
 
@@ -150,14 +145,14 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     }
 
-    private static SatsEndringHendelseDto lagSatsEndringHendelseDto(BrevfeilHåndterer brevfeilHåndterer, LocalDateSegment<UngdomsytelseSatser> current, LocalDateSegment<UngdomsytelseSatser> previous) {
+    private static SatsEndringHendelseDto lagSatsEndringHendelseDto(LocalDateSegment<UngdomsytelseSatser> current, LocalDateSegment<UngdomsytelseSatser> previous) {
         var currentSatser = current.getValue();
         var previousSatser = previous.getValue();
 
         SatsEndring result = SatsEndring.bestemSatsendring(currentSatser, previousSatser);
 
         if (result.overgangLavSats()) {
-            brevfeilHåndterer.registrerFeilmelding("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
+            throw new IllegalStateException("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
         }
 
         return new SatsEndringHendelseDto(
@@ -171,7 +166,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static SatsOgBeregningDto mapSatsOgBeregning(NavigableSet<LocalDateSegment<UngdomsytelseSatser>> satsSegments, BrevfeilHåndterer brevfeilHåndterer) {
+    private static SatsOgBeregningDto mapSatsOgBeregning(NavigableSet<LocalDateSegment<UngdomsytelseSatser>> satsSegments) {
         var satser = satsSegments.stream()
             .map(it -> it.getValue().satsType())
             .collect(Collectors.toSet());
@@ -183,7 +178,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var nyesteSegment = satsSegments.last();
         var nyesteSats = nyesteSegment.getValue();
 
-        var overgangTilHøySats = satser.size() > 1 ? mapOvergangTilHøySats(nyesteSegment, brevfeilHåndterer) :  null;
+        var overgangTilHøySats = satser.size() > 1 ? mapOvergangTilHøySats(nyesteSegment) :  null;
         var grunnbeløp = tilHeltall(nyesteSats.grunnbeløp());
 
         var barnetillegg = nyesteSats.antallBarn() > 0
@@ -203,10 +198,10 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             barnetillegg);
     }
 
-    private static BeregningDto mapOvergangTilHøySats(LocalDateSegment<UngdomsytelseSatser> nyesteSegment, BrevfeilHåndterer brevfeilHåndterer) {
+    private static BeregningDto mapOvergangTilHøySats(LocalDateSegment<UngdomsytelseSatser> nyesteSegment) {
         var nyesteSats = nyesteSegment.getValue();
         if (nyesteSats.satsType() != UngdomsytelseSatsType.HØY) {
-            brevfeilHåndterer.registrerFeilmelding("Forventet at nyeste sats skulle være høy når det er flere satser, men var %s for periode %s".formatted(nyesteSats.satsType(), nyesteSegment.getLocalDateInterval()));
+            throw new IllegalStateException("Forventet at nyeste sats skulle være høy når det er flere satser, men var %s for periode %s".formatted(nyesteSats.satsType(), nyesteSegment.getLocalDateInterval()));
         }
         return mapTilBeregningDto(nyesteSegment);
     }

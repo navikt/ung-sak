@@ -4,13 +4,23 @@ package no.nav.ung.sak.formidling.scenarioer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
+import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ytelse.BeregnetSats;
@@ -68,6 +78,20 @@ public class BrevScenarioerUtils {
         return lavSatsMedBarnBuilder(fom, 0);
     }
 
+    public static LocalDateTimeline<UngdomsytelseSatser> lavSatsBuilder(LocalDateInterval interval) {
+        SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
+        var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(interval).getValue();
+        return GrunnbeløpTidslinje.hentTidslinje().mapValue(g1 ->
+            UngdomsytelseSatser.builder()
+                .medGrunnbeløp(g1.verdi())
+                .medGrunnbeløpFaktor(satsOgGrunnbeløpfaktor.grunnbeløpFaktor())
+                .medSatstype(satsOgGrunnbeløpfaktor.satstype())
+                .medAntallBarn(0)
+                .medBarnetilleggDagsats(beregnDagsatsInklBarnetillegg(0, barneTillegg).intValue() ).build()
+        );
+    }
+
+
     public static UngdomsytelseSatser.Builder lavSatsMedBarnBuilder(LocalDate fom, int antallBarn) {
         SatsOgGrunnbeløpfaktor satsOgGrunnbeløpfaktor = hentSatstypeOgGrunnbeløp(Sats.LAV);
         var barneTillegg = BarnetilleggSatsTidslinje.BARNETILLEGG_DAGSATS.getSegment(new LocalDateInterval(fom, fom)).getValue();
@@ -110,4 +134,19 @@ public class BrevScenarioerUtils {
         ))).stream().findFirst().orElseThrow().getValue();
     }
 
+    public static Behandling lagBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestscenario);
+
+        scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, aksjonspunktDefinisjon.getBehandlingSteg());
+
+        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories1);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
+        new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
+        BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        return behandling;
+    }
 }

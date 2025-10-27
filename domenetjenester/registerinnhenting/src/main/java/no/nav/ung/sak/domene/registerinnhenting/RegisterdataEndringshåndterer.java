@@ -43,22 +43,25 @@ public class RegisterdataEndringshåndterer {
     private EndringsresultatSjekker endringsresultatSjekker;
     private RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste;
     private BehandlingÅrsakTjeneste behandlingÅrsakTjeneste;
+    private TemporalAmount overstyrtInnhentingDuration;
 
     RegisterdataEndringshåndterer() {
         // for CDI proxy
     }
 
     /**
-     * @param periode - Periode for hvor ofte registerdata skal oppdateres
+     * @param oppdaterRegisterdataEtterPeriode - periode som angir hvor gammel registerdata skal være for at den skal oppdateres på nytt
+     * @param overstyrtInnhentingDuration
      */
     @Inject
     public RegisterdataEndringshåndterer( // NOSONAR jobber med å redusere
                                           BehandlingRepositoryProvider repositoryProvider,
-                                          @KonfigVerdi(value = "oppdatere.registerdata.tidspunkt", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
+                                          @KonfigVerdi(value = "OPPDATERE_REGISTERDATA_TIDSPUNKT", defaultVerdi = "PT10H") String oppdaterRegisterdataEtterPeriode,
                                           Endringskontroller endringskontroller,
                                           EndringsresultatSjekker endringsresultatSjekker,
                                           RegisterinnhentingHistorikkinnslagTjeneste historikkinnslagTjeneste,
-                                          BehandlingÅrsakTjeneste behandlingÅrsakTjeneste) {
+                                          BehandlingÅrsakTjeneste behandlingÅrsakTjeneste,
+                                          @KonfigVerdi(value = "OVERSTYR_REGISTERDATA_DURATION", required = false) String overstyrtInnhentingDuration) {
 
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.endringskontroller = endringskontroller;
@@ -68,11 +71,19 @@ public class RegisterdataEndringshåndterer {
         if (oppdaterRegisterdataEtterPeriode != null) {
             this.oppdatereRegisterdataTidspunkt = Duration.parse(oppdaterRegisterdataEtterPeriode);
         }
+
+        this.overstyrtInnhentingDuration = overstyrtInnhentingDuration != null ? Duration.parse(overstyrtInnhentingDuration): null;
     }
 
     public boolean skalInnhenteRegisteropplysningerPåNytt(Behandling behandling) {
-        LocalDateTime midnatt = LocalDate.now().atStartOfDay();
         Optional<LocalDateTime> opplysningerOppdatertTidspunkt = behandlingRepository.hentSistOppdatertTidspunkt(behandling.getId());
+
+        if (overstyrtInnhentingDuration != null) {
+            LocalDateTime oppdateringsgrense = LocalDateTime.now().minus(overstyrtInnhentingDuration);
+            return erOpplysningerOppdatertTidspunktFør(oppdateringsgrense, opplysningerOppdatertTidspunkt);
+        }
+
+        LocalDateTime midnatt = LocalDate.now().atStartOfDay();
         if (oppdatereRegisterdataTidspunkt == null) {
             // konfig-verdien er ikke satt
             return erOpplysningerOppdatertTidspunktFør(midnatt, opplysningerOppdatertTidspunkt);
