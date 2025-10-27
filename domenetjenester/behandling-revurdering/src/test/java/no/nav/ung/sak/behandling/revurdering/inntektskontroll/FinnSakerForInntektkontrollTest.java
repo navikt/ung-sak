@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -18,6 +19,9 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
@@ -69,6 +73,9 @@ class FinnSakerForInntektkontrollTest {
     @Inject
     private EntityManager entityManager;
 
+    @Inject
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
+
     private FinnSakerForInntektkontroll finnSakerForInntektkontroll;
 
     private Behandling behandling;
@@ -82,7 +89,8 @@ class FinnSakerForInntektkontrollTest {
             prosessTriggereRepository,
             new VilkårTjeneste(behandlingRepository, null, vilkårResultatRepository),
             ungdomsytelseGrunnlagRepository,
-            tilkjentYtelseRepository
+            tilkjentYtelseRepository,
+            relevanteKontrollperioderUtleder
         );
 
         behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
