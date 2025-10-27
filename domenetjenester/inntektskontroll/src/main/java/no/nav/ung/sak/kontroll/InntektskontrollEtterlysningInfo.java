@@ -1,13 +1,13 @@
-package no.nav.ung.sak.uttalelse;
+package no.nav.ung.sak.kontroll;
 
 
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 
 import java.util.Objects;
 
-public record EtterlysningInfo(EtterlysningStatus etterlysningStatus, Boolean harUttalelse) {
+public record InntektskontrollEtterlysningInfo(EtterlysningStatus etterlysningStatus, Boolean harUttalelse) {
 
-    public EtterlysningInfo {
+    public InntektskontrollEtterlysningInfo {
         if (etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR) {
             Objects.requireNonNull(harUttalelse);
         }

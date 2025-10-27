@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ytelse;
+package no.nav.ung.sak.kontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -12,7 +12,6 @@ import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +59,10 @@ public class RapportertInntektMapper {
 
     public LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterForEtterlysninger(
         Long behandlingId,
-        List<EtterlysningsPeriode> etterlysningsperioder) {
+        List<InntektskontrollEtterlysningsPeriode> etterlysningsperioder) {
 
         return etterlysningsperioder.stream()
-            .filter(it -> !it.etterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.AVBRUTT) && !it.etterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.SKAL_AVBRYTES))
+            .filter(it -> !it.inntektskontrollEtterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.AVBRUTT) && !it.inntektskontrollEtterlysningInfo().etterlysningStatus().equals(EtterlysningStatus.SKAL_AVBRYTES))
             .map(it -> finnRegisterinntekterVurdertIUttalelse(behandlingId, it))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
@@ -79,11 +78,11 @@ public class RapportertInntektMapper {
     }
 
 
-    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(Long behandlingId, EtterlysningsPeriode it) {
+    private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(Long behandlingId, InntektskontrollEtterlysningsPeriode it) {
         final var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlagForGrunnlagId(behandlingId, it.iayGrunnlagUUID());
         final var grupperteInntekter = grupperInntekter(iayGrunnlag);
         final var registerTidslinje = finnRegisterinntektForPeriode(grupperteInntekter, it.periode());
-        return registerTidslinje.mapValue(registerinntekter -> new EtterlysningOgRegisterinntekt(registerinntekter, it.etterlysningInfo()));
+        return registerTidslinje.mapValue(registerinntekter -> new EtterlysningOgRegisterinntekt(registerinntekter, it.inntektskontrollEtterlysningInfo()));
     }
 
     private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje, Map<InntektType, List<Inntektspost>> grupperteInntekter) {

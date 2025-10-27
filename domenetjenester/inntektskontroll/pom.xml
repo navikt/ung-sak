@@ -9,8 +9,8 @@
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
-	<name>ung-sak :: Domenetjenester - Beregning Ytelse </name>
-	<artifactId>beregning-ytelse</artifactId>
+	<name>ung-sak :: Domenetjenester - Inntektskontroll </name>
+	<artifactId>inntektskontroll</artifactId>
 	<packaging>jar</packaging>
 
 	<dependencies>
@@ -39,11 +39,6 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>arbeidsforhold</artifactId>
-        </dependency>
-
 
         <!-- NARE: Java regelmodell -->
 		<dependency>
@@ -63,23 +58,14 @@
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>grunnbelop</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>person</artifactId>
-        </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>perioder</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>etterlysning</artifactId>
-            <scope>compile</scope>
+            <artifactId>arbeidsforhold-domene</artifactId>
         </dependency>
     </dependencies>
 
