@@ -2,17 +2,6 @@ package no.nav.ung.sak.web.app.tjenester.abakus;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.abakus.callback.registerdata.CallbackDto;
-import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.ung.sak.domene.arbeidsforhold.RegisterdataCallback;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -23,12 +12,23 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.abakus.callback.registerdata.CallbackDto;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.ung.sak.domene.arbeidsforhold.RegisterdataCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Objects;
 import java.util.function.Function;
 
 import static no.nav.abakus.callback.registerdata.Grunnlag.IAY;
-import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.UPDATE;
 
 @Path("/registerdata")
 @ApplicationScoped
@@ -56,7 +56,7 @@ public class IAYRegisterdataCallbackRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Callback når registerinnhenting av IAY har blitt fullført i Abakus", tags = "registerdata")
     @PollTaskAfterTransaction
-    @BeskyttetRessurs(action = UPDATE, resource = APPLIKASJON)
+    @BeskyttetRessurs(action = UPDATE, resource = BeskyttetRessursResourceType.APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response callback(@Parameter(description = "callbackDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) CallbackDto dto) {
         if (Objects.equals(IAY, dto.getGrunnlagType())) {

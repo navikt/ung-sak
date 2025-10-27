@@ -1,11 +1,21 @@
 package no.nav.ung.sak.web.app.konfig;
 
-import static org.assertj.core.api.Fail.fail;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import no.nav.k9.felles.sikkerhet.abac.AbacDto;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
@@ -14,21 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.core.Request;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import no.nav.ung.abac.BeskyttetRessursKoder;
-import no.nav.k9.felles.sikkerhet.abac.AbacDto;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import static org.assertj.core.api.Fail.fail;
 
 /**
  * Sjekker at alle REST endepunkt har definert tilgangskontroll konfigurert for ABAC (Attribute Based Access Control).
@@ -36,7 +32,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 public class RestApiAbacTest {
 
     public static Stream<Arguments> provideArguments() {
-        return RestApiTester.finnAlleRestMetoder().stream().map(m -> Arguments.of( m ))
+        return RestApiTester.finnAlleRestMetoder().stream().map(m -> Arguments.of(m))
             .collect(Collectors.toList()).stream();
     }
 
@@ -113,12 +109,11 @@ public class RestApiAbacTest {
         Class<?> klasse = metode.getDeclaringClass();
         BeskyttetRessurs annotation = metode.getAnnotation(BeskyttetRessurs.class);
         if (annotation != null) {
-            if (annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
+            if (annotation.action() == BeskyttetRessursActionType.DUMMY) {
                 fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for action()");
-            } else if (annotation.property() != null && !"".equals(annotation.property())) {
-                return; // ok
-            } else if (annotation.resource().isEmpty()) {
-                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk Dtom verdi for resource()");
+            }
+            if (annotation.resource() == BeskyttetRessursResourceType.DUMMY) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk DUMMY-verdi for resource()");
             }
         }
     }
@@ -126,33 +121,13 @@ public class RestApiAbacTest {
     private void assertAtIngenBrukerTommeEllerUgyldigeVerdierPåBeskyttetRessurs(Method metode) {
         Class<?> klasse = metode.getDeclaringClass();
         BeskyttetRessurs annotation = metode.getAnnotation(BeskyttetRessurs.class);
-        final List<String> konstanter = Arrays.stream(BeskyttetRessursKoder.class.getDeclaredFields())
-            .filter(it -> Modifier.isStatic(it.getModifiers()) && Modifier.isFinal(it.getModifiers()))
-            .map(it -> extractValueFromField(it))
-            .collect(Collectors.toList());
-
-        if (annotation != null && !annotation.property().isEmpty()) {
-            return; // ok
-        }
-
-        if (annotation != null && annotation.action() == BeskyttetRessursActionAttributt.DUMMY) {
-            if (annotation.resource().isEmpty()) {
-                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk tom-verdi for resource()");
+        if (annotation != null) {
+            if (annotation.resource() == BeskyttetRessursResourceType.BEREGNINGSGRUNNLAG) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk BEREGNINGSGRUNNLAG-verdi for resource(). Brukes kun i kalkulus");
             }
-
-            if (!konstanter.contains(annotation.resource())) {
-                fail(klasse.getSimpleName() + "." + metode.getName() + " Bruk verdi fra kodeliste for "
-                    + BeskyttetRessursKoder.class.getSimpleName());
+            if (annotation.resource() == BeskyttetRessursResourceType.PDP) {
+                fail(klasse.getSimpleName() + "." + metode.getName() + " Ikke bruk PDP-verdi for resource(). brukes kun i PDP");
             }
-        }
-    }
-
-    private String extractValueFromField(Field field) {
-        try {
-            return (String) field.get(this);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return "";
         }
     }
 

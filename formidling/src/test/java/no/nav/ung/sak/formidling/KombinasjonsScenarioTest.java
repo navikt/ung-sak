@@ -12,7 +12,6 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
@@ -55,11 +54,7 @@ public class KombinasjonsScenarioTest {
 
         behandling.avsluttBehandling();
 
-        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.forhåndsvis(new VedtaksbrevForhåndsvisRequest(
-            behandling.getId(),
-            null,
-            true,
-            null));
+        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.genererAlleForBehandling(behandling.getId(), true);
 
         assertThat(generertBrev).hasSize(2);
 
@@ -88,11 +83,7 @@ public class KombinasjonsScenarioTest {
 
         behandling.avsluttBehandling();
 
-        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.forhåndsvis(new VedtaksbrevForhåndsvisRequest(
-            behandling.getId(),
-            null,
-            true,
-            null));
+        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.genererAlleForBehandling(behandling.getId(), true);
 
         assertThat(generertBrev).hasSize(2);
         var endringInntektBrev = generertBrev.stream().filter(it -> it.malType() == DokumentMalType.ENDRING_INNTEKT).findFirst().orElseThrow();
@@ -117,11 +108,7 @@ public class KombinasjonsScenarioTest {
 
         behandling.avsluttBehandling();
 
-        List<GenerertBrev> genererteBrev = vedtaksbrevTjeneste.forhåndsvis(new VedtaksbrevForhåndsvisRequest(
-            behandling.getId(),
-            null,
-            true,
-            null));
+        List<GenerertBrev> genererteBrev = vedtaksbrevTjeneste.genererAlleForBehandling(behandling.getId(), true);
 
         assertThat(genererteBrev).hasSize(1);
         var generertBrev = genererteBrev.getFirst();
@@ -158,11 +145,7 @@ public class KombinasjonsScenarioTest {
         var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
         behandling.avsluttBehandling();
 
-        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.forhåndsvis(new VedtaksbrevForhåndsvisRequest(
-            behandling.getId(),
-            null,
-            true,
-            null));
+        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.genererAlleForBehandling(behandling.getId(), true);
 
         assertThat(generertBrev).hasSize(2);
 
@@ -203,11 +186,7 @@ public class KombinasjonsScenarioTest {
         var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
         behandling.avsluttBehandling();
 
-        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.forhåndsvis(new VedtaksbrevForhåndsvisRequest(
-            behandling.getId(),
-            null,
-            true,
-            null));
+        List<GenerertBrev> generertBrev = vedtaksbrevTjeneste.genererAlleForBehandling(behandling.getId(), true);
 
         assertThat(generertBrev).hasSize(2);
 

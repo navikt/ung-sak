@@ -62,7 +62,7 @@ public class JournalføringOgDistribusjonsTjeneste {
 
     private BrevbestillingResultat journalførOgDistribuer(Behandling behandling, BrevbestillingEntitet bestilling, GenerertBrev generertBrev, ProsessTaskData distTaskMal) {
         var dokArkivRequest = opprettJournalpostRequest(bestilling.getBrevbestillingUuid(), generertBrev, behandling);
-        var opprettJournalpostResponse = dokArkivKlient.opprettJournalpost(dokArkivRequest);
+        var opprettJournalpostResponse = dokArkivKlient.opprettJournalpostOgFerdigstill(dokArkivRequest);
 
         bestilling.journalført(
             opprettJournalpostResponse.journalpostId(),
@@ -110,7 +110,7 @@ public class JournalføringOgDistribusjonsTjeneste {
 
 
         return new OpprettJournalpostRequestBuilder()
-            .journalpostType("UTGAAENDE")
+            .journalpostType(JournalpostType.UTGAAENDE)
             .avsenderMottaker(avsenderMottaker)
             .bruker(bruker)
             .tema(OmrådeTema.UNG.getKode())
@@ -132,11 +132,16 @@ public class JournalføringOgDistribusjonsTjeneste {
             case ENDRING_BARNETILLEGG -> "Endring Barnetillegg";
             case ENDRING_PROGRAMPERIODE -> "Endring Programperiode";
             case ENDRING_INNTEKT -> "Endring Inntekt";
+            case ENDRING_INNTEKT_UTEN_REDUKSJON -> "Endring inntekt uten reduksjon";
             case ENDRING_HØY_SATS -> "Endring Høy Sats";
             case OPPHØR_DOK -> "Opphør";
             case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";
             case GENERELT_FRITEKSTBREV -> "Fritekst generelt brev";
+            case KLAGE_AVVIST_DOK -> "Vedtaksbrev for avvist klage";
+            case KLAGE_VEDTAK_MEDHOLD -> "Vedtaksbrev for medhold klage";
+            case KLAGE_OVERSENDT_KLAGEINSTANS -> "Brev om oversendelse til klageinstans";
+
         };
         return prefix + fraMal;
     }

@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -31,8 +32,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("/saksbehandler")
 @ApplicationScoped
@@ -70,7 +70,7 @@ public class SaksbehandlerRestTjeneste {
         tags = "nav-ansatt",
         summary = ("Identer hentes fra historikkinnslag og sykdomsvurderinger.")
     )
-    @BeskyttetRessurs(action = READ, resource = FAGSAK, sporingslogg = false)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK, auditlogg = false)
     public SaksbehandlerDto getSaksbehandlere(
         @QueryParam(BehandlingUuidDto.NAME)
         @Parameter(description = BehandlingUuidDto.DESC)

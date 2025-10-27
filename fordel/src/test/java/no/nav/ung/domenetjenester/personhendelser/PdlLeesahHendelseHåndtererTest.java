@@ -58,7 +58,7 @@ class PdlLeesahHendelseHåndtererTest {
             .thenReturn(List.of(new AktørId(AKTØR_ID)));
         when(forsinkelseTjeneste.finnTidspunktForInnsendingAvHendelse()).thenReturn(LocalDateTime.now());
 
-        when(oversetter.oversettStøttetPersonhendelse(personhendelse)).thenCallRealMethod();
+        when(oversetter.oversettStøttetPersonhendelse(any(Personhendelse.class))).thenCallRealMethod();
 
         // Act
         pdlLeesahHendelseHåndterer.håndterHendelse(UUID.randomUUID().toString(), personhendelse);
@@ -84,7 +84,7 @@ class PdlLeesahHendelseHåndtererTest {
             .thenReturn(List.of(new AktørId(AKTØR_ID)));
         when(forsinkelseTjeneste.finnTidspunktForInnsendingAvHendelse()).thenReturn(LocalDateTime.now());
 
-        when(oversetter.oversettStøttetPersonhendelse(personhendelse)).thenReturn(byggFødselshendelse(personhendelse, LocalDate.now()));
+        when(oversetter.oversettStøttetPersonhendelse(any(Personhendelse.class))).thenReturn(byggFødselshendelse(personhendelse, LocalDate.now()));
 
         // Act
         pdlLeesahHendelseHåndterer.håndterHendelse(UUID.randomUUID().toString(), personhendelse);

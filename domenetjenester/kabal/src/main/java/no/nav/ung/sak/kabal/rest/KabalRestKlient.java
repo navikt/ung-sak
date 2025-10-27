@@ -1,0 +1,91 @@
+package no.nav.ung.sak.kabal.rest;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.sak.kabal.kontrakt.KabalRequestv4;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.UUID;
+
+
+@ApplicationScoped
+@ScopedRestIntegration(scopeKey = "kabal.scope", defaultScope = "api://prod-gcp.klage.kabal-api/.default")
+public class KabalRestKlient {
+
+    private static final Logger log = LoggerFactory.getLogger(KabalRestKlient.class);
+
+    static final ObjectMapper objectMapper = new ObjectMapper()
+        .registerModule(new Jdk8Module())
+        .registerModule(new JavaTimeModule())
+        .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        .enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
+        .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
+        .setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE)
+        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
+    private OidcRestClient restClient;
+
+    private URI endpointKabalApi;
+
+    protected KabalRestKlient() {
+        // for proxying
+    }
+
+    @Inject
+    public KabalRestKlient(
+        @KonfigVerdi(value = "kabal.url", defaultVerdi = "http://kabal-api.klage") URI kabalEndpoint,
+        OidcRestClient oidcRestClient) {
+
+        // https://github.com/navikt/kabal-api/tree/main/docs/integrasjon
+        this.endpointKabalApi = toUri(kabalEndpoint, "/api/oversendelse/v4/sak");
+        this.restClient = oidcRestClient;
+    }
+
+    public void overførKlagebehandling(KabalRequestv4 request) {
+        try {
+            restClient.post(endpointKabalApi, request);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilKabal(request.behandlingUuid(), e).toException();
+        }
+    }
+
+    private URI toUri(URI baseUri, String relativeUri) {
+        String uri = baseUri.toString() + relativeUri;
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Ugyldig uri: " + uri, e);
+        }
+    }
+
+    interface RestTjenesteFeil extends DeklarerteFeil {
+        static final RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
+
+        @TekniskFeil(feilkode = "K9KLAGE-KABAL-1000014", feilmelding = "Feil ved kall til Kabal: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilKabal(UUID behandlingUuid, Throwable t);
+    }
+}

@@ -22,14 +22,13 @@ public class VedtaksbrevGenerererTjenesteFake implements VedtaksbrevGenerererTje
         );
     }
 
-
     @Override
-    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
+    public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenereringInput) {
         return resultat;
     }
 
     @Override
-    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, DokumentMalType originalDokumentMalType, boolean kunHtml) {
+    public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         return resultat;
     }
 }

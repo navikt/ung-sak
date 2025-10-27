@@ -2,8 +2,8 @@ package no.nav.ung.sak.behandlingslager.ytelse.uttak;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
-import no.nav.ung.kodeverk.hjemmel.HjemmelKodeverdiConverter;
-import no.nav.ung.kodeverk.ungdomsytelse.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
 import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;

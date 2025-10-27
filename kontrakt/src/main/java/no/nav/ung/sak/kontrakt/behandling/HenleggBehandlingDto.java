@@ -13,7 +13,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.Patterns;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -59,7 +60,8 @@ public class HenleggBehandlingDto {
         return begrunnelse;
     }
 
-    @AbacAttributt("behandlingId")
+
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
     public Long getBehandlingId() {
         return behandlingId;
     }

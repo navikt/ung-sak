@@ -1,14 +1,14 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -21,10 +21,15 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
+import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
+import no.nav.ung.sak.domene.vedtak.impl.KlageVedtakTjeneste;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
+import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
@@ -39,11 +44,14 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -52,6 +60,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ForeslåVedtakTjenesteTest {
 
+    public static final String GYLDIG_BREV_TEKST = "<h1>overskrift</h1><p>brødtekst</p>";
     @Inject
     private EntityManager entityManager;
 
@@ -72,8 +81,12 @@ public class ForeslåVedtakTjenesteTest {
     @Mock
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekreving;
 
+
     @Mock
-    private VedtaksbrevTjeneste vedtaksbrevTjeneste;
+    private VedtaksbrevValgRepository vedtaksbrevValgRepository;
+
+    @Mock
+    private VedtaksbrevReglerUng vedtaksbrevRegler;
 
     private Behandling behandling;
 
@@ -84,6 +97,9 @@ public class ForeslåVedtakTjenesteTest {
     private AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
 
     private ArrayList<Oppgaveinfo> oppgaveinfoerSomReturneres = new ArrayList<>();
+
+    @Mock(strictness = Mock.Strictness.LENIENT)
+    private KlageVedtakTjeneste klageVedtakTjeneste;
 
     @BeforeEach
     public void setUp() {
@@ -97,7 +113,16 @@ public class ForeslåVedtakTjenesteTest {
 
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevTjeneste);
+        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevValgRepository, klageVedtakTjeneste, false, new UnitTestLookupInstanceImpl<>(vedtaksbrevRegler));
+        when(vedtaksbrevRegler.kjør(any())).thenReturn(
+            new BehandlingVedtaksbrevResultat(
+                false,
+                null,
+                Collections.emptyList(),
+                List.of(new IngenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, ""))
+            )
+        );
+
     }
 
     @Test
@@ -173,6 +198,222 @@ public class ForeslåVedtakTjenesteTest {
         assertThat(behandling.isToTrinnsBehandling()).isFalse();
     }
 
+    @Test
+    public void feilerHvisUgyldigRedigertBrev() {
+        VedtaksbrevValgEntitet valgMedTomOverskrift = new VedtaksbrevValgEntitet(
+            behandling.getId(), DokumentMalType.ENDRING_INNTEKT, true, false, "<h1></h1>"
+        );
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            List.of(valgMedTomOverskrift));
+
+        assertThatThrownBy(() -> tjeneste.foreslåVedtak(behandling, kontekst))
+            .isInstanceOf((IllegalStateException.class));
+    }
+
+    @Test
+    public void okHvisGyldigHtml() {
+        VedtaksbrevValgEntitet valgMedGyldigBrev = new VedtaksbrevValgEntitet(
+            behandling.getId(), DokumentMalType.ENDRING_INNTEKT, true, false,
+            GYLDIG_BREV_TEKST
+        );
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            List.of(valgMedGyldigBrev));
+
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(behandling.isToTrinnsBehandling()).isFalse();
+    }
+
+    @Test
+    public void oppretterAksjonspunktBrevRedigering() {
+        // Arrange
+        behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
+
+        when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
+            vedtaksbrevResultatMåRedigere(DokumentMalType.MANUELT_VEDTAK_DOK)
+        );
+
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            Collections.emptyList());
+
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(1);
+        assertThat(stegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+    }
+
+    @Test
+    public void oppretterAksjonspunktBrevRedigeringHvisIkkeRedigert() {
+        // Arrange
+        behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
+        when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
+            vedtaksbrevResultatMåRedigere(DokumentMalType.MANUELT_VEDTAK_DOK)
+        );
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            List.of(
+                new VedtaksbrevValgEntitet(
+                    behandling.getId(), DokumentMalType.MANUELT_VEDTAK_DOK, false, false, null)
+            )
+        );
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(1);
+        assertThat(stegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+    }
+
+    @Test
+    public void oppretterAksjonspunktBrevRedigeringHvisAnnenBrevErRedigert() {
+        // Arrange
+        behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
+        when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
+            vedtaksbrevResultatMåRedigere(DokumentMalType.MANUELT_VEDTAK_DOK)
+        );
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            List.of(
+                new VedtaksbrevValgEntitet(
+                    behandling.getId(), DokumentMalType.ENDRING_INNTEKT, true, false, GYLDIG_BREV_TEKST)
+            )
+        );
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(1);
+        assertThat(stegResultat.getAksjonspunktListe().get(0)).isEqualTo(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
+    }
+
+    @Test
+    public void oppretterIkkeAksjonspunktBrevRedigeringHvisBrevErRedigert() {
+        // Arrange
+        behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
+        when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
+            vedtaksbrevResultatMåRedigere(DokumentMalType.MANUELT_VEDTAK_DOK)
+        );
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            List.of(
+                new VedtaksbrevValgEntitet(
+                    behandling.getId(), DokumentMalType.MANUELT_VEDTAK_DOK, true, false, GYLDIG_BREV_TEKST)
+            )
+        );
+
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(0);
+    }
+
+    @Test
+    public void oppretterIkkeAksjonspunktBrevRedigeringHvisBrevErHindret() {
+        // Arrange
+        behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
+        when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
+            vedtaksbrevResultatMåRedigere(DokumentMalType.MANUELT_VEDTAK_DOK)
+        );
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            List.of(
+                new VedtaksbrevValgEntitet(
+                    behandling.getId(), DokumentMalType.MANUELT_VEDTAK_DOK, false, true, null)
+            )
+        );
+
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(0);
+    }
+
+    @Test
+    public void oppretterIkkeAksjonspunktBrevRedigeringHvisMåIkkeRedigere() {
+        // Arrange
+        behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
+        when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
+            vedtaksbrevResultatMåIkkeRedigere(DokumentMalType.INNVILGELSE_DOK)
+        );
+        when(vedtaksbrevValgRepository.finnVedtakbrevValg(behandling.getId())).thenReturn(
+            List.of(
+                new VedtaksbrevValgEntitet(
+                    behandling.getId(), DokumentMalType.INNVILGELSE_DOK, true, false, GYLDIG_BREV_TEKST)
+            )
+        );
+
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(0);
+    }
+
+    @Test
+    public void feilertHvisBrevIkkeImplementert() {
+        // Arrange
+        behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
+        when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
+            new BehandlingVedtaksbrevResultat(
+                false,
+                LocalDateTimeline.empty(),
+                Collections.emptyList(),
+                List.of(new IngenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "")
+                )
+            ));
+
+        // Act
+        assertThatThrownBy(() -> tjeneste.foreslåVedtak(behandling, kontekst)).isInstanceOf(IllegalStateException.class);
+
+    }
+
+    private static BehandlingVedtaksbrevResultat vedtaksbrevResultatMåRedigere(DokumentMalType dokumentMalType) {
+        return new BehandlingVedtaksbrevResultat(
+            true,
+            LocalDateTimeline.empty(),
+            List.of(new Vedtaksbrev(
+                dokumentMalType,
+                mock(VedtaksbrevInnholdBygger.class),
+                new VedtaksbrevEgenskaper(
+                    false,
+                    false,
+                    true,
+                    false
+                ),
+                ""
+            )),
+            Collections.emptyList()
+        );
+    }
+
+    private static BehandlingVedtaksbrevResultat vedtaksbrevResultatMåIkkeRedigere(DokumentMalType dokumentMalType) {
+        return new BehandlingVedtaksbrevResultat(
+            true,
+            LocalDateTimeline.empty(),
+            List.of(new Vedtaksbrev(
+                dokumentMalType,
+                mock(VedtaksbrevInnholdBygger.class),
+                new VedtaksbrevEgenskaper(
+                    false,
+                    false,
+                    true,
+                    true
+                ),
+                ""
+            )),
+            Collections.emptyList()
+        );
+    }
+
 
     @Test
     public void utførerUtenAksjonspunktHvisRevurderingIkkeOpprettetManueltOgIkkeTotrinnskontroll() {
@@ -233,6 +474,7 @@ public class ForeslåVedtakTjenesteTest {
         revurdering.setToTrinnsBehandling();
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
+
 
         // Act
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(revurdering, kontekst);

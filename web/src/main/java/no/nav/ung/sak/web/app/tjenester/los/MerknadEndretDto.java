@@ -12,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.merknad.BehandlingMerknadType;
 import no.nav.ung.sak.kontrakt.Patterns;
 
@@ -44,7 +45,7 @@ public record MerknadEndretDto(
     String saksbehandlerIdent
 ) {
 
-    @AbacAttributt("behandlingUuid")
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_UUID)
     public UUID getBehandlingUuid() {
         return behandlingUuid;
     }

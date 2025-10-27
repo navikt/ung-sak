@@ -1,29 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.personopplysning;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.ung.sak.web.app.tjenester.forvaltning.CsvOutput.dumpAsCsv;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -53,6 +31,7 @@ import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
@@ -65,6 +44,25 @@ import no.nav.ung.sak.kontrakt.person.AktørInfoDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.CREATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
+import static no.nav.ung.sak.web.app.tjenester.forvaltning.CsvOutput.dumpAsCsv;
 
 
 @ApplicationScoped
@@ -100,7 +98,7 @@ public class ForvaltningPersonRestTjeneste {
             description = "Aktører for pr sak",
             content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response finnAktørerKobletTilSammeSakSomAktør(@Parameter(description = "AktørId") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid AktørIdDto aktørId) {
         var fagsakQuery = entityManager.createNativeQuery("select * from fagsak where bruker_aktoer_id = :aktørId", Fagsak.class)
@@ -120,7 +118,7 @@ public class ForvaltningPersonRestTjeneste {
             description = "Hent fnr for aktørid",
             content = @Content(mediaType = MediaType.TEXT_PLAIN))
     })
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getFnrForAktørId(@Parameter(description = "AktørIder (skilt med mellomrom eller linjeskift)") @Valid HentFnr hentFnr) {
         var alleAktørIder = Objects.requireNonNull(hentFnr.getAktørIder(), "aktørIder");
@@ -154,7 +152,7 @@ public class ForvaltningPersonRestTjeneste {
             description = "Fiks ugyldig aktørId",
             content = @Content(mediaType = MediaType.TEXT_PLAIN))
     })
-    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
         aktørIdSplittTjeneste.patchBrukerAktørId(dto.getGyldigAktørId(),
@@ -257,7 +255,7 @@ public class ForvaltningPersonRestTjeneste {
     @Operation(description = "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'", tags = "aktoer", responses = {
         @ApiResponse(responseCode = "200", description = "Liste av fagsaker i ung-sak personen er del av.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
     })
-    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.DRIFT)
     @Path("/saksnumre-for-person")
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<Saksnummer> getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {

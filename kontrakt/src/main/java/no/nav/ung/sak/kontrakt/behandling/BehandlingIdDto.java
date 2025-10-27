@@ -17,7 +17,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 
 /**
  * Referanse til en behandling.
@@ -71,12 +72,12 @@ public class BehandlingIdDto {
     /**
      * Denne er kun intern nøkkel, bør ikke eksponeres ut men foreløpig støttes både Long id og UUID id for behandling på grensesnittene.
      */
-    @AbacAttributt(NAME)
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
     public Long getBehandlingId() {
         return id != null && isLong() ? Long.parseLong(id) : null;
     }
 
-    @AbacAttributt("behandlingUuid")
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_UUID)
     public UUID getBehandlingUuid() {
         return id != null && !isLong() ? UUID.fromString(id) : null;
     }

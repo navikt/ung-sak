@@ -28,9 +28,18 @@ public class DokArkivKlientFake implements DokArkivKlient {
     }
 
     @Override
-    public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request) {
+    public OpprettJournalpostResponse opprettJournalpostOgFerdigstill(OpprettJournalpostRequest request) {
         requests.add(request);
         var opprettJournalpostResponse = new OpprettJournalpostResponse(journalpostId, Collections.emptyList(), true, "melding");
+        responses.add(opprettJournalpostResponse);
+
+        return opprettJournalpostResponse;
+    }
+
+    @Override
+    public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request) {
+        requests.add(request);
+        var opprettJournalpostResponse = new OpprettJournalpostResponse(journalpostId, Collections.emptyList(), false, "melding");
         responses.add(opprettJournalpostResponse);
 
         return opprettJournalpostResponse;

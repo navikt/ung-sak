@@ -24,13 +24,15 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
 
     @DisplayName("Endringsbrev med periode, innrapportert inntekt, reduksjon og utbetaling")
     @Test
-    void standardEndringRapportertInntekt() {
+    void standard_endring_inntekt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får 8 326 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
-                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Pengene får du utbetalt innen fire dager. " +
+                "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
                 standardTekstEndringInntekt());
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -43,22 +45,24 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsprogramytelsen din</h1>",
-                "<a title=\"utregningseksempler\" href=\"https://nav.no/ungdomsportal/beregning\">Se eksempel på hvordan vi regner ut ungdomsprogramytelsen basert på inntekt i Ungdomsportalen.</a>"
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
             );
     }
 
-    @DisplayName("Endringsbrev med flere perioder")
+    @DisplayName("Endringsbrev med reduksjon for flere perioder")
     @Test
-    void melder_inntekt_for_flere_mnd() {
+    void inntekt_reduksjon_flere_mnd() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_flere_mnd_19år(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får 8 326 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
-                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
                 "Du får 6 380 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
-                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
+                "Pengene får du utbetalt innen fire dager. " +
                 standardTekstEndringInntekt());
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -77,15 +81,18 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
 
     @DisplayName("Endringsbrev med flere perioder med ingen reduksjon i midten")
     @Test
-    void melder_inntekt_for_flere_mnd_med_0_inntekt_i_midten() {
+    void inntekt_for_flere_mnd_med_0_inntekt_i_midten() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektPå10k_utenom_mnd_2(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får 8 326 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
-                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
                 "Du får 7 035 kroner i ungdomsprogramytelse for perioden fra 1. mars 2025 til 31. mars 2025. " +
-                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
+                "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
+                "Pengene får du utbetalt innen fire dager. " +
                 standardTekstEndringInntekt());
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -102,16 +109,16 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
             );
     }
 
-    @DisplayName("Endringsbrev med 0 kr utbetaling pga for mye inntekt")
+    @DisplayName("Endringsbrev med ingen utbetaling pga for mye inntekt")
     @Test
-    void melder_inntekt_0_utbetaling() {
+    void inntekt_ingen_utbetaling() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntekt0krUtbetaling(fom);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektIngenUtbetaling(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
-                "Du får 0 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
-                "Det er fordi du har hatt en inntekt på 23 000 kroner i denne perioden. " +
-                standardTekstEndringInntekt());
+                "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
+                standardTekstIngenUtbetalingEndringInntekt());
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -123,24 +130,25 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>",
+                "<h2>Hvorfor får du ingen utbetaling?</h2>"
             );
     }
 
-    @DisplayName("Endringsbrev med flere perioder der det ikke er utbetaling i midten")
+
+    @DisplayName("Endringsbrev med reduksjon og ingen utbetaling")
     @Test
-    void melder_inntekt_for_flere_mnd_med_0_utbetaling_i_midten() {
+    void inntekt_reduksjon_og_ingen_utbetaling() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var ungTestGrunnlag = EndringInntektScenarioer.endringMedInntektReduksjonOgIngenUtbetalingKombinasjon(fom);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringInntektRedusertOgIngenUtbetaling(fom);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
-                "Du får 8 326 kroner i ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
-                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
-                "Du får 0 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
-                "Det er fordi du har hatt en inntekt på 23 000 kroner i denne perioden. " +
-                "Du får 7 035 kroner i ungdomsprogramytelse for perioden fra 1. mars 2025 til 31. mars 2025. " +
-                "Det er fordi du har hatt en inntekt på 10 000 kroner i denne perioden. " +
-                standardTekstEndringInntekt());
+                "Du får 6 380 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
+                "Pengene får du utbetalt innen fire dager. " +
+                "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+                "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+                "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
+                standardTekstIngenUtbetalingEndringInntekt());
 
         var behandling = lagScenario(ungTestGrunnlag);
 
@@ -152,19 +160,56 @@ class EndringRapportertInntektTest extends AbstractVedtaksbrevInnholdByggerTest 
         assertThatHtml(brevtekst)
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>",
+                "<h2>Hvorfor får du ingen utbetaling?</h2>"
             );
+    }
+
+    @DisplayName("Endringsbrev med flere perioder med full, redusert og ingen utbetaling")
+    @Test
+    void inntekt_for_flere_mnd_med_full_redusert_og_ingen_utbetaling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringInntektAlleKombinasjoner(fom);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret ungdomsprogramytelsen din " +
+            "Du får 6 380 kroner i ungdomsprogramytelse for perioden fra 1. februar 2025 til 28. februar 2025. " +
+            "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+            "Du får 8 382 kroner i ungdomsprogramytelse for perioden fra 1. mai 2025 til 31. mai 2025. " +
+            "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+            "Pengene får du utbetalt innen fire dager. " +
+            "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
+            "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
+            "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. april 2025 til 30. april 2025. " +
+            "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
+            standardTekstIngenUtbetalingEndringInntekt());
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>",
+                "<h2>Hvorfor får du ingen utbetaling?</h2>"
+
+            );
+    }
+
+    private String standardTekstIngenUtbetalingEndringInntekt() {
+        return """
+            Hvorfor får du ingen utbetaling? \
+            Når du har en inntekt, får du mindre penger i ungdomsprogramytelse. \
+            Vi regnet ut hva 66 prosent av inntekten din var for denne perioden, og så trakk vi dette beløpet fra pengene du får i ungdomsprogramytelsen. \
+            Siden 66 prosent av inntekten din var høyere enn det du ville fått utbetalt i ungdomsprogramytelse for denne perioden, får du ingen utbetaling. \
+            """ + standardTekstEndringInntekt();
     }
 
     private static String standardTekstEndringInntekt() {
-        return """
-            Pengene får du utbetalt før den 10. denne måneden. \
-            Når du har en inntekt, får du mindre penger i ungdomsprogramytelse. \
-            Vi regner ut hva 66 prosent av inntekten din er hver måned, og så trekker vi dette beløpet fra pengene du får i ungdomsprogramytelsen for den måneden. \
-            Likevel får du til sammen mer penger når du både har en inntekt og får ungdomsprogramytelse, enn hvis du bare hadde fått penger gjennom ungdomsprogramytelsen. \
-            Se eksempel på hvordan vi regner ut ungdomsprogramytelsen basert på inntekt i Ungdomsportalen. \
-            Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 11. \
-            """;
+        return "Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 11. ";
     }
 
 

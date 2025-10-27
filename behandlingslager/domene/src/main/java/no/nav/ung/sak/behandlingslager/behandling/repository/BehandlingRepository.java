@@ -185,7 +185,7 @@ public class BehandlingRepository {
     public List<Behandling> hentÅpneBehandlingerForFagsakId(Long fagsakId, BehandlingType... behandlingTyper) {
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
-        List<BehandlingType> typerList = Arrays.asList(behandlingTyper == null || behandlingTyper.length == 0 ? BehandlingType.values() : behandlingTyper);
+        List<BehandlingType> behandlingtyper = Arrays.asList(behandlingTyper == null || behandlingTyper.length == 0 ? BehandlingType.values() : behandlingTyper);
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT beh from Behandling AS beh " +
@@ -194,21 +194,26 @@ public class BehandlingRepository {
                 "AND beh.status NOT IN (:status)",
             Behandling.class);
         query.setParameter(FAGSAK_ID, fagsakId);
-        query.setParameter("behandlingType", typerList);
+        query.setParameter("behandlingType", behandlingtyper);
         query.setParameter("status", BehandlingStatus.getFerdigbehandletStatuser());
         query.setHint(QueryHints.HINT_READONLY, "true");
         return medAktiveBehandlingTilstanderFilter(query::getResultList);
     }
 
-    public List<Long> hentÅpneBehandlingerIdForFagsakId(Long fagsakId) {
+    public List<Long> hentÅpneBehandlingerIdForFagsakId(Long fagsakId, Set<BehandlingType> inkluderteBehandlingtyper) {
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
+
+        Set<BehandlingType> behandlingtyper = (inkluderteBehandlingtyper == null || inkluderteBehandlingtyper.isEmpty()) ? Set.of(BehandlingType.values()) : inkluderteBehandlingtyper;
 
         TypedQuery<Long> query = getEntityManager().createQuery(
             "SELECT beh.id from Behandling AS beh " +
                 "WHERE beh.fagsak.id = :fagsakId " +
+                "AND beh.behandlingType IN (:behandlingtyper)" +
                 "AND beh.status NOT IN (:status)",
             Long.class);
+
         query.setParameter(FAGSAK_ID, fagsakId);
+        query.setParameter("behandlingtyper", behandlingtyper);
         query.setParameter("status", BehandlingStatus.getFerdigbehandletStatuser());
         query.setHint(QueryHints.HINT_READONLY, "true");
         query.setHint(QueryHints.HINT_CACHE_MODE, "IGNORE");
@@ -254,24 +259,33 @@ public class BehandlingRepository {
         }
     }
 
-    public Optional<Behandling> finnSisteAvsluttedeIkkeHenlagteBehandling(Long fagsakId) {
+    public Optional<Behandling> finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(Long fagsakId) {
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
-        return optionalFirst(finnAlleAvsluttedeIkkeHenlagteBehandlinger(fagsakId));
+        return optionalFirst(finnAlleAvsluttedeIkkeHenlagtebehandlinger(fagsakId, BehandlingType.getYtelseBehandlingTyper()));
     }
 
-    public List<Behandling> finnAlleAvsluttedeIkkeHenlagteBehandlinger(Long fagsakId) {
+    public List<Behandling> finnAlleAvsluttedeIkkeHenlagteYtelsebehandlinger(Long fagsakId) {
+        Objects.requireNonNull(fagsakId, FAGSAK_ID);
+        return finnAlleAvsluttedeIkkeHenlagtebehandlinger(fagsakId, BehandlingType.getYtelseBehandlingTyper());
+    }
+
+    public List<Behandling> finnAlleAvsluttedeIkkeHenlagtebehandlinger(Long fagsakId, Set<BehandlingType> inkluderteBehandlingtyper) {
         // BehandlingResultatType = Innvilget, endret, ikke endret, avslått.
         Objects.requireNonNull(fagsakId, FAGSAK_ID); // NOSONAR
+
+        Set<BehandlingType> behandlingtyper = (inkluderteBehandlingtyper == null || inkluderteBehandlingtyper.isEmpty()) ? Set.of(BehandlingType.values()) : inkluderteBehandlingtyper;
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT behandling FROM Behandling behandling " +
                 "INNER JOIN BehandlingVedtak behandling_vedtak ON behandling.id=behandling_vedtak.behandlingId " +
                 "WHERE behandling.status IN :avsluttetOgIverkKode " +
                 "  AND behandling.fagsak.id=:fagsakId " +
+                " AND behandling.behandlingType IN (:behandlingtyper)" +
                 "ORDER BY behandling_vedtak.vedtakstidspunkt DESC, behandling_vedtak.endretTidspunkt DESC",
             Behandling.class);
 
         query.setParameter(FAGSAK_ID, fagsakId);
+        query.setParameter("behandlingtyper", behandlingtyper);
         query.setParameter("avsluttetOgIverkKode", BehandlingStatus.getFerdigbehandletStatuser());
         query.setHint(QueryHints.HINT_READONLY, true);
 

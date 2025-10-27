@@ -12,7 +12,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.Patterns;
 
@@ -91,7 +92,7 @@ public class BestillBrevDtoGammel {
         this.dokumentbestillingsId = dokumentbestillingsId;
     }
 
-    @AbacAttributt("behandlingId")
+    @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
     public Long getBehandlingId() {
         return behandlingId;
     }

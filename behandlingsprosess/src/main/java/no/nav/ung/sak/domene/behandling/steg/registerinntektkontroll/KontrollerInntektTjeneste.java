@@ -5,10 +5,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
-import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.kontroll.Inntektsresultat;
+import no.nav.ung.sak.kontroll.EtterlysningOgRegisterinntekt;
+import no.nav.ung.sak.kontroll.Inntektsresultat;
+import no.nav.ung.sak.kontroll.RapportertInntekt;
+import no.nav.ung.sak.kontroll.RapporterteInntekter;
 
 import java.math.BigDecimal;
 import java.util.List;

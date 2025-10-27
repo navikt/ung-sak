@@ -187,7 +187,7 @@ public class DokumentArkivTjenesteImplTest {
         when(safTjeneste.hentDokument(any(HentDokumentQuery.class))).thenReturn(bytesExpected);
 
         // Act
-        byte[] bytesActual = dokumentApplikasjonTjeneste.hentDokumnet(new JournalpostId("123"), "456");
+        byte[] bytesActual = dokumentApplikasjonTjeneste.hentDokument(new JournalpostId("123"), "456");
 
         // Assert
         assertThat(bytesActual).isEqualTo(bytesExpected);

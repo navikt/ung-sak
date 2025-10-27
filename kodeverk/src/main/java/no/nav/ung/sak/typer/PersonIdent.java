@@ -1,19 +1,18 @@
 package no.nav.ung.sak.typer;
 
-import java.util.Objects;
-
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
-
-import no.nav.ung.abac.AbacAttributt;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.api.IndexKey;
+
+import java.util.Objects;
 
 /**
  * Denne mapper p.t Norsk person ident (fødselsnummer, inkl F-nr, D-nr eller FDAT)
@@ -125,12 +124,12 @@ public class PersonIdent implements Comparable<PersonIdent>, IndexKey {
         return Objects.equals(ident, other.ident);
     }
 
-    @AbacAttributt(value = "fnr", masker = true)
+    @StandardAbacAttributt(StandardAbacAttributtType.FNR)
     public String getIdent() {
         return erGyldigFnr(ident) ? ident : null;
     }
 
-    @AbacAttributt(value = "aktorId", masker = true)
+    @StandardAbacAttributt(StandardAbacAttributtType.AKTØR_ID)
     public String getAktørId() {
         return erAktørId() ? ident : null;
     }

@@ -1,18 +1,17 @@
 package no.nav.ung.sak.typer;
 
-import java.util.Objects;
-
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
-
-import no.nav.ung.abac.AbacAttributt;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.api.IndexKey;
+
+import java.util.Objects;
 
 /**
  * Saksnummer refererer til saksnummer registret i GSAK.
@@ -55,7 +54,7 @@ public class Saksnummer implements IndexKey, Comparable<Saksnummer>{
         return saksnummer;
     }
 
-    @AbacAttributt("saksnummer")
+    @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
     public Saksnummer getSaksnummer() {
         return this;
     }

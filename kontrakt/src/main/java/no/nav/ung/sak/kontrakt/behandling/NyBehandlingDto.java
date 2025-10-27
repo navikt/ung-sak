@@ -9,9 +9,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,6 +38,10 @@ public class NyBehandlingDto {
     @Valid
     private Saksnummer saksnummer;
 
+    @JsonProperty(value = "periode")
+    @Valid
+    private Periode periode;
+
     public NyBehandlingDto() {
         //
     }
@@ -52,7 +58,7 @@ public class NyBehandlingDto {
         return nyBehandlingEtterKlage;
     }
 
-    @AbacAttributt("saksnummer")
+    @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
     public Saksnummer getSaksnummer() {
         return saksnummer;
     }
@@ -72,5 +78,9 @@ public class NyBehandlingDto {
     public void setSaksnummer(Saksnummer saksnummer) {
         this.saksnummer = saksnummer;
     }
+
+    public Periode getPeriode() { return periode; }
+
+    public void setPeriode(Periode periode) { this.periode = periode; }
 
 }

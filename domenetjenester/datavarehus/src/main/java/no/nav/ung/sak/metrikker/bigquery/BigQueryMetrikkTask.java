@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,8 @@ import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_BEGYNNELSE;
  * Det er også satt en grense for maksimalt antall mislykkede kjøringer til 20.
  */
 @ApplicationScoped
-@ProsessTask(value = BigQueryMetrikkTask.TASKTYPE, cronExpression = "0 1 * * * *", maxFailedRuns = 20, firstDelay = 60)
-public class BigQueryMetrikkTask implements ProsessTaskHandler {
+@ProsessTask(value = BigQueryMetrikkTask.TASKTYPE, maxFailedRuns = 20, firstDelay = 60)
+public class BigQueryMetrikkTask implements BatchProsessTaskHandler {
 
     private static final int LOG_THRESHOLD = 5000;
 
@@ -92,5 +93,10 @@ public class BigQueryMetrikkTask implements ProsessTaskHandler {
 
             bigQueryKlient.publish(dataset, tabell, records);
         });
+    }
+
+    @Override
+    public CronExpression getCron() {
+        return CronExpression.create("0 1 * * * *");
     }
 }

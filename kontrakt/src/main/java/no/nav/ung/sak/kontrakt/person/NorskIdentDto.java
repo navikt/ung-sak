@@ -9,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.ung.abac.StandardAbacAttributt;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -30,7 +31,7 @@ public class NorskIdentDto {
         this.fnr = fnr;
     }
 
-    @AbacAttributt("fnr")
+    @StandardAbacAttributt(StandardAbacAttributtType.FNR)
     public String getFnr() {
         return fnr;
     }

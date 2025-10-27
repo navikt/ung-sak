@@ -9,7 +9,6 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdBygger;
 import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdByggerTypeRef;
@@ -49,13 +48,8 @@ public class InformasjonsbrevGenerererTjeneste {
     public InformasjonsbrevGenerererTjeneste() {
     }
 
-    @WithSpan
-    public GenerertBrev genererInformasjonsbrev(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
-        return BrevGenereringSemafor.begrensetParallellitet(() -> doGenererInformasjonsbrev(informasjonsbrevBestillingInput));
-    }
-
     @WithSpan //WithSpan her for å kunne skille ventetid på semafor i opentelemetry
-    private GenerertBrev doGenererInformasjonsbrev(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
+    public GenerertBrev genererInformasjonsbrev(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
         var behandling = behandlingRepository.hentBehandling(informasjonsbrevBestillingInput.behandlingId());
 
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
@@ -64,7 +58,7 @@ public class InformasjonsbrevGenerererTjeneste {
 
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), innhold.automatiskGenerertFooter()),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false),
                 innhold.templateInnholdDto()
             ));
 

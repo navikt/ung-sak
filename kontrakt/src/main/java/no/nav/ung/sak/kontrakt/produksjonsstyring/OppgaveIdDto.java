@@ -1,16 +1,15 @@
 package no.nav.ung.sak.kontrakt.produksjonsstyring;
 
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.ung.abac.AbacAttributt;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import no.nav.ung.abac.AppAbacAttributt;
+import no.nav.ung.abac.AppAbacAttributtType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -31,7 +30,7 @@ public class OppgaveIdDto {
         this.verdi = verdi;
     }
 
-    @AbacAttributt("oppgaveId")
+    @AppAbacAttributt(AppAbacAttributtType.OPPGAVE_ID)
     public String getVerdi() {
         return verdi;
     }
