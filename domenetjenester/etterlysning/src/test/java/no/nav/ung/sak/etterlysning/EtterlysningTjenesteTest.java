@@ -248,7 +248,7 @@ class EtterlysningTjenesteTest {
         etterlysning.vent(LocalDateTime.now());
         boolean harUttalelse = false;
         String uttalelse = "Uttalelse";
-        etterlysning.mottaSvar(svarJournalpostId, harUttalelse, uttalelse);
+        etterlysning.mottaSvar();
         uttalelseRepository.lagre(behandling.getId(), new UttalelseV2(
             harUttalelse,
             uttalelse,
