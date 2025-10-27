@@ -52,7 +52,7 @@ public class TilkjentYtelseBeregner {
         sporing.put("antallVirkedager", String.valueOf(antallVirkedager));
         BigDecimal antallVirkedagerHeleMåned = BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(periode.getFomDato().withDayOfMonth(1), periode.getTomDato().with(TemporalAdjusters.lastDayOfMonth())));
         sporing.put("antallVirkedagerHeleMåned", String.valueOf(antallVirkedagerHeleMåned));
-        BigDecimal andelVirkedagerIMåned = antallVirkedager.divide(antallVirkedagerHeleMåned, RoundingMode.HALF_UP);
+        BigDecimal andelVirkedagerIMåned = antallVirkedager.divide(antallVirkedagerHeleMåned, 10, RoundingMode.HALF_UP);
         sporing.put("andelVirkedagerInnenforPeriode", String.valueOf(andelVirkedagerIMåned));
         sporing.put("rapportertInntekt", rapporertinntekt.toString());
         BigDecimal andelRapportertInntektInnenforPeriode = andelVirkedagerIMåned.multiply(rapporertinntekt);
