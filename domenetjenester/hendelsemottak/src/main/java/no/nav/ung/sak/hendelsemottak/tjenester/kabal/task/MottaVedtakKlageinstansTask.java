@@ -183,7 +183,7 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
 
     public void opprettHistorikkinnslagKlageFraKabal(Behandling behandling, KlageVurderingAdapter klageVurdering) {
         var historikkBuilder = new Historikkinnslag.Builder();
-        historikkBuilder.medTittel("Resultat fra klageinstansen")
+        historikkBuilder.medTittel("Mottatt resultat fra klageenheten")
             .medBehandlingId(behandling.getId())
             .addLinje(klageVurdering.getKlageVurdering().getNavn())
             .medFagsakId(behandling.getFagsakId())
@@ -199,7 +199,7 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
 
     public void opprettHistorikkinnslagAnkeFraKabal(Behandling behandling, String utfall) {
         var historikkBuilder = new Historikkinnslag.Builder();
-        historikkBuilder.medTittel("Resultat fra ankebehandling")
+        historikkBuilder.medTittel("Mottatt resultat fra ankeenheten")
             .medBehandlingId(behandling.getId())
             .addLinje(utfall)
             .medFagsakId(behandling.getFagsakId())
