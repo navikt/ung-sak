@@ -256,7 +256,7 @@ public class FagsakRestTjeneste {
     }
 
     @POST
-    @Path(MATCH_PATH)
+    @Path(BLI_DIGITAL_BRUKER_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Setter en ikke-digital bruker til å være digital", tags = "fagsak", summary = ("Setter en ikke-digital bruker til å være digital"))
@@ -268,7 +268,7 @@ public class FagsakRestTjeneste {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        if (fagsak.get().erIkkeDigitalBruker()){
+        if (!fagsak.get().erIkkeDigitalBruker()){
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         fagsak.get().setIkkeDigitalBruker(false);
