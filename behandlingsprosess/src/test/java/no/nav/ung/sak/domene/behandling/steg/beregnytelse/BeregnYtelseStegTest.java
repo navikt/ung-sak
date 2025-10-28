@@ -69,7 +69,8 @@ class BeregnYtelseStegTest {
             behandlingRepository);
         beregnYtelseSteg = new BeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
-            månedsvisTidslinjeUtleder
+            månedsvisTidslinjeUtleder,
+            false
         );
 
         fagsakRepository = new FagsakRepository(entityManager);
