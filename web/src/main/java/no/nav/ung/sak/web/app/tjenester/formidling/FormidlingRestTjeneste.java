@@ -41,6 +41,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("")
@@ -89,7 +90,7 @@ public class FormidlingRestTjeneste {
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling",
         responses = @ApiResponse(responseCode = "200", description = "lagret ok")
     )
-    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response lagreVedtaksbrevValg(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequest dto) {
         vedtaksbrevTjeneste.lagreVedtaksbrev(dto);
@@ -222,7 +223,7 @@ public class FormidlingRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Bestill informasjonsbrev for en behandling. ", tags = "formidling")
-    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response bestillInformasjonsbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingRequest dto
     ) {
