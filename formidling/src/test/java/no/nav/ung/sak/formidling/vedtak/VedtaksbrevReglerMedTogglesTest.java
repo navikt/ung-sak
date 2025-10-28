@@ -59,7 +59,7 @@ class VedtaksbrevReglerMedTogglesTest {
 
 
     @Test //Denne testen er ikke avklart funksjonelt. Avhengig av toggle
-    void skal_gi_ingen_brev_ved_avkortning_men_fastsatt_til_0_kr_og_register_er_over_0kr() {
+    void skal_gi_brev_ved_avkortning_men_fastsatt_til_0_kr_og_register_er_over_0kr() {
         UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endring0KrRapportert10000KrRegister0krFastsatt(LocalDate.of(2024, 12, 1));
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestGrunnlag, ungTestRepositories);
 
