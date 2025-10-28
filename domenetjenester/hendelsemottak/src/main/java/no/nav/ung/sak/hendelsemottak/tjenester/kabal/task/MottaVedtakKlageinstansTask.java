@@ -8,11 +8,15 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -43,6 +47,7 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private Event<KlageresultatEndretEvent> klageresultatEndretEvent;
+    private HistorikkinnslagRepository historikkinnslagRepository;
 
     MottaVedtakKlageinstansTask() {
     }
@@ -52,12 +57,14 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
                                        KlageRepository klageRepository,
                                        ProsessTaskTjeneste prosessTaskRepository,
                                        BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                       Event<KlageresultatEndretEvent> klageresultatEndretEvent) {
+                                       Event<KlageresultatEndretEvent> klageresultatEndretEvent,
+                                       HistorikkinnslagRepository historikkinnslagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.klageRepository = klageRepository;
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.klageresultatEndretEvent = klageresultatEndretEvent;
+        this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     @Override
@@ -71,7 +78,9 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
             if(!behandling.erAvsluttet()) {
                 log.warn("Ankebehandling avsluttet for behandling {} som ikke er avsluttet", behandlingsId);
             }
-            opprettAnkebehandlingAvsluttetTask(behandling, prosessTaskData.getPropertyValue(UTFALL));
+            var utfall = prosessTaskData.getPropertyValue(UTFALL);
+            opprettAnkebehandlingAvsluttetTask(behandling, utfall);
+            opprettHistorikkinnslagAnkeFraKabal(behandling, utfall);
         } else {
             if (behandling.getAktivtBehandlingSteg() != BehandlingStegType.OVERFØRT_NK) {
                 log.warn("Mottok hendelse fra kabal for vedtak mens behandling står i steg={}, forventet steg={}",
@@ -92,6 +101,8 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
 
             klageRepository.lagre(klageUtredning);
             klageresultatEndretEvent.fire(new KlageresultatEndretEvent(behandling.getId()));
+
+            opprettHistorikkinnslagKlageFraKabal(behandling, klageVurderingAdapter);
 
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
         }
@@ -169,4 +180,31 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
         prosessTaskRepository.lagre(opprettOppgaveAnkebehandlingAvsluttetTask);
     }
 
+
+    public void opprettHistorikkinnslagKlageFraKabal(Behandling behandling, KlageVurderingAdapter klageVurdering) {
+        var historikkBuilder = new Historikkinnslag.Builder();
+        historikkBuilder.medTittel("Mottatt resultat fra klageenheten")
+            .medBehandlingId(behandling.getId())
+            .addLinje(klageVurdering.getKlageVurdering().getNavn())
+            .medFagsakId(behandling.getFagsakId())
+            .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+
+        if (klageVurdering.getKlageVurderingOmgjoer() != null &&
+            klageVurdering.getKlageVurderingOmgjoer() != KlageVurderingOmgjør.UDEFINERT) {
+            historikkBuilder.addLinje(klageVurdering.getKlageVurderingOmgjoer().getNavn());
+        }
+
+        historikkinnslagRepository.lagre(historikkBuilder.build());
+    }
+
+    public void opprettHistorikkinnslagAnkeFraKabal(Behandling behandling, String utfall) {
+        var historikkBuilder = new Historikkinnslag.Builder();
+        historikkBuilder.medTittel("Mottatt resultat fra ankeenheten")
+            .medBehandlingId(behandling.getId())
+            .addLinje(utfall)
+            .medFagsakId(behandling.getFagsakId())
+            .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+
+        historikkinnslagRepository.lagre(historikkBuilder.build());
+    }
 }

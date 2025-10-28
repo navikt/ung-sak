@@ -117,8 +117,9 @@ public class KlageRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON, auditlogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentValgbareKlagehjemler() {
-        var klagehjemler = Arrays.stream(Hjemmel.values()).map(hjemmel ->
-            new KlageHjemmelDto(hjemmel.getKode(), hjemmel.getNavn())
+        var klagehjemler = Arrays.stream(Hjemmel.values())
+            .filter(hjemmel -> !Hjemmel.MANGLER.equals(hjemmel))
+            .map(hjemmel -> new KlageHjemmelDto(hjemmel.getKode(), hjemmel.getNavn())
         );
 
         return Response.ok(klagehjemler).build();
