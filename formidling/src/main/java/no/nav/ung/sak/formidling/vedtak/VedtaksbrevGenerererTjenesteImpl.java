@@ -5,6 +5,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -36,6 +37,8 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
     private MicrosoftGraphTjeneste microsoftGraphTjeneste;
+    private boolean enableBrevAnsvarlig;
+
     public VedtaksbrevGenerererTjenesteImpl() {
     }
 
@@ -45,12 +48,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         PdfGenKlient pdfGen,
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger,
         BrevMottakerTjeneste brevMottakerTjeneste,
-        MicrosoftGraphTjeneste microsoftGraphTjeneste) {
+        MicrosoftGraphTjeneste microsoftGraphTjeneste,
+        @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG", defaultVerdi = "true") boolean enableBrevAnsvarlig) {
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
+        this.enableBrevAnsvarlig = enableBrevAnsvarlig;
     }
 
 
@@ -93,6 +98,10 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     }
 
     private BrevAnsvarligDto lagManuellBrevAnsvarlig(Behandling behandling) {
+        if (!enableBrevAnsvarlig) {
+            return  new BrevAnsvarligDto(false, null, null);
+        }
+
         var saksbehandlerNavn = Optional.ofNullable(behandling.getAnsvarligSaksbehandler())
             .flatMap(microsoftGraphTjeneste::navnPåNavAnsatt)
             .orElse(null);
