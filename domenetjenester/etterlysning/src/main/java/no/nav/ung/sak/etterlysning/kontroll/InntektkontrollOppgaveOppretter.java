@@ -6,11 +6,9 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.PersonIdent;
 
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.function.Function;
 
@@ -40,18 +38,8 @@ public class InntektkontrollOppgaveOppretter {
                 etterlysning.getFrist(),
                 etterlysning.getPeriode().getFomDato(),
                 etterlysning.getPeriode().getTomDato(),
-                InntektKontrollOppgaveMapper.mapTilRegisterInntekter(grunnlag, mapTilHelMåned(etterlysning.getPeriode())));
+                InntektKontrollOppgaveMapper.mapTilRegisterInntekter(grunnlag, etterlysning.getPeriode()));
         };
-    }
-
-    private DatoIntervallEntitet mapTilHelMåned(DatoIntervallEntitet periode) {
-        if (periode.getFomDato().getMonth() != periode.getTomDato().getMonth() || periode.getFomDato().getYear() != periode.getTomDato().getYear()) {
-            throw new IllegalArgumentException("Periode må være innenfor samme måned for inntektskontrolloppgave");
-        }
-        return DatoIntervallEntitet.fraOgMedTilOgMed(
-            periode.getFomDato().withDayOfMonth(1),
-            periode.getTomDato().with(TemporalAdjusters.lastDayOfMonth())
-        );
     }
 
 
