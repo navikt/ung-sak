@@ -7,7 +7,7 @@ public record InformasjonsbrevBestillingInput(
     Long behandlingId,
     DokumentMalType dokumentMalType,
     InformasjonsbrevInnholdDto innhold,
-    boolean kunHtml
+    String bestillerIdent, boolean kunHtml
 ) {
 
     public <B extends InformasjonsbrevInnholdDto> B getTypedInnhold() {

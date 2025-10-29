@@ -27,7 +27,7 @@ class KlageMedholdTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
         var klage = KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuellUtenBeslutter(fnr,
             """
                 NAV har omgjort vedtaket ditt om ungdomsprogramytelse \
                 Etter at du klaget har vi vurdert saken på nytt. Vi har kommet fram til at vedtaket gjøres om. \
