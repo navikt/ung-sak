@@ -89,6 +89,8 @@ jobs:
       suites: "frontend-ung"
       override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
       image_version: ${{ needs.build-app.outputs.build-version }}
+      k9-verdikjede-sha: 'playwright-container'
+
 
 
 
