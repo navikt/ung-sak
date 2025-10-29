@@ -33,16 +33,18 @@ public class ManglendeKontrollperioderTjeneste {
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     @Inject
     public ManglendeKontrollperioderTjeneste(MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                              ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                              @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int dagIMånedForInntektsKontroll,
-                                             TilkjentYtelseRepository tilkjentYtelseRepository) {
+                                             TilkjentYtelseRepository tilkjentYtelseRepository, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.dagIMånedForInntektsKontroll = dagIMånedForInntektsKontroll;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     /**
@@ -54,7 +56,7 @@ public class ManglendeKontrollperioderTjeneste {
      */
     public NavigableSet<DatoIntervallEntitet> finnPerioderForManglendeKontroll(Long behandlingId) {
         final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
-        final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
+        final var påkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
         final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);

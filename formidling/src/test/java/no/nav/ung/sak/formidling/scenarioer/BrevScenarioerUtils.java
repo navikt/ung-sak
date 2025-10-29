@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
@@ -19,6 +20,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
@@ -66,16 +68,25 @@ public class BrevScenarioerUtils {
         return tilkjentYtelsePerioderMedReduksjon(satser, tilkjentPeriode, LocalDateTimeline.empty());
     }
 
-    static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
+    static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektHolder) {
         LocalDateTimeline<Boolean> ytelseTidslinje = splitPrMåned(new LocalDateTimeline<>(tilkjentPeriode, true));
         LocalDateTimeline<BeregnetSats> beregnetSats = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
-        return beregnetSats.intersection(ytelseTidslinje).combine(rapportertInntektTimeline,
+        return beregnetSats.intersection(ytelseTidslinje).combine(kontrollerInntektHolder,
             (s, lhs, rhs) -> {
-                var rapportertInntekt = rhs == null ? BigDecimal.ZERO : rhs.getValue();
-                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), rapportertInntekt).verdi());
+                var inntekt = rhs != null ? bestemInntekt(rhs.getValue()) : BigDecimal.ZERO;
+                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), inntekt).verdi());
             },
             LocalDateTimeline.JoinStyle.LEFT_JOIN
         );
+    }
+
+    private static BigDecimal bestemInntekt(KontrollerInntektHolder value) {
+        if (value.inntekt != null) {
+            // inntekt er fastsatt
+            return value.inntekt;
+        }
+        // inntekt er ikke fastsatt, bruker register inntekten
+        return value.registerInntekt != null ? value.registerInntekt : BigDecimal.ZERO;
     }
 
 
@@ -197,5 +208,32 @@ public class BrevScenarioerUtils {
         var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories1);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         return behandling;
+    }
+
+    public record KontrollerInntektHolder(BigDecimal inntekt, BigDecimal rapportertInntekt, BigDecimal registerInntekt, boolean erManueltVurdert) {
+        public static KontrollerInntektHolder forRegisterInntekt(BigDecimal registerInntekt) {
+            return new KontrollerInntektHolder(null, registerInntekt, registerInntekt, false);
+        }
+
+    }
+    public static LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektFraHolder(LocalDateInterval programperiode, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektTimeline) {
+        var kontrollertInntektPerioder = AbstractTestScenario.kontrollerInntektFraTilkjenYtelse(programperiode, tilkjentYtelsePerioder);
+        return new LocalDateTimeline<>(
+            kontrollertInntektPerioder.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).toList()
+        ).combine(kontrollerInntektTimeline, BrevScenarioerUtils::overskrivKontrollerInntektFraHolder, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    }
+
+    private static LocalDateSegment<KontrollertInntektPeriode> overskrivKontrollerInntektFraHolder(LocalDateInterval di, LocalDateSegment<KontrollertInntektPeriode> lhs, LocalDateSegment<KontrollerInntektHolder> rhs) {
+        KontrollerInntektHolder kontrollerInntekt = rhs.getValue();
+        return new LocalDateSegment<>(
+            di.getFomDato(), di.getTomDato(),
+            KontrollertInntektPeriode.ny()
+                .medInntekt(kontrollerInntekt != null && kontrollerInntekt.inntekt() != null ? kontrollerInntekt.inntekt() : lhs.getValue().getInntekt())
+                .medRapportertInntekt(kontrollerInntekt != null && kontrollerInntekt.rapportertInntekt() != null ? kontrollerInntekt.rapportertInntekt() : BigDecimal.ZERO)
+                .medRegisterInntekt(kontrollerInntekt != null && kontrollerInntekt.registerInntekt() != null ? kontrollerInntekt.rapportertInntekt() : BigDecimal.ZERO)
+                .medErManueltVurdert(kontrollerInntekt != null && kontrollerInntekt.erManueltVurdert() || lhs.getValue().getErManueltVurdert())
+                .medKilde(lhs.getValue().getKilde())
+                .medPeriode(DatoIntervallEntitet.fra(di)).build()
+        );
     }
 }

@@ -21,12 +21,12 @@ class RelevanteKontrollperioderUtlederTest {
         final var sistePeriodeFom = LocalDate.of(2023, 3, 1);
         final var sistePeriodeTom = LocalDate.of(2023, 3, 14);
         LocalDateTimeline<YearMonth> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, YearMonth.of(2023, 1)),
-            new LocalDateSegment<>(førstePeriodeTom.plusDays(1), sistePeriodeFom.minusDays(1), YearMonth.of(2023, 2)),
-            new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 3))
+                new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, YearMonth.of(2023, 1)),
+                new LocalDateSegment<>(førstePeriodeTom.plusDays(1), sistePeriodeFom.minusDays(1), YearMonth.of(2023, 2)),
+                new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 3))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(2, result.toSegments().size());
         final var første = result.toSegments().first();
@@ -47,11 +47,11 @@ class RelevanteKontrollperioderUtlederTest {
         final var sistePeriodeFom = LocalDate.of(2023, 2, 1);
         final var sistePeriodeTom = LocalDate.of(2023, 2, 12);
         LocalDateTimeline<YearMonth> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, YearMonth.of(2023, 1)),
-            new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 2))
+                new LocalDateSegment<>(førstePeriodeFom, førstePeriodeTom, YearMonth.of(2023, 1)),
+                new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 2))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(2, result.toSegments().size());
         final var første = result.toSegments().first();
@@ -77,13 +77,13 @@ class RelevanteKontrollperioderUtlederTest {
         final var sistePeriode2Fom = LocalDate.of(2023, 4, 1);
         final var sistePeriode2Tom = LocalDate.of(2023, 4, 1);
         LocalDateTimeline<YearMonth> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, YearMonth.of(2023, 1)),
-            new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, YearMonth.of(2023, 2)),
-            new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, YearMonth.of(2023, 3)),
-            new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 4))
+                new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, YearMonth.of(2023, 1)),
+                new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, YearMonth.of(2023, 2)),
+                new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, YearMonth.of(2023, 3)),
+                new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 4))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(4, result.toSegments().size());
         final var iterator = result.toSegments().iterator();
@@ -120,15 +120,15 @@ class RelevanteKontrollperioderUtlederTest {
         final var sistePeriode2Fom = LocalDate.of(2023, 6, 1);
         final var sistePeriode2Tom = LocalDate.of(2023, 6, 2);
         LocalDateTimeline<YearMonth> ytelsesPerioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, YearMonth.of(2023, 1)),
-            new LocalDateSegment<>(førstePeriode1Tom.plusDays(1), sistePeriode1Fom.minusDays(1), YearMonth.of(2023, 2)),
-            new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, YearMonth.of(2023, 3)),
-            new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, YearMonth.of(2023, 4)),
-            new LocalDateSegment<>(førstePeriode2Tom.plusDays(1), sistePeriode2Fom.minusDays(1), YearMonth.of(2023, 5)),
-            new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 6))
+                new LocalDateSegment<>(førstePeriode1Fom, førstePeriode1Tom, YearMonth.of(2023, 1)),
+                new LocalDateSegment<>(førstePeriode1Tom.plusDays(1), sistePeriode1Fom.minusDays(1), YearMonth.of(2023, 2)),
+                new LocalDateSegment<>(sistePeriode1Fom, sistePeriode1Tom, YearMonth.of(2023, 3)),
+                new LocalDateSegment<>(førstePeriode2Fom, førstePeriode2Tom, YearMonth.of(2023, 4)),
+                new LocalDateSegment<>(førstePeriode2Tom.plusDays(1), sistePeriode2Fom.minusDays(1), YearMonth.of(2023, 5)),
+                new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 6))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(4, result.toSegments().size());
         final var iterator = result.toSegments().iterator();

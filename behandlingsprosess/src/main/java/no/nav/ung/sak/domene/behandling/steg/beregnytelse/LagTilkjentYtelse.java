@@ -22,12 +22,12 @@ public class LagTilkjentYtelse {
     static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
                                                                          LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                          LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
-                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
+                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje, boolean kontrollSisteMndEnabled) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
-        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje);
+        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje, kontrollSisteMndEnabled);
 
 
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);

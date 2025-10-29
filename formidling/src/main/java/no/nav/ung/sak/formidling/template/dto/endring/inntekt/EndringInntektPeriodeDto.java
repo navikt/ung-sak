@@ -2,9 +2,9 @@ package no.nav.ung.sak.formidling.template.dto.endring.inntekt;
 
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 
-public record EndringRapportertInntektPeriodeDto(
+public record EndringInntektPeriodeDto(
     PeriodeDto periode,
-    long rapportertInntekt,
+    long inntekt,
     long utbetalingBeløp
 ) {
 }
