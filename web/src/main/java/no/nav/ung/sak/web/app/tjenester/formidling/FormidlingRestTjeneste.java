@@ -19,6 +19,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
@@ -37,8 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 @Path("")
@@ -87,7 +90,7 @@ public class FormidlingRestTjeneste {
     @Operation(description = "Lagring av brevvalg eks redigert eller hindretbrev  ", tags = "formidling",
         responses = @ApiResponse(responseCode = "200", description = "lagret ok")
     )
-    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response lagreVedtaksbrevValg(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevValgRequest dto) {
         vedtaksbrevTjeneste.lagreVedtaksbrev(dto);
@@ -187,7 +190,9 @@ public class FormidlingRestTjeneste {
         @Valid @QueryParam("kunHtml") Boolean kunHtml,
         @Context HttpServletRequest request
     ) {
-        var generertBrev = informasjonsbrevTjeneste.forhåndsvis(dto, kunHtml);
+
+        var bestillerIdent = Optional.ofNullable(SubjectHandler.getSubjectHandler().getUid()).orElseThrow();
+        var generertBrev = informasjonsbrevTjeneste.forhåndsvis(dto, bestillerIdent, kunHtml);
 
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
 
@@ -218,11 +223,13 @@ public class FormidlingRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Bestill informasjonsbrev for en behandling. ", tags = "formidling")
-    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response bestillInformasjonsbrev(
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) InformasjonsbrevBestillingRequest dto
     ) {
-        BrevbestillingResultat resultat = informasjonsbrevTjeneste.bestill(dto);
+        var bestillerIdent = Optional.ofNullable(SubjectHandler.getSubjectHandler().getUid()).orElseThrow();
+
+        BrevbestillingResultat resultat = informasjonsbrevTjeneste.bestill(dto, bestillerIdent);
 
         return Response.ok(resultat.journalpostId()).build();
 

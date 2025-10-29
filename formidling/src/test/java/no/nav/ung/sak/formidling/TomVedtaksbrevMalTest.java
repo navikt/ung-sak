@@ -3,14 +3,12 @@ package no.nav.ung.sak.formidling;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,15 +39,11 @@ class TomVedtaksbrevMalTest {
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
-        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
-            .medUngTestGrunnlag(ungTestGrunnlag);
-        scenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT, BehandlingStegType.FORESLÅ_VEDTAK);
-        var behandling = scenarioBuilder
-            .buildOgLagreMedUng(ungTestRepositories);
+        var behandling = BrevScenarioerUtils
+            .lagÅpenBehandlingMedAP(ungTestGrunnlag, ungTestRepositories, AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
 
 
-        var forventetMal = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(pdlKlientFake.fnr(),
+        var forventetMal = VedtaksbrevVerifikasjon.medHeaderOgFooterManuellUtenBeslutter(pdlKlientFake.fnr(),
             "<Fyll inn overskrift...> " +
                 "<Fyll inn brødtekst...> ");
         var mal = AbstractVedtaksbrevInnholdByggerTest.genererVedtaksbrev(behandling.getId(), testInfo, vedtaksbrevTjeneste).dokument().html();
