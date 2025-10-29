@@ -19,9 +19,9 @@ import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Supplier;
@@ -293,7 +293,7 @@ public class StatistikkRepository {
                 String behandlingResultatType = t.get(4, String.class);
                 String vilkårType = t.get(5, String.class);
                 String avslagKode = t.get(6, String.class);
-                long tidsstempel = t.get(7, Timestamp.class).getTime();
+                long tidsstempel = t.get(7, LocalDateTime.class).toEpochSecond(ZoneOffset.UTC) * 1000;
                 return SensuEvent.createSensuEvent(metricName,
                     toMap(
                         "ytelse_type", ytelseType,
@@ -382,7 +382,7 @@ public class StatistikkRepository {
                 String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), UDEFINERT);
                 String aksjonspunktStatus = t.get(4, String.class);
                 String venteÅrsak = coalesce(t.get(5, String.class), UDEFINERT);
-                long tidsstempel = t.get(6, Timestamp.class).getTime();
+                long tidsstempel = t.get(6, LocalDateTime.class).toEpochSecond(ZoneOffset.UTC) * 1000;
 
                 return SensuEvent.createSensuEvent(metricName,
                     toMap(
@@ -559,8 +559,8 @@ public class StatistikkRepository {
                 String taskId = t.get(2, Number.class).toString();
                 String taskType = t.get(3, String.class);
                 String status = t.get(4, String.class);
-                Timestamp sistKjørt = t.get(5, Timestamp.class);
-                long tidsstempel = sistKjørt == null ? now : sistKjørt.getTime();
+                LocalDateTime sistKjørt = t.get(5, LocalDateTime.class);
+                long tidsstempel = sistKjørt == null ? now : sistKjørt.toEpochSecond(ZoneOffset.UTC) * 1000;;
 
                 String sisteFeil = MetrikkUtils.finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
                 String taskParams = t.get(7, String.class);
@@ -568,7 +568,7 @@ public class StatistikkRepository {
                 Number blokkertAvId = t.get(8, Number.class);
                 String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
 
-                String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
+                String opprettetTid = t.get(9, LocalDateTime.class).toInstant(ZoneOffset.UTC).toString();
 
                 var gruppeSekvensnr = t.get(10, Long.class);
 

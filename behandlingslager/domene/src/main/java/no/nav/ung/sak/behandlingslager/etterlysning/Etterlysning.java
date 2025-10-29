@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.kodeverk.EtterlysningStatusKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.EtterlysningTypeKodeverdiConverter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 
@@ -34,8 +36,11 @@ public class Etterlysning extends BaseEntitet {
     @Embedded
     private DatoIntervallEntitet periode;
 
+    @Convert(converter = EtterlysningTypeKodeverdiConverter.class)
     @Column(name = "type", nullable = false)
     private EtterlysningType type;
+
+    @Convert(converter = EtterlysningStatusKodeverdiConverter.class)
 
     @Column(name = "status", nullable = false)
     private EtterlysningStatus status;
