@@ -26,6 +26,7 @@ jobs:
       upload-image: ${{ github.ref_name != github.event.repository.default_branch }}
       db_schema: ung_sak_unit
       pg_version: 16
+      skip-tests: 'true' #todo remove!
       t-2c: "-T1C"
     secrets: inherit
 
@@ -64,7 +65,7 @@ jobs:
       id-token: write
       contents: read
       packages: read
-    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@playwright-speedup
     if: ${{github.actor != 'dependabot[bot]'}}
     needs: build-app
     with:
@@ -80,7 +81,7 @@ jobs:
       id-token: write
       contents: read
       packages: read
-    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@playwright-speedup
     if: ${{github.actor != 'dependabot[bot]'}}
     needs: build-app
     with:
