@@ -65,7 +65,7 @@ jobs:
       id-token: write
       contents: read
       packages: read
-    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@playwright-speedup
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
     if: ${{github.actor != 'dependabot[bot]'}}
     needs: build-app
     with:
@@ -74,8 +74,6 @@ jobs:
       override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
       image_version: ${{ needs.build-app.outputs.build-version }}
       k9-verdikjede-sha: 'playwright-container'
-
-
 
   deploy-dev:
     name: Deploy dev
