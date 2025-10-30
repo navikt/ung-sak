@@ -119,7 +119,9 @@ public class RapportertInntektMapper {
         for (var intervall : månedsvisYtelseTidslinje.getLocalDateIntervals()) {
 
             final var inntekterForPeriode = finnRegisterinntektForPeriode(grupperteInntekter, intervall);
-            registerTidslinje = registerTidslinje.crossJoin(new LocalDateTimeline<>(intervall, inntekterForPeriode));
+            if (!inntekterForPeriode.isEmpty()) {
+                registerTidslinje = registerTidslinje.crossJoin(new LocalDateTimeline<>(intervall, inntekterForPeriode));
+            }
 
         }
         return registerTidslinje;
