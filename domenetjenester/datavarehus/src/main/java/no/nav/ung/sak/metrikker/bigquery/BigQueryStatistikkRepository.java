@@ -390,7 +390,7 @@ public class BigQueryStatistikkRepository {
      */
     Collection<EtterlysningRecord> etterlysningData(LocalDateTime sistKjørtTidspunkt) {
         String sql = """
-            select f.saksnummer, e.type, e.status, e.fom, e.tom, frist, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
+            select f.saksnummer, e.etterlysning_type, e.etterlysning_status, e.fom, e.tom, frist, coalesce(e.endret_tid, e.opprettet_tid) opprettet_tid
              from etterlysning e
              inner join behandling b on b.id = e.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
