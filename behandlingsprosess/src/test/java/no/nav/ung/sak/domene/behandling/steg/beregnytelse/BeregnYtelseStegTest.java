@@ -66,7 +66,7 @@ class BeregnYtelseStegTest {
         behandlingRepository = new BehandlingRepository(entityManager);
         final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
-            behandlingRepository, false);
+            behandlingRepository);
         beregnYtelseSteg = new BeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
             månedsvisTidslinjeUtleder,

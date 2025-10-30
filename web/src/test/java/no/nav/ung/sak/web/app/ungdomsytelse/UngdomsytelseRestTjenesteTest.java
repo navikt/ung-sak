@@ -55,7 +55,7 @@ class UngdomsytelseRestTjenesteTest {
             ungdomsytelseGrunnlagRepository,
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
             tilkjentYtelseRepository,
-            new MånedsvisTidslinjeUtleder(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)), behandlingRepository, false)
+            new MånedsvisTidslinjeUtleder(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)), behandlingRepository)
         );
 
 
