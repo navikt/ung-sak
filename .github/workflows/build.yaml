@@ -58,7 +58,7 @@ jobs:
           path: "${{ steps.generate-typescript.outputs.resultDir }}"
           if-no-files-found: error
 
-  verdikjede-tester-frontend:
+  verdikjede-tester:
     name: Verdikjedetester
     secrets: inherit
     permissions:
@@ -70,11 +70,10 @@ jobs:
     needs: build-app
     with:
       tag: ${{ needs.build-app.outputs.build-version }}
-      suites: "frontend-ung"
+      suites: "ung,ung-tilbake,frontend-ung"
       override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
       image_version: ${{ needs.build-app.outputs.build-version }}
       k9-verdikjede-sha: 'playwright-container'
-
 
 
 
