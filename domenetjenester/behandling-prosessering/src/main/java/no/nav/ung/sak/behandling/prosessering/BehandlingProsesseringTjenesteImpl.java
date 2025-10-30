@@ -95,24 +95,24 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     @Override
-    public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling) {
+    public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean manuellFortsettelse) {
         boolean innhentRegisterdata = skalHenteInnRegisterData(behandling);
         if (innhentRegisterdata) {
             log.info("Innhenter registerdata på nytt, grunnlg er utdatert");
         }
-        return doOppfriskingTaskOgFortsattBehandling(behandling, innhentRegisterdata);
+        return doOppfriskingTaskOgFortsattBehandling(behandling, innhentRegisterdata, manuellFortsettelse);
     }
 
     @Override
-    public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent) {
+    public ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent, boolean manuellFortsettelse) {
         if (forceInnhent) {
             log.warn("Innhenter registerdata på nytt (force), selv om data er hentet tidligere i dag");
-            return doOppfriskingTaskOgFortsattBehandling(behandling, forceInnhent);
+            return doOppfriskingTaskOgFortsattBehandling(behandling, forceInnhent, manuellFortsettelse);
         }
-        return lagOppdaterFortsettTasksForPolling(behandling);
+        return lagOppdaterFortsettTasksForPolling(behandling, manuellFortsettelse);
     }
 
-    private ProsessTaskGruppe doOppfriskingTaskOgFortsattBehandling(Behandling behandling, boolean innhentRegisterdataFørst) {
+    private ProsessTaskGruppe doOppfriskingTaskOgFortsattBehandling(Behandling behandling, boolean innhentRegisterdataFørst, boolean manuellFortsettelse) {
         if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Utvikler feil: Kan ikke oppdater behandling med nye data når er allerede i iverksettelse/avsluttet. behandlingId=" + behandling.getId()
                 + ", behandlingStatus=" + behandling.getStatus()
@@ -137,10 +137,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         ProsessTaskData fortsettBehandlingTask;
         if (oppfriskKontrollbehandlingEnabled) {
             fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingDersomIkkePåVentTask.class);
+
         } else {
             fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
-            fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         }
+        fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(manuellFortsettelse));
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
 
