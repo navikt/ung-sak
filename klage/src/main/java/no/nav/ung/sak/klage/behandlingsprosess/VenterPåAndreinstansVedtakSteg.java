@@ -46,6 +46,8 @@ public class VenterPåAndreinstansVedtakSteg implements BehandlingSteg {
             .map(KlageVurderingType.STADFESTE_YTELSESVEDTAK::equals)
             .orElse(false);
 
+        behandling.nullstillToTrinnsBehandling();
+
         if (skalOversendesKabal) {
             // Sett på vent. Steget tas av vent når Kabal sender tilbake hendelse om utfall
             var aksjonspunktResultat = AksjonspunktResultat.opprettForAksjonspunktMedFrist(
