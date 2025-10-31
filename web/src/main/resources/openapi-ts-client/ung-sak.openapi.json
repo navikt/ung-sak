@@ -6841,6 +6841,30 @@
         "tags" : [ "fagsak" ]
       }
     },
+    "/api/fagsak/bruker-bli-digital" : {
+      "post" : {
+        "description" : "Setter en ikke-digital bruker til å være digital",
+        "operationId" : "bliDigitalBruker",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Setter en ikke-digital bruker til å være digital",
+        "tags" : [ "fagsak" ]
+      }
+    },
     "/api/fagsak/hendelse/innsending" : {
       "post" : {
         "description" : "Mottak av dokument.",
