@@ -3,7 +3,6 @@ package no.nav.ung.sak.behandlingslager.notat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.Where;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.SQLRestriction;
 
 
 /**
@@ -33,7 +33,7 @@ public class NotatSakEntitet extends NotatEntitet {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "notat_id", nullable = false)
-    @Where(clause = "aktiv = true")
+    @SQLRestriction("aktiv = true")
     private List<NotatSakTekst> notatSakTekst;
 
     NotatSakEntitet(long fagsakId, String notatTekst, boolean skjult) {

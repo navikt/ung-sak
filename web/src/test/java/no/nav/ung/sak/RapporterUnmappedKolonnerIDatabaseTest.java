@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.Namespace;
+import org.hibernate.boot.spi.BootstrapContext;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.jpa.boot.spi.IntegratorProvider;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
@@ -41,7 +42,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
         Pattern.compile("^PROSESS_TASK.*$", Pattern.CASE_INSENSITIVE),
         Pattern.compile("^.*SCHEMA_VERSION.*$", Pattern.CASE_INSENSITIVE),
         Pattern.compile("^BEHANDLING#SIST_OPPDATERT_TIDSPUNKT.*$", Pattern.CASE_INSENSITIVE)
-        );
+    );
 
     public RapporterUnmappedKolonnerIDatabaseTest() {
     }
@@ -71,7 +72,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
 
         var em = entityManagerFactory.createEntityManager();
         try {
-            @SuppressWarnings({ "unchecked" })
+            @SuppressWarnings({"unchecked"})
             var result = (NavigableMap<String, Set<String>>) em
                 .createNativeQuery(
                     "select table_name, column_name\n" +
@@ -98,11 +99,11 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
     }
 
     private Set<String> whitelistColumns(String table, Set<String> columns) {
-       var cols = columns.stream()
-               .filter(c -> !WHITELIST.stream().anyMatch(p -> p.matcher(table + "#" + c).matches()))
-               .collect(Collectors.toSet());
+        var cols = columns.stream()
+            .filter(c -> !WHITELIST.stream().anyMatch(p -> p.matcher(table + "#" + c).matches()))
+            .collect(Collectors.toSet());
 
-       return cols;
+        return cols;
     }
 
     @Test
@@ -121,7 +122,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
             for (var table : namespace.getTables()) {
 
                 String tableName = table.getName().toUpperCase();
-                if(whitelistTable(tableName)) {
+                if (whitelistTable(tableName)) {
                     continue;
                 }
 
@@ -162,7 +163,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
     }
 
     public static class MetadataExtractorIntegrator
-            implements org.hibernate.integrator.spi.Integrator {
+        implements org.hibernate.integrator.spi.Integrator {
 
         public static final MetadataExtractorIntegrator INSTANCE = new MetadataExtractorIntegrator();
 
@@ -173,18 +174,12 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
         }
 
         @Override
-        public void integrate(
-                              Metadata metadata,
-                              SessionFactoryImplementor sessionFactory,
-                              SessionFactoryServiceRegistry serviceRegistry) {
-
+        public void integrate(Metadata metadata, BootstrapContext bootstrapContext, SessionFactoryImplementor sessionFactory) {
             database = metadata.getDatabase();
         }
 
         @Override
-        public void disintegrate(
-                                 SessionFactoryImplementor sessionFactory,
-                                 SessionFactoryServiceRegistry serviceRegistry) {
+        public void disintegrate(SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
         }
     }
 
