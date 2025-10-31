@@ -19,10 +19,12 @@ public class PartEntitet extends BaseEntitet {
     @Column(name = "identifikasjon", nullable = false)
     public String identifikasjon;
 
-    @Column(name = "identifikasjon_type", nullable = false)
+    @Column(name = "identifikasjon_type_kode", nullable = false)
+    @Enumerated(EnumType.STRING)
     public IdType identifikasjonType;
 
-    @Column(name = "rolle_type", nullable = false)
+    @Column(name = "rolle_type_kode", nullable = false)
+    @Enumerated(EnumType.STRING)
     public RolleType rolleType;
 
     public PartEntitet() {
