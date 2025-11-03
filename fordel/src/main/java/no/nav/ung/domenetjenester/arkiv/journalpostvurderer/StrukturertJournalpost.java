@@ -1,7 +1,7 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
@@ -20,7 +20,7 @@ import java.util.Set;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
-@ApplicationScoped
+@Dependent
 public class StrukturertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(StrukturertJournalpost.class);
@@ -65,7 +65,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Override
     public boolean skalVurdere(Vurderingsgrunnlag vurderingsgrunnlag) {
-        return vurderingsgrunnlag.journalpostInfo().harBrevkode();
+        return GODKJENTE_KODER.contains(vurderingsgrunnlag.journalpostInfo().getBrevkode());
     }
 
     private void mapBrevkodeInformasjon(MottattMelding dataWrapper, JournalpostInfo journalpostInfo) {

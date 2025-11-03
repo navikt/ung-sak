@@ -1,7 +1,9 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
 import no.nav.ung.domenetjenester.oppgave.gosys.OpprettOppgaveTask;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
@@ -13,7 +15,7 @@ import java.util.Set;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
-@ApplicationScoped
+@Dependent
 public class UhåndtertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(UhåndtertJournalpost.class);
@@ -23,6 +25,12 @@ public class UhåndtertJournalpost implements Journalpostvurderer {
             JournalføringHendelsetype.TEMA_ENDRET,
             JournalføringHendelsetype.ENDELING_JOURNALFØRT
     );
+    private final boolean enableHåndterAndreJournalposter;
+
+    @Inject
+    public UhåndtertJournalpost(@KonfigVerdi(value = "ENABLE_HANDTER_ANDRE_JOURNALPOSTER", defaultVerdi = "false") boolean enableHåndterAndreJournalposter) {
+        this.enableHåndterAndreJournalposter = enableHåndterAndreJournalposter;
+    }
 
     @Override
     public Set<JournalføringHendelsetype> relevanteHendelsetyper() {
@@ -46,6 +54,10 @@ public class UhåndtertJournalpost implements Journalpostvurderer {
     }
 
     private VurdertJournalpost vurderAnnetEnnEndeligJournalført(Vurderingsgrunnlag vurderingsgrunnlag) {
+        if (!enableHåndterAndreJournalposter) {
+            return ikkeHåndtert();
+        }
+
         var melding = vurderingsgrunnlag.melding();
         var journalpostInfo = vurderingsgrunnlag.journalpostInfo();
         if (!journalpostInfo.harBrevkode()) {
