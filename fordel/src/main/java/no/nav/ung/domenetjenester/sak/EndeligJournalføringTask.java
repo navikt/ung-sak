@@ -82,7 +82,7 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
                 if (!e.getMessage().contains("Kan ikke ferdigstille journalpost, følgende felt(er) mangler")) {
                     throw e;
                 }
-                throw new IllegalStateException("Kan ikke ferdigstille journalpost. Vurder om løsningen dette skal føre til oppgave i Gosys", e);
+                throw new IllegalStateException("Kan ikke ferdigstille journalpost. Vurder om  dette skal føre til oppgave i Gosys", e);
             }
         }
 
