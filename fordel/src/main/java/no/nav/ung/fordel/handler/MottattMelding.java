@@ -49,15 +49,8 @@ public class MottattMelding {
     public static final String DOKUMENT_TITTEL_KEY = "dokument.tittel";
     public static final String BREVKODE_KEY = "dokument.brevkode";
 
-    // Gosysoppgave
-    public static final String OPPGAVE_IGNORER_SJEKK = "oppgave.ignorer.sjekk";
     private static final String OPPGAVE_BESKRIVELSE = "oppgave.beskrivelse";
-    private static final String OPPGAVE_FAGSAKSYSTEM = "oppgave.fagsaksystem";
     private static final String OPPGAVE_TYPE = "oppgave.type";
-
-    // Gosysoppgave fremfor innsending.
-    private static final String JOURNALFORING_TILOPPGAVE = "journalforing.tilOppgave";
-    private static final String JOURNALFORING_OPPDATERT_BRUKER = "journalforing.oppdatertBruker";
 
     // Formidling
     private static final String DOKUMENT_MAL_TYPE = "formidling.dokumentmal.type";
@@ -329,15 +322,6 @@ public class MottattMelding {
         return null;
     }
 
-    public void setOppgaveIgnorerSjekk(boolean ignorer) {
-        prosessTaskData.setProperty(OPPGAVE_IGNORER_SJEKK, String.valueOf(ignorer));
-    }
-
-    public boolean isOppgaveIgnorerSjekk() {
-        var ignorer = prosessTaskData.getPropertyValue(OPPGAVE_IGNORER_SJEKK);
-        return ignorer != null && Boolean.parseBoolean(ignorer);
-    }
-
     public void setBehandlingTema(BehandlingTema behandlingTema) {
         Objects.requireNonNull(behandlingTema);
         prosessTaskData.setProperty(BEHANDLINGSTEMA_KEY, behandlingTema.getKode());
@@ -416,15 +400,6 @@ public class MottattMelding {
     }
 
 
-    public void setOppgaveFagsaksystem(GosysKonstanter.Fagsaksystem fagsystem) {
-        prosessTaskData.setProperty(OPPGAVE_FAGSAKSYSTEM, fagsystem.getKode());
-    }
-
-    public Optional<GosysKonstanter.Fagsaksystem> getOppgaveFagsaksystem() {
-        var propertyValue = prosessTaskData.getPropertyValue(OPPGAVE_FAGSAKSYSTEM);
-        return Optional.ofNullable(GosysKonstanter.Fagsaksystem.from(propertyValue));
-    }
-
     public void setOppgaveType(GosysKonstanter.OppgaveType oppgaveType) {
         prosessTaskData.setProperty(OPPGAVE_TYPE, oppgaveType.getKode());
     }
@@ -432,27 +407,6 @@ public class MottattMelding {
     public Optional<GosysKonstanter.OppgaveType> getOppgaveType() {
         var propertyValue = prosessTaskData.getPropertyValue(OPPGAVE_TYPE);
         return Optional.ofNullable(GosysKonstanter.OppgaveType.from(propertyValue));
-    }
-
-    public void setJournalforingTilOppgave(boolean journalforingTilOppgave) {
-        prosessTaskData.setProperty(JOURNALFORING_TILOPPGAVE, Boolean.toString(journalforingTilOppgave));
-    }
-
-    public boolean isJournalforingTilOppgave() {
-        var propertyValue = prosessTaskData.getPropertyValue(JOURNALFORING_TILOPPGAVE);
-        return Boolean.parseBoolean(propertyValue);
-    }
-
-    public void setJournalforingOppdatertBruker(boolean journalforingTilOppgave) {
-        prosessTaskData.setProperty(JOURNALFORING_OPPDATERT_BRUKER, Boolean.toString(journalforingTilOppgave));
-    }
-
-    public boolean isJournalforingOppdatertBruker() {
-        var propertyValue = prosessTaskData.getPropertyValue(JOURNALFORING_OPPDATERT_BRUKER);
-        if (propertyValue == null) {
-            return false;
-        }
-        return Boolean.parseBoolean(propertyValue);
     }
 
     public void setJournalføringHendelsetype(JournalføringHendelsetype journalføringHendelsetype) {

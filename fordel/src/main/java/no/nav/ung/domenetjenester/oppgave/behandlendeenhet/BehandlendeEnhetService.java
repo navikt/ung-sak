@@ -15,8 +15,8 @@ import java.util.List;
 @Dependent
 public class BehandlendeEnhetService {
 
-    private PersoninfoAdapter personinfoAdapter;
-    private no.nav.ung.sak.produksjonsstyring.behandlingenhet.EnhetsTjeneste enhetsTjeneste;
+    private final PersoninfoAdapter personinfoAdapter;
+    private final no.nav.ung.sak.produksjonsstyring.behandlingenhet.EnhetsTjeneste enhetsTjeneste;
 
     @Inject
     public BehandlendeEnhetService(PersoninfoAdapter personinfoAdapter, no.nav.ung.sak.produksjonsstyring.behandlingenhet.EnhetsTjeneste enhetsTjeneste) {
