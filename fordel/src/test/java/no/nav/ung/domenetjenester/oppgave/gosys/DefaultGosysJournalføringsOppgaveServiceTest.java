@@ -64,7 +64,7 @@ public class DefaultGosysJournalføringsOppgaveServiceTest {
             Oppgavestatus.AAPNET
         ));
 
-        String gosysOppgave = service.opprettOppgave(
+        String gosysOppgave = service.opprettEllerHentEksisterendeOppgave(
             tema,
             BehandlingTema.UNGDOMSPROGRAMYTELSEN,
             FordelBehandlingType.UDEFINERT,

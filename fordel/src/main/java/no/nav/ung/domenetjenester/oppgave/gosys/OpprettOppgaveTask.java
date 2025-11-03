@@ -84,7 +84,7 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
             final GosysKonstanter.Fagsaksystem fagsaksystem = null;
 
             // opprett gosys oppgave og få tildelt oppgaveid
-            var oppgaveId = gosysOppgaveService.opprettOppgave(
+            var gosysOppgaveId = gosysOppgaveService.opprettEllerHentEksisterendeOppgave(
                 tema,
                 behandlingTema,
                 behandlingType.orElse(null),
@@ -94,10 +94,10 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
                 fagsaksystem,
                 oppgaveType);
 
-            log.info("Opprettet oppgave={}", oppgaveId);
+            log.info("Opprettet oppgave={}", gosysOppgaveId);
 
             // oppdater sporede data med oppgaveId
-            oppgave.setOppgaveId(oppgaveId);
+            oppgave.setOppgaveId(gosysOppgaveId);
             lagreOppgaveEntitet(oppgave);
 
             return null;
