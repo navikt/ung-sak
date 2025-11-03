@@ -50,16 +50,7 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
     public MottattMelding doTask(MottattMelding data) {
 
         try {
-            /*
-             * Det å sette fagsystem sperrer muligheten for å løse saken i Gosys.
-             *
-             * Denne funksjonaliteten skal kun brukes for å kunne beholde en
-             * oppgave i Gosys av synlighetsgrunner ... mens den skal løses
-             * i k9-punsj.
-             *
-             * var fagsaksystem = data.getOppgaveFagsaksystem().orElse(GosysKonstanter.Fagsaksystem.INFOTRYGD);
-             */
-            final GosysKonstanter.Fagsaksystem fagsaksystem = null;
+
 
             var oppgaveType = data.getOppgaveType().orElse(GosysKonstanter.OppgaveType.JOURNALFØRING);
 
@@ -75,14 +66,22 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
             var behandlingTema = data.getBehandlingTema();
             var behandlingType = data.getBehandlingType();
 
-            log.info("Oppretter oppgave: fagsaksystem={}, oppgaveType={}, tema={}, behandingTema={}, behandlingType={}: {}",
-                fagsaksystem, oppgaveType, tema, behandlingTema, behandlingType, beskrivelse);
+            log.info("Oppretter oppgave: oppgaveType={}, tema={}, behandingTema={}, behandlingType={}: {}",
+                oppgaveType, tema, behandlingTema, behandlingType, beskrivelse);
 
             // marker mottatt journalpost som behandlet
             journalpostRepository.markerJournalposterBehandlet(journalpostId);
 
             // spor oppgave data
-            var oppgave = lagreOppgaveEntitet(data, fagsaksystem, oppgaveType, journalpostId, beskrivelse);
+            var oppgave = lagreOppgaveEntitet(data, oppgaveType, journalpostId, beskrivelse);
+
+
+            /*
+             * Det å sette fagsystem sperrer muligheten for å løse saken i Gosys.
+             * Oppgavene her er bare de som manuelt må behandles i Gosys da vi ikke har punsj.
+             *
+             */
+            final GosysKonstanter.Fagsaksystem fagsaksystem = null;
 
             // opprett gosys oppgave og få tildelt oppgaveid
             var oppgaveId = gosysOppgaveService.opprettOppgave(
@@ -108,7 +107,7 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
         }
     }
 
-    private ProduksjonsstyringOppgaveEntitet lagreOppgaveEntitet(MottattMelding data, GosysKonstanter.Fagsaksystem fagsaksystem, GosysKonstanter.OppgaveType oppgaveType,
+    private ProduksjonsstyringOppgaveEntitet lagreOppgaveEntitet(MottattMelding data, GosysKonstanter.OppgaveType oppgaveType,
                                                                  JournalpostId journalpostId, String beskrivelse) {
         // sporer opprette oppgave
         var ytelseType = data.getYtelseType().orElse(null);
@@ -116,7 +115,6 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
             .withAktørId(data.getAktørId().orElse(null))
             .withJournalpostId(journalpostId.getVerdi())
             .withBeskrivelse(beskrivelse)
-            .withFagsaksystem(fagsaksystem)
             .withOppgaveType(oppgaveType)
             .withYtelseType(ytelseType)
             .withBehandlingTema(data.getBehandlingTema())

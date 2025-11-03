@@ -32,7 +32,7 @@ public class DefaultGosysJournalføringsOppgaveServiceTest {
 
     private static GosysOppgaveService service;
 
-    private OmrådeTema tema = OmrådeTema.OMS;
+    private OmrådeTema tema = OmrådeTema.UNG;
 
     @BeforeEach
     public void initialisering() {
@@ -66,7 +66,7 @@ public class DefaultGosysJournalføringsOppgaveServiceTest {
 
         String gosysOppgave = service.opprettOppgave(
             tema,
-            BehandlingTema.PLEIEPENGER_LIVETS_SLUTTFASE,
+            BehandlingTema.UNGDOMSPROGRAMYTELSEN,
             FordelBehandlingType.UDEFINERT,
             new AktørId("111"),
             new JournalpostId("666"),

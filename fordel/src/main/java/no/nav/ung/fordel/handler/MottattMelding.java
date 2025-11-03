@@ -59,9 +59,6 @@ public class MottattMelding {
     private static final String JOURNALFORING_TILOPPGAVE = "journalforing.tilOppgave";
     private static final String JOURNALFORING_OPPDATERT_BRUKER = "journalforing.oppdatertBruker";
 
-
-    // Punsj
-
     // Formidling
     private static final String DOKUMENT_MAL_TYPE = "formidling.dokumentmal.type";
     private static final String NESTE_TASK_ETTER_DOKUMENTBESTILLER = "formidling.task.etter.dokumentbestiller";

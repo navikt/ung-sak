@@ -1,15 +1,6 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
-
-import java.util.Optional;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -20,6 +11,14 @@ import no.nav.ung.domenetjenester.arkiv.VurderStrukturertDokumentTask;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.kodeverdi.BrevkodeInformasjonUtleder;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+import java.util.Set;
+
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
 @ApplicationScoped
 public class StrukturertJournalpost implements Journalpostvurderer {
@@ -66,7 +65,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Override
     public boolean skalVurdere(Vurderingsgrunnlag vurderingsgrunnlag) {
-        return GODKJENTE_KODER.contains(vurderingsgrunnlag.journalpostInfo().getBrevkode());
+        return vurderingsgrunnlag.journalpostInfo().harBrevkode();
     }
 
     private void mapBrevkodeInformasjon(MottattMelding dataWrapper, JournalpostInfo journalpostInfo) {

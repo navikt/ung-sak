@@ -1,23 +1,17 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.StrukturertJournalpost.GODKJENTE_KODER;
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.k9.felles.integrasjon.saf.Journalstatus;
 import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
-import no.nav.ung.kodeverk.dokument.Brevkode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
+
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 
 @ApplicationScoped
 public class IgnorertJournalpost implements Journalpostvurderer {
@@ -47,12 +41,8 @@ public class IgnorertJournalpost implements Journalpostvurderer {
             return håndtert();
         }
 
-        if (ignorer(vurderingsgrunnlag)) {
-            // Feiler her i stedet for å ignorere, slik at vi kan se hvilke brevkoder som ikke er håndtert.
-            throw new IllegalArgumentException("Fikk brevkode som ikke kunne håndteres: " + journalpostInfo.getBrevkode());
-        }
-
-        return ikkeHåndtert();
+        // Feiler her i stedet for å ignorere, slik at vi kan se hvilke brevkoder som ikke er håndtert.
+        throw new IllegalArgumentException("Fikk brevkode som ikke kunne håndteres: " + journalpostInfo.getBrevkode());
     }
 
     private boolean hendelseErMottattMenStatusErJournalført(Optional<JournalføringHendelsetype> hendelsetype, Journalstatus journalstatus) {
@@ -61,8 +51,4 @@ public class IgnorertJournalpost implements Journalpostvurderer {
         return hendelsetypeErMottatt && erJournalførtEllerFerdigstilt;
     }
 
-    private boolean ignorer(Vurderingsgrunnlag vurderingsgrunnlag) {
-        var brevkode = vurderingsgrunnlag.journalpostInfo().getBrevkode();
-        return brevkode == null || !GODKJENTE_KODER.contains(brevkode);
-    }
 }

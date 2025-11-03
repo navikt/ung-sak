@@ -30,15 +30,17 @@ public final class BrevkodeInformasjonUtleder {
         return Optional.ofNullable(brevkodeInformasjon.get(brevkode));
     }
 
-    /** titler for papirdokumenter.  Digitale søknader får tittel ved innsending. */
+    /**
+     * titler for papirdokumenter.  Digitale søknader får tittel ved innsending.
+     */
     private static Map<String, BrevkodeInformasjon> createTitler() {
         final List<BrevkodeInformasjon> brevkodeliste = new ArrayList<>();
         // Fra Brukerdialog:
 
-        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(), null, "Søknad om ungdomsytelse - UNG Søknad", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
-        brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, "Endringssøknad for ungdomsytelsen - UNG Endringssøknad", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
-        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(), null, "Inntektsrapportering for ungdomsytelsen", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
-        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(), null, "Bekreftelse av periodeendring for ungdomsprogrammet", FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD, false));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
 
         final Map<String, BrevkodeInformasjon> titler = new HashMap<>();
         brevkodeliste.forEach(bi -> {
@@ -55,25 +57,23 @@ public final class BrevkodeInformasjonUtleder {
         private final FagsakYtelseType ytelseType;
         private final BehandlingTema behandlingTema;
         private final FordelBehandlingType fordelBehandlingTypeHvisStrukturert;
-        private final boolean ettersendelse;
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel) {
-            this(brevkode, alternativBrevkode, tittel, null, null, null, false);
+            this(brevkode, alternativBrevkode, tittel, null, null, null);
         }
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel, boolean ettersendelse) {
-            this(brevkode, alternativBrevkode, tittel, null, null, null, ettersendelse);
+            this(brevkode, alternativBrevkode, tittel, null, null, null);
         }
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel, FagsakYtelseType ytelseType,
-                                   BehandlingTema behandlingTema, FordelBehandlingType fordelBehandlingTypeHvisStrukturert, boolean ettersendelse) {
+                                   BehandlingTema behandlingTema, FordelBehandlingType fordelBehandlingTypeHvisStrukturert) {
             this.brevkode = brevkode;
             this.alternativBrevkode = alternativBrevkode;
             this.tittel = tittel;
             this.ytelseType = ytelseType;
             this.behandlingTema = behandlingTema;
             this.fordelBehandlingTypeHvisStrukturert = fordelBehandlingTypeHvisStrukturert;
-            this.ettersendelse = ettersendelse;
         }
 
         public String getBrevkode() {
@@ -100,8 +100,5 @@ public final class BrevkodeInformasjonUtleder {
             return Optional.ofNullable(fordelBehandlingTypeHvisStrukturert);
         }
 
-        public boolean isEttersendelse() {
-            return ettersendelse;
-        }
     }
 }
