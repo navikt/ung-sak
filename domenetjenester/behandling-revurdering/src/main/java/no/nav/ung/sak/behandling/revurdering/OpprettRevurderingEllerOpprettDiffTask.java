@@ -41,7 +41,6 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
     public static final String TASKNAME = "behandlingskontroll.opprettRevurderingEllerDiff";
     public static final String BEHANDLING_ÅRSAK = "behandlingArsak";
-    public static final String ÅRSAK_OG_PERIODER = "aarsakOgPerioder";
     public static final String PERIODER = "perioder";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);

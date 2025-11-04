@@ -91,7 +91,7 @@ class HendelsemottakTjenesteTest {
 
         assertThat(åpneTasker.size()).isEqualTo(1);
         var task = åpneTasker.get(0);
-        var årsakOgPerioder = JsonObjectMapper.fromJson(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.ÅRSAK_OG_PERIODER), ÅrsakerOgPerioder.class);
+        var årsakOgPerioder = JsonObjectMapper.fromJson(task.getPayloadAsString(), ÅrsakerOgPerioder.class);
         ÅrsakOgPerioder årsakOgPeriode = årsakOgPerioder.aarsakOgPerioder().getFirst();
         DatoIntervallEntitet periode = årsakOgPeriode.perioder().iterator().next();
         assertThat(periode.getTomDato()).isEqualTo(FAGSAK_TOM);

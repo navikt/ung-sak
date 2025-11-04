@@ -67,7 +67,6 @@ public class HendelsemottakTjeneste {
             log.info("Oppretter revurdering for fagsak {} med behandlingÅrsaker og perioder {}", fagsak.getSaksnummer().getVerdi(), årsakerOgPerioderList);
             String årsakOgPerioderString = mapTilJsonString(entry.getValue());
             ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.ÅRSAK_OG_PERIODER, årsakOgPerioderString);
             tilRevurderingTaskData.setPayload(årsakOgPerioderString);
             var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
             if (sisteBehandling.isPresent()) {
