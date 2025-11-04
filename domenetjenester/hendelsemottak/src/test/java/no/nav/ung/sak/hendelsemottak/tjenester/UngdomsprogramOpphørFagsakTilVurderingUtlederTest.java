@@ -168,7 +168,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     private static void validerHarÅrsak(Map<Fagsak, List<ÅrsakOgPerioder>> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {
         assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
         assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().getFirst().behandlingÅrsak()).isEqualTo(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().getFirst().perioder()).isEqualTo(forventetPeriode);
+        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().getFirst().perioder().iterator().next()).isEqualTo(forventetPeriode);
 
     }
 
