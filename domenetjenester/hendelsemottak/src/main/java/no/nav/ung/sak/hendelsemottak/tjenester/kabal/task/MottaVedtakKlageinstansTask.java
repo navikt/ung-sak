@@ -92,7 +92,7 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
             var klagevurderingNK = klageUtredning.hentKlagevurdering(KlageVurdertAv.KLAGEINSTANS);
             if (klagevurderingNK.isPresent()) {
                 throw new IllegalStateException("Forsokte oppdatere klageresultat fra kabal men klageresultatet var allerede satt till: "
-                    + klageUtredning.getKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).map(KlageVurderingType::getNavn).get());
+                    + klageUtredning.hentKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).map(KlageVurderingType::getNavn).get());
             }
 
             log.info("Tar behandling som er overført til NK av vent");
