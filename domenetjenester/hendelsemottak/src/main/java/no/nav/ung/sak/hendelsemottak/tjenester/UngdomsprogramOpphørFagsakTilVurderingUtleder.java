@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -32,6 +33,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
+    private boolean kontrollSisteMndEnabled;
 
     public UngdomsprogramOpphørFagsakTilVurderingUtleder() {
         // For CDI
@@ -39,12 +41,15 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
     @Inject
     public UngdomsprogramOpphørFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
-                                                         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
-                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
+                                                         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
+                                                         KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
+                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
+                                                         @KonfigVerdi(value = "KONTROLL_SISTE_MND_ENABLED", defaultVerdi = "false") boolean kontrollSisteMndEnabled) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
+        this.kontrollSisteMndEnabled = kontrollSisteMndEnabled;
     }
 
     @Override
@@ -77,15 +82,17 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
                 var opphørsÅrsak = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse));
                 årsaker.add(opphørsÅrsak);
 
-                LocalDate sisteDagIOpphørsmåned = opphørsdatoFraHendelse.with(TemporalAdjusters.lastDayOfMonth());
-                // Sjekker om det er gjort inntektskontroll for resten av måneden etter opphørsdato
-                // Dersom det er gjort kontroll og kontrollperioden inkluderer resten av måneden, må vi gjøre ny kontroll med ny periode
-                if (opphørsdatoFraHendelse.isBefore(sisteDagIOpphørsmåned)) {
-                    LocalDateTimeline<BigDecimal> kontrollertePerioder = kontrollerteInntektperioderTjeneste.hentTidslinje(sisteBehandling.getId());
-                    LocalDateInterval restenAvMåneden = new LocalDateInterval(opphørsdatoFraHendelse.plusDays(1), sisteDagIOpphørsmåned);
-                    if(harGjortKontrollIRestenAvMåneden(kontrollertePerioder, restenAvMåneden)) {
-                        LocalDate førsteDagIMåneden = opphørsdatoFraHendelse.withDayOfMonth(1);
-                        årsaker.add(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,  Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(førsteDagIMåneden, opphørsdatoFraHendelse))));
+                if (kontrollSisteMndEnabled) {
+                    LocalDate sisteDagIOpphørsmåned = opphørsdatoFraHendelse.with(TemporalAdjusters.lastDayOfMonth());
+                    // Sjekker om det er gjort inntektskontroll for resten av måneden etter opphørsdato
+                    // Dersom det er gjort kontroll og kontrollperioden inkluderer resten av måneden, må vi gjøre ny kontroll med ny periode
+                    if (opphørsdatoFraHendelse.isBefore(sisteDagIOpphørsmåned)) {
+                        LocalDateTimeline<BigDecimal> kontrollertePerioder = kontrollerteInntektperioderTjeneste.hentTidslinje(sisteBehandling.getId());
+                        LocalDateInterval restenAvMåneden = new LocalDateInterval(opphørsdatoFraHendelse.plusDays(1), sisteDagIOpphørsmåned);
+                        if (harGjortKontrollIRestenAvMåneden(kontrollertePerioder, restenAvMåneden)) {
+                            LocalDate førsteDagIMåneden = opphørsdatoFraHendelse.withDayOfMonth(1);
+                            årsaker.add(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(førsteDagIMåneden, opphørsdatoFraHendelse))));
+                        }
                     }
                 }
 
@@ -130,7 +137,6 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
         return gammelTomDato.isBefore(nyTomdato) ? DatoIntervallEntitet.fraOgMedTilOgMed(gammelTomDato.plusDays(1), nyTomdato) : DatoIntervallEntitet.fraOgMedTilOgMed(nyTomdato.plusDays(1), gammelTomDato);
     }
-
 
 
     /**

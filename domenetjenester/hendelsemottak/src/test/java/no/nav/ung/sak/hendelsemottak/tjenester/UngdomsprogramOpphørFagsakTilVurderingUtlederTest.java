@@ -62,7 +62,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
             new BehandlingRepository(entityManager),
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
             kontrollerteInntektperioderTjeneste,
-            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
+            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository),
+            false);
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
     }
