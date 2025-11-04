@@ -21,8 +21,12 @@ import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.math.BigDecimal;
+import java.time.Period;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @ApplicationScoped
@@ -109,13 +113,35 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     }
 
     private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<BigDecimal> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {
-        final var rapporterteInntekterSomIkkeMatcherYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeMatchendeYtelseMåned(s, månedstidslinjeForYtelse)).toList();
-        if (!rapporterteInntekterSomIkkeMatcherYtelsesperiode.isEmpty()) {
-            throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av månedstidslinjen: " + rapporterteInntekterSomIkkeMatcherYtelsesperiode.stream().map(LocalDateSegment::getLocalDateInterval).toList());
+
+        var rapporterteMåneder= lagMånedsTidslinje(rapportertInntektTidslinje);
+
+        Set<YearMonth> rapporterteMåneder1 = rapporterteMåneder.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
+        Set<YearMonth> ytelseMåneder = månedstidslinjeForYtelse.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
+
+        var rapporterteInntekterSomIkkeMatcherYtelsesperiode2 = ytelseMåneder.stream().filter(it -> !rapporterteMåneder1.contains(it))
+            .collect(Collectors.toSet());
+
+        final var rapporterteInntekterSomIkkeMatcherYtelsesperiode = rapporterteMåneder.stream()
+            .filter(s -> harIkkeMatchendeYtelseMåned(s, månedstidslinjeForYtelse))
+            .toList();
+
+        if (!rapporterteInntekterSomIkkeMatcherYtelsesperiode2.isEmpty()) {
+            throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av månedstidslinjen: " + rapporterteInntekterSomIkkeMatcherYtelsesperiode2);
         }
     }
 
-    private static boolean harIkkeMatchendeYtelseMåned(LocalDateSegment<?> s, LocalDateTimeline<YearMonth> månedstidslinje) {
+    private static LocalDateTimeline<YearMonth> lagMånedsTidslinje(LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
+        if (rapportertInntektTidslinje.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
+        return new LocalDateTimeline<>(rapportertInntektTidslinje.getMinLocalDate(), rapportertInntektTidslinje.getMaxLocalDate(), true)
+            .splitAtRegular(rapportertInntektTidslinje.getMinLocalDate(), rapportertInntektTidslinje.getMaxLocalDate(), Period.ofMonths(1))
+            .map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonthValue()))));
+    }
+
+    private static boolean harIkkeMatchendeYtelseMåned(LocalDateSegment<YearMonth> s, LocalDateTimeline<YearMonth> månedstidslinje) {
         return månedstidslinje.getLocalDateIntervals().stream().noneMatch(intervall -> intervall.equals(s.getLocalDateInterval()));
     }
 
