@@ -9,8 +9,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +50,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     @Inject
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     @Inject
+    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
+    @Inject
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private TestScenarioBuilder scenarioBuilder;
 
@@ -54,7 +59,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     void setUp() {
         var fagsakRepository = new FagsakRepository(entityManager);
         this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
-            new BehandlingRepository(entityManager), new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)), new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
+            new BehandlingRepository(entityManager),
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
+            kontrollerteInntektperioderTjeneste,
+            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository));
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
     }
@@ -157,10 +165,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
     }
 
-    private static void validerHarÅrsak(Map<Fagsak, ÅrsakOgPeriode> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {
+    private static void validerHarÅrsak(Map<Fagsak, List<ÅrsakOgPerioder>> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {
         assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
-        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().behandlingÅrsak()).isEqualTo(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().periode()).isEqualTo(forventetPeriode);
+        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().getFirst().behandlingÅrsak()).isEqualTo(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().getFirst().perioder()).isEqualTo(forventetPeriode);
 
     }
 

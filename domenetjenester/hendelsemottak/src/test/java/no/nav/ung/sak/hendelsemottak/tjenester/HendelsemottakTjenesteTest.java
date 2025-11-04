@@ -6,14 +6,16 @@ import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakerOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse;
 import no.nav.ung.sak.typer.AktørId;
@@ -24,7 +26,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -76,7 +80,8 @@ class HendelsemottakTjenesteTest {
     @Test
     void skal_opprette_revurdering_task_for_hendelse_som_er_relevant() {
         var opphørsdato = LocalDate.now().plusDays(10);
-        when(fagsakerTilVurderingUtleder.finnFagsakerTilVurdering(any())).thenReturn(Map.of(fagsak, new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(opphørsdato, fagsak.getPeriode().getTomDato()))));
+        List<ÅrsakOgPerioder> årsakerOgPerioder = List.of(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(opphørsdato, fagsak.getPeriode().getTomDato()))));
+        when(fagsakerTilVurderingUtleder.finnFagsakerTilVurdering(any())).thenReturn(Map.of(fagsak, årsakerOgPerioder));
         var opphørHendelse = new UngdomsprogramOpphørHendelse(new HendelseInfo.Builder().medHendelseId("hendelse1").medOpprettet(LocalDateTime.now()).leggTilAktør(AKTØR_ID).build(),
             opphørsdato);
 
@@ -86,9 +91,12 @@ class HendelsemottakTjenesteTest {
 
         assertThat(åpneTasker.size()).isEqualTo(1);
         var task = åpneTasker.get(0);
-        assertThat(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM)).isEqualTo(opphørsdato.toString());
-        assertThat(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM)).isEqualTo(FAGSAK_TOM.toString());
-        assertThat(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK)).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM.getKode());
+        var årsakOgPerioder = JsonObjectMapper.fromJson(task.getPropertyValue(OpprettRevurderingEllerOpprettDiffTask.ÅRSAK_OG_PERIODER), ÅrsakerOgPerioder.class);
+        ÅrsakOgPerioder årsakOgPeriode = årsakOgPerioder.aarsakOgPerioder().getFirst();
+        DatoIntervallEntitet periode = årsakOgPeriode.perioder().iterator().next();
+        assertThat(periode.getTomDato()).isEqualTo(FAGSAK_TOM);
+        assertThat(periode.getFomDato()).isEqualTo(opphørsdato);
+        assertThat(årsakOgPeriode.behandlingÅrsak()).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
     }
 
 }

@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,16 +39,19 @@ public class KontrollerInntektSteg implements BehandlingSteg {
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private BehandlingRepository behandlingRepository;
     private KontrollerInntektInputMapper inputMapper;
+    private RelevanteKontrollperioderUtleder kontrollPerioderUtleder;
     private int akseptertDifferanse;
 
     @Inject
     public KontrollerInntektSteg(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
                                  BehandlingRepository behandlingRepository,
                                  KontrollerInntektInputMapper inputMapper,
+                                 RelevanteKontrollperioderUtleder kontrollPerioderUtleder,
                                  @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.inputMapper = inputMapper;
+        this.kontrollPerioderUtleder = kontrollPerioderUtleder;
         this.akseptertDifferanse = akseptertDifferanse;
     }
 
@@ -121,8 +125,8 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         }
     }
 
-    private static boolean erKontrollbehandling(Behandling behandling) {
-        return behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+    private boolean erKontrollbehandling(Behandling behandling) {
+        return !kontrollPerioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId()).isEmpty();
     }
 
 }
