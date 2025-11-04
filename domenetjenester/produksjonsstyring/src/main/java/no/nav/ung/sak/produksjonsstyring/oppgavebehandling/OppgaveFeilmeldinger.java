@@ -1,12 +1,13 @@
 package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 
 public interface OppgaveFeilmeldinger extends DeklarerteFeil { // NOSONAR
     OppgaveFeilmeldinger FACTORY = FeilFactory.create(OppgaveFeilmeldinger.class);
@@ -19,4 +20,7 @@ public interface OppgaveFeilmeldinger extends DeklarerteFeil { // NOSONAR
 
     @TekniskFeil(feilkode = "K9-395340", feilmelding = "Feil ved henting av oppgaver for ytelseType=%s, oppgavetype=%s", logLevel = LogLevel.WARN)
     Feil feilVedHentingAvOppgaver(FagsakYtelseType ytelseType, OppgaveÅrsak oppgavetype, Exception e);
+
+    @TekniskFeil(feilkode = "K9-395341", feilmelding = "Feil ved henting av oppgaver for tema=%s, oppgavetype=%s", logLevel = LogLevel.WARN)
+    Feil feilVedHentingAvOppgaver(OmrådeTema tema, String oppgaveType, Exception e);
 }

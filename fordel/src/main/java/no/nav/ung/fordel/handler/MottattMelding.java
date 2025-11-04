@@ -3,6 +3,7 @@ package no.nav.ung.fordel.handler;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
+import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
@@ -47,6 +48,9 @@ public class MottattMelding {
 
     public static final String DOKUMENT_TITTEL_KEY = "dokument.tittel";
     public static final String BREVKODE_KEY = "dokument.brevkode";
+
+    private static final String OPPGAVE_BESKRIVELSE = "oppgave.beskrivelse";
+    private static final String OPPGAVE_TYPE = "oppgave.type";
 
     // Formidling
     private static final String DOKUMENT_MAL_TYPE = "formidling.dokumentmal.type";
@@ -379,12 +383,30 @@ public class MottattMelding {
         prosessTaskData.setProperty(YTELSE_TYPE, ytelseType.getKode());
     }
 
+    public Optional<String> getBeskrivelse() {
+        return Optional.ofNullable(prosessTaskData.getPropertyValue(OPPGAVE_BESKRIVELSE));
+    }
+
+    public void setBeskrivelse(String beskrivelse) {
+        prosessTaskData.setProperty(OPPGAVE_BESKRIVELSE, beskrivelse);
+    }
+
     public void setBrevkode(String brevkode) {
         prosessTaskData.setProperty(BREVKODE_KEY, brevkode);
     }
 
     public String getBrevkode() {
         return prosessTaskData.getPropertyValue(BREVKODE_KEY);
+    }
+
+
+    public void setOppgaveType(GosysKonstanter.OppgaveType oppgaveType) {
+        prosessTaskData.setProperty(OPPGAVE_TYPE, oppgaveType.getKode());
+    }
+
+    public Optional<GosysKonstanter.OppgaveType> getOppgaveType() {
+        var propertyValue = prosessTaskData.getPropertyValue(OPPGAVE_TYPE);
+        return Optional.ofNullable(GosysKonstanter.OppgaveType.from(propertyValue));
     }
 
     public void setJournalføringHendelsetype(JournalføringHendelsetype journalføringHendelsetype) {
