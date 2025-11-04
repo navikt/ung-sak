@@ -45,7 +45,7 @@ class MånedsvisTidslinjeUtlederTest {
     @BeforeEach
     void setUp() {
 
-        månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository, false);
+        månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
     }
 
     @Test

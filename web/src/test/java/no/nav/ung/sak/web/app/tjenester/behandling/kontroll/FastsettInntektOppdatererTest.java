@@ -90,7 +90,7 @@ class FastsettInntektOppdatererTest {
         var ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
         final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository),
-            behandlingRepository, false);
+            behandlingRepository);
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosesstriggerRepo,
             new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository), behandlingRepository));
         RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(prosessTriggerPeriodeUtleder, månedsvisTidslinjeUtleder, false);
