@@ -83,16 +83,14 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
                 årsaker.add(opphørsÅrsak);
 
                 if (kontrollSisteMndEnabled) {
+                    // Sjekker om det er gjort inntektskontroll for opphørsmåneden
+                    // Dersom det er gjort kontroll må vi gjøre ny kontroll med ny periode
+                    LocalDateTimeline<BigDecimal> kontrollertePerioder = kontrollerteInntektperioderTjeneste.hentTidslinje(sisteBehandling.getId());
                     LocalDate sisteDagIOpphørsmåned = opphørsdatoFraHendelse.with(TemporalAdjusters.lastDayOfMonth());
-                    // Sjekker om det er gjort inntektskontroll for resten av måneden etter opphørsdato
-                    // Dersom det er gjort kontroll og kontrollperioden inkluderer resten av måneden, må vi gjøre ny kontroll med ny periode
-                    if (opphørsdatoFraHendelse.isBefore(sisteDagIOpphørsmåned)) {
-                        LocalDateTimeline<BigDecimal> kontrollertePerioder = kontrollerteInntektperioderTjeneste.hentTidslinje(sisteBehandling.getId());
-                        LocalDateInterval restenAvMåneden = new LocalDateInterval(opphørsdatoFraHendelse.plusDays(1), sisteDagIOpphørsmåned);
-                        if (harGjortKontrollIRestenAvMåneden(kontrollertePerioder, restenAvMåneden)) {
-                            LocalDate førsteDagIMåneden = opphørsdatoFraHendelse.withDayOfMonth(1);
-                            årsaker.add(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(førsteDagIMåneden, opphørsdatoFraHendelse))));
-                        }
+                    LocalDate førsteDagIOpphørsmåneden = opphørsdatoFraHendelse.withDayOfMonth(1);
+                    LocalDateInterval heleOpphørsmåneden = new LocalDateInterval(førsteDagIOpphørsmåneden, sisteDagIOpphørsmåned);
+                    if (harGjortKontrollIRestenAvMåneden(kontrollertePerioder, heleOpphørsmåneden)) {
+                        årsaker.add(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(førsteDagIOpphørsmåneden, opphørsdatoFraHendelse))));
                     }
                 }
 
