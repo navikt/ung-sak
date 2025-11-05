@@ -7,6 +7,7 @@ import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
@@ -85,7 +86,7 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
         FødselHendelse hendelse = lagFødselshendelse(behandling, barnIdent, fødselsdato);
 
         // Act
-        Map<Fagsak, ÅrsakOgPeriode> fagsakÅrsakOgPeriodeMap = utleder.finnFagsakerTilVurdering(hendelse);
+        Map<Fagsak, List<ÅrsakOgPerioder>> fagsakÅrsakOgPeriodeMap = utleder.finnFagsakerTilVurdering(hendelse);
 
         // Assert
         assertEquals(1, fagsakÅrsakOgPeriodeMap.size());
@@ -104,7 +105,7 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
         FødselHendelse hendelse = lagFødselshendelse(behandling, barnIdent, barnFødselsdato);
 
         // Act
-        Map<Fagsak, ÅrsakOgPeriode> fagsakÅrsakOgPeriodeMap = utleder.finnFagsakerTilVurdering(hendelse);
+        var fagsakÅrsakOgPeriodeMap = utleder.finnFagsakerTilVurdering(hendelse);
 
         // Assert
         assertEquals(0, fagsakÅrsakOgPeriodeMap.size());
