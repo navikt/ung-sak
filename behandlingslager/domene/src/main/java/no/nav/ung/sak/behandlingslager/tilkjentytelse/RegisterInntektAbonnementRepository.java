@@ -31,7 +31,7 @@ public class RegisterInntektAbonnementRepository {
 
     public Optional<RegisterInntektAbonnement> hentAbonnementForAktør(AktørId aktørId) {
         var query = entityManager.createQuery(
-            "SELECT r FROM RegisterEndringAbonnement r WHERE r.aktørId = :aktørId",
+            "SELECT r FROM RegisterInntektAbonnement r WHERE r.aktørId = :aktørId",
             RegisterInntektAbonnement.class
         );
         query.setParameter("aktørId", aktørId);
