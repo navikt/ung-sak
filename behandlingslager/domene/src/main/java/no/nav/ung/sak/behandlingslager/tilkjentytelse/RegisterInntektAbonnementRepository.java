@@ -8,35 +8,39 @@ import no.nav.ung.sak.typer.AktørId;
 import java.util.Optional;
 
 @Dependent
-public class RegisterEndringAbonnementRepository {
+public class RegisterInntektAbonnementRepository {
 
     private EntityManager entityManager;
 
-    public RegisterEndringAbonnementRepository() {
+    public RegisterInntektAbonnementRepository() {
     }
 
     @Inject
-    public RegisterEndringAbonnementRepository(EntityManager entityManager) {
+    public RegisterInntektAbonnementRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    public void lagre(RegisterEndringAbonnement abonnement) {
+    public void lagre(RegisterInntektAbonnement abonnement) {
         entityManager.persist(abonnement);
         entityManager.flush();
     }
 
-    public Optional<RegisterEndringAbonnement> hentAbonnementForAktør(AktørId aktørId) {
+    public Optional<RegisterInntektAbonnement> hentAbonnement(String abonnementId) {
+        return Optional.ofNullable(entityManager.find(RegisterInntektAbonnement.class, abonnementId));
+    }
+
+    public Optional<RegisterInntektAbonnement> hentAbonnementForAktør(AktørId aktørId) {
         var query = entityManager.createQuery(
             "SELECT r FROM RegisterEndringAbonnement r WHERE r.aktørId = :aktørId",
-            RegisterEndringAbonnement.class
+            RegisterInntektAbonnement.class
         );
         query.setParameter("aktørId", aktørId);
         return query.getResultStream().findFirst();
     }
 
-    public void slett(String abonnementId) {
-        hentAbonnement(abonnementId).ifPresent(entityManager::remove);
-        entityManager.flush();
+    public void slettAbonnement(RegisterInntektAbonnement abonnement) {
+        entityManager.remove(abonnement);
     }
+
 }
 

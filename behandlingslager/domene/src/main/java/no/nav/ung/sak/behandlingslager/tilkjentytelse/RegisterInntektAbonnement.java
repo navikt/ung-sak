@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.typer.AktørId;
 
-@Entity(name = "RegisterEndringAbonnement")
-@Table(name = "REGISTER_ENDRING_ABONNEMENT")
-public class RegisterEndringAbonnement extends BaseEntitet {
+@Entity(name = "RegisterInntektAbonnement")
+@Table(name = "REGISTER_INNTEKT_ABONNEMENT")
+public class RegisterInntektAbonnement extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_REGISTER_ENDRING_ABONNEMENT")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_REGISTER_INNTEKT_ABONNEMENT")
     private Long id;
 
     @Column(name = "abonnement_id", nullable = false, unique = true)
@@ -19,10 +19,10 @@ public class RegisterEndringAbonnement extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", nullable = false)))
     private AktørId aktørId;
 
-    public RegisterEndringAbonnement() {
+    public RegisterInntektAbonnement() {
     }
 
-    public RegisterEndringAbonnement(String abonnementId, AktørId aktørId) {
+    public RegisterInntektAbonnement(String abonnementId, AktørId aktørId) {
         this.abonnementId = abonnementId;
         this.aktørId = aktørId;
     }
