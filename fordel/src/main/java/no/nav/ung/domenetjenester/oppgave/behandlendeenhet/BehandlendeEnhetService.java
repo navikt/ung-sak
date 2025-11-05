@@ -64,7 +64,7 @@ public class BehandlendeEnhetService {
     private GeografiskTilknytning hentGeografiskTilknytning(AktørId aktørId) {
         var ident = personinfoAdapter.hentIdentForAktørId(aktørId);
         return ident
-            .map(fnr -> personinfoAdapter.hentGeografiskTilknytning(fnr))
+            .map(personinfoAdapter::hentGeografiskTilknytning)
             .orElse(null);
     }
 
