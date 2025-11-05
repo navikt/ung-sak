@@ -10,6 +10,7 @@ import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import no.nav.ung.fordel.repo.MeldingRepository;
 import no.nav.ung.fordel.repo.ProduksjonsstyringOppgaveEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.slf4j.Logger;
@@ -110,7 +111,9 @@ public class OpprettOppgaveTask extends WrappedProsessTaskHandler {
     private ProduksjonsstyringOppgaveEntitet lagreOppgaveEntitet(MottattMelding data, GosysKonstanter.OppgaveType oppgaveType,
                                                                  JournalpostId journalpostId, String beskrivelse) {
         // sporer opprette oppgave
-        var ytelseType = data.getYtelseType().orElse(null);
+        // ytelsetype bør være satt på MottattMelding tidligere hvis det finnes BehandlingsTema.
+        // Hvis OmrådeTema UNG alltid gjelder FagsakYtelseType=UNG så bør MottattMelding.ytelseType settes til UNG.
+        var ytelseType = data.getYtelseType().orElse(FagsakYtelseType.UDEFINERT);
         var oppgaveEntitet = new ProduksjonsstyringOppgaveEntitet.Builder()
             .withAktørId(data.getAktørId().orElse(null))
             .withJournalpostId(journalpostId.getVerdi())
