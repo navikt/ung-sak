@@ -3126,7 +3126,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer" ],
+        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer", "opprettetTidspunkt" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.historikk.HistorikkinnslagDto.HistorikkAktørDto" : {
