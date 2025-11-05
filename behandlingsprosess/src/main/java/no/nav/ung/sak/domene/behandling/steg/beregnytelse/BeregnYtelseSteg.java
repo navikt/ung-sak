@@ -119,14 +119,14 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         Set<YearMonth> rapporterteMåneder1 = rapporterteMåneder.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
         Set<YearMonth> ytelseMåneder = månedstidslinjeForYtelse.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
 
-        var rapporterteInntekterSomIkkeMatcherYtelsesperiode2 = ytelseMåneder.stream().filter(it -> !rapporterteMåneder1.contains(it))
+        var rapporterteInntekterSomIkkeMatcherYtelsesperiode2 = rapporterteMåneder1.stream().filter(it -> !ytelseMåneder.contains(it))
             .collect(Collectors.toSet());
 
         final var rapporterteInntekterSomIkkeMatcherYtelsesperiode = rapporterteMåneder.stream()
             .filter(s -> harIkkeMatchendeYtelseMåned(s, månedstidslinjeForYtelse))
             .toList();
 
-        if (!rapporterteInntekterSomIkkeMatcherYtelsesperiode2.isEmpty()) {
+        if (!rapporterteInntekterSomIkkeMatcherYtelsesperiode.isEmpty()) {
             throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av månedstidslinjen: " + rapporterteInntekterSomIkkeMatcherYtelsesperiode2);
         }
     }
