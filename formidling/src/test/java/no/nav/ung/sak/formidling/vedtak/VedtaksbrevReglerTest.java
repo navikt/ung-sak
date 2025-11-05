@@ -162,7 +162,8 @@ class VedtaksbrevReglerTest {
     void skal_ikke_kunne_redigere_eller_hindre_automatisk_brev_for_andre_totrinn_ap_enn_kontroller_inntekt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
-        var behandling = BrevScenarioerUtils.lagBehandlingMedAP(
+
+        var behandling = BrevScenarioerUtils.lagAvsluttetBehandlingMedAP(
           EndringHøySatsScenarioer.endring25År(fom.minusYears(25)), ungTestRepositories,
             AksjonspunktDefinisjon.VURDER_TILBAKETREKK
         );

@@ -24,7 +24,7 @@ public class VedtaksbrevVerifikasjon {
         Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
         Med vennlig hilsen \
         Nav Arbeid og ytelser \
-        %s\
+        %s \
         side av""";
 
     public static String medHeaderOgFooter(String fnr, String body) {
@@ -36,7 +36,7 @@ public class VedtaksbrevVerifikasjon {
                 BrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body,
-                "Dette er et automatisk behandlet vedtak. ");
+                "Dette er et automatisk behandlet vedtak.");
     }
 
     public static String medHeaderOgFooterManuell(String fnr, String body) {
@@ -47,6 +47,17 @@ public class VedtaksbrevVerifikasjon {
                 BrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body,
-                "");
+                BrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN + " " + BrevScenarioerUtils.DEFAULT_BESLUTTER_NAVN);
+    }
+
+    public static String medHeaderOgFooterManuellUtenBeslutter(String fnr, String body) {
+        LocalDate brevdato = LocalDate.now();
+        return STANDARD_HEADER_FOOTER
+            .formatted(
+                BrevTestUtils.brevDatoString(brevdato),
+                BrevScenarioerUtils.DEFAULT_NAVN,
+                fnr,
+                body,
+                BrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN);
     }
 }
