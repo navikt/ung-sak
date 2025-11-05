@@ -39,12 +39,12 @@
         <felles.version>8.0.0</felles.version>
         <swagger.version>2.2.39</swagger.version>
         <junit.version>5.13.4</junit.version>
-        <k9format.version>12.5.8</k9format.version>
+        <k9format.version>12.6.2</k9format.version>
         <jackson.version>2.20.0</jackson.version>
         <asm.version>9.9</asm.version>
         <kotlin-stdlib.version>2.2.21</kotlin-stdlib.version>
         <jandex.version>3.5.1</jandex.version>
-        <pdfgen-core.version>1.1.63</pdfgen-core.version>
+        <pdfgen-core.version>1.1.65</pdfgen-core.version>
         <flyway.version>11.15.0</flyway.version>
         <confluent.platform.version>8.1.0</confluent.platform.version>
         <mockito.version>5.20.0</mockito.version>
