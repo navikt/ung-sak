@@ -1,22 +1,20 @@
 package no.nav.ung.sak.kabal.task;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
-import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kabal.rest.KabalRestKlient;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 @ProsessTask(OverføringTilKabalTask.TASKTYPE)
@@ -44,7 +42,7 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
                                   BehandlingRepository repository,
                                   TpsTjeneste pdlTjeneste,
                                   KlageRepository klageRepository,
-                                  @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled) {
+                                  @KonfigVerdi(value = "INTEGRASJON_KABAL", defaultVerdi = "false") boolean klageEnabled) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.restKlient = restKlient;
         this.kabalRequestMapper = kabalRequestMapper;
