@@ -63,7 +63,7 @@ public class OppgaveRedirectTjenesteTest {
         fagsak.setId(2L);
 
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        OppgaveBehandlingKobling kobling = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, "1", saksnummer, behandling);
+        OppgaveBehandlingKobling kobling = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK, "1", saksnummer, behandling);
         Mockito.when(oppgaveRepo.hentOppgaveBehandlingKobling("1")).thenReturn(Optional.of(kobling));
         Mockito.when(fagsakRepo.finnEksaktFagsak(2)).thenReturn(fagsak);
 
@@ -90,7 +90,7 @@ public class OppgaveRedirectTjenesteTest {
         Whitebox.setInternalState(fagsak, "id", 3l);
         Whitebox.setInternalState(fagsak, "saksnummer", new Saksnummer("123"));
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        OppgaveBehandlingKobling kobling = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, "1", saksnummer, behandling);
+        OppgaveBehandlingKobling kobling = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK, "1", saksnummer, behandling);
         Mockito.when(fagsakRepo.hentSakGittSaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
         Mockito.when(fagsakRepo.finnEksaktFagsak(3)).thenReturn(fagsak);
 
@@ -108,7 +108,7 @@ public class OppgaveRedirectTjenesteTest {
         Whitebox.setInternalState(fagsak, "id", 5l);
         Whitebox.setInternalState(fagsak, "saksnummer", saksnummer);
         Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
-        OppgaveBehandlingKobling kobling = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK_VL, "1", saksnummer, behandling);
+        OppgaveBehandlingKobling kobling = new OppgaveBehandlingKobling(OppgaveÅrsak.BEHANDLE_SAK, "1", saksnummer, behandling);
         Mockito.when(fagsakRepo.hentSakGittSaksnummer(saksnummer)).thenReturn(Optional.of(fagsak));
         Mockito.when(fagsakRepo.finnEksaktFagsak(5)).thenReturn(fagsak);
 

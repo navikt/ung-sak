@@ -168,7 +168,7 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
         };
     }
 
-    private void opprettAnkebehandlingAvsluttetTask(no.nav.ung.sak.behandlingslager.behandling.Behandling behandling, String utfall) {
+    private void opprettAnkebehandlingAvsluttetTask(Behandling behandling, String utfall) {
         ProsessTaskData opprettOppgaveAnkebehandlingAvsluttetTask = ProsessTaskData.forProsessTask(OpprettOppgaveAnkebehandlingAvsluttetTask.class);
         opprettOppgaveAnkebehandlingAvsluttetTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         opprettOppgaveAnkebehandlingAvsluttetTask.setSekvens("1");
