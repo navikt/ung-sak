@@ -76,7 +76,7 @@ public class EnhetsTjeneste {
         var request = ArbeidsfordelingRequest.ny()
             .medTema(tema.getOffisiellKode())
             .medBehandlingstema(behandlingsTema == null ? null : behandlingsTema.getOffisiellKode())
-            .medDiskresjonskode(geo.getDiskresjonskode().getKode())
+            .medDiskresjonskode(ofNullable(geo.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null))
             .medGeografiskOmraade(geo.getTilknytning())
             .build();
 
