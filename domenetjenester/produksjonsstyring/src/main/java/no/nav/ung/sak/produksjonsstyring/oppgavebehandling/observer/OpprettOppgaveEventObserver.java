@@ -85,17 +85,6 @@ public class OpprettOppgaveEventObserver {
         }
     }
 
-    /**
-     * Observer endringer i BehandlingStatus og håndter oppgaver deretter.
-     */
-    public void observerBehandlingStatus(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent statusEvent) {
-        Long behandlingId = statusEvent.getBehandlingId();
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (!behandling.erYtelseBehandling()) {
-            oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling);
-        }
-    }
-
     private void opprettOppgaveVedBehov(Behandling behandling) {
         List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandling.getId());
         Optional<OppgaveBehandlingKobling> aktivOppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK, oppgaveBehandlingKoblinger);
