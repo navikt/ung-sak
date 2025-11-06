@@ -6,14 +6,13 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
@@ -32,11 +31,15 @@ public class RapportertInntektMapper {
 
     private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
+    private final boolean kontrollerInntektSisteMånedEnabled;
 
     @Inject
-    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, MånedsvisTidslinjeUtleder ytelsesperiodeutleder) {
+    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                   MånedsvisTidslinjeUtleder ytelsesperiodeutleder,
+                                   @KonfigVerdi(value = "KONTROLL_SISTE_MND_ENABLED", defaultVerdi = "false") boolean kontrollerInntektSisteMånedEnabled) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.ytelsesperiodeutleder = ytelsesperiodeutleder;
+        this.kontrollerInntektSisteMånedEnabled = kontrollerInntektSisteMånedEnabled;
     }
 
     public LocalDateTimeline<RapporterteInntekter> mapAlleGjeldendeRegisterOgBrukersInntekter(Long behandlingId) {
@@ -49,7 +52,10 @@ public class RapportertInntektMapper {
         final var månedsvisYtelseTidslinje = ytelsesperiodeutleder.periodiserMånedsvis(behandlingId);
 
 
-        final var brukersRapporterteInntekter = finnBrukersRapporterteInntekter(iayGrunnlag.get(), månedsvisYtelseTidslinje);
+        final var brukersRapporterteInntekter =
+            kontrollerInntektSisteMånedEnabled ?
+                finnBrukersRapporterteInntekterForOverlapp(iayGrunnlag.get(), månedsvisYtelseTidslinje) :
+                finnBrukersRapporterteInntekter(iayGrunnlag.get(), månedsvisYtelseTidslinje);
         validerBrukersRapporterteInntekterTidslinje(brukersRapporterteInntekter, månedsvisYtelseTidslinje);
 
         final var grupperteInntekter = grupperInntekter(iayGrunnlag.get());
@@ -85,7 +91,7 @@ public class RapportertInntektMapper {
                     it.getArbeidsgiver(),
                     førsteInntektspost.getInntektYtelseType(),
                     it.getAlleInntektsposter().stream()
-                        .map(ip -> new Inntektsperiode(ip.getBeløp(), ip.getPeriode()))
+                        .map(ip -> new Inntektsperiode(ip.getBeløp(), ip.getBeløp(), ip.getPeriode()))
                         .toList()
                 );
             }).toList();
@@ -140,18 +146,16 @@ public class RapportertInntektMapper {
             .stream()
             .filter(it -> it.inntektType() == InntektType.ARBEIDSTAKER_ELLER_FRILANSER)
             .flatMap(it -> it.inntekter().stream())
-            .map(Inntektsperiode::beløp)
-            .reduce(Beløp::adder)
-            .map(it -> new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, it.getVerdi()))
+            .reduce(Inntektsperiode::adderBeløp)
+            .map(it -> new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, it.beløp().getVerdi(), it.periodebeløpFraRådata().getVerdi()))
             .ifPresent(inntekterForPeriode::add);
 
         overlappendeInntekter
             .stream()
             .filter(it -> it.inntektType() == InntektType.YTELSE)
             .flatMap(it -> it.inntekter().stream())
-            .map(Inntektsperiode::beløp)
-            .reduce(Beløp::adder)
-            .map(it -> new RapportertInntekt(InntektType.YTELSE, it.getVerdi()))
+            .reduce(Inntektsperiode::adderBeløp)
+            .map(it -> new RapportertInntekt(InntektType.YTELSE, it.beløp().getVerdi(), it.periodebeløpFraRådata().getVerdi()))
             .ifPresent(inntekterForPeriode::add);
         return inntekterForPeriode;
     }
@@ -182,25 +186,27 @@ public class RapportertInntektMapper {
         final var antallVirkedager = inntektsperiode.antallArbeidsdager();
         final var overlappAntallVirkedager = Virkedager.beregnAntallVirkedager(overlappPeriode.getFomDato(), overlappPeriode.getTomDato());
 
-        var beløp = new Beløp(it.beløp().getVerdi().multiply(BigDecimal.valueOf(overlappAntallVirkedager).divide(BigDecimal.valueOf(antallVirkedager), 10, RoundingMode.HALF_UP)));
-        return new Inntektsperiode(beløp, inntektsperiode);
+        var delvisBeløp = new Beløp(it.beløp().getVerdi().multiply(BigDecimal.valueOf(overlappAntallVirkedager).divide(BigDecimal.valueOf(antallVirkedager), 10, RoundingMode.HALF_UP)));
+        return new Inntektsperiode(delvisBeløp, it.periodebeløpFraRådata(), inntektsperiode);
     }
 
     private static List<InntekterForKilde> finnOverlappendeInntekter(LocalDateInterval intervall, List<InntekterForKilde> grupperteInntekter) {
         return grupperteInntekter.stream()
             .map(inntekterForKilde ->
-                {
-                    List<Inntektsperiode> overlappendeInntektsperioder = inntekterForKilde.inntekter().stream()
-                        .filter(it -> it.periode().toLocalDateInterval().overlaps(intervall))
-                        .map(it -> finnBeløpInnenforPeriode(intervall, it))
-                        .toList();
-                    return new InntekterForKilde(
-                        inntekterForKilde.inntektType(),
-                        inntekterForKilde.arbeidsgiver(),
-                        inntekterForKilde.ytelseType(),
-                        overlappendeInntektsperioder);
-                }
+                finnOverlappendeInntekt(intervall, inntekterForKilde)
             ).toList();
+    }
+
+    private static InntekterForKilde finnOverlappendeInntekt(LocalDateInterval intervall, InntekterForKilde inntekterForKilde) {
+        List<Inntektsperiode> overlappendeInntektsperioder = inntekterForKilde.inntekter().stream()
+            .filter(it -> it.periode().toLocalDateInterval().overlaps(intervall))
+            .map(it -> finnBeløpInnenforPeriode(intervall, it))
+            .toList();
+        return new InntekterForKilde(
+            inntekterForKilde.inntektType(),
+            inntekterForKilde.arbeidsgiver(),
+            inntekterForKilde.ytelseType(),
+            overlappendeInntektsperioder);
     }
 
     private InntektType mapTilInntektType(Inntektspost it) {
@@ -210,6 +216,33 @@ public class RapportertInntektMapper {
             return InntektType.YTELSE;
         }
         throw new IllegalArgumentException("Kunne ikke håndtere inntektsposttype: " + it.getInntektspostType());
+    }
+
+    private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekterForOverlapp(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje) {
+        LocalDateTimeline<Set<RapportertInntekt>> resultat = new LocalDateTimeline<>(List.of());
+        var inntektsperiodeOgInnsendingstidspunkt = iayGrunnlag.getOppgittOpptjeningAggregat()
+            .stream()
+            .flatMap(o -> o.getOppgitteOpptjeninger().stream())
+            .flatMap(o ->
+                o.getOppgittArbeidsforhold().stream()
+                    .map(it ->
+                        new Inntektsperiode(
+                            new Beløp(it.getInntekt()),
+                            new Beløp(it.getInntekt()),
+                            it.getPeriode()
+                        )).map(it -> new InntektsperiodeOgMottattTidspunkt(o.getInnsendingstidspunkt(), it))
+            ).toList();
+
+        for (LocalDateInterval p : månedsvisYtelseTidslinje.getLocalDateIntervals()) {
+            Optional<InntektsperiodeOgMottattTidspunkt> sisteMottatteInntektForPeriode = inntektsperiodeOgInnsendingstidspunkt.stream()
+                .filter(it -> it.inntektsperiode.periode().toLocalDateInterval().overlaps(p))
+                .max(Comparator.comparing(InntektsperiodeOgMottattTidspunkt::mottattTidspunkt));
+            if (sisteMottatteInntektForPeriode.isPresent()) {
+                InntekterForKilde forOverlapp = finnOverlappendeInntekt(p, InntekterForKilde.forBrukersRapporterteArbeidsinntekter(sisteMottatteInntektForPeriode.get().inntektsperiode));
+                resultat = resultat.crossJoin(new LocalDateTimeline<>(p, mapTilRapporterteInntekterPrType(List.of(forOverlapp))));
+            }
+        }
+        return resultat;
     }
 
     private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje) {
@@ -258,6 +291,7 @@ public class RapportertInntektMapper {
                 it.getPeriode().toLocalDateInterval(),
                 Set.of(new RapportertInntekt(
                     InntektType.ARBEIDSTAKER_ELLER_FRILANSER,
+                    it.getInntekt(),
                     it.getInntekt())
                 ))).toList();
     }
@@ -273,6 +307,17 @@ public class RapportertInntektMapper {
                 ", tidslinje=" + tidslinje +
                 '}';
         }
+
+        @Override
+        public int compareTo(InntektForMottattidspunkt o) {
+            return this.mottattTidspunkt.compareTo(o.mottattTidspunkt);
+        }
+    }
+
+    public record InntektsperiodeOgMottattTidspunkt(
+        LocalDateTime mottattTidspunkt,
+        Inntektsperiode inntektsperiode
+    ) implements Comparable<InntektForMottattidspunkt> {
 
         @Override
         public int compareTo(InntektForMottattidspunkt o) {

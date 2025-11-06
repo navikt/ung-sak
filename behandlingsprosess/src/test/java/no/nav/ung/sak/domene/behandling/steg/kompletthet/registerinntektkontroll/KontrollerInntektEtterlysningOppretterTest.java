@@ -77,7 +77,7 @@ class KontrollerInntektEtterlysningOppretterTest {
         // Arrange
         var fom = LocalDate.now().withDayOfMonth(1);
         var tom = fom.plusMonths(1).minusDays(1);
-        var rapporterteInntekter = Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.TEN));
+        var rapporterteInntekter = Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.TEN, BigDecimal.TEN));
         when(kontrollerInntektInputMapper.mapInput(any())).thenReturn(new KontrollerInntektInput(
             new LocalDateTimeline<>(fom, tom, true),
             new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(rapporterteInntekter, rapporterteInntekter)),

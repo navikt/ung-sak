@@ -38,7 +38,7 @@ class RapportertInntektMapperTest {
         when(ytelsesperiodeutleder.periodiserMånedsvis(anyLong())).thenReturn(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()), YearMonth.now()),
             new LocalDateSegment<>(LocalDate.now().plusMonths(1).withDayOfMonth(1), LocalDate.now().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()), YearMonth.now().plusMonths(1)))));
-        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, ytelsesperiodeutleder);
+        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, ytelsesperiodeutleder, false);
     }
 
     @Test
@@ -54,7 +54,7 @@ class RapportertInntektMapperTest {
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
-            new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)),
+            new RapporterteInntekter(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt,inntekt)),
                 Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
 
@@ -74,7 +74,7 @@ class RapportertInntektMapperTest {
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
             new RapporterteInntekter(Set.of(
-                new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, arbeidsinntekt)
+                new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, arbeidsinntekt, arbeidsinntekt)
             ), Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
     }
@@ -103,10 +103,10 @@ class RapportertInntektMapperTest {
         final var forventet = new LocalDateTimeline<>(
             List.of(
                 new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), new RapporterteInntekter(
-                    Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt)),
+                    Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt, inntekt)),
                     Set.of())),
                 new LocalDateSegment<>(periode2.getFomDato(), periode2.getTomDato(), new RapporterteInntekter(
-                    Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)),
+                    Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2, inntekt2)),
                     Set.of()))
             ));
         assertThat(tidslinje).isEqualTo(forventet);
@@ -134,7 +134,7 @@ class RapportertInntektMapperTest {
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
             new RapporterteInntekter(
-                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2)),
+                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, inntekt2, inntekt2)),
                 Set.of()));
         assertThat(tidslinje).isEqualTo(forventet);
     }
