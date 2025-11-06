@@ -104,12 +104,12 @@ public class KlageUtredningEntitet extends BaseEntitet {
     }
 
     public KlageVurderingType hentGjeldendeKlagevurderingType() {
-        return getKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).or(() ->
-            getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
+        return hentKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).or(() ->
+            hentKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
         ).orElse(null);
     }
 
-    public Optional<KlageVurderingType> getKlageVurderingType(KlageVurdertAv klageVurdertAv) {
+    public Optional<KlageVurderingType> hentKlageVurderingType(KlageVurdertAv klageVurdertAv) {
         var klagevurdering = hentKlagevurdering(klageVurdertAv);
         return klagevurdering
             .map(kv -> kv.getKlageresultat().getKlageVurdering())

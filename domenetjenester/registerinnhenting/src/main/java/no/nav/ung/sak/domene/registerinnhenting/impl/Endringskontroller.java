@@ -59,11 +59,6 @@ public class Endringskontroller {
     public void spolTilStartpunkt(Behandling behandling, EndringsresultatDiff endringsresultat) {
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
 
-        if (behandling.getFagsakYtelseType() == FagsakYtelseType.FRISINN) {
-            //kun FRISINN som bruker gosys for produksjonsstyring, de andre ytelsene håndteres i k9-los
-            avsluttOppgaverIGsak(behandling, behandling.getStatus());
-        }
-
         StartpunktType startpunkt = FagsakYtelseTypeRef.Lookup.find(startpunktTjenester, behandling.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Ingen implementasjoner funnet for ytelse: " + behandling.getFagsakYtelseType().getKode()))
             .utledStartpunktForDiffBehandlingsgrunnlag(ref, endringsresultat);
@@ -109,12 +104,4 @@ public class Endringskontroller {
                 førSteg.getNavn(), etterSteg.getNavn());// NOSONAR //$NON-NLS-1$
         }
     }
-
-    private void avsluttOppgaverIGsak(Behandling behandling, BehandlingStatus før) {
-        boolean behandlingIFatteVedtak = BehandlingStatus.FATTER_VEDTAK.equals(før);
-        if (behandlingIFatteVedtak) {
-            oppgaveTjeneste.avslutt(behandling.getId(), OppgaveÅrsak.GODKJENN_VEDTAK_VL);
-        }
-    }
-
 }

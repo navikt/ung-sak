@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +128,17 @@ public class OppgaveTjeneste {
         logger.info("GOSYS ferdigstilte oppgave {} svar {}", aktivOppgave.getOppgaveId(), oppgv);
     }
 
+    public void avsluttOppgaveOgStartTask(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String taskType) {
+        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
+        taskGruppe.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        opprettTaskAvsluttOppgave(behandling, oppgaveÅrsak, false).ifPresent(taskGruppe::addNesteSekvensiell);
+        taskGruppe.addNesteSekvensiell(opprettProsessTask(behandling, new TaskType(taskType)));
+
+        taskGruppe.setCallIdFraEksisterende();
+
+        taskTjeneste.lagre(taskGruppe);
+    }
+
     private void ferdigstillOppgaveBehandlingKobling(OppgaveBehandlingKobling aktivOppgave) {
         aktivOppgave.ferdigstillOppgave(SubjectHandler.getSubjectHandler().getUid());
         oppgaveBehandlingKoblingRepository.lagre(aktivOppgave);
@@ -159,12 +172,8 @@ public class OppgaveTjeneste {
         Optional<OppgaveBehandlingKobling> oppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger);
         if (oppgave.isPresent()) {
             OppgaveBehandlingKobling aktivOppgave = oppgave.get();
-            // skal ikke avslutte oppgave av denne typen
-            if (OppgaveÅrsak.BEHANDLE_SAK_IT.equals(aktivOppgave.getOppgaveÅrsak())) {
-                return Optional.empty();
-            }
             ferdigstillOppgaveBehandlingKobling(aktivOppgave);
-            ProsessTaskData avsluttOppgaveTask = opprettProsessTask(behandling);
+            ProsessTaskData avsluttOppgaveTask = opprettProsessTask(behandling, new TaskType(AvsluttOppgaveTask.TASKTYPE));
             avsluttOppgaveTask.setOppgaveId(aktivOppgave.getOppgaveId());
             if (skalLagres) {
                 avsluttOppgaveTask.setCallIdFraEksisterende();
@@ -176,8 +185,8 @@ public class OppgaveTjeneste {
         }
     }
 
-    private ProsessTaskData opprettProsessTask(Behandling behandling) {
-        ProsessTaskData prosessTask = ProsessTaskData.forProsessTask(AvsluttOppgaveTask.class);
+    private ProsessTaskData opprettProsessTask(Behandling behandling, TaskType taskType) {
+        ProsessTaskData prosessTask = ProsessTaskData.forTaskType(taskType);
         prosessTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTask.setPrioritet(50);
         return prosessTask;
@@ -232,7 +241,7 @@ public class OppgaveTjeneste {
 
     public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(String behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER_VL : OppgaveÅrsak.BEHANDLE_SAK_VL;
+        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK;
         return opprettOppgave(behandling, oppgaveÅrsak, beskrivelse, hentPrioritetKode(høyPrioritet), fristDager);
     }
 

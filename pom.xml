@@ -36,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>8.0.0</felles.version>
+        <felles.version>9.0.0</felles.version>
         <swagger.version>2.2.39</swagger.version>
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.5.8</k9format.version>
@@ -79,9 +79,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.glassfish</groupId>
-                <artifactId>jakarta.el</artifactId>
-                <version>4.0.2</version>
+                <groupId>org.glassfish.expressly</groupId>
+                <artifactId>expressly</artifactId>
+                <version>6.0.0</version>
             </dependency>
 
             <!-- Felles biblioteker - Importerte avhengigheter. -->

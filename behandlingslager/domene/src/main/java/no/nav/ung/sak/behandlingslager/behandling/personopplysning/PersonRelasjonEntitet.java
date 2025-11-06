@@ -1,7 +1,5 @@
 package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 
-import java.util.Objects;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -14,11 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
-import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
@@ -26,6 +19,10 @@ import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.ung.sak.typer.AktørId;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.Objects;
 
 @Entity(name = "PersonopplysningRelasjon")
 @Table(name = "PO_RELASJON")
@@ -37,12 +34,12 @@ public class PersonRelasjonEntitet extends BaseEntitet implements HarAktørId, I
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PO_RELASJON")
     private Long id;
 
-    @Convert(converter = AktørIdConverter.class, attributeName = "aktørId")
+    @Embedded
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "fra_aktoer_id", updatable = false, nullable = false)))
     @ChangeTracked
     private AktørId fraAktørId;
 
-    @Convert(converter = AktørIdConverter.class, attributeName = "aktørId")
+    @Embedded
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "til_aktoer_id", updatable = false, nullable = false)))
     @ChangeTracked
     private AktørId tilAktørId;
