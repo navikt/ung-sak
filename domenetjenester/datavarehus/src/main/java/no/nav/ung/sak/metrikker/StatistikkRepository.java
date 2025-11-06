@@ -293,7 +293,7 @@ public class StatistikkRepository {
                 String behandlingResultatType = t.get(4, String.class);
                 String vilkårType = t.get(5, String.class);
                 String avslagKode = t.get(6, String.class);
-                long tidsstempel = t.get(7, LocalDateTime.class).toEpochSecond(ZoneOffset.UTC) * 1000;
+                long tidsstempel = t.get(7, LocalDateTime.class).toInstant(ZoneOffset.UTC).toEpochMilli();
                 return SensuEvent.createSensuEvent(metricName,
                     toMap(
                         "ytelse_type", ytelseType,
@@ -382,7 +382,7 @@ public class StatistikkRepository {
                 String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), UDEFINERT);
                 String aksjonspunktStatus = t.get(4, String.class);
                 String venteÅrsak = coalesce(t.get(5, String.class), UDEFINERT);
-                long tidsstempel = t.get(6, LocalDateTime.class).toEpochSecond(ZoneOffset.UTC) * 1000;
+                long tidsstempel = t.get(6, LocalDateTime.class).toInstant(ZoneOffset.UTC).toEpochMilli();
 
                 return SensuEvent.createSensuEvent(metricName,
                     toMap(
@@ -560,7 +560,7 @@ public class StatistikkRepository {
                 String taskType = t.get(3, String.class);
                 String status = t.get(4, String.class);
                 LocalDateTime sistKjørt = t.get(5, LocalDateTime.class);
-                long tidsstempel = sistKjørt == null ? now : sistKjørt.toEpochSecond(ZoneOffset.UTC) * 1000;;
+                long tidsstempel = sistKjørt == null ? now : sistKjørt.toInstant(ZoneOffset.UTC).toEpochMilli();
 
                 String sisteFeil = MetrikkUtils.finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
                 String taskParams = t.get(7, String.class);
