@@ -189,7 +189,7 @@ public class InnhentDokumentTjeneste {
     }
 
     private void sjekkBehandlingKanLåses(Behandling behandling) {
-        int forsøk = 3;
+        int forsøk = 15;
 
         BehandlingLås lås;
         while (--forsøk >= 0) {
@@ -198,7 +198,7 @@ public class InnhentDokumentTjeneste {
                 return; // OK - Fikk lås
             }
             try {
-                Thread.sleep(1 * 1000L);
+                Thread.sleep(200L);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
