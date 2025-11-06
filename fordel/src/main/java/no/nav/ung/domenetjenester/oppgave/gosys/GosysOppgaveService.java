@@ -74,7 +74,7 @@ public class GosysOppgaveService {
             .medPrioritet(Prioritet.NORM)
             .medBehandlingstema(behandlingTema.getOffisiellKode())
             .medOppgavetype(oppgaveType.getKode())
-            .medBehandlesAvApplikasjon(fagsaksystem.getKode())
+            .medBehandlesAvApplikasjon(fagsaksystem != null ? fagsaksystem.getKode() : null)
             .medJournalpostId(journalpostId.getVerdi())
             .medBehandlingstype(fordelBehandlingType != null ? fordelBehandlingType.getOffisiellKode() : null);
 

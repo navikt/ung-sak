@@ -1,6 +1,5 @@
 package no.nav.ung.sak.behandling.revurdering;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -9,6 +8,7 @@ import java.util.stream.Stream;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,6 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
     public static final String TASKNAME = "behandlingskontroll.opprettRevurderingEllerDiff";
     public static final String BEHANDLING_ÅRSAK = "behandlingArsak";
-    public static final String PERIODE_FOM = "fom";
-    public static final String PERIODE_TOM = "tom";
     public static final String PERIODER = "perioder";
 
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingEllerOpprettDiffTask.class);
@@ -86,8 +84,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         logContext(fagsak);
 
         var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId, BehandlingType.getYtelseBehandlingTyper());
-        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
-        var perioder = utledPerioder(prosessTaskData);
+
+        var perioderOgÅrsaker = utledÅrsakOgPerioder(prosessTaskData);
+        if (perioderOgÅrsaker.isEmpty()) {
+            throw new IllegalArgumentException("Må ha minst en årsak for å opprette revurdering eller diff");
+        }
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
             if (sisteVedtak.isPresent() && skalUtsetteKjøring(prosessTaskData, sisteVedtak)) {
@@ -99,10 +100,11 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
                 var origBehandling = sisteVedtak.get();
+                BehandlingÅrsakType behandlingÅrsakType = perioderOgÅrsaker.getFirst().behandlingÅrsak();// Velger første årsak som behandlingsårsak, burde vurdere om vi skal legge til alle
+
                 var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
-                if (perioder != null && !perioder.isEmpty()) {
-                    prosessTriggereRepository.leggTil(behandling.getId(), perioder.stream().map(it -> new Trigger(behandlingÅrsakType, it)).collect(Collectors.toSet()));
-                }
+
+                leggTilTriggere(perioderOgÅrsaker, behandling);
                 log.info("Oppretter revurdering='{}' basert på '{}'", behandling, origBehandling);
                 behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(behandling);
             } else {
@@ -113,19 +115,28 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                 throw new IllegalStateException("Fant flere åpne behandlinger");
             }
             var behandlingId = behandlinger.get(0);
-            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, behandlingÅrsakType);
+            Set<BehandlingÅrsakType> årsaker = perioderOgÅrsaker.stream().map(ÅrsakOgPerioder::behandlingÅrsak).collect(Collectors.toSet());
+            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, årsaker);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
-            BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
+            årsaker.forEach(it -> BehandlingÅrsak.builder(it).buildFor(behandling));
             behandlingRepository.lagre(behandling, behandlingLås);
-            var skalTvingeRegisterinnhenting = REGISTERINNHENTING_ÅRSAKER.contains(behandlingÅrsakType);
+            var skalTvingeRegisterinnhenting = årsaker.stream().anyMatch(REGISTERINNHENTING_ÅRSAKER::contains);
 
             behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false, skalTvingeRegisterinnhenting);
 
             // Legger til sist, ønsker diffen denne gir for å sette startpunkt
-            if (perioder != null && !perioder.isEmpty()) {
-                prosessTriggereRepository.leggTil(behandling.getId(), perioder.stream().map(it -> new Trigger(behandlingÅrsakType, it)).collect(Collectors.toSet()));
-            }
+            leggTilTriggere(perioderOgÅrsaker, behandling);
+        }
+    }
+
+    private void leggTilTriggere(List<ÅrsakOgPerioder> perioderOgÅrsaker, Behandling behandling) {
+        Set<Trigger> triggere = perioderOgÅrsaker.stream().filter(it -> !it.perioder().isEmpty())
+            .flatMap(it -> it.perioder().stream().map(p -> new Trigger(it.behandlingÅrsak(), p)))
+            .collect(Collectors.toSet());
+
+        if (!triggere.isEmpty()) {
+            prosessTriggereRepository.leggTil(behandling.getId(), triggere);
         }
     }
 
@@ -145,41 +156,25 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         return false;
     }
 
-    private Set<DatoIntervallEntitet> utledPerioder(ProsessTaskData prosessTaskData) {
+    private List<ÅrsakOgPerioder> utledÅrsakOgPerioder(ProsessTaskData prosessTaskData) {
         var perioderString = prosessTaskData.getPropertyValue(PERIODER);
+        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
         if (perioderString != null && !perioderString.isEmpty()) {
-            return parseToPeriodeSet(perioderString);
+            return List.of(new ÅrsakOgPerioder(behandlingÅrsakType, parseToPeriodeSet(perioderString)));
         }
 
-        return fallbackHåndtering(prosessTaskData);
+        var årsakOgPerioderString = prosessTaskData.getPayloadAsString();
+        if (årsakOgPerioderString != null && !årsakOgPerioderString.isEmpty()) {
+            ÅrsakerOgPerioder årsakOgPerioder = JsonObjectMapper.fromJson(årsakOgPerioderString, ÅrsakerOgPerioder.class);
+            return årsakOgPerioder.aarsakOgPerioder();
+        }
+
+        throw new IllegalArgumentException("Må ha enten perioder eller årsakOgPerioder satt i task data");
     }
 
     TreeSet<DatoIntervallEntitet> parseToPeriodeSet(String perioderString) {
         return Arrays.stream(perioderString.split("\\|")).map(Periode::new).map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private Set<DatoIntervallEntitet> fallbackHåndtering(ProsessTaskData prosessTaskData) {
-        var fomString = prosessTaskData.getPropertyValue(PERIODE_FOM);
-        var tomString = prosessTaskData.getPropertyValue(PERIODE_TOM);
-
-        var fom = fomString != null ? LocalDate.parse(fomString) : null;
-        var tom = tomString != null ? LocalDate.parse(tomString) : null;
-
-        if (fom == null && tom == null) {
-            return null;
-        }
-        validerPeriode(fom, tom);
-
-        return Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
-    }
-
-    private void validerPeriode(LocalDate fom, LocalDate tom) {
-        if (fom == null && tom != null) {
-            throw new IllegalStateException("Ugyldig datorange, fom er null men ikke tom");
-        }
-        if (tom == null && fom != null) {
-            throw new IllegalStateException("Ugyldig datorange, tom er null men ikke fom");
-        }
-    }
 
 }

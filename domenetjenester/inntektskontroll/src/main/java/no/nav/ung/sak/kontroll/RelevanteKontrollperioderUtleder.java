@@ -63,7 +63,7 @@ public class RelevanteKontrollperioderUtleder {
      */
     public LocalDateTimeline<Boolean> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder) {
         LocalDateTimeline<Boolean> perioderForKontroll = LocalDateTimeline.empty();
-        if (ytelsesPerioder.toSegments().size() > 2) {
+        if (ytelsesPerioder.toSegments().size() > 1) {
             final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, kontrollSisteMndEnabled);
             perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(it -> true);
         }
