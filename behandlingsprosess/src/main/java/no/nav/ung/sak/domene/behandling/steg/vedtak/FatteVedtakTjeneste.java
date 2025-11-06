@@ -89,9 +89,6 @@ public class FatteVedtakTjeneste {
                 return BehandleStegResultat.tilbakeførtMedAksjonspunkter(aksjonspunktDefinisjoner);
             } else if (harUtførtAksjonspunktOgGodkjentAlleVurderinger(fatterVedtakAksjonspunkt.get(), totrinnaksjonspunktvurderinger)) {
                 // Dersom alle vurderinger er godkjent og aksjonspunktet er utført går vi videre
-                // Avslutter eventuelt åpne oppgaver i gosys
-                // TODO: Vurder om dette trenger å ligge her, kan det ligge i iverksetting?
-                oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling);
             } else {
                 throw new IllegalStateException("Kunne ikke fatte vedtak. Hadde aksjonspunkt med status " + fatterVedtakAksjonspunkt.get().getStatus() + " og totrinnsvurderinger: " + totrinnaksjonspunktvurderinger);
             }
