@@ -60,6 +60,10 @@ public class OpprettOppgaveEventObserver {
      */
     public void opprettOppgaveDersomDetErÅpneAksjonspunktForAktivtBehandlingSteg(@Observes BehandlingskontrollEvent.StoppetEvent event) {
         Behandling behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
+        if (behandling.erYtelseBehandling()) {
+            return;
+        }
+
         if (behandling.isBehandlingPåVent()) {
             oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling);
             return;
@@ -87,7 +91,9 @@ public class OpprettOppgaveEventObserver {
     public void observerBehandlingStatus(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent statusEvent) {
         Long behandlingId = statusEvent.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling);
+        if (!behandling.erYtelseBehandling()) {
+            oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling);
+        }
     }
 
     private void opprettOppgaveVedBehov(Behandling behandling) {
