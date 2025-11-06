@@ -93,9 +93,6 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
-        assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isNull();
-        assertThat(oppdatertEtterlysning.getUttalelse().get().harUttalelse()).isFalse();
-        assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
 
         var uttalelser = uttalelseRepository.hentEksisterendeGrunnlag(behandling.getId()).get().getUttalelser().getUttalelser();
         assertThat(uttalelser).hasSize(1);
@@ -144,9 +141,6 @@ class InntektBekreftelseHåndtererTest {
         //etterlysning er oppdatert
         var oppdatertEtterlysning = etterlysningRepository.hentEtterlysning(etterlysning.getId());
         assertThat(oppdatertEtterlysning.getStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
-        assertThat(oppdatertEtterlysning.getUttalelse().get().getUttalelseBegrunnelse()).isEqualTo("en uttalelse");
-        assertThat(oppdatertEtterlysning.getUttalelse().get().harUttalelse()).isTrue();
-        assertThat(oppdatertEtterlysning.getUttalelse().get().getSvarJournalpostId().getJournalpostId().getVerdi()).isEqualTo(String.valueOf(journalpostId));
 
         var uttalelser = uttalelseRepository.hentEksisterendeGrunnlag(behandling.getId()).get().getUttalelser().getUttalelser();
         assertThat(uttalelser).hasSize(1);

@@ -6,12 +6,14 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
+import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveForBehandlingSendtTilbakeTask;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
@@ -78,14 +80,15 @@ public class FatteVedtakTjeneste {
             Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
             // Sjekker om vi har minst en ikke godkjent vurdering og om behandlingen skal flyttes tilbake
             if (sendesTilbakeTilSaksbehandler(totrinnaksjonspunktvurderinger)) {
+                if (!behandling.erYtelseBehandling()) {
+                    oppgaveTjeneste.avsluttOppgaveOgStartTask(behandling, OppgaveÅrsak.GODKJENN_VEDTAK, OpprettOppgaveForBehandlingSendtTilbakeTask.TASKTYPE);
+                }
+
                 List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = finnIkkeGodkjenteVurderinger(totrinnaksjonspunktvurderinger);
                 // Flytter behandling tilbake til første ikke-godkjente aksjonspunkt
                 return BehandleStegResultat.tilbakeførtMedAksjonspunkter(aksjonspunktDefinisjoner);
             } else if (harUtførtAksjonspunktOgGodkjentAlleVurderinger(fatterVedtakAksjonspunkt.get(), totrinnaksjonspunktvurderinger)) {
                 // Dersom alle vurderinger er godkjent og aksjonspunktet er utført går vi videre
-                // Avslutter eventuelt åpne oppgaver i gosys
-                // TODO: Vurder om dette trenger å ligge her, kan det ligge i iverksetting?
-                oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling);
             } else {
                 throw new IllegalStateException("Kunne ikke fatte vedtak. Hadde aksjonspunkt med status " + fatterVedtakAksjonspunkt.get().getStatus() + " og totrinnsvurderinger: " + totrinnaksjonspunktvurderinger);
             }
@@ -124,6 +127,12 @@ public class FatteVedtakTjeneste {
         BehandlingResultatType behandlingResultatType = behandling.getBehandlingResultatType();
         if (behandling.erRevurdering()) {
             if (!VEDTAKSTILSTANDER_REVURDERING.contains(behandlingResultatType)) {
+                throw new IllegalStateException(
+                    "Utvikler-feil: Vedtak kan ikke fattes for [" + behandling.getType() + "], behandlingsresultat er " // $NON-NLS-1$
+                        + (behandlingResultatType.getNavn()));
+            }
+        } else if (!behandling.erYtelseBehandling()) {
+            if (!BehandlingResultatType.erKlagekode(behandlingResultatType)) {
                 throw new IllegalStateException(
                     "Utvikler-feil: Vedtak kan ikke fattes for [" + behandling.getType() + "], behandlingsresultat er " // $NON-NLS-1$
                         + (behandlingResultatType.getNavn()));

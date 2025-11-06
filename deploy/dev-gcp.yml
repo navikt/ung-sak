@@ -78,6 +78,8 @@ spec:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
         - application: ung-tilbake
+        - application: kabal-api
+          namespace: klage
       external:
         - host: "dokarkiv-q2.dev-fss-pub.nais.io"
         - host: "k9-abakus.dev-fss-pub.nais.io"
@@ -141,6 +143,9 @@ spec:
       value: pdl.leesah-v1
     - name: KAFKA_JOURNAL_TOPIC
       value: teamdokumenthandtering.aapen-dok-journalfoering
+    - name: KAFKA_KABAL_TOPIC
+      value: klage.behandling-events.v1
+
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -190,6 +195,11 @@ spec:
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
 
+    - name: KABAL_URL
+      value: http://kabal-api.klage
+    - name: KABAL_SCOPE
+      value: api://dev-gcp.klage.kabal-api/.default
+
     # Saf
     - name: SAF_BASE_URL
       value: https://saf-q2.dev-fss-pub.nais.io
@@ -229,7 +239,17 @@ spec:
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "true"
+    - name: KLAGE_ENABLED
+      value: "true"
+    - name: INTEGRASJON_KABAL
+      value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
+      value: "true"
+    - name: KONTROLL_SISTE_MND_ENABLED
+      value: "true"
+    - name: ENABLE_BREV_ANSVARLIG
+      value: "true"
+    - name: ENABLE_HANDTER_ANDRE_JOURNALPOSTER
       value: "true"
 
     # Konfigurasjoner

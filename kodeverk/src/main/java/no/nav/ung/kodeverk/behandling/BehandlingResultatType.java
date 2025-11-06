@@ -24,11 +24,27 @@ public enum BehandlingResultatType implements Kodeverdi {
     INNVILGET_ENDRING("INNVILGET_ENDRING", "Endring innvilget"),
     INGEN_ENDRING("INGEN_ENDRING", "Ingen endring"),
     MANGLER_BEREGNINGSREGLER("MANGLER_BEREGNINGSREGLER", "Mangler beregningsregler", true),
+
+    // Klage
+    KLAGE_AVVIST("KLAGE_AVVIST", "Klage er avvist"),
+    KLAGE_MEDHOLD("KLAGE_MEDHOLD", "Medhold"),
+    KLAGE_YTELSESVEDTAK_OPPHEVET("KLAGE_YTELSESVEDTAK_OPPHEVET", "Ytelsesvedtak opphevet"),
+    KLAGE_YTELSESVEDTAK_STADFESTET("KLAGE_YTELSESVEDTAK_STADFESTET", "Ytelsesvedtak stadfestet"),
+    KLAGE_TRUKKET("KLAGE_TRUKKET", "Klagen er trukket"),
+    HENLAGT_KLAGE_TRUKKET("HENLAGT_KLAGE_TRUKKET", "Henlagt, klagen er trukket"),
+    DELVIS_MEDHOLD_I_KLAGE("DELVIS_MEDHOLD_I_KLAGE", "Delvis medhold i klage"),
+    HJEMSENDE_UTEN_OPPHEVE("HJEMSENDE_UTEN_OPPHEVE", "Behandlingen er hjemsendt"),
+    UGUNST_MEDHOLD_I_KLAGE("UGUNST_MEDHOLD_I_KLAGE", "Ugunst medhold i klage"),
+    FEILREGISTRERT("FEILREGISTRERT", "Feilregistrert av Kabal"),
+
     ;
 
     private static final Set<BehandlingResultatType> HENLEGGELSESKODER_FOR_SØKNAD;
     private static final Set<BehandlingResultatType> ALLE_HENLEGGELSESKODER;
     private static final Set<BehandlingResultatType> INNVILGET_KODER = Set.of(INNVILGET, DELVIS_INNVILGET, INNVILGET_ENDRING);
+    private static final Set<BehandlingResultatType> KLAGE_KODER = Set.of(KLAGE_AVVIST, KLAGE_MEDHOLD,
+        KLAGE_YTELSESVEDTAK_OPPHEVET, KLAGE_YTELSESVEDTAK_STADFESTET, KLAGE_TRUKKET, HENLAGT_KLAGE_TRUKKET,
+        DELVIS_MEDHOLD_I_KLAGE, HJEMSENDE_UTEN_OPPHEVE, UGUNST_MEDHOLD_I_KLAGE, FEILREGISTRERT);
 
     private static final Map<String, BehandlingResultatType> KODER = new LinkedHashMap<>();
 
@@ -121,6 +137,10 @@ public enum BehandlingResultatType implements Kodeverdi {
 
     public static Set<BehandlingResultatType> getInnvilgetKoder() {
         return INNVILGET_KODER;
+    }
+
+    public static boolean erKlagekode(BehandlingResultatType behandlingResultatType) {
+        return KLAGE_KODER.contains(behandlingResultatType);
     }
 
     public boolean isBehandlingHenlagt() {

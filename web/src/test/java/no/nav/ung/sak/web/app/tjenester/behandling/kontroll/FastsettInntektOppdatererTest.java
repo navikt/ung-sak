@@ -30,6 +30,8 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
+import no.nav.ung.sak.kontroll.RapportertInntektMapper;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -38,8 +40,8 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
+
+import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,12 +93,13 @@ class FastsettInntektOppdatererTest {
             behandlingRepository);
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosesstriggerRepo,
             new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository), behandlingRepository));
-        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, månedsvisTidslinjeUtleder, prosessTriggerPeriodeUtleder);
+        RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(prosessTriggerPeriodeUtleder, månedsvisTidslinjeUtleder, false);
+        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, månedsvisTidslinjeUtleder, relevanteKontrollperioderUtleder);
         final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, månedsvisTidslinjeUtleder);
         oppdaterer = new FastsettInntektOppdaterer(
             kontrollerteInntektperioderTjeneste,
             rapportertInntektMapper,
-            prosessTriggerPeriodeUtleder,
+            relevanteKontrollperioderUtleder,
             new HistorikkinnslagRepository(entityManager));
 
         fagsakRepository = new FagsakRepository(entityManager);
@@ -149,8 +152,6 @@ class FastsettInntektOppdatererTest {
         assertThat(kontrollertperiode.getInntekt().compareTo(BigDecimal.valueOf(brukersRapporterteInntekt))).isEqualTo(0);
     }
 
-
-
     @Test
     void skal_bekrefte_med_valg_av_register_inntekt() {
         // Arrange
@@ -163,7 +164,7 @@ class FastsettInntektOppdatererTest {
         lagreRegisterinntekt(periode, registerinntekt);
         leggTilTriggerForKontroll(periode);
 
-        final var dto = lagDto(periode, BrukKontrollertInntektValg.BRUK_REGISTER_INNTEKT);
+        final FastsettInntektDto dto = lagDto(periode, BrukKontrollertInntektValg.BRUK_REGISTER_INNTEKT);
         final var param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
 
         // Act
@@ -204,6 +205,55 @@ class FastsettInntektOppdatererTest {
         final var kontrollertperiode = kontrollertePerioder.get().getPerioder().get(0);
         assertThat(kontrollertperiode.getKilde()).isEqualTo(KontrollertInntektKilde.SAKSBEHANDLER);
         assertThat(kontrollertperiode.getInntekt().compareTo(BigDecimal.valueOf(manueltFastsattArbeidsinntekt))).isEqualTo(0);
+    }
+
+    @Test
+    void skal_bekrefte_med_manuelt_fastsatt_inntekt_når_det_ikke_er_rapportert_eller_register_inntekt() {
+        // Arrange
+        final var førsteRapporteringsmånedFom = FOM.plusMonths(1).withDayOfMonth(1);
+        final var førsteRapporteringsmånedTom = FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(førsteRapporteringsmånedFom, førsteRapporteringsmånedTom);
+        lagreIAYUtenRapportertInntekt();
+        leggTilTriggerForKontroll(periode);
+
+        final var manueltFastsattArbeidsinntekt = 300;
+        final FastsettInntektDto dto = lagDto(periode, manueltFastsattArbeidsinntekt);
+        final var param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
+
+        // Act
+        final var resultat = oppdaterer.oppdater(dto, param);
+
+        // Assert
+        assertThat(resultat).isNotNull();
+        final var kontrollertePerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId());
+        assertThat(kontrollertePerioder.get().getPerioder().size()).isEqualTo(1);
+        final var kontrollertperiode = kontrollertePerioder.get().getPerioder().get(0);
+        assertThat(kontrollertperiode.getKilde()).isEqualTo(KontrollertInntektKilde.SAKSBEHANDLER);
+        assertThat(kontrollertperiode.getInntekt()).isEqualTo(BigDecimal.valueOf(manueltFastsattArbeidsinntekt));
+    }
+
+    @Test
+    void skal_bekrefte_med_valg_av_register_inntekt_når_det_ikke_er_rapportert_eller_register_inntek() {
+        // Arrange
+        final var førsteRapporteringsmånedFom = FOM.plusMonths(1).withDayOfMonth(1);
+        final var førsteRapporteringsmånedTom = FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(førsteRapporteringsmånedFom, førsteRapporteringsmånedTom);
+        lagreIAYUtenRapportertInntekt();
+        leggTilTriggerForKontroll(periode);
+
+        final FastsettInntektDto dto = lagDto(periode, BrukKontrollertInntektValg.BRUK_REGISTER_INNTEKT);
+        final var param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
+
+        // Act
+        final var resultat = oppdaterer.oppdater(dto, param);
+
+        // Assert
+        assertThat(resultat).isNotNull();
+        final var kontrollertePerioder = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId());
+        assertThat(kontrollertePerioder.get().getPerioder().size()).isEqualTo(1);
+        final var kontrollertperiode = kontrollertePerioder.get().getPerioder().get(0);
+        assertThat(kontrollertperiode.getKilde()).isEqualTo(KontrollertInntektKilde.REGISTER);
+        assertThat(kontrollertperiode.getInntekt().compareTo(BigDecimal.valueOf(0))).isEqualTo(0);
     }
 
     private static FastsettInntektDto lagDto(DatoIntervallEntitet periode, BrukKontrollertInntektValg brukBrukersInntekt) {

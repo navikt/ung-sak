@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +39,8 @@ public class OppgaveTjeneste {
     private static final int DEFAULT_OPPGAVEFRIST_DAGER = 1;
 
     private static final String SAK_MÅ_FLYTTES_TIL_INFOTRYGD = "Sak må flyttes til Infotrygd";
+    private static final String DEFAULT_OPPGAVEBESKRIVELSE = "Må behandle sak i VL";
+    private static final String OPPGAVEBESKRIVELSE_ANKE = "Anke er ferdigbehandlet med utfall ";
 
     private static final String NØS_ANSVARLIG_ENHETID = "4151";
     private static final String NØS_BEH_TEMA = "ab0271";
@@ -123,6 +128,17 @@ public class OppgaveTjeneste {
         logger.info("GOSYS ferdigstilte oppgave {} svar {}", aktivOppgave.getOppgaveId(), oppgv);
     }
 
+    public void avsluttOppgaveOgStartTask(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String taskType) {
+        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
+        taskGruppe.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        opprettTaskAvsluttOppgave(behandling, oppgaveÅrsak, false).ifPresent(taskGruppe::addNesteSekvensiell);
+        taskGruppe.addNesteSekvensiell(opprettProsessTask(behandling, new TaskType(taskType)));
+
+        taskGruppe.setCallIdFraEksisterende();
+
+        taskTjeneste.lagre(taskGruppe);
+    }
+
     private void ferdigstillOppgaveBehandlingKobling(OppgaveBehandlingKobling aktivOppgave) {
         aktivOppgave.ferdigstillOppgave(SubjectHandler.getSubjectHandler().getUid());
         oppgaveBehandlingKoblingRepository.lagre(aktivOppgave);
@@ -156,12 +172,8 @@ public class OppgaveTjeneste {
         Optional<OppgaveBehandlingKobling> oppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger);
         if (oppgave.isPresent()) {
             OppgaveBehandlingKobling aktivOppgave = oppgave.get();
-            // skal ikke avslutte oppgave av denne typen
-            if (OppgaveÅrsak.BEHANDLE_SAK_IT.equals(aktivOppgave.getOppgaveÅrsak())) {
-                return Optional.empty();
-            }
             ferdigstillOppgaveBehandlingKobling(aktivOppgave);
-            ProsessTaskData avsluttOppgaveTask = opprettProsessTask(behandling);
+            ProsessTaskData avsluttOppgaveTask = opprettProsessTask(behandling, new TaskType(AvsluttOppgaveTask.TASKTYPE));
             avsluttOppgaveTask.setOppgaveId(aktivOppgave.getOppgaveId());
             if (skalLagres) {
                 avsluttOppgaveTask.setCallIdFraEksisterende();
@@ -173,8 +185,8 @@ public class OppgaveTjeneste {
         }
     }
 
-    private ProsessTaskData opprettProsessTask(Behandling behandling) {
-        ProsessTaskData prosessTask = ProsessTaskData.forProsessTask(AvsluttOppgaveTask.class);
+    private ProsessTaskData opprettProsessTask(Behandling behandling, TaskType taskType) {
+        ProsessTaskData prosessTask = ProsessTaskData.forTaskType(taskType);
         prosessTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTask.setPrioritet(50);
         return prosessTask;
@@ -218,6 +230,42 @@ public class OppgaveTjeneste {
         return oppgave.getId().toString();
     }
 
+    public String opprettBasertPåBehandlingId(String behandlingId, OppgaveÅrsak oppgaveÅrsak) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        return opprettOppgave(behandling, oppgaveÅrsak, DEFAULT_OPPGAVEBESKRIVELSE, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER);
+    }
+
+    public String opprettBehandleOppgaveForBehandling(String behandlingId) {
+        return opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(behandlingId, DEFAULT_OPPGAVEBESKRIVELSE, false, DEFAULT_OPPGAVEFRIST_DAGER);
+    }
+
+    public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(String behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK;
+        return opprettOppgave(behandling, oppgaveÅrsak, beskrivelse, hentPrioritetKode(høyPrioritet), fristDager);
+    }
+
+    private String opprettOppgave(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String beskrivelse, Prioritet prioritet, int fristDager) {
+        List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandling.getId());
+        if (OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger).isPresent()) {
+            // skal ikke opprette oppgave med samme årsak når behandlingen allerede har en åpen oppgave med den årsaken knyttet til seg
+            return null;
+        }
+        Fagsak fagsak = behandling.getFagsak();
+        var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, prioritet, fristDager,
+            mapYtelseTypeTilTema(fagsak.getYtelseType()))
+            .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
+            .medOppgavetype(oppgaveÅrsak.getKode());
+        var oppgave = restKlient.opprettetOppgave(orequest.build());
+        logger.info("Ungsak GOSYS opprettet oppgave med oppgaveid={} for behandling={}, saksnummer={}", oppgave.getId(), behandling.getId(), fagsak.getSaksnummer());
+        return behandleRespons(behandling, oppgaveÅrsak, oppgave.getId().toString(), fagsak.getSaksnummer());
+    }
+
+    private Prioritet hentPrioritetKode(boolean høyPrioritet) {
+        return høyPrioritet ? Prioritet.HOY : Prioritet.NORM;
+    }
+
+
     /**
      * Observer endringer i BehandlingStatus og håndter oppgaver deretter.
      */
@@ -247,5 +295,25 @@ public class OppgaveTjeneste {
         var oppgave = restKlient.opprettetOppgave(request.build());
         logger.info("GOSYS opprettet NØS oppgave {}", oppgave);
         return oppgave.getId().toString();
+    }
+
+    public String opprettOppgaveOmAnke(String behandlingId, OppgaveÅrsak oppgaveÅrsak, String utfall) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        var fagsak = behandling.getFagsak();
+        var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(),
+            OPPGAVEBESKRIVELSE_ANKE + utfall, Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
+            mapYtelseTypeTilTema(fagsak.getYtelseType()))
+            .medBehandlingstype(BehandlingType.ANKE.getOffisiellKode())
+            .medOppgavetype(oppgaveÅrsak.getKode());
+        var oppgave = restKlient.opprettetOppgave(orequest.build());
+        logger.info("Ung sak GOSYS oppretter oppgave" + oppgave);
+        return behandleRespons(behandling, oppgaveÅrsak, oppgave.getId().toString(), fagsak.getSaksnummer());
+    }
+
+    private String behandleRespons(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String oppgaveId,
+                                   Saksnummer saksnummer) {
+        OppgaveBehandlingKobling oppgaveBehandlingKobling = new OppgaveBehandlingKobling(oppgaveÅrsak, oppgaveId, saksnummer, behandling);
+        oppgaveBehandlingKoblingRepository.lagre(oppgaveBehandlingKobling);
+        return oppgaveId;
     }
 }

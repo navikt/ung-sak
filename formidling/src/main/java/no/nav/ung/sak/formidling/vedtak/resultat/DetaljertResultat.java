@@ -23,7 +23,8 @@ public record DetaljertResultat(
 
 
     public static String timelineToString(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        return String.join(", ", detaljertResultatTidslinje.toSegments().stream()
+        return detaljertResultatTidslinje == null ? "null" :
+            String.join(", ", detaljertResultatTidslinje.toSegments().stream()
             .map(it ->
                 it.getLocalDateInterval().toString() + " -> " +
                     "resultatInfo: " + it.getValue().resultatInfo()

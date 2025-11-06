@@ -28,6 +28,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -88,6 +89,7 @@ public class SaksbehandlerRestTjeneste {
 
         unikeIdenter.addAll(historikkinnslag.stream()
             .map(BaseEntitet::getEndretAv)
+            .filter(Objects::nonNull)
             .collect(Collectors.toSet()));
 
         unikeIdenter.remove(systembruker);

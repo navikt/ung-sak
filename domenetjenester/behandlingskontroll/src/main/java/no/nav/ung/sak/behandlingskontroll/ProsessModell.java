@@ -53,10 +53,30 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_UTTAK)
-            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
-            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT, StartpunktType.KONTROLLER_INNTEKT)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT)
             .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
+            .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
+        return modellBuilder.build();
+    }
+
+
+    @FagsakYtelseTypeRef() // Default - dekker alle fagsakytelsestyper
+    @BehandlingTypeRef(BehandlingType.KLAGE) // Behandlingtype = klage (på fagsakytelsene)
+    @Produces
+    @ApplicationScoped
+    public BehandlingModell klage() {
+        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.KLAGE, null);
+        modellBuilder
+            .medSteg(BehandlingStegType.START_STEG, StartpunktType.UDEFINERT)
+            .medSteg(BehandlingStegType.VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS)
+            .medSteg(BehandlingStegType.VURDER_KLAGE_FØRSTEINSTANS)
+
+            .medSteg(BehandlingStegType.OVERFØRT_NK)
+
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);

@@ -79,6 +79,8 @@ spec:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
         - application: ung-sak
+        - application: kabal-api
+          namespace: klage
         #kommenter inn når ung-tilbake er i prod
         #- application: ung-tilbake
       external:
@@ -152,6 +154,8 @@ spec:
       value: pdl.leesah-v1
     - name: KAFKA_JOURNAL_TOPIC
       value: teamdokumenthandtering.aapen-dok-journalfoering
+    - name: KAFKA_KABAL_TOPIC
+      value: klage.behandling-events.v1
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -200,6 +204,10 @@ spec:
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
+    - name: KABAL_URL
+      value: http://kabal-api.klage
+    - name: KABAL_SCOPE
+      value: api://prod-gcp.klage.kabal-api/.default
 
     # Saf
     - name: SAF_BASE_URL
@@ -240,8 +248,16 @@ spec:
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "false"
+    - name: KLAGE_ENABLED
+      value: "false"
+    - name: INTEGRASJON_KABAL
+      value: "false"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
+    - name: KONTROLL_SISTE_MND_ENABLED
+      value: "false"
+    - name: ENABLE_BREV_ANSVARLIG
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

@@ -4,17 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
+import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.inntektskontroll.KontrollertePerioderRecord;
-import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
 
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 public class KontrollerteInntektPerioderMetrikkPubliserer {
@@ -38,6 +35,7 @@ public class KontrollerteInntektPerioderMetrikkPubliserer {
         this.bigQueryKlient = bigQueryKlient;
         this.bigQueryEnabled = bigQueryEnabled;
     }
+
     public void publiserKontrollertePerioderMetrikker(BehandlingReferanse behandlingReferanse) {
         List<KontrollertInntektPeriode> kontrollertInntektPerioder = kontrollerteInntektperioderTjeneste.finnPerioderKontrollertIBehandling(behandlingReferanse.getBehandlingId());
         var behandlingVedtak = vedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Forventer å finne behandlingVedtak"));

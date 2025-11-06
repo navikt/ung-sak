@@ -14,29 +14,17 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
-import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
-import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
-import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.ung.domenetjenester.papirsøknad.PapirsøknadHåndteringTjeneste;
+import no.nav.ung.domenetjenester.papirsøknad.PapirsøknadPdf;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
 import no.nav.ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto;
-import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.io.ByteArrayInputStream;
-import java.util.Optional;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste.BASE_PATH;
 
 @Path(BASE_PATH)
@@ -44,14 +32,9 @@ import static no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjenest
 @Transactional
 public class PapirSøknadRestTjeneste {
     static final String BASE_PATH = "/papir";
-    static final String PAPIRSØKNAD_TAG = "papirsøknad";
+    private static final String PAPIRSØKNAD_TAG = "papirsøknad";
 
-    private TilJournalføringTjeneste journalføringTjeneste;
-    private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
-    private PersoninfoAdapter personinfoAdapter;
     private PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste;
-    private ArkivTjeneste arkivTjeneste;
-    private DokumentArkivTjeneste dokumentArkivTjeneste;
 
 
     public PapirSøknadRestTjeneste() {// For Rest-CDI
@@ -60,16 +43,8 @@ public class PapirSøknadRestTjeneste {
 
     @Inject
     public PapirSøknadRestTjeneste(
-        TilJournalføringTjeneste journalføringTjeneste,
-        @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
-        PersoninfoAdapter personinfoAdapter,
-        PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste, ArkivTjeneste arkivTjeneste, DokumentArkivTjeneste dokumentArkivTjeneste) {
-        this.journalføringTjeneste = journalføringTjeneste;
-        this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
-        this.personinfoAdapter = personinfoAdapter;
+        PapirsøknadHåndteringTjeneste papirsøknadHåndteringTjeneste) {
         this.papirsøknadHåndteringTjeneste = papirsøknadHåndteringTjeneste;
-        this.arkivTjeneste = arkivTjeneste;
-        this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }
 
     @POST
@@ -80,20 +55,14 @@ public class PapirSøknadRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     // Kan bruke drift fordi kallet mot SAF gjør tilgangskontroll uansett.
     public Response hentPapirSøknad(@NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
-        JournalpostInfo journalpostInfo = arkivTjeneste.hentJournalpostInfo(journalpostId);
-        String dokumentInfoId = journalpostInfo.getDokumentInfoId();
-        if (dokumentInfoId == null) {
-            throw new IllegalArgumentException("Finner ikke dokumentInfoId for journalpost " + journalpostId.getVerdi());
-        }
-
-        // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
-        byte[] dokument = dokumentArkivTjeneste.hentDokument(journalpostId, dokumentInfoId);
-        String filnavn = "søknadsdokument-" + dokumentInfoId + ".pdf";
-
         try {
-            Response.ResponseBuilder responseBuilder = Response.ok(new ByteArrayInputStream(dokument));
-            responseBuilder.header("Content-Disposition", "inline; filename=\"" + filnavn + "\"");
-            return responseBuilder.build();
+            // SafTjeneste gjør tilgangskontroll på journalpostId internt gjennom kall til SAF
+            PapirsøknadPdf papirsøknadPdf = papirsøknadHåndteringTjeneste.hentDokumentForJournalpostId(journalpostId);
+
+            return Response.ok(new ByteArrayInputStream(papirsøknadPdf.dokument()))
+                .header("Content-Disposition", "inline; filename=\"" + papirsøknadPdf.filnavn() + "\"")
+                .build();
+
         } catch (Exception e) {
             return Response.serverError().entity("Klarte ikke å generere PDF: " + e.getMessage()).build();
         }
@@ -106,35 +75,23 @@ public class PapirSøknadRestTjeneste {
     @Operation(description = "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.", summary = ("Oppretter fagsak og journalfører papirsøknad"), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response journalførPapirSøknad(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalførPapirSøknadDto journalførPapirSøknadDto) {
-        Periode periode = new Periode(journalførPapirSøknadDto.startDato(), null);
+        try {
+            String saksnummer = papirsøknadHåndteringTjeneste
+                .journalførPapirsøknadMotFagsak(
+                    journalførPapirSøknadDto.deltakerIdent(),
+                    journalførPapirSøknadDto.journalpostId())
+                .getVerdi();
 
-        AktørId aktørId = personinfoAdapter.hentAktørIdForPersonIdent(PersonIdent.fra(journalførPapirSøknadDto.deltakerIdent()))
-            .orElseThrow(() -> new IllegalArgumentException("Finner ikke aktørId for deltakerIdent"));
-
-        Fagsak fagsak = ungdomsytelseSøknadMottaker.finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType.UNGDOMSYTELSE, aktørId, periode.getFom(), periode.getTom());
-
-        var journalpostId = journalførPapirSøknadDto.journalpostId();
-        if (journalpostId != null && journalføringTjeneste.erAlleredeJournalført(journalpostId)) {
-            throw new IllegalStateException("Journalpost er allerede journalført");
-        } else {
-            try {
-                boolean ferdigJournalført = journalføringTjeneste.tilJournalføring(journalpostId, Optional.of(fagsak.getSaksnummer().getVerdi()), OmrådeTema.UNG, aktørId.getAktørId());
-                if (!ferdigJournalført) {
-                    throw new IllegalStateException("Journalpost kunne ikke journalføres");
+            String response = """
+                {
+                  "saksnummer": "%s"
                 }
+                """.formatted(
+                saksnummer);
 
-                String response = """
-                    {
-                      "saksnummer": "%s"
-                    }
-                    """.formatted(fagsak.getSaksnummer().getVerdi());
-
-                return Response.ok()
-                    .entity(response)
-                    .build();
-            } catch (Exception e) {
-                return Response.serverError().entity("Kan ikke ferdigstille journalpost: " + e.getMessage()).build();
-            }
+            return Response.ok().entity(response).build();
+        } catch (Exception e) {
+            return Response.serverError().entity(e.getMessage()).build();
         }
     }
 
@@ -145,9 +102,8 @@ public class PapirSøknadRestTjeneste {
     @Operation(description = "Mapper til strukturert søknadsopplysninger og oppretter journalpost.", summary = ("Mapper til strukturert søknadsopplysninger og oppretter journalpost."), tags = PAPIRSØKNAD_TAG)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public OpprettJournalpostResponse sendInnPapirsøknadopplysninger(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SendInnPapirsøknadopplysningerRequestDto dto) {
-        return papirsøknadHåndteringTjeneste.journalførPapirsøknad(
+        return papirsøknadHåndteringTjeneste.opprettJournalpostForInnsendtPapirsøknad(
             PersonIdent.fra(dto.deltakerIdent()),
-            dto.startdato(),
             dto.journalpostIdForPapirsøknad()
         );
     }

@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.*;
@@ -33,6 +34,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private boolean kontrollSisteMndEnabled;
 
     public BeregnYtelseSteg() {
     }
@@ -40,10 +42,12 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     @Inject
     public BeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                             TilkjentYtelseRepository tilkjentYtelseRepository,
-                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+                            @KonfigVerdi(value = "KONTROLL_SISTE_MND_ENABLED", defaultVerdi = "false") boolean kontrollSisteMndEnabled) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.kontrollSisteMndEnabled = kontrollSisteMndEnabled;
     }
 
     @Override
@@ -65,7 +69,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
 
         // Utfør reduksjon og map til tilkjent ytelse
-        final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje, kontrollSisteMndEnabled);
         final var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
