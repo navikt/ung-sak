@@ -256,8 +256,6 @@ spec:
       value: "true"
     - name: KONTROLL_SISTE_MND_ENABLED
       value: "false"
-    - name: ENABLE_BREV_ANSVARLIG
-      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

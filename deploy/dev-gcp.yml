@@ -247,8 +247,6 @@ spec:
       value: "true"
     - name: KONTROLL_SISTE_MND_ENABLED
       value: "true"
-    - name: ENABLE_BREV_ANSVARLIG
-      value: "true"
     - name: ENABLE_HANDTER_ANDRE_JOURNALPOSTER
       value: "true"
 

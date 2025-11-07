@@ -7,7 +7,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -35,22 +34,19 @@ public class InformasjonsbrevGenerererTjeneste {
     private BrevMottakerTjeneste brevMottakerTjeneste;
     private Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere;
     private MicrosoftGraphTjeneste microsoftGraphTjeneste;
-    private boolean enableBrevAnsvarlig;
 
     @Inject
     public InformasjonsbrevGenerererTjeneste(
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
         BrevMottakerTjeneste brevMottakerTjeneste,
-        @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere, MicrosoftGraphTjeneste microsoftGraphTjeneste,
-        @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG", defaultVerdi = "true") boolean enableBrevAnsvarlig) {
+        @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere, MicrosoftGraphTjeneste microsoftGraphTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
         this.informasjonsbrevInnholdByggere = informasjonsbrevInnholdByggere;
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
-        this.enableBrevAnsvarlig = enableBrevAnsvarlig;
     }
 
     public InformasjonsbrevGenerererTjeneste() {
@@ -89,9 +85,6 @@ public class InformasjonsbrevGenerererTjeneste {
 
 
     private BrevAnsvarligDto lagBrevansvarlig(String bestillerIdent) {
-        if (!enableBrevAnsvarlig) {
-            return new BrevAnsvarligDto(false, null, null);
-        }
         return new BrevAnsvarligDto(
             false,
             microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null),
