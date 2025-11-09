@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -7,12 +7,11 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevForhåndsvisInput;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;

@@ -1,13 +1,13 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType;

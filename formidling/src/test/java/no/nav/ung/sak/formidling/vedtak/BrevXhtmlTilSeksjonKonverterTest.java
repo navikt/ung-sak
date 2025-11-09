@@ -1,4 +1,4 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak;
 
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType;
