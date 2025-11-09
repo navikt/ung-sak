@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -20,18 +19,12 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
-import no.nav.ung.sak.ytelse.kontroll.KontrollerteInntektperioderTjeneste;
-import no.nav.ung.sak.ytelse.kontroll.ManueltKontrollertInntekt;
+import no.nav.ung.sak.kontroll.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = FastsettInntektDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -39,9 +32,8 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private RapportertInntektMapper rapportertInntektMapper;
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     private HistorikkinnslagRepository historikkinnslagRepository;
-    ;
 
 
     public FastsettInntektOppdaterer() {
@@ -49,33 +41,32 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
     }
 
     @Inject
-    public FastsettInntektOppdaterer(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste, RapportertInntektMapper rapportertInntektMapper, ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder, HistorikkinnslagRepository historikkinnslagRepository) {
+    public FastsettInntektOppdaterer(KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste, RapportertInntektMapper rapportertInntektMapper, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder, HistorikkinnslagRepository historikkinnslagRepository) {
         this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
         this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     @Override
     public OppdateringResultat oppdater(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
-        final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, param);
+        var rapportertInntektTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(param.getBehandlingId());
+        final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, rapportertInntektTidslinje);
         validerVurdertePerioder(param, sammenslåtteInntekterTidslinje);
-        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje);
+        kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje, rapportertInntektTidslinje);
         opprettHistorikkinnslag(dto, param.getRef(), sammenslåtteInntekterTidslinje);
         return OppdateringResultat.builder().medTotrinnHvis(true).build();
     }
 
     private void validerVurdertePerioder(AksjonspunktOppdaterParameter param, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
-        final var prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(param.getBehandlingId());
-        final var tidslinjeTilVurdering = prosesstriggerTidslinje.filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+        final var tidslinjeTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(param.getBehandlingId());
         final var vurdertePerioderSomIkkeSkalVurderes = sammenslåtteInntekterTidslinje.disjoint(tidslinjeTilVurdering);
         if (!vurdertePerioderSomIkkeSkalVurderes.isEmpty()) {
             throw new IllegalStateException("Kan ikke bekrefte perioder som ikke skal vurderes i denne behandlingen: " + vurdertePerioderSomIkkeSkalVurderes);
         }
     }
 
-    private LocalDateTimeline<ManueltKontrollertInntekt> finnInntektOgKildeTidslinje(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
-        final var brukerOgRegisterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(param.getBehandlingId());
+    private LocalDateTimeline<ManueltKontrollertInntekt> finnInntektOgKildeTidslinje(FastsettInntektDto dto, LocalDateTimeline<RapporterteInntekter> brukerOgRegisterTidslinje) {
         final var saksbehandlerFastsatteInntekterTidslinje = finnSaksbehandlersFastsatteInntekterTidslinje(dto);
         final var inntekterForAlleKilderTidslinje = kombinerInntekterFraAlleKilder(brukerOgRegisterTidslinje, saksbehandlerFastsatteInntekterTidslinje);
         final var valgTidslinje = tidslinjeForValg(dto);
@@ -91,10 +82,17 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
                 }
                 yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.BRUKER, summerRapporterteInntekter(inntekt.getValue().brukersRapporterteInntekt()), valgOgBegrunnelse.getValue().begrunnelse()));
             }
-            case BRUK_REGISTER_INNTEKT ->
-                new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.REGISTER, summerRapporterteInntekter(inntekt.getValue().registersRapporterteInntekt()), valgOgBegrunnelse.getValue().begrunnelse()));
-            case MANUELT_FASTSATT ->
-                new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.SAKSBEHANDLER, inntekt.getValue().saksbehandlersFastsatteInntekt(), valgOgBegrunnelse.getValue().begrunnelse()));
+            case BRUK_REGISTER_INNTEKT -> {
+                Set<RapportertInntekt> registersRapporterteInntekt = inntekt == null ? Set.of() : inntekt.getValue().registersRapporterteInntekt;
+                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.REGISTER, summerRapporterteInntekter(registersRapporterteInntekt), valgOgBegrunnelse.getValue().begrunnelse()));
+            }
+            case MANUELT_FASTSATT -> {
+                if (inntekt == null) {
+                    throw new IllegalArgumentException("Kan ikke bruke saksbehandlers fastsatte inntekt for periode " + di + " da saksbehandler ikke har fastsatt inntekt i perioden");
+                }
+                BigDecimal saksbehandlersFastsatteInntekt = inntekt.getValue().saksbehandlersFastsatteInntekt;
+                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.SAKSBEHANDLER, saksbehandlersFastsatteInntekt, valgOgBegrunnelse.getValue().begrunnelse()));
+            }
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
@@ -110,9 +108,16 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private static LocalDateTimeline<InntekterPrKilde> kombinerInntekterFraAlleKilder(LocalDateTimeline<RapporterteInntekter> brukerOgRegisterTidslinje,
                                                                                       LocalDateTimeline<BigDecimal> saksbehandlerFastsatteInntekterTidslinje) {
-        return brukerOgRegisterTidslinje.combine(saksbehandlerFastsatteInntekterTidslinje,
+        LocalDateTimeline<InntekterPrKilde> kombinerteInntekterFraAlleKilder = brukerOgRegisterTidslinje.combine(saksbehandlerFastsatteInntekterTidslinje,
             FastsettInntektOppdaterer::mapTilInntekterPrKilde,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
+
+        // Dersom saksbehandler har satt inntekt uten at det finnes rapportert inntekt fra bruker eller register, må vi likevel få med dette i tidslinjen
+        return kombinerteInntekterFraAlleKilder.isEmpty() ? brukSaksbehandlersFastsatteInntekt(saksbehandlerFastsatteInntekterTidslinje) : kombinerteInntekterFraAlleKilder;
+    }
+
+    private static LocalDateTimeline<InntekterPrKilde> brukSaksbehandlersFastsatteInntekt(LocalDateTimeline<BigDecimal> saksbehandlerFastsatteInntekterTidslinje) {
+        return saksbehandlerFastsatteInntekterTidslinje.mapSegment(bigDecimal -> new InntekterPrKilde(Set.of(), Set.of(), bigDecimal));
     }
 
     private static LocalDateTimeline<BigDecimal> finnSaksbehandlersFastsatteInntekterTidslinje(FastsettInntektDto dto) {
@@ -135,7 +140,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
                 new ArrayList<>(List.of(
                     HistorikkinnslagLinjeBuilder.fraTilEquals("Inntekt for " + finnMåned(p), null, finnValgTekst(sammenslåtteInntekterTidslinje.getSegment(new LocalDateInterval(p.periode().getFom(), p.periode().getTom())))),
                     HistorikkinnslagLinjeBuilder.plainTekstLinje(p.begrunnelse())
-                    )))
+                )))
             .reduce((s1, s2) -> {
                 s1.add(HistorikkinnslagLinjeBuilder.LINJESKIFT);
                 s1.addAll(s2);
@@ -145,7 +150,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
         var historikkinnslag = new Historikkinnslag.Builder()
             .medFagsakId(behandlingReferanse.getFagsakId())
             .medBehandlingId(behandlingReferanse.getId())
-            .medTittel(SkjermlenkeType.BEREGNING)
+            .medTittel(SkjermlenkeType.KONTROLL_AV_INNTEKT)
             .medAktør(HistorikkAktør.SAKSBEHANDLER)
             .medLinjer(linjer)
             .build();
@@ -154,8 +159,10 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     private static String finnValgTekst(LocalDateSegment<ManueltKontrollertInntekt> segment) {
         return switch (segment.getValue().kilde()) {
-            case BRUKER -> "Rapportert inntekt fra deltaker: " + formater(segment.getValue().samletInntekt().intValue());
-            case REGISTER -> "Rapportert inntekt fra a-ordningen: " + formater(segment.getValue().samletInntekt().intValue());
+            case BRUKER ->
+                "Rapportert inntekt fra deltaker: " + formater(segment.getValue().samletInntekt().intValue());
+            case REGISTER ->
+                "Rapportert inntekt fra a-ordningen: " + formater(segment.getValue().samletInntekt().intValue());
             case SAKSBEHANDLER -> "Manuelt fastsatt beløp: " + formater(segment.getValue().samletInntekt().intValue());
         };
     }

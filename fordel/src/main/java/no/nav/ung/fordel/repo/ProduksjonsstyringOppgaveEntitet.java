@@ -1,17 +1,12 @@
 package no.nav.ung.fordel.repo;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity(name = "ProduksjonsstyringOppgaveEntitet")
 @Table(name = "FORDEL_PRODUKSJONSSTYRING_OPPGAVE")
@@ -27,7 +22,7 @@ public class ProduksjonsstyringOppgaveEntitet {
     @Column(name = "ytelse_type", nullable = false)
     private String ytelseType;
 
-    @Column(name = "fagsak_system", nullable = false)
+    @Column(name = "fagsak_system")
     private String fagsakSystem;
 
     @Column(name = "oppgave_type", nullable = false)

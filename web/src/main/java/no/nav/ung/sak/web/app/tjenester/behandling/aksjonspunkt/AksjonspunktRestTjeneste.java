@@ -185,14 +185,13 @@ public class AksjonspunktRestTjeneste {
                 @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BekreftedeAksjonspunkterDto apDto)
         throws URISyntaxException { // NOSONAR
-        Long behandlingId = apDto.getBehandlingId();
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandlingId);
+        final Behandling behandling = apDto.getBehandlingId() != null
+            ? behandlingRepository.hentBehandling(apDto.getBehandlingId())
+            : behandlingRepository.hentBehandling(apDto.getBehandlingUuid());
+        final BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling.getId());
 
         Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = apDto.getBekreftedeAksjonspunktDtoer();
 
-        Behandling behandling = behandlingId != null
-            ? behandlingRepository.hentBehandling(behandlingId)
-            : behandlingRepository.hentBehandling(apDto.getBehandlingUuid());
 
         behandlingutredningTjeneste.kanEndreBehandling(behandling.getId(), apDto.getBehandlingVersjon());
 

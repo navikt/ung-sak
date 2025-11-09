@@ -206,7 +206,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning3);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+            final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);
@@ -248,7 +248,7 @@ class EtterlysningTjenesteTest {
         etterlysning.vent(LocalDateTime.now());
         boolean harUttalelse = false;
         String uttalelse = "Uttalelse";
-        etterlysning.mottaSvar(svarJournalpostId, harUttalelse, uttalelse);
+        etterlysning.mottaSvar();
         uttalelseRepository.lagre(behandling.getId(), new UttalelseV2(
             harUttalelse,
             uttalelse,

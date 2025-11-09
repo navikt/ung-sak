@@ -43,16 +43,22 @@ public class KombinasjonScenarioer {
                 .with(TemporalAdjusters.lastDayOfMonth()));
 
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
-        var rapportertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, BigDecimal.valueOf(10000)));
+        var rapportertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode,
+            BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.valueOf(10000))));
         var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
+
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, rapportertInntektTimeline);
+
 
         var opptjening = OppgittOpptjeningBuilder.ny();
 
         rapportertInntektTimeline.forEach(it ->
             opptjening.leggTilOppgittArbeidsforhold(OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny()
-                .medInntekt(it.getValue())
+                .medInntekt(it.getValue().rapportertInntekt())
                 .medPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             ));
+
+
 
 
         return new UngTestScenario(
@@ -72,7 +78,8 @@ public class KombinasjonScenarioer {
             ),
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
-            ), null);
+            ), null,
+            kontrollerInntektPerioder);
     }
 
 
@@ -97,14 +104,17 @@ public class KombinasjonScenarioer {
             fom.withDayOfMonth(1).plusMonths(3).with(TemporalAdjusters.lastDayOfMonth()));
 
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
-        var rapportertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode, BigDecimal.valueOf(10000)));
+        var rapportertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(rapportertInntektPeriode,
+            BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.valueOf(10000))));
         var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
+
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, rapportertInntektTimeline);
 
         var opptjening = OppgittOpptjeningBuilder.ny();
 
         rapportertInntektTimeline.forEach(it ->
             opptjening.leggTilOppgittArbeidsforhold(OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder.ny()
-                .medInntekt(it.getValue())
+                .medInntekt(it.getValue().rapportertInntekt())
                 .medPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()))
             ));
 
@@ -125,7 +135,8 @@ public class KombinasjonScenarioer {
                 new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, p.getTomDato()))
             ),
             Collections.emptyList(),
-            null);
+            null,
+            kontrollerInntektPerioder);
     }
 
     /**
@@ -163,7 +174,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null);
+            null, null);
     }
 
     public static UngTestScenario endringStartdatoOgOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate nyStartdato, LocalDate sluttdato) {
@@ -199,7 +210,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null);
+            null, null);
     }
 
 
@@ -238,6 +249,6 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ),
-            null);
+            null, null);
     }
 }

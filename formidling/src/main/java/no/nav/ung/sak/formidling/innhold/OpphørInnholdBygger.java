@@ -27,7 +27,6 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
         this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
-
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         var opphørStartdato = resultatTidslinje.filterValue(it -> it.resultatInfo().stream()
@@ -42,7 +41,7 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
             new OpphørDto(
                 opphørStartdato,
                 sisteUtbetalingsdato
-            ), true);
+            ));
     }
 
     private YearMonth bestemInneværendeMåned() {

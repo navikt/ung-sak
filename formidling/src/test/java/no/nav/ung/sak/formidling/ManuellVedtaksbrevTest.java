@@ -1,11 +1,14 @@
 package no.nav.ung.sak.formidling;
 
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
-import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
+import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,11 +35,12 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
     @DisplayName("Standard manuell brev")
     @Test
     void standardManuellBrev() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
 
-        var behandling = EndringInntektScenarioer
-            .lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories);
-        behandling.avsluttBehandling();
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
+        var behandling = BrevScenarioerUtils.lagAvsluttetBehandlingMedAP(
+            ungTestGrunnlag, ungTestRepositories, AksjonspunktDefinisjon.FATTER_VEDTAK
+        );
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
@@ -70,11 +74,11 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
-        LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = EndringInntektScenarioer
-            .lagBehandlingMedAksjonspunktKontrollerInntekt(EndringInntektScenarioer.endring0KrInntekt_19år(fom), ungTestRepositories);
-
-        behandling.avsluttBehandling();
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
+        var behandling = BrevScenarioerUtils.lagAvsluttetBehandlingMedAP(
+            ungTestGrunnlag, ungTestRepositories, AksjonspunktDefinisjon.FATTER_VEDTAK
+        );
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),

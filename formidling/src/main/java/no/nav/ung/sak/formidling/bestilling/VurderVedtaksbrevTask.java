@@ -1,8 +1,9 @@
 package no.nav.ung.sak.formidling.bestilling;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -30,13 +31,12 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "formidling.vedtak.brevvurdering";
 
-    private boolean enableIgnoreManglendeBrev;
-    private VedtaksbrevRegler vedtaksbrevRegler;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository;
     private BehandlingRepository behandlingRepository;
     private BrevbestillingRepository brevbestillingRepository;
+    private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
 
     VurderVedtaksbrevTask() {
         // for proxy
@@ -44,20 +44,19 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
 
     @Inject
     public VurderVedtaksbrevTask(
-        VedtaksbrevRegler vedtaksbrevRegler,
-        @KonfigVerdi(value = "IGNORE_MANGLENDE_BREV", defaultVerdi = "false") boolean ignoreManglendeBrev,
         ProsessTaskTjeneste prosessTaskTjeneste,
         VedtaksbrevValgRepository vedtaksbrevValgRepository,
         BehandlingVedtaksbrevRepository behandlingVedtaksbrevRepository,
-        BehandlingRepository behandlingRepository, BrevbestillingRepository brevbestillingRepository) {
+        BehandlingRepository behandlingRepository,
+        BrevbestillingRepository brevbestillingRepository,
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler) {
 
-        this.enableIgnoreManglendeBrev = ignoreManglendeBrev;
-        this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
         this.behandlingVedtaksbrevRepository = behandlingVedtaksbrevRepository;
         this.behandlingRepository = behandlingRepository;
         this.brevbestillingRepository = brevbestillingRepository;
+        this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
 
     @Override
@@ -65,6 +64,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(this.vedtaksbrevRegler, behandling.getType());
         var resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", resultat.safePrint());
 
@@ -84,8 +84,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .collect(Collectors.toSet());
 
         var vedtaksbrevResultater = resultat.vedtaksbrevResultater().stream()
-                .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
-                .toList();
+            .filter(it -> !hindredeEllerRedigerteMaler.contains(it.dokumentMalType()))
+            .toList();
 
         for (int brevNr = 0; brevNr < vedtaksbrevResultater.size(); brevNr++) {
             Vedtaksbrev it = vedtaksbrevResultater.get(brevNr);
@@ -95,7 +95,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
     private void validerBrevbestillingForespørsel(Behandling behandling, Vedtaksbrev vedtaksbrev) {
-        if (!behandling.erAvsluttet()) {
+        if (!behandling.erAvsluttet() &&
+            !DokumentMalType.KLAGE_OVERSENDT_KLAGEINSTANS.equals(vedtaksbrev.dokumentMalType())) { // Unntak for oversendt til klageinstans, som ikke avslutter behandling før den er ferdig behandlet i kabal
             throw new IllegalStateException("Behandling må være avsluttet for å kunne bestille vedtaksbrev");
         }
 
@@ -193,13 +194,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .toList();
 
         if (!ikkeImplementerteBrev.isEmpty()) {
-            if (enableIgnoreManglendeBrev) {
-                LOG.warn("Ingen brev implementert for tilfelle pga: {}", forklaring);
-                behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev
-                    .utenBestilling(behandlingId, fagsakId, VedtaksbrevResultatType.IKKE_RELEVANT, forklaring, null));
-            } else {
-                throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
-            }
+            throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
         }
         LOG.info("Ingen brev relevant for tilfelle: {}", forklaring);
         behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev

@@ -6,6 +6,9 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.formidling.template.dto.ManuellVedtaksbrevDto;
 
 @Dependent
+/**
+ * Bruker for alle redigerte vedtaksbrev
+ */
 public class ManueltVedtaksbrevInnholdBygger {
 
     @Inject
@@ -17,8 +20,8 @@ public class ManueltVedtaksbrevInnholdBygger {
 
         return new TemplateInnholdResultat(
             TemplateType.MANUELT_VEDTAKSBREV,
-            new ManuellVedtaksbrevDto(brevHtml),
-            false);
+            new ManuellVedtaksbrevDto(brevHtml)
+        );
     }
 
 

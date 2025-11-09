@@ -1,10 +1,20 @@
 package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.KjønnKodeverdiConverter;
@@ -25,7 +35,7 @@ public class PersonopplysningEntitet extends BaseEntitet implements HarAktørId,
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PO_PERSONOPPLYSNING")
     private Long id;
 
-    @Convert(converter = AktørIdConverter.class, attributeName = "aktørId")
+    @Embedded
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", updatable = false)))
     private AktørId aktørId;
 

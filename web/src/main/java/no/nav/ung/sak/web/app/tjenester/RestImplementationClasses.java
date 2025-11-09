@@ -8,6 +8,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollerInntektRestTjeneste;
@@ -23,6 +24,7 @@ import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.formidling.FormidlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
@@ -31,6 +33,7 @@ import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningProduksjonsstyrin
 import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.klage.KlageRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.microsoftgraph.ForvaltningTestRestTjeneste;
@@ -64,6 +67,7 @@ public class RestImplementationClasses {
         classes.add(KodeverkRestTjeneste.class);
         classes.add(SøknadsfristRestTjeneste.class);
         classes.add(FordelRestTjeneste.class);
+        classes.add(PapirSøknadRestTjeneste.class);
         classes.add(FordelHendelseRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
         classes.add(TotrinnskontrollRestTjeneste.class);
@@ -82,6 +86,10 @@ public class RestImplementationClasses {
         classes.add(KontrollerInntektRestTjeneste.class);
         classes.add(EtterlysningRestTjeneste.class);
         classes.add(OppdragProxyRestTjeneste.class);
+        classes.add(ArbeidsgiverRestTjeneste.class);
+
+
+        classes.add(KlageRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);

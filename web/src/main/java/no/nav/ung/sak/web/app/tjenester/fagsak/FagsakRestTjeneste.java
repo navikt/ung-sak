@@ -1,5 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.fagsak;
 
+import com.google.common.collect.ImmutableSet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -23,6 +24,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
@@ -57,11 +59,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -84,6 +82,7 @@ public class FagsakRestTjeneste {
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
+    private boolean klageEnabled;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
@@ -92,10 +91,12 @@ public class FagsakRestTjeneste {
     @Inject
     public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
                               FagsakTjeneste fagsakTjeneste,
-                              BehandlingsoppretterTjeneste behandlingsoppretterTjeneste) {
+                              BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
+                              @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
+        this.klageEnabled = klageEnabled;
     }
 
     @GET
@@ -205,6 +206,10 @@ public class FagsakRestTjeneste {
             .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt), perioderMedGjennomførtKontroll))
             .collect(Collectors.toList());
 
+        if (klageEnabled) {
+            oppretting.add(new BehandlingOpprettingDto(BehandlingType.KLAGE, true, List.of()));
+        }
+
         var dto = new SakRettigheterDto(oppretting, List.of());
         return Response.ok(dto).build();
     }
@@ -270,7 +275,9 @@ public class FagsakRestTjeneste {
             personDto,
             kanRevurderingOpprettes,
             fagsak.getOpprettetTidspunkt(),
-            fagsak.getEndretTidspunkt());
+            fagsak.getEndretTidspunkt(),
+            fagsak.erIkkeDigitalBruker()
+        );
     }
 
     private PersonDto mapFraPersoninfoBasis(PersoninfoBasis pi) {

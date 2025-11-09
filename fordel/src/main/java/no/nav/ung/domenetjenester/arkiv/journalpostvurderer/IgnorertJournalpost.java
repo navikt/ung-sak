@@ -1,30 +1,34 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.saf.Journalstatus;
+import no.nav.k9.felles.integrasjon.saf.Tema;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
+
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.StrukturertJournalpost.GODKJENTE_KODER;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.k9.felles.integrasjon.saf.Journalstatus;
-import no.nav.k9.felles.integrasjon.saf.Tema;
-import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
-import no.nav.ung.kodeverk.dokument.Brevkode;
-
-@ApplicationScoped
+@Dependent
 public class IgnorertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(IgnorertJournalpost.class);
 
     private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.UNG);
+    private final boolean enableHåndterAndreJournalposter;
+
+    @Inject
+    public IgnorertJournalpost(@KonfigVerdi(value = "ENABLE_HANDTER_ANDRE_JOURNALPOSTER", defaultVerdi = "false") boolean enableHåndterAndreJournalposter) {
+        this.enableHåndterAndreJournalposter = enableHåndterAndreJournalposter;
+    }
 
     @Override
     public VurdertJournalpost gjørVurdering(Vurderingsgrunnlag vurderingsgrunnlag) {
@@ -45,6 +49,10 @@ public class IgnorertJournalpost implements Journalpostvurderer {
         if (hendelseErMottattMenStatusErJournalført(hendelsetype, journalstatus)) {
             log.info("HendelseType på journalpost ({}) virker å være MOTTATT, men journalpost har status: {} i arkiv. Ignorerer", vurderingsgrunnlag.journalpostInfo(), journalstatus);
             return håndtert();
+        }
+
+        if (enableHåndterAndreJournalposter) {
+            return ikkeHåndtert();
         }
 
         if (ignorer(vurderingsgrunnlag)) {

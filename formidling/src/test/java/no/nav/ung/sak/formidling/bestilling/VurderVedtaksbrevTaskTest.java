@@ -7,6 +7,7 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
@@ -14,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.*;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevTestUtils;
+import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
@@ -162,7 +164,7 @@ class VurderVedtaksbrevTaskTest {
 
         String redigertBrevHtml = "<h1>redigert</h1>";
         vedtaksbrevValgRepository.lagre(
-            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_BARNETILLEGG, true, false, redigertBrevHtml)
+            new VedtaksbrevValgEntitet(behandling.getId(), DokumentMalType.ENDRING_INNTEKT, true, false, redigertBrevHtml)
         );
 
 
@@ -176,7 +178,7 @@ class VurderVedtaksbrevTaskTest {
         assertThat(bestillinger).hasSize(2);
 
         var bestilling1 = bestillinger.stream()
-            .filter(b -> b.getDokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .filter(b -> b.getDokumentMalType().equals(DokumentMalType.ENDRING_BARNETILLEGG))
             .findFirst()
             .orElseThrow();
         assertThat(bestilling1.getStatus()).isEqualTo(BrevbestillingStatusType.NY);
@@ -352,10 +354,13 @@ class VurderVedtaksbrevTaskTest {
     void skalFeilHvisTomManuellBrevIkkeErRedigert() {
         // Arrange
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+        LocalDate fom = LocalDate.of(2025, 8, 1);
+        UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
+        var behandling = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
+            .medUngTestGrunnlag(ungTestGrunnlag)
+            .buildOgLagreMedUng(ungTestRepositories);
 
-        var behandling = EndringInntektScenarioer
-            .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);
         behandling.avsluttBehandling();
 
         vedtaksbrevValgRepository.lagre(
@@ -373,7 +378,7 @@ class VurderVedtaksbrevTaskTest {
     void skalFeileHvisForsøkerÅBestilleBrevSomIkkeErMulig() {
         // Arrange
         UngTestRepositories ungTestRepositories = BrevTestUtils.lagAlleUngTestRepositories(entityManager);
-        UngTestScenario ungTestScenario = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2025, 11, 1));
+        UngTestScenario ungTestScenario = EndringInntektScenarioer.endringMedInntektPå10k_19år(LocalDate.of(2025, 11, 1));
 
         var behandling = EndringInntektScenarioer
             .lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestScenario, ungTestRepositories);

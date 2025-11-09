@@ -3,10 +3,10 @@ package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
-import no.nav.ung.sak.ytelse.kontroll.RelevanteKontrollperioderUtleder;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -22,12 +22,12 @@ public class LagTilkjentYtelse {
     static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
                                                                          LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                          LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
-                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
+                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje, boolean kontrollSisteMndEnabled) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
-        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje);
+        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje, kontrollSisteMndEnabled);
 
 
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);

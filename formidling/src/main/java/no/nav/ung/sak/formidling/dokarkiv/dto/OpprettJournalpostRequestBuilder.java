@@ -1,13 +1,16 @@
 package no.nav.ung.sak.formidling.dokarkiv.dto;
 
+import no.nav.ung.kodeverk.behandling.BehandlingTema;
+import no.nav.ung.sak.formidling.bestilling.JournalpostType;
+
 import java.util.List;
 
 public class OpprettJournalpostRequestBuilder {
-    private String journalpostType;
+    private JournalpostType journalpostType;
     private OpprettJournalpostRequest.AvsenderMottaker avsenderMottaker;
     private OpprettJournalpostRequest.Bruker bruker;
     private String tema;
-    private String behandlingstema;
+    private BehandlingTema behandlingstema;
     private String tittel;
     private String kanal;
     private String journalfoerendeEnhet;
@@ -16,7 +19,7 @@ public class OpprettJournalpostRequestBuilder {
     private OpprettJournalpostRequest.Sak sak;
     private List<OpprettJournalpostRequest.Dokument> dokumenter;
 
-    public OpprettJournalpostRequestBuilder journalpostType(String journalpostType) {
+    public OpprettJournalpostRequestBuilder journalpostType(JournalpostType journalpostType) {
         this.journalpostType = journalpostType;
         return this;
     }
@@ -36,7 +39,7 @@ public class OpprettJournalpostRequestBuilder {
         return this;
     }
 
-    public OpprettJournalpostRequestBuilder behandlingstema(String behandlingstema) {
+    public OpprettJournalpostRequestBuilder behandlingstema(BehandlingTema behandlingstema) {
         this.behandlingstema = behandlingstema;
         return this;
     }
@@ -77,6 +80,7 @@ public class OpprettJournalpostRequestBuilder {
     }
 
     public OpprettJournalpostRequest build() {
-        return new OpprettJournalpostRequest(journalpostType, avsenderMottaker, bruker, tema, behandlingstema, tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
+        String offisiellKode = behandlingstema != null ? behandlingstema.getOffisiellKode() : null;
+        return new OpprettJournalpostRequest(journalpostType.name(), avsenderMottaker, bruker, tema, offisiellKode, tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
     }
 }

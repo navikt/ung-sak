@@ -8,13 +8,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public enum SkjermlenkeType implements Kodeverdi {
-    BEREGNING("BEREGNING", "Beregning"),
+    KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll av inntekt"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     SOEKNADSFRIST("SOEKNADSFRIST", "Søknadsfrist"),
     UDEFINERT("-", "Ikke definert"),
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     VEDTAK("VEDTAK", "Vedtak"),
+    FORMKRAV_KLAGE_VEDTAKSINSTANS("FORMKRAV_KLAGE_VEDTAKSINSTANS", "Formkrav klage Vedtaksinstans"),
+    KLAGE_BEH_VEDTAKSINSTANS("KLAGE_BEH_VEDTAKSINSTANS", "Klageresultat Vedtaksinstans"),
     ;
 
     private static final Map<String, SkjermlenkeType> KODER = new LinkedHashMap<>();

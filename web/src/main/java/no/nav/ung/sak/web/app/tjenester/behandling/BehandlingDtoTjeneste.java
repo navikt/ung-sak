@@ -24,6 +24,7 @@ import no.nav.ung.sak.kontrakt.vilkår.VilkårResultatDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.kontroll.KontrollerInntektRestTjeneste;
@@ -35,6 +36,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTj
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.klage.KlageRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.ungdomsytelse.UngdomsytelseRestTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
@@ -102,9 +104,14 @@ public class BehandlingDtoTjeneste {
         dto.setBehandlingsresultat(behandlingsresultatDto);
 
         leggTilRettigheterLinks(dto);
+        leggTilHandlingerResourceLinks(behandling, dto);
         leggTilGrunnlagResourceLinks(behandling, dto);
         leggTilStatusResultaterLinks(behandling, dto);
-        leggTilHandlingerResourceLinks(behandling, dto);
+
+        if (BehandlingType.KLAGE.equals(behandling.getType())) {
+            var uuidQueryParams = Map.of(BehandlingUuidDto.NAME, dto.getUuid().toString());
+            dto.leggTil(getFraMap(KlageRestTjeneste.KLAGE_V2_PATH, "klage-vurdering", uuidQueryParams));
+        }
     }
 
     private void leggTilRettigheterLinks(BehandlingDto dto) {
@@ -202,7 +209,7 @@ public class BehandlingDtoTjeneste {
     }
 
     public BehandlingDto lagUtvidetBehandlingDto(Behandling behandling, AsyncPollingStatus asyncStatus) {
-        Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandling.getFagsakId());
+        Optional<Behandling> sisteAvsluttedeIkkeHenlagteBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId());
         BehandlingDto dto = mapFra(behandling, erBehandlingMedGjeldendeVedtak(behandling, sisteAvsluttedeIkkeHenlagteBehandling.map(Behandling::getId)));
         if (asyncStatus != null && !asyncStatus.isPending()) {
             dto.setAsyncStatus(asyncStatus);
@@ -258,9 +265,10 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(PersonRestTjeneste.PERSONOPPLYSNINGER_PATH, "soeker-personopplysninger", uuidQueryParams));
 
-        leggTilBeregnetYtelseBaserteLinks(behandling, dto, uuidQueryParams);
-
-        leggTilUngdomsytelseSpesifikkeLinks(dto, uuidQueryParams);
+        if (behandling.erYtelseBehandling()) {
+            leggTilBeregnetYtelseBaserteLinks(behandling, dto, uuidQueryParams);
+            leggTilUngdomsytelseSpesifikkeLinks(dto, uuidQueryParams);
+        }
     }
 
     private static void leggTilUngdomsytelseSpesifikkeLinks(BehandlingDto dto, Map<String, String> uuidQueryParams) {
@@ -276,6 +284,7 @@ public class BehandlingDtoTjeneste {
         if (ytelseMedBeregning) {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_PATH, "beregningsresultat", uuidQueryParams));
             dto.leggTil(getFraMap(KontrollerInntektRestTjeneste.KONTROLL_PERIODER_PATH, "kontroller-inntekt-perioder", uuidQueryParams));
+            dto.leggTil(getFraMap(ArbeidsgiverRestTjeneste.ARBEIDSGIVER_PATH, "arbeidsgivere", uuidQueryParams));
             lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
             lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
         }

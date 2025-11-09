@@ -97,8 +97,9 @@ public class AktørRestTjeneste {
                         personDto,
                         null,
                         f.getOpprettetTidspunkt(),
-                        f.getEndretTidspunkt())
-                    );
+                        f.getEndretTidspunkt(),
+                        f.erIkkeDigitalBruker()
+                    ));
                 }
                 aktoerInfoDto.setFagsaker(fagsakDtoer);
                 return Response.ok(aktoerInfoDto).build();

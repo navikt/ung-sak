@@ -130,7 +130,7 @@ public class InnhentDokumentTjeneste {
             sjekkBehandlingKanLåses(sisteBehandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
             if (erBehandlingAvsluttet(sisteYtelsesbehandling)) {
                 // siste behandling er avsluttet, oppretter ny behandling
-                Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+                Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
                 sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
 
                 // Håndter avsluttet behandling
@@ -189,7 +189,7 @@ public class InnhentDokumentTjeneste {
     }
 
     private void sjekkBehandlingKanLåses(Behandling behandling) {
-        int forsøk = 3;
+        int forsøk = 15;
 
         BehandlingLås lås;
         while (--forsøk >= 0) {
@@ -198,7 +198,7 @@ public class InnhentDokumentTjeneste {
                 return; // OK - Fikk lås
             }
             try {
-                Thread.sleep(1 * 1000L);
+                Thread.sleep(200L);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
