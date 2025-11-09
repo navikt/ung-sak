@@ -51,7 +51,7 @@ class VedtaksbrevTjenesteEditorTest {
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestscenario, ungTestRepositories);
 
         //Initielle valg - kun automatisk brev
-        VedtaksbrevEditorResponse response = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT, false);
+        VedtaksbrevEditorResponse response = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
         List<VedtaksbrevSeksjon> seksjoner = response.original();
         assertThat(seksjoner).hasSize(4);
 
