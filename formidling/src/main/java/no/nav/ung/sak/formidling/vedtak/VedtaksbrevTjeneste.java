@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -252,7 +253,6 @@ public class VedtaksbrevTjeneste {
     }
 
     public VedtaksbrevEditorResponse editor(Long behandlingId, DokumentMalType dokumentMalType, boolean redigertVersjon) {
-        BehandlingVedtaksbrevResultat kjør = vedtaksbrevRegler.kjør(behandlingId);
         GenerertBrev forhåndsvis = forhåndsvis(new VedtaksbrevForhåndsvisInput(
             behandlingId,
             dokumentMalType,

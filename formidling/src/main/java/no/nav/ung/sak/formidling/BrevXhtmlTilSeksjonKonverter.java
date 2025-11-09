@@ -8,10 +8,10 @@ import java.util.List;
 public class BrevXhtmlTilSeksjonKonverter {
     public static List<VedtaksbrevSeksjon> konverter(String html) {
         return List.of(
-            new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.STYLE, "<style>"),
+            new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.STYLE, "<style></style>"),
             new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.STATISK, "Til XXXXXX"),
             new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.REDIGERBAR, "<h1>Overskrift</h1>"),
-            new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.STATISK, "<h1>Du kan klage</h1>")
+            new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.STATISK, "<h2>Du kan klage</h2>")
         );
     }
 }
