@@ -22,6 +22,9 @@ class BrevXhtmlTilSeksjonKonverterTest {
             </head>
             <body>
                 <header>
+                    <div id="nav_logo_container">
+                        <img id="nav_logo" src="data:image/png;base64,svg-bilde" alt="nav logo"/>
+                    </div>
                     <div class="uten-mellomrom">
                         <p>Til: Ung Testesen</p>
                         <p>Fødselsnummer: 01017000299</p>
@@ -57,6 +60,8 @@ class BrevXhtmlTilSeksjonKonverterTest {
         assertThat(seksjoner.get(1).type()).isEqualTo(VedtaksbrevSeksjonType.STATISK);
         assertThat(seksjoner.get(1).innhold()).contains("<p>Til: Ung Testesen</p>");
         assertThat(seksjoner.get(1).innhold()).doesNotContain("overskrift");
+        //Skal ikke ha med logo
+        assertThat(seksjoner.get(1).innhold()).doesNotContain("<img>");
 
         // Del 3: Redigerbar
         assertThat(seksjoner.get(2).type()).isEqualTo(VedtaksbrevSeksjonType.REDIGERBAR);

@@ -29,6 +29,7 @@ public class BrevXhtmlTilSeksjonKonverter {
         if (header == null) {
             throw new IllegalArgumentException("Fant ingen headerelement");
         }
+        header.select("#nav_logo_container").remove();
         seksjoner.add(new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.STATISK, header.outerHtml()));
 
         Element editableDiv = doc.body().selectFirst("div[data-editable]");

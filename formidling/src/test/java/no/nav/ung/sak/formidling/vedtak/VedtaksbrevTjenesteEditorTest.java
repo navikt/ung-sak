@@ -72,7 +72,7 @@ class VedtaksbrevTjenesteEditorTest {
 
         String statiskHeaderInnhold = statiskHeader.innhold();
         verifiserWellformedFragment(statiskHeaderInnhold,
-            "header", "div", "img", "p");
+            "header", "div", "p");
         assertThat(statiskHeader.innhold()).contains(BrevScenarioerUtils.DEFAULT_NAVN);
 
         String redigerbarInnhold = redigerbar.innhold();
