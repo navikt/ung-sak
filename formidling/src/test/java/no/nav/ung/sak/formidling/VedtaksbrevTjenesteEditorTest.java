@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Tester at ulike flyter fra klient funker.
- */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class VedtaksbrevTjenesteEditorTest {
@@ -76,7 +73,7 @@ class VedtaksbrevTjenesteEditorTest {
         String statiskHeaderInnhold = statiskHeader.innhold();
         verifiserWellformedFragment(statiskHeaderInnhold,
             "header", "div", "img", "p");
-        assertThat(stiler.innhold()).contains(BrevScenarioerUtils.DEFAULT_NAVN);
+        assertThat(statiskHeader.innhold()).contains(BrevScenarioerUtils.DEFAULT_NAVN);
 
         String redigerbarInnhold = redigerbar.innhold();
         verifiserWellformedFragment(redigerbarInnhold,
@@ -85,7 +82,7 @@ class VedtaksbrevTjenesteEditorTest {
 
 
         String statiskFooterInnhold = statiskFooter.innhold();
-        verifiserWellformedFragment(statiskFooterInnhold, "h2", "p", "div", "a", "footer", "span");
+        verifiserWellformedFragment(statiskFooterInnhold, "h2", "p", "div", "a", "td", "tbody", "table", "tr");
         assertThat(statiskFooterInnhold).contains("Med vennlig hilsen");
 
     }
