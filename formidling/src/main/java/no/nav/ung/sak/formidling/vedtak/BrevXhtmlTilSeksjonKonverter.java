@@ -5,17 +5,47 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonT
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.safety.Safelist;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BrevXhtmlTilSeksjonKonverter {
+    private static final Safelist SAFELIST = Safelist.none()
+        .addTags(
+            "div",
+            "p",
+            "h1",
+            "h2",
+            "a",
+            "span",
+            "section",
+            "header",
+            "footer",
+            "style",
+            "table",
+            "tr",
+            "td"
+
+        )
+        .addAttributes(":all", "class", "id")
+        .addAttributes("div", "data-hidden", "data-editable")
+        .addAttributes("a", "href", "title")
+        .addAttributes("span", "class")
+        .addAttributes(":all", "style")
+        .addProtocols("a", "href", "http", "https");
+
+
+
     public static List<VedtaksbrevSeksjon> konverter(String html) {
         List<VedtaksbrevSeksjon> seksjoner = new ArrayList<>();
 
         // Parse HTML med Jsoup
-        Document doc = Jsoup.parse(html);
+        String clean = Jsoup.clean(html, "", SAFELIST);
+        Document doc = Jsoup.parse(clean);
+        doc.outputSettings(new Document.OutputSettings()
+            .prettyPrint(false));
 
         // Del 1: Style - Trekk ut style taggen
         Element style = doc.selectFirst("style");
@@ -43,4 +73,6 @@ public class BrevXhtmlTilSeksjonKonverter {
 
         return seksjoner;
     }
+
+    // Build a restrictive Safelist matching the allowed XHTML fragments
 }
