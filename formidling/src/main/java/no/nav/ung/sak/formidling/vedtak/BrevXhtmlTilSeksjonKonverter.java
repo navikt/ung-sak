@@ -77,5 +77,4 @@ public class BrevXhtmlTilSeksjonKonverter {
         return seksjoner;
     }
 
-    // Build a restrictive Safelist matching the allowed XHTML fragments
 }
