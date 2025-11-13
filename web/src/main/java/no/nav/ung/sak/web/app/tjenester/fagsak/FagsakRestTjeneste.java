@@ -1,6 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.fagsak;
 
-import com.google.common.collect.ImmutableSet;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -43,6 +42,7 @@ import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
@@ -61,7 +61,6 @@ import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.TmpAktoerIdRepository;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
@@ -86,7 +85,7 @@ public class FagsakRestTjeneste {
     public static final String BRUKER_PATH = PATH + "/bruker";
     public static final String RETTIGHETER_PATH = PATH + "/rettigheter";
 
-    public static final String BLI_DIGITAL_BRUKER_PATH = PATH + "/bruker-bli-digital";
+    public static final String FJERN_IKKEDIGITAL_FLAGG = PATH + "/fjern-ikkedigital-flagg";
 
     private FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste;
     private FagsakTjeneste fagsakTjeneste;
@@ -94,6 +93,7 @@ public class FagsakRestTjeneste {
     private boolean klageEnabled;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste taskTjeneste;
+    private FagsakRepository fagsakRepository;
 
     public FagsakRestTjeneste() {
         // For Rest-CDI
@@ -103,13 +103,14 @@ public class FagsakRestTjeneste {
     public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
                               FagsakTjeneste fagsakTjeneste,
                               BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
-                              @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled, BehandlingRepository behandlingRepository, ProsessTaskTjeneste taskTjeneste) {
+                              @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled, BehandlingRepository behandlingRepository, ProsessTaskTjeneste taskTjeneste, FagsakRepository fagsakRepository) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.klageEnabled = klageEnabled;
         this.behandlingRepository = behandlingRepository;
         this.taskTjeneste = taskTjeneste;
+        this.fagsakRepository = fagsakRepository;
     }
 
     @GET
@@ -256,13 +257,13 @@ public class FagsakRestTjeneste {
     }
 
     @POST
-    @Path(BLI_DIGITAL_BRUKER_PATH)
+    @Path(FJERN_IKKEDIGITAL_FLAGG)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Setter en ikke-digital bruker til å være digital", tags = "fagsak", summary = ("Setter en ikke-digital bruker til å være digital"))
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response bliDigitalBruker(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
+    public Response fjernIkkedigitalFlagg(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi().getSaksnummer(), false);
         if (fagsak.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -271,16 +272,16 @@ public class FagsakRestTjeneste {
         if (!fagsak.get().erIkkeDigitalBruker()){
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
-        fagsak.get().setIkkeDigitalBruker(false);
+        fagsakRepository.fjernIkkedigitalFlagg(fagsak.get().getId());
 
-        final Behandling behandling = finnBehandlingSomKanSendesTilbakeTilStart(s.getVerdi());
-        if (behandling == null) {
+        final Optional<Behandling> behandling = finnBehandlingSomKanSendesTilbakeTilStart(s.getVerdi());
+        if (behandling.isEmpty()) {
             logger.warn("Kunne ikke finne åpen behandling for: {}", s.getVerdi());
         }
         else {
             final ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
             prosessTaskData.setCallIdFraEksisterende();
-            prosessTaskData.setBehandling(fagsak.get().getId(), behandling.getId(), fagsak.get().getAktørId().getId());
+            prosessTaskData.setBehandling(fagsak.get().getId(), behandling.get().getId(), fagsak.get().getAktørId().getId());
             taskTjeneste.lagre(prosessTaskData);
         }
         return Response.ok().build();
@@ -358,7 +359,7 @@ public class FagsakRestTjeneste {
         }
     }
 
-    private Behandling finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {
+    private Optional<Behandling> finnBehandlingSomKanSendesTilbakeTilStart(Saksnummer saksnummer) {
         final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer)
             .stream()
             .filter(Behandling::erYtelseBehandling)
@@ -366,11 +367,11 @@ public class FagsakRestTjeneste {
             .toList();
 
         if (behandlinger.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
         if (behandlinger.size() > 1) {
             throw new IllegalStateException("Flere åpne behandlinger på én fagsak er ikke støttet i denne tasken ennå.");
         }
-        return behandlinger.get(0);
+        return Optional.of(behandlinger.get(0));
     }
 }
