@@ -12,13 +12,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -43,20 +48,31 @@ import no.nav.ung.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingT
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
-import no.nav.ung.sak.kontrakt.behandling.*;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingOperasjonerDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.ung.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
+import no.nav.ung.sak.kontrakt.behandling.GjenopptaBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.HenleggBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.NyBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.ReåpneBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
-import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static no.nav.k9.felles.feil.LogLevel.ERROR;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.*;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.CREATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.UPDATE;
 
 @ApplicationScoped
 @Transactional
