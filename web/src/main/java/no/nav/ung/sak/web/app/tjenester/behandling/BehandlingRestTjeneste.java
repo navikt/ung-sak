@@ -48,7 +48,17 @@ import no.nav.ung.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingT
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
-import no.nav.ung.sak.kontrakt.behandling.*;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingOperasjonerDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.ung.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
+import no.nav.ung.sak.kontrakt.behandling.GjenopptaBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.HenleggBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.NyBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.ReåpneBehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
@@ -344,6 +354,10 @@ public class BehandlingRestTjeneste {
         Fagsak fagsak = funnetFagsak.get();
         if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
+
+            if (behandlingÅrsakType == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT && dto.getPeriode() == null) {
+                throw new UnsupportedOperationException("Ikke implementert støtte for å opprette revurdering for inntektskontroll uten definert periode");
+            }
             Behandling behandling = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, dto.getPeriode() == null ? Optional.empty() : Optional.of(DatoIntervallEntitet.fra(dto.getPeriode())));
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
