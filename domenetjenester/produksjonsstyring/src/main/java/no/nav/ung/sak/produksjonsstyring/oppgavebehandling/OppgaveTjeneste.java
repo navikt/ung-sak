@@ -1,12 +1,22 @@
 package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.k9.felles.exception.VLException;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +62,7 @@ public class OppgaveTjeneste {
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
     private ProsessTaskTjeneste taskTjeneste;
     private OppgaveRestKlient restKlient;
+
 
     OppgaveTjeneste() {
         // for CDI proxy
@@ -223,7 +234,6 @@ public class OppgaveTjeneste {
 
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), enhetsId, beskrivelse, høyPrioritet ? Prioritet.HOY : Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
             mapYtelseTypeTilTema(fagsak.getYtelseType()))
-                .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
                 .medOppgavetype(oppgaveÅrsak.getKode());
         var oppgave = restKlient.opprettetOppgave(orequest.build());
         logger.info("GOSYS opprettet VURDER VL oppgave {}", oppgave);
@@ -254,7 +264,6 @@ public class OppgaveTjeneste {
         Fagsak fagsak = behandling.getFagsak();
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, prioritet, fristDager,
             mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
             .medOppgavetype(oppgaveÅrsak.getKode());
         var oppgave = restKlient.opprettetOppgave(orequest.build());
         logger.info("Ungsak GOSYS opprettet oppgave med oppgaveid={} for behandling={}, saksnummer={}", oppgave.getId(), behandling.getId(), fagsak.getSaksnummer());
