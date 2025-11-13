@@ -6841,10 +6841,10 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/api/fagsak/bruker-bli-digital" : {
+    "/api/fagsak/fjern-ikkedigital-flagg" : {
       "post" : {
         "description" : "Setter en ikke-digital bruker til å være digital",
-        "operationId" : "bliDigitalBruker",
+        "operationId" : "fjernIkkedigitalFlagg",
         "parameters" : [ {
           "in" : "query",
           "name" : "saksnummer",
