@@ -1,16 +1,5 @@
 package no.nav.ung.sak.behandling.revurdering.ytelse;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -27,13 +16,23 @@ import no.nav.ung.sak.behandling.revurdering.BeregningRevurderingTestUtil;
 import no.nav.ung.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjenesteFelles;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.ung.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -59,6 +58,8 @@ public class RevurderingTjenesteImplTest {
     @Inject
     @Any
     private Instance<GrunnlagKopierer> grunnlagKopierer;
+    @Inject
+    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
 
     @BeforeEach
     public void setup() {
@@ -83,7 +84,7 @@ public class RevurderingTjenesteImplTest {
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
         var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste,
-            revurderingTjenesteFelles, grunnlagKopierer, historikkRepository, prosessTriggereRepository);
+            revurderingTjenesteFelles, grunnlagKopierer, historikkRepository, prosessTriggereRepository, kontrollerteInntektperioderTjeneste);
 
         // Act
         Behandling revurdering = revurderingTjeneste

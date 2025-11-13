@@ -12,13 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -60,9 +54,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static no.nav.k9.felles.feil.LogLevel.ERROR;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.CREATE;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.UPDATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.*;
 
 @ApplicationScoped
 @Transactional
@@ -344,9 +336,6 @@ public class BehandlingRestTjeneste {
         Fagsak fagsak = funnetFagsak.get();
         if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
-            if (behandlingÅrsakType == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT && dto.getPeriode() == null){
-                throw new UnsupportedOperationException("kke implementert støtte for å opprette revurdering for inntektskontroll uten definert periode");
-            }
             Behandling behandling = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, dto.getPeriode() == null ? Optional.empty() : Optional.of(DatoIntervallEntitet.fra(dto.getPeriode())));
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));

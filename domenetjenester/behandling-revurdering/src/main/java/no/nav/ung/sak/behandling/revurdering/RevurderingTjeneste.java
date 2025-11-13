@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -19,9 +19,11 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,6 +37,7 @@ public class RevurderingTjeneste {
     private Instance<GrunnlagKopierer> grunnlagKopierere;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
 
     public RevurderingTjeneste() {
         // for CDI proxy
@@ -44,17 +47,30 @@ public class RevurderingTjeneste {
     public RevurderingTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                RevurderingTjenesteFelles revurderingTjenesteFelles,
                                @Any Instance<GrunnlagKopierer> grunnlagKopierere,
-                               HistorikkinnslagRepository historikkinnslagRepository, ProsessTriggereRepository prosessTriggereRepository) {
+                               HistorikkinnslagRepository historikkinnslagRepository, ProsessTriggereRepository prosessTriggereRepository, KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.grunnlagKopierere = grunnlagKopierere;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
     }
 
     public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet, Optional<DatoIntervallEntitet> periode) {
         validerTilstand(origBehandling);
         Behandling revurdering = opprettRevurdering(origBehandling, revurderingsÅrsak, true, enhet);
+
+        if (revurderingsÅrsak == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT) {
+            if (periode.isEmpty()){
+                throw new UnsupportedOperationException("Ikke implementert støtte for å opprette revurdering for inntektskontroll uten definert periode");
+            }
+            LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje = kontrollerteInntektperioderTjeneste.hentTidslinje(origBehandling.getId());
+            LocalDateTimeline<Boolean> periodeTidslinje = new LocalDateTimeline<>(periode.get().getFomDato(), periode.get().getTomDato(), true);
+            boolean periodenErKontollert = periodeTidslinje.disjoint(kontrollertInntektTidslinje).isEmpty();
+            if (!periodenErKontollert){
+                throw new IllegalArgumentException("Kan ikke opprette manuell revurdering av inntektskontroll for periode: " + periode.get() + " da den ikke er kontrollert i orginalbehandlingen.");
+            }
+        }
 
         DatoIntervallEntitet revurderingPeriode = periode.orElse(revurdering.getFagsak().getPeriode());
         prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(new Trigger(revurderingsÅrsak, revurderingPeriode)));
