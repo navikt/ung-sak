@@ -8,6 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.safety.Safelist;
 import org.jsoup.select.Elements;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +46,8 @@ public class BrevXhtmlTilSeksjonKonverter {
         String clean = Jsoup.clean(html, "", SAFELIST);
         Document doc = Jsoup.parse(clean);
         doc.outputSettings(new Document.OutputSettings()
+            .syntax(Document.OutputSettings.Syntax.xml)
+            .charset(StandardCharsets.UTF_8)
             .prettyPrint(false));
 
         // Del 1: Style - Trekk ut style taggen

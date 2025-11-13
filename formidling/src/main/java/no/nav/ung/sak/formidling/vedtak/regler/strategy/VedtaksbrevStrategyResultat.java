@@ -34,7 +34,7 @@ public record VedtaksbrevStrategyResultat(
             bygger,
             new VedtaksbrevEgenskaper(false,
                 false,
-                false,
+                true,
                 false),
             null,
             forklaring
