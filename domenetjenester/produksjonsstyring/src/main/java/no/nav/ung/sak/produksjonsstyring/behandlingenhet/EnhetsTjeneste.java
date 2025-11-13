@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
@@ -139,7 +140,7 @@ public class EnhetsTjeneste {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
             .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema())
-            .medOppgavetype("BEH_SAK_VL") // fra Oppgavetype offisielt kodeverk)
+            .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK.getKode()) // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)
             .medGeografiskOmraade(geografi)
