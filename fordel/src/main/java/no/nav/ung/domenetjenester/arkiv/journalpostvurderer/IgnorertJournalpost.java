@@ -5,7 +5,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.saf.Journalstatus;
 import no.nav.k9.felles.integrasjon.saf.Tema;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +22,9 @@ public class IgnorertJournalpost implements Journalpostvurderer {
     private static final Logger log = LoggerFactory.getLogger(IgnorertJournalpost.class);
 
     private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.UNG);
-    private final boolean enableHåndterAndreJournalposter;
 
     @Inject
-    public IgnorertJournalpost(@KonfigVerdi(value = "ENABLE_HANDTER_ANDRE_JOURNALPOSTER", defaultVerdi = "false") boolean enableHåndterAndreJournalposter) {
-        this.enableHåndterAndreJournalposter = enableHåndterAndreJournalposter;
+    public IgnorertJournalpost() {
     }
 
     @Override
@@ -38,7 +35,7 @@ public class IgnorertJournalpost implements Journalpostvurderer {
         Tema temaPåJournalpostInfo = journalpostInfo.getTema();
 
         if (!RELEVANTE_TEMAER.contains(temaPåMelding) || !RELEVANTE_TEMAER.contains(temaPåJournalpostInfo)) {
-            log.info("Ignorerer dokument som ikke er på forventet tema. Tema=" + temaPåJournalpostInfo);
+            log.info("Ignorerer dokument som ikke er på forventet tema. Tema={}", temaPåJournalpostInfo);
             return håndtert();
         }
 
@@ -51,16 +48,8 @@ public class IgnorertJournalpost implements Journalpostvurderer {
             return håndtert();
         }
 
-        if (enableHåndterAndreJournalposter) {
-            return ikkeHåndtert();
-        }
-
-        if (ignorer(vurderingsgrunnlag)) {
-            // Feiler her i stedet for å ignorere, slik at vi kan se hvilke brevkoder som ikke er håndtert.
-            throw new IllegalArgumentException("Fikk brevkode som ikke kunne håndteres: " + journalpostInfo.getBrevkode());
-        }
-
         return ikkeHåndtert();
+
     }
 
     private boolean hendelseErMottattMenStatusErJournalført(Optional<JournalføringHendelsetype> hendelsetype, Journalstatus journalstatus) {
