@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.exception.TekniskException;
@@ -22,7 +23,6 @@ import java.util.List;
 public class InntektAbonnentKlient {
 
     private static final Logger LOG = LoggerFactory.getLogger(InntektAbonnentKlient.class);
-    public static final int INNTEKT_HENDELSE_LIMIT = 1000;
 
     private OidcRestClient oidcRestClient;
     private final URI opprettAbonnementURI;
@@ -66,25 +66,25 @@ public class InntektAbonnentKlient {
     }
 
     public long hentStartSekvensnummer(LocalDate dato) {
-        var request = new AbonnementHendelseStartApiInn(dato);
-        AbonnementHendelseStartApiUt response;
+        var request = new HendelseStartRequest(dato);
+        HendelseStartResponse response;
         try {
-            response = oidcRestClient.post(hendelseStartURI, request, AbonnementHendelseStartApiUt.class);
+            response = oidcRestClient.post(hendelseStartURI, request, HendelseStartResponse.class);
         } catch (Exception e) {
             throw new TekniskException("UNG-440600", "Feil ved henting av startsekvensnummer", e);
         }
         return response.sekvensnummer();
     }
 
-    public List<AbonnementHendelse> sjekkNyeInntektHendelser(long fraSekvensnummer, List<String> filter) {
-        var request = new InntektHendelserRequest(fraSekvensnummer, INNTEKT_HENDELSE_LIMIT, filter);
-        AbonnementHendelseApiUt response;
+    public HendelserResponse sjekkNyeHendelser(long fraSekvensnummer, int antall, List<String> filter) {
+        var request = new HendelserRequest(fraSekvensnummer, antall, filter);
+        HendelserResponse response;
         try {
-            response = oidcRestClient.post(hendelseURI, request, AbonnementHendelseApiUt.class);
+            response = oidcRestClient.post(hendelseURI, request, HendelserResponse.class);
         } catch (Exception e) {
             throw new TekniskException("UNG-769025", "Feil ved henting av nye hendelser", e);
         }
-        return response.data;
+        return response;
     }
 
     public void avsluttAbonnement(long abonnementId) {
@@ -118,19 +118,19 @@ public class InntektAbonnentKlient {
     public record AbonnementResponse(String abonnementId) {
     }
 
-    public record AbonnementHendelseStartApiInn(LocalDate dato) {}
+    public record HendelseStartRequest(LocalDate dato) {}
 
-    public record AbonnementHendelseStartApiUt(long sekvensnummer) {}
+    public record HendelseStartResponse(long sekvensnummer) {}
 
-    public record InntektHendelserRequest(
+    public record HendelserRequest(
         long fra,
         int antall,
         List<String> filter
     ) {}
 
-    public record AbonnementHendelseApiUt(List<AbonnementHendelse> data) {}
+    public record HendelserResponse(List<HendelseData> data) {}
 
-    public record AbonnementHendelse(
+    public record HendelseData(
         long sekvensnummer,
         String norskident,
         String maaned,

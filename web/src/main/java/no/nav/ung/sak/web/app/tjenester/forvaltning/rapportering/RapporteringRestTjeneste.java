@@ -67,7 +67,7 @@ public class RapporteringRestTjeneste {
     @POST
     @Path("/generer")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Operation(description = "Dumper en rapport av inntektHendelser", summary = ("Henter en dump av info for debugging og analyse av en sak"), tags = "rapportering")
+    @Operation(description = "Dumper en rapport av data", summary = ("Henter en dump av info for debugging og analyse av en sak"), tags = "rapportering")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.DRIFT)
     public Response genererRapportForYtelse(@NotNull @FormParam("ytelseType") @Parameter(description = "ytelseType", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) YtelseTypeKode ytelseTypeKode,
                                             @NotNull @FormParam("rapport") @Parameter(description = "rapport", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) RapportType rapportType,

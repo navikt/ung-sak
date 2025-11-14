@@ -140,7 +140,7 @@ public class FagsakApplikasjonTjeneste {
 
     private FagsakSamlingForBruker tilFagsakView(List<Fagsak> fagsaker, Personinfo personinfo) {
         FagsakSamlingForBruker view = new FagsakSamlingForBruker(personinfo);
-        // FIXME K9 relevante inntektHendelser
+        // FIXME K9 relevante data
         fagsaker.forEach(sak -> view.leggTil(sak));
         return view;
     }

@@ -72,7 +72,7 @@ public class RegisterdataInnhenter {
     }
 
     public Personinfo innhentPersonopplysninger(Behandling behandling) {
-        // Innhent inntektHendelser fra TPS for søker
+        // Innhent data fra TPS for søker
         AktørId søkerAktørId = behandling.getAktørId();
         Personinfo søkerInfo = innhentSaksopplysningerForSøker(søkerAktørId);
 
@@ -81,7 +81,7 @@ public class RegisterdataInnhenter {
                 .toException();
         }
 
-        // Innhent øvrige inntektHendelser fra TPS
+        // Innhent øvrige data fra TPS
         var personInformasjonBuilder = byggPersonopplysningMedRelasjoner(søkerInfo, behandling);
 
         // lagre alt

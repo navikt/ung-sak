@@ -69,7 +69,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             //lager dummy PDP request, siden
             // 1. det er unødvendig å lage en ordentlig, da det uansett ikke kan gjøres sjekk i PDP for request mot PIP-tjenesten (siden den brukes fra PDP-en) (se også PepImpl) tilgang istedet er styrt med tilgangslister i applikasjonen
             // 2. PDP requesten brukes også til logging, men ikke for servicebrukere (og det er kun servicebrukere som får kalle PIP-tjenesten)
-            // 3. å lage en ekte PDP-request tar tid siden det gjør oppslag mot databasen for å hente ut inntektHendelser
+            // 3. å lage en ekte PDP-request tar tid siden det gjør oppslag mot databasen for å hente ut data
             return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
         }
 

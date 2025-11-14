@@ -180,7 +180,7 @@ public class AksjonspunktRestTjeneste {
     public Response bekreft(
                 @Context
             HttpServletRequest request,
-                @Parameter(description = "Liste over aksjonspunkt som skal bekreftes, inklusiv inntektHendelser som trengs for å løse de.")
+                @Parameter(description = "Liste over aksjonspunkt som skal bekreftes, inklusiv data som trengs for å løse de.")
                 @Valid
                 @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
             BekreftedeAksjonspunkterDto apDto)

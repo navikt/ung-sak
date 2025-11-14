@@ -111,7 +111,7 @@ public class CsvOutput {
                     }
                     sb.append(csvHeader(toCsv));
                 } else {
-                    // inntektHendelser row
+                    // data row
                     sb.append(csvValueRow(t, toCsv)).append('\n');
                 }
             }
@@ -146,7 +146,7 @@ public class CsvOutput {
                     }
                     sb.append(csvHeader(toCsv));
                 } else {
-                    // inntektHendelser row
+                    // data row
                     sb.append(csvValueRow(t, toCsv)).append('\n');
                 }
             }

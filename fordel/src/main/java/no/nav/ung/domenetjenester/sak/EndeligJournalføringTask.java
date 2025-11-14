@@ -76,7 +76,7 @@ public abstract class EndeligJournalføringTask extends WrappedProsessTaskHandle
                 }
             } catch (DokarkivException e) {
                 /*
-                 * Stygt, men manglende felt tilbys ikke som strukturerte inntektHendelser ... så eneste måten å hente ut
+                 * Stygt, men manglende felt tilbys ikke som strukturerte data ... så eneste måten å hente ut
                  * dette på er strengsøk. Arkiv jobber med å legge til den samme informasjonen strukturert.
                  */
                 if (!e.getMessage().contains("Kan ikke ferdigstille journalpost, følgende felt(er) mangler")) {

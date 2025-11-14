@@ -16,7 +16,7 @@ import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import java.util.Collection;
 
 /**
- * Lagrer inntektHendelser som ble brukt i utførelse av aksjonspunktet i json-format. Brukes utelukkende til diagnostikkformål for enklere feilsøking.
+ * Lagrer data som ble brukt i utførelse av aksjonspunktet i json-format. Brukes utelukkende til diagnostikkformål for enklere feilsøking.
  */
 @Dependent
 public class AksjonspunktSporingTjeneste {
