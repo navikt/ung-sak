@@ -6,12 +6,14 @@ import java.util.Objects;
 public class RapportertInntekt {
     private InntektType inntektType;
     private BigDecimal beløp;
+    private BigDecimal fulltRapporteringsbeløp;
 
     public RapportertInntekt(
         InntektType inntektType,
-        BigDecimal beløp) {
+        BigDecimal beløp, BigDecimal fulltRapporteringsbeløp) {
         this.inntektType = inntektType;
         this.beløp = beløp;
+        this.fulltRapporteringsbeløp = fulltRapporteringsbeløp;
     }
 
     @Override
@@ -29,6 +31,11 @@ public class RapportertInntekt {
     public BigDecimal beløp() {
         return beløp;
     }
+
+    public BigDecimal fulltRapporteringsbeløp() {
+        return beløp;
+    }
+
 
     @Override
     public boolean equals(Object obj) {
