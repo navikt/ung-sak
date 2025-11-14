@@ -90,7 +90,7 @@ public class PdlLeesahOversetter {
         Endringstype endringstype = personhendelse.getEndringstype();
 
         if (forelderBarnRelasjon == null) {
-            logger.info("Ignorerer forelderBarnRelasjon fordi det mangler data. endringstype {}, hendelseId {}", endringstype, hendelseInfo.getHendelseId());
+            logger.info("Ignorerer forelderBarnRelasjon fordi det mangler inntektHendelser. endringstype {}, hendelseId {}", endringstype, hendelseInfo.getHendelseId());
             return Optional.empty();
         }
 

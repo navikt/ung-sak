@@ -21,9 +21,9 @@ public enum Søknadsformat {
                 throw new RuntimeException("Parsing av melding feilet", e);
             }
 
-            if (jsonNode.hasNonNull("data")) {
+            if (jsonNode.hasNonNull("inntektHendelser")) {
                 // kafka topic format - delvis unwrapped
-                jsonNode = jsonNode.get("data");
+                jsonNode = jsonNode.get("inntektHendelser");
             } // else ta formatet som det er
 
             JsonNode søknad;

@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 import static no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil.*;
 
 /**
- * Bygger et sammensatt resultat av BehandlingDto ved å samle data fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
+ * Bygger et sammensatt resultat av BehandlingDto ved å samle inntektHendelser fra ulike tjenester, for å kunne levere dette ut på en REST tjeneste.
  */
 @Dependent
 public class BehandlingDtoTjeneste {

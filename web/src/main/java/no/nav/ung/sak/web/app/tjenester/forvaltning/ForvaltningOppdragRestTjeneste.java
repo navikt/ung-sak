@@ -55,8 +55,8 @@ public class ForvaltningOppdragRestTjeneste {
     @GET
     @Path("hent-iverksetting-data")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter data som ung-sak sender til k9-oppdrag ved iverksetting", summary = ("Henter data som ung-sak sender til k9-oppdrag ved iverksetting"), tags = "oppdrag", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer data som ung-sak sender tli k9-oppdrag ved iverksetting", content = {
+    @Operation(description = "Henter inntektHendelser som ung-sak sender til k9-oppdrag ved iverksetting", summary = ("Henter inntektHendelser som ung-sak sender til k9-oppdrag ved iverksetting"), tags = "oppdrag", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer inntektHendelser som ung-sak sender tli k9-oppdrag ved iverksetting", content = {
             @Content(mediaType = "application/json", schema = @Schema(implementation = TilkjentYtelseOppdrag.class))
         })})
     @Produces(JSON_UTF8)

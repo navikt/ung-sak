@@ -61,7 +61,7 @@ public class UhåndtertJournalpost implements Journalpostvurderer {
         var melding = vurderingsgrunnlag.melding();
         var journalpostInfo = vurderingsgrunnlag.journalpostInfo();
         if (!journalpostInfo.harBrevkode()) {
-            melding.setBeskrivelse("Må manuelt journalføres siden det mangler data som er påkrevd for automatisk journalføring. Mangler brevkode");
+            melding.setBeskrivelse("Må manuelt journalføres siden det mangler inntektHendelser som er påkrevd for automatisk journalføring. Mangler brevkode");
         }
         melding.setOppgaveType(GosysKonstanter.OppgaveType.JOURNALFØRING);
         return håndtert(melding.nesteSteg(OpprettOppgaveTask.TASKTYPE));
