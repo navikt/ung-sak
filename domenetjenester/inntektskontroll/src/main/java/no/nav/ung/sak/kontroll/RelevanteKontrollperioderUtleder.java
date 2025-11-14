@@ -5,12 +5,14 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
 
@@ -67,6 +69,15 @@ public class RelevanteKontrollperioderUtleder {
             final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, kontrollSisteMndEnabled);
             perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(it -> true);
         }
+        if (kontrollSisteMndEnabled) {
+            var mappedSegments = perioderForKontroll
+                .toSegments()
+                .stream()
+                .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), it.getValue()))
+                .toList(); // Mapper segmenter til å dekke hele måneder
+            perioderForKontroll = new LocalDateTimeline<>(mappedSegments, StandardCombinators::alwaysTrueForMatch).compress();
+        }
+
         return perioderForKontroll;
     }
 

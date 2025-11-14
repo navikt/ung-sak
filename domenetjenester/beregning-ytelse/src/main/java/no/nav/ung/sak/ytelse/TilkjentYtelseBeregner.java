@@ -10,9 +10,13 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -36,22 +40,31 @@ public class TilkjentYtelseBeregner {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(sats, "sats");
         Objects.requireNonNull(rapporertinntekt, "rapporertinntekt");
+        if (!toYearMonth(periode.getFomDato()).equals(toYearMonth(periode.getTomDato()))) {
+            throw new IllegalArgumentException("Periode må være innenfor samme måned");
+        }
         final var sporing = new HashMap<String, String>();
         // Uredusert beløp bergnes fra totalsats
         final var uredusertBeløp = sats.totalSats().setScale(10, RoundingMode.HALF_UP);
         sporing.put("totalSats", sats.totalSats().toString());
         // Reduserer beløp med rapportert inntekt
-        final var reduksjon = rapporertinntekt.multiply(REDUKSJONS_FAKTOR);
+        BigDecimal antallVirkedager = BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato()));
+        sporing.put("antallVirkedager", String.valueOf(antallVirkedager));
+        BigDecimal antallVirkedagerHeleMåned = BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(periode.getFomDato().withDayOfMonth(1), periode.getTomDato().with(TemporalAdjusters.lastDayOfMonth())));
+        sporing.put("antallVirkedagerHeleMåned", String.valueOf(antallVirkedagerHeleMåned));
+        BigDecimal andelVirkedagerIMåned = antallVirkedager.divide(antallVirkedagerHeleMåned, 10, RoundingMode.HALF_UP);
+        sporing.put("andelVirkedagerInnenforPeriode", String.valueOf(andelVirkedagerIMåned));
         sporing.put("rapportertInntekt", rapporertinntekt.toString());
+        BigDecimal andelRapportertInntektInnenforPeriode = andelVirkedagerIMåned.multiply(rapporertinntekt);
+        sporing.put("andelRapportertInntektInnenforPeriode", andelRapportertInntektInnenforPeriode.toString());
         sporing.put("reduksjonsfaktor", REDUKSJONS_FAKTOR.toString());
+        final var reduksjon = andelRapportertInntektInnenforPeriode.multiply(REDUKSJONS_FAKTOR);
         sporing.put("reduksjon", reduksjon.toString());
 
         final var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
         sporing.put("redusertBeløp", redusertBeløp.toString());
 
         // Beregner dagsats utifra antall virkedager i perioden
-        BigDecimal antallVirkedager = BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato()));
-        sporing.put("antallVirkedager", String.valueOf(antallVirkedager));
 
         final var avrundetDagsats = antallVirkedager.equals(BigDecimal.ZERO) ?  BigDecimal.ZERO : redusertBeløp.divide(antallVirkedager, 0, RoundingMode.HALF_UP);
         BigDecimal tilkjentBeløp = avrundetDagsats.multiply(antallVirkedager);
@@ -75,6 +88,10 @@ public class TilkjentYtelseBeregner {
             utbetalingsgrad,
             tilkjentBeløp);
         return new TilkjentYtelsePeriodeResultat(tilkjentYtelseVerdi, sporing);
+    }
+
+    private static YearMonth toYearMonth(LocalDate dato) {
+        return YearMonth.of(dato.getYear(), dato.getMonth());
     }
 
 
