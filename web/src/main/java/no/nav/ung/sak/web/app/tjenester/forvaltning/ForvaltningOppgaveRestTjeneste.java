@@ -17,7 +17,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
@@ -48,6 +50,7 @@ import java.util.UUID;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 @Path("/oppgave/forvaltning")
 @ApplicationScoped
@@ -60,16 +63,19 @@ public class ForvaltningOppgaveRestTjeneste {
     private FagsakRepository fagsakRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private EtterlysningRepository etterlysningRepository;
+    private int dagIMånedForInntektsKontroll;
     private boolean isProd = Environment.current().isProd();
 
     @Inject
-    public ForvaltningOppgaveRestTjeneste(EntityManager entityManager, BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskTjeneste, FagsakRepository fagsakRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, EtterlysningRepository etterlysningRepository) {
+    public ForvaltningOppgaveRestTjeneste(EntityManager entityManager, BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskTjeneste, FagsakRepository fagsakRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, EtterlysningRepository etterlysningRepository,
+                                          @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int dagIMånedForInntektsKontroll) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
         this.etterlysningRepository = etterlysningRepository;
+        this.dagIMånedForInntektsKontroll = dagIMånedForInntektsKontroll;
     }
 
     public ForvaltningOppgaveRestTjeneste() {
@@ -127,6 +133,10 @@ public class ForvaltningOppgaveRestTjeneste {
 
         final var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer, false).get();
         final var periode = finnPeriode(måned, fagsak);
+
+        if (finnPerioderMedPassertRapporteringsfrist().intersection(periode).isEmpty()) {
+            throw new IllegalArgumentException("Kan ikke starte inntektskontroll for periode som ikke har passert rapporteringsfrist");
+        }
 
         ProsessTaskData utløpOppgave = ProsessTaskData.forProsessTask(SettOppgaveUtløptForInntektsrapporteringTask.class);
         utløpOppgave.setAktørId(fagsak.getAktørId().getAktørId());
@@ -230,5 +240,15 @@ public class ForvaltningOppgaveRestTjeneste {
 
         prosessTaskTjeneste.lagre(tilVurderingTask);
     }
+
+    private LocalDateTimeline<Boolean> finnPerioderMedPassertRapporteringsfrist() {
+        return new LocalDateTimeline<>(TIDENES_BEGYNNELSE, getTomDatoForPassertRapporteringsfrist(), true);
+    }
+
+    private LocalDate getTomDatoForPassertRapporteringsfrist() {
+        final var dagensDato = LocalDate.now();
+        return dagensDato.getDayOfMonth() < dagIMånedForInntektsKontroll ? dagensDato.minusMonths(2).with(TemporalAdjusters.lastDayOfMonth()) : dagensDato.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+    }
+
 
 }
