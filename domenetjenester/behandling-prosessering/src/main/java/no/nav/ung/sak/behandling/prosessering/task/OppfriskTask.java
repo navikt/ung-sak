@@ -45,7 +45,7 @@ public class OppfriskTask extends BehandlingProsessTask {
             var behandling = repository.hentBehandling(prosessTaskData.getBehandlingId());
             logContext(behandling);
             boolean forceInnhent = Boolean.parseBoolean(prosessTaskData.getPropertyValue(PROPERTY_FORCE));
-            behandlingsprosessApplikasjonTjeneste.asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, forceInnhent);
+            behandlingsprosessApplikasjonTjeneste.asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, forceInnhent, false);
         } catch (RuntimeException e) {
             log.info("Uventet feil ved oppfrisking av behandling.", e);
         }
