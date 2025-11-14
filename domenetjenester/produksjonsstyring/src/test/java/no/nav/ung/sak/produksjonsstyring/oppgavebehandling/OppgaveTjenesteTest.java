@@ -130,13 +130,13 @@ public class OppgaveTjenesteTest {
         when(oppgaveRestKlient.opprettetOppgave(captor.capture())).thenReturn(OPPGAVE);
 
         // Act
-        String oppgaveId = tjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(behandling.getFagsakId(), OppgaveÅrsak.GODKJENN_VEDTAK_VL,
+        String oppgaveId = tjeneste.opprettMedPrioritetOgBeskrivelseBasertPåFagsakId(behandling.getFagsakId(), OppgaveÅrsak.GODKJENN_VEDTAK,
             "4321", "noe tekst", true);
 
         // Assert
         OpprettOppgave request = captor.getValue();
         assertThat((String) Whitebox.getInternalState(request, "saksreferanse")).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
-        assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.GODKJENN_VEDTAK_VL.getKode());
+        assertThat((String) Whitebox.getInternalState(request, "oppgavetype")).isEqualTo(OppgaveÅrsak.GODKJENN_VEDTAK.getKode());
         assertThat((LocalDate) Whitebox.getInternalState(request, "fristFerdigstillelse")).isEqualTo(forventetFrist);
         assertThat((Prioritet) Whitebox.getInternalState(request, "prioritet")).isEqualTo(Prioritet.HOY);
         assertThat(oppgaveId).isEqualTo(OPPGAVE.getId().toString());

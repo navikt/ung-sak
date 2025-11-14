@@ -1,13 +1,13 @@
 package no.nav.ung.sak.formidling;
 
-import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,10 +38,9 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
 
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
-        var behandling = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
-            .medUngTestGrunnlag(ungTestGrunnlag)
-            .buildOgLagreMedUng(ungTestRepositories);
+        var behandling = BrevScenarioerUtils.lagAvsluttetBehandlingMedAP(
+            ungTestGrunnlag, ungTestRepositories, AksjonspunktDefinisjon.FATTER_VEDTAK
+        );
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),
@@ -77,13 +76,9 @@ class ManuellVedtaksbrevTest extends AbstractVedtaksbrevInnholdByggerTest {
     protected Behandling lagScenarioForFellesTester() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
-        var behandling = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
-            .medUngTestGrunnlag(ungTestGrunnlag)
-            .buildOgLagreMedUng(ungTestRepositories);
-
-
-        behandling.avsluttBehandling();
+        var behandling = BrevScenarioerUtils.lagAvsluttetBehandlingMedAP(
+            ungTestGrunnlag, ungTestRepositories, AksjonspunktDefinisjon.FATTER_VEDTAK
+        );
 
         vedtaksbrevValgRepository.lagre(new VedtaksbrevValgEntitet(
             behandling.getId(),

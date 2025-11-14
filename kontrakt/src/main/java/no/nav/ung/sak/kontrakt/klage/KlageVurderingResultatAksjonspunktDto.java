@@ -1,5 +1,6 @@
 package no.nav.ung.sak.kontrakt.klage;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -8,8 +9,8 @@ import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.kodeverk.klage.KlageMedholdÅrsak;
-import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingOmgjør;
+import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 import java.time.LocalDate;
@@ -105,6 +106,15 @@ public abstract class KlageVurderingResultatAksjonspunktDto extends BekreftetAks
 
     public boolean isErGodkjentAvMedunderskriver() {
         return erGodkjentAvMedunderskriver;
+    }
+
+    @JsonIgnore
+    public boolean valider() {
+        if (klageVurderingType == KlageVurderingType.STADFESTE_YTELSESVEDTAK) {
+            if (klageHjemmel == null) { throw new IllegalArgumentException("Hjemmel må være satt ved oversendelse av klage"); }
+            return false;
+        }
+        return true;
     }
 
     @JsonTypeName(AksjonspunktKodeDefinisjon.MANUELL_VURDERING_AV_KLAGE_KODE)

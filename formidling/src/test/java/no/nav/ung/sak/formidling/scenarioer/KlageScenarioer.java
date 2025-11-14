@@ -101,12 +101,21 @@ public class KlageScenarioer {
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET)
             .medKlageGrunnlag(klageScenario);
 
-        klageScenario.utførteAksjonspunkter().forEach(it -> fagsakTestScenario.leggTilAksjonspunkt(it, it.getBehandlingSteg()));
+        klageScenario.utførteAksjonspunkter().forEach(it ->
+            fagsakTestScenario.leggTilAksjonspunkt(it, it.getBehandlingSteg()));
 
         Behandling klageBehandling = fagsakTestScenario.buildOgLagreKlage(ungTestRepositories);
 
         AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
-        klageBehandling.getÅpneAksjonspunkter().forEach(it -> aksjonspunktTestSupport.setTilUtført(it, "utført"));
+        klageBehandling.getÅpneAksjonspunkter().forEach(
+            it -> {
+                it.setAnsvarligSaksbehandler(BrevScenarioerUtils.SAKSBEHANDLER1_IDENT);
+                aksjonspunktTestSupport.setTilUtført(it, "utført");
+            }
+        );
+
+        klageBehandling.setAnsvarligSaksbehandler(BrevScenarioerUtils.SAKSBEHANDLER1_IDENT);
+
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
         behandlingRepository.lagre(klageBehandling, behandlingRepository.taSkriveLås(klageBehandling));
 

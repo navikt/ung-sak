@@ -8,7 +8,6 @@ import jakarta.persistence.Tuple;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class SatsEndringRepository {
     }
 
     private LocalDate mapTilEndringsdato(Tuple tuple) {
-        Date fødselsdatoString = tuple.get(1, Date.class);
-        return LocalDate.parse(fødselsdatoString.toString()).plusYears(25);
+        LocalDate fødselsdato = tuple.get(1, LocalDate.class);
+        return fødselsdato.plusYears(25);
     }
 }

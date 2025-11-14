@@ -3,11 +3,10 @@ package no.nav.ung.sak.hendelsemottak.tjenester;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
@@ -41,12 +40,12 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
     }
 
     @Override
-    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, List<ÅrsakOgPerioder>> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
         LocalDate nyFomdato = hendelse.getHendelsePeriode().getFom();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
 
-        var fagsaker = new HashMap<Fagsak, ÅrsakOgPeriode>();
+        var fagsaker = new HashMap<Fagsak, List<ÅrsakOgPerioder>>();
 
         for (AktørId aktør : aktører) {
             var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, nyFomdato);
@@ -55,9 +54,9 @@ public class UngdomsprogramEndretStartdatoFagsakTilVurderingUtleder implements F
             }
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), nyFomdato, hendelseId)) {
-                fagsaker.put(relevantFagsak.get(), new ÅrsakOgPeriode(
+                fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(
                     BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
-                    utledPeriode(relevantFagsak.get(), nyFomdato)));
+                    Set.of(utledPeriode(relevantFagsak.get(), nyFomdato)))));
             }
         }
 

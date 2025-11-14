@@ -3,7 +3,7 @@ package no.nav.ung.sak.web.server.jetty;
 import no.nav.ung.sak.web.app.JettyTestApplication;
 import no.nav.ung.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.ung.sak.web.server.jetty.db.EnvironmentClass;
-import org.eclipse.jetty.ee9.webapp.WebAppContext;
+import org.eclipse.jetty.ee11.webapp.WebAppContext;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
