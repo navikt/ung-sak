@@ -200,4 +200,12 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
+    public void fjernIkkedigitalFlagg(Long fagsakId){
+        Fagsak fagsak = finnEksaktFagsak(fagsakId);
+        // fjern flagg om det er en digital sak
+        fagsak.setIkkeDigitalBruker(false);
+        entityManager.persist(fagsak);
+        entityManager.flush();
+    }
+
 }
