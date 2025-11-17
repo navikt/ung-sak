@@ -167,8 +167,8 @@ public class FormidlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public VedtaksbrevEditorResponse editor(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto,
-        @NotNull @QueryParam("dokumentMalType") @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Valid String dokumentMalTypeKode) {
-        return vedtaksbrevTjeneste.editor(dto.getBehandlingId(), DokumentMalType.fraKode(dokumentMalTypeKode));
+        @NotNull @QueryParam("dokumentMalType") @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Valid DokumentMalType dokumentMalType) {
+        return vedtaksbrevTjeneste.editor(dto.getBehandlingId(), dokumentMalType);
     }
 
     @GET
