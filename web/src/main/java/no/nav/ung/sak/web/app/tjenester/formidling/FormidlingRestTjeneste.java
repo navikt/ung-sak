@@ -35,6 +35,7 @@ import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevKlageForhåndsv
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse;
+import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +167,7 @@ public class FormidlingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public VedtaksbrevEditorResponse editor(
         @NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto dto,
-        @NotNull @QueryParam("dokumentMalType") @Valid String dokumentMalTypeKode) {
+        @NotNull @QueryParam("dokumentMalType") @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Valid String dokumentMalTypeKode) {
         return vedtaksbrevTjeneste.editor(dto.getBehandlingId(), DokumentMalType.fraKode(dokumentMalTypeKode));
     }
 
