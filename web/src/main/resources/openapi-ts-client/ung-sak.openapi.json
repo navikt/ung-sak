@@ -2876,12 +2876,6 @@
           },
           "redigert" : {
             "type" : "boolean"
-          },
-          "redigertBrevHtml" : {
-            "type" : "string"
-          },
-          "tidligereRedigertBrevHtml" : {
-            "type" : "string"
           }
         },
         "type" : "object"
