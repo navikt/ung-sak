@@ -63,8 +63,12 @@ class VedtaksbrevTjenesteTest {
         assertThat(valg.redigert()).isFalse();
         assertThat(valg.kanOverstyreRediger()).isTrue();
         assertThat(valg.harTidligereRedigertBrevHtml()).isFalse();
-        assertThat(valg.redigertBrevHtml()).isNull();
-        assertThat(valg.tidligereRedigertBrevHtml()).isNull();
+
+
+        var editorResponse = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
+        assertThat(editorResponse.redigert()).isNull();
+        assertThat(editorResponse.tidligereRedigert()).isNull();
+
 
         //Forhåndsviser automatisk brev
         String automatiskBrevHtmlSnippet = "<h1>";
@@ -103,8 +107,6 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering1.enableRediger()).isTrue();
         assertThat(valgEtterRedigering1.redigert()).isTrue();
         assertThat(valgEtterRedigering1.kanOverstyreRediger()).isTrue();
-        assertThat(valgEtterRedigering1.redigertBrevHtml()).isEqualTo(redigertHtml);
-        assertThat(valgEtterRedigering1.tidligereRedigertBrevHtml()).isNull();
 
         var editorResponse = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
         assertThat(editorResponse.original()).isNotNull();
@@ -161,8 +163,10 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering2.enableRediger()).isTrue();
         assertThat(valgEtterRedigering2.redigert()).isFalse();
         assertThat(valgEtterRedigering2.kanOverstyreRediger()).isTrue();
-        assertThat(valgEtterRedigering2.redigertBrevHtml()).isNull();
-        assertThat(valgEtterRedigering2.tidligereRedigertBrevHtml()).isNull();
+
+        var editorResponse = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
+        assertThat(editorResponse.redigert()).isNull();
+        assertThat(editorResponse.tidligereRedigert()).isNull();
 
 
         //Forhåndsviser automatisk brev
@@ -204,8 +208,6 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterTilbakehopp.redigert()).isFalse();
         assertThat(valgEtterTilbakehopp.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterTilbakehopp.harTidligereRedigertBrevHtml()).isTrue();
-        assertThat(valgEtterTilbakehopp.redigertBrevHtml()).isNull();
-        assertThat(valgEtterTilbakehopp.tidligereRedigertBrevHtml()).isEqualTo(redigertHtml);
 
         var editorResponse1 = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
         assertThat(editorResponse1.redigert()).isNull();
@@ -241,8 +243,13 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterTilbakehopp2.redigert()).isTrue();
         assertThat(valgEtterTilbakehopp2.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterTilbakehopp2.harTidligereRedigertBrevHtml()).isFalse();
-        assertThat(valgEtterTilbakehopp2.redigertBrevHtml()).isEqualTo(nyttRedigertBrev);
-        assertThat(valgEtterTilbakehopp2.tidligereRedigertBrevHtml()).isNull();
+
+        var editorEtterTilbakehopp = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
+        assertThat(editorEtterTilbakehopp.original()).isNotNull();
+        String editorHtml = finnRedigertSeksjon(editorEtterTilbakehopp.redigert()).innhold();
+        assertThat(editorHtml).isEqualTo(nyttRedigertBrev);
+        assertThat(editorEtterTilbakehopp.tidligereRedigert()).isNull();
+
 
         var editorResponse2 = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
         var redigert2 = finnRedigertSeksjon(editorResponse2.redigert());
@@ -328,14 +335,24 @@ class VedtaksbrevTjenesteTest {
             .findFirst()
             .orElseThrow();
         assertThat(inntektValg.redigert()).isTrue();
-        assertThat(inntektValg.redigertBrevHtml()).isEqualTo(redigertHtml);
+
+        var editorResponse = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
+        assertThat(editorResponse.original()).isNotNull();
+        String editorHtml = finnRedigertSeksjon(editorResponse.redigert()).innhold();
+        assertThat(editorHtml).isEqualTo(redigertHtml);
+
+
 
         var barnetilleggValg = valg2.vedtaksbrevValg().stream()
             .filter(v -> v.dokumentMalType().getKilde().equals(DokumentMalType.ENDRING_BARNETILLEGG))
             .findFirst()
             .orElseThrow();
         assertThat(barnetilleggValg.redigert()).isFalse();
-        assertThat(barnetilleggValg.redigertBrevHtml()).isNull();
+
+        var barnetilleggEditor = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_BARNETILLEGG);
+        assertThat(barnetilleggEditor.original()).isNotNull();
+        assertThat(barnetilleggEditor.redigert()).isNull();
+
 
         //Forhåndsviser automatisk brev
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_BARNETILLEGG, false))
