@@ -1,6 +1,5 @@
 package no.nav.ung.fordel.kodeverdi;
 
-import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
@@ -37,10 +36,10 @@ public final class BrevkodeInformasjonUtleder {
         final List<BrevkodeInformasjon> brevkodeliste = new ArrayList<>();
         // Fra Brukerdialog:
 
-        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
-        brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
-        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
-        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, null, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon("UNG Endringssøknad", null, null, FagsakYtelseType.UNGDOMSYTELSE, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, FordelBehandlingType.DIGITAL_SØKNAD));
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.KLAGE.getOffisiellKode(), null, "Klage"));
 
         final Map<String, BrevkodeInformasjon> titler = new HashMap<>();
@@ -56,24 +55,22 @@ public final class BrevkodeInformasjonUtleder {
         private final String alternativBrevkode;
         private final String tittel;
         private final FagsakYtelseType ytelseType;
-        private final BehandlingTema behandlingTema;
         private final FordelBehandlingType fordelBehandlingTypeHvisStrukturert;
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel) {
-            this(brevkode, alternativBrevkode, tittel, null, null, null);
+            this(brevkode, alternativBrevkode, tittel, null, null);
         }
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel, boolean ettersendelse) {
-            this(brevkode, alternativBrevkode, tittel, null, null, null);
+            this(brevkode, alternativBrevkode, tittel, null, null);
         }
 
         public BrevkodeInformasjon(String brevkode, String alternativBrevkode, String tittel, FagsakYtelseType ytelseType,
-                                   BehandlingTema behandlingTema, FordelBehandlingType fordelBehandlingTypeHvisStrukturert) {
+                                   FordelBehandlingType fordelBehandlingTypeHvisStrukturert) {
             this.brevkode = brevkode;
             this.alternativBrevkode = alternativBrevkode;
             this.tittel = tittel;
             this.ytelseType = ytelseType;
-            this.behandlingTema = behandlingTema;
             this.fordelBehandlingTypeHvisStrukturert = fordelBehandlingTypeHvisStrukturert;
         }
 
@@ -91,10 +88,6 @@ public final class BrevkodeInformasjonUtleder {
 
         public Optional<FagsakYtelseType> getYtelseType() {
             return Optional.ofNullable(ytelseType);
-        }
-
-        public Optional<BehandlingTema> getBehandlingTema() {
-            return Optional.ofNullable(behandlingTema);
         }
 
         public Optional<FordelBehandlingType> getBehandlingTypeHvisStrukturert() {
