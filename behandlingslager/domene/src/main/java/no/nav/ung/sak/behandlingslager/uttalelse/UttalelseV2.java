@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.uttalelse;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.kodeverk.EndringTypeKodeverdiConverter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.hibernate.annotations.Immutable;
@@ -29,6 +30,7 @@ public class UttalelseV2 extends BaseEntitet {
     private DatoIntervallEntitet periode;
 
     @Column(name = "endring_type", nullable = false)
+    @Convert(converter = EndringTypeKodeverdiConverter.class)
     private EndringType type;
 
     @Column(name = "grunnlag_ref", nullable = false)
