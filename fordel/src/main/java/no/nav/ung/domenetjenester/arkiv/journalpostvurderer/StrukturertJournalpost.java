@@ -82,7 +82,6 @@ public class StrukturertJournalpost implements Journalpostvurderer {
         } else {
             var bi = brevkodeInfo.get();
             bi.getYtelseType().ifPresent(dataWrapper::setYtelseType);
-            bi.getBehandlingTema().ifPresent(dataWrapper::setBehandlingTema);
             if (journalpostInfo.getInnholderStrukturertInformasjon()) {
                 bi.getBehandlingTypeHvisStrukturert().ifPresent(dataWrapper::setBehandlingType);
             }

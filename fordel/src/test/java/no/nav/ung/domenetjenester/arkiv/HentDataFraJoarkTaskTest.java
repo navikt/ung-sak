@@ -49,13 +49,13 @@ public class HentDataFraJoarkTaskTest {
     private FordelProsessTaskTjeneste fordelProsessTaskTjeneste;
 
     @Spy
-    private IgnorertJournalpost ignorertJournalpost = new IgnorertJournalpost(true);
+    private IgnorertJournalpost ignorertJournalpost = new IgnorertJournalpost();
     @Spy
     private AlleredeMottattJournalpost alleredeMottattJournalpost = new AlleredeMottattJournalpost(journalpostRepository);
     @Spy
     private StrukturertJournalpost strukturertJournalpost = new StrukturertJournalpost(true);
     @Spy
-    private UhåndtertJournalpost uhåndtertJournalpost = new UhåndtertJournalpost(true);
+    private UhåndtertJournalpost uhåndtertJournalpost = new UhåndtertJournalpost();
 
     @Mock
     private ArkivTjeneste arkivTjeneste;

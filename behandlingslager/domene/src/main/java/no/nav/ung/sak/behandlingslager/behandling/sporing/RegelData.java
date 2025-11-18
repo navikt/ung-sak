@@ -8,8 +8,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.persistence.PersistenceException;
-
-import org.hibernate.engine.jdbc.ClobProxy;
+import org.hibernate.Hibernate;
 
 /** Wrapper regel input/sporing data. */
 public class RegelData {
@@ -74,7 +73,7 @@ public class RegelData {
     }
 
     static Clob createProxy(String input) {
-        return input.isEmpty() ? null : ClobProxy.generateProxy(input);
+        return input.isEmpty() ? null : Hibernate.getLobHelper().createClob(input);
     }
 
     public Clob getClob() {

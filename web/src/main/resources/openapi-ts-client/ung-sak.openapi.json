@@ -1277,9 +1277,9 @@
         "x-enum-varnames" : [ "KVINNE", "MANN", "UDEFINERT" ]
       },
       "ung.kodeverk.produksjonsstyring.OppgaveÅrsak" : {
-        "enum" : [ "BEH_SAK_VL", "RV_VL", "GOD_VED_VL", "REG_SOK_VL", "VUR_KONS_YTE", "VUR", "FEILUTBET", "INNH_DOK", "SETTVENT", "BEH_SAK", "-" ],
+        "enum" : [ "BEH_SAK", "RV", "GOD_VED", "REG_SOK", "VUR_KONS_YTE", "VUR", "FEILUTBET", "INNH_DOK", "SETTVENT", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BEHANDLE_SAK_VL", "REVURDER_VL", "GODKJENN_VEDTAK_VL", "REG_SOKNAD_VL", "VURDER_KONSEKVENS_YTELSE", "VURDER_DOKUMENT", "FEILUTBETALING", "INNHENT_DOK", "SETTVENT", "BEHANDLE_SAK_IT", "UDEFINERT" ]
+        "x-enum-varnames" : [ "BEHANDLE_SAK", "REVURDER", "GODKJENN_VEDTAK", "REG_SOKNAD", "VURDER_KONSEKVENS_YTELSE", "VURDER_DOKUMENT", "FEILUTBETALING", "INNHENT_DOK", "SETTVENT", "UDEFINERT" ]
       },
       "ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet" : {
         "properties" : {
@@ -2862,6 +2862,9 @@
           "forklaring" : {
             "type" : "string"
           },
+          "harTidligereRedigertBrevHtml" : {
+            "type" : "boolean"
+          },
           "hindret" : {
             "type" : "boolean"
           },
@@ -2927,6 +2930,45 @@
           }
         },
         "type" : "object"
+      },
+      "ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse" : {
+        "properties" : {
+          "original" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon"
+            },
+            "type" : "array"
+          },
+          "redigert" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon"
+            },
+            "type" : "array"
+          },
+          "tidligereRedigert" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon" : {
+        "properties" : {
+          "innhold" : {
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType" : {
+        "enum" : [ "STATISK", "REDIGERBAR", "STYLE" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "STATISK", "REDIGERBAR", "STYLE" ]
       },
       "ung.sak.kontrakt.hendelser.DødsfallHendelse" : {
         "properties" : {
@@ -3126,7 +3168,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer" ],
+        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer", "opprettetTidspunkt" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.historikk.HistorikkinnslagDto.HistorikkAktørDto" : {
@@ -7281,6 +7323,40 @@
         "responses" : {
           "200" : {
             "description" : "lagret ok"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
+    "/api/formidling/vedtaksbrev/editor" : {
+      "get" : {
+        "description" : "Html versjoner av original, redigert og evt. tidligere redigert vedtaksbrev",
+        "operationId" : "editor",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dokumentMalType",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.dokument.DokumentMalType"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse"
+                }
+              }
+            },
+            "description" : "default response"
           }
         },
         "tags" : [ "formidling" ]

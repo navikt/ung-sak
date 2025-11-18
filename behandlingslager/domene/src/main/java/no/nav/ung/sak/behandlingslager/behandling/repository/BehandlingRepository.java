@@ -3,8 +3,8 @@ package no.nav.ung.sak.behandlingslager.behandling.repository;
 import static no.nav.k9.felles.jpa.HibernateVerktøy.hentEksaktResultat;
 import static no.nav.k9.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -443,8 +443,8 @@ public class BehandlingRepository {
             return Optional.empty();
         }
 
-        Timestamp timestamp = (Timestamp) resultat;
-        LocalDateTime value = LocalDateTime.ofInstant(timestamp.toInstant(), TimeZone.getDefault().toZoneId());
+        LocalDateTime timestamp = (LocalDateTime) resultat;
+        LocalDateTime value = LocalDateTime.ofInstant(timestamp.toInstant(ZoneOffset.UTC), TimeZone.getDefault().toZoneId());
         return Optional.of(value);
     }
 

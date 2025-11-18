@@ -92,7 +92,7 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
             var klagevurderingNK = klageUtredning.hentKlagevurdering(KlageVurdertAv.KLAGEINSTANS);
             if (klagevurderingNK.isPresent()) {
                 throw new IllegalStateException("Forsokte oppdatere klageresultat fra kabal men klageresultatet var allerede satt till: "
-                    + klageUtredning.getKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).map(KlageVurderingType::getNavn).get());
+                    + klageUtredning.hentKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).map(KlageVurderingType::getNavn).get());
             }
 
             log.info("Tar behandling som er overført til NK av vent");
@@ -168,7 +168,7 @@ public class MottaVedtakKlageinstansTask implements ProsessTaskHandler {
         };
     }
 
-    private void opprettAnkebehandlingAvsluttetTask(no.nav.ung.sak.behandlingslager.behandling.Behandling behandling, String utfall) {
+    private void opprettAnkebehandlingAvsluttetTask(Behandling behandling, String utfall) {
         ProsessTaskData opprettOppgaveAnkebehandlingAvsluttetTask = ProsessTaskData.forProsessTask(OpprettOppgaveAnkebehandlingAvsluttetTask.class);
         opprettOppgaveAnkebehandlingAvsluttetTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         opprettOppgaveAnkebehandlingAvsluttetTask.setSekvens("1");

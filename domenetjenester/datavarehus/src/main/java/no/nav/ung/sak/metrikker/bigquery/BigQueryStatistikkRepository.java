@@ -28,8 +28,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -407,18 +406,18 @@ public class BigQueryStatistikkRepository {
             String saksnummer = t.get(0, String.class);
             String type = t.get(1, String.class);
             String status = t.get(2, String.class);
-            Date fom = t.get(3, Date.class);
-            Date tom = t.get(4, Date.class);
-            Timestamp frist = t.get(5, Timestamp.class);
-            Timestamp tidsstempel = t.get(6, Timestamp.class);
+            LocalDate fom = t.get(3, LocalDate.class);
+            LocalDate tom = t.get(4, LocalDate.class);
+            LocalDateTime frist = t.get(5, LocalDateTime.class);
+            LocalDateTime tidsstempel = t.get(6, LocalDateTime.class);
 
             return new EtterlysningRecord(
                 new Saksnummer(saksnummer),
                 EtterlysningType.fraKode(type),
                 EtterlysningStatus.fraKode(status),
-                DatoIntervallEntitet.fraOgMedTilOgMed(fom.toLocalDate(), tom.toLocalDate()),
-                frist == null ? null : frist.toLocalDateTime().atZone(ZoneId.systemDefault()),
-                tidsstempel.toLocalDateTime().atZone(ZoneId.systemDefault())
+                DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
+                frist == null ? null : frist.atZone(ZoneId.systemDefault()),
+                tidsstempel.atZone(ZoneId.systemDefault())
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }

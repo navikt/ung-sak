@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
@@ -61,7 +62,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
      * @param hendelse fødselshendelsen som inneholder informasjon om barn og foreldre
      * @return et kart over `Fagsak` til `ÅrsakOgPeriode` for saker som skal vurderes for revurdering
      */
-    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, List<ÅrsakOgPerioder>> finnFagsakerTilVurdering(Hendelse hendelse) {
         FødselHendelse fødselsHendelse = (FødselHendelse) hendelse;
         String hendelseId = fødselsHendelse.getHendelseInfo().getHendelseId();
 
@@ -79,14 +80,16 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
 
         LocalDate aktuellDato = finnAktuellDato(barnInfo);
 
-        var fagsakÅrsakMap = new HashMap<Fagsak, ÅrsakOgPeriode>();
+        var fagsakÅrsakMap = new HashMap<Fagsak, List<ÅrsakOgPerioder>>();
 
         for (AktørId aktør : forelderAktørIder) {
             Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
                     if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktørIdBarn.get(), aktuellDato, hendelseId)) {
-                        fagsakÅrsakMap.put(f, new ÅrsakOgPeriode(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato())));
+                        ÅrsakOgPerioder årsakOgPerioder = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato()));
+                        fagsakÅrsakMap.put(f,
+                            List.of(årsakOgPerioder));
                     }
                 }
             );

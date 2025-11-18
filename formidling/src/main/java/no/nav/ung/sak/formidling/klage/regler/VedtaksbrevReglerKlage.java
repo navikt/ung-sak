@@ -48,7 +48,7 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
     }
 
     private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, KlageUtredningEntitet klageutredning) {
-        var klagevurderingFørsteinstans = klageutredning.getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
+        var klagevurderingFørsteinstans = klageutredning.hentKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
             .orElseThrow(() -> new IllegalStateException("Trenger vurdering av førsteinstans for å kunne vise vedtaksbrev for klage"));
 
         var strategyResultater = innholdbyggerStrategies.stream()

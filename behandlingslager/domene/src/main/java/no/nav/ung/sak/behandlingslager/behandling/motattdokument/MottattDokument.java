@@ -23,9 +23,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.engine.jdbc.ClobProxy;
 
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
@@ -180,7 +180,7 @@ public class MottattDokument extends BaseEntitet {
         if (this.payload != null) {
             throw new IllegalStateException("Kan ikke overskrive payload for journalpostId: " + journalpostId + ", fagsakId=" + fagsakId);
         }
-        this.payload = payload == null || payload.isEmpty() ? null : ClobProxy.generateProxy(payload);
+        this.payload = payload == null || payload.isEmpty() ? null : Hibernate.getLobHelper().createClob(payload);
     }
 
     void setJournalpostId(JournalpostId journalpostId) {

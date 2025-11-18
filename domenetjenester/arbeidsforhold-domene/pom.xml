@@ -25,11 +25,10 @@
             <artifactId>kontrakt</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>jakarta.el</artifactId>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
         </dependency>
         <dependency>
-            <!-- trengs for integrasjon mellom Weld og jakarta.el -->
             <groupId>org.jboss.weld.module</groupId>
             <artifactId>weld-web</artifactId>
         </dependency>
