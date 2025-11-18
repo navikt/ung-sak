@@ -90,8 +90,8 @@ public class InntektAbonnentKlient {
     public void avsluttAbonnement(long abonnementId) {
         try {
             var uri = URI.create(String.format(avsluttAbonnementURI.toString(), abonnementId));
-            // TODO fikse delete kall mot inntektskomponenten
             oidcRestClient.delete(uri);
+            LOG.info("Avslutter abonnement med id {}", abonnementId);
         } catch (Exception e) {
             throw new TekniskException("UNG-328650", "Feil ved avslutning av abonnement", e);
         }

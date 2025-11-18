@@ -4,7 +4,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.typer.AktørId;
-
 import java.util.Optional;
 
 @Dependent
@@ -34,6 +33,5 @@ public class InntektAbonnementRepository {
         abonnement.setAktiv(false);
         entityManager.persist(abonnement);
     }
-
 }
 
