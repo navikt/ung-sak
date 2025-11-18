@@ -76,7 +76,7 @@ public class InntektAbonnentKlient {
         return response.sekvensnummer();
     }
 
-    public List<AbonnementHendelse> sjekkNyeInntektHendelser(long fraSekvensnummer, List<String> filter) {
+    public List<AbonnementHendelse> hentAbonnentHendelser(long fraSekvensnummer, List<String> filter) {
         var request = new InntektHendelserRequest(fraSekvensnummer, INNTEKT_HENDELSE_LIMIT, filter);
         AbonnementHendelseApiUt response;
         try {
@@ -84,7 +84,7 @@ public class InntektAbonnentKlient {
         } catch (Exception e) {
             throw new TekniskException("UNG-769025", "Feil ved henting av nye hendelser", e);
         }
-        return response.data;
+        return response.data();
     }
 
     public void avsluttAbonnement(long abonnementId) {
@@ -137,10 +137,4 @@ public class InntektAbonnentKlient {
         String behandlet,
         List<String> filter
     ) {}
-
-
-
-
-
-
 }
