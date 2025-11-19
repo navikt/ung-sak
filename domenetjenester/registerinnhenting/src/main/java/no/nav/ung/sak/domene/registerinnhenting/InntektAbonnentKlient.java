@@ -21,7 +21,7 @@ import java.util.List;
 @ScopedRestIntegration(scopeKey = "inntektskomponenten.scope", defaultScope = "api://ikomp-q2.intern.dev.nav.no/.default")
 public class InntektAbonnentKlient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(InntektAbonnentKlient.class);
+    private static final Logger log = LoggerFactory.getLogger(InntektAbonnentKlient.class);
     public static final int INNTEKT_HENDELSE_LIMIT = 1000;
 
     private OidcRestClient oidcRestClient;
@@ -61,7 +61,7 @@ public class InntektAbonnentKlient {
         }
 
         var abonnement = new InntektAbonnement(String.valueOf(response.abonnementId()), aktørId);
-        LOG.info("Opprettet abonnementId: {} for aktør: {}", response.abonnementId(), aktørId.getId());
+        log.info("Opprettet abonnementId: {} for aktør: {}", response.abonnementId(), aktørId.getId());
         return abonnement;
     }
 
@@ -91,11 +91,11 @@ public class InntektAbonnentKlient {
         try {
             var uri = URI.create(String.format(avsluttAbonnementURI.toString(), abonnementId));
             oidcRestClient.delete(uri);
-            LOG.info("Avslutter abonnement med id {}", abonnementId);
+            log.info("Avslutter abonnement med id {}", abonnementId);
         } catch (Exception e) {
             throw new TekniskException("UNG-328650", "Feil ved avslutning av abonnement", e);
         }
-        LOG.info("Avsluttet abonnement {}", abonnementId);
+        log.info("Avsluttet abonnement {}", abonnementId);
     }
 
     private static URI tilUri(String baseUrl, String path) {
