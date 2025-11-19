@@ -58,6 +58,10 @@ public class InntektAbonnentTjeneste {
         return inntektAbonnement;
     }
 
+    public long hentFørsteSekvensnummer() {
+        return  inntektAbonnentKlient.hentStartSekvensnummer(LocalDate.now());
+    }
+
     public Stream<InntektHendelse> hentNyeInntektHendelser(long startSekvensnummer) {
         log.info("Henter inntektshendelser fra sekvensnummer={}", startSekvensnummer);
 
