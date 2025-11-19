@@ -73,12 +73,13 @@ public class InntektAbonnentTjeneste {
             .flatMap(InntektHendelseMapper::tilDomeneListe);
     }
 
-    public void avsluttAbonnent(long abonnementId, AktørId aktørId) {
-        inntektAbonnentKlient.avsluttAbonnement(abonnementId);
-        inntektAbonnementRepository.slettAbonnement(
-            inntektAbonnementRepository.hentAbonnementForAktør(aktørId)
-                .orElseThrow(() -> new IllegalStateException("Fant ikke abonnement for aktørId: " + aktørId.getId()))
-        );
+    public void avsluttAbonnentHvisFinnes(AktørId aktørId) {
+        inntektAbonnementRepository.hentAbonnementForAktør(aktørId)
+            .ifPresent(abonnement -> {
+                inntektAbonnentKlient.avsluttAbonnement(Long.parseLong(abonnement.getAbonnementId()));
+                inntektAbonnementRepository.slettAbonnement(abonnement);
+                log.info("Avsluttet abonnement for aktørId={}", aktørId.getId());
+            });
     }
 
     public record InntektHendelse(Long sekvensnummer, AktørId aktørId, LocalDate hendelsesdato) {
