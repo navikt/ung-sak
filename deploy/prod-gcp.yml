@@ -245,6 +245,8 @@ spec:
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "false"
+    - name: HENT_INNTEKT_HENDELSER_ENABLED
+      value: "false"
     - name: KLAGE_ENABLED
       value: "false"
     - name: INTEGRASJON_KABAL
@@ -267,6 +269,8 @@ spec:
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P14D"
+    - name: HENT_INNTEKT_HENDElSER_INTERVALl
+      value: "PT1M"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

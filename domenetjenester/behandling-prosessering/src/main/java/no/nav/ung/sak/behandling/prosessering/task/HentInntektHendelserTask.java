@@ -21,6 +21,7 @@ import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,6 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "registerinnhenting.hentInntektHendelser";
     private static final String SEKVENSNUMMER_KEY = "sekvensnummer";
-    private static final int VENTETID_FØR_NESTE_KJØRING_MINUTTER = 1;
 
     private static final Logger log = LoggerFactory.getLogger(HentInntektHendelserTask.class);
 
@@ -42,6 +42,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private boolean hentInntektHendelserEnabled;
     private boolean oppfriskKontrollbehandlingEnabled;
+    private Duration ventetidFørNesteKjøring;
 
     public HentInntektHendelserTask() {
         // For CDI
@@ -52,12 +53,14 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
                                     EntityManager entityManager,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled,
+                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALl", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring,
                                     @KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled){
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.entityManager = entityManager;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
         this.oppfriskKontrollbehandlingEnabled = oppfriskKontrollbehandlingEnabled;
+        this.ventetidFørNesteKjøring = Duration.parse(ventetidFørNesteKjøring);
     }
 
 
@@ -164,7 +167,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     private void opprettNesteTask(long nesteSekvensnummer) {
         var nesteTask = ProsessTaskData.forProsessTask(HentInntektHendelserTask.class);
-        nesteTask.setNesteKjøringEtter(LocalDateTime.now().plusMinutes(VENTETID_FØR_NESTE_KJØRING_MINUTTER));
+        nesteTask.setNesteKjøringEtter(LocalDateTime.now().plus(ventetidFørNesteKjøring));
         nesteTask.setProperty(SEKVENSNUMMER_KEY, String.valueOf(nesteSekvensnummer));
         prosessTaskTjeneste.lagre(nesteTask);
         log.info("Opprettet neste task med sekvensnummer={}", nesteSekvensnummer);

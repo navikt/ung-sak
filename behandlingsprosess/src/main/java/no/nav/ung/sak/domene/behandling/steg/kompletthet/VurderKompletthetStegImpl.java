@@ -3,13 +3,11 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -61,6 +59,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
     private Duration ventePeriode;
+    private boolean hentInntektHendelserEnabled;
 
 
     VurderKompletthetStegImpl() {
@@ -73,7 +72,8 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
                                      ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
                                      InntektAbonnentTjeneste inntektAbonnentTjeneste,
                                      RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder,
-                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
+                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
+                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.kontrollerInntektEtterlysningOppretter = kontrollerInntektEtterlysningOppretter;
@@ -81,6 +81,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.rapporteringsfristAutopunktUtleder = rapporteringsfristAutopunktUtleder;
         this.ventePeriode = Duration.parse(ventePeriode);
+        this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
     }
 
     @Override
@@ -95,7 +96,9 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         if (erDigitalBruker) {
             kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
             programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
-            inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId());
+            if (hentInntektHendelserEnabled) {
+                inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId());
+            }
         } else {
             log.info("Behandling {} har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.", kontekst.getBehandlingId());
         }
@@ -111,7 +114,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
 
-        if(etterlysningerSomVenterPåSvar.isEmpty()) {
+        if(hentInntektHendelserEnabled && etterlysningerSomVenterPåSvar.isEmpty()) {
             inntektAbonnentTjeneste.avsluttAbonnentHvisFinnes(behandlingReferanse.getAktørId());
         }
 
