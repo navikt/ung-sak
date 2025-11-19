@@ -17,6 +17,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
+import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -71,6 +72,7 @@ class VurderKompletthetStegImplTest {
         vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, behandlingRepository,
             mock(KontrollerInntektEtterlysningOppretter.class),
             mock(ProgramperiodeendringEtterlysningTjeneste.class),
+            mock(InntektAbonnentTjeneste.class),
             rapporteringsfristAutopunktUtleder,
             "P14D");
 
