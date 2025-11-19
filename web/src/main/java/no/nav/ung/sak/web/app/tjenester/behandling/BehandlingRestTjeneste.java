@@ -59,12 +59,14 @@ import no.nav.ung.sak.kontrakt.behandling.NyBehandlingDto;
 import no.nav.ung.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -355,9 +357,17 @@ public class BehandlingRestTjeneste {
         if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
 
-            if (behandlingÅrsakType == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT && dto.getPeriode() == null) {
-                throw new UnsupportedOperationException("Ikke implementert støtte for å opprette revurdering for inntektskontroll uten definert periode");
+            if (behandlingÅrsakType == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT) {
+                if (dto.getPeriode() == null) {
+                    throw new UnsupportedOperationException("Ikke implementert støtte for å opprette revurdering for inntektskontroll uten definert periode");
+                }
+                if (dto.getPeriode().getTom().isAfter(LocalDate.now())){
+                    throw new IllegalArgumentException("Kan ikke opprette revurdering av inntektskontroll for periode som helt eller delivs er i fremtiden");
+                }
             }
+            // Hvis perioden overlapper med framtidige datoer så kast feil
+            // Vurder om det skal kastes feil hvis perioden overskrider siste kjørte inntekts kontroll
+
             Behandling behandling = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, dto.getPeriode() == null ? Optional.empty() : Optional.of(DatoIntervallEntitet.fra(dto.getPeriode())));
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
